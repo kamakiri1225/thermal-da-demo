@@ -1,0 +1,2953 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カルマンフィルタによる熱データ同化 | 001_kalman_thermal_1d</title>
+
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   BASE & VARIABLES
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:        #0d1117;
+  --bg2:       #161b22;
+  --bg3:       #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --blue:      #58a6ff;
+  --blue-light:#79c0ff;
+  --green:     #3fb950;
+  --orange:    #e3b341;
+  --red:       #f85149;
+  --purple:    #bc8cff;
+  --cyan:      #39d0d8;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal {
+  background: var(--bg);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+  color: var(--text);
+  font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════
+   HEADINGS
+   ═══════════════════════════════════════════ */
+.reveal h1 {
+  font-size: 2em;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  line-height: 1.3;
+  margin-bottom: 0.4em;
+}
+.reveal h2 {
+  font-size: 1.45em;
+  font-weight: 700;
+  color: var(--blue-light);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  text-align: left;
+}
+.reveal h3 {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--orange);
+  margin-bottom: 0.4em;
+  text-align: left;
+}
+.reveal h4 {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--cyan);
+  margin-bottom: 0.3em;
+  text-align: left;
+}
+.reveal p, .reveal li { line-height: 1.65; font-size: 0.9em; text-align: left; }
+
+/* ═══════════════════════════════════════════
+   SLIDE LAYOUT
+   ═══════════════════════════════════════════ */
+.reveal .slides section {
+  text-align: left;
+  padding: 30px 40px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.reveal .slides section.title-slide {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(ellipse at 30% 40%, #1a2744 0%, var(--bg) 65%),
+              radial-gradient(ellipse at 70% 70%, #0d2a1e 0%, transparent 60%);
+}
+
+/* scrollable wrapper */
+.scroll-box {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 540px;
+  padding-right: 8px;
+}
+.scroll-box::-webkit-scrollbar { width: 5px; }
+.scroll-box::-webkit-scrollbar-track { background: var(--bg3); border-radius: 3px; }
+.scroll-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.scroll-box::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ═══════════════════════════════════════════
+   CODE
+   ═══════════════════════════════════════════ */
+.reveal pre {
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  margin: 0.5em 0;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+.reveal pre code.hljs {
+  max-height: 360px !important;
+  overflow-y: auto !important;
+  font-size: 0.72em;
+  line-height: 1.55;
+  border-radius: 8px;
+  padding: 16px;
+}
+.reveal pre code.hljs::-webkit-scrollbar { width: 5px; height: 5px; }
+.reveal pre code.hljs::-webkit-scrollbar-track { background: #1a1a1a; }
+.reveal pre code.hljs::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.reveal code { font-family: 'JetBrains Mono', 'Consolas', monospace; font-size: 0.85em; }
+
+/* ═══════════════════════════════════════════
+   TABLES
+   ═══════════════════════════════════════════ */
+.reveal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82em;
+  margin: 0.5em 0;
+}
+.reveal table th {
+  background: var(--bg3);
+  color: var(--blue-light);
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.reveal table td {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  line-height: 1.5;
+}
+.reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+.reveal table tr:hover td { background: rgba(88,166,255,0.06); }
+
+/* ═══════════════════════════════════════════
+   CARDS & BOXES
+   ═══════════════════════════════════════════ */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.card.blue  { border-left: 4px solid var(--blue); }
+.card.green { border-left: 4px solid var(--green); }
+.card.orange{ border-left: 4px solid var(--orange); }
+.card.red   { border-left: 4px solid var(--red); }
+.card.purple{ border-left: 4px solid var(--purple); }
+.card.cyan  { border-left: 4px solid var(--cyan); }
+
+.info-box {
+  background: rgba(88,166,255,0.08);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.warn-box {
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.success-box {
+  background: rgba(63,185,80,0.08);
+  border: 1px solid rgba(63,185,80,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUTS
+   ═══════════════════════════════════════════ */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.col-6-4 { display: grid; grid-template-columns: 6fr 4fr; gap: 18px; align-items: start; }
+.col-4-6 { display: grid; grid-template-columns: 4fr 6fr; gap: 18px; align-items: start; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
+
+/* ═══════════════════════════════════════════
+   BADGES & TAGS
+   ═══════════════════════════════════════════ */
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.badge-blue   { background: #1f6feb; color: #fff; }
+.badge-green  { background: #238636; color: #fff; }
+.badge-orange { background: #9e6a03; color: #fff; }
+.badge-red    { background: #b91c1c; color: #fff; }
+.badge-purple { background: #6e40c9; color: #fff; }
+.badge-gray   { background: #444c56; color: #e6edf3; }
+
+/* ═══════════════════════════════════════════
+   SECTION NUMBER ACCENT
+   ═══════════════════════════════════════════ */
+.sec-tag {
+  display: inline-block;
+  font-size: 0.6em;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════
+   FORMULA BOX
+   ═══════════════════════════════════════════ */
+.math-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 20px;
+  margin: 8px 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+/* ═══════════════════════════════════════════
+   RESULT HIGHLIGHTS
+   ═══════════════════════════════════════════ */
+.result-num {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--green);
+}
+.result-unit { font-size: 0.7em; color: var(--muted); }
+
+/* ═══════════════════════════════════════════
+   TIMELINE / ROADMAP
+   ═══════════════════════════════════════════ */
+.timeline { list-style: none; padding: 0; margin: 0; }
+.timeline li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 8px 0;
+  font-size: 0.85em;
+  border-left: 2px solid var(--border);
+  padding-left: 16px;
+  margin-left: 14px;
+  position: relative;
+}
+.timeline li::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 13px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 2px solid var(--bg);
+}
+.timeline li.done::before { background: var(--green); }
+.timeline li.future::before { background: var(--muted); }
+
+/* ═══════════════════════════════════════════
+   CONTROLS & NAVIGATION
+   ═══════════════════════════════════════════ */
+.reveal .controls { color: var(--blue); }
+.reveal .progress { background: rgba(88,166,255,0.2); }
+.reveal .progress span { background: var(--blue); }
+
+/* slide number */
+.reveal .slide-number {
+  background: var(--bg2);
+  color: var(--muted);
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* ═══════════════════════════════════════════
+   ARROW & FLOW
+   ═══════════════════════════════════════════ */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.82em;
+  margin: 8px 0;
+}
+.flow-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: var(--text);
+}
+.flow-arrow { color: var(--blue); font-size: 1.1em; }
+
+/* ═══════════════════════════════════════════
+   MISC
+   ═══════════════════════════════════════════ */
+.reveal ul { padding-left: 1.2em; }
+.reveal ul li { margin-bottom: 0.3em; }
+.reveal ul li::marker { color: var(--blue); }
+.reveal ol li::marker { color: var(--orange); }
+.hl-blue   { color: var(--blue); font-weight: 600; }
+.hl-green  { color: var(--green); font-weight: 600; }
+.hl-orange { color: var(--orange); font-weight: 600; }
+.hl-red    { color: var(--red); font-weight: 600; }
+.hl-cyan   { color: var(--cyan); font-weight: 600; }
+.hl-purple { color: var(--purple); font-weight: 600; }
+.muted     { color: var(--muted); font-size: 0.85em; }
+hr.dim { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* ═══════════════════════════════════════════
+   LINKS
+   ═══════════════════════════════════════════ */
+.reveal a {
+  color: var(--blue);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(88,166,255,0.4);
+  transition: color 0.2s, border-color 0.2s;
+}
+.reveal a:hover {
+  color: var(--blue-light);
+  border-bottom-color: var(--blue-light);
+}
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1: TITLE
+     ═══════════════════════════════════════════ -->
+<section class="title-slide">
+  <div style="max-width: 900px;">
+    <p class="muted" style="font-size:0.7em; letter-spacing:0.15em; text-transform:uppercase; margin-bottom:16px;">
+      001_kalman_thermal_1d &nbsp;|&nbsp; Proof of Concept
+    </p>
+    <h1 style="font-size:2.2em; margin-bottom:0.5em;">
+      工作機械の熱変位補償に向けた<br>カルマンフィルタによるデータ同化
+    </h1>
+    <p style="font-size:1em; color:#8b949e; margin-bottom:40px;">
+      1次元熱棒モデルを用いた概念実証
+    </p>
+    <!-- 1D thermal bar illustration (SVG) -->
+    <svg viewBox="0 0 680 130" style="width:680px; max-width:100%; margin:10px auto 8px; display:block;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ff5533" stop-opacity="0.55"/>
+          <stop offset="45%" stop-color="#e3b341" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#39d0d8" stop-opacity="0.38"/>
+        </linearGradient>
+        <marker id="ab" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <polygon points="0 0, 7 3.5, 0 7" fill="#58a6ff"/>
+        </marker>
+        <marker id="ag" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <polygon points="0 0, 7 3.5, 0 7" fill="#3fb950"/>
+        </marker>
+      </defs>
+      <!-- Thermal rod -->
+      <rect x="48" y="43" width="584" height="16" rx="4" fill="url(#hg)" stroke="#30363d" stroke-width="1"/>
+      <!-- Heat source -->
+      <rect x="16" y="35" width="30" height="32" rx="4" fill="rgba(255,85,51,0.12)" stroke="rgba(255,85,51,0.5)" stroke-width="1"/>
+      <text x="31" y="56" font-size="15" text-anchor="middle" font-family="serif">&#128293;</text>
+      <text x="31" y="77" font-size="8" text-anchor="middle" font-family="sans-serif" fill="#ff8866">熱入力</text>
+      <!-- Cooling end -->
+      <rect x="634" y="35" width="30" height="32" rx="4" fill="rgba(57,208,216,0.1)" stroke="rgba(57,208,216,0.4)" stroke-width="1"/>
+      <text x="649" y="55" font-size="14" text-anchor="middle" font-family="serif">&#10052;</text>
+      <text x="649" y="77" font-size="8" text-anchor="middle" font-family="sans-serif" fill="#39d0d8">冷却端</text>
+      <!-- Sensor N0 -->
+      <circle cx="48" cy="51" r="10" fill="#1a4731" stroke="#3fb950" stroke-width="2.5"/>
+      <text x="48" y="55" font-size="8" text-anchor="middle" fill="#3fb950" font-weight="bold" font-family="sans-serif">S</text>
+      <text x="48" y="34" font-size="8" text-anchor="middle" fill="#3fb950" font-family="sans-serif">N0</text>
+      <!-- Unknown N1-N8 -->
+      <circle cx="113" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="113" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="113" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N1</text>
+      <circle cx="178" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="178" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="178" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N2</text>
+      <circle cx="243" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="243" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="243" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N3</text>
+      <circle cx="308" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="308" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="308" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N4</text>
+      <circle cx="373" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="373" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="373" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N5</text>
+      <circle cx="437" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="437" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="437" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N6</text>
+      <circle cx="502" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="502" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="502" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N7</text>
+      <circle cx="567" cy="51" r="7" fill="#161b22" stroke="#444c56" stroke-width="1.5"/><text x="567" y="55" font-size="9" text-anchor="middle" fill="#8b949e">?</text>
+      <text x="567" y="34" font-size="7" text-anchor="middle" fill="#8b949e" font-family="sans-serif">N8</text>
+      <!-- Sensor N9 -->
+      <circle cx="632" cy="51" r="10" fill="#1a4731" stroke="#3fb950" stroke-width="2.5"/>
+      <text x="632" y="55" font-size="8" text-anchor="middle" fill="#3fb950" font-weight="bold" font-family="sans-serif">S</text>
+      <text x="632" y="34" font-size="8" text-anchor="middle" fill="#3fb950" font-family="sans-serif">N9</text>
+      <!-- KF box -->
+      <rect x="255" y="88" width="170" height="30" rx="6" fill="rgba(88,166,255,0.12)" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="340" y="101" font-size="10" text-anchor="middle" fill="#58a6ff" font-weight="bold" font-family="sans-serif">カルマンフィルタ</text>
+      <text x="340" y="112" font-size="8" text-anchor="middle" fill="#8b949e" font-family="sans-serif">モデル + 観測 &#8594; 最適推定</text>
+      <!-- Sensor arrows to KF -->
+      <line x1="48" y1="62" x2="270" y2="88" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.8" marker-end="url(#ag)"/>
+      <line x1="632" y1="62" x2="410" y2="88" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.8" marker-end="url(#ag)"/>
+      <!-- KF output upward -->
+      <line x1="340" y1="88" x2="340" y2="67" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#ab)"/>
+      <text x="356" y="81" font-size="8" fill="#e3b341" font-family="sans-serif">推定</text>
+      <!-- Legend -->
+      <circle cx="80" cy="120" r="6" fill="#1a4731" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="92" y="124" font-size="8" fill="#3fb950" font-family="sans-serif">センサ節点 (2点)</text>
+      <circle cx="200" cy="120" r="6" fill="#161b22" stroke="#444c56" stroke-width="1.5"/>
+      <text x="212" y="124" font-size="8" fill="#8b949e" font-family="sans-serif">未観測節点 (8点) &#8594; KF で推定</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2: AGENDA
+     ═══════════════════════════════════════════ -->
+<section>
+  <h2>目次</h2>
+  <div class="two-col">
+    <div>
+      <div class="card purple" style="margin-bottom:8px;">
+        <strong class="hl-purple">―</strong>&ensp;参考図書
+        <p class="muted" style="margin:4px 0 0;">入門〜応用まで 5 冊を難易度順に紹介</p>
+      </div>
+      <div class="card" style="margin-bottom:8px; border-left:3px solid var(--muted);">
+        <strong style="color:var(--muted);">00</strong>&ensp;開発の経緯（Claude との対話）
+        <p class="muted" style="margin:4px 0 0;">開発フロー / 主なやりとり / AI を使うコツ</p>
+      </div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong class="hl-blue">01</strong>&ensp;先行研究
+        <p class="muted" style="margin:4px 0 0;">DA手法の全体像 / 工作機械熱変位補償研究</p>
+      </div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong class="hl-blue">02</strong>&ensp;研究の動機・本プロジェクトの位置づけ
+        <p class="muted" style="margin:4px 0 0;">問題設定 / ロードマップ</p>
+      </div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong class="hl-blue">03</strong>&ensp;手法の位置づけと理論解説
+        <p class="muted" style="margin:4px 0 0;">線形KFの選択理由 / 状態空間モデル / KFアルゴリズム / ゲイン導出</p>
+      </div>
+      <div class="card blue">
+        <strong class="hl-blue">04</strong>&ensp;実装
+        <p class="muted" style="margin:4px 0 0;">ファイル構成 / プログラム構成 / 主要コード</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:8px;">
+        <strong class="hl-green">05</strong>&ensp;結果
+        <p class="muted" style="margin:4px 0 0;">ケース1：基本デモ（初期誤差）<br>
+        ケース2：DA効果デモ（コールドスタート＋モデル誤差）<br>
+        ケース3：変位センサ追加（Case A / B / C）</p>
+      </div>
+      <div class="card green" style="margin-bottom:8px;">
+        <strong class="hl-green">06</strong>&ensp;まとめ
+        <p class="muted" style="margin:4px 0 0;">達成したこと</p>
+      </div>
+      <div class="card orange" style="margin-bottom:8px;">
+        <strong class="hl-orange">07</strong>&ensp;今後の展望
+        <p class="muted" style="margin:4px 0 0;">短期・中期・長期ロードマップ</p>
+      </div>
+      <div class="card orange">
+        <strong class="hl-orange">08</strong>&ensp;先行研究から今後の取り組み
+        <p class="muted" style="margin:4px 0 0;">各論文から得られる研究方向</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 参考図書
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">参考図書 &mdash; さらに学ぶために</p>
+  <h2>データ同化を学ぶ参考図書</h2>
+  <div class="scroll-box">
+    <p style="font-size:0.8em; color:var(--muted); margin-bottom:12px;">
+      本プロジェクトの理論的背景となるデータ同化・カルマンフィルタを学ぶための参考図書を紹介します。<br>
+      難易度順に並んでいます。まず <span class="hl-green">入門書</span> で概念を押さえ、
+      <span class="hl-blue">中級・応用書</span> で実践力を深めることを推奨します。
+    </p>
+
+    <!-- Book 1 -->
+    <div class="card" style="display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;">
+      <a href="https://www.amazon.co.jp/dp/4254127863" target="_blank" style="flex-shrink:0; border:none;">
+        <img src="https://images-na.ssl-images-amazon.com/images/P/4254127863.09._SX140_.jpg"
+             onerror="this.src=''; this.style.cssText='width:90px;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:block;'"
+             alt="データ同化入門 書影"
+             style="width:90px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:block;">
+      </a>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="badge badge-green">入門</span>
+          <strong style="font-size:0.92em;">データ同化入門 ― 予測と発見の科学</strong>
+        </div>
+        <p class="muted" style="margin:2px 0;">樋口 知之 著 ／ 朝倉書店（2011）</p>
+        <p style="font-size:0.82em; margin:6px 0 0;">
+          「観測データとモデルをどう組み合わせるか」という問いに対し、ベイズ推定の視点から丁寧に解説。
+          数学的な前提知識が少なくても読める入門の定番。DAとは何かを直感的に理解するのに最適。
+        </p>
+      </div>
+    </div>
+
+    <!-- Book 2 -->
+    <div class="card" style="display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;">
+      <a href="https://www.amazon.co.jp/dp/4320112776" target="_blank" style="flex-shrink:0; border:none;">
+        <img src="https://images-na.ssl-images-amazon.com/images/P/4320112776.09._SX140_.jpg"
+             onerror="this.src=''; this.style.cssText='width:90px;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:block;'"
+             alt="データ同化 書影"
+             style="width:90px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:block;">
+      </a>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="badge badge-green">入門〜中級</span>
+          <strong style="font-size:0.92em;">データ同化（統計学 One Point 26）</strong>
+        </div>
+        <p class="muted" style="margin:2px 0;">中野 慎也 著 ／ 共立出版</p>
+        <p style="font-size:0.82em; margin:6px 0 0;">
+          統計学シリーズの一冊。カルマンフィルタ・アンサンブルカルマンフィルタ・粒子フィルタを数式ベースで整理。
+          本プロジェクトで使った線形KFのアルゴリズムを理論面から追う際に特に役立つ。コンパクトで読みやすい。
+        </p>
+      </div>
+    </div>
+
+    <!-- Book 3 -->
+    <div class="card" style="display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;">
+      <a href="https://www.amazon.co.jp/dp/4876987971" target="_blank" style="flex-shrink:0; border:none;">
+        <img src="https://images-na.ssl-images-amazon.com/images/P/4876987971.09._SX140_.jpg"
+             onerror="this.src=''; this.style.cssText='width:90px;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:block;'"
+             alt="データ同化 観測・実験とモデル 書影"
+             style="width:90px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:block;">
+      </a>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="badge badge-blue">中級</span>
+          <strong style="font-size:0.92em;">データ同化 ― 観測・実験とモデルを融合するイノベーション</strong>
+        </div>
+        <p class="muted" style="margin:2px 0;">淡路 敏之 著 ／ 京都大学学術出版会（2014）</p>
+        <p style="font-size:0.82em; margin:6px 0 0;">
+          実験・観測データと数値モデルをどう組み合わせるかという実用視点から解説。
+          気象・海洋モデルを題材にしているが、「モデル誤差があってもDAがなぜ機能するか」を深く理解できる。
+          本プロジェクトのケース2（モデル誤差あり）の理論的背景として参考になる。
+        </p>
+      </div>
+    </div>
+
+    <!-- Book 4 -->
+    <div class="card" style="display:flex; gap:14px; align-items:flex-start; margin-bottom:10px;">
+      <a href="https://www.amazon.co.jp/dp/4254169450" target="_blank" style="flex-shrink:0; border:none;">
+        <img src="https://images-na.ssl-images-amazon.com/images/P/4254169450.09._SX140_.jpg"
+             onerror="this.src=''; this.style.cssText='width:90px;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:block;'"
+             alt="気象学におけるデータ同化入門 書影"
+             style="width:90px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:block;">
+      </a>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="badge badge-blue">中級（気象応用）</span>
+          <strong style="font-size:0.92em;">気象学におけるデータ同化入門（気象学ライブラリー 5）</strong>
+        </div>
+        <p class="muted" style="margin:2px 0;">三好 建正 著 ／ 朝倉書店</p>
+        <p style="font-size:0.82em; margin:6px 0 0;">
+          気象予報を事例に、EnKF（アンサンブルカルマンフィルタ）・4D-Var など実践的な手法を解説。
+          気象専門書だが「大規模システムにDAをどう適用するか」という設計思想は他分野にも通じる。
+          本プロジェクトの次ステップ（観測点最適配置、EnKFへの拡張）を考える際の参考になる。
+        </p>
+      </div>
+    </div>
+
+    <!-- Book 5 -->
+    <div class="card" style="display:flex; gap:14px; align-items:flex-start; margin-bottom:4px;">
+      <a href="https://www.amazon.co.jp/dp/4320111265" target="_blank" style="flex-shrink:0; border:none;">
+        <img src="https://images-na.ssl-images-amazon.com/images/P/4320111265.09._SX140_.jpg"
+             onerror="this.src=''; this.style.cssText='width:90px;height:120px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;display:block;'"
+             alt="データ同化流体科学 書影"
+             style="width:90px; border-radius:4px; box-shadow:0 2px 8px rgba(0,0,0,0.5); display:block;">
+      </a>
+      <div style="flex:1;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+          <span class="badge badge-orange">上級（CFD応用）</span>
+          <strong style="font-size:0.92em;">データ同化流体科学 ― 流動現象のデジタルツイン</strong>
+        </div>
+        <p class="muted" style="margin:2px 0;">大林 茂 著 ／ 共立出版（クロスセクショナル統計シリーズ）</p>
+        <p style="font-size:0.82em; margin:6px 0 0;">
+          CFD（数値流体力学）シミュレーションへのDA適用を解説。流体計算とセンサデータを融合した
+          デジタルツイン構築の最先端事例を紹介。本プロジェクトが目指す「CAEへのDA統合」の
+          発展形がここにある。OpenFOAM × KF への拡張を考える際の重要リファレンス。
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /scroll-box -->
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: Claude との対話・開発の経緯
+     ═══════════════════════════════════════════ -->
+<section>
+
+  <!-- スライド A: 開発フロー -->
+  <section>
+    <p class="sec-tag">00 &mdash; 開発の経緯</p>
+    <h2>Claude との対話で進めた開発フロー</h2>
+    <div class="scroll-box">
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:0.78em;">
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">1</div>
+          <div style="flex:1; background:rgba(100,160,255,0.12); border:1px solid var(--blue); border-radius:6px; padding:6px 12px;">
+            <strong>3つのスクリプト作成・実行</strong>（main.py / main_da_demo.py / main_disp_obs.py）<br>
+            <span style="color:var(--muted);">カルマンフィルタによる1D熱場推定の基本実装。ツイン実験の枠組みを構築。</span>
+          </div>
+        </div>
+        <div style="margin-left:14px; color:var(--muted); font-size:0.9em;">↓「比較は本当に正しいですか？」</div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--orange); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">2</div>
+          <div style="flex:1; background:rgba(255,165,0,0.10); border:1px solid var(--orange); border-radius:6px; padding:6px 12px;">
+            <strong>問題発見：No-DA と KF の出発条件が揃っていなかった</strong><br>
+            <span style="color:var(--muted);">→ 完全同一条件（同初期温度・同熱入力）からスタートするよう修正。「比較の大原則」を全スライドに明記。</span>
+          </div>
+        </div>
+        <div style="margin-left:14px; color:var(--muted); font-size:0.9em;">↓「DAなしが少しだけ不利になるよう条件を変えて、パラメータも最適化して」</div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--orange); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">3</div>
+          <div style="flex:1; background:rgba(255,165,0,0.10); border:1px solid var(--orange); border-radius:6px; padding:6px 12px;">
+            <strong>問題発見：「10%モデル誤差」シナリオで中央節点がDA使用で逆に悪化（-287%）</strong><br>
+            <span style="color:var(--muted);">原因分析：熱源局在→空間的に不均一な温度誤差→KFが中央節点を誤方向に過補正。<br>
+            → 「+2°C 一様初期誤差」シナリオに変更。Q_SCALE=1.0, P0=4.0°C², L_P0=4 に最適化。全10節点 88〜95% 改善達成。</span>
+          </div>
+        </div>
+        <div style="margin-left:14px; color:var(--muted); font-size:0.9em;">↓「カルマンゲインの導出をスライドに追加して」</div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">4</div>
+          <div style="flex:1; background:rgba(80,200,120,0.10); border:1px solid var(--green); border-radius:6px; padding:6px 12px;">
+            <strong>カルマンゲイン導出スライドを追加</strong>（MMSE 最小化 4ステップ）<br>
+            <span style="color:var(--muted);">tr(P⁺) を K で微分 → ゼロ置き → K = P⁻Hᵀ(HP⁻Hᵀ+R)⁻¹</span>
+          </div>
+        </div>
+        <div style="margin-left:14px; color:var(--muted); font-size:0.9em;">↓「グラフの日本語が文字化けする」「変位センサのケースがわかりにくい」「Node 0も表示して」</div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">5</div>
+          <div style="flex:1; background:rgba(80,200,120,0.10); border:1px solid var(--green); border-radius:6px; padding:6px 12px;">
+            <strong>グラフ・スライドの大幅改善</strong><br>
+            <span style="color:var(--muted);">・全グラフのラベルを英語化（文字化け解消）<br>
+            ・ケース3：全10節点グラフ追加、Node 0をメイングラフに追加、main_da_demo と同一レイアウトに統一<br>
+            ・Case A を薄青点線 → 濃紺実線に変更（No-DA との見た目の混同を防止）</span>
+          </div>
+        </div>
+        <div style="margin-left:14px; color:var(--muted); font-size:0.9em;">↓「p.22とp.25の違いがわからない / 条件と意図を明記して / ケース2→3の橋渡し文を」</div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div style="min-width:28px; height:28px; border-radius:50%; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700;">6</div>
+          <div style="flex:1; background:rgba(100,160,255,0.12); border:1px solid var(--blue); border-radius:6px; padding:6px 12px;">
+            <strong>全結果スライドに条件表・意図・橋渡し文を追加</strong><br>
+            <span style="color:var(--muted);">各スライドに「実験条件」「このケースの意図」「次のケースで何を検証するか」を明記。</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- スライド B: 主なやりとり -->
+  <section>
+    <p class="sec-tag">00 &mdash; 開発の経緯</p>
+    <h2>Claude との主なやりとり（抜粋）</h2>
+    <div class="scroll-box" style="font-size:0.80em;">
+
+      <div style="margin-bottom:12px;">
+        <div style="background:rgba(100,160,255,0.18); border:1px solid var(--blue); border-radius:8px 8px 8px 2px; padding:7px 12px; margin-bottom:4px; max-width:85%;">
+          <span style="color:var(--blue); font-weight:700; font-size:0.85em;">👤 ユーザー</span><br>
+          本当にDAありとDAなしで正しい比較はできていますか？No-DAはDAと同条件で、DAなしだとどれだけ正解からずれるのかを示してください。
+        </div>
+        <div style="background:rgba(80,200,120,0.12); border:1px solid var(--green); border-radius:8px 8px 2px 8px; padding:7px 12px; margin-left:15%; max-width:85%;">
+          <span style="color:var(--green); font-weight:700; font-size:0.85em;">🤖 Claude</span><br>
+          コードを確認し No-DA と KF が<u>完全同一条件</u>からスタートするよう修正。RMSEテーブルを No-DA vs KF の比較表に更新。「比較の大原則」ボックスを全スライドに追加。
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="background:rgba(100,160,255,0.18); border:1px solid var(--blue); border-radius:8px 8px 8px 2px; padding:7px 12px; margin-bottom:4px; max-width:85%;">
+          <span style="color:var(--blue); font-weight:700; font-size:0.85em;">👤 ユーザー</span><br>
+          DAなしが少しだけ不利になるよう条件を変えてほしい。適切なパラメータがあれば最適化もして。
+        </div>
+        <div style="background:rgba(80,200,120,0.12); border:1px solid var(--green); border-radius:8px 8px 2px 8px; padding:7px 12px; margin-left:15%; max-width:85%;">
+          <span style="color:var(--green); font-weight:700; font-size:0.85em;">🤖 Claude</span><br>
+          「10%モデル誤差」案で N5, N6 が<span style="color:var(--red);">逆に悪化（-287%）</span>する問題が発生。原因分析：熱源局在→空間的に不均一な誤差→KFが過補正。<br>
+          → 「<strong>+2°C 一様初期誤差</strong>」に変更。Q_SCALE=1.0, P0=4.0°C², L_P0=4 を最適化。全10節点 88〜95% 改善。
+        </div>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <div style="background:rgba(100,160,255,0.18); border:1px solid var(--blue); border-radius:8px 8px 8px 2px; padding:7px 12px; margin-bottom:4px; max-width:85%;">
+          <span style="color:var(--blue); font-weight:700; font-size:0.85em;">👤 ユーザー</span><br>
+          基本デモと Case A/B/C の違いがわからない。p.22 と p.25 も違う結果に見えるが異なる条件ですか？
+        </div>
+        <div style="background:rgba(80,200,120,0.12); border:1px solid var(--green); border-radius:8px 8px 2px 8px; padding:7px 12px; margin-left:15%; max-width:85%;">
+          <span style="color:var(--green); font-weight:700; font-size:0.85em;">🤖 Claude</span><br>
+          基本デモ＝「DA vs No-DA」の縦比較。Case A/B/C＝「センサ種類」の横比較（全てDA使用）。<br>
+          p.22（ケース1: 初期誤差2°C）と p.25（ケース2: コールドスタート26°C＋モデル誤差30%）は<strong>意図的に異なる条件</strong>。各スライドに条件表と意図を追加。
+        </div>
+      </div>
+
+      <div style="margin-bottom:4px;">
+        <div style="background:rgba(100,160,255,0.18); border:1px solid var(--blue); border-radius:8px 8px 8px 2px; padding:7px 12px; margin-bottom:4px; max-width:85%;">
+          <span style="color:var(--blue); font-weight:700; font-size:0.85em;">👤 ユーザー</span><br>
+          ケース3のグラフに Node 0 の温度も追加して。main_da_demo のグラフ表示と合わせてほしい。
+        </div>
+        <div style="background:rgba(80,200,120,0.12); border:1px solid var(--green); border-radius:8px 8px 2px 8px; padding:7px 12px; margin-left:15%; max-width:85%;">
+          <span style="color:var(--green); font-weight:700; font-size:0.85em;">🤖 Claude</span><br>
+          plot_comparison を 4行×2列に再設計。Row0：センサ節点（N0, N9）／ Row1：未観測節点（N1, N5）＋±2σ帯 ／ Row2：熱変位＋RMSEバーグラフ ／ Row3：全節点平均RMSE時系列。main_da_demo.py と統一レイアウト。
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- スライド C: AIを使うコツ -->
+  <section>
+    <p class="sec-tag">00 &mdash; 開発の経緯</p>
+    <h2>AI でうまくプロジェクトを進めるコツ</h2>
+    <div class="scroll-box">
+      <div class="two-col" style="gap:16px; font-size:0.84em;">
+        <div>
+          <h3 style="color:var(--green); margin-bottom:10px;">✅ 効果的だったこと</h3>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:7px 12px; border-radius:4px;">
+              <strong>① 目的（ゴール）を明確に伝える</strong><br>
+              <span style="color:var(--muted);">「差が出るようにして」だけでなく「No-DAより少しだけ不利に」と具体的に伝えると精度が上がる</span>
+            </div>
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:7px 12px; border-radius:4px;">
+              <strong>② 失敗を具体的に報告する</strong><br>
+              <span style="color:var(--muted);">「うまくいかない」ではなく「N5の改善率が-287%になった」と数値で伝えると原因分析が速い</span>
+            </div>
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:7px 12px; border-radius:4px;">
+              <strong>③ 「なぜ」も一緒に伝える</strong><br>
+              <span style="color:var(--muted);">背景・文脈があると AI が状況を正しく判断できる。「スライドで説明したいから」などの目的を付けると的外れな回答が減る</span>
+            </div>
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:7px 12px; border-radius:4px;">
+              <strong>④ ひとつずつ疑問を解消する</strong><br>
+              <span style="color:var(--muted);">一度に多くの依頼をまとめるより「Q1〜Q4」のように番号付きで整理すると抜け漏れが防げる</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:var(--orange); margin-bottom:10px;">⚠️ 注意すべきこと</h3>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="background:rgba(255,165,0,0.10); border-left:3px solid var(--orange); padding:7px 12px; border-radius:4px;">
+              <strong>⑤ 出力は必ず自分で確認・検証する</strong><br>
+              <span style="color:var(--muted);">AI がコードを変更しても「動く」と「正しい」は別物。グラフを実際に見て期待通りか確認する</span>
+            </div>
+            <div style="background:rgba(255,165,0,0.10); border-left:3px solid var(--orange); padding:7px 12px; border-radius:4px;">
+              <strong>⑥ 一発で完璧を求めない</strong><br>
+              <span style="color:var(--muted);">初稿は「たたき台」として対話しながら反復改善するほうが最終品質が高くなる。今回のスライドも 7ステップかけて改善した</span>
+            </div>
+            <div style="background:rgba(255,165,0,0.10); border-left:3px solid var(--orange); padding:7px 12px; border-radius:4px;">
+              <strong>⑦ コンテキストを引き継がせる</strong><br>
+              <span style="color:var(--muted);">長い会話では AI の記憶が薄れる。「前回と同じ条件で」と言うより、その都度パラメータや前提を再掲すると確実</span>
+            </div>
+            <div style="background:rgba(255,165,0,0.10); border-left:3px solid var(--orange); padding:7px 12px; border-radius:4px;">
+              <strong>⑧ 「何をしたか」をドキュメント化させる</strong><br>
+              <span style="color:var(--muted);">変更点をその場で docs/ や slides に反映させておくと、後から「なぜこうなっているか」が追跡できる</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 先行研究
+     ═══════════════════════════════════════════ -->
+
+<!-- 先行研究グループ -->
+<section>
+
+  <!-- 先行研究 0: データ同化とは何か -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究 ／ 基礎概念</p>
+    <h2>データ同化（DA）とは何か？</h2>
+    <div class="scroll-box">
+      <p style="margin-bottom:12px;">
+        <strong>目標</strong>：観測できない量（未観測節点の温度）を、
+        <span class="hl-orange">物理モデルの予測</span>と<span class="hl-green">センサ観測</span>を組み合わせることで推定する。
+      </p>
+
+      <!-- Concept diagram -->
+      <div style="display:flex; align-items:stretch; gap:12px; margin:14px 0;">
+        <!-- Left: Two inputs stacked -->
+        <div style="flex:2; display:flex; flex-direction:column; gap:10px;">
+          <div style="background:var(--bg2); border:1px solid var(--border); border-left:4px solid var(--orange); border-radius:8px; padding:12px;">
+            <div style="color:var(--orange); font-weight:700; font-size:0.82em; margin-bottom:4px;">物理モデル（シミュレーション）</div>
+            <div style="font-size:0.78em;">$\hat{\boldsymbol{\theta}}_k^- = \mathbf{A}_d\hat{\boldsymbol{\theta}}_{k-1}^+$<br>
+            <span style="color:var(--muted);">熱伝導方程式を解いて全節点の温度を予測</span></div>
+            <div style="font-size:0.72em; color:var(--red); margin-top:4px;">⚠ モデル誤差あり（パラメータの不確かさ）</div>
+          </div>
+          <div style="background:var(--bg2); border:1px solid var(--border); border-left:4px solid var(--green); border-radius:8px; padding:12px;">
+            <div style="color:var(--green); font-weight:700; font-size:0.82em; margin-bottom:4px;">センサ観測</div>
+            <div style="font-size:0.78em;">$\mathbf{y}_k = \mathbf{H}\boldsymbol{\theta}_k + \mathbf{v}_k$<br>
+            <span style="color:var(--muted);">Node 0 と Node 9 の温度を測定</span></div>
+            <div style="font-size:0.72em; color:var(--red); margin-top:4px;">⚠ 一部節点のみ / センサノイズあり</div>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div style="display:flex; align-items:center; color:var(--blue); font-size:2em; flex-shrink:0;">&#10233;</div>
+
+        <!-- Center: DA Process -->
+        <div style="flex:2; background:rgba(88,166,255,0.08); border:1.5px solid var(--blue); border-radius:8px; padding:16px; display:flex; flex-direction:column; justify-content:center;">
+          <div style="color:var(--blue); font-weight:700; font-size:0.88em; text-align:center; margin-bottom:10px;">データ同化</div>
+          <div style="font-size:0.78em; text-align:center;">
+            $$\hat{\boldsymbol{\theta}}_k^+ = \hat{\boldsymbol{\theta}}_k^- + \mathbf{K}_k\underbrace{(\mathbf{y}_k - \mathbf{H}\hat{\boldsymbol{\theta}}_k^-)}_{\text{イノベーション}}$$
+          </div>
+          <div style="font-size:0.72em; color:var(--muted); text-align:center; margin-top:8px;">
+            $\mathbf{K}_k$（カルマンゲイン）が<br>モデルと観測の信頼度に応じて重みを決定
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div style="display:flex; align-items:center; color:var(--cyan); font-size:2em; flex-shrink:0;">&#10233;</div>
+
+        <!-- Right: Output -->
+        <div style="flex:1.5; background:rgba(57,208,216,0.07); border:1px solid rgba(57,208,216,0.4); border-radius:8px; padding:12px; display:flex; flex-direction:column; justify-content:center;">
+          <div style="color:var(--cyan); font-weight:700; font-size:0.82em; margin-bottom:6px;">最適推定値</div>
+          <div style="font-size:0.78em;">$\hat{\boldsymbol{\theta}}_k^+ \in \mathbb{R}^{10}$<br>
+          <span style="color:var(--muted);">全10節点の温度（未観測含む）</span></div>
+          <div style="font-size:0.72em; color:var(--green); margin-top:6px;">✅ モデル単独より精度が高い</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <strong>カルマンゲイン $\mathbf{K}$ の直感</strong>：&ensp;
+        モデルが不正確（誤差共分散 $\mathbf{P}$ が大きい）→ $\mathbf{K}$ が大きく → 観測を重視
+        &emsp;/&emsp;
+        センサがノイジー（$\mathbf{R}$ が大きい）→ $\mathbf{K}$ が小さく → モデルを重視
+      </div>
+    </div>
+  </section>
+
+  <!-- 先行研究 0b: ベイズの定理 -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究 ／ 基礎概念</p>
+    <h2>データ同化の数学的基礎：ベイズの定理</h2>
+    <div class="scroll-box">
+      <p style="margin-bottom:10px;">
+        データ同化は <strong>ベイズ推定</strong> の枠組みで統一的に理解できる。
+        「モデル予測（事前情報）」と「観測（尤度）」を組み合わせて
+        「更新後の推定（事後分布）」を求める操作がその本質。
+      </p>
+
+      <!-- ベイズの定理 ボックス -->
+      <div style="background:rgba(88,166,255,0.08); border:1px solid var(--blue); border-radius:8px; padding:12px 16px; margin-bottom:12px; text-align:center;">
+        <div style="font-size:1.05em; margin-bottom:6px;">
+          \[ p(\mathbf{x} \mid \mathbf{y}) \;=\; \frac{p(\mathbf{y} \mid \mathbf{x})\; p(\mathbf{x})}{p(\mathbf{y})} \;\propto\; \underbrace{p(\mathbf{y} \mid \mathbf{x})}_{\text{尤度（観測）}} \cdot \underbrace{p(\mathbf{x})}_{\text{事前分布（モデル）}} \]
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; font-size:0.85em; text-align:left;">
+          <div class="card orange" style="padding:8px;">
+            <strong>事前分布 \(p(\mathbf{x})\)</strong><br>
+            モデルによる予測分布<br>
+            平均 \(\hat{\mathbf{x}}^-\)、共分散 \(\mathbf{P}^-\)<br>
+            <span class="muted">→ 観測前の不確かさ（広い）</span>
+          </div>
+          <div class="card green" style="padding:8px;">
+            <strong>尤度 \(p(\mathbf{y}\mid\mathbf{x})\)</strong><br>
+            センサが状態 \(\mathbf{x}\) のとき<br>
+            観測 \(\mathbf{y}\) が得られる確率<br>
+            <span class="muted">→ 観測ノイズ \(\mathbf{R}\) で決まる</span>
+          </div>
+          <div class="card" style="padding:8px; border-color:var(--blue);">
+            <strong>事後分布 \(p(\mathbf{x}\mid\mathbf{y})\)</strong><br>
+            観測を反映した更新分布<br>
+            平均 \(\hat{\mathbf{x}}^+\)、共分散 \(\mathbf{P}^+\)<br>
+            <span class="muted">→ 不確かさが縮小（狭い）</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ガウス分布の図（SVG） -->
+      <svg viewBox="0 0 680 175" style="width:100%; max-width:680px; display:block; margin:0 auto 10px;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#58a6ff"/></marker>
+        </defs>
+        <!-- 軸 -->
+        <line x1="40" y1="145" x2="650" y2="145" stroke="#8b949e" stroke-width="1.5"/>
+        <polygon points="650,141 658,145 650,149" fill="#8b949e"/>
+        <text x="660" y="149" fill="#8b949e" font-size="12">x（状態）</text>
+        <text x="42" y="162" fill="#8b949e" font-size="11">低←確率密度→高</text>
+
+        <!-- 事前分布（オレンジ、広い） sigma=80 center=240 -->
+        <path d="M 60,144
+          C 80,144 120,143 160,130 C 180,123 200,108 220,90
+          C 230,81 235,70 240,58
+          C 245,70 250,81 260,90
+          C 280,108 300,123 320,130
+          C 360,143 400,144 440,144"
+          fill="rgba(255,163,72,0.25)" stroke="#f0883e" stroke-width="2"/>
+        <text x="205" y="48" fill="#f0883e" font-size="12" font-weight="bold">事前分布 p(x)</text>
+        <text x="205" y="62" fill="#f0883e" font-size="11">μ = x̂⁻（モデル予測）</text>
+
+        <!-- 尤度（緑、中程度） sigma=55 center=390 -->
+        <path d="M 230,144
+          C 270,144 300,143 320,137 C 340,130 355,120 365,108
+          C 375,96 382,82 390,68
+          C 398,82 405,96 415,108
+          C 425,120 440,130 460,137
+          C 480,143 510,144 550,144"
+          fill="rgba(63,185,80,0.20)" stroke="#3fb950" stroke-width="2"/>
+        <text x="430" y="55" fill="#3fb950" font-size="12" font-weight="bold">尤度 p(y|x)</text>
+        <text x="430" y="69" fill="#3fb950" font-size="11">センサ観測 y</text>
+
+        <!-- 事後分布（青、狭い） sigma=35 center=330 -->
+        <path d="M 260,144
+          C 275,144 285,143 295,139 C 305,135 312,128 318,118
+          C 324,108 328,96 330,82
+          C 332,96 336,108 342,118
+          C 348,128 355,135 365,139
+          C 375,143 385,144 400,144"
+          fill="rgba(88,166,255,0.30)" stroke="#58a6ff" stroke-width="2.5"/>
+        <text x="330" y="145" text-anchor="middle" fill="#58a6ff" font-size="12" font-weight="bold" dy="15">事後分布 p(x|y)</text>
+        <text x="330" y="145" text-anchor="middle" fill="#58a6ff" font-size="11" dy="28">μ = x̂⁺（更新後）</text>
+
+        <!-- 矢印: 事前 × 尤度 → 事後 -->
+        <text x="200" y="100" fill="#8b949e" font-size="18" font-weight="bold">×</text>
+        <text x="467" y="100" fill="#8b949e" font-size="18" font-weight="bold">∝</text>
+
+        <!-- 不確かさのブラケット -->
+        <line x1="60" y1="140" x2="440" y2="140" stroke="#f0883e" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="245" y="136" fill="#f0883e" font-size="10">P⁻（大）</text>
+        <line x1="260" y1="133" x2="400" y2="133" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="316" y="129" fill="#58a6ff" font-size="10">P⁺（小）</text>
+      </svg>
+
+      <!-- カルマンフィルタとの対応 -->
+      <div class="success-box" style="font-size:0.85em;">
+        <strong>カルマンフィルタ ＝ 線形ガウス系でのベイズ推定の厳密解</strong><br>
+        事前分布 \(\mathcal{N}(\hat{\mathbf{x}}^-, \mathbf{P}^-)\) × 尤度 \(\mathcal{N}(\mathbf{H}\mathbf{x}, \mathbf{R})\)
+        の積を解析的に計算すると、そのままカルマンゲイン式が導かれる：
+        \[
+          \hat{\mathbf{x}}^+ = \hat{\mathbf{x}}^- + \underbrace{\mathbf{K}}_{\text{ゲイン}}(\mathbf{y} - \mathbf{H}\hat{\mathbf{x}}^-)
+          \qquad
+          \mathbf{P}^+ = (\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}^-
+        \]
+        <span class="muted">非線形・非ガウスの場合は EnKF・粒子フィルタ等の近似手法が必要</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 先行研究 0a: DA時系列イメージ図 -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究 ／ 基礎概念</p>
+    <h2>データ同化の動作イメージ：逐次的な推定更新</h2>
+    <div class="scroll-box">
+      <p style="font-size:0.82em; margin-bottom:8px;">
+        観測が届くたびに「<span class="hl-orange">予測（P⁻ 大）</span>」→「<span class="hl-green">観測</span>」→「<span class="hl-blue">更新（P⁺ 小）</span>」を繰り返す。推定誤差が収縮していく。
+      </p>
+      <svg viewBox="0 0 700 265" style="width:100%; max-width:700px; display:block; margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid -->
+        <line x1="60" y1="100" x2="660" y2="100" stroke="#1c2128" stroke-width="1"/>
+        <line x1="60" y1="140" x2="660" y2="140" stroke="#1c2128" stroke-width="1"/>
+        <line x1="60" y1="180" x2="660" y2="180" stroke="#1c2128" stroke-width="1"/>
+        <!-- Axes -->
+        <line x1="60" y1="25" x2="60" y2="215" stroke="#444c56" stroke-width="1.5"/>
+        <line x1="60" y1="215" x2="660" y2="215" stroke="#444c56" stroke-width="1.5"/>
+        <polygon points="60,22 56,30 64,30" fill="#444c56"/>
+        <polygon points="663,215 655,211 655,219" fill="#444c56"/>
+        <!-- Axis labels -->
+        <text x="28" y="125" font-size="10" fill="#8b949e" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 28 125)">状態値（温度）</text>
+        <text x="360" y="238" font-size="10" fill="#8b949e" text-anchor="middle" font-family="sans-serif">時間 k &#8594;</text>
+        <!-- Vertical marker lines at observation times -->
+        <line x1="200" y1="28" x2="200" y2="215" stroke="rgba(63,185,80,0.18)" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="370" y1="28" x2="370" y2="215" stroke="rgba(63,185,80,0.18)" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="540" y1="28" x2="540" y2="215" stroke="rgba(63,185,80,0.18)" stroke-width="1" stroke-dasharray="3,3"/>
+        <!-- PHASE 1: Forecast band (x=80→188); mean 148→141, σ 8→24 -->
+        <polygon points="80,140 188,117 188,165 80,156" fill="rgba(227,179,65,0.18)" stroke="none"/>
+        <path d="M 80,148 C 130,146 165,142 188,141" fill="none" stroke="#e3b341" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.85"/>
+        <!-- Prior bar obs 1 -->
+        <rect x="188" y="117" width="16" height="48" rx="2" fill="rgba(227,179,65,0.28)" stroke="#e3b341" stroke-width="0.8"/>
+        <line x1="188" y1="141" x2="204" y2="141" stroke="#e3b341" stroke-width="1.5"/>
+        <!-- Observation 1: x=200, y=154 -->
+        <circle cx="200" cy="154" r="6" fill="#3fb950" stroke="#0d1117" stroke-width="1.5"/>
+        <line x1="200" y1="144" x2="200" y2="164" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="194" y1="144" x2="206" y2="144" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="194" y1="164" x2="206" y2="164" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <!-- Innovation arrow (prior mean → analysis) -->
+        <line x1="203" y1="141" x2="203" y2="147" stroke="#58a6ff" stroke-width="1.5" stroke-dasharray="2,1" opacity="0.75"/>
+        <!-- Analysis bar 1: x=204-232, mean=146, σ=10 -->
+        <rect x="204" y="136" width="28" height="20" rx="3" fill="rgba(88,166,255,0.32)" stroke="#58a6ff" stroke-width="0.8"/>
+        <line x1="204" y1="146" x2="232" y2="146" stroke="#58a6ff" stroke-width="2.5"/>
+        <!-- PHASE 2: Forecast band (x=232→360); σ 10→22 -->
+        <polygon points="232,136 360,124 360,168 232,156" fill="rgba(227,179,65,0.18)" stroke="none"/>
+        <path d="M 232,146 C 275,146 325,146 360,146" fill="none" stroke="#e3b341" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.85"/>
+        <!-- Prior bar obs 2 -->
+        <rect x="360" y="124" width="16" height="44" rx="2" fill="rgba(227,179,65,0.28)" stroke="#e3b341" stroke-width="0.8"/>
+        <line x1="360" y1="146" x2="376" y2="146" stroke="#e3b341" stroke-width="1.5"/>
+        <!-- Observation 2: x=370, y=151 -->
+        <circle cx="370" cy="151" r="6" fill="#3fb950" stroke="#0d1117" stroke-width="1.5"/>
+        <line x1="370" y1="141" x2="370" y2="161" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="364" y1="141" x2="376" y2="141" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="364" y1="161" x2="376" y2="161" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <!-- Analysis bar 2: x=374-402, mean=148, σ=10 -->
+        <rect x="374" y="138" width="28" height="20" rx="3" fill="rgba(88,166,255,0.32)" stroke="#58a6ff" stroke-width="0.8"/>
+        <line x1="374" y1="148" x2="402" y2="148" stroke="#58a6ff" stroke-width="2.5"/>
+        <!-- PHASE 3: Forecast band (x=402→530); σ 10→22 -->
+        <polygon points="402,138 530,127 530,170 402,158" fill="rgba(227,179,65,0.18)" stroke="none"/>
+        <path d="M 402,148 C 450,148 490,149 530,149" fill="none" stroke="#e3b341" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.85"/>
+        <!-- Prior bar obs 3 -->
+        <rect x="530" y="127" width="16" height="43" rx="2" fill="rgba(227,179,65,0.28)" stroke="#e3b341" stroke-width="0.8"/>
+        <line x1="530" y1="148" x2="546" y2="148" stroke="#e3b341" stroke-width="1.5"/>
+        <!-- Observation 3: x=540, y=153 -->
+        <circle cx="540" cy="153" r="6" fill="#3fb950" stroke="#0d1117" stroke-width="1.5"/>
+        <line x1="540" y1="143" x2="540" y2="163" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="534" y1="143" x2="546" y2="143" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <line x1="534" y1="163" x2="546" y2="163" stroke="#3fb950" stroke-width="1.5" opacity="0.85"/>
+        <!-- Analysis bar 3: x=544-572, mean=150, σ=10 -->
+        <rect x="544" y="140" width="28" height="20" rx="3" fill="rgba(88,166,255,0.32)" stroke="#58a6ff" stroke-width="0.8"/>
+        <line x1="544" y1="150" x2="572" y2="150" stroke="#58a6ff" stroke-width="2.5"/>
+        <!-- Trailing forecast -->
+        <polygon points="572,140 640,131 640,169 572,160" fill="rgba(227,179,65,0.12)" stroke="none"/>
+        <path d="M 572,150 C 600,150 625,151 640,151" fill="none" stroke="#e3b341" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.5"/>
+        <!-- True state line (on top) -->
+        <path d="M 80,148 C 160,148 190,149 200,149 C 285,150 330,150 370,150 C 450,151 490,151 540,152 C 585,152 620,152 640,153"
+              fill="none" stroke="rgba(255,255,255,0.58)" stroke-width="2" stroke-dasharray="5,3"/>
+        <!-- ANNOTATIONS -->
+        <!-- "予測ステップ" -->
+        <text x="133" y="95" font-size="9" fill="#e3b341" text-anchor="middle" font-family="sans-serif" font-weight="600">&#9654; 予測ステップ</text>
+        <text x="133" y="107" font-size="8" fill="#e3b341" text-anchor="middle" font-family="sans-serif">P&#8315; 大（不確かさ拡大）</text>
+        <!-- Bracket for P⁻ width at obs 1 approach -->
+        <line x1="184" y1="115" x2="184" y2="167" stroke="#e3b341" stroke-width="0.8" opacity="0.7"/>
+        <line x1="179" y1="115" x2="189" y2="115" stroke="#e3b341" stroke-width="0.8" opacity="0.7"/>
+        <line x1="179" y1="167" x2="189" y2="167" stroke="#e3b341" stroke-width="0.8" opacity="0.7"/>
+        <text x="169" y="142" font-size="8" fill="#e3b341" text-anchor="middle" font-family="sans-serif" transform="rotate(-90 169 142)">&#177;&#963; (P&#8315;)</text>
+        <!-- "更新ステップ" -->
+        <text x="218" y="115" font-size="9" fill="#58a6ff" text-anchor="middle" font-family="sans-serif" font-weight="600">更新ステップ</text>
+        <text x="218" y="127" font-size="8" fill="#58a6ff" text-anchor="middle" font-family="sans-serif">P&#8314; 小（不確かさ収縮）</text>
+        <!-- Bracket for P⁺ width -->
+        <line x1="236" y1="134" x2="236" y2="158" stroke="#58a6ff" stroke-width="0.8" opacity="0.7"/>
+        <line x1="231" y1="134" x2="241" y2="134" stroke="#58a6ff" stroke-width="0.8" opacity="0.7"/>
+        <line x1="231" y1="158" x2="241" y2="158" stroke="#58a6ff" stroke-width="0.8" opacity="0.7"/>
+        <text x="248" y="148" font-size="8" fill="#58a6ff" text-anchor="start" font-family="sans-serif">&#177;&#963; (P&#8314;)</text>
+        <!-- Innovation annotation -->
+        <text x="255" y="150" font-size="8" fill="rgba(88,166,255,0.88)" text-anchor="start" font-family="sans-serif">&#8592; &#12452;&#12494;&#12505;&#12540;&#12471;&#12519;&#12531;</text>
+        <text x="255" y="161" font-size="7" fill="#8b949e" text-anchor="start" font-family="sans-serif">y&#8342; &#8722; H&#x1D77C;&#770;&#8342;&#8315;</text>
+        <!-- Observation labels -->
+        <text x="200" y="177" font-size="9" fill="#3fb950" text-anchor="middle" font-family="sans-serif">y&#8342;</text>
+        <text x="370" y="173" font-size="9" fill="#3fb950" text-anchor="middle" font-family="sans-serif">y&#8342;</text>
+        <text x="540" y="175" font-size="9" fill="#3fb950" text-anchor="middle" font-family="sans-serif">y&#8342;</text>
+        <!-- X-axis labels -->
+        <text x="200" y="228" font-size="10" fill="#8b949e" text-anchor="middle" font-family="sans-serif">k&#8321;</text>
+        <text x="370" y="228" font-size="10" fill="#8b949e" text-anchor="middle" font-family="sans-serif">k&#8322;</text>
+        <text x="540" y="228" font-size="10" fill="#8b949e" text-anchor="middle" font-family="sans-serif">k&#8323;</text>
+        <!-- Legend -->
+        <path d="M 65,250 L 92,250" fill="none" stroke="rgba(255,255,255,0.58)" stroke-width="2" stroke-dasharray="5,3"/>
+        <text x="97" y="254" font-size="9" fill="#e6edf3" font-family="sans-serif">&#30495;&#20516;</text>
+        <rect x="145" y="244" width="26" height="12" rx="2" fill="rgba(227,179,65,0.18)" stroke="#e3b341" stroke-width="0.5"/>
+        <text x="176" y="254" font-size="9" fill="#e3b341" font-family="sans-serif">&#20104;&#27979;&#20998;&#24067; P&#8315;&#65288;&#22823;&#65289;</text>
+        <circle cx="293" cy="250" r="4" fill="#3fb950"/>
+        <text x="301" y="254" font-size="9" fill="#3fb950" font-family="sans-serif">&#35266;&#27979; y&#8342;</text>
+        <rect x="362" y="244" width="26" height="12" rx="2" fill="rgba(88,166,255,0.32)" stroke="#58a6ff" stroke-width="0.5"/>
+        <text x="393" y="254" font-size="9" fill="#58a6ff" font-family="sans-serif">&#26356;&#26032;&#24460;&#20998;&#24067; P&#8314;&#65288;&#23567;&#65289;</text>
+      </svg>
+      <div class="info-box" style="margin-top:10px; font-size:0.82em;">
+        <strong>ポイント</strong>：観測が来るたびに P⁻（広い）→ P⁺（狭い）へ収縮。
+        次の予測で再び P⁻ に拡大。この繰り返しで推定値が真値に収束していく。
+        カルマンゲイン $\mathbf{K} = \mathbf{P}^-\mathbf{H}^\top(\mathbf{H}\mathbf{P}^-\mathbf{H}^\top + \mathbf{R})^{-1}$
+        が P⁻ と R の比から <span class="hl-blue">自動的に重みを決定</span>する。
+      </div>
+    </div>
+  </section>
+
+  <!-- 先行研究 0b: 変分法 vs 逐次法 -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究 ／ 手法分類</p>
+    <h2>DA手法の2大アプローチ：変分法 vs 逐次法</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>変分法（Variational）</h3>
+          <div class="info-box" style="margin-bottom:8px; font-size:0.82em;">
+            <strong>考え方</strong>：観測全体に対してコスト関数を最小化する。<br>
+            「過去〜現在の全観測を一括して最適化」
+          </div>
+          <div class="card blue">
+            <strong>3D-Var</strong><br>
+            <span class="muted">コスト関数：$J = \frac{1}{2}(\mathbf{x}-\mathbf{x}^b)^T\mathbf{B}^{-1}(\mathbf{x}-\mathbf{x}^b) + \frac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^T\mathbf{R}^{-1}(\mathbf{y}-\mathbf{H}\mathbf{x})$</span><br>
+            <span style="color:var(--muted); font-size:0.75em;">固定の背景誤差共分散 B。気象予報で広く利用</span>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>4D-Var</strong><br>
+            <span class="muted">時間方向にも積分してコスト最小化</span><br>
+            <span style="color:var(--muted); font-size:0.75em;">随伴モデルが必要。実装が難しいが最高精度</span>
+          </div>
+          <div class="warn-box" style="margin-top:8px; font-size:0.78em;">
+            デメリット：随伴コード作成コストが高い。<br>時間逆積分が困難なモデルには不向き
+          </div>
+        </div>
+        <div>
+          <h3>逐次法（Sequential）</h3>
+          <div class="info-box" style="margin-bottom:8px; font-size:0.82em;">
+            <strong>考え方</strong>：観測が来るたびに推定値を逐次更新する。<br>
+            「予測 → 観測が来たら更新 → また予測 → …」
+          </div>
+          <div class="card green">
+            <strong>OI（Optimal Interpolation）</strong>&ensp;<span class="badge badge-green">002 実装済み</span><br>
+            <span style="color:var(--muted); font-size:0.78em;">sample/002_laplacian_da_1d/oi/</span><br>
+            <span class="muted">固定 B、A_d 不要。CFD をブラックボックスとして使える</span>
+          </div>
+          <div class="card orange" style="margin-top:8px;">
+            <strong>カルマンフィルタ（KF）</strong>&ensp;<span class="badge badge-orange">001 実装済み</span><br>
+            <span style="color:var(--muted); font-size:0.78em;">sample/001_kalman_thermal_1d/</span><br>
+            <span class="muted">P を逐次更新。線形系で厳密最適</span>
+          </div>
+          <div class="card cyan" style="margin-top:8px;">
+            <strong>アンサンブル KF（EnKF）</strong>&ensp;<span class="badge badge-gray">003 計画中</span><br>
+            <span style="color:var(--muted); font-size:0.78em;">sample/003_enkf_... （未実装）</span><br>
+            <span class="muted">A_d 不要。大規模 CFD に対応可能</span>
+          </div>
+          <div class="card purple" style="margin-top:8px;">
+            <strong>粒子フィルタ（Particle Filter）</strong><br>
+            <span class="muted">モンテカルロで任意の非線形・非ガウス系を扱える<br>
+            <span style="font-size:0.78em;">計算コストが高いため大規模系には困難</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 先行研究 1 (旧3-1): DA全体マップ -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究</p>
+    <h2>データ同化手法の全体マップ</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>変分法（Variational DA）</h3>
+          <div class="card blue">
+            <strong>3D-Var</strong><br>
+            <span class="muted">全観測を一度にコスト関数最小化</span><br>
+            <span class="muted">気象予報で実用（静的）</span>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>4D-Var</strong><br>
+            <span class="muted">時間方向にも最適化</span><br>
+            <span class="muted">随伴モデルが必要・最高精度</span>
+          </div>
+        </div>
+        <div>
+          <h3>逐次法（Sequential DA）</h3>
+          <div class="card green">
+            <strong>Optimal Interpolation (OI)</strong>&ensp;<span class="badge badge-gray">002で実装</span><br>
+            <span class="muted">固定の背景誤差共分散 B を使用。A_d 不要</span>
+          </div>
+          <div class="card orange" style="margin-top:8px;">
+            <strong>Kalman Filter (KF)</strong>&ensp;<span class="badge badge-green">001で実装</span><br>
+            <span class="muted">誤差共分散 P を時間発展。線形系で厳密最適</span>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>Extended / Unscented KF</strong><br>
+            <span class="muted">非線形系への拡張（ヤコビアン / シグマ点）</span>
+          </div>
+          <div class="card cyan" style="margin-top:8px;">
+            <strong>Ensemble KF (EnKF)</strong>&ensp;<span class="badge badge-blue">将来目標</span><br>
+            <span class="muted">A_d 不要・大規模 CFD に強い（OpenFOAM 連成の標準手法）</span>
+          </div>
+          <div class="card red" style="margin-top:8px;">
+            <strong>Particle Filter</strong><br>
+            <span class="muted">任意の非線形・非ガウス系（計算コスト大）</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:12px;">
+        <strong>本プロジェクトでの選択</strong>：
+        001 → <span class="hl-orange">線形KF</span>（Python製モデルで A_d を明示構築）&emsp;
+        002 → <span class="hl-green">OI</span>（OpenFOAM をブラックボックスとして扱う）
+      </div>
+    </div>
+  </section>
+
+  <!-- 先行研究 3-2: 工作機械+DA論文 -->
+  <section>
+    <p class="sec-tag">01 &mdash; 先行研究</p>
+    <h2>工作機械熱変位補償 + データ同化</h2>
+    <div class="scroll-box">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>著者・年</th><th>手法</th><th>内容</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="hl-orange">M1</span></td>
+            <td><a href="https://scholar.google.com/scholar?q=Kalman+Filter+Driven+State+Observer+Thermal+Error+Compensation+Machine+Tool+Digital+Twins+Lang+2024" target="_blank">Lang et al.<br><span class="muted">2024, Manuf. Lett.</span></a></td>
+            <td><span class="badge badge-orange">KF</span></td>
+            <td>工作機械デジタルツインへのKF適用。<br>KF駆動の熱誤差オブザーバ設計</td>
+          </tr>
+          <tr>
+            <td><span class="hl-orange">M2</span></td>
+            <td><a href="https://scholar.google.com/scholar?q=Sensor+placement+digital+twin+thermal+error+compensation+machine+tools+Lang+2025" target="_blank">Lang et al.<br><span class="muted">2025, J. Manuf. Syst.</span></a></td>
+            <td><span class="badge badge-blue">Digital Twin</span></td>
+            <td>デジタルツインを使った温度センサ配置最適化。<br>少数センサで熱誤差低減</td>
+          </tr>
+          <tr>
+            <td><span class="hl-orange">M3</span></td>
+            <td><a href="https://scholar.google.com/scholar?q=Thermal+Issues+Machine+Tools+Mayr+CIRP+2012" target="_blank">Mayr et al.<br><span class="muted">2012, CIRP Ann.</span></a></td>
+            <td><span class="badge badge-gray">Survey</span></td>
+            <td>工作機械の熱変位問題の包括的サーベイ。<br>補償手法の分類と課題整理</td>
+          </tr>
+          <tr>
+            <td><span class="hl-orange">M4</span></td>
+            <td><a href="https://scholar.google.com/scholar?q=thermal+distortion+compensation+large+machine+tools+Kalman+filter+Gomez-Acedo+2013" target="_blank">Gomez-Acedo et al.<br><span class="muted">2013, Int. J. Mach. Tools</span></a></td>
+            <td><span class="badge badge-orange">KF + SS</span></td>
+            <td>状態空間モデル + KFによる大型工作機械の熱変位補償</td>
+          </tr>
+          <tr>
+            <td><span class="hl-orange">M5</span></td>
+            <td><a href="https://scholar.google.com/scholar?q=Unscented+Kalman+Filter+Machine+Tool+Errors+Brecher+2017+Procedia+CIRP" target="_blank">Brecher et al.<br><span class="muted">2017, Procedia CIRP</span></a></td>
+            <td><span class="badge badge-purple">UKF</span></td>
+            <td>UKFを用いた工作機械の幾何誤差・熱誤差モデリング</td>
+          </tr>
+          <tr>
+            <td><span class="hl-blue">P1</span></td>
+            <td><a href="https://doi.org/10.1115/1.3662552" target="_blank">Kalman, R.E.<br><span class="muted">1960, J. Basic Eng.</span></a></td>
+            <td><span class="badge badge-orange">KF 原著</span></td>
+            <td>線形フィルタリングと予測問題の新しいアプローチ</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn-box" style="margin-top:12px;">
+        <strong>先行研究から見えるギャップ</strong>：
+        多くの研究が特定の機械・センサ配置に特化。
+        <span class="hl-orange">汎用的な数値モデル + KF フレームワーク</span>を
+        段階的に構築した検証事例は少ない。
+        → まず <strong>1D モデルで原理実証</strong>、その後 OpenFOAM CFD と連成へ拡張する。
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 研究動機・位置づけ
+     ═══════════════════════════════════════════ -->
+
+<!-- 動機 4-1: 問題設定 -->
+<section>
+  <section>
+    <p class="sec-tag">02 &mdash; 研究の動機</p>
+    <h2>工作機械の熱変位問題</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>問題の構造</h3>
+          <div class="flow" style="flex-direction:column; align-items:flex-start; gap:6px;">
+            <div class="flow-item" style="border-color:var(--red);">🔴 スピンドル回転 → <strong>発熱</strong></div>
+            <div class="flow-arrow" style="margin-left:16px;">↓</div>
+            <div class="flow-item">温度場の変化（時空間分布）</div>
+            <div class="flow-arrow" style="margin-left:16px;">↓</div>
+            <div class="flow-item">機械構造の<strong>熱変形</strong></div>
+            <div class="flow-arrow" style="margin-left:16px;">↓</div>
+            <div class="flow-item" style="border-color:var(--red);">🔴 工具中心点（TCP）に<strong>熱変位</strong>が発生</div>
+            <div class="flow-arrow" style="margin-left:16px;">↓</div>
+            <div class="flow-item" style="border-color:var(--red);">🔴 <strong>加工誤差</strong>の原因</div>
+          </div>
+          <div class="card red" style="margin-top:12px;">
+            <strong>典型的な影響</strong>：高精度加工機では熱変位が
+            <span class="hl-red">数十 µm</span> に達することもある
+          </div>
+        </div>
+        <div>
+          <h3>現実の制約</h3>
+          <div class="card orange">
+            <strong>① センサ制約</strong><br>
+            機械全体に多数の温度センサを取り付けることは
+            コスト・スペースの制約から困難
+          </div>
+          <div class="card orange" style="margin-top:8px;">
+            <strong>② モデル不確かさ</strong><br>
+            発熱量・切削液・環境温度などの
+            境界条件は完全には分からない
+          </div>
+          <div class="card orange" style="margin-top:8px;">
+            <strong>③ リアルタイム要件</strong><br>
+            補償制御のためには加工中に
+            リアルタイムで変位を推定する必要がある
+          </div>
+          <div class="success-box" style="margin-top:12px;">
+            <strong>この研究が答える問い</strong>：<br>
+            少数の温度センサ（2点）と物理モデルを組み合わせて、
+            未観測節点の温度場と熱変位を高精度に推定できるか？
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 動機 4-2: モデル設定 -->
+  <section>
+    <p class="sec-tag">02 &mdash; 研究の動機</p>
+    <h2>概念実証モデルの設定</h2>
+    <div class="scroll-box">
+      <h3>1次元熱棒モデル（10節点）</h3>
+      <div class="card blue" style="font-family: 'JetBrains Mono', monospace; font-size:0.8em; overflow-x:auto; white-space:pre;">
+Sensor                                              Sensor
+ Node 0   Node 1   Node 2   Node 3 ... Node 8   Node 9
+  [S]------[ ]------[ ]------[ ]----------[ ]------[S]
+   ↑                                               ↑
+ 熱入力 Q                                       対流冷却
+ (スピンドル)                               両端: 対流境界条件</div>
+
+      <div class="three-col" style="margin-top:14px;">
+        <div>
+          <h4>物理パラメータ</h4>
+          <table>
+            <tr><td>棒の長さ</td><td>0.9 m</td></tr>
+            <tr><td>節点間距離 Δx</td><td>0.1 m</td></tr>
+            <tr><td>熱拡散率 α</td><td>1.2×10⁻⁵ m²/s</td></tr>
+            <tr><td>時間刻み Δt</td><td>10 s</td></tr>
+            <tr><td>総シミュレーション</td><td>90 min</td></tr>
+          </table>
+        </div>
+        <div>
+          <h4>センサ・観測設定</h4>
+          <table>
+            <tr><td>センサ位置</td><td>Node 0, Node 9</td></tr>
+            <tr><td>観測ノイズ σ_obs</td><td>0.20 °C</td></tr>
+            <tr><td>推定対象</td><td>Node 1〜8（8点）</td></tr>
+            <tr><td>変位推定</td><td>全節点温度の積算</td></tr>
+          </table>
+        </div>
+        <div>
+          <h4>熱入力パターン</h4>
+          <table>
+            <tr><td>スピンドル熱入力</td><td>6500 W/m</td></tr>
+            <tr><td>ONサイクル</td><td>10 min ON</td></tr>
+            <tr><td>OFFサイクル</td><td>5 min OFF</td></tr>
+            <tr><td>プロセスノイズ</td><td>0.03 °C</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:12px;">
+        この小さなモデルで <span class="hl-blue">原理を検証</span> し、
+        その後 <strong>OpenFOAM（2D/3D CFD）</strong> へスケールアップする計画
+      </div>
+    </div>
+  </section>
+
+  <!-- 動機 4-3: ロードマップ -->
+  <section>
+    <p class="sec-tag">02 &mdash; 本プロジェクトの位置づけ</p>
+    <h2>研究ロードマップ</h2>
+    <div class="scroll-box">
+      <div class="card green" style="margin-bottom:10px;">
+        <strong class="hl-green">✅ 001_kalman_thermal_1d（現在）</strong><br>
+        Python製1次元熱伝導モデル + 線形カルマンフィルタ<br>
+        <span class="muted">→ KF の原理確認・少数センサからの温度場推定・変位推定</span>
+      </div>
+      <div class="card orange" style="margin-bottom:10px;">
+        <strong class="hl-orange">✅ 002_laplacian_da_1d（実装済み）</strong><br>
+        OpenFOAM laplacianFoam + Optimal Interpolation (OI)<br>
+        <span class="muted">→ CFDソルバをブラックボックスとして扱うDAの原理実証</span>
+      </div>
+      <div class="card blue" style="margin-bottom:10px;">
+        <strong class="hl-blue">📅 003（次のステップ）</strong><br>
+        OpenFOAM + EnKF / パラメータ同化<br>
+        <span class="muted">→ 境界条件（熱入力量）自体の推定・大規模化</span>
+      </div>
+      <div class="card purple" style="margin-bottom:10px;">
+        <strong class="hl-purple">🔮 004（中期目標）</strong><br>
+        実測温度データ + OpenFOAM + DA<br>
+        <span class="muted">→ 丸棒実験での実証・工作機械構造部品への適用</span>
+      </div>
+      <div class="card cyan">
+        <strong class="hl-cyan">🔮 長期目標</strong><br>
+        工作機械スピンドルへの熱変位リアルタイム補償<br>
+        <span class="muted">→ IoT センサ + デジタルツイン + EnKF によるオンライン推定</span>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 手法の位置づけと理論
+     ═══════════════════════════════════════════ -->
+
+<!-- 手法 5-1: KFを選んだ理由 -->
+<section>
+  <section>
+    <p class="sec-tag">03 &mdash; 手法の位置づけ</p>
+    <h2>線形カルマンフィルタを選んだ理由</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>001の条件</h3>
+          <ul>
+            <li>Python で自作した1次元熱伝導モデル</li>
+            <li>状態方程式 $\boldsymbol{\theta}_{k+1} = \mathbf{A}_d \boldsymbol{\theta}_k + \mathbf{B}_d u_k$ が明示的に分かる</li>
+            <li>線形系（熱拡散 PDE の有限差分モデル）</li>
+            <li>状態数が小さい（10次元）</li>
+          </ul>
+          <div class="success-box" style="margin-top:12px;">
+            → <strong>線形 KF が厳密に最適（MMSE 推定量）</strong>
+          </div>
+        </div>
+        <div>
+          <h3>手法ごとの要件比較</h3>
+          <table>
+            <thead><tr><th>手法</th><th>A_d</th><th>規模</th><th>非線形</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="hl-orange"><strong>KF ← 001</strong></span></td>
+                <td>✅ 必要</td>
+                <td>小〜中</td>
+                <td>✖</td>
+              </tr>
+              <tr>
+                <td>OI ← 002</td>
+                <td>✖ 不要</td>
+                <td>中〜大</td>
+                <td>✖</td>
+              </tr>
+              <tr>
+                <td>EKF</td>
+                <td>ヤコビアン</td>
+                <td>小〜中</td>
+                <td>△</td>
+              </tr>
+              <tr>
+                <td>UKF</td>
+                <td>✖ 不要</td>
+                <td>中</td>
+                <td>◎</td>
+              </tr>
+              <tr>
+                <td>EnKF</td>
+                <td>✖ 不要</td>
+                <td>大</td>
+                <td>◎</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top:12px;">
+        <strong>001 の役割</strong>：
+        KF が <span class="hl-blue">どのように動作するか</span> を明示的な A_d で学ぶ。
+        この理解が 002（OI）・003（EnKF）の基礎となる。
+      </div>
+    </div>
+  </section>
+
+  <!-- 理論 新A: 熱伝導方程式とモデル設定 -->
+  <section>
+    <p class="sec-tag">03 &mdash; 理論：物理モデルの導出</p>
+    <h2>出発点：1次元熱伝導方程式</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>物理問題の設定</h3>
+          <p>長さ $L = 1$ m の熱棒。左端から熱入力、両端から対流冷却：</p>
+          <div style="margin:10px 0;">
+            <svg viewBox="0 0 360 80" style="width:100%; max-width:360px;" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="barG2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ff5533" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#39d0d8" stop-opacity="0.3"/>
+                </linearGradient>
+              </defs>
+              <rect x="40" y="28" width="280" height="20" rx="3" fill="url(#barG2)" stroke="#30363d"/>
+              <!-- BC labels -->
+              <text x="20" y="42" font-size="8" text-anchor="middle" fill="#ff8866" font-family="sans-serif">Q</text>
+              <text x="20" y="52" font-size="7" text-anchor="middle" fill="#ff8866" font-family="sans-serif">熱入力</text>
+              <text x="340" y="42" font-size="8" text-anchor="middle" fill="#39d0d8" font-family="sans-serif">T&#8321;</text>
+              <text x="340" y="52" font-size="7" text-anchor="middle" fill="#39d0d8" font-family="sans-serif">対流冷却</text>
+              <!-- Dimension label -->
+              <line x1="40" y1="65" x2="320" y2="65" stroke="#30363d" stroke-width="0.8"/>
+              <text x="180" y="75" font-size="8" text-anchor="middle" fill="#8b949e" font-family="sans-serif">x: 0 &#x2192; L = 1 m</text>
+              <!-- arrows showing heat flow direction -->
+              <polygon points="40,38 50,34 50,42" fill="#ff6644" opacity="0.7"/>
+            </svg>
+          </div>
+          <h3>支配方程式（熱伝導 PDE）</h3>
+          <div class="math-box">
+            $$\rho c_p \frac{\partial \theta}{\partial t} = k \frac{\partial^2 \theta}{\partial x^2}$$
+          </div>
+          <p style="font-size:0.8em; color:var(--muted);">
+            $\rho c_p$：体積熱容量 [J/(m³·K)]、$k$：熱伝導率 [W/(m·K)]<br>
+            $\alpha = k/(\rho c_p)$：熱拡散率 [m²/s]
+          </p>
+          <div class="math-box">
+            $$\frac{\partial \theta}{\partial t} = \alpha \frac{\partial^2 \theta}{\partial x^2}$$
+          </div>
+        </div>
+        <div>
+          <h3>有限差分法（FDM）による空間離散化</h3>
+          <p>棒を $n=10$ 節点に分割（$\Delta x = L/(n-1) = 0.1$ m）。2階微分を中心差分で近似：</p>
+          <div class="math-box">
+            $$\left.\frac{\partial^2\theta}{\partial x^2}\right|_i \approx \frac{\theta_{i-1} - 2\theta_i + \theta_{i+1}}{\Delta x^2}$$
+          </div>
+          <p>各節点 $i$ の時間微分：</p>
+          <div class="math-box">
+            $$\dot{\theta}_i = \underbrace{\frac{\alpha}{\Delta x^2}}_{r}\left(\theta_{i-1} - 2\theta_i + \theta_{i+1}\right)$$
+          </div>
+          <p>境界節点（Node 0）では対流冷却の境界条件を加算：</p>
+          <div class="math-box">
+            $$\dot{\theta}_0 = r(\theta_1 - 2\theta_0) - h(\theta_0 - T_\text{amb}) + \underbrace{Q_\text{in}}_{\text{熱入力}}$$
+          </div>
+          <div class="card green" style="margin-top:10px;">
+            <strong>まとめると連続時間 ODE：</strong>
+            $$\dot{\boldsymbol{\theta}} = \mathbf{A}_c\boldsymbol{\theta} + \mathbf{B}_c u$$
+            <span style="font-size:0.78em;">$\boldsymbol{\theta} \in \mathbb{R}^{10}$（全節点温度）、$\mathbf{A}_c$：三重対角行列</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 理論 6-1: 状態空間モデル (離散化) -->
+  <section>
+    <p class="sec-tag">03 &mdash; 理論：状態空間モデル</p>
+    <h2>連続時間 ODE から離散時間状態方程式へ</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>前進オイラー法で時間離散化</h3>
+          <p>連続時間 ODE $\dot{\boldsymbol{\theta}} = \mathbf{A}_c\boldsymbol{\theta} + \mathbf{B}_c u$ を $\Delta t = 10$ s で差分化：</p>
+          <div class="math-box">
+            $$\frac{\boldsymbol{\theta}_{k+1} - \boldsymbol{\theta}_k}{\Delta t} \approx \mathbf{A}_c\boldsymbol{\theta}_k + \mathbf{B}_c u_k$$
+          </div>
+          <p>整理すると：</p>
+          <div class="math-box">
+            $$\mathbf{A}_d = \mathbf{I} + \mathbf{A}_c\,\Delta t,\quad \mathbf{B}_d = \mathbf{B}_c\,\Delta t$$
+          </div>
+          <p>$\mathbf{A}_c$ の実装（thermal_model.py）：</p>
+          <pre><code class="language-python">r = alpha / dx**2   # r = 1.2e-5 / 0.01 = 0.0012
+h = h_conv / (rho_cp * dx)
+
+# 内部節点 i
+A_c[i, i-1] = +r
+A_c[i, i  ] = -2*r
+A_c[i, i+1] = +r
+
+# 端部節点（対流冷却あり）
+A_c[0, 0] = -r - h
+A_c[0, 1] = +r
+</code></pre>
+        </div>
+        <div>
+          <h3>離散時間状態方程式</h3>
+          <div class="card orange">
+            <strong>状態方程式（システムモデル）</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\boldsymbol{\theta}_{k+1} = \mathbf{A}_d\,\boldsymbol{\theta}_k + \mathbf{B}_d\,u_k + \mathbf{w}_k$$
+            </div>
+            <span style="font-size:0.78em; color:var(--muted);">$\mathbf{w}_k \sim \mathcal{N}(0, \mathbf{Q})$：プロセスノイズ（モデル誤差）</span>
+          </div>
+          <div class="card green" style="margin-top:8px;">
+            <strong>安定条件の確認</strong>：<br>
+            $r\,\Delta t = 0.0012 \times 10 = 0.012 \ll 0.5$ ✅
+          </div>
+          <h3 style="margin-top:12px;">Step 3：観測式</h3>
+          <div class="card blue" style="margin-top:6px;">
+            <strong>観測方程式（センサモデル）</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\mathbf{y}_k = \mathbf{H}\,\boldsymbol{\theta}_k + \mathbf{v}_k$$
+            </div>
+            <span style="font-size:0.78em; color:var(--muted);">$\mathbf{H} \in \mathbb{R}^{2 \times 10}$：Node 0, Node 9 のみ取り出す行列<br>
+            $\mathbf{v}_k \sim \mathcal{N}(0, \mathbf{R})$：観測ノイズ</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 理論 6-2: KFアルゴリズム -->
+  <section>
+    <p class="sec-tag">03 &mdash; 理論：カルマンフィルタ</p>
+    <h2>線形カルマンフィルタのアルゴリズム</h2>
+    <div class="scroll-box">
+      <!-- Symbol definitions -->
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 16px; margin-bottom:12px; font-size:0.78em;">
+        <strong style="color:var(--cyan);">記号の定義</strong>
+        <table style="margin:6px 0; font-size:0.95em;">
+          <tbody>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--orange);">$\hat{\boldsymbol{\theta}}_k^- \in \mathbb{R}^{10}$</td><td style="color:var(--muted);">予測ステップ後の推定温度ベクトル（観測反映前）</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--blue);">$\hat{\boldsymbol{\theta}}_k^+ \in \mathbb{R}^{10}$</td><td style="color:var(--muted);">更新ステップ後の推定温度ベクトル（観測反映済み）</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--orange);">$\mathbf{P}_k^- \in \mathbb{R}^{10\times10}$</td><td style="color:var(--muted);">予測誤差共分散行列：推定誤差の大きさと相関を表す</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--blue);">$\mathbf{P}_k^+ \in \mathbb{R}^{10\times10}$</td><td style="color:var(--muted);">更新後誤差共分散行列：観測後に不確かさが減少</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--green);">$\mathbf{Q} \in \mathbb{R}^{10\times10}$</td><td style="color:var(--muted);">プロセスノイズ共分散：モデル誤差の大きさ</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--green);">$\mathbf{R} \in \mathbb{R}^{2\times2}$</td><td style="color:var(--muted);">観測ノイズ共分散：センサ精度の逆数に相当</td></tr>
+            <tr><td style="padding:2px 10px 2px 0; white-space:nowrap; color:var(--cyan);">$\mathbf{K}_k \in \mathbb{R}^{10\times2}$</td><td style="color:var(--muted);">カルマンゲイン：2点センサ → 10節点全体への「重み行列」</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="two-col">
+        <div>
+          <h3>予測ステップ（Predict）</h3>
+          <div class="card orange">
+            <strong>状態の時間発展</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\hat{\boldsymbol{\theta}}_k^- = \mathbf{A}_d\,\hat{\boldsymbol{\theta}}_{k-1}^+ + \mathbf{B}_d\,u_{k-1}$$
+            </div>
+          </div>
+          <div class="card orange" style="margin-top:8px;">
+            <strong>誤差共分散の時間発展</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\mathbf{P}_k^- = \mathbf{A}_d\,\mathbf{P}_{k-1}^+\,\mathbf{A}_d^\top + \mathbf{Q}$$
+            </div>
+          </div>
+          <pre style="margin-top:8px;"><code class="language-python">def predict(self, u):
+    self.x = self.A @ self.x + self.B @ u
+    self.P = self.A @ self.P @ self.A.T + self.Q
+</code></pre>
+        </div>
+        <div>
+          <h3>更新ステップ（Update）</h3>
+          <div class="card blue">
+            <strong>カルマンゲイン</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\mathbf{K}_k = \mathbf{P}_k^-\,\mathbf{H}^\top\!\left(\mathbf{H}\,\mathbf{P}_k^-\,\mathbf{H}^\top + \mathbf{R}\right)^{-1}$$
+            </div>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>状態の更新（イノベーション反映）</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\hat{\boldsymbol{\theta}}_k^+ = \hat{\boldsymbol{\theta}}_k^- + \mathbf{K}_k\!\left(\mathbf{y}_k - \mathbf{H}\,\hat{\boldsymbol{\theta}}_k^-\right)$$
+            </div>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>誤差共分散の更新</strong>
+            <div class="math-box" style="margin-top:8px;">
+              $$\mathbf{P}_k^+ = \left(\mathbf{I} - \mathbf{K}_k\,\mathbf{H}\right)\mathbf{P}_k^-$$
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top:10px;">
+        <strong>カルマンゲインの直感</strong>：
+        $\mathbf{K} \approx \dfrac{\text{モデルの不確かさ } \mathbf{P}}{\text{モデル不確かさ} + \text{センサノイズ } \mathbf{R}}$
+        &emsp;→&emsp;
+        $\mathbf{R}$ が大きい（ノイズ多）→ K 小 → モデル重視
+        &emsp;/&emsp;
+        $\mathbf{P}$ が大きい（モデル不確か）→ K 大 → センサ重視
+      </div>
+    </div>
+  </section>
+
+  <!-- 理論: カルマンゲインの導出 -->
+  <section>
+    <p class="sec-tag">03 &mdash; 理論</p>
+    <h2>カルマンゲインの導出（最小分散推定）</h2>
+    <div class="scroll-box">
+      <p>
+        カルマンゲイン $\mathbf{K}$ は「推定誤差の分散を最小にする最適な重み行列」として導出される。
+        「センサ観測をどれだけ信じるか」という重みを、モデル誤差とセンサ誤差の比から自動計算する。
+      </p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+        <!-- Step 0+1 -->
+        <div>
+          <div class="card orange" style="margin-bottom:8px;">
+            <strong>Step 0 — 何を最小化するか？</strong>
+            <p style="font-size:0.85em; margin-top:6px;">
+              更新式を線形に仮定する：
+              $$\hat{\mathbf{x}}^+ = \hat{\mathbf{x}}^- + \mathbf{K}(\mathbf{y} - \mathbf{H}\hat{\mathbf{x}}^-)$$
+              $\mathbf{K}$ をどう選べば推定誤差が最小になるか？<br>
+              目標：事後誤差共分散 $\text{tr}(\mathbf{P}^+)$ を最小化。
+            </p>
+          </div>
+          <div class="card blue">
+            <strong>Step 1 — $\mathbf{P}^+$ を $\mathbf{K}$ で表す</strong>
+            <p style="font-size:0.85em; margin-top:6px;">
+              事後誤差 $\mathbf{e}^+ = \mathbf{x} - \hat{\mathbf{x}}^+$ を計算すると：
+              $$\mathbf{e}^+ = (\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{e}^- - \mathbf{K}\mathbf{v}$$
+              （$\mathbf{e}^-$：事前誤差、$\mathbf{v}$：観測ノイズ）<br>
+              事後共分散：
+              $$\mathbf{P}^+ = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}^-(\mathbf{I}-\mathbf{K}\mathbf{H})^\top + \mathbf{K}\mathbf{R}\mathbf{K}^\top$$
+            </p>
+          </div>
+        </div>
+        <!-- Step 2+3 -->
+        <div>
+          <div class="card green" style="margin-bottom:8px;">
+            <strong>Step 2 — $\mathbf{K}$ で微分してゼロと置く</strong>
+            <p style="font-size:0.85em; margin-top:6px;">
+              $\text{tr}(\mathbf{P}^+)$ を $\mathbf{K}$ で微分してゼロと置く：
+              $$\frac{\partial\,\text{tr}(\mathbf{P}^+)}{\partial \mathbf{K}}
+                = -2\mathbf{P}^-\mathbf{H}^\top
+                  + 2\mathbf{K}(\mathbf{H}\mathbf{P}^-\mathbf{H}^\top + \mathbf{R}) = \mathbf{0}$$
+            </p>
+          </div>
+          <div class="success-box">
+            <strong>Step 3 — 最適ゲイン</strong>
+            $$\boxed{\mathbf{K} = \mathbf{P}^-\mathbf{H}^\top
+              \!\left(\mathbf{H}\mathbf{P}^-\mathbf{H}^\top + \mathbf{R}\right)^{-1}}$$
+            この $\mathbf{K}$ を代入すると
+            $\mathbf{P}^+ = (\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}^-$ に整理できる。
+          </div>
+          <div class="info-box" style="margin-top:8px; font-size:0.82em;">
+            <strong>物理的解釈</strong>：<br>
+            分子 $\mathbf{P}^-\mathbf{H}^\top$：モデルの不確かさをセンサ空間に射影した量<br>
+            分母 $\mathbf{H}\mathbf{P}^-\mathbf{H}^\top + \mathbf{R}$：センサ空間での合計不確かさ<br>
+            → $\mathbf{K}$ = モデル不確かさ ÷ 合計不確かさ = センサへの信頼度割合
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 実装
+     ═══════════════════════════════════════════ -->
+<section>
+  <section>
+    <p class="sec-tag">04 &mdash; 実装</p>
+    <h2>プログラム構成</h2>
+    <div class="scroll-box">
+      <div class="two-col">
+        <div>
+          <h3>ファイル構成と役割</h3>
+          <div class="card orange">
+            <strong>thermal_model.py</strong><br>
+            <span class="muted">物理モデル：PDE → A_c → A_d, B_d<br>
+            連続系構築 + 前進オイラー離散化</span>
+          </div>
+          <div class="card blue" style="margin-top:8px;">
+            <strong>kalman_filter.py</strong><br>
+            <span class="muted">推定アルゴリズム：predict / update<br>
+            誤差共分散 P の管理・カルマンゲイン計算</span>
+          </div>
+          <div class="card green" style="margin-top:8px;">
+            <strong>main.py</strong><br>
+            <span class="muted">メインシナリオ：温度センサ2点<br>
+            8パネルグラフ生成（results.png）</span>
+          </div>
+          <div class="card green" style="margin-top:8px;">
+            <strong>main_da_demo.py</strong><br>
+            <span class="muted">DA効果デモ：コールドスタート + 30%モデル誤差<br>
+            過酷条件下でのKF vs No-DA比較</span>
+          </div>
+          <div class="card green" style="margin-top:8px;">
+            <strong>main_disp_obs.py</strong><br>
+            <span class="muted">変位センサ追加実験<br>
+            3ケース比較（温度のみ / 温度+変位 / 変位のみ）</span>
+          </div>
+        </div>
+        <div>
+          <h3>データフロー</h3>
+          <div class="card" style="font-family: 'JetBrains Mono', monospace; font-size:0.72em; overflow-x:auto; white-space:pre; line-height:1.7;">
+<span style="color:var(--orange)">ThermalBarModel</span>
+  ├─ _build_continuous()
+  │    → A_c, B_c
+  ├─ _discretize()
+  │    → A_d, B_d  ←→ <span style="color:var(--blue)">KalmanFilter</span>
+  └─ step(x, u)
+       → x_true（真値）
+           ↓
+    <span style="color:var(--green)">main.py</span>
+    ├─ 観測 H, センサ配置
+    ├─ y = H·x_true + ノイズ
+    ├─ kf.step(u, y)
+    │    → x̂, P
+    └─ 熱変位 δ [µm]
+         = α·Σ(θᵢ-T_ref)·Δx</div>
+
+          <div class="info-box" style="margin-top:10px;">
+            <strong>変位センサの H への組み込み</strong>：<br>
+            $\delta\,[\mu\text{m}] = C_\text{disp}\sum_{i}\theta_i$
+            → $\mathbf{H}_\text{disp} = C_\text{disp}\cdot[1,1,\ldots,1]$
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ファイル構成詳細 -->
+  <section>
+    <p class="sec-tag">04 &mdash; 実装：ファイル構成</p>
+    <h2>プロジェクトのファイル構成</h2>
+    <div class="scroll-box">
+      <div class="two-col" style="gap:16px; font-size:0.82em;">
+        <div>
+          <h3>ディレクトリ構成</h3>
+          <div class="card" style="font-family:'JetBrains Mono',monospace; font-size:0.78em; line-height:1.9; white-space:pre;">
+<span style="color:var(--orange);">001_kalman_thermal_1d/</span>
+├── <span style="color:var(--orange);">thermal_model.py</span>   ← 物理モデル
+├── <span style="color:var(--blue);">kalman_filter.py</span>   ← KF アルゴリズム
+├── <span style="color:var(--green);">main.py</span>            ← ケース1（基本デモ）
+├── <span style="color:var(--green);">main_da_demo.py</span>    ← ケース2（DA効果デモ）
+├── <span style="color:var(--green);">main_disp_obs.py</span>   ← ケース3（変位センサ）
+├── slides.html        ← このスライド
+├── results.png              ┐
+├── results_all_nodes.png    │
+├── results_da_demo.png      │ 出力グラフ
+├── results_da_demo_all_nodes.png  │
+├── results_disp_obs.png     │
+├── results_disp_obs_all_nodes.png ┘
+└── <span style="color:var(--muted);">docs/</span>
+    ├── 06_results_guide.md  ← 結果解説
+    └── ...</div>
+        </div>
+        <div>
+          <h3>各ファイルの入出力</h3>
+          <div style="display:flex; flex-direction:column; gap:7px;">
+            <div style="background:rgba(255,165,0,0.10); border-left:3px solid var(--orange); padding:6px 10px; border-radius:4px;">
+              <strong>thermal_model.py</strong><br>
+              入力：物理パラメータ（α, dx, h_conv, ρcₚ, dt）<br>
+              出力：A_d, B_d（離散時間状態行列）、step() で次ステップ温度
+            </div>
+            <div style="background:rgba(100,160,255,0.12); border-left:3px solid var(--blue); padding:6px 10px; border-radius:4px;">
+              <strong>kalman_filter.py</strong><br>
+              入力：A_d, B_d, H, Q, R, x0, P0<br>
+              出力：step(u, y) → 推定値 x̂, 誤差共分散 P
+            </div>
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:6px 10px; border-radius:4px;">
+              <strong>main.py / main_da_demo.py</strong><br>
+              入力：なし（内部パラメータで動作）<br>
+              出力：results*.png（グラフ画像）、コンソールに RMSE 表
+            </div>
+            <div style="background:rgba(80,200,120,0.10); border-left:3px solid var(--green); padding:6px 10px; border-radius:4px;">
+              <strong>main_disp_obs.py</strong><br>
+              入力：なし<br>
+              出力：results_disp_obs.png（6パネル比較）<br>
+              　　　results_disp_obs_all_nodes.png（全10節点 5×2グリッド）
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 実装コード -->
+  <section>
+    <p class="sec-tag">04 &mdash; 実装：メインループ</p>
+    <h2>シミュレーションループ（main.py 核心部）</h2>
+    <div class="scroll-box">
+      <pre><code class="language-python">
+# ── 初期化 ───────────────────────────────────────────────────────────────────
+model = ThermalBarModel(n_nodes=N_NODES, dx=DX, dt=DT, ...)
+kf    = KalmanFilter(A=model.A_d, B=model.B_d,
+                     H=H, Q=Q_mat, R=R_mat, x0=x0, P0=P0)
+
+# ── メインループ (540 ステップ = 90 min) ──────────────────────────────────────
+for k in range(N_STEPS):
+    u = np.array([u_series[k]])          # 現在の熱入力 [W/m]
+
+    # ① 真値の時間発展（シミュレーション上の「正解」）
+    x_true = model.step(x_true, u, noise_std=PROC_NOISE_STD)
+
+    # ② センサ計測（真値 + ガウスノイズ）
+    y = H @ x_true + np.random.randn(n_obs) * OBS_NOISE_STD
+
+    # ③ カルマンフィルタ: 予測 → 更新
+    x_est, P_est = kf.step(u, y)
+    # 内部: predict() → x̂⁻, P⁻
+    #       update(y)  → K, x̂⁺, P⁺
+
+    # ④ 記録
+    true_T[k]   = x_true              # 全10節点の真値
+    kf_T[k]     = x_est               # KF推定値
+    kf_sigma[k] = np.sqrt(np.diag(P_est))   # 推定標準偏差 σ
+
+# ── 熱変位の計算 ──────────────────────────────────────────────────────────────
+def compute_displacement(temps, t_ref=T_INIT):
+    delta_T = temps - t_ref                    # 各節点の温度上昇
+    return ALPHA_EXP * np.sum(delta_T) * DX * 1e6   # [µm]
+
+disp_true = compute_displacement(true_T[-1])
+disp_est  = compute_displacement(kf_T[-1])
+</code></pre>
+      <div class="success-box" style="margin-top:10px;">
+        <strong>設計のポイント</strong>：
+        <span class="hl-green">真値（x_true）</span> と
+        <span class="hl-blue">KF推定値（x_est）</span> を別々に管理。
+        KF はセンサ2点の情報のみを使って未観測8節点を推定。
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SECTION: 結果
+     ═══════════════════════════════════════════ -->
+
+<!-- 結果グループ -->
+<section>
+
+  <!-- 結果 0a: 3ケース条件一覧 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果：条件一覧</p>
+    <h2>3つのケース — 条件と目的の一覧</h2>
+    <div class="scroll-box">
+      <table style="width:100%; font-size:0.80em; border-collapse:collapse;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.07);">
+            <th style="padding:7px 10px; text-align:left; width:16%;">項目</th>
+            <th style="padding:7px 10px; background:rgba(100,160,255,0.15); width:28%;">
+              ケース 1 — 基本デモ<br><span style="font-weight:400; font-size:0.88em;">main.py</span>
+            </th>
+            <th style="padding:7px 10px; background:rgba(255,165,0,0.15); width:28%;">
+              ケース 2 — DA 効果デモ<br><span style="font-weight:400; font-size:0.88em;">main_da_demo.py</span>
+            </th>
+            <th style="padding:7px 10px; background:rgba(80,200,120,0.15); width:28%;">
+              ケース 3 — センサ比較<br><span style="font-weight:400; font-size:0.88em;">main_disp_obs.py</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>目的</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">
+              「センサを使うと初期誤差を<br>速やかに修正できる」<br>を示す
+            </td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              「初期誤差もモデル誤差も<br>大きい過酷条件でも<br>DA は有効か」を検証
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">
+              「温度センサ・変位センサの<br>どの組み合わせが<br>最も精度が良いか」を比較
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>真値の<br>初期温度</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">全節点 <strong>20°C</strong></td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              <strong>暖機後の状態</strong><br>Node 0 ≈ <strong>46°C</strong><br>
+              <span style="color:var(--muted); font-size:0.88em;">（50 分先行して真値のみ計算）</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">全節点 <strong>20°C</strong></td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>推定側の<br>初期温度</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">
+              全節点 <strong>22°C</strong><br>
+              <span style="color:var(--red); font-size:0.88em;">初期誤差 +2°C（小）</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              全節点 <strong>20°C</strong>（コールドスタート）<br>
+              <span style="color:var(--red); font-size:0.88em;">初期誤差 最大 26°C（大）</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">
+              全節点 <strong>20°C</strong>（真値と同じ）<br>
+              <span style="color:var(--muted); font-size:0.88em;">初期誤差なし</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>熱入力<br>（Node 0 のみ）</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">
+              真値・推定側とも<br><strong>6,500 W/m</strong><br>
+              <span style="color:var(--muted); font-size:0.88em;">モデル誤差なし</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              真値：<strong>8,450 W/m</strong><br>推定側：<strong>6,500 W/m</strong><br>
+              <span style="color:var(--red); font-size:0.88em;">30% 過小評価（モデル誤差あり）</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">
+              真値・推定側とも<br><strong>6,500 W/m</strong><br>
+              <span style="color:var(--muted); font-size:0.88em;">モデル誤差なし</span>
+            </td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>熱入力<br>パターン</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);" colspan="3" style="text-align:center;">
+              3 ケース共通：<strong>10 分 ON → 5 分 OFF</strong> のサイクル繰り返し（90 分間）
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>センサ構成</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">
+              Node 0・Node 9 温度センサ<br>
+              <span style="color:var(--muted); font-size:0.88em;">No-DA と KF で比較</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              Node 0・Node 9 温度センサ<br>
+              <span style="color:var(--muted); font-size:0.88em;">No-DA と KF で比較</span>
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">
+              <strong>Case A</strong>：温度 2 点のみ<br>
+              <strong>Case B</strong>：温度 2 点 ＋ 変位<br>
+              <strong>Case C</strong>：変位のみ<br>
+              <span style="color:var(--muted); font-size:0.88em;">3 ケースすべて KF 使用</span>
+            </td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px; color:var(--muted); font-size:0.92em;"><strong>比較軸</strong></td>
+            <td style="padding:6px 10px; background:rgba(100,160,255,0.06);">
+              <span class="badge badge-blue">縦比較</span><br>
+              DA あり vs DA なし
+            </td>
+            <td style="padding:6px 10px; background:rgba(255,165,0,0.06);">
+              <span class="badge badge-blue">縦比較</span><br>
+              DA あり vs DA なし<br>（過酷条件版）
+            </td>
+            <td style="padding:6px 10px; background:rgba(80,200,120,0.06);">
+              <span class="badge badge-green">横比較</span><br>
+              センサ種類 A vs B vs C<br>（全て DA 使用）
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-box" style="margin-top:8px; font-size:0.82em;">
+        ケース 1・2 は「DAを使うことの価値」を検証。ケース 3 は「どのセンサが最も効果的か」を検証。<br>
+        ケース 1 → 2 と条件を段階的に厳しくし、ケース 3 でセンサ構成の最適化を探る。
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 0: 実験設定 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>結果を読む前に：ツイン実験の設定</h2>
+    <div class="scroll-box">
+      <p>
+        現実では「真の温度場」は測れない。そこで <strong>ツイン実験</strong>（双子実験）を使う。<br>
+        仮想上の「正解シミュレーション（真値）」を先に走らせ、そこから作ったセンサ観測を KF に与えて推定させる。
+        真値が既知なので、KF がどれだけ真値に近いかを直接 RMSE で評価できる。
+      </p>
+      <p style="margin-top:6px; font-size:0.9em;">
+        各ケースは比較する <strong>3 本の線</strong>（真値 / No-DA / KF）を同時にシミュレーションする。
+        以下の 3 ケースで誤差の種類と難しさを変えて KF の効果を検証する。
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:14px;">
+        <div>
+          <h3 style="font-size:0.95em;">ケース 1：基本デモ</h3>
+          <div class="code-inline" style="margin:0 0 4px; font-size:0.8em;"><code>main.py</code></div>
+          <div class="card green" style="font-size:0.82em;">
+            <strong>目的</strong>：KF の基本動作確認<br>
+            モデル誤差なし・正しいパラメータ
+          </div>
+          <div class="card orange" style="margin-top:6px; font-size:0.82em;">
+            <strong>初期条件</strong>：全節点 20°C から開始<br>
+            → KF が初期値ズレを補正
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:0.95em;">ケース 2：DA 効果デモ</h3>
+          <div class="code-inline" style="margin:0 0 4px; font-size:0.8em;"><code>main_da_demo.py</code></div>
+          <div class="card red" style="font-size:0.82em;">
+            <strong>設定</strong>：機械が稼働中（暖機済み）なのに<br>
+            推定側は室温 20°C でコールドスタート<br>
+            ＋ モデルが発熱量を 30% 過小評価
+          </div>
+          <div class="success-box" style="margin-top:6px; font-size:0.82em;">
+            <strong>真値</strong>: Q×1.3（高発熱）<br>
+            <strong>モデル</strong>: Q×1.0（公称値のみ）<br>
+            → <span class="hl-green">全節点で DA 効果を確認</span>
+          </div>
+        </div>
+        <div>
+          <h3 style="font-size:0.95em;">ケース 3：変位センサ追加</h3>
+          <div class="code-inline" style="margin:0 0 4px; font-size:0.8em;"><code>main_disp_obs.py</code></div>
+          <div class="card" style="font-size:0.82em;">
+            <strong>目的</strong>：変位センサ（積算値）を<br>
+            温度センサに追加した場合の効果
+          </div>
+          <div class="info-box" style="margin-top:6px; font-size:0.82em;">
+            変位は全節点の積算値<br>
+            → 中央節点への間接的な情報
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 1: 条件詳細 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 1 の実験条件（main.py）</h2>
+    <div class="scroll-box">
+
+      <!-- 核心メッセージ: 大原則 -->
+      <div class="success-box" style="font-size:0.95em; margin-bottom:14px;">
+        <strong>比較の大原則</strong>：
+        No-DA と KF（DA あり）は <u>まったく同じ条件</u> からスタートする。<br>
+        同じ初期温度・同じ熱入力モデルを使う。<strong>唯一の違いはセンサ観測を使うかどうかだけ。</strong>
+      </div>
+
+      <!-- 3通りの条件を一表にまとめる -->
+      <table style="font-size:0.88em; width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:6px 10px;">条件</th>
+            <th style="color:var(--fg); padding:6px 10px;">① 真値 (Truth)</th>
+            <th style="color:var(--blue); padding:6px 10px;">② No-DA（センサなし）</th>
+            <th style="color:var(--orange); padding:6px 10px;">③ KF（DA あり）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px;"><strong>初期温度</strong></td>
+            <td style="padding:6px 10px;">全節点 <strong>20°C</strong>（正解）</td>
+            <td style="padding:6px 10px;">全節点 <strong>22°C</strong>（2°C 高め）</td>
+            <td style="padding:6px 10px;">全節点 <strong>22°C</strong> ← No-DA と同じ</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;"><strong>熱入力モデル</strong><br><span style="font-size:0.88em; color:var(--muted);">投入節点・パターン</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong>（左端）<br>6,500 W/m<br><span style="color:var(--muted); font-size:0.88em;">10 min ON → 5 min OFF サイクル</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong><br>6,500 W/m ← 同じ<br><span style="color:var(--muted); font-size:0.88em;">モデル誤差なし</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong><br>6,500 W/m ← 同じ<br><span style="color:var(--muted); font-size:0.88em;">モデル誤差なし</span></td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px;"><strong>プロセスノイズ</strong></td>
+            <td style="padding:6px 10px;">σ = 0.03°C/step あり</td>
+            <td style="padding:6px 10px;">なし</td>
+            <td style="padding:6px 10px;">なし</td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;"><strong>センサ観測</strong></td>
+            <td style="padding:6px 10px;">（比較の基準）</td>
+            <td style="padding:6px 10px; color:var(--red);">✗ 使わない</td>
+            <td style="padding:6px 10px; color:var(--green);">✓ Node 0, Node 9（σ=0.20°C）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 熱入力サイクル説明 -->
+      <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:8px 14px; margin-top:10px; font-size:0.83em;">
+        <strong>熱入力パターン</strong>：Node 0 のみに ON/OFF サイクルで投入（節点1〜9 への直接投入なし）<br>
+        <div style="font-family:'JetBrains Mono',monospace; margin-top:4px; font-size:0.90em;">
+          <span style="color:var(--orange);">████ 10 min ON</span> → <span style="color:var(--muted);">── 5 min OFF</span> → <span style="color:var(--orange);">████ 10 min ON</span> → <span style="color:var(--muted);">── 5 min OFF</span> → … （90 分繰り返し）
+        </div>
+      </div>
+
+      <!-- 挙動の説明 -->
+      <div class="two-col" style="margin-top:12px; gap:10px;">
+        <div class="card red" style="font-size:0.85em;">
+          <strong>No-DA の挙動</strong>：<br>
+          初期温度を 2°C 過大評価した状態からスタートする。
+          熱的な時定数が長い（対流時定数 ≈ 73 分）ため、
+          誤差は 90 分間ほとんど自然には消えない。
+          センサで補正しないので 2°C 近い誤差が残り続ける。
+        </div>
+        <div class="card green" style="font-size:0.85em;">
+          <strong>KF の挙動</strong>：<br>
+          No-DA と全く同じ誤った初期状態からスタートする。
+          Node 0, Node 9 のセンサが「真値は 2°C 低い」ことをすぐに検知し、
+          カルマンフィルタが全節点を数ステップで正しい値に引き戻す。
+          → センサ 2 点で全 10 節点が急速に収束
+        </div>
+      </div>
+
+      <!-- KFパラメータ説明 -->
+      <div class="info-box" style="margin-top:10px; font-size:0.82em;">
+        <strong>KF パラメータ（最適値）</strong>：
+        P₀ = 4.0°C²（= 2°C 初期誤差の分散 σ²）, 空間相関長 L=4 節点, Q_SCALE = 1.0（モデル誤差なし → 拡大不要）, σ_R = 0.20°C（センサ精度に対応）
+      </div>
+      <div class="info-box" style="margin-top:6px; font-size:0.82em;">
+        <strong>評価方法</strong>：90 分（540 ステップ × 10 秒）、後半 30 分（t = 60〜90 min）の RMSE で定常精度を評価。
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 1: 基本デモ -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>基本デモ：2点センサによる温度場推定</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(100,160,255,0.20); border:1px solid var(--blue); border-radius:4px; padding:2px 8px;"><strong>ケース 1</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong style="color:var(--orange);">+2°C</strong>（推定側 22°C、真値 20°C）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong>6,500 W/m @ Node 0</strong>（モデル誤差なし）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">センサ <strong>N0・N9 温度</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>No-DA vs KF</strong></span>
+      </div>
+      <div class="col-6-4">
+        <div>
+          <img src="results.png" alt="基本デモ結果"
+               style="width:100%; border-radius:8px; border:1px solid var(--border);">
+        </div>
+        <div>
+          <h3>定常域 RMSE 比較（t = 60〜90 min）</h3>
+          <table style="font-size:0.78em;">
+            <thead><tr><th>節点</th><th>種別</th><th>No-DA [°C]</th><th>KF [°C]</th><th>改善率</th></tr></thead>
+            <tbody>
+              <tr><td>Node 0</td><td><span class="badge badge-green">センサ</span></td><td>1.729</td><td>0.082</td><td><span class="hl-green">95%</span></td></tr>
+              <tr><td>Node 1</td><td><span class="badge badge-gray">未観測</span></td><td>1.851</td><td>0.139</td><td><span class="hl-green">93%</span></td></tr>
+              <tr><td>Node 2</td><td><span class="badge badge-gray">未観測</span></td><td>1.852</td><td>0.121</td><td><span class="hl-green">93%</span></td></tr>
+              <tr><td>Node 3</td><td><span class="badge badge-gray">未観測</span></td><td>1.871</td><td>0.128</td><td><span class="hl-green">93%</span></td></tr>
+              <tr><td>Node 4</td><td><span class="badge badge-gray">未観測</span></td><td>1.857</td><td>0.113</td><td><span class="hl-green">94%</span></td></tr>
+              <tr><td>Node 5</td><td><span class="badge badge-gray">未観測</span></td><td>1.959</td><td>0.186</td><td><span class="hl-green">91%</span></td></tr>
+              <tr><td>Node 6</td><td><span class="badge badge-gray">未観測</span></td><td>2.059</td><td>0.167</td><td><span class="hl-green">92%</span></td></tr>
+              <tr><td>Node 7</td><td><span class="badge badge-gray">未観測</span></td><td>1.888</td><td>0.137</td><td><span class="hl-green">93%</span></td></tr>
+              <tr><td>Node 8</td><td><span class="badge badge-gray">未観測</span></td><td>1.828</td><td>0.217</td><td><span class="hl-green">88%</span></td></tr>
+              <tr><td>Node 9</td><td><span class="badge badge-green">センサ</span></td><td>2.012</td><td>0.092</td><td><span class="hl-green">95%</span></td></tr>
+            </tbody>
+          </table>
+          <div class="success-box" style="margin-top:6px; font-size:0.82em;">
+            熱変位 RMSE：No-DA <strong>22.65 µm</strong> → KF <strong>0.616 µm</strong>（<span class="hl-green">97% 改善</span>）
+          </div>
+          <div class="info-box" style="margin-top:6px; font-size:0.78em;">
+            全 10 節点で 88〜95% 改善。初期誤差（+2°C 一様）が KF により
+            数ステップで正しい値に引き戻されている。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 1b: 基本デモ 全節点比較 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 1：全 10 節点 — 真値 vs No-DA vs KF（main.py）</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(100,160,255,0.20); border:1px solid var(--blue); border-radius:4px; padding:2px 8px;"><strong>ケース 1</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong style="color:var(--orange);">+2°C</strong>（推定側 22°C、真値 20°C）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong>6,500 W/m @ Node 0</strong>（モデル誤差なし）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">センサ <strong>N0・N9 温度</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>No-DA vs KF</strong></span>
+      </div>
+
+      <!-- 条件と意図 -->
+      <div class="two-col" style="gap:10px; margin-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:8px 12px; font-size:0.82em;">
+          <strong>📋 実験条件</strong><br>
+          <table style="width:100%; margin-top:4px; font-size:0.95em;">
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">初期温度</td><td>真値 <strong>20°C</strong>、No-DA・KF <strong>22°C</strong>（+2°C 過大）</td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">熱入力</td><td>全シミュレーション共通 <strong>6,500 W/m</strong>（モデル誤差なし）</td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">センサ</td><td>No-DA：使わない　／　KF：Node 0・Node 9 温度</td></tr>
+          </table>
+        </div>
+        <div class="success-box" style="font-size:0.82em;">
+          <strong>🎯 このケースの意図</strong><br>
+          「起動時に内部温度を正確に知れない」という<br>
+          <u>現実的でよくある状況</u> を再現。<br><br>
+          初期誤差が小さくても、熱的時定数（≈73 min）の<br>
+          ために No-DA では誤差が最後まで残り続ける。<br>
+          KF がどれだけ速く引き戻せるかを確認する。
+        </div>
+      </div>
+
+      <img src="results_all_nodes.png" alt="全節点比較（基本デモ）"
+           style="width:100%; border-radius:8px; border:1px solid var(--border);">
+      <div class="info-box" style="margin-top:8px; font-size:0.82em;">
+        <strong>凡例</strong>：黒実線 = 真値　／　灰破線 = No-DA（センサなし）　／　色実線 = KF 推定<br>
+        <strong>結果</strong>：No-DA は +2°C の初期誤差が 90 分後も解消されない。KF は数ステップで真値に収束。
+        全 10 節点で RMSE <strong>88〜95% 改善</strong>（センサ節点 ≈ 0.08°C、未観測 ≈ 0.11〜0.22°C）。
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 2: 条件詳細 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 2 の実験条件（main_da_demo.py）</h2>
+    <div class="scroll-box">
+
+      <!-- 核心メッセージ -->
+      <div class="success-box" style="font-size:0.95em; margin-bottom:14px;">
+        <strong>比較の大原則</strong>：
+        No-DA と KF（DA あり）は <u>まったく同じ条件</u> からスタートする。<br>
+        同じ初期温度・同じ（誤った）熱入力モデルを使う。<strong>唯一の違いはセンサ観測を使うかどうかだけ。</strong>
+      </div>
+
+      <!-- 暖機フェーズ説明 -->
+      <div style="background:rgba(255,165,0,0.08); border-left:3px solid var(--orange); padding:8px 14px; border-radius:4px; margin-bottom:12px; font-size:0.85em;">
+        <strong>前提：真値は計測開始 50 分前から既に暖まっている</strong><br>
+        真値シミュレーションを 50 分間先行して走らせ、Node 0 ≈ 46°C の「暖機済み状態」を作る。
+        No-DA・KF にはこの暖機履歴を渡さない。「電源を入れたら機械はすでに温かかった」状況。
+      </div>
+
+      <!-- 条件比較表 -->
+      <table style="font-size:0.88em; width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:6px 10px;">条件</th>
+            <th style="color:var(--fg); padding:6px 10px;">① 真値 (Truth)</th>
+            <th style="color:var(--blue); padding:6px 10px;">② No-DA（センサなし）</th>
+            <th style="color:var(--orange); padding:6px 10px;">③ KF（DA あり）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px;"><strong>初期温度</strong></td>
+            <td style="padding:6px 10px;">暖機後の状態<br>Node 0 <strong>≈ 46°C</strong></td>
+            <td style="padding:6px 10px;">全節点 <strong>20°C</strong>（コールドスタート）<br><span style="color:var(--red);">初期誤差 Node 0 で 26°C</span></td>
+            <td style="padding:6px 10px;">全節点 <strong>20°C</strong> ← No-DA と同じ<br><span style="color:var(--red);">同じく初期誤差 26°C</span></td>
+          </tr>
+          <tr>
+            <td style="padding:6px 10px;"><strong>熱入力モデル</strong><br><span style="font-size:0.88em; color:var(--muted);">投入節点・パターン</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong>（左端）<br>8,450 W/m（Q×1.3）<br><span style="color:var(--muted); font-size:0.88em;">10 min ON → 5 min OFF サイクル</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong>（同じ節点）<br>6,500 W/m（<span style="color:var(--red);">30% 過小評価</span>）<br><span style="color:var(--muted); font-size:0.88em;">同じ ON/OFF サイクルを仮定</span></td>
+            <td style="padding:6px 10px;"><strong>Node 0 のみ</strong> ← No-DA と同じ<br>6,500 W/m（<span style="color:var(--red);">同じく 30% 過小評価</span>）<br><span style="color:var(--muted); font-size:0.88em;">同じ ON/OFF サイクルを仮定</span></td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:6px 10px;"><strong>センサ観測</strong></td>
+            <td style="padding:6px 10px;">（比較の基準）</td>
+            <td style="padding:6px 10px; color:var(--red);">✗ 使わない</td>
+            <td style="padding:6px 10px; color:var(--green);">✓ Node 0, Node 9（σ=0.20°C）</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 熱入力サイクル説明 -->
+      <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:8px 14px; margin-top:10px; font-size:0.83em;">
+        <strong>熱入力パターン（全ケース共通）</strong>：Node 0 のみに ON/OFF サイクルで投入<br>
+        <div style="font-family:'JetBrains Mono',monospace; margin-top:6px; font-size:0.92em; color:var(--fg);">
+          ←── 10 min ON ──→← 5 min OFF →←── 10 min ON ──→← 5 min OFF →  …（90 min 繰り返し）<br>
+          <span style="color:var(--orange);">████████████████████</span><span style="color:var(--muted);">──────────</span><span style="color:var(--orange);">████████████████████</span><span style="color:var(--muted);">──────────</span>
+        </div>
+        <div style="margin-top:4px; color:var(--muted);">
+          CYCLE_ON = 60 step × 10 sec = 600 sec = <strong>10 分</strong>　／　CYCLE_OFF = 30 step × 10 sec = 300 sec = <strong>5 分</strong><br>
+          節点1〜9 への直接投入はなし。Node 0 の熱が熱伝導で隣接節点へ伝わる。
+        </div>
+      </div>
+
+      <!-- 挙動の説明 -->
+      <div class="two-col" style="margin-top:12px; gap:10px;">
+        <div class="card red" style="font-size:0.85em;">
+          <strong>No-DA の挙動</strong>：<br>
+          初期値が 26°C ズレている上に、発熱量を 30% 過小評価している。
+          センサがないため誤差を補正する手段がまったくない。
+          両方の誤差が積み重なって時間とともに悪化する。
+        </div>
+        <div class="card green" style="font-size:0.85em;">
+          <strong>KF の挙動</strong>：<br>
+          No-DA と全く同じ「誤った初期値 + 誤ったモデル」からスタートする。
+          センサ 2 点が「真値はモデルよりずっと熱い」ことを継続的に検知し、
+          カルマンフィルタが全 10 節点の推定を逐次引き上げて補正する。
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top:10px; font-size:0.82em;">
+        <strong>KF パラメータ（最適値）</strong>：
+        Q_SCALE = 5.0（30% モデル誤差に対応してゲインを上げる）, P₀ に空間相関（L=4 節点）,
+        σ_R = 0.20°C（センサ精度）。中間節点への補正波及は P₀ 空間相関 + Q_SCALE で実現。
+      </div>
+      <div class="info-box" style="margin-top:6px; font-size:0.82em;">
+        <strong>評価方法</strong>：90 分後半 30 分（t = 60〜90 min）の RMSE で No-DA / KF を比較。全 10 節点と熱変位の改善率を確認する。
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 2: DA効果デモ (main_da_demo.py) -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>DA 効果デモ：暖機済み機械 × モデル誤差 30% · 90 分（main_da_demo.py）</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(255,165,0,0.25); border:1px solid var(--orange); border-radius:4px; padding:2px 8px;"><strong>ケース 2</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong style="color:var(--red);">最大 26°C</strong>（推定側 20°C、真値 ≈46°C 暖機後）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong style="color:var(--red);">30% 誤差</strong>（真値 8,450 / 推定 6,500 W/m @ Node 0）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">センサ <strong>N0・N9 温度</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>No-DA vs KF</strong></span>
+      </div>
+      <div class="col-6-4">
+        <div>
+          <img src="results_da_demo.png" alt="DA効果デモ"
+               style="width:100%; border-radius:8px; border:1px solid var(--border);">
+        </div>
+        <div>
+          <h3>後半 30 分 RMSE 比較（定常状態、t = 60〜90 min）</h3>
+          <table>
+            <thead><tr><th>節点</th><th>種別</th><th>No DA [°C]</th><th>DA [°C]</th><th>改善率</th></tr></thead>
+            <tbody>
+              <tr><td>Node 0</td><td><span class="badge badge-green">センサ</span></td>
+                  <td class="hl-red">17.7</td><td class="hl-green">0.1</td><td class="hl-green">99%</td></tr>
+              <tr><td>Node 1</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td class="hl-red">14.7</td><td class="hl-green">1.5</td><td class="hl-green">90%</td></tr>
+              <tr><td>Node 2</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td class="hl-red">11.8</td><td>2.4</td><td>80%</td></tr>
+              <tr><td>Node 3</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td class="hl-red">8.9</td><td>2.7</td><td>69%</td></tr>
+              <tr><td>Node 4</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td>6.3</td><td>2.7</td><td>58%</td></tr>
+              <tr><td>Node 5</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td>4.2</td><td>2.2</td><td>48%</td></tr>
+              <tr><td>Node 6</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td>2.7</td><td>1.6</td><td>40%</td></tr>
+              <tr><td>Node 7</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td>1.6</td><td>1.0</td><td>42%</td></tr>
+              <tr><td>Node 8</td><td><span class="badge badge-gray">未観測</span></td>
+                  <td>0.9</td><td>0.4</td><td>56%</td></tr>
+              <tr><td>Node 9</td><td><span class="badge badge-green">センサ</span></td>
+                  <td>0.6</td><td class="hl-green">0.1</td><td class="hl-green">87%</td></tr>
+            </tbody>
+          </table>
+          <table style="margin-top:8px;">
+            <thead><tr><th>ケース</th><th>変位 RMSE [µm]</th><th>改善率</th></tr></thead>
+            <tbody>
+              <tr><td>No DA</td><td class="hl-red">83.2</td><td>—</td></tr>
+              <tr><td>KF (DA)</td><td class="hl-green">17.3</td><td class="hl-green">79%</td></tr>
+            </tbody>
+          </table>
+          <div class="success-box" style="margin-top:8px; font-size:0.8em;">
+            <strong>全 10 節点でDA改善を確認</strong>（最低 40%、センサ節点は 87〜99%）<br>
+            → <span class="hl-green">変位 RMSE 83.2 → 17.3 µm（79% 改善）</span>
+          </div>
+          <div class="info-box" style="margin-top:6px; font-size:0.8em;">
+            <strong>中央節点（N5-N7）も 40〜48% 改善</strong>：直接観測なしでも<br>
+            センサ補正が熱伝導モデルを通じて波及するため効果あり。<br>
+            ノイズパラメータは main.py / main_compare_da.py と同一（公平比較）
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 2b: 全節点比較 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 2：全 10 節点 — 真値 vs No-DA vs KF（main_da_demo.py）</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(255,165,0,0.25); border:1px solid var(--orange); border-radius:4px; padding:2px 8px;"><strong>ケース 2</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong style="color:var(--red);">最大 26°C</strong>（推定側 20°C、真値 ≈46°C 暖機後）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong style="color:var(--red);">30% 誤差</strong>（真値 8,450 / 推定 6,500 W/m @ Node 0）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">センサ <strong>N0・N9 温度</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>No-DA vs KF</strong></span>
+      </div>
+
+      <!-- 条件と意図 -->
+      <div class="two-col" style="gap:10px; margin-bottom:10px;">
+        <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:8px 12px; font-size:0.82em;">
+          <strong>📋 実験条件（ケース 1 より過酷）</strong><br>
+          <table style="width:100%; margin-top:4px; font-size:0.95em;">
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">真値の初期温度</td><td>暖機後の状態（Node 0 <strong>≈ 46°C</strong>）</td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">No-DA・KF の初期温度</td><td><strong>20°C</strong>（コールドスタート、<span style="color:var(--red);">誤差最大 26°C</span>）</td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">真値の熱入力</td><td><strong>8,450 W/m</strong></td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">No-DA・KF の熱入力</td><td><strong>6,500 W/m</strong>（<span style="color:var(--red);">30% 過小評価</span>）</td></tr>
+            <tr><td style="color:var(--muted); padding:2px 6px 2px 0;">センサ</td><td>No-DA：使わない　／　KF：Node 0・Node 9 温度</td></tr>
+          </table>
+        </div>
+        <div class="warn-box" style="font-size:0.82em;">
+          <strong>🎯 このケースの意図</strong><br>
+          ケース 1（初期誤差 2°C のみ）より大幅に過酷な条件。<br><br>
+          ① <strong>コールドスタート</strong>：機械がすでに暖まっていることを<br>
+          　知らずに 20°C から計算開始（誤差 26°C）<br>
+          ② <strong>モデル誤差 30%</strong>：発熱量の見積もりが誤っており<br>
+          　誤差が時間とともに累積し続ける<br><br>
+          この「2 重の誤差」条件でも KF が有効かを確認する。
+        </div>
+      </div>
+
+      <img src="results_da_demo_all_nodes.png" alt="全節点比較"
+           style="width:100%; border-radius:8px; border:1px solid var(--border);">
+      <div class="two-col" style="margin-top:8px; gap:12px;">
+        <div class="info-box" style="font-size:0.82em;">
+          <strong>凡例</strong>：黒実線 = 真値　／　青破線 = No-DA（センサなし）　／　赤実線 = KF<br>
+          薄赤帯 = KF ±2σ　／　右下ボックス = 後半 30 分 RMSE<br>
+          <em>青線と黒線の乖離 = センサなしでの累積誤差</em><br>
+          <em>赤線と黒線の近さ = センサで補正できた量</em>
+        </div>
+        <div class="success-box" style="font-size:0.82em;">
+          <strong>結果：2 重誤差下でも KF は有効</strong><br>
+          N0（センサ）: <strong>99%</strong> 改善（17.7 → 0.1°C）<br>
+          N1〜N2: 90%, 80% 改善<br>
+          中央 N4, N5: 58%, 48% 改善（モデル誤差の影響残存）<br>
+          N9（センサ）: <strong>87%</strong> 改善<br>
+          熱変位: <strong>79%</strong> 改善（83.2 → 17.3 µm）
+        </div>
+      </div>
+
+      <!-- 課題と次のステップ -->
+      <div style="background:rgba(255,165,0,0.10); border:1px solid var(--orange); border-radius:6px; padding:10px 14px; margin-top:10px; font-size:0.84em;">
+        <strong>⚠️ 残課題：温度センサ 2 点だけでは中央節点の補正が不十分</strong><br>
+        N4・N5 は 48〜58% 改善にとどまる。両端センサから遠く、モデル誤差の影響が直接残るため。<br><br>
+        <strong>→ 次のケース 3 で検証すること</strong>：<em>データ同化に使うセンサの種類を変えたらどうなるか？</em><br>
+        工作機械には <strong>工具長計（リニアエンコーダ）</strong> が既設されていることが多い。
+        これは棒全体の熱変位（全節点温度の積算）を測る。<br>
+        この <strong>変位センサを KF の観測量に追加 / 置換</strong> すると、
+        温度センサだけでは補正できなかった中央節点の精度が改善できるか？
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 3: 変位観測追加 -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 3：変位センサ追加による推定精度の向上（main_disp_obs.py）</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(80,200,120,0.20); border:1px solid var(--green); border-radius:4px; padding:2px 8px;"><strong>ケース 3</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong>なし</strong>（真値・推定側とも 20°C）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong>6,500 W/m @ Node 0</strong>（モデル誤差なし）</span>
+        <span style="background:rgba(100,160,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:2px 8px;"><strong>A</strong>: N0・N9 温度のみ</span>
+        <span style="background:rgba(220,50,50,0.15); border:1px solid #c84; border-radius:4px; padding:2px 8px;"><strong>B</strong>: N0・N9 温度 ＋ 変位</span>
+        <span style="background:rgba(255,165,0,0.15); border:1px solid var(--orange); border-radius:4px; padding:2px 8px;"><strong>C</strong>: 変位のみ</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>A vs B vs C（全て KF 使用）</strong></span>
+      </div>
+
+      <!-- 条件説明 -->
+      <div class="info-box" style="font-size:0.84em; margin-bottom:10px;">
+        <strong>このケースでやっていること</strong>：
+        センサの種類を変えて 3 通りで KF を走らせ、どの観測が最も効くかを比較する。<br>
+        3通りとも同じ熱モデル・同じ初期条件からスタートし、<strong>観測の種類だけが違う</strong>。<br><br>
+        <strong>📋 初期条件（ケース 2 とは異なる）</strong>：真値・Case A/B/C とも全節点 <strong>20°C</strong> からスタート。
+        ケース 2 の暖機済み 46°C 状態とは別設定。
+        ここではセンサ構成の差だけを純粋に比較するため、初期誤差・モデル誤差のないシンプルな条件を使用している。
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; font-size:0.95em;">
+          <div class="card orange" style="padding:6px 10px;">
+            <strong>Case A</strong>：温度センサ 2 点のみ<br>
+            <span class="muted">Node 0, Node 9 の温度を観測</span>
+          </div>
+          <div class="card green" style="padding:6px 10px;">
+            <strong>Case B</strong>：温度 2 点 ＋ 変位センサ<br>
+            <span class="muted">Node 0, Node 9 の温度 ＋ 棒全体の熱変位を観測</span>
+          </div>
+          <div class="card blue" style="padding:6px 10px;">
+            <strong>Case C</strong>：変位センサのみ<br>
+            <span class="muted">温度センサなし、熱変位だけを観測</span>
+          </div>
+        </div>
+        <div style="margin-top:6px;">
+          <strong>変位</strong>とは何か：棒全体の温度上昇の積算 $\delta = \alpha\!\sum_i(\theta_i - T_\text{ref})\Delta x$。
+          全節点の温度を「合計」した量なので、中央節点の情報も間接的に含む。
+        </div>
+      </div>
+
+      <div class="col-6-4">
+        <div>
+          <img src="results_disp_obs.png" alt="変位観測比較"
+               style="width:100%; border-radius:8px; border:1px solid var(--border);">
+        </div>
+        <div>
+          <h3>3ケース比較（定常域 RMSE）</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ケース</th>
+                <th>平均 RMSE<br>[°C]</th>
+                <th>最大 RMSE<br>[°C]</th>
+                <th>変位 RMSE<br>[µm]</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>温度 2点のみ</strong></td>
+                <td class="hl-orange">0.341</td>
+                <td class="hl-orange">0.519</td>
+                <td class="hl-orange">3.212</td>
+              </tr>
+              <tr>
+                <td><strong>温度 2点 + 変位</strong></td>
+                <td class="hl-green">0.113</td>
+                <td class="hl-green">0.169</td>
+                <td class="hl-green">0.234</td>
+              </tr>
+              <tr>
+                <td><strong>変位のみ</strong></td>
+                <td>0.191</td>
+                <td>0.312</td>
+                <td>0.250</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="success-box" style="margin-top:10px;">
+            <strong>主な知見</strong>：<br>
+            変位観測追加で温度 RMSE が
+            <span class="hl-green">0.341 → 0.113 °C</span>（<strong>67% 改善</strong>）<br>
+            変位 RMSE は
+            <span class="hl-green">3.21 → 0.23 µm</span>（<strong>93% 改善</strong>）
+          </div>
+          <div class="info-box" style="margin-top:8px; font-size:0.8em;">
+            <strong>なぜ変位センサが効くか</strong>：<br>
+            変位 $\delta = \alpha_\text{exp}\sum_i(\theta_i - T_\text{ref})\Delta x$ は全節点の <strong>積算値</strong>。<br>
+            → 2点温度センサが届かない中央節点の情報を「全体の合計」という形で間接提供。<br>
+            → KF は変位観測から逆算して中央節点の温度を推定できる。
+          </div>
+          <div class="warn-box" style="margin-top:6px; font-size:0.8em;">
+            <strong>「変位のみ」でも有効</strong>：温度センサなしでも変位 RMSE = 0.25 µm（ケース 2 と同等）。<br>
+            実機では変位計（工具長計測）だけでも熱補償できる可能性を示唆。
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 3b: 全節点比較 (Case A/B/C) -->
+  <section>
+    <p class="sec-tag">05 &mdash; 結果</p>
+    <h2>ケース 3：全 10 節点 — Case A / B / C vs 真値（main_disp_obs.py）</h2>
+    <div class="scroll-box">
+      <!-- 条件サマリーバー -->
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; font-size:0.78em;">
+        <span style="background:rgba(80,200,120,0.20); border:1px solid var(--green); border-radius:4px; padding:2px 8px;"><strong>ケース 3</strong></span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">初期誤差 <strong>なし</strong>（真値・推定側とも 20°C）</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">熱入力 <strong>6,500 W/m @ Node 0</strong>（モデル誤差なし）</span>
+        <span style="background:rgba(100,160,255,0.15); border:1px solid var(--blue); border-radius:4px; padding:2px 8px;"><strong>A</strong>: N0・N9 温度のみ</span>
+        <span style="background:rgba(220,50,50,0.15); border:1px solid #c84; border-radius:4px; padding:2px 8px;"><strong>B</strong>: N0・N9 温度 ＋ 変位</span>
+        <span style="background:rgba(255,165,0,0.15); border:1px solid var(--orange); border-radius:4px; padding:2px 8px;"><strong>C</strong>: 変位のみ</span>
+        <span style="background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:4px; padding:2px 8px;">比較 <strong>A vs B vs C（全て KF 使用）</strong></span>
+      </div>
+      <div class="success-box" style="font-size:0.84em; margin-bottom:8px; padding:6px 12px;">
+        <strong>比較条件の確認</strong>：3 ケースはすべて同じ初期条件・同じ熱モデルからスタートしている。
+        異なるのは <strong>観測の種類だけ</strong>。
+        濃い青 = Case A（温度 2 点）、赤 = Case B（温度 2 点 + 変位）、橙 = Case C（変位のみ）
+      </div>
+      <img src="results_disp_obs_all_nodes.png" alt="全節点比較 Case A/B/C"
+           style="width:100%; border-radius:8px; border:1px solid var(--border);">
+      <div class="info-box" style="margin-top:8px; font-size:0.82em;">
+        右下の RMSE ボックスで A / B / C の精度を節点ごとに比較できる。<br>
+        Case B（温度 + 変位）は中央節点（N4〜N6）での RMSE が最も小さい。
+        変位観測が「全節点の積算値」として中央節点の情報を間接提供するため。
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- (このセクションは目次直後に移動) -->
+
+<!-- ═══════════════════════════════════════════
+     SLIDE: まとめ
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">06 &mdash; まとめ</p>
+  <h2>まとめ</h2>
+  <div class="scroll-box">
+    <div class="two-col">
+      <div>
+        <h3>✅ 達成したこと</h3>
+        <div class="card green">
+          <strong>1. 状態空間モデルの構築</strong><br>
+          熱拡散 PDE → 有限差分 → A_d, B_d の明示的導出
+        </div>
+        <div class="card green" style="margin-top:8px;">
+          <strong>2. カルマンフィルタの実装</strong><br>
+          予測・更新ステップ、誤差共分散 P の管理
+        </div>
+        <div class="card green" style="margin-top:8px;">
+          <strong>3. 少数センサからの温度場推定</strong><br>
+          センサ 2点から未観測 8節点を推定（RMSE ≈ 0.1〜0.2 °C）
+        </div>
+        <div class="card green" style="margin-top:8px;">
+          <strong>4. 熱変位の推定</strong><br>
+          温度場から変位を計算（RMSE ≈ 0.64 µm）
+        </div>
+        <div class="card green" style="margin-top:8px;">
+          <strong>5. 変位センサ統合の効果確認</strong><br>
+          変位観測追加で精度が大幅向上（93% 改善）
+        </div>
+      </div>
+      <div>
+        <h3>📋 確認できた知見</h3>
+        <div class="card orange">
+          <strong>センサ位置が精度に効く</strong><br>
+          両端センサは端部では効果大・中央付近は補正弱め。
+          中央追加センサで改善が見込める。
+        </div>
+        <div class="card orange" style="margin-top:8px;">
+          <strong>変位観測の効果が大きい</strong><br>
+          変位は全節点積算 → 全体情報として内部節点の制約を補完。
+        </div>
+        <div class="card orange" style="margin-top:8px;">
+          <strong>KF の本質的な動作を確認</strong><br>
+          P が大 → K が大 → センサを重視。
+          時間とともに P が収束 → 推定が安定。
+        </div>
+        <hr class="dim">
+        <div class="info-box" style="margin-top:10px;">
+          <strong>001 の役割</strong>：<br>
+          Python 製モデルで KF の原理を確認。<br>
+          この基盤の上に 002（OpenFOAM + OI）、003（EnKF）と発展させる。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE: 今後の展望
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">07 &mdash; 今後の展望</p>
+  <h2>今後の展望</h2>
+  <div class="scroll-box">
+    <div class="three-col">
+      <div>
+        <h3>短期（次のステップ）</h3>
+        <div class="card orange">
+          <strong>002_laplacian_da_1d</strong><br>
+          <span class="muted">実装済み</span><br>
+          OpenFOAM laplacianFoam + OI。
+          A_d を使わず CFD をブラックボックスとして扱う DA の実証。
+        </div>
+        <div class="card orange" style="margin-top:8px;">
+          <strong>センサ最適配置</strong><br>
+          センサ位置を変えて RMSE がどう変わるか系統的に調査。
+          中央センサ追加の効果確認。
+        </div>
+        <div class="card orange" style="margin-top:8px;">
+          <strong>パラメータ同化</strong><br>
+          温度場ではなく熱入力 Q 自体を状態に含めて推定。
+        </div>
+      </div>
+      <div>
+        <h3>中期目標</h3>
+        <div class="card blue">
+          <strong>003: OpenFOAM + EnKF</strong><br>
+          アンサンブルカルマンフィルタによる大規模 CFD 連成。
+          A_d 不要・非線形対応・スケーラブル。
+        </div>
+        <div class="card blue" style="margin-top:8px;">
+          <strong>実測データへの適用</strong><br>
+          丸棒実験での実測温度を使い、
+          ツイン実験から実データへ橋渡し。
+        </div>
+        <div class="card blue" style="margin-top:8px;">
+          <strong>2D/3D モデルへの拡張</strong><br>
+          機械構造部品（軸・コラム）への適用。
+          節点数増加時の P 行列スケーラビリティ。
+        </div>
+      </div>
+      <div>
+        <h3>長期目標</h3>
+        <div class="card cyan">
+          <strong>デジタルツイン構築</strong><br>
+          IoT センサ + OpenFOAM + EnKF によるリアルタイム熱変位推定システム。
+        </div>
+        <div class="card cyan" style="margin-top:8px;">
+          <strong>工作機械熱変位補償</strong><br>
+          推定した変位を CNC コントローラへフィードバック。
+          加工精度の向上を実証。
+        </div>
+        <div class="card cyan" style="margin-top:8px;">
+          <strong>4D-Var / 随伴法</strong><br>
+          OpenFOAM の随伴コードを用いた時間窓全体の最適化。
+          最高精度だが実装難度が高い。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE: 先行研究から今後の取り組み
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">08 &mdash; 先行研究から今後の取り組み</p>
+  <h2>先行研究から得た知見と今後の取り組み</h2>
+  <div class="scroll-box">
+    <table>
+      <thead>
+        <tr>
+          <th>先行研究</th>
+          <th>主な知見</th>
+          <th>今後の取り組み</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <a href="https://scholar.google.com/scholar?q=Kalman+Filter+Driven+State+Observer+Thermal+Error+Compensation+Machine+Tool+Digital+Twins+Lang+2024" target="_blank"><strong>Lang et al. 2024</strong></a><br>
+            <span class="muted">Machine Tool KF Observer</span>
+          </td>
+          <td>
+            KF ベースのオブザーバが工作機械デジタルツインに有効。
+            状態空間モデルと KF の組み合わせが実用的
+          </td>
+          <td>
+            <span class="badge badge-orange">001 延長</span>
+            001 の KF フレームワークを実機モデルへ適用。
+            A_d を OpenFOAM 近似から実測ベースに改良
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://scholar.google.com/scholar?q=Sensor+placement+digital+twin+thermal+error+compensation+machine+tools+Lang+2025" target="_blank"><strong>Lang et al. 2025</strong></a><br>
+            <span class="muted">Sensor Placement DT</span>
+          </td>
+          <td>
+            センサ配置がデジタルツインの精度を大きく左右。
+            観測可能性（Observability）の視点が重要
+          </td>
+          <td>
+            <span class="badge badge-blue">003</span>
+            001 の結果（中央センサ不足）を踏まえ、
+            Observability 行列を使った最適センサ位置の探索
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://scholar.google.com/scholar?q=Thermal+Issues+Machine+Tools+Mayr+CIRP+2012" target="_blank"><strong>Mayr et al. 2012</strong></a><br>
+            <span class="muted">Thermal Issues Survey</span>
+          </td>
+          <td>
+            熱変位の主な発生源・補償手法の分類。
+            環境温度・切削液などの外乱が補償を困難にする
+          </td>
+          <td>
+            <span class="badge badge-purple">将来</span>
+            切削液・環境温度外乱の状態拡張による同時推定。
+            パラメータ同化として境界条件を推定
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://scholar.google.com/scholar?q=thermal+distortion+compensation+large+machine+tools+Kalman+filter+Gomez-Acedo+2013" target="_blank"><strong>Gomez-Acedo et al. 2013</strong></a><br>
+            <span class="muted">State-Space + KF</span>
+          </td>
+          <td>
+            大型工作機械に状態空間 + KF を適用可能。
+            低次元化モデルが実用的な計算コストの鍵
+          </td>
+          <td>
+            <span class="badge badge-blue">003</span>
+            OpenFOAM の高次元計算結果を低次元化（POD等）
+            し、KF/EnKF の対象として扱う手法の調査
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="https://scholar.google.com/scholar?q=Unscented+Kalman+Filter+Machine+Tool+Errors+Brecher+2017+Procedia+CIRP" target="_blank"><strong>Brecher et al. 2017</strong></a><br>
+            <span class="muted">UKF Machine Tool</span>
+          </td>
+          <td>
+            UKF で幾何誤差・熱誤差を同時に扱える。
+            ヤコビアン不要で非線形モデルに対応
+          </td>
+          <td>
+            <span class="badge badge-purple">将来</span>
+            機械の幾何誤差 + 熱誤差を状態ベクトルに統合した
+            UKF / EnKF による複合誤差補償
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="success-box" style="margin-top:10px;">
+      <strong>共通する研究方向</strong>：
+      (1) 少数センサでの状態推定精度向上、
+      (2) センサ配置の最適化、
+      (3) 境界条件・外乱の同時推定（パラメータ同化）、
+      (4) OpenFOAM CFD モデルとのスケーラブルな連成（EnKF）
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE: 参考文献
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">参考文献</p>
+  <h2>参考文献</h2>
+  <div class="scroll-box">
+    <h3>工作機械 + データ同化</h3>
+    <table style="font-size:0.78em;">
+      <thead><tr><th>#</th><th>文献</th></tr></thead>
+      <tbody>
+        <tr><td>[M1]</td><td><a href="https://scholar.google.com/scholar?q=Kalman+Filter+Driven+State+Observer+Thermal+Error+Compensation+Machine+Tool+Digital+Twins+Lang+2024" target="_blank">Lang et al., "Kalman Filter-Driven State Observer for Thermal Error Compensation in Machine Tool Digital Twins," <em>Manufacturing Letters</em>, 41, 2024.</a></td></tr>
+        <tr><td>[M2]</td><td><a href="https://scholar.google.com/scholar?q=Sensor+placement+digital+twin+thermal+error+compensation+machine+tools+Lang+2025" target="_blank">Lang et al., "Sensor placement utilizing a digital twin for thermal error compensation of machine tools," <em>J. Manufacturing Systems</em>, 80, 2025.</a></td></tr>
+        <tr><td>[M3]</td><td><a href="https://scholar.google.com/scholar?q=Thermal+Issues+Machine+Tools+Mayr+CIRP+2012" target="_blank">Mayr et al., "Thermal Issues in Machine Tools," <em>CIRP Annals</em>, 61(2), 2012.</a></td></tr>
+        <tr><td>[M4]</td><td><a href="https://scholar.google.com/scholar?q=thermal+distortion+compensation+large+machine+tools+Kalman+filter+Gomez-Acedo+2013" target="_blank">Gomez-Acedo et al., "Methodology for the design of a thermal distortion compensation for large machine tools based in state-space representation with Kalman filter," <em>Int. J. Machine Tools and Manufacture</em>, 75, 2013.</a></td></tr>
+        <tr><td>[M5]</td><td><a href="https://scholar.google.com/scholar?q=Unscented+Kalman+Filter+Machine+Tool+Errors+Brecher+2017+Procedia+CIRP" target="_blank">Brecher et al., "Application of an Unscented Kalman Filter for Modeling Multiple Types of Machine Tool Errors," <em>Procedia CIRP</em>, 63, 2017.</a></td></tr>
+      </tbody>
+    </table>
+    <h3 style="margin-top:14px;">データ同化・カルマンフィルタ 基礎</h3>
+    <table style="font-size:0.78em;">
+      <thead><tr><th>#</th><th>文献</th></tr></thead>
+      <tbody>
+        <tr><td>[P1]</td><td><a href="https://doi.org/10.1115/1.3662552" target="_blank">Kalman, R.E., "A New Approach to Linear Filtering and Prediction Problems," <em>J. Basic Engineering</em>, 82(D), 1960.</a></td></tr>
+        <tr><td>[J1]</td><td><a href="https://ci.nii.ac.jp/books/search?q=%E3%83%87%E3%83%BC%E3%82%BF%E5%90%8C%E5%8C%96%E5%85%A5%E9%96%80" target="_blank">中野慎也ほか, 『データ同化入門』, 朝倉書店, 2015.</a></td></tr>
+        <tr><td>[J2]</td><td><a href="https://ci.nii.ac.jp/books/search?q=%E3%82%AB%E3%83%AB%E3%83%9E%E3%83%B3%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF+%E7%89%87%E5%B1%B1" target="_blank">片山徹, 『カルマンフィルタの基礎』, 東京電機大学出版局, 2000.</a></td></tr>
+        <tr><td>[E1]</td><td><a href="https://scholar.google.com/scholar?q=Evensen+Data+Assimilation+Ensemble+Kalman+Filter+2009+Springer" target="_blank">Evensen, G., <em>Data Assimilation: The Ensemble Kalman Filter</em>, Springer, 2009.</a></td></tr>
+        <tr><td>[E2]</td><td><a href="https://scholar.google.com/scholar?q=Asch+Bocquet+Nodet+Data+Assimilation+Methods+Algorithms+Applications+SIAM+2016" target="_blank">Asch, Bocquet, Nodet, <em>Data Assimilation: Methods, Algorithms, and Applications</em>, SIAM, 2016.</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div><!-- /.slides -->
+</div><!-- /.reveal -->
+
+<script src="https://unpkg.com/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/math/math.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+
+<script>
+Reveal.initialize({
+  hash: true,
+  width:  1280,
+  height: 720,
+  margin: 0.02,
+  minScale: 0.1,
+  maxScale: 2.0,
+  controls: true,
+  controlsTutorial: false,
+  progress: true,
+  slideNumber: 'c/t',
+  overview: true,
+  center: false,
+  touch: true,
+  transition: 'slide',
+  transitionSpeed: 'default',
+  backgroundTransition: 'fade',
+
+  math: {
+    mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+    config: 'TeX-AMS_HTML-full',
+    TeX: {
+      Macros: {
+        boldsymbol: ['\\boldsymbol{#1}', 1]
+      }
+    }
+  },
+
+  highlight: {
+    highlightOnLoad: true,
+  },
+
+  plugins: [RevealHighlight, RevealMath.MathJax3, RevealNotes],
+});
+
+/* スクロールボックスのホイールイベントが
+   reveal.js のナビゲーションと干渉しないよう分離する */
+document.querySelectorAll('.scroll-box, pre code').forEach(el => {
+  el.addEventListener('wheel', e => { e.stopPropagation(); }, { passive: true });
+});
+</script>
+</body>
+</html>
