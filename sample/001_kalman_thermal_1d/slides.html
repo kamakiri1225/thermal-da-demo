@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>カルマンフィルタによる熱データ同化 | 001_kalman_thermal_1d</title>
 
-<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
@@ -401,8 +400,106 @@ hr.dim { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
 /* ═══════════════════════════════════════════
    PRINT / PDF レイアウト（?print-pdf モード）
-   スクロールボックスを全展開 → 全スライド内容が印刷される
+   ─ 白背景ライトテーマ + スクロールボックス全展開
    ═══════════════════════════════════════════ */
+body.print-pdf,
+body.print-pdf .reveal-viewport,
+body.print-pdf .reveal,
+body.print-pdf .slides,
+body.print-pdf .slides section { background: #ffffff !important; }
+
+body.print-pdf .reveal,
+body.print-pdf .reveal p,
+body.print-pdf .reveal li,
+body.print-pdf .reveal td { color: #1a1a2e !important; }
+
+body.print-pdf .reveal h1 {
+  background: linear-gradient(135deg, #1a5fb4, #1a8a9e) !important;
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+}
+body.print-pdf .reveal h2 {
+  color: #1a4a8e !important;
+  border-bottom-color: #cccccc !important;
+}
+body.print-pdf .reveal h3 { color: #9a5000 !important; }
+body.print-pdf .reveal h4 { color: #1a7a8e !important; }
+
+body.print-pdf .card {
+  background: #f5f7fa !important;
+  border-color: #d0d7de !important;
+}
+body.print-pdf .card.blue  { border-left-color: #1a5fb4 !important; }
+body.print-pdf .card.green { border-left-color: #2d8a3e !important; }
+body.print-pdf .card.orange{ border-left-color: #9a5000 !important; }
+body.print-pdf .card.red   { border-left-color: #b91c1c !important; }
+body.print-pdf .card.purple{ border-left-color: #6e40c9 !important; }
+body.print-pdf .card.cyan  { border-left-color: #1a8a9e !important; }
+
+body.print-pdf .info-box {
+  background: #e8f4fd !important;
+  border-color: #a0c4e8 !important;
+  color: #1a1a2e !important;
+}
+body.print-pdf .warn-box {
+  background: #fef9e7 !important;
+  border-color: #e8d060 !important;
+  color: #1a1a2e !important;
+}
+body.print-pdf .success-box {
+  background: #eafaf1 !important;
+  border-color: #78c99a !important;
+  color: #1a1a2e !important;
+}
+body.print-pdf .math-box {
+  background: #f5f7fa !important;
+  border-color: #d0d7de !important;
+  color: #1a1a2e !important;
+}
+
+body.print-pdf .muted { color: #555 !important; }
+body.print-pdf .sec-tag { color: #777 !important; }
+body.print-pdf hr.dim { border-top-color: #ccc !important; }
+
+body.print-pdf .reveal pre,
+body.print-pdf .reveal pre code.hljs {
+  background: #f6f8fa !important;
+  color: #24292f !important;
+}
+body.print-pdf .reveal code { background: #f0f0f0 !important; color: #c0392b !important; }
+
+body.print-pdf .reveal table th {
+  background: #e8ecf0 !important;
+  color: #1a4a8e !important;
+  border-color: #c0c8d0 !important;
+}
+body.print-pdf .reveal table td {
+  color: #1a1a2e !important;
+  border-color: #c0c8d0 !important;
+}
+body.print-pdf .reveal table tr:nth-child(even) td { background: #f5f7fa !important; }
+
+body.print-pdf .reveal a { color: #1a5fb4 !important; }
+
+body.print-pdf .timeline li { border-left-color: #ccc !important; }
+body.print-pdf .timeline li::before { background: #1a5fb4 !important; border-color: #fff !important; }
+body.print-pdf .timeline li.done::before { background: #2d8a3e !important; }
+
+body.print-pdf .flow-item {
+  background: #f5f7fa !important;
+  border-color: #d0d7de !important;
+  color: #1a1a2e !important;
+}
+body.print-pdf .flow-arrow { color: #1a5fb4 !important; }
+
+/* hl-* クラスの色調整 */
+body.print-pdf .hl-blue   { color: #1a5fb4 !important; }
+body.print-pdf .hl-green  { color: #2d8a3e !important; }
+body.print-pdf .hl-orange { color: #9a5000 !important; }
+body.print-pdf .hl-red    { color: #b91c1c !important; }
+body.print-pdf .hl-cyan   { color: #1a8a9e !important; }
+body.print-pdf .hl-purple { color: #6e40c9 !important; }
+
+/* scroll-box を全展開して全内容を印刷 */
 body.print-pdf .scroll-box {
   max-height: none !important;
   overflow: visible !important;
@@ -410,6 +507,7 @@ body.print-pdf .scroll-box {
 body.print-pdf .pdf-canvas-wrap {
   max-height: none !important;
   overflow: visible !important;
+  background: #e8e8e8 !important;
 }
 body.print-pdf #pdf-export-btn,
 body.print-pdf #pdf-toast { display: none !important; }
@@ -3133,12 +3231,29 @@ document.querySelectorAll('.scroll-box, pre code').forEach(el => {
   let busy    = false;
   let ready   = false;
 
+  const PDFJS_CDN = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js';
+
+  function loadPdfJs(cb) {
+    if (window.pdfjsLib) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = PDFJS_CDN;
+    s.onload = cb;
+    s.onerror = function() { console.error('Failed to load PDF.js from CDN'); };
+    document.head.appendChild(s);
+  }
+
   function setup() {
     if (ready) return;
-    if (typeof pdfjsLib === 'undefined') { setTimeout(setup, 300); return; }
     ready = true;
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    loadPdfJs(function() {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      buildTabs();
+      loadDoc(0);
+    });
+  }
+
+  function buildTabs() {
 
     const bar = document.getElementById('pdf-tabs');
     DOCS.forEach(function(d, i) {
