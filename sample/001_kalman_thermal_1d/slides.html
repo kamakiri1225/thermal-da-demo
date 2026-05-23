@@ -368,11 +368,14 @@ hr.dim { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .pdf-tab:hover { border-color:var(--blue); color:var(--text); }
 .pdf-tab.active { background:#1f6feb; border-color:#1f6feb; color:#fff; font-weight:600; }
 .pdf-canvas-wrap {
-  background:#525659; overflow:auto; max-height:450px;
-  display:flex; justify-content:center; padding:8px;
-  border-radius:6px; margin-bottom:8px;
+  background:#525659; overflow:auto; max-height:480px;
+  padding:8px; border-radius:6px; margin-bottom:8px;
+  text-align:center;
 }
-.pdf-canvas-wrap canvas { box-shadow:0 2px 12px rgba(0,0,0,.6); display:block; }
+.pdf-canvas-wrap canvas {
+  box-shadow:0 2px 12px rgba(0,0,0,.6);
+  display:inline-block; /* text-align:center で中央寄せ、横overflow時はスクロール */
+}
 .pdf-toolbar {
   display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:0.82em;
 }
@@ -3078,16 +3081,31 @@ document.querySelectorAll('.scroll-box, pre code').forEach(el => {
 
     pdfDoc.getPage(n).then(function(page) {
       var wrap = document.getElementById('pdf-canvas-wrap');
-      var w0   = page.getViewport({ scale: 1 }).width;
-      var fitW = Math.max(wrap.clientWidth - 20, 300) / w0;
-      var vp   = page.getViewport({ scale: fitW * zoom });
       var cv   = document.getElementById('pdf-canvas');
-      cv.width  = vp.width;
-      cv.height = vp.height;
-      page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise.then(function() {
-        busy = false;
-        wrap.scrollTop = 0;
-      });
+
+      // デバイスのピクセル比取得（Retina / HiDPI 対応）
+      var dpr  = window.devicePixelRatio || 1;
+
+      // ページ本来の幅を基準に「コンテナ幅ぴったり」の倍率を計算
+      var vp0  = page.getViewport({ scale: 1 });
+      var availW = Math.max(wrap.clientWidth - 20, 300);
+      var fitScale = availW / vp0.width;
+      var logicalScale = fitScale * zoom;         // CSS ピクセル基準の倍率
+      var physicalScale = logicalScale * dpr;     // 物理ピクセル基準の倍率（シャープ描画用）
+
+      // キャンバスを物理ピクセルサイズで確保し、CSS 表示は論理サイズに戻す
+      var vpPhys = page.getViewport({ scale: physicalScale });
+      cv.width       = Math.floor(vpPhys.width);
+      cv.height      = Math.floor(vpPhys.height);
+      cv.style.width  = Math.floor(vpPhys.width  / dpr) + 'px';
+      cv.style.height = Math.floor(vpPhys.height / dpr) + 'px';
+
+      page.render({ canvasContext: cv.getContext('2d'), viewport: vpPhys })
+        .promise.then(function() {
+          busy = false;
+          wrap.scrollTop = 0;
+          wrap.scrollLeft = 0;
+        });
     });
   }
 
