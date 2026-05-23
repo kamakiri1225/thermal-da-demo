@@ -18,8 +18,8 @@ venv/
 *.out
 *.tex
 
-# Generated PDFs (LaTeX output - can be rebuilt)
-sample/*/docs/pdf/
+# LaTeX build intermediates only (final PDFs are kept)
+sample/*/docs/pdf/_build/
 
 # Heavy reference materials (papers, screenshots)
 docs/*.pdf

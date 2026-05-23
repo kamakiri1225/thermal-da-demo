@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>カルマンフィルタによる熱データ同化 | 001_kalman_thermal_1d</title>
 
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
@@ -354,6 +355,35 @@ hr.dim { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
   color: var(--blue-light);
   border-bottom-color: var(--blue-light);
 }
+
+/* ═══════════════════════════════════════════
+   PDF VIEWER
+   ═══════════════════════════════════════════ */
+.pdf-tab-bar { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:8px; }
+.pdf-tab {
+  background:var(--bg2); border:1px solid var(--border); border-radius:6px;
+  padding:3px 11px; font-size:0.73em; cursor:pointer; color:var(--muted);
+  font-family:'Noto Sans JP',sans-serif; transition:all 0.15s;
+}
+.pdf-tab:hover { border-color:var(--blue); color:var(--text); }
+.pdf-tab.active { background:#1f6feb; border-color:#1f6feb; color:#fff; font-weight:600; }
+.pdf-canvas-wrap {
+  background:#525659; overflow:auto; max-height:450px;
+  display:flex; justify-content:center; padding:8px;
+  border-radius:6px; margin-bottom:8px;
+}
+.pdf-canvas-wrap canvas { box-shadow:0 2px 12px rgba(0,0,0,.6); display:block; }
+.pdf-toolbar {
+  display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:0.82em;
+}
+.pdf-toolbar button {
+  background:var(--bg2); border:1px solid var(--border); color:var(--text);
+  padding:3px 10px; border-radius:6px; cursor:pointer; font-size:0.82em;
+  font-family:'Noto Sans JP',sans-serif; transition:all 0.15s;
+}
+.pdf-toolbar button:hover { border-color:var(--blue); color:var(--blue); }
+.pdf-toolbar button:disabled { opacity:.4; cursor:not-allowed; }
+.pdf-page-info { color:var(--muted); min-width:90px; text-align:center; }
 </style>
 </head>
 <body>
@@ -2868,6 +2898,41 @@ disp_est  = compute_displacement(kf_T[-1])
 </section>
 
 <!-- ═══════════════════════════════════════════
+     SLIDE: PDF VIEWER
+     ═══════════════════════════════════════════ -->
+<section>
+  <p class="sec-tag">付録 &mdash; ドキュメント</p>
+  <h2>PDF ドキュメント ビューア</h2>
+
+  <!-- タブバー（JS で動的生成） -->
+  <div class="pdf-tab-bar" id="pdf-tabs"></div>
+
+  <!-- PDF 描画キャンバス -->
+  <div class="pdf-canvas-wrap" id="pdf-canvas-wrap">
+    <canvas id="pdf-canvas"></canvas>
+  </div>
+
+  <!-- ツールバー -->
+  <div class="pdf-toolbar">
+    <div style="display:flex;gap:5px;">
+      <button id="pdf-zoom-out">－ 縮小</button>
+      <button id="pdf-fit">幅に合わせる</button>
+      <button id="pdf-zoom-in">＋ 拡大</button>
+    </div>
+    <div class="pdf-page-info">
+      <span id="pdf-cur">—</span> / <span id="pdf-total">—</span> ページ
+    </div>
+    <div style="display:flex;gap:5px;">
+      <button id="pdf-prev" disabled>◀ 前</button>
+      <button id="pdf-next" disabled>次 ▶</button>
+    </div>
+  </div>
+  <p class="muted" style="font-size:0.68em;margin-top:5px;">
+    スクロールで縦移動 &nbsp;·&nbsp; 前次ボタンでページ切替 &nbsp;·&nbsp; タブでドキュメント選択
+  </p>
+</section>
+
+<!-- ═══════════════════════════════════════════
      SLIDE: 参考文献
      ═══════════════════════════════════════════ -->
 <section>
@@ -2948,6 +3013,115 @@ Reveal.initialize({
 document.querySelectorAll('.scroll-box, pre code').forEach(el => {
   el.addEventListener('wheel', e => { e.stopPropagation(); }, { passive: true });
 });
+
+// ─── PDF Viewer ───────────────────────────────────────────────
+(function () {
+  const DOCS = [
+    { label: '理論解説',       path: 'docs/pdf/theory.pdf' },
+    { label: 'コード解説',     path: 'docs/pdf/program_guide.pdf' },
+    { label: '結果ガイド',     path: 'docs/pdf/results_guide.pdf' },
+    { label: '理論→コード対応', path: 'docs/pdf/theory_to_code.pdf' },
+    { label: 'ZOH 解説',       path: 'docs/pdf/zoh_guide.pdf' },
+    { label: '次のステップ',   path: 'docs/pdf/nextstep.pdf' },
+    { label: 'ブログ記事',     path: 'docs/pdf/blog_data_assimilation_story.pdf' },
+  ];
+
+  let pdfDoc  = null;
+  let curPage = 1;
+  let zoom    = 1.0;   // 1.0 = 幅に合わせる
+  let busy    = false;
+  let ready   = false;
+
+  function setup() {
+    if (ready) return;
+    if (typeof pdfjsLib === 'undefined') { setTimeout(setup, 300); return; }
+    ready = true;
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+
+    const bar = document.getElementById('pdf-tabs');
+    DOCS.forEach(function(d, i) {
+      const b = document.createElement('button');
+      b.className = 'pdf-tab' + (i === 0 ? ' active' : '');
+      b.textContent = d.label;
+      b.addEventListener('click', function() { loadDoc(i); });
+      bar.appendChild(b);
+    });
+    loadDoc(0);
+  }
+
+  function loadDoc(idx) {
+    curPage = 1; zoom = 1.0;
+    document.querySelectorAll('.pdf-tab').forEach(function(t, i) {
+      t.classList.toggle('active', i === idx);
+    });
+    document.getElementById('pdf-cur').textContent = '…';
+    document.getElementById('pdf-total').textContent = '…';
+    document.getElementById('pdf-prev').disabled = true;
+    document.getElementById('pdf-next').disabled = true;
+
+    pdfjsLib.getDocument(DOCS[idx].path).promise.then(function(pdf) {
+      pdfDoc = pdf;
+      document.getElementById('pdf-total').textContent = pdf.numPages;
+      render(1);
+    }).catch(function() {
+      document.getElementById('pdf-cur').textContent = 'Error';
+    });
+  }
+
+  function render(n) {
+    if (busy || !pdfDoc) return;
+    busy = true; curPage = n;
+    document.getElementById('pdf-cur').textContent = n;
+    document.getElementById('pdf-prev').disabled = (n <= 1);
+    document.getElementById('pdf-next').disabled = (n >= pdfDoc.numPages);
+
+    pdfDoc.getPage(n).then(function(page) {
+      var wrap = document.getElementById('pdf-canvas-wrap');
+      var w0   = page.getViewport({ scale: 1 }).width;
+      var fitW = Math.max(wrap.clientWidth - 20, 300) / w0;
+      var vp   = page.getViewport({ scale: fitW * zoom });
+      var cv   = document.getElementById('pdf-canvas');
+      cv.width  = vp.width;
+      cv.height = vp.height;
+      page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise.then(function() {
+        busy = false;
+        wrap.scrollTop = 0;
+      });
+    });
+  }
+
+  document.getElementById('pdf-prev').addEventListener('click', function() {
+    if (curPage > 1 && !busy) render(curPage - 1);
+  });
+  document.getElementById('pdf-next').addEventListener('click', function() {
+    if (pdfDoc && curPage < pdfDoc.numPages && !busy) render(curPage + 1);
+  });
+  document.getElementById('pdf-zoom-in').addEventListener('click', function() {
+    zoom = Math.min(zoom * 1.25, 4.0);
+    if (!busy) render(curPage);
+  });
+  document.getElementById('pdf-zoom-out').addEventListener('click', function() {
+    zoom = Math.max(zoom * 0.8, 0.3);
+    if (!busy) render(curPage);
+  });
+  document.getElementById('pdf-fit').addEventListener('click', function() {
+    zoom = 1.0;
+    if (!busy) render(curPage);
+  });
+
+  // PDF エリアのスクロール・キー入力を reveal.js ナビから分離
+  document.getElementById('pdf-canvas-wrap').addEventListener('wheel',
+    function(e) { e.stopPropagation(); }, { passive: true });
+
+  // スライドが表示されたタイミングで初期化
+  Reveal.on('slidechanged', function(e) {
+    if (e.currentSlide.querySelector('#pdf-canvas')) setup();
+  });
+  Reveal.on('ready', function(e) {
+    if (e.currentSlide && e.currentSlide.querySelector('#pdf-canvas')) setup();
+  });
+})();
 </script>
 </body>
 </html>
