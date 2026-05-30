@@ -25,6 +25,9 @@ sample/*/docs/pdf/_build/
 docs/*.pdf
 docs/img/
 sample/002_laplacian_da_1d/docs/*.pdf
+sample/002_laplacian_da_1d/oi/paraview_cases/
+sample/002_laplacian_da_1d/oi/results/results_all_nodes_comparison.png
+sample/002_laplacian_da_1d/oi/results/**/post.foam
 
 # Archives
 *.zip

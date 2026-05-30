@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>laplacianFoam + OI データ同化 | 002_laplacian_da_1d</title>
+
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg2:       #161b22;
+  --bg3:       #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --blue:      #58a6ff;
+  --blue2:     #79c0ff;
+  --green:     #3fb950;
+  --orange:    #e3b341;
+  --red:       #f85149;
+  --purple:    #bc8cff;
+  --cyan:      #39d0d8;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal {
+  background: var(--bg);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+  color: var(--text);
+  font-size: 18px;
+}
+.reveal .slides section {
+  text-align: left;
+  padding: 30px 40px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.reveal .slides section.title-slide {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 28% 38%, #1a2744 0%, transparent 58%),
+    radial-gradient(ellipse at 72% 68%, #0f3027 0%, transparent 58%),
+    var(--bg);
+}
+.reveal h1 {
+  font-size: 1.95em;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.35em;
+  text-transform: none;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal h2 {
+  font-size: 1.42em;
+  font-weight: 700;
+  text-transform: none;
+  color: var(--blue2);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  text-align: left;
+}
+.reveal h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--orange);
+  margin: 0.2em 0 0.4em;
+  text-align: left;
+}
+.reveal p, .reveal li {
+  line-height: 1.55;
+  font-size: 0.88em;
+  text-align: left;
+}
+.reveal ul { margin-top: 0.3em; }
+.reveal li { margin-bottom: 0.28em; }
+.reveal strong { color: #fff; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 0.76em !important; }
+.center { text-align: center !important; }
+.sec-tag {
+  display: inline-block;
+  font-size: 0.62em;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.col-6-4 { display: grid; grid-template-columns: 6fr 4fr; gap: 18px; align-items: start; }
+.col-4-6 { display: grid; grid-template-columns: 4fr 6fr; gap: 18px; align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch; }
+.four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: stretch; }
+.scroll-box {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 510px;
+  padding-right: 8px;
+}
+.scroll-box::-webkit-scrollbar { width: 6px; }
+.scroll-box::-webkit-scrollbar-track { background: var(--bg3); border-radius: 3px; }
+.scroll-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.scroll-box::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.card.blue { border-left: 4px solid var(--blue); }
+.card.green { border-left: 4px solid var(--green); }
+.card.orange { border-left: 4px solid var(--orange); }
+.card.red { border-left: 4px solid var(--red); }
+.card.purple { border-left: 4px solid var(--purple); }
+.card.cyan { border-left: 4px solid var(--cyan); }
+.info-box {
+  background: rgba(88,166,255,0.08);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.warn-box {
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.success-box {
+  background: rgba(63,185,80,0.08);
+  border: 1px solid rgba(63,185,80,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.math-box {
+  background: #0b1220;
+  border: 1px solid rgba(88,166,255,0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.badge-blue { background: #1f6feb; color: #fff; }
+.badge-green { background: #238636; color: #fff; }
+.badge-orange { background: #9e6a03; color: #fff; }
+.badge-purple { background: #6e40c9; color: #fff; }
+.badge-gray { background: #444c56; color: #e6edf3; }
+
+.flow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+.flow-item {
+  flex: 1;
+  min-height: 88px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.flow-item .num {
+  color: var(--cyan);
+  font-weight: 700;
+  font-size: 0.78em;
+}
+.flow-item .label {
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+.flow-item .note {
+  color: var(--muted);
+  font-size: 0.78em;
+  line-height: 1.45;
+  margin-top: 5px;
+}
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--blue);
+  font-size: 1.3em;
+}
+
+.timeline { list-style: none; padding: 0; margin: 10px 0; }
+.timeline li {
+  position: relative;
+  padding: 8px 0 8px 24px;
+  border-left: 2px solid var(--border);
+  margin-left: 10px;
+}
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  background: var(--blue);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+}
+.timeline li.done::before { background: var(--green); }
+
+.reveal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78em;
+  margin: 0.45em 0;
+}
+.reveal table th {
+  background: var(--bg3);
+  color: var(--blue2);
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+.reveal table td {
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  line-height: 1.45;
+}
+.reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.reveal pre {
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  margin: 0.45em 0;
+}
+.reveal pre code.hljs {
+  max-height: 340px !important;
+  overflow-y: auto !important;
+  font-size: 0.80em;
+  line-height: 1.5;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+.reveal code {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.92em;
+}
+.scroll-box pre code.hljs {
+  font-size: 0.84em;
+  line-height: 1.52;
+}
+
+.metric {
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+}
+.metric .value {
+  display: block;
+  font-size: 1.65em;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1.15;
+}
+.metric .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75em;
+  margin-top: 6px;
+}
+
+.hl-blue { color: var(--blue2); }
+.hl-green { color: var(--green); }
+.hl-orange { color: var(--orange); }
+.hl-red { color: var(--red); }
+.hl-purple { color: var(--purple); }
+.hl-cyan { color: var(--cyan); }
+hr.dim { border: 0; border-top: 1px solid var(--border); margin: 12px 0; }
+
+.figure {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+}
+.figure img {
+  width: 100%;
+  display: block;
+  border-radius: 4px;
+}
+.figure.large {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 6px;
+}
+.figure.large img {
+  max-height: 560px;
+  object-fit: contain;
+}
+.paraview-shot {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px;
+}
+.paraview-shot img {
+  width: 100%;
+  display: block;
+  border-radius: 4px;
+}
+.image-scroll {
+  max-height: 555px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg2);
+  padding: 8px;
+}
+.image-scroll img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.image-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.image-scroll::-webkit-scrollbar-track { background: var(--bg3); border-radius: 4px; }
+.image-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.image-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.caption {
+  color: var(--muted);
+  font-size: 0.72em;
+  margin-top: 5px;
+  text-align: center !important;
+}
+
+#pdf-export-btn {
+  position: fixed;
+  right: 10px;
+  top: 10px;
+  z-index: 50;
+  background: rgba(13,17,23,0.92);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font: 600 11px 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  opacity: 0.38;
+  transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#pdf-export-btn:hover { border-color: var(--blue); color: var(--blue); opacity: 1; }
+#pdf-toast {
+  display: none;
+  position: fixed;
+  right: 10px;
+  top: 44px;
+  z-index: 60;
+  width: 360px;
+  background: rgba(13,17,23,0.96);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 15px;
+  font: 13px/1.55 'Noto Sans JP', sans-serif;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+#pdf-toast.show { display: block; }
+#pdf-toast code { color: var(--cyan); }
+#pdf-toast .close-toast {
+  float: right;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
+body.print-pdf,
+body.print-pdf .reveal-viewport,
+body.print-pdf .reveal,
+body.print-pdf .slides,
+body.print-pdf .slides section { background: #fff !important; }
+body.print-pdf .reveal,
+body.print-pdf .reveal p,
+body.print-pdf .reveal li,
+body.print-pdf .reveal td { color: #1a1a2e !important; }
+body.print-pdf .reveal h1 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  color: #1a5fb4 !important;
+}
+body.print-pdf .reveal h2 { color: #1a5fb4 !important; border-bottom-color: #ccc !important; }
+body.print-pdf .reveal h3 { color: #9a5000 !important; }
+body.print-pdf .card,
+body.print-pdf .flow-item,
+body.print-pdf .metric {
+  background: #f8fafc !important;
+  border-color: #d0d7de !important;
+  color: #1a1a2e !important;
+}
+body.print-pdf .info-box { background: #eef6ff !important; border-color: #8bbff0 !important; }
+body.print-pdf .warn-box { background: #fff7e6 !important; border-color: #d4a72c !important; }
+body.print-pdf .success-box { background: #eef8ef !important; border-color: #7bc47f !important; }
+body.print-pdf .math-box { background: #f5f7fa !important; border-color: #c9d7e8 !important; }
+body.print-pdf .muted,
+body.print-pdf .caption,
+body.print-pdf .flow-item .note,
+body.print-pdf .metric .label { color: #555 !important; }
+body.print-pdf .sec-tag { color: #777 !important; }
+body.print-pdf .reveal table th { background: #e9eef5 !important; color: #1a5fb4 !important; border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table td { border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table tr:nth-child(even) td { background: #f5f7fa !important; }
+body.print-pdf .reveal pre,
+body.print-pdf .reveal pre code.hljs { background: #f0f0f0 !important; color: #1a1a2e !important; }
+body.print-pdf #pdf-export-btn,
+body.print-pdf #pdf-toast { display: none !important; }
+</style>
+</head>
+
+<body>
+<button id="pdf-export-btn">PDF 出力</button>
+<div id="pdf-toast">
+  <span class="close-toast" onclick="this.parentElement.classList.remove('show')">&times;</span>
+  <strong>PDF 出力</strong><br>
+  ブラウザの印刷で保存できます。URL に <code>?print-pdf</code> を付けてから、印刷先を PDF にしてください。
+</div>
+
+<div class="reveal">
+<div class="slides">
+
+<section class="title-slide">
+  <div class="sec-tag">002_laplacian_da_1d</div>
+  <h1>laplacianFoam + optimal interpolation<br>データ同化テスト</h1>
+  <div class="col-6-4" style="width: 1080px; margin-top: 8px; text-align: left;">
+    <div>
+      <div class="card blue">
+        <h3>目的</h3>
+        <p>OpenFOAM の温度場予測をブラックボックスとして扱い、センサ観測でセル温度を補正するデータ同化の流れを作る。</p>
+      </div>
+      <div class="card green">
+        <h3>やったこと</h3>
+        <p>`laplacianFoam` を 1 ステップずつ進め、Python 側で optimal interpolation による補正を行い、補正後の温度場を次ステップへ書き戻した。</p>
+      </div>
+      <div class="card orange">
+        <h3>見るもの</h3>
+        <p>`truth`、`OpenFOAM only`、`OpenFOAM DA (OI)` を比較し、観測を入れることで温度場推定がどう変わるかを見る。</p>
+        <table>
+          <tr><th>名前</th><th>意味</th></tr>
+          <tr><td>`truth`</td><td>左端の加熱を正しい強さにした、正解として扱う計算結果</td></tr>
+          <tr><td>`OpenFOAM only`</td><td>左端の加熱を半分に間違えた、補正なしの計算結果</td></tr>
+          <tr><td>`OpenFOAM DA (OI)`</td><td>同じく加熱を半分に間違えた計算を、センサ観測で補正した結果</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="paraview-shot">
+      <img src="oi/paraview_cases/with_da/ani/ani.gif" alt="ParaView animation on title slide">
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">OpenFOAM Field</span>
+  <h2>OpenFOAM で見ている温度場</h2>
+  <div class="col-6-4">
+    <div class="paraview-shot">
+      <img src="oi/paraview_cases/with_da/ani/ani.gif" alt="ParaView animation of OpenFOAM DA temperature field">
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>描画条件</h3>
+        <table>
+          <tr><th>項目</th><th>内容</th></tr>
+          <tr><td>ケース</td><td>`with_da` / OpenFOAM DA (OI)</td></tr>
+          <tr><td>時刻</td><td>`0-900 s` のアニメーション</td></tr>
+          <tr><td>表示量</td><td>温度 `T`</td></tr>
+          <tr><td>色範囲</td><td>約 `20-25 degC`</td></tr>
+          <tr><td>セル数</td><td>10 cells</td></tr>
+        </table>
+      </div>
+      <div class="info-box">
+        この GIF は、OpenFOAM のセル温度場を ParaView で可視化したもの。青い領域が低温側で、左端からの熱入力により温度分布が時間とともに変化する。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Message</span>
+  <h2>この 002 で整理したいこと</h2>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>どういう手法か</h3>
+      <p>OpenFOAM の時間発展行列を作らず、予測温度場とセンサ値の差を OI で空間的に配る。</p>
+    </div>
+    <div class="card green">
+      <h3>何を実装したか</h3>
+      <p>正解データ生成、DA なし、DA ありの 3 ケースを laplacianFoam で回し、Python 側で補正を挟む。</p>
+    </div>
+    <div class="card orange">
+      <h3>何が出たか</h3>
+      <p>境界条件が 50% ずれたモデルでも、2 点観測で全体の RMSE が大きく下がった。</p>
+    </div>
+  </div>
+  <div class="info-box">
+    001 は Python 内で離散化した 1D 熱モデル + カルマンフィルタの教材。002 は OpenFOAM ソルバを予測器として使い、同化の接続方法を検証する教材。
+  </div>
+</section>
+
+<section>
+<section>
+  <span class="sec-tag">Problem Setup</span>
+  <h2>対象問題: 1 次元相当の熱伝導</h2>
+  <div class="col-6-4">
+    <div>
+      <p>`laplacianFoam` が温度場を時間発展させる。</p>
+      <div class="math-box">
+        \[
+        \frac{\partial T}{\partial t}
+        =
+        \nabla \cdot (\alpha \nabla T)
+        \]
+      </div>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="num">left</div>
+          <div class="label">fixedGradient</div>
+          <div class="note">熱入力側。正解役の計算と予測モデルで勾配を変える。</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="num">domain</div>
+          <div class="label">10 cells</div>
+          <div class="note">長さ 0.3 m、セル幅 0.03 m。</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="num">right</div>
+          <div class="label">fixedValue</div>
+          <div class="note">20 degC に固定。</div>
+        </div>
+      </div>
+    </div>
+    <div class="card cyan">
+      <h3>ツイン実験の意図</h3>
+      <p>正解役の計算も予測モデルも OpenFOAM で作るが、境界勾配だけを意図的にずらす。</p>
+      <table>
+        <tr><th>ケース</th><th>境界勾配</th></tr>
+        <tr><td>truth</td><td>左端の加熱を正しい強さにした条件</td></tr>
+        <tr><td>model</td><td>左端の加熱を正解の半分にした条件</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Key Choice</span>
+  <h2>今回の重要な設計: A_d を作らない</h2>
+  <div class="two-col">
+    <div class="card red">
+      <h3>避けたこと</h3>
+      <ul>
+        <li>OpenFOAM の内部離散化行列を Python 側で再現する</li>
+        <li>時間発展行列 `A_d` を推定する</li>
+        <li>ソルバごとに同化コードを作り直す</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>採用したこと</h3>
+      <ul>
+        <li>時間発展は OpenFOAM に任せる</li>
+        <li>Python は予測値と観測値の差だけを見る</li>
+        <li>固定した背景誤差共分散 `B` で補正を広げる</li>
+      </ul>
+    </div>
+  </div>
+  <div class="math-box">
+    \[
+    \mathbf{x}_k^f =
+    \mathcal{M}_{OF}
+    \left(\mathbf{x}_{k-1}^a, G_{\mathrm{model}}\right)
+    \]
+  </div>
+  <div class="info-box">
+    この式はコード中で行列計算している式ではない。`M_OF` は OpenFOAM の `laplacianFoam` 実行そのものを表す記号。
+    実装では、補正済み温度場を書き込み、OpenFOAM を 1 ステップ走らせ、出てきた温度場を `x_pred` として読む。
+  </div>
+  <pre><code class="language-python">ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
+ofi.run_step(k * DT, (k + 1) * DT)
+x_pred = ofi.read_field((k + 1) * DT)</code></pre>
+</section>
+
+<section>
+  <span class="sec-tag">Method</span>
+  <h2>手法: optimal interpolation</h2>
+  <div class="col-6-4">
+    <div>
+      <p>OpenFOAM 予測値を背景値とし、センサ観測との差を OI ゲインで全節点へ配る。</p>
+      <div class="math-box">
+        \[
+        \mathbf{x}^a =
+        \mathbf{x}^f +
+        \mathbf{K}
+        \left(\mathbf{y} - \mathbf{H}\mathbf{x}^f\right)
+        \]
+      </div>
+      <div class="math-box">
+        \[
+        \mathbf{K} =
+        \mathbf{B}\mathbf{H}^T
+        \left(\mathbf{H}\mathbf{B}\mathbf{H}^T+\mathbf{R}\right)^{-1}
+        \]
+      </div>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>H</h3>
+        <p>状態ベクトルからセンサ位置だけを取り出す行列。</p>
+      </div>
+      <div class="card purple">
+        <h3>B</h3>
+        <p>OpenFOAM 予測誤差が空間的にどう似ていそうかを表す。</p>
+      </div>
+      <div class="card orange">
+        <h3>R</h3>
+        <p>観測ノイズの大きさ。今回は `0.05 degC`。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Intuition</span>
+  <h2>B は「誤差の広がり方」の仮定</h2>
+  <div class="two-col">
+    <div>
+      <p>今回の `B` は節点間距離から作る。</p>
+      <pre><code class="language-python">x = np.arange(N_NODES) * DX
+distance = np.abs(x[:, None] - x[None, :])
+B = BACKGROUND_ERROR_STD**2 * np.exp(
+    -(distance**2) / (2.0 * CORRELATION_LENGTH_M**2)
+)</code></pre>
+      <p class="muted">近い節点ほど同じ方向に間違っていそう、という仮定。</p>
+    </div>
+    <div>
+      <table>
+        <tr><th>センサからの距離</th><th>重みの目安</th><th>意味</th></tr>
+        <tr><td>0.00 m</td><td>約 1.00</td><td>ほぼ直接補正</td></tr>
+        <tr><td>0.03 m</td><td>約 0.88</td><td>強く補正</td></tr>
+        <tr><td>0.06 m</td><td>約 0.61</td><td>中程度</td></tr>
+        <tr><td>0.09 m</td><td>約 0.32</td><td>弱め</td></tr>
+        <tr><td>0.12 m</td><td>約 0.14</td><td>かなり弱い</td></tr>
+      </table>
+      <div class="warn-box">相関長 `CORRELATION_LENGTH_M` は結果に効く。実験データでは感度確認が必要。</div>
+    </div>
+  </div>
+</section>
+
+</section>
+
+<section>
+<section>
+  <span class="sec-tag">Experiment Design</span>
+  <h2>今回回した 3 ケース</h2>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">PASS 1</div>
+      <div class="label">truth</div>
+      <div class="note">左端の加熱を正しい強さにして、正解として扱う計算結果を作る。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">PASS 2</div>
+      <div class="label">model_only</div>
+      <div class="note">左端の加熱を正解の半分にした、DA なし予測を作る。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">PASS 3</div>
+      <div class="label">with_da</div>
+      <div class="note">同じく加熱を半分にした予測を、OI で補正する。</div>
+    </div>
+  </div>
+  <table>
+    <tr><th>項目</th><th>設定</th></tr>
+    <tr><td>ソルバ</td><td>`laplacianFoam`</td></tr>
+    <tr><td>セル数 / 棒長</td><td>10 cells / 0.3 m</td></tr>
+    <tr><td>時間刻み / ステップ数</td><td>10 s / 90 steps</td></tr>
+    <tr><td>センサ位置</td><td>Node 0, Node 4</td></tr>
+    <tr><td>背景誤差標準偏差 / 相関長</td><td>3.0 degC / 0.06 m</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="sec-tag">Case Definition</span>
+  <h2>`truth`、`OpenFOAM only`、`OF + OI` の違い</h2>
+  <table>
+    <tr>
+      <th>表示名</th>
+      <th>フォルダ名</th>
+      <th>境界勾配</th>
+      <th>センサ観測</th>
+      <th>目的</th>
+    </tr>
+    <tr>
+      <td><span class="badge badge-green">truth</span></td>
+      <td>`oi/results/truth/`</td>
+      <td>左端の加熱を正しい強さにした条件<br><span class="muted">内部名: `G_TRUE = 100 degC/m`</span></td>
+      <td>使わない</td>
+      <td>正解として扱う正解として扱う計算結果を作る</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">OpenFOAM only</span></td>
+      <td>`oi/results/model_only/`</td>
+      <td>左端の加熱を正解の半分にした条件<br><span class="muted">内部名: `G_MODEL = 50 degC/m`</span></td>
+      <td>使わない</td>
+      <td>境界条件が外れたとき、OpenFOAM 単独でどれだけずれるかを見る</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-purple">OF + OI</span></td>
+      <td>`oi/results/with_da/`</td>
+      <td>左端の加熱を正解の半分にした条件<br><span class="muted">内部名: `G_MODEL = 50 degC/m`</span></td>
+      <td>Node 0, Node 4 を使う</td>
+      <td>同じ外れたモデルを、センサ観測でどれだけ補正できるかを見る</td>
+    </tr>
+  </table>
+  <div class="info-box">
+    重要: `OpenFOAM only` と `OF + OI` はどちらも「左端の加熱を半分に間違えた」同じ不完全なモデルを使う。違いは、`OF + OI` だけがセンサ観測で毎ステップ補正する点。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Case Definition</span>
+  <h2>なぜ正解役と予測モデルを分けたか</h2>
+  <div class="two-col">
+    <div class="card green">
+      <h3>`truth`: 正解役</h3>
+      <p>正しい加熱条件を知っている仮想実験として、左端の加熱を強めた条件で OpenFOAM を走らせる。</p>
+      <pre><code class="language-text">目的:
+  実測実験の代わりに、比較可能な正解データを作る
+
+条件:
+  solver = laplacianFoam
+  left boundary = fixedGradient 100 degC/m
+  right boundary = fixedValue 20 degC</code></pre>
+    </div>
+    <div class="card blue">
+      <h3>`OpenFOAM only`: 誤差を持つ予測</h3>
+      <p>左端の加熱を半分に間違えたモデルとして、OpenFOAM を走らせる。</p>
+      <pre><code class="language-text">目的:
+  データ同化なしだと、どれだけ truth から外れるかを見る
+
+条件:
+  solver = laplacianFoam
+  left boundary = fixedGradient 50 degC/m
+  right boundary = fixedValue 20 degC
+  sensor correction = none</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Case Definition</span>
+  <h2>`OF + OI` は何が違うか</h2>
+  <div class="col-6-4">
+    <div>
+      <p>`OF + OI` も、OpenFOAM 予測の境界条件は `OpenFOAM only` と同じ。</p>
+      <div class="math-box">
+        \[
+        G_{\mathrm{model}} = 50\ \mathrm{degC/m}
+        \]
+      </div>
+      <p>違いは、各ステップで `truth` から作った疑似センサ値を使い、OpenFOAM のセル温度を補正すること。</p>
+      <div class="math-box">
+        \[
+        \mathbf{x}^a
+        =
+        \mathbf{x}^f
+        +
+        \mathbf{K}
+        \left(
+        \mathbf{y}-\mathbf{H}\mathbf{x}^f
+        \right)
+        \]
+      </div>
+    </div>
+    <div class="card purple">
+      <h3>比較の読み方</h3>
+      <table>
+        <tr><th>比較</th><th>意味</th></tr>
+        <tr><td>`truth` vs `OpenFOAM only`</td><td>モデル誤差の大きさ</td></tr>
+        <tr><td>`truth` vs `OF + OI`</td><td>同化後の推定誤差</td></tr>
+        <tr><td>`OpenFOAM only` vs `OF + OI`</td><td>OI 補正の効果</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="warn-box">
+    これは実測データではなくツイン実験。`truth` は実験値ではなく、正しい加熱条件で作った OpenFOAM 結果。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Implementation</span>
+  <h2>OpenFOAM と Python の接続</h2>
+  <div class="col-4-6">
+    <div class="card blue">
+      <h3>1 ステップずつ止める</h3>
+      <p>DA ありケースでは OpenFOAM を最後まで一気に走らせない。</p>
+      <p>各ステップで温度場を読み、OI で補正し、補正後の場を次の初期条件にする。</p>
+    </div>
+    <div>
+      <pre><code class="language-python">ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
+ofi.run_step(k * DT, (k + 1) * DT)
+x_pred = ofi.read_field((k + 1) * DT)
+
+y = H @ truth_T[k] + np.random.randn(n_obs) * OBS_NOISE_STD
+innovation = y - H @ x_pred
+x_da = x_pred + gain @ innovation
+
+x_current = x_da</code></pre>
+    </div>
+  </div>
+  <div class="info-box">
+    実測データに置き換えるときは、`y = H @ truth_T[k] + noise` を `y = measured_assimilation_values[k]` に差し替える。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Implementation</span>
+  <h2>セル値は毎ステップ補正して書き戻す</h2>
+  <div class="col-6-4">
+    <div>
+      <p>この 002 では、OpenFOAM の計算結果を後処理で見るだけではない。</p>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="num">1</div>
+          <div class="label">OpenFOAM へ書く</div>
+          <div class="note">補正済み温度場 `x_current` を `T` に書く。</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="num">2</div>
+          <div class="label">1 ステップ進める</div>
+          <div class="note">`laplacianFoam` で `x_pred` を得る。</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="num">3</div>
+          <div class="label">OI で補正</div>
+          <div class="note">`x_da = x_pred + K(y - Hx_pred)`。</div>
+        </div>
+      </div>
+      <div class="success-box">
+        補正後の `x_da` を次ステップの `x_current` にするため、観測情報が次の OpenFOAM 計算へ引き継がれる。
+      </div>
+    </div>
+    <div>
+      <pre><code class="language-python">ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
+ofi.run_step(k * DT, (k + 1) * DT)
+x_pred = ofi.read_field((k + 1) * DT)
+
+innovation = y - H @ x_pred
+x_da = x_pred + gain @ innovation
+
+# 次ステップで OpenFOAM に書き戻す温度場
+x_current = x_da</code></pre>
+      <p class="muted">現在は `DT = 10 s` なので 10 秒ごとに同化。30 秒や 60 秒ごとの同化にも変更できる。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Implementation</span>
+  <h2>どのファイルのどこで補正しているか</h2>
+  <div class="col-4-6">
+    <div>
+      <div class="card blue">
+        <h3>対象ファイル</h3>
+        <p>`sample/002_laplacian_da_1d/oi/da_main.py`</p>
+      </div>
+      <div class="card green">
+        <h3>対象関数</h3>
+        <p>`run_da()`</p>
+      </div>
+      <div class="card orange">
+        <h3>対応する式</h3>
+        <div class="math-box">
+          \[
+          \mathbf{x}^a =
+          \mathbf{x}^f +
+          \mathbf{K}
+          \left(\mathbf{y}-\mathbf{H}\mathbf{x}^f\right)
+          \]
+        </div>
+      </div>
+    </div>
+    <div class="scroll-box">
+      <pre><code class="language-python">def run_da(
+    ofi: OFInterface,
+    truth_T: np.ndarray,
+    g_model_series: np.ndarray,
+    H: np.ndarray,
+    B: np.ndarray,
+    R: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    laplacianFoam (G_model) + optimal interpolation で
+    データ同化を実行する。
+    """
+    print("─── データ同化ループ (G_model + OI) ───")
+    ofi.reset(initial_T=T_INIT)
+
+    n_obs = len(SENSOR_NODES)
+
+    # OI ゲイン:
+    # K = B H^T (H B H^T + R)^-1
+    gain = B @ H.T @ np.linalg.inv(H @ B @ H.T + R)
+
+    x_current = np.ones(N_NODES) * T_INIT
+    of_T = np.zeros((N_STEPS, N_NODES))
+    da_T = np.zeros((N_STEPS, N_NODES))
+
+    for k in range(N_STEPS):
+        # センサ観測 y:
+        # ツイン実験なので truth_T から疑似観測を作る
+        y = H @ truth_T[k] + np.random.randn(n_obs) * OBS_NOISE_STD
+
+        # OpenFOAM 予測 x_f:
+        # 前ステップの補正済み温度場 x_current を書き、
+        # laplacianFoam を 1 ステップだけ進める
+        ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
+        ofi.run_step(k * DT, (k + 1) * DT)
+        x_pred = ofi.read_field((k + 1) * DT)
+
+        # innovation = y - H x_f
+        innovation = y - H @ x_pred
+
+        # OI 更新:
+        # x_a = x_f + K (y - H x_f)
+        x_da = x_pred + gain @ innovation
+
+        # 補正後のセル値を次ステップの OpenFOAM 入力にする
+        x_current = x_da
+
+        of_T[k] = x_pred
+        da_T[k] = x_da
+
+    return of_T, da_T</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Scalability</span>
+  <h2>大規模セル数でそのまま使えるか</h2>
+  <div class="two-col">
+    <div class="card red">
+      <h3>そのままは厳しい</h3>
+      <p>現在の教材実装は全セルの密な背景誤差共分散 `B` を作る。</p>
+      <div class="math-box">
+        \[
+        \mathbf{B} \in \mathbb{R}^{N \times N}
+        \]
+      </div>
+      <p>`N = 1,000,000` なら `B` は \(10^{12}\) 要素になり、メモリだけで数 TB 規模になる。</p>
+    </div>
+    <div class="card green">
+      <h3>考え方は使える</h3>
+      <p>OpenFOAM を予測器にして、観測で場を補正する構造自体は大規模 CFD でも有効。</p>
+      <ul>
+        <li>局所化してセンサ周辺だけ補正する</li>
+        <li>`B` を疎行列・距離カットオフで近似する</li>
+        <li>低ランク近似や EnKF を使う</li>
+        <li>全ステップではなく数ステップごとに同化する</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warn-box">
+    100 万点規模では「全セル × 全セル」の OI ではなく、局所 OI、EnKF、低ランク表現、観測近傍だけの補正などに設計を変える必要がある。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Computation</span>
+  <h2>計算回数と出力</h2>
+  <div class="two-col">
+    <div>
+      <h3>計算の回し方</h3>
+      <ul>
+        <li>`truth`: OpenFOAM を 90 ステップ実行</li>
+        <li>`model_only`: OpenFOAM を 90 ステップ実行</li>
+        <li>`with_da`: 1 ステップ実行 + OI 補正を 90 回</li>
+      </ul>
+      <div class="warn-box">ツイン実験全体では概念的に `laplacianFoam` を 270 回起動する。</div>
+    </div>
+    <div>
+      <h3>保存される結果</h3>
+      <pre><code class="language-text">oi/results/
+  truth/temperature_history.csv
+  model_only/temperature_history.csv
+  with_da/temperature_history.csv
+  with_da/openfoam_forecast_before_oi.csv
+  summary_rmse.csv
+  results_of_da.png</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Folder Workflow</span>
+  <h2>どのフォルダを触りながら進めたか</h2>
+  <div class="col-4-6">
+    <div class="card cyan">
+      <h3>作業の中心</h3>
+      <p>002 の作業は `sample/002_laplacian_da_1d/` を起点に、OpenFOAM ケース、Python 同化コード、結果フォルダを行き来して進めた。</p>
+    </div>
+    <div>
+      <pre><code class="language-text">sample/002_laplacian_da_1d/
+├── case_base/              # OpenFOAM ケースのひな形
+├── of_interface.py         # Python から OpenFOAM を操作する共通窓口
+├── oi/
+│   ├── case/               # 実行時に使う OpenFOAM ケース
+│   ├── da_main.py          # OI データ同化の本体
+│   ├── run.sh              # 実行スクリプト
+│   └── results/            # 計算結果
+├── docs/                   # 理論・実装・結果・次ステップの文章
+└── slides.html             # この発表スライド</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Program Roles</span>
+  <h2>`kf`、`oi`、`of_interface.py` の目的</h2>
+  <table>
+    <tr>
+      <th>場所</th>
+      <th>目的</th>
+      <th>現在の状態</th>
+      <th>今回の 002 での役割</th>
+    </tr>
+    <tr>
+      <td>`oi/`</td>
+      <td>optimal interpolation によるデータ同化を実行する本体</td>
+      <td>実装済み。`da_main.py` と `run.sh` がある</td>
+      <td>今回の計算の中心。OpenFOAM 予測値を OI で補正し、結果を `oi/results/` に保存する</td>
+    </tr>
+    <tr>
+      <td>`kf/`</td>
+      <td>Kalman filter 版へ拡張するための準備場所</td>
+      <td>現状は `README.md` のみ。実装予定を整理している段階</td>
+      <td>今回は未実装。OI の次に、時変共分散 `P` と状態遷移 `A_d` を扱う候補として残している</td>
+    </tr>
+    <tr>
+      <td>`of_interface.py`</td>
+      <td>Python と OpenFOAM ケースをつなぐ共通インターフェース</td>
+      <td>実装済み</td>
+      <td>`T` フィールドの書き込み、`laplacianFoam` の 1 ステップ実行、結果温度場の読み取りを担当する</td>
+    </tr>
+  </table>
+  <div class="info-box">
+    役割分担は、`oi/da_main.py` が同化の判断を行い、`of_interface.py` が OpenFOAM の入出力を担当する形。`kf/` は今後のカルマンフィルタ拡張用。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Program Roles</span>
+  <h2>3 つの関係</h2>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">driver</div>
+      <div class="label">`oi/da_main.py`</div>
+      <div class="note">何ステップ回すか、観測をどう作るか、OI でどう補正するかを決める。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">bridge</div>
+      <div class="label">`of_interface.py`</div>
+      <div class="note">OpenFOAM の `T` ファイル、`controlDict`、`laplacianFoam` 実行を隠蔽する。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">solver</div>
+      <div class="label">`oi/case/`</div>
+      <div class="note">OpenFOAM が実際に温度場を 1 ステップ進める作業ケース。</div>
+    </div>
+  </div>
+  <div class="warn-box">
+    `kf/` はこの流れにまだ入っていない。将来は `kf/da_main.py` を作り、同じ `of_interface.py` を使って Kalman filter 版を動かす想定。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">OI vs KF</span>
+  <h2>今回は KF ではなく OI を使った</h2>
+  <div class="two-col">
+    <div class="card green">
+      <h3>今回使った: `oi/`</h3>
+      <ul>
+        <li>固定した背景誤差共分散 `B` を使う</li>
+        <li>OpenFOAM の状態遷移行列 `A_d` は作らない</li>
+        <li>ゲイン `K` は `B, H, R` から作る</li>
+        <li>実装が単純で、OpenFOAM 接続検証に向く</li>
+      </ul>
+      <div class="math-box">
+        \[
+        K = B H^T (H B H^T + R)^{-1}
+        \]
+      </div>
+    </div>
+    <div class="card purple">
+      <h3>今回は未使用: `kf/`</h3>
+      <ul>
+        <li>時変の誤差共分散 `P` を毎ステップ更新する</li>
+        <li>本来は状態遷移行列 `A_d` が必要</li>
+        <li>ゲイン `K` は予測共分散 `P^-` から毎ステップ変わる</li>
+        <li>より本格的だが、OpenFOAM との接続設計が難しい</li>
+      </ul>
+      <div class="math-box">
+        \[
+        K = P^- H^T (H P^- H^T + R)^{-1}
+        \]
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">OI vs KF</span>
+  <h2>OI と KF の違い</h2>
+  <table>
+    <tr>
+      <th>観点</th>
+      <th>OI</th>
+      <th>KF</th>
+      <th>今回の判断</th>
+    </tr>
+    <tr>
+      <td>誤差共分散</td>
+      <td>固定の `B`</td>
+      <td>時間発展する `P`</td>
+      <td>まずは固定 `B` で十分</td>
+    </tr>
+    <tr>
+      <td>OpenFOAM の時間発展</td>
+      <td>ブラックボックスでよい</td>
+      <td>`A_d` や線形化近似が欲しい</td>
+      <td>`A_d` を作らない方針を優先</td>
+    </tr>
+    <tr>
+      <td>ゲイン</td>
+      <td>`B, H, R` から計算</td>
+      <td>`P^-, H, R` から毎ステップ計算</td>
+      <td>OI の方が実装が軽い</td>
+    </tr>
+    <tr>
+      <td>モデル誤差の扱い</td>
+      <td>空間相関を仮定して補正</td>
+      <td>予測誤差の時間発展も扱える</td>
+      <td>今回は接続検証なので OI</td>
+    </tr>
+    <tr>
+      <td>大規模計算</td>
+      <td>密な `B` は不可。局所化が必要</td>
+      <td>密な `P` は不可。EnKF などが現実的</td>
+      <td>どちらも大規模化には近似が必要</td>
+    </tr>
+  </table>
+  <div class="info-box">
+    まとめ: 今回は「OpenFOAM のセル値を逐次補正して書き戻す流れ」を作ることが目的なので、KF ではなく OI を採用した。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory</span>
+  <h2>共通の理論背景: 予測と観測をどう混ぜるか</h2>
+  <div class="col-6-4">
+    <div>
+      <p>OI も KF も、基本形は同じ。</p>
+      <div class="math-box">
+        \[
+        \mathbf{x}^a =
+        \mathbf{x}^f +
+        \mathbf{K}
+        \left(
+        \mathbf{y} - \mathbf{H}\mathbf{x}^f
+        \right)
+        \]
+      </div>
+      <table>
+        <tr><th>記号</th><th>意味</th></tr>
+        <tr><td>\(\mathbf{x}^f\)</td><td>forecast。モデルによる予測状態</td></tr>
+        <tr><td>\(\mathbf{x}^a\)</td><td>analysis。観測で補正した解析状態</td></tr>
+        <tr><td>\(\mathbf{y}\)</td><td>観測値。センサ温度</td></tr>
+        <tr><td>\(\mathbf{H}\)</td><td>状態から観測位置だけを取り出す観測行列</td></tr>
+        <tr><td>\(\mathbf{y}-\mathbf{H}\mathbf{x}^f\)</td><td>innovation。観測と予測の差</td></tr>
+        <tr><td>\(\mathbf{K}\)</td><td>ゲイン。観測差をどこへどれだけ配るか</td></tr>
+      </table>
+    </div>
+    <div class="card blue">
+      <h3>今回の状態ベクトル</h3>
+      <div class="math-box">
+        \[
+        \mathbf{x}
+        =
+        \begin{bmatrix}
+        T_0 & T_1 & \cdots & T_9
+        \end{bmatrix}^T
+        \]
+      </div>
+      <p>10 セルの温度を状態として扱う。実測実験では、この状態が OpenFOAM セル温度に対応する。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory</span>
+  <h2>観測式と誤差の考え方</h2>
+  <div class="two-col">
+    <div>
+      <h3>観測式</h3>
+      <div class="math-box">
+        \[
+        \mathbf{y}
+        =
+        \mathbf{H}\mathbf{x}^{true}
+        +
+        \mathbf{v}
+        \]
+      </div>
+      <p>\(\mathbf{v}\) はセンサノイズ。平均 0、共分散 \(\mathbf{R}\) と仮定する。</p>
+      <div class="math-box">
+        \[
+        E[\mathbf{v}] = 0,\quad
+        E[\mathbf{v}\mathbf{v}^T] = \mathbf{R}
+        \]
+      </div>
+    </div>
+    <div>
+      <h3>予測誤差</h3>
+      <div class="math-box">
+        \[
+        \mathbf{e}^f =
+        \mathbf{x}^f - \mathbf{x}^{true}
+        \]
+      </div>
+      <p>OI では予測誤差共分散を固定の \(\mathbf{B}\) と置く。</p>
+      <div class="math-box">
+        \[
+        E[\mathbf{e}^f(\mathbf{e}^f)^T] = \mathbf{B}
+        \]
+      </div>
+      <p>KF ではこの共分散を \(\mathbf{P}\) として毎ステップ時間発展させる。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: OI</span>
+  <h2>OI の理論: 固定 B で解析誤差を最小化する</h2>
+  <div class="col-6-4">
+    <div>
+      <p>解析値を次の線形結合で作る。</p>
+      <div class="math-box">
+        \[
+        \mathbf{x}^a =
+        \mathbf{x}^f +
+        \mathbf{K}
+        \left(
+        \mathbf{y}-\mathbf{H}\mathbf{x}^f
+        \right)
+        \]
+      </div>
+      <p>解析誤差は、</p>
+      <div class="math-box">
+        \[
+        \mathbf{e}^a =
+        \mathbf{x}^a - \mathbf{x}^{true}
+        =
+        (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{e}^f
+        +
+        \mathbf{K}\mathbf{v}
+        \]
+      </div>
+      <p>この解析誤差の分散、つまり \(\mathrm{tr}(\mathbf{P}^a)\) を最小にする \(\mathbf{K}\) を求める。</p>
+    </div>
+    <div>
+      <h3>解析誤差共分散</h3>
+      <div class="math-box">
+        \[
+        \mathbf{P}^a =
+        (\mathbf{I}-\mathbf{K}\mathbf{H})
+        \mathbf{B}
+        (\mathbf{I}-\mathbf{K}\mathbf{H})^T
+        +
+        \mathbf{K}\mathbf{R}\mathbf{K}^T
+        \]
+      </div>
+      <div class="success-box">
+        \[
+        \mathbf{K}_{OI}
+        =
+        \mathbf{B}\mathbf{H}^T
+        \left(
+        \mathbf{H}\mathbf{B}\mathbf{H}^T+\mathbf{R}
+        \right)^{-1}
+        \]
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: OI</span>
+  <h2>OI の B は何を表すか</h2>
+  <div class="two-col">
+    <div>
+      <p>今回の OI では、OpenFOAM 予測誤差の空間相関をガウス型で仮定した。</p>
+      <div class="math-box">
+        \[
+        B_{ij}
+        =
+        \sigma_b^2
+        \exp
+        \left(
+        -
+        \frac{d_{ij}^2}{2L^2}
+        \right)
+        \]
+      </div>
+      <table>
+        <tr><th>記号</th><th>意味</th></tr>
+        <tr><td>\(\sigma_b\)</td><td>背景誤差標準偏差</td></tr>
+        <tr><td>\(d_{ij}\)</td><td>セル \(i\) と \(j\) の距離</td></tr>
+        <tr><td>\(L\)</td><td>相関長</td></tr>
+      </table>
+    </div>
+    <div class="card orange">
+      <h3>直感</h3>
+      <p>センサ位置で「予測が +3 degC 低い」と分かったとき、近いセルも同じ方向に間違っていそうだと考える。</p>
+      <p>遠いセルは同じ誤差を持つとは限らないので、補正を弱くする。</p>
+      <div class="warn-box">
+        つまり OI は「観測差を、事前に決めた誤差相関マップに従って配る方法」。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: KF</span>
+  <h2>KF の理論: 状態と誤差共分散を時間発展させる</h2>
+  <div class="two-col">
+    <div>
+      <h3>状態方程式</h3>
+      <div class="math-box">
+        \[
+        \mathbf{x}_k =
+        \mathbf{A}_d \mathbf{x}_{k-1}
+        +
+        \mathbf{w}_k
+        \]
+      </div>
+      <div class="math-box">
+        \[
+        E[\mathbf{w}_k] = 0,\quad
+        E[\mathbf{w}_k\mathbf{w}_k^T] = \mathbf{Q}
+        \]
+      </div>
+      <p>\(\mathbf{A}_d\) は離散時間の状態遷移行列、\(\mathbf{Q}\) はモデル誤差共分散。</p>
+    </div>
+    <div>
+      <h3>観測方程式</h3>
+      <div class="math-box">
+        \[
+        \mathbf{y}_k =
+        \mathbf{H}\mathbf{x}_k
+        +
+        \mathbf{v}_k
+        \]
+      </div>
+      <div class="math-box">
+        \[
+        E[\mathbf{v}_k] = 0,\quad
+        E[\mathbf{v}_k\mathbf{v}_k^T] = \mathbf{R}
+        \]
+      </div>
+      <p>KF は「状態の予測」だけでなく、「予測がどれくらい不確かか」も毎ステップ更新する。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: KF</span>
+  <h2>KF の予測ステップ</h2>
+  <div class="two-col">
+    <div>
+      <h3>状態予測</h3>
+      <div class="math-box">
+        \[
+        \mathbf{x}_k^- =
+        \mathbf{A}_d \mathbf{x}_{k-1}^+
+        \]
+      </div>
+      <p>\(-\) は観測で補正する前の予測、\(+\) は補正後を表す。</p>
+    </div>
+    <div>
+      <h3>誤差共分散予測</h3>
+      <div class="math-box">
+        \[
+        \mathbf{P}_k^- =
+        \mathbf{A}_d
+        \mathbf{P}_{k-1}^+
+        \mathbf{A}_d^T
+        +
+        \mathbf{Q}
+        \]
+      </div>
+      <p>モデルを進めると、状態だけでなく不確かさ \(\mathbf{P}\) も進む。</p>
+    </div>
+  </div>
+  <div class="warn-box">
+    OpenFOAM でこの形を使うには、\(\mathbf{A}_d\) をどう作るか、またはどう近似するかが問題になる。今回そこを避けるために OI を使った。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: KF</span>
+  <h2>KF の更新ステップ</h2>
+  <div class="col-6-4">
+    <div>
+      <h3>カルマンゲイン</h3>
+      <div class="math-box">
+        \[
+        \mathbf{K}_k =
+        \mathbf{P}_k^-\mathbf{H}^T
+        \left(
+        \mathbf{H}\mathbf{P}_k^-\mathbf{H}^T
+        +
+        \mathbf{R}
+        \right)^{-1}
+        \]
+      </div>
+      <h3>状態更新</h3>
+      <div class="math-box">
+        \[
+        \mathbf{x}_k^+ =
+        \mathbf{x}_k^- +
+        \mathbf{K}_k
+        \left(
+        \mathbf{y}_k-\mathbf{H}\mathbf{x}_k^-
+        \right)
+        \]
+      </div>
+    </div>
+    <div>
+      <h3>共分散更新</h3>
+      <div class="math-box">
+        \[
+        \mathbf{P}_k^+ =
+        (\mathbf{I}-\mathbf{K}_k\mathbf{H})
+        \mathbf{P}_k^-
+        \]
+      </div>
+      <div class="info-box">
+        KF のゲインは毎ステップ変わる。予測が不確かなら観測を強く信じ、予測が確かなら観測を弱く反映する。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory</span>
+  <h2>OI は KF の簡略版として見られる</h2>
+  <table>
+    <tr>
+      <th>式の位置</th>
+      <th>OI</th>
+      <th>KF</th>
+      <th>違い</th>
+    </tr>
+    <tr>
+      <td>ゲイン</td>
+      <td>\(\mathbf{K}=\mathbf{B}\mathbf{H}^T(\mathbf{H}\mathbf{B}\mathbf{H}^T+\mathbf{R})^{-1}\)</td>
+      <td>\(\mathbf{K}_k=\mathbf{P}_k^-\mathbf{H}^T(\mathbf{H}\mathbf{P}_k^-\mathbf{H}^T+\mathbf{R})^{-1}\)</td>
+      <td>OI は固定 \(B\)、KF は時変 \(P_k^-\)</td>
+    </tr>
+    <tr>
+      <td>予測</td>
+      <td>\(\mathbf{x}^f=\mathcal{M}_{OF}(\mathbf{x}^a)\)</td>
+      <td>\(\mathbf{x}_k^-=\mathbf{A}_d\mathbf{x}_{k-1}^+\)</td>
+      <td>OI は OpenFOAM をブラックボックスにできる</td>
+    </tr>
+    <tr>
+      <td>共分散</td>
+      <td>固定値として設計</td>
+      <td>\(\mathbf{P}_k^-=\mathbf{A}_d\mathbf{P}_{k-1}^+\mathbf{A}_d^T+\mathbf{Q}\)</td>
+      <td>KF は誤差の時間発展も扱う</td>
+    </tr>
+    <tr>
+      <td>今回の実装</td>
+      <td>採用</td>
+      <td>未採用</td>
+      <td>まず OpenFOAM との逐次補正ループを成立させるため</td>
+    </tr>
+  </table>
+  <div class="success-box">
+    今回の OI は「KF のゲイン式に似ているが、時間発展した \(P_k^-\) の代わりに、固定した \(B\) を使う方法」と理解するとよい。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">KF vs EnKF</span>
+  <h2>EnKF と KF は違う</h2>
+  <table>
+    <tr>
+      <th>観点</th>
+      <th>KF</th>
+      <th>EnKF</th>
+    </tr>
+    <tr>
+      <td>状態の持ち方</td>
+      <td>1 つの状態ベクトル \(\mathbf{x}\) と共分散行列 \(\mathbf{P}\)</td>
+      <td>多数の状態サンプル、つまりアンサンブル \(\mathbf{x}^{(1)},\dots,\mathbf{x}^{(m)}\)</td>
+    </tr>
+    <tr>
+      <td>予測誤差共分散</td>
+      <td>\(\mathbf{P}\) を行列として直接持つ</td>
+      <td>アンサンブルのばらつきから近似する</td>
+    </tr>
+    <tr>
+      <td>モデルの進め方</td>
+      <td>\(\mathbf{x}_k^-=\mathbf{A}_d\mathbf{x}_{k-1}^+\)</td>
+      <td>\(\mathbf{x}_{k}^{f,(i)}=\mathcal{M}_{OF}(\mathbf{x}_{k-1}^{a,(i)})\)</td>
+    </tr>
+    <tr>
+      <td>`A_d` の必要性</td>
+      <td>基本的に必要</td>
+      <td>明示的な `A_d` は不要</td>
+    </tr>
+    <tr>
+      <td>OpenFOAM との相性</td>
+      <td>線形化や近似行列が課題</td>
+      <td>OpenFOAM をそのまま複数回走らせればよい</td>
+    </tr>
+  </table>
+  <div class="success-box">
+    OpenFOAM の内部行列を知らない方法で進めたいなら、次の候補は通常 KF ではなく EnKF。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: EnKF</span>
+  <h2>EnKF の基本式</h2>
+  <div class="col-6-4">
+    <div>
+      <p>EnKF では、状態を 1 本ではなく \(m\) 本のアンサンブルで持つ。</p>
+      <div class="math-box">
+        \[
+        \mathbf{X}^f =
+        \begin{bmatrix}
+        \mathbf{x}^{f,(1)} &
+        \mathbf{x}^{f,(2)} &
+        \cdots &
+        \mathbf{x}^{f,(m)}
+        \end{bmatrix}
+        \]
+      </div>
+      <p>各メンバーを OpenFOAM で予測する。</p>
+      <div class="math-box">
+        \[
+        \mathbf{x}_{k}^{f,(i)}
+        =
+        \mathcal{M}_{OF}
+        \left(
+        \mathbf{x}_{k-1}^{a,(i)},
+        \theta^{(i)}
+        \right)
+        \]
+      </div>
+    </div>
+    <div class="card cyan">
+      <h3>ポイント</h3>
+      <p>\(\mathcal{M}_{OF}\) は OpenFOAM の計算そのもの。行列 \(\mathbf{A}_d\) を作らない。</p>
+      <p>\(\theta^{(i)}\) は境界条件、物性、熱入力などをメンバーごとに少し変えたもの。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: EnKF</span>
+  <h2>EnKF では共分散をアンサンブルから作る</h2>
+  <div class="two-col">
+    <div>
+      <h3>平均</h3>
+      <div class="math-box">
+        \[
+        \bar{\mathbf{x}}^f =
+        \frac{1}{m}
+        \sum_{i=1}^{m}
+        \mathbf{x}^{f,(i)}
+        \]
+      </div>
+      <h3>偏差行列</h3>
+      <div class="math-box">
+        \[
+        \mathbf{A}^f =
+        \begin{bmatrix}
+        \mathbf{x}^{f,(1)}-\bar{\mathbf{x}}^f &
+        \cdots &
+        \mathbf{x}^{f,(m)}-\bar{\mathbf{x}}^f
+        \end{bmatrix}
+        \]
+      </div>
+    </div>
+    <div>
+      <h3>予測共分散の近似</h3>
+      <div class="math-box">
+        \[
+        \mathbf{P}^f
+        \approx
+        \frac{1}{m-1}
+        \mathbf{A}^f(\mathbf{A}^f)^T
+        \]
+      </div>
+      <p>密な \(\mathbf{P}\) を直接作らず、アンサンブル偏差から必要な計算を行う。</p>
+      <div class="warn-box">
+        100 万点規模では、それでも局所化や領域分割が必要。だが `A_d` を作らない点では KF より現実的。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Theory: EnKF</span>
+  <h2>EnKF の更新式</h2>
+  <div class="col-6-4">
+    <div>
+      <p>式の形は KF と似ている。</p>
+      <div class="math-box">
+        \[
+        \mathbf{K}
+        =
+        \mathbf{P}^f\mathbf{H}^T
+        \left(
+        \mathbf{H}\mathbf{P}^f\mathbf{H}^T
+        +
+        \mathbf{R}
+        \right)^{-1}
+        \]
+      </div>
+      <div class="math-box">
+        \[
+        \mathbf{x}^{a,(i)}
+        =
+        \mathbf{x}^{f,(i)}
+        +
+        \mathbf{K}
+        \left(
+        \mathbf{y}^{(i)}
+        -
+        \mathbf{H}\mathbf{x}^{f,(i)}
+        \right)
+        \]
+      </div>
+    </div>
+    <div class="card green">
+      <h3>実装上の意味</h3>
+      <p>OpenFOAM を複数条件で走らせ、結果のばらつきから「どのセルがどの観測と一緒に変わるか」を推定する。</p>
+      <p>これは固定の `B` を手で設計する OI より一歩進んだ方法。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Next Method</span>
+  <h2>`A_d` を知らない方針で進めるなら</h2>
+  <table>
+    <tr>
+      <th>候補</th>
+      <th>`A_d` は必要か</th>
+      <th>OpenFOAM との相性</th>
+      <th>次にやるなら</th>
+    </tr>
+    <tr>
+      <td>OI</td>
+      <td>不要</td>
+      <td>よい</td>
+      <td>今回の方法。まず実測データ版へ進める</td>
+    </tr>
+    <tr>
+      <td>KF</td>
+      <td>必要になりやすい</td>
+      <td>OpenFOAM の線形化が課題</td>
+      <td>今回の方針とは合いにくい</td>
+    </tr>
+    <tr>
+      <td>EnKF</td>
+      <td>不要</td>
+      <td>よい。ただし OpenFOAM を複数メンバー分走らせる</td>
+      <td>OI の次の本命候補</td>
+    </tr>
+    <tr>
+      <td>local EnKF / local OI</td>
+      <td>不要</td>
+      <td>大規模計算向き</td>
+      <td>100 万点規模を考えるなら必要</td>
+    </tr>
+  </table>
+  <div class="success-box">
+    方針: 今回は OI で実測同化の流れを作る。次に精度と不確かさの扱いを上げるなら、KF ではなく EnKF または local EnKF を検討する。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Folder Workflow</span>
+  <h2>計算を進めた順番</h2>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">1</div>
+      <div class="label">`case_base/`</div>
+      <div class="note">OpenFOAM の基本ケースを用意。メッシュ、境界条件、物性、時間設定の元になる。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">2</div>
+      <div class="label">`of_interface.py`</div>
+      <div class="note">Python から `T` を書く、`laplacianFoam` を 1 ステップ走らせる、結果を読む処理をまとめた。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">3</div>
+      <div class="label">`oi/da_main.py`</div>
+      <div class="note">正解データ生成、DA なし、OI ありの 3 ケースを実装した。</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">4</div>
+      <div class="label">`oi/case/`</div>
+      <div class="note">実行中に Python が温度場を書き換え、OpenFOAM が時刻フォルダを作る作業場所。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">5</div>
+      <div class="label">`oi/results/`</div>
+      <div class="note">CSV、OpenFOAM 時刻フォルダのコピー、RMSE、結果画像を保存。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">6</div>
+      <div class="label">`docs/` / `slides.html`</div>
+      <div class="note">手法、結果、次の実験計画を文章とスライドに整理。</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Folder Workflow</span>
+  <h2>実行中に何が起きるか</h2>
+  <div class="two-col">
+    <div>
+      <h3>Python が触る場所</h3>
+      <table>
+        <tr><th>場所</th><th>役割</th></tr>
+        <tr><td>`oi/da_main.py`</td><td>同化ループの制御</td></tr>
+        <tr><td>`of_interface.py`</td><td>OpenFOAM ファイルの読み書き</td></tr>
+        <tr><td>`oi/case/0/T`</td><td>初期温度場を書き込む</td></tr>
+        <tr><td>`oi/case/system/controlDict`</td><td>1 ステップ実行範囲を設定</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>OpenFOAM が作る場所</h3>
+      <table>
+        <tr><th>場所</th><th>役割</th></tr>
+        <tr><td>`oi/case/10/T` など</td><td>各時刻の温度場</td></tr>
+        <tr><td>`oi/results/truth/`</td><td>正解役ケースの保存</td></tr>
+        <tr><td>`oi/results/model_only/`</td><td>DA なしケースの保存</td></tr>
+        <tr><td>`oi/results/with_da/`</td><td>OI ありケースの保存</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="info-box">
+    `oi/case/` は作業場、`oi/results/` は保存場所。次の計算で `oi/case/` はリセットされるので、必要な時刻フォルダは `results/` 側へコピーして残している。
+  </div>
+</section>
+
+</section>
+
+<section>
+<section>
+  <span class="sec-tag">Result Visualization</span>
+  <h2>結果を見る前提: OpenFOAM DA (OI) の描画</h2>
+  <div class="col-6-4">
+    <div class="paraview-shot">
+      <img src="oi/paraview_cases/with_da/ani/ani.gif" alt="ParaView animation before result comparison">
+    </div>
+    <div>
+      <div class="card purple">
+        <h3>この描画の条件</h3>
+        <ul>
+          <li>左端の加熱を正解の半分にした OpenFOAM 予測を使用</li>
+          <li>Node 0, Node 4 の観測で OI 補正</li>
+          <li>補正後のセル温度を次ステップへ書き戻す</li>
+          <li>図は `with_da` ケースの `0-900 s` アニメーション</li>
+        </ul>
+      </div>
+      <div class="warn-box">
+        後続の結果グラフでは、この OpenFOAM DA (OI) を `truth` と `OpenFOAM only` に対して比較する。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result</span>
+  <h2>結果: OI による RMSE 低減</h2>
+  <div class="four-col">
+    <div class="metric"><span class="value">1.186</span><span class="label">DA なし平均 RMSE [degC]</span></div>
+    <div class="metric"><span class="value">0.136</span><span class="label">DA あり平均 RMSE [degC]</span></div>
+    <div class="metric"><span class="value">90.3%</span><span class="label">改善率</span></div>
+    <div class="metric"><span class="value">2 点</span><span class="label">同化用センサ</span></div>
+  </div>
+  <table>
+    <tr><th>節点</th><th>DA なし RMSE</th><th>OI あり RMSE</th><th>メモ</th></tr>
+    <tr><td>N0</td><td>3.025</td><td>0.045</td><td>センサ節点</td></tr>
+    <tr><td>N1</td><td>2.603</td><td>0.188</td><td>N0 から強く補正</td></tr>
+    <tr><td>N4</td><td>1.059</td><td>0.054</td><td>センサ節点</td></tr>
+    <tr><td>N7</td><td>0.268</td><td>0.183</td><td>遠方なので補正は弱め</td></tr>
+    <tr><td>N9</td><td>0.043</td><td>0.046</td><td>右端固定に近く元々誤差が小さい</td></tr>
+  </table>
+  <div class="success-box">
+    境界条件が 50% 外れた OpenFOAM 予測でも、観測との差を OI で空間展開すると、観測していない節点にも補正効果が出る。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result Conditions</span>
+  <h2>結果図はこの 3 条件の比較</h2>
+  <div class="three-col">
+    <div class="card green">
+      <h3>truth</h3>
+      <p><strong>正解役の計算。</strong></p>
+      <table>
+        <tr><th>項目</th><th>条件</th></tr>
+        <tr><td>ソルバ</td><td>`laplacianFoam`</td></tr>
+        <tr><td>左端境界</td><td>正しい加熱条件<br><span class="muted">内部名: `G_TRUE = 100 degC/m`</span></td></tr>
+        <tr><td>右端境界</td><td>`fixedValue 20 degC`</td></tr>
+        <tr><td>センサ補正</td><td>なし</td></tr>
+      </table>
+      <p class="muted">実測値ではなく、正しい条件で作った正解として扱う計算結果。</p>
+    </div>
+    <div class="card blue">
+      <h3>OpenFOAM only</h3>
+      <p><strong>データ同化なしの予測。</strong></p>
+      <table>
+        <tr><th>項目</th><th>条件</th></tr>
+        <tr><td>ソルバ</td><td>`laplacianFoam`</td></tr>
+        <tr><td>左端境界</td><td>正解の半分にした加熱条件<br><span class="muted">内部名: `G_MODEL = 50 degC/m`</span></td></tr>
+        <tr><td>右端境界</td><td>`fixedValue 20 degC`</td></tr>
+        <tr><td>センサ補正</td><td>なし</td></tr>
+      </table>
+      <p class="muted">熱入力を半分に間違えたモデル単独計算。</p>
+    </div>
+    <div class="card purple">
+      <h3>OF + OI</h3>
+      <p><strong>データ同化ありの予測。</strong></p>
+      <table>
+        <tr><th>項目</th><th>条件</th></tr>
+        <tr><td>ソルバ</td><td>`laplacianFoam`</td></tr>
+        <tr><td>左端境界</td><td>正解の半分にした加熱条件<br><span class="muted">内部名: `G_MODEL = 50 degC/m`</span></td></tr>
+        <tr><td>同化センサ</td><td>Node 0, Node 4</td></tr>
+        <tr><td>補正方法</td><td>OI で毎ステップ補正</td></tr>
+      </table>
+      <p class="muted">OpenFOAM only と同じ不完全モデルを観測で補正。</p>
+    </div>
+  </div>
+  <div class="warn-box">
+    図で見たいこと: `OpenFOAM only` が `truth` からどれだけ外れ、`OF + OI` がその誤差をどれだけ戻せたか。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result Figure</span>
+  <h2>結果図の読み方</h2>
+  <div class="figure large">
+    <img src="oi/results/results_of_da.png" alt="laplacianFoam OI data assimilation results">
+  </div>
+  <div class="four-col" style="margin-top: 8px;">
+    <div class="card blue">
+      <p><strong>(1)</strong> センサ節点 N0, N4</p>
+    </div>
+    <div class="card green">
+      <p><strong>(2)</strong> 未観測節点への補正</p>
+    </div>
+    <div class="card orange">
+      <p><strong>(3)</strong> 後半 1/3 の RMSE</p>
+    </div>
+    <div class="card purple">
+      <p><strong>(4)</strong> 未観測節点の誤差</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Node-wise Result</span>
+  <h2>各 Node ごとの比較</h2>
+  <div class="image-scroll">
+    <img src="oi/results/results_all_nodes_comparison.png" alt="Node-wise comparison of truth, OpenFOAM only, and OF plus OI">
+  </div>
+  <div class="info-box">
+    黒破線が `truth`、青点線が `OpenFOAM only`、赤実線が `OF + OI`。Node 0 と Node 4 は同化に使ったセンサ節点。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Improvement</span>
+  <h2>改善しにくい Node への対策</h2>
+  <table>
+    <tr>
+      <th>見えている課題</th>
+      <th>考えられる原因</th>
+      <th>改善策</th>
+      <th>確認方法</th>
+    </tr>
+    <tr>
+      <td>Node 9 など遠方で DA (OI) の改善が小さい</td>
+      <td>同化センサが Node 0, Node 4 だけで、Node 9 から遠い</td>
+      <td>Node 7-9 側にもセンサを追加する</td>
+      <td>センサ位置を変えたケースで RMSE を比較</td>
+    </tr>
+    <tr>
+      <td>補正が一部の範囲にしか広がらない</td>
+      <td>OI の相関長 `CORRELATION_LENGTH_M` が短い</td>
+      <td>相関長を変えて感度解析する</td>
+      <td>`0.03, 0.06, 0.09, 0.12 m` などで比較</td>
+    </tr>
+    <tr>
+      <td>遠い点を強く補正すると別の点が悪化する可能性</td>
+      <td>固定した `B` が実際の誤差構造と合っていない</td>
+      <td>`B` の設計を距離だけでなく物理・境界条件に合わせる</td>
+      <td>節点別 RMSE と誤差時系列で確認</td>
+    </tr>
+    <tr>
+      <td>熱入力の間違いが根本原因として残る</td>
+      <td>OI は温度場を補正するが、左端加熱の強さ自体は推定しない</td>
+      <td>境界勾配 `G` も推定対象に入れる</td>
+      <td>温度場のみ補正と、`G` 推定ありを比較</td>
+    </tr>
+    <tr>
+      <td>固定 `B` では時刻ごとの誤差変化を表しにくい</td>
+      <td>OI は誤差共分散を時間発展させない</td>
+      <td>EnKF や local EnKF に拡張する</td>
+      <td>アンサンブルで不確かさを持たせて RMSE を比較</td>
+    </tr>
+  </table>
+  <div class="success-box">
+    次に試す順番: まずセンサ配置と OI パラメータを振る。改善が頭打ちなら、境界条件推定や EnKF へ進む。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Improvement</span>
+  <h2>具体的な追加検証案</h2>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>1. センサ配置を増やす</h3>
+      <p>現在は Node 0, Node 4 の 2 点だけ。Node 8 または Node 9 近くに検証用ではなく同化用センサを追加する。</p>
+      <pre><code class="language-python">SENSOR_NODES = [0, 4, 8]</code></pre>
+    </div>
+    <div class="card orange">
+      <h3>2. OI パラメータを振る</h3>
+      <p>補正の広がり方は `B` の相関長と背景誤差標準偏差で変わる。</p>
+      <pre><code class="language-python">BACKGROUND_ERROR_STD = 3.0
+CORRELATION_LENGTH_M = 0.09</code></pre>
+    </div>
+    <div class="card purple">
+      <h3>3. 手法を変える</h3>
+      <p>固定 `B` の OI で限界がある場合は、OpenFOAM の `A_d` を作らずに進められる EnKF を検討する。</p>
+      <pre><code class="language-text">OI -> local OI
+OI -> EnKF
+EnKF -> local EnKF</code></pre>
+    </div>
+  </div>
+  <div class="warn-box">
+    ただし、Node 9 は右端 fixedValue 20 degC に近く、元々 OpenFOAM only の誤差が小さい。改善率だけでなく絶対 RMSE も見る必要がある。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result Summary</span>
+  <h2>何を検証して、何が得られたか</h2>
+  <table>
+    <tr>
+      <th>検証したこと</th>
+      <th>確認方法</th>
+      <th>得られた結果</th>
+      <th>意味</th>
+    </tr>
+    <tr>
+      <td>OpenFOAM をブラックボックス予測器として使えるか</td>
+      <td>`A_d` を作らず、`laplacianFoam` の出力だけを読んで OI 補正</td>
+      <td>1 ステップごとの読み取り、補正、書き戻しが成立</td>
+      <td>OpenFOAM の内部離散化行列を知らなくても同化ループを作れる</td>
+    </tr>
+    <tr>
+      <td>境界条件が間違ったモデルを観測で補正できるか</td>
+      <td>正しい加熱条件と、加熱を半分に間違えた条件の比較実験</td>
+      <td>平均 RMSE が `1.186 degC` から `0.136 degC` に低下</td>
+      <td>熱入力がずれた予測でも、少数観測で温度場を正解役の計算結果へ近づけられる</td>
+    </tr>
+    <tr>
+      <td>センサがない節点にも補正が伝わるか</td>
+      <td>Node 0, Node 4 だけを同化し、他ノードを比較</td>
+      <td>N1, N2, N3, N5 など未観測節点でも RMSE が低下</td>
+      <td>`B` の空間相関により、観測点のズレを周辺セルへ配れる</td>
+    </tr>
+    <tr>
+      <td>OI の限界はどこか</td>
+      <td>センサから遠い N7-N9 の RMSE と誤差時系列を見る</td>
+      <td>遠方では改善が小さい、N9 は元々誤差が小さく差が出にくい</td>
+      <td>補正効果はセンサ位置と相関長に依存する</td>
+    </tr>
+    <tr>
+      <td>実測実験へ進める構造か</td>
+      <td>疑似観測 `y` を実測 CSV に置き換える設計を確認</td>
+      <td>`da_main_experiment.py` を追加すれば実測同化へ移れる</td>
+      <td>次は丸棒実験で同化用センサと検証用センサを分けて評価する</td>
+    </tr>
+  </table>
+  <div class="success-box">
+    結論: 002 では、OpenFOAM のセル値を逐次補正しながら進めるデータ同化の最小構成が動き、2 点観測で全体の RMSE 改善を確認できた。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Interpretation</span>
+  <h2>この結果から言えること</h2>
+  <div class="two-col">
+    <div>
+      <h3>確認できたこと</h3>
+      <ul>
+        <li>OpenFOAM の内部行列を知らなくても、同化ループは組める。</li>
+        <li>センサ 2 点の情報で、未観測節点もある程度改善する。</li>
+        <li>OI は実装が軽く、OpenFOAM との接続検証に向く。</li>
+      </ul>
+    </div>
+    <div>
+      <h3>まだ残る制約</h3>
+      <ul>
+        <li>`B` は固定で、実際のモデル誤差を学習していない。</li>
+        <li>境界勾配 `G` 自体は推定していない。</li>
+        <li>センサから遠い場所の補正は相関長の仮定に強く依存する。</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warn-box">
+    002 は「実験データを入れる前の接続検証」として成功。次は、正解として扱う計算結果を実測温度へ置き換えたときに同じ構造が機能するかを見る。
+  </div>
+</section>
+
+</section>
+
+<section>
+<section>
+  <span class="sec-tag">Home Experiment</span>
+  <h2>次の段階: 自宅での丸棒実験</h2>
+  <div class="col-6-4">
+    <div>
+      <p>目的は、ツイン実験の `truth` を実測データに置き換えること。</p>
+      <div class="flow">
+        <div class="flow-item">
+          <div class="num">now</div>
+          <div class="label">ツイン実験</div>
+          <div class="note">正解役のデータも観測データも OpenFOAM から作る。</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">
+          <div class="num">next</div>
+          <div class="label">実測同化</div>
+          <div class="note">実センサ値を OI に入力。</div>
+        </div>
+      </div>
+      <div class="math-box">
+        \[
+        \mathbf{y}_k =
+        \text{実測された同化用センサ温度}
+        \]
+      </div>
+    </div>
+    <div class="card cyan">
+      <h3>確認したい問い</h3>
+      <p>少数の温度センサを使って、測っていない位置の温度をどこまで推定できるか。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Experimental Plan</span>
+  <h2>実験構成案</h2>
+  <div class="two-col">
+    <div>
+      <h3>装置</h3>
+      <ul>
+        <li>細長い丸棒</li>
+        <li>片端加熱用のヒータ</li>
+        <li>温度センサ 4 点以上</li>
+        <li>データロガー</li>
+        <li>室温センサ</li>
+        <li>断熱材または放熱条件を一定にする治具</li>
+      </ul>
+    </div>
+    <div>
+      <h3>センサの使い分け</h3>
+      <pre><code class="language-text">加熱端                                      反対端
+|----------------------------------------------|
+S1          S2             V1             V2
+
+S1, S2 : 同化用センサ
+V1, V2 : 検証用センサ</code></pre>
+      <div class="info-box">検証用センサは OI に入れない。推定結果の答え合わせだけに使う。</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Measurement Data</span>
+  <h2>取得するデータ形式</h2>
+  <div class="col-6-4">
+    <div>
+      <p>最初は現在のプログラムに合わせて `DT = 10 s` 程度でそろえる。</p>
+      <pre><code class="language-text">time_s,S1,S2,V1,V2,ambient
+0,20.1,20.1,20.0,20.0,20.0
+10,20.8,20.2,20.1,20.0,20.0
+20,21.6,20.5,20.1,20.0,20.0</code></pre>
+    </div>
+    <div class="card orange">
+      <h3>記録する条件</h3>
+      <ul>
+        <li>丸棒の長さ・直径・材質</li>
+        <li>センサ位置 `x_m`</li>
+        <li>加熱方法と入力条件</li>
+        <li>初期温度・室温</li>
+        <li>サンプリング間隔</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Code Plan</span>
+  <h2>実測データ対応で変える場所</h2>
+  <div class="two-col">
+    <div>
+      <h3>現在</h3>
+      <pre><code class="language-python">y = H @ truth_T[k] + np.random.randn(n_obs) * OBS_NOISE_STD</code></pre>
+      <p class="muted">ツイン実験なので、OpenFOAM で作った正解役の温度から疑似観測を作っている。</p>
+    </div>
+    <div>
+      <h3>実験版</h3>
+      <pre><code class="language-python">data = load_measurements("measurements.csv")
+y = np.array([data[name][k] for name in ASSIM_SENSOR_NAMES])</code></pre>
+      <p class="muted">同化用センサだけを `y` に入れる。検証用センサは RMSE 評価に残す。</p>
+    </div>
+  </div>
+  <div class="success-box">
+    `da_main.py` はツイン実験用として残し、実験用には `da_main_experiment.py` を新規作成するのが安全。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Evaluation</span>
+  <h2>実験で見る指標</h2>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>RMSE</h3>
+      <p>検証用センサ V1, V2 で、DA なしより OI ありが小さいかを見る。</p>
+    </div>
+    <div class="card green">
+      <h3>最大誤差</h3>
+      <p>加熱開始直後や ON/OFF 切替時の大きな外れを確認する。</p>
+    </div>
+    <div class="card orange">
+      <h3>追従性</h3>
+      <p>温度上昇・冷却の遅れを、同化ありなしで比較する。</p>
+    </div>
+  </div>
+  <table>
+    <tr><th>成功判定</th><th>内容</th></tr>
+    <tr><td>最小条件</td><td>検証用センサで `OpenFOAM + OI` の RMSE が `OpenFOAM only` より小さい。</td></tr>
+    <tr><td>次の改善</td><td>`CORRELATION_LENGTH_M` とセンサ配置を変え、未測定点の推定精度を整理する。</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="sec-tag">Checklist</span>
+  <h2>自宅実験に向けたチェックリスト</h2>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>実験前</h3>
+      <ul>
+        <li>丸棒の材質・寸法を決める</li>
+        <li>センサ 4 点以上の位置を決める</li>
+        <li>同化用と検証用を分ける</li>
+        <li>加熱方法と記録間隔を決める</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>OpenFOAM 側</h3>
+      <ul>
+        <li>1 次元相当モデルを作る</li>
+        <li>物性値を設定する</li>
+        <li>加熱端・反対端の境界条件を決める</li>
+        <li>DA なしで先に走らせる</li>
+      </ul>
+    </div>
+    <div class="card orange">
+      <h3>Python 側</h3>
+      <ul>
+        <li>実測 CSV 読み込みを追加する</li>
+        <li>センサ位置をセル番号に対応させる</li>
+        <li>実測値から `y` を作る</li>
+        <li>検証用センサで RMSE を出す</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</section>
+
+<section>
+  <span class="sec-tag">Summary</span>
+  <h2>まとめ</h2>
+  <ul class="timeline">
+    <li class="done"><strong>手法:</strong> OpenFOAM 予測を背景値にして、OI で観測との差を空間的に配った。</li>
+    <li class="done"><strong>実装:</strong> `truth`, `model_only`, `with_da` の 3 ケースを作り、DA ありでは 1 ステップごとに OpenFOAM と Python を接続した。</li>
+    <li class="done"><strong>結果:</strong> 平均 RMSE は `1.186 degC` から `0.136 degC` に低下し、改善率は `90.3%`。</li>
+    <li><strong>次:</strong> 自宅の丸棒実験で、同化用 2 点 + 検証用 2 点の実測温度に置き換える。</li>
+  </ul>
+  <div class="info-box">
+    次に作るべきものは `da_main_experiment.py`。ツイン実験の構造を保ったまま、観測 `y` だけを実測 CSV に差し替える。
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/markdown/markdown.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/math/math.js"></script>
+<script>
+if (window.location.search.includes('print-pdf')) {
+  document.body.classList.add('print-pdf');
+}
+
+Reveal.initialize({
+  hash: true,
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  controls: true,
+  progress: true,
+  center: false,
+  transition: 'slide',
+  plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+});
+
+document.getElementById('pdf-export-btn').addEventListener('click', () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('print-pdf', '');
+  history.replaceState(null, '', url.toString());
+  document.body.classList.add('print-pdf');
+  document.getElementById('pdf-toast').classList.add('show');
+});
+</script>
+</body>
+</html>
