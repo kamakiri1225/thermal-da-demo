@@ -40,7 +40,14 @@
   padding: 30px 40px;
   height: 100%;
   box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+/* スクロールバー（セクション全体） */
+.reveal .slides section::-webkit-scrollbar { width: 5px; }
+.reveal .slides section::-webkit-scrollbar-track { background: transparent; }
+.reveal .slides section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.reveal .slides section::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 .reveal .slides section.title-slide {
   text-align: center;
   display: flex;
@@ -494,6 +501,41 @@ body.print-pdf #pdf-toast { display: none !important; }
   </div>
 </section>
 
+<!-- ═══ 目次 ═══ -->
+<section>
+  <h2>目次</h2>
+  <div class="two-col">
+    <div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong style="color:var(--blue);">01</strong>&ensp;概要と問題設定
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">OpenFOAM + OI の目的 / 001との違い / ツイン実験の構成 / なぜ A_d を作らないか</p>
+      </div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong style="color:var(--blue);">02</strong>&ensp;手法: Optimal Interpolation
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">OI の 4 ステップ / OI ゲインの意味と導出 / 背景誤差共分散 B / OI vs KF</p>
+      </div>
+      <div class="card blue" style="margin-bottom:8px;">
+        <strong style="color:var(--blue);">03</strong>&ensp;実装とプログラム構成
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">OpenFOAM-Python 接続 / コードと式の対応 / 3 ケース構成</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green" style="margin-bottom:8px;">
+        <strong style="color:var(--green);">04</strong>&ensp;結果
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">RMSE 90.3% 改善 / センサ節点・隠れ節点 / 改善しにくい節点への考察</p>
+      </div>
+      <div class="card green" style="margin-bottom:8px;">
+        <strong style="color:var(--green);">05</strong>&ensp;まとめ
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">確認できたこと / 残る制約 / 次にやること</p>
+      </div>
+      <div class="card orange">
+        <strong style="color:var(--orange);">06</strong>&ensp;実測実験計画（丸棒）
+        <p class="muted" style="margin:4px 0 0; font-size:0.83em;">装置構成 / センサ配置設計 / OpenFOAM モデル設定 / 評価方法・成功判定</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <span class="sec-tag">OpenFOAM Field</span>
   <h2>OpenFOAM で見ている温度場</h2>
@@ -588,6 +630,76 @@ body.print-pdf #pdf-toast { display: none !important; }
   </div>
 </section>
 
+<!-- ═══ OI 全体フロー（1枚まとめ） ═══ -->
+<section>
+  <span class="sec-tag">Method Overview</span>
+  <h2>OI + OpenFOAM の全体ループ（1 ステップ分）</h2>
+  <svg viewBox="0 0 1100 340" style="width:100%;max-width:1060px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#58a6ff"/></marker>
+      <marker id="arrg" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#3fb950"/></marker>
+      <marker id="arro" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#e3b341"/></marker>
+    </defs>
+    <!-- Step boxes -->
+    <!-- Box 1: Write -->
+    <rect x="10" y="120" width="190" height="100" rx="8" fill="#161b22" stroke="#58a6ff" stroke-width="2"/>
+    <text x="105" y="148" text-anchor="middle" fill="#58a6ff" font-size="11" font-weight="700" font-family="sans-serif">① 書き込み</text>
+    <text x="105" y="167" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">補正済み温度場</text>
+    <text x="105" y="182" text-anchor="middle" fill="#e3b341" font-size="10.5" font-family="monospace">x_current → T ファイル</text>
+    <text x="105" y="197" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="sans-serif">of_interface.write_field()</text>
+    <text x="105" y="104" text-anchor="middle" fill="#8b949e" font-size="9" font-family="sans-serif">補正後の場を渡す</text>
+    <!-- Box 2: OpenFOAM -->
+    <rect x="240" y="90" width="200" height="160" rx="8" fill="#1a2744" stroke="#79c0ff" stroke-width="2"/>
+    <text x="340" y="120" text-anchor="middle" fill="#79c0ff" font-size="11" font-weight="700" font-family="sans-serif">② OpenFOAM 実行</text>
+    <text x="340" y="138" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">laplacianFoam を</text>
+    <text x="340" y="153" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">1 ステップだけ実行</text>
+    <text x="340" y="173" text-anchor="middle" fill="#3fb950" font-size="10" font-family="monospace">x_pred = x_f</text>
+    <text x="340" y="192" text-anchor="middle" fill="#3fb950" font-size="10" font-family="monospace">G_model = 50 degC/m</text>
+    <text x="340" y="211" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="sans-serif">of_interface.run_step()</text>
+    <!-- Box 3: Innovation -->
+    <rect x="480" y="90" width="200" height="160" rx="8" fill="#161b22" stroke="#e3b341" stroke-width="2"/>
+    <text x="580" y="120" text-anchor="middle" fill="#e3b341" font-size="11" font-weight="700" font-family="sans-serif">③ イノベーション計算</text>
+    <text x="580" y="140" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">観測値と予測値の差</text>
+    <text x="580" y="165" text-anchor="middle" fill="#e3b341" font-size="11" font-family="serif">d = y − Hx</text>
+    <text x="580" y="180" text-anchor="middle" fill="#e3b341" font-size="9" font-family="serif">f</text>
+    <text x="580" y="198" text-anchor="middle" fill="#8b949e" font-size="9" font-family="sans-serif">y: センサ観測値</text>
+    <text x="580" y="212" text-anchor="middle" fill="#8b949e" font-size="9" font-family="sans-serif">Hx_f: 予測値のセンサ位置</text>
+    <!-- Box 4: OI Update -->
+    <rect x="720" y="90" width="200" height="160" rx="8" fill="#162032" stroke="#bc8cff" stroke-width="2"/>
+    <text x="820" y="120" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="700" font-family="sans-serif">④ OI 更新</text>
+    <text x="820" y="140" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">全節点を補正する</text>
+    <text x="820" y="165" text-anchor="middle" fill="#bc8cff" font-size="11" font-family="serif">x</text>
+    <text x="836" y="162" text-anchor="middle" fill="#bc8cff" font-size="8" font-family="serif">a</text>
+    <text x="843" y="165" text-anchor="middle" fill="#bc8cff" font-size="11" font-family="serif">= x</text>
+    <text x="872" y="162" text-anchor="middle" fill="#bc8cff" font-size="8" font-family="serif">f</text>
+    <text x="880" y="165" text-anchor="middle" fill="#bc8cff" font-size="11" font-family="serif">+ Kd</text>
+    <text x="820" y="188" text-anchor="middle" fill="#8b949e" font-size="9" font-family="sans-serif">K = BH⊤(HBH⊤+R)⁻¹</text>
+    <text x="820" y="210" text-anchor="middle" fill="#3fb950" font-size="9.5" font-family="monospace">x_da = x_pred + gain @ innov</text>
+    <!-- Box 5: Feed back -->
+    <rect x="960" y="120" width="130" height="100" rx="8" fill="#161b22" stroke="#3fb950" stroke-width="2"/>
+    <text x="1025" y="148" text-anchor="middle" fill="#3fb950" font-size="11" font-weight="700" font-family="sans-serif">⑤ 書き戻し</text>
+    <text x="1025" y="167" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">x_da を次ステップ</text>
+    <text x="1025" y="182" text-anchor="middle" fill="#e6edf3" font-size="10" font-family="sans-serif">の初期条件に</text>
+    <text x="1025" y="196" text-anchor="middle" fill="#3fb950" font-size="9.5" font-family="monospace">x_current = x_da</text>
+    <!-- Arrows -->
+    <line x1="200" y1="170" x2="236" y2="170" stroke="#58a6ff" stroke-width="2" marker-end="url(#arr)"/>
+    <line x1="440" y1="170" x2="476" y2="170" stroke="#3fb950" stroke-width="2" marker-end="url(#arrg)"/>
+    <line x1="680" y1="170" x2="716" y2="170" stroke="#e3b341" stroke-width="2" marker-end="url(#arro)"/>
+    <line x1="920" y1="170" x2="956" y2="170" stroke="#bc8cff" stroke-width="2" marker-end="url(#arr)"/>
+    <!-- Feedback arrow (bottom) -->
+    <path d="M 1025 220 Q 1025 290 550 290 Q 105 290 105 224" stroke="#8b949e" stroke-width="1.5" fill="none" stroke-dasharray="6,3" marker-end="url(#arr)"/>
+    <text x="550" y="307" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="sans-serif">次ステップへ繰り返す（N_STEPS = 90 回）</text>
+    <!-- Sensor input -->
+    <rect x="480" y="10" width="200" height="55" rx="8" fill="#1a2b1a" stroke="#3fb950" stroke-width="1.5"/>
+    <text x="580" y="32" text-anchor="middle" fill="#3fb950" font-size="10.5" font-weight="700" font-family="sans-serif">センサ観測値 y</text>
+    <text x="580" y="50" text-anchor="middle" fill="#8b949e" font-size="9.5" font-family="sans-serif">Node 0, Node 4 の温度</text>
+    <line x1="580" y1="65" x2="580" y2="86" stroke="#3fb950" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrg)"/>
+  </svg>
+  <div class="info-box" style="font-size:0.8em; margin-top:6px;">
+    ポイント: OpenFOAM は「予測」だけを担当し、補正は Python の OI が行う。②→③→④が毎ステップ繰り返される。
+  </div>
+</section>
+
 <section>
   <span class="sec-tag">Key Choice</span>
   <h2>今回の重要な設計: A_d を作らない</h2>
@@ -609,20 +721,42 @@ body.print-pdf #pdf-toast { display: none !important; }
       </ul>
     </div>
   </div>
-  <div class="math-box">
-    \[
-    \mathbf{x}_k^f =
-    \mathcal{M}_{OF}
-    \left(\mathbf{x}_{k-1}^a, G_{\mathrm{model}}\right)
-    \]
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+    <div>
+      <p style="font-size:0.8em; color:var(--cyan); font-weight:700; margin:0 0 4px;">① 予測ステップ（OpenFOAM が担当）</p>
+      <div class="math-box">
+        \[
+        \underbrace{\mathbf{x}_k^f}_{\text{予測値}}
+        =
+        \mathcal{M}_{OF}
+        \left(\mathbf{x}_{k-1}^a, G_{\mathrm{model}}\right)
+        \]
+      </div>
+      <div class="warn-box" style="font-size:0.82em;">
+        ⚠️ これは OI の式ではない。<br>
+        <code>M_OF</code> は OpenFOAM の実行そのものを指す記号。Python 側に行列はない。
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.8em; color:var(--purple); font-weight:700; margin:0 0 4px;">② 更新ステップ（Python / OI が担当）</p>
+      <div class="math-box">
+        \[
+        \underbrace{\mathbf{x}_k^a}_{\text{補正後}} = \mathbf{x}_k^f + \mathbf{K}\underbrace{(\mathbf{y}_k - \mathbf{H}\mathbf{x}_k^f)}_{\text{イノベーション}}
+        \]
+      </div>
+      <div class="success-box" style="font-size:0.82em;">
+        ✅ これが OI（Optimal Interpolation）の式。センサ観測 y で予測値 x_f を補正する。
+      </div>
+    </div>
   </div>
-  <div class="info-box">
-    この式はコード中で行列計算している式ではない。`M_OF` は OpenFOAM の `laplacianFoam` 実行そのものを表す記号。
-    実装では、補正済み温度場を書き込み、OpenFOAM を 1 ステップ走らせ、出てきた温度場を `x_pred` として読む。
-  </div>
-  <pre><code class="language-python">ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
+  <pre><code class="language-python"># ① OpenFOAM 予測（laplacianFoam 実行）
+ofi.write_field(k * DT, x_current, gradient=g_model_series[k])
 ofi.run_step(k * DT, (k + 1) * DT)
-x_pred = ofi.read_field((k + 1) * DT)</code></pre>
+x_pred = ofi.read_field((k + 1) * DT)   # = x_f
+
+# ② OI 更新（Python 側）
+innovation = y - H @ x_pred             # イノベーション
+x_da = x_pred + gain @ innovation       # = x_a（補正後）</code></pre>
 </section>
 
 <section>
@@ -687,6 +821,91 @@ B = BACKGROUND_ERROR_STD**2 * np.exp(
         <tr><td>0.12 m</td><td>約 0.14</td><td>かなり弱い</td></tr>
       </table>
       <div class="warn-box">相関長 `CORRELATION_LENGTH_M` は結果に効く。実験データでは感度確認が必要。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ OI 4ステップ詳細 ═══ -->
+<section>
+  <span class="sec-tag">Method — Step by Step</span>
+  <h2>OI アルゴリズムを 4 ステップで理解する</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+    <div class="card blue">
+      <p style="font-size:0.72em; color:var(--cyan); font-weight:700; margin:0 0 4px;">STEP 1 — 予測（OpenFOAM）</p>
+      <p><strong>補正済み温度場 \(x^a_{k-1}\) を初期条件として、laplacianFoam を1ステップ実行し、予測値 \(x^f_k\) を得る</strong></p>
+      <div class="math-box" style="margin:6px 0;">
+        \[ x^f_k = \mathcal{M}_{OF}(x^a_{k-1},\; G_{\text{model}}) \]
+      </div>
+      <p class="muted" style="font-size:0.8em;">OpenFOAMは G_model = 50 degC/m で計算（真値とは違う境界条件）。Python 側は内部行列を知らない。</p>
+    </div>
+    <div class="card orange">
+      <p style="font-size:0.72em; color:var(--orange); font-weight:700; margin:0 0 4px;">STEP 2 — イノベーション計算</p>
+      <p><strong>センサ観測値 \(y_k\) と、予測値のセンサ位置抽出値 \(Hx^f_k\) の差を計算する</strong></p>
+      <div class="math-box" style="margin:6px 0;">
+        \[ d_k = y_k - H x^f_k \]
+      </div>
+      <p class="muted" style="font-size:0.8em;">「イノベーション」= モデルと観測のズレ。これを全節点に配分する。<br>センサ Node 0, Node 4 の2点のみを使用。</p>
+    </div>
+    <div class="card purple">
+      <p style="font-size:0.72em; color:var(--purple); font-weight:700; margin:0 0 4px;">STEP 3 — OI 更新（補正）</p>
+      <p><strong>OI ゲイン K で全節点に補正を配り、解析値（補正後温度場）\(x^a_k\) を得る</strong></p>
+      <div class="math-box" style="margin:6px 0;">
+        \[ x^a_k = x^f_k + K\, d_k \]
+      </div>
+      <p class="muted" style="font-size:0.8em;">K は固定行列なので毎ステップ再計算しない。センサに近い節点ほど強く補正される（B の空間相関による）。</p>
+    </div>
+    <div class="card green">
+      <p style="font-size:0.72em; color:var(--green); font-weight:700; margin:0 0 4px;">STEP 4 — 書き戻し</p>
+      <p><strong>補正後の温度場 \(x^a_k\) を、次ステップの OpenFOAM 初期条件として書き戻す</strong></p>
+      <div class="math-box" style="margin:6px 0;">
+        \[ x_{\text{current}} \leftarrow x^a_k \]
+      </div>
+      <p class="muted" style="font-size:0.8em;">これにより観測情報が次の予測ステップへ引き継がれる。センサ情報がシミュレーション全体に蓄積される。</p>
+    </div>
+  </div>
+  <div class="success-box" style="margin-top:8px; font-size:0.82em;">
+    この 4 ステップを N_STEPS = 90 回繰り返す。補正後の温度場が常に次の「スタート地点」になるため、モデル誤差が蓄積しにくい。
+  </div>
+</section>
+
+<!-- ═══ イノベーションの直感 ═══ -->
+<section>
+  <span class="sec-tag">Intuition</span>
+  <h2>イノベーション d をどう全節点に配るか</h2>
+  <div class="two-col">
+    <div>
+      <h3>1センサの場合（直感）</h3>
+      <div class="math-box">
+        \[ x^a_i = x^f_i + \underbrace{\frac{B_{i,s}}{B_{s,s}+R}}_{\text{重み}\; w_i} \underbrace{(y_s - x^f_s)}_{\text{イノベーション}\; d} \]
+      </div>
+      <table>
+        <tr><th>記号</th><th>意味</th><th>今回の値</th></tr>
+        <tr><td>\(y_s\)</td><td>センサ s の実測温度</td><td>Node 0 または Node 4</td></tr>
+        <tr><td>\(x^f_s\)</td><td>予測温度（センサ位置）</td><td>OpenFOAM 出力</td></tr>
+        <tr><td>\(d = y_s - x^f_s\)</td><td>ズレ（イノベーション）</td><td>例: +4 degC</td></tr>
+        <tr><td>\(B_{i,s}\)</td><td>節点 i とセンサ s の誤差の類似度</td><td>距離が近いほど大きい</td></tr>
+        <tr><td>\(w_i\)</td><td>節点 i への補正割合（0〜1）</td><td>センサ直下: ≈1.00</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>数値例：センサが +4 degC ズレていた場合</h3>
+      <div class="card blue" style="margin-bottom:6px;">
+        <p><strong>センサ位置 Node 0 の重み = 1.00</strong></p>
+        <p>補正量 = 1.00 × 4 = <span style="color:var(--cyan); font-weight:700;">+4.0 degC</span></p>
+      </div>
+      <div class="card green" style="margin-bottom:6px;">
+        <p><strong>隣の Node 1（距離 0.03 m）の重み = 0.88</strong></p>
+        <p>補正量 = 0.88 × 4 = <span style="color:var(--green); font-weight:700;">+3.5 degC</span></p>
+      </div>
+      <div class="card orange" style="margin-bottom:6px;">
+        <p><strong>Node 3（距離 0.09 m）の重み = 0.32</strong></p>
+        <p>補正量 = 0.32 × 4 = <span style="color:var(--orange); font-weight:700;">+1.3 degC</span></p>
+      </div>
+      <div class="card" style="margin-bottom:6px; border-left:4px solid var(--muted);">
+        <p><strong>Node 6（距離 0.18 m）の重み ≈ 0.02</strong></p>
+        <p class="muted">ほとんど補正されない → センサ配置が重要</p>
+      </div>
+      <div class="warn-box" style="font-size:0.82em;">複数センサでは全センサのイノベーションを K で同時に処理する。センサ同士の相関も考慮される。</div>
     </div>
   </div>
 </section>
@@ -2096,63 +2315,152 @@ EnKF -> local EnKF</code></pre>
 </section>
 
 <section>
+<!-- ═══ 実験計画セクション ═══ -->
 <section>
-  <span class="sec-tag">Home Experiment</span>
-  <h2>次の段階: 自宅での丸棒実験</h2>
-  <div class="col-6-4">
+  <span class="sec-tag">Experiment Plan</span>
+  <h2>丸棒実験計画: ツイン実験 → 実測同化へ</h2>
+  <div class="two-col">
     <div>
-      <p>目的は、ツイン実験の `truth` を実測データに置き換えること。</p>
-      <div class="flow">
-        <div class="flow-item">
-          <div class="num">now</div>
-          <div class="label">ツイン実験</div>
-          <div class="note">正解役のデータも観測データも OpenFOAM から作る。</div>
+      <h3>ツイン実験（現在）→ 実測同化（次）</h3>
+      <div class="flow" style="flex-direction:column; gap:6px;">
+        <div class="flow-item" style="min-height:auto; border-color:var(--muted);">
+          <div class="label" style="color:var(--muted);">現在: ツイン実験</div>
+          <div class="note">「正解」も「観測」も OpenFOAM で作成。実データなし。</div>
         </div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-item">
-          <div class="num">next</div>
-          <div class="label">実測同化</div>
-          <div class="note">実センサ値を OI に入力。</div>
+        <div class="flow-arrow" style="justify-content:center; margin:2px 0;">↓</div>
+        <div class="flow-item" style="min-height:auto; border-color:var(--green);">
+          <div class="label" style="color:var(--green);">次: 実測同化</div>
+          <div class="note">丸棒にセンサを貼り、実測温度を <code>y</code> として OI に入力する。OpenFOAM がモデル予測担当。</div>
         </div>
       </div>
-      <div class="math-box">
-        \[
-        \mathbf{y}_k =
-        \text{実測された同化用センサ温度}
-        \]
+      <div class="info-box" style="margin-top:10px; font-size:0.82em;">
+        コードの変更は <strong>1 行だけ</strong>。<br>
+        <code>y = H @ truth_T[k] + noise</code>（ツイン実験用）<br>
+        →&ensp;<code>y = measured_data[k]</code>（実測用）
       </div>
     </div>
-    <div class="card cyan">
+    <div>
       <h3>確認したい問い</h3>
-      <p>少数の温度センサを使って、測っていない位置の温度をどこまで推定できるか。</p>
+      <div class="card cyan" style="margin-bottom:6px;">
+        <p><strong>Q1:</strong> 少数センサで未観測点の温度をどこまで推定できるか？</p>
+      </div>
+      <div class="card blue" style="margin-bottom:6px;">
+        <p><strong>Q2:</strong> 相関長 L_c の設定が補正精度にどの程度影響するか？</p>
+      </div>
+      <div class="card orange" style="margin-bottom:6px;">
+        <p><strong>Q3:</strong> センサ配置（位置・数）が推定精度を変えるか？</p>
+      </div>
+      <div class="card green">
+        <p><strong>Q4:</strong> OpenFOAMモデルの境界条件を間違えても、センサ情報で補正できるか？</p>
+      </div>
     </div>
   </div>
 </section>
 
 <section>
-  <span class="sec-tag">Experimental Plan</span>
-  <h2>実験構成案</h2>
+  <span class="sec-tag">Experiment Setup</span>
+  <h2>推奨実験構成: 丸棒 + 温度センサ 4 点</h2>
   <div class="two-col">
     <div>
-      <h3>装置</h3>
-      <ul>
-        <li>細長い丸棒</li>
-        <li>片端加熱用のヒータ</li>
-        <li>温度センサ 4 点以上</li>
-        <li>データロガー</li>
-        <li>室温センサ</li>
-        <li>断熱材または放熱条件を一定にする治具</li>
-      </ul>
+      <h3>装置仕様（推奨値）</h3>
+      <table>
+        <tr><th>項目</th><th>推奨値・条件</th></tr>
+        <tr><td>丸棒材質</td><td>アルミ（熱伝導率 ≈ 160 W/m·K）または鉄（50 W/m·K）</td></tr>
+        <tr><td>棒の長さ</td><td>0.3 〜 0.5 m（セル 10 個相当）</td></tr>
+        <tr><td>棒の直径</td><td>10 〜 20 mm（側面放熱が少ない）</td></tr>
+        <tr><td>加熱方法</td><td>抵抗線ヒータ、カートリッジヒータ、またはホットプレート</td></tr>
+        <tr><td>温度センサ</td><td>熱電対 K 型 × 4 点以上（応答速度 ≦ 5 s）</td></tr>
+        <tr><td>データロガー</td><td>10 s 間隔で記録可能なもの</td></tr>
+        <tr><td>断熱</td><td>側面をグラスウールまたはロックウールで覆う</td></tr>
+        <tr><td>加熱パターン</td><td>ON 10 分 → OFF 5 分 × 複数サイクル</td></tr>
+      </table>
     </div>
     <div>
-      <h3>センサの使い分け</h3>
-      <pre><code class="language-text">加熱端                                      反対端
-|----------------------------------------------|
-S1          S2             V1             V2
+      <h3>センサ配置（推奨）</h3>
+      <svg viewBox="0 0 400 120" style="width:100%;display:block;margin:8px 0;" xmlns="http://www.w3.org/2000/svg">
+        <!-- Rod -->
+        <rect x="30" y="50" width="340" height="20" rx="3" fill="url(#rg2)" stroke="#444c56" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ff5533" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#39d0d8" stop-opacity="0.2"/>
+          </linearGradient>
+        </defs>
+        <!-- Heater left -->
+        <rect x="5" y="44" width="24" height="32" rx="3" fill="rgba(255,85,51,0.15)" stroke="rgba(255,85,51,0.6)" stroke-width="1.5"/>
+        <text x="17" y="64" text-anchor="middle" fill="#ff8866" font-size="14" font-family="serif">🔥</text>
+        <text x="17" y="80" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">加熱端</text>
+        <!-- Right end -->
+        <rect x="371" y="44" width="24" height="32" rx="3" fill="rgba(57,208,216,0.1)" stroke="rgba(57,208,216,0.4)" stroke-width="1.5"/>
+        <text x="383" y="63" text-anchor="middle" fill="#39d0d8" font-size="14">❄</text>
+        <text x="383" y="80" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">固定端</text>
+        <!-- Sensor S1 at x=60 -->
+        <circle cx="65" cy="60" r="8" fill="#1a4731" stroke="#3fb950" stroke-width="2"/>
+        <text x="65" y="63.5" text-anchor="middle" fill="#3fb950" font-size="8" font-weight="700" font-family="sans-serif">S1</text>
+        <text x="65" y="40" text-anchor="middle" fill="#3fb950" font-size="8" font-family="sans-serif">同化</text>
+        <line x1="65" y1="48" x2="65" y2="43" stroke="#3fb950" stroke-width="1"/>
+        <!-- Sensor S2 at x=160 -->
+        <circle cx="160" cy="60" r="8" fill="#1a4731" stroke="#3fb950" stroke-width="2"/>
+        <text x="160" y="63.5" text-anchor="middle" fill="#3fb950" font-size="8" font-weight="700" font-family="sans-serif">S2</text>
+        <text x="160" y="40" text-anchor="middle" fill="#3fb950" font-size="8" font-family="sans-serif">同化</text>
+        <line x1="160" y1="48" x2="160" y2="43" stroke="#3fb950" stroke-width="1"/>
+        <!-- Sensor V1 at x=250 -->
+        <circle cx="250" cy="60" r="8" fill="#1e2a3a" stroke="#58a6ff" stroke-width="2"/>
+        <text x="250" y="63.5" text-anchor="middle" fill="#58a6ff" font-size="8" font-weight="700" font-family="sans-serif">V1</text>
+        <text x="250" y="40" text-anchor="middle" fill="#58a6ff" font-size="8" font-family="sans-serif">検証</text>
+        <line x1="250" y1="48" x2="250" y2="43" stroke="#58a6ff" stroke-width="1"/>
+        <!-- Sensor V2 at x=330 -->
+        <circle cx="330" cy="60" r="8" fill="#1e2a3a" stroke="#58a6ff" stroke-width="2"/>
+        <text x="330" y="63.5" text-anchor="middle" fill="#58a6ff" font-size="8" font-weight="700" font-family="sans-serif">V2</text>
+        <text x="330" y="40" text-anchor="middle" fill="#58a6ff" font-size="8" font-family="sans-serif">検証</text>
+        <line x1="330" y1="48" x2="330" y2="43" stroke="#58a6ff" stroke-width="1"/>
+        <!-- Positions -->
+        <text x="65" y="90" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">L/6</text>
+        <text x="160" y="90" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">L/3</text>
+        <text x="250" y="90" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">L×2/3</text>
+        <text x="330" y="90" text-anchor="middle" fill="#8b949e" font-size="8" font-family="sans-serif">L×5/6</text>
+        <!-- Legend -->
+        <circle cx="40" cy="112" r="5" fill="#1a4731" stroke="#3fb950" stroke-width="1.5"/>
+        <text x="50" y="116" fill="#3fb950" font-size="9" font-family="sans-serif">同化用（OIに入力）</text>
+        <circle cx="175" cy="112" r="5" fill="#1e2a3a" stroke="#58a6ff" stroke-width="1.5"/>
+        <text x="185" y="116" fill="#58a6ff" font-size="9" font-family="sans-serif">検証用（答え合わせのみ）</text>
+      </svg>
+      <div class="warn-box" style="font-size:0.82em;">
+        <strong>重要:</strong> 検証用センサ V1, V2 は OI に入力しない。「DAありが、答えを知らない場所でどれだけ合うか」を確認するため。
+      </div>
+    </div>
+  </div>
+</section>
 
-S1, S2 : 同化用センサ
-V1, V2 : 検証用センサ</code></pre>
-      <div class="info-box">検証用センサは OI に入れない。推定結果の答え合わせだけに使う。</div>
+<section>
+  <span class="sec-tag">Experiment — OpenFOAM Model</span>
+  <h2>OpenFOAM モデルの設定方針</h2>
+  <div class="two-col">
+    <div>
+      <h3>境界条件の設定</h3>
+      <table>
+        <tr><th>境界</th><th>設定</th><th>補足</th></tr>
+        <tr><td>加熱端（左）</td><td>fixedGradient<br>または fixedValue</td><td>ヒータ電力から熱流束を概算するか、加熱端センサ S1 の温度を fixedValue で与える</td></tr>
+        <tr><td>反対端（右）</td><td>fixedValue<br>= 室温</td><td>実験開始時の室温を使う</td></tr>
+        <tr><td>側面</td><td>zeroGradient<br>または断熱</td><td>断熱材で覆えば zeroGradient で近似可能。側面放熱が大きい場合は convective 条件を検討</td></tr>
+      </table>
+      <div class="warn-box" style="font-size:0.82em; margin-top:8px;">
+        モデルが多少間違っていても OI で補正されるので、最初は単純な境界条件から始めてよい。
+      </div>
+    </div>
+    <div>
+      <h3>メッシュと物性値</h3>
+      <table>
+        <tr><th>項目</th><th>値・方針</th></tr>
+        <tr><td>セル数</td><td>10〜20（1次元相当）</td></tr>
+        <tr><td>熱拡散係数 α</td><td>アルミ: 9.7×10⁻⁵ m²/s<br>鉄: 1.17×10⁻⁵ m²/s</td></tr>
+        <tr><td>時間刻み</td><td>10 s（センサのサンプリングに合わせる）</td></tr>
+        <tr><td>ソルバ</td><td>laplacianFoam</td></tr>
+      </table>
+      <h3 style="margin-top:12px;">物性値が不確かな場合</h3>
+      <div class="info-box" style="font-size:0.82em;">
+        文献値から始め、DA なしで実験と比較する。大きくズレていれば物性値を調整する。DA は誤差を「補正」するが、物性が極端に間違っていると効果が薄れる。
+      </div>
     </div>
   </div>
 </section>
@@ -2204,26 +2512,40 @@ y = np.array([data[name][k] for name in ASSIM_SENSOR_NAMES])</code></pre>
 
 <section>
   <span class="sec-tag">Evaluation</span>
-  <h2>実験で見る指標</h2>
-  <div class="three-col">
-    <div class="card blue">
-      <h3>RMSE</h3>
-      <p>検証用センサ V1, V2 で、DA なしより OI ありが小さいかを見る。</p>
+  <h2>実験の評価フローと成功判定</h2>
+  <div class="two-col">
+    <div>
+      <h3>評価フロー</h3>
+      <ul class="timeline">
+        <li class="done"><strong>Step 1:</strong> DA なしで先に走らせる<br><span class="muted">OpenFOAM only vs 実測全センサ → モデル誤差の大きさを把握</span></li>
+        <li><strong>Step 2:</strong> DA あり（S1, S2 のみ使用）<br><span class="muted">OI で補正後に V1, V2 と比較 → 未観測点の推定精度を確認</span></li>
+        <li><strong>Step 3:</strong> OI パラメータを調整<br><span class="muted">L_c（相関長）を変えて RMSE の感度を見る</span></li>
+        <li><strong>Step 4:</strong> センサ配置を変える<br><span class="muted">S1 の位置を変えたり S3 を追加して精度を比較</span></li>
+      </ul>
     </div>
-    <div class="card green">
-      <h3>最大誤差</h3>
-      <p>加熱開始直後や ON/OFF 切替時の大きな外れを確認する。</p>
-    </div>
-    <div class="card orange">
-      <h3>追従性</h3>
-      <p>温度上昇・冷却の遅れを、同化ありなしで比較する。</p>
+    <div>
+      <h3>評価指標と成功判定</h3>
+      <table>
+        <tr><th>指標</th><th>最小成功条件</th><th>理想</th></tr>
+        <tr><td>V1 RMSE</td><td>OI あり &lt; OF only</td><td>50% 以上改善</td></tr>
+        <tr><td>V2 RMSE</td><td>OI あり &lt; OF only</td><td>50% 以上改善</td></tr>
+        <tr><td>温度追従</td><td>加熱時・冷却時ともに誤差が小さい</td><td>最大誤差 &lt; 1 degC</td></tr>
+      </table>
+      <div class="success-box" style="margin-top:10px; font-size:0.82em;">
+        <strong>最低成功条件:</strong><br>
+        「同化用センサを入れていない V1, V2 で、<br>
+        OpenFOAM + OI の RMSE が OpenFOAM only より小さい」<br>
+        これが実証できれば、DA が未観測点に効いていると言える。
+      </div>
+      <div class="warn-box" style="margin-top:8px; font-size:0.82em;">
+        <strong>失敗した場合にまず疑うこと:</strong><br>
+        ① 相関長 L_c が短すぎて補正が広がらない<br>
+        ② モデルの境界条件が実験と大きく違う<br>
+        ③ センサ取り付けの熱的遅れ・接触抵抗<br>
+        ④ 側面放熱が無視できないほど大きい
+      </div>
     </div>
   </div>
-  <table>
-    <tr><th>成功判定</th><th>内容</th></tr>
-    <tr><td>最小条件</td><td>検証用センサで `OpenFOAM + OI` の RMSE が `OpenFOAM only` より小さい。</td></tr>
-    <tr><td>次の改善</td><td>`CORRELATION_LENGTH_M` とセンサ配置を変え、未測定点の推定精度を整理する。</td></tr>
-  </table>
 </section>
 
 <section>
@@ -2298,7 +2620,19 @@ Reveal.initialize({
   progress: true,
   center: false,
   transition: 'slide',
+  mouseWheel: false,
   plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+});
+
+/* セクション内スクロール中はReveal.jsのホイールナビゲーションを抑制 */
+document.querySelectorAll('.reveal .slides section').forEach(function(sec) {
+  sec.addEventListener('wheel', function(e) {
+    var atTop    = sec.scrollTop <= 0;
+    var atBottom = sec.scrollTop + sec.clientHeight >= sec.scrollHeight - 2;
+    if (!atTop || !atBottom) {
+      e.stopPropagation();
+    }
+  }, { passive: true });
 });
 
 document.getElementById('pdf-export-btn').addEventListener('click', () => {
