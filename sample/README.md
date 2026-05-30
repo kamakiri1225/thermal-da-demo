@@ -6,10 +6,10 @@
 
 ## サンプル一覧
 
-| サンプル | 目的 | 使う手法 | OpenFOAM | 主な出力 |
+| サンプル | 目的 | 使う手法 | OpenFOAM | スライド |
 |---|---|---|---|---|
-| `001_kalman_thermal_1d` | Python だけでデータ同化の基本動作を確認する | Kalman filter | 不要 | 温度推定グラフ、解説スライド |
-| `002_laplacian_da_1d` | OpenFOAM の温度場予測をセンサ観測で補正する流れを確認する | optimal interpolation | 必要 | OpenFOAM 結果、RMSE、解説スライド |
+| `001_kalman_thermal_1d` | Python だけでデータ同化の基本動作を確認する | Kalman filter | 不要 | [slides.html](001_kalman_thermal_1d/slides.html) |
+| `002_laplacian_da_1d` | OpenFOAM の温度場予測をセンサ観測で補正する流れを確認する | optimal interpolation | 必要 | [slides.html](002_laplacian_da_1d/slides.html) |
 
 ## 001: Kalman filter による 1D 熱データ同化
 
@@ -53,6 +53,10 @@ Kalman filter は、モデル予測と観測値を誤差共分散に応じて混
 | `main_disp_obs.py` | 変位観測を追加した場合を比較する |
 | `slides.html` | 解説スライド |
 | `docs/00_index.md` | 詳細ドキュメントの入口 |
+
+### スライド
+
+[001_kalman_thermal_1d/slides.html](001_kalman_thermal_1d/slides.html)
 
 ### 実行例
 
@@ -107,6 +111,10 @@ K   = B H^T (H B H^T + R)^-1
 | `kf/README.md` | Kalman filter 版へ拡張する場合のメモ。今回の計算では未使用 |
 | `slides.html` | 解説スライド |
 | `docs/00_index.md` | 詳細ドキュメントの入口 |
+
+### スライド
+
+[002_laplacian_da_1d/slides.html](002_laplacian_da_1d/slides.html)
 
 ### 実行例
 
