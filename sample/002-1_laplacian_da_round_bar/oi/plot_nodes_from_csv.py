@@ -73,7 +73,13 @@ def main() -> None:
     ASSIM_NODES = {4, 16}
     VALIDATION_NODES = {28, 36}
 
+    BG_SENSOR     = "#FFF9C4"
+    BG_VALIDATION = "#DBEAFE"
+    BORDER_SENSOR     = "#F59E0B"
+    BORDER_VALIDATION = "#3B82F6"
+
     fig, axes = plt.subplots(nrows, ncols, figsize=(18, 22), sharex=True, sharey=True)
+    fig.patch.set_facecolor("white")
     fig.suptitle(
         "Round Bar Twin Experiment: each axial node\n"
         "truth / DA off / DA on",
@@ -93,11 +99,27 @@ def main() -> None:
         ax.plot(time_s, da_y[:, idx], color="crimson", ls="-", lw=1.5)
 
         if node in ASSIM_NODES:
-            ax.set_facecolor("#FFF3CD")
-            title = f"N{node} x={x_m:.3f} m [sensor]"
+            ax.set_facecolor(BG_SENSOR)
+            for spine in ax.spines.values():
+                spine.set_edgecolor(BORDER_SENSOR)
+                spine.set_linewidth(2.5)
+            title = f"N{node}  x={x_m:.3f} m\n[S] Sensor"
+            title_color = BORDER_SENSOR
+        elif node in VALIDATION_NODES:
+            ax.set_facecolor(BG_VALIDATION)
+            for spine in ax.spines.values():
+                spine.set_edgecolor(BORDER_VALIDATION)
+                spine.set_linewidth(2.5)
+            title = f"N{node}  x={x_m:.3f} m\n[V] Validation"
+            title_color = BORDER_VALIDATION
         else:
-            title = f"N{node} x={x_m:.3f} m"
-        ax.set_title(title, fontsize=8)
+            ax.set_facecolor("white")
+            title = f"N{node}  x={x_m:.3f} m"
+            title_color = "#333333"
+
+        ax.set_title(title, fontsize=8,
+                     fontweight="bold" if node in ASSIM_NODES | VALIDATION_NODES else "normal",
+                     color=title_color)
         ax.grid(True, alpha=0.25)
         ax.set_ylim(ymin - pad, ymax + pad)
 
@@ -111,9 +133,10 @@ def main() -> None:
         Line2D([0], [0], color="black", ls="--", lw=1.6, label="truth"),
         Line2D([0], [0], color="#377eb8", ls=":", lw=1.6, label="DA off"),
         Line2D([0], [0], color="crimson", ls="-", lw=1.6, label="DA on"),
-        Patch(facecolor="#FFF3CD", edgecolor="gray", lw=0.8, label="assimilation sensor"),
+        Patch(facecolor=BG_SENSOR,     edgecolor=BORDER_SENSOR,     lw=2, label="[S] assimilation sensor"),
+        Patch(facecolor=BG_VALIDATION, edgecolor=BORDER_VALIDATION, lw=2, label="[V] validation node"),
     ]
-    fig.legend(handles=handles, loc="upper center", ncol=4, frameon=False, bbox_to_anchor=(0.5, 0.978), fontsize=9)
+    fig.legend(handles=handles, loc="upper center", ncol=5, frameon=False, bbox_to_anchor=(0.5, 0.978), fontsize=9)
 
     plt.tight_layout(rect=(0.02, 0.02, 0.98, 0.957))
     OUT_PNG.parent.mkdir(parents=True, exist_ok=True)
