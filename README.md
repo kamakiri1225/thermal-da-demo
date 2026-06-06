@@ -72,11 +72,15 @@ thermal-da-demo/
 
 | フェーズ | 内容 | 状態 |
 |---|---|---|
-| Phase 1 | Python だけで 1D 熱モデル + Kalman filter を確認 | 完了 |
-| Phase 2 | OpenFOAM を予測器として使い、Python 側でデータ同化する | 実装済み |
-| Phase 3 | 実測温度データを読み込み、同化用センサと検証用センサを分けて評価する | 次に実施 |
-| Phase 4 | `A_d` を作らない方針で EnKF / local EnKF を検討する | 計画中 |
-| Phase 5 | 実験装置・IoT センサ・熱変位補償へ接続する | 計画中 |
+| Phase 1 | Python のみで 1D 熱モデル + Kalman filter を確認 | 完了 |
+| Phase 2a | OpenFOAM + OI データ同化 (1D 擬似モデル、2点センサ) | 完了 |
+| Phase 2b | OpenFOAM + FrontISTR の 2 ソルバーで OI DA を実装・比較 (丸棒モデル) | 完了 |
+| Phase 3 | アルミ丸棒片持ちはり実機実験 × EnKF パラメータ同定 DA (温度のみ vs 温度+変位) | 次に実施 |
+| Phase 4 | 熱流体・熱構造連成解析 (OpenFOAM + FrontISTR/CalculiX) との DA 統合 | 計画中 |
+| Phase 5 | DA 較正済みモデルによるサロゲートモデル構築 → リアルタイム熱変位予測 | 計画中 |
+
+> 研究の核となる問い: **「温度センサを増やすより、変位センサを 1 点加える方が熱変位予測には効くか？」**  
+> 詳細は [docs/research_roadmap.md](docs/research_roadmap.md) を参照。
 
 ## ドキュメント
 
