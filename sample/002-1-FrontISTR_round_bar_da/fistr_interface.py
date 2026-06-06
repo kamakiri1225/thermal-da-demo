@@ -156,6 +156,9 @@ round_bar_vis
         )
 
     def _write_cnt(self, values: np.ndarray, left_flux: float, right_temp: float) -> None:
+        # round_bar.cnt is tracked in the repo as a readable template.
+        # Each DA step overwrites it with the current nodal initial temperatures
+        # and boundary conditions before calling fistr1.
         lines = [
             "!STEP,INCMAX=10000",
             "!SOLUTION,TYPE=HEAT",

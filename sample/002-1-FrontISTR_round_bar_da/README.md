@@ -45,6 +45,7 @@ cd "$(git rev-parse --show-toplevel)/sample/002-1-FrontISTR_round_bar_da/oi"
 
 | 出力 | 内容 |
 |---|---|
+| `case/round_bar.cnt` | FrontISTR の熱解析条件。実行時に Python が同じ名前で更新します |
 | `oi/results/img/results_frontistr_da.png` | truth / FrontISTR-only / OI の比較グラフ |
 | `oi/results/img/measurement_points_frontistr_da.png` | 代表測定点の比較グラフ |
 | `oi/results/img/all_axial_nodes_timeseries_frontistr_da.png` | 全 axial node の時刻歴 |
@@ -59,7 +60,15 @@ cd "$(git rev-parse --show-toplevel)/sample/002-1-FrontISTR_round_bar_da/oi"
 
 - [FrontISTR の比較画像](oi/results/img/results_frontistr_da.png)
 - [FrontISTR の測定点比較](oi/results/img/measurement_points_frontistr_da.png)
+- [FrontISTR の cnt 設定](case/round_bar.cnt)
 - [OpenFOAM 版スライド](../002-1_laplacian_da_round_bar/slides.html)
+
+`case/round_bar.cnt` はテンプレートとして置いてあり、`fistr_interface.py` が各ステップで上書きします。
+上書きするのは主に次の部分です。
+
+- `!INITIAL_CONDITION,TYPE=TEMPERATURE` 配下の全ノード初期温度
+- `!FIXTEMP` の右端境界温度
+- `!DFLUX` の左端境界熱流束
 
 ## インストール
 
