@@ -28,6 +28,7 @@ OUT_PNG = RESULTS_IMG_DIR / "all_nodes_temperature_comparison.png"
 
 
 def load_history(path: Path) -> tuple[np.ndarray, list[str]]:
+    """温度履歴 CSV を読み、データ本体とヘッダを返す。"""
     with path.open("r", encoding="utf-8") as f:
         header = f.readline().strip().split(",")
     data = np.loadtxt(path, delimiter=",", skiprows=1)
@@ -35,6 +36,7 @@ def load_history(path: Path) -> tuple[np.ndarray, list[str]]:
 
 
 def parse_node_labels(header: list[str]) -> list[tuple[int, float]]:
+    """CSV ヘッダから node 番号と位置情報を取り出す。"""
     labels: list[tuple[int, float]] = []
     for name in header[1:]:
         # N12_x0.094m -> node=12, x=0.094
@@ -46,6 +48,7 @@ def parse_node_labels(header: list[str]) -> list[tuple[int, float]]:
 
 
 def main() -> None:
+    """OpenFOAM round-bar の全節点比較図を生成する。"""
     RESULTS_IMG_DIR.mkdir(parents=True, exist_ok=True)
     truth, header = load_history(TRUTH_CSV)
     model, _ = load_history(MODEL_CSV)

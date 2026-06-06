@@ -1,8 +1,8 @@
 """
-FrontISTR round-bar twin experiment with Optimal Interpolation.
+FrontISTR の丸棒データ同化デモ。
 
-The workflow mirrors sample/002-1_laplacian_da_round_bar:
-truth, model-only, and OI-corrected runs are compared and plotted.
+`sample/002-1_laplacian_da_round_bar` と同じ流れで、
+真値、モデル単独、OI 補正後の結果を比較・可視化する。
 """
 
 from __future__ import annotations
@@ -51,19 +51,19 @@ RESULTS_IMG_DIR = RESULTS_DIR / "img"
 
 
 def make_gradient_series(n_steps: int, g_on: float) -> np.ndarray:
-    """Create the heat-input on/off schedule for the round-bar twin experiment."""
+    """丸棒の加熱 ON/OFF 列を作る。"""
     cycle = CYCLE_ON + CYCLE_OFF
     return np.array([g_on if (k % cycle) < CYCLE_ON else 0.0 for k in range(n_steps)])
 
 
 def make_left_flux_series(gradient_series: np.ndarray) -> np.ndarray:
-    """Convert the imposed temperature gradient series into a heat flux series."""
+    """与えた温度勾配列を、左端境界の熱流束列に変換する。"""
     conductivity = 160.0  # W/(mK) aluminum
     return conductivity * gradient_series
 
 
 def save_history(path: Path, time_s: np.ndarray, values: np.ndarray, prefix: str) -> None:
-    """Save a time-history matrix to CSV with one column per axial node."""
+    """時系列行列を CSV に保存する。各列は軸方向節点を表す。"""
     path.parent.mkdir(parents=True, exist_ok=True)
     data = np.column_stack([time_s, values])
     header = "time_s," + ",".join(f"{prefix}{i}" for i in range(values.shape[1]))
@@ -71,7 +71,7 @@ def save_history(path: Path, time_s: np.ndarray, values: np.ndarray, prefix: str
 
 
 def load_frontistr_mesh(mesh_path: Path) -> tuple[np.ndarray, list[list[int]]]:
-    """Load points and cell connectivity from the generated FrontISTR mesh file."""
+    """生成済みの FrontISTR メッシュから節点座標と要素接続を読む。"""
     points: list[tuple[float, float, float]] = []
     cells: list[list[int]] = []
     mode: str | None = None
@@ -97,7 +97,7 @@ def load_frontistr_mesh(mesh_path: Path) -> tuple[np.ndarray, list[list[int]]]:
 
 
 def write_legacy_vtk(path: Path, points: np.ndarray, cells: list[list[int]], temperature: np.ndarray) -> None:
-    """Write one legacy VTK file for ParaView post-processing."""
+    """ParaView で開ける legacy VTK を 1 枚書き出す。"""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
         f.write("# vtk DataFile Version 3.0\n")
@@ -121,7 +121,7 @@ def write_legacy_vtk(path: Path, points: np.ndarray, cells: list[list[int]], tem
 
 
 def export_vtk_series(case_name: str, history: np.ndarray) -> None:
-    """Export a whole time series as a VTK folder tree for ParaView."""
+    """時系列全体を VTK 群として出力する。ParaView のアニメーション用。"""
     points, cells = load_frontistr_mesh(CASE_DIR / "round_bar.msh")
     out_dir = RESULTS_DIR / case_name / "vtk"
     if out_dir.exists():
@@ -134,22 +134,34 @@ def export_vtk_series(case_name: str, history: np.ndarray) -> None:
 
 
 def build_oi_matrices(fistr: FrontISTRInterface) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
-    """Build the OI observation matrix, background covariance, and noise covariance."""
+    """OI の観測行列 H、背景誤差共分散 B、観測誤差共分散 R を作る。"""
     representative = fistr.axial_representative_node_indices()
     n_nodes = fistr.n_nodes
+    # 観測行列 H:
+    #   y = H x + v
+    # ここでは「どの節点をセンサとして読むか」を 1 行ずつ表す。
     H = np.zeros((len(ASSIM_SENSOR_AXIAL_NODES), n_nodes))
     for i, axial_node in enumerate(ASSIM_SENSOR_AXIAL_NODES):
         H[i, representative[axial_node]] = 1.0
 
     assert fistr.node_x is not None
     distance = np.abs(fistr.node_x[:, None] - fistr.node_x[None, :])
+    # 背景誤差共分散 B:
+    #   B_ij = σ_b^2 exp(-(d_ij^2)/(2L^2))
+    #   σ_b : 背景誤差の大きさ
+    #   d_ij: 節点 i と j の距離
+    #   L   : 誤差相関長
+    # 近い節点ほど一緒に補正され、遠い節点ほど弱く結び付く。
     B = BACKGROUND_ERROR_STD**2 * np.exp(-(distance**2) / (2.0 * CORRELATION_LENGTH_M**2))
+    # 観測誤差共分散 R:
+    #   R = σ_o^2 I
+    # センサノイズは各観測で独立、同じ分散を持つと仮定する。
     R = np.eye(len(ASSIM_SENSOR_AXIAL_NODES)) * OBS_NOISE_STD**2
     return H, B, R, representative
 
 
 def run_sequence(label: str, fistr: FrontISTRInterface, left_series: np.ndarray) -> np.ndarray:
-    """Run a pure FrontISTR sequence without data assimilation and record the state history."""
+    """データ同化なしで FrontISTR を回し、状態履歴を記録する。"""
     print(f"--- {label} ---")
     fistr.reset()
     state = np.full(fistr.n_nodes, T_INIT)
@@ -172,18 +184,32 @@ def run_da(
     B: np.ndarray,
     R: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Run the FrontISTR forecast step followed by an OI correction step."""
+    """FrontISTR の予測ステップの後に OI 補正をかける。"""
     print("--- FrontISTR + OI data assimilation ---")
     fistr.reset()
+    # OI の更新式:
+    #   x_a = x_f + K (y - H x_f)
+    #   K   = B H^T (H B H^T + R)^-1
+    # ここで x_f は FrontISTR の予測場、y は観測、x_a は同化後の場。
     gain = B @ H.T @ np.linalg.inv(H @ B @ H.T + R)
     state = np.full(fistr.n_nodes, T_INIT)
     forecast_t = np.zeros((N_STEPS, fistr.n_nodes))
     da_t = np.zeros((N_STEPS, fistr.n_nodes))
     t0 = time_mod.time()
     for k in range(N_STEPS):
+        # 真値場から観測を作る。観測ノイズは N(0, sigma^2) を仮定する。
         y = H @ truth_t[k] + np.random.randn(H.shape[0]) * OBS_NOISE_STD
+        # 予測ステップ:
+        #   x_f^{k+1} = M(x_a^k, u^k)
+        # 直前の同化後状態 state を FrontISTR で 1 ステップ進める。
         forecast = fistr.run_step(state, left_flux=left_model[k], right_temp=T_AMB)
+        # イノベーション(観測差):
+        #   d = y - H x_f
         innovation = y - H @ forecast
+        # OI 更新:
+        #   x_a = x_f + K d
+        # つまり、観測との差分 d を、B と R から作った重み K で
+        # 空間全体へ広げる。
         state = forecast + gain @ innovation
         forecast_t[k] = forecast
         da_t[k] = state
@@ -200,12 +226,12 @@ def run_da(
 
 
 def axial_history(fistr: FrontISTRInterface, values: np.ndarray) -> np.ndarray:
-    """Collapse a nodal temperature history into axial averages."""
+    """節点温度履歴を軸方向平均へ畳み込む。"""
     return np.vstack([fistr.axial_profile(row) for row in values])
 
 
 def save_summary(fistr: FrontISTRInterface, truth_t: np.ndarray, model_t: np.ndarray, da_t: np.ndarray) -> None:
-    """Save axial RMSE statistics for the model-only and DA cases."""
+    """モデル単独と同化ありの軸方向 RMSE を保存する。"""
     t_start = 2 * N_STEPS // 3
     truth = axial_history(fistr, truth_t)
     model = axial_history(fistr, model_t)
@@ -237,7 +263,7 @@ def save_node_temperature_comparison(
     model_t: np.ndarray,
     da_t: np.ndarray,
 ) -> None:
-    """Save per-node temperature comparison CSVs for the nodal and axial views."""
+    """節点ごとの温度比較 CSV を保存する。軸方向表示にも使う。"""
     time_s = (np.arange(N_STEPS) + 1) * DT
     assert fistr.node_x is not None
     coords = fistr._node_coordinates()

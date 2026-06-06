@@ -12,6 +12,7 @@ BUILD_DIR = OUT_DIR / "_build"
 
 
 def latex_escape(text: str) -> str:
+    """LaTeX で特別扱いされる記号を安全にエスケープする。"""
     repl = {
         "\\": r"\textbackslash{}",
         "&": r"\&",
@@ -121,6 +122,7 @@ def image_latex(alt: str, rel: str, base: Path) -> str:
 
 
 def table_to_latex(rows: list[str]) -> str:
+    """Markdown の表を LaTeX の longtable に変換する。"""
     parsed = []
     for row in rows:
         cells = [c.strip() for c in row.strip().strip("|").split("|")]
@@ -142,6 +144,7 @@ def table_to_latex(rows: list[str]) -> str:
 
 
 def markdown_to_latex(md: str, base: Path) -> str:
+    """Markdown 本文を LaTeX 本文へ変換する。"""
     lines = md.splitlines()
     out: list[str] = []
     i = 0
@@ -269,6 +272,7 @@ def markdown_to_latex(md: str, base: Path) -> str:
 
 
 def make_tex(md_path: Path) -> str:
+    """指定した Markdown からコンパイル用の TeX 文書を作る。"""
     body = markdown_to_latex(md_path.read_text(encoding="utf-8"), md_path.parent)
     title = latex_escape(md_path.stem)
     return rf"""\documentclass[a4paper,11pt]{{ltjsarticle}}
@@ -293,6 +297,7 @@ def make_tex(md_path: Path) -> str:
 
 
 def convert(md_path: Path) -> None:
+    """Markdown を LaTeX 経由で PDF に変換する。"""
     OUT_DIR.mkdir(exist_ok=True)
     BUILD_DIR.mkdir(exist_ok=True)
     tex_path = BUILD_DIR / f"{md_path.stem}.tex"
@@ -314,6 +319,7 @@ def convert(md_path: Path) -> None:
 
 
 def main() -> int:
+    """コマンドライン入口。Docs 配下の Markdown を順に PDF 化する。"""
     md_files = sorted(p for p in DOC_DIR.glob("*.md") if p.name.lower() != "md_to_pdf.md")
     failed = []
     for md in md_files:

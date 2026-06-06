@@ -222,7 +222,7 @@ class OFInterface:
 # ------------------------------------------------------------------ #
 
 def _is_time_dir(name: str) -> bool:
-    """ディレクトリ名が有効な数値（時刻）かを確認する。"""
+    """ディレクトリ名が時刻として解釈できるかを判定する。"""
     try:
         float(name)
         return True
@@ -243,11 +243,7 @@ def _format_time(time: float) -> str:
 
 
 def _parse_internal_field(text: str, n_cells: int) -> np.ndarray:
-    """
-    OpenFOAM ASCII フィールドファイルから internalField の値を読み取る。
-
-    nonuniform List<scalar> と uniform value の両形式に対応する。
-    """
+    """OpenFOAM フィールドファイルの internalField を読み取る。"""
     # nonuniform パターン: "internalField nonuniform List<scalar>\nN\n(\n値...\n);"
     m = re.search(
         r"internalField\s+nonuniform\s+List<scalar>\s+\d+\s*\(\s*(.*?)\s*\)",

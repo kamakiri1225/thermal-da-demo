@@ -33,6 +33,7 @@ from kalman_filter import KalmanFilter
 
 # ── 日本語フォント設定 ─────────────────────────────────────────
 def _setup_jp_font() -> None:
+    """日本語が文字化けしないように使えるフォントを優先設定する。"""
     import matplotlib.font_manager as fm
     candidates = ["IPAexGothic","IPAGothic","Noto Sans CJK JP",
                   "Yu Gothic","Meiryo","MS Gothic"]
@@ -83,16 +84,18 @@ C_DISP = ALPHA_EXP * DX * 1e6   # [μm/°C] per node
 # ヘルパー
 # ══════════════════════════════════════════════════════════════
 def make_heat_input(n_steps: int) -> np.ndarray:
+    """ON/OFF サイクルの熱入力系列を作る。"""
     cycle = CYCLE_ON + CYCLE_OFF
     return np.array([Q_ON if (k % cycle) < CYCLE_ON else 0.0 for k in range(n_steps)])
 
 
 def true_displacement_um(temps: np.ndarray) -> np.ndarray:
-    """全節点温度から真の変位 [μm] を計算"""
+    """全節点温度から真の変位 [μm] を計算する。"""
     return C_DISP * np.sum(temps - T_INIT, axis=1)
 
 
 def rmse(a: np.ndarray, b: np.ndarray) -> float:
+    """2系列の RMSE を返す。"""
     return float(np.sqrt(np.mean((a - b) ** 2)))
 
 
@@ -189,6 +192,7 @@ def run_case(case: str, x_true_series: np.ndarray, u_series: np.ndarray) -> dict
 # 統計表示
 # ══════════════════════════════════════════════════════════════
 def print_comparison(cases: dict[str, dict], true_T: np.ndarray, disp_true: np.ndarray) -> None:
+    """ケースごとの RMSE を表にして標準出力へ出す。"""
     t_start = 2 * N_STEPS // 3
     labels  = {"A": "温度2点のみ     ", "B": "温度2点+変位1点", "C": "変位1点のみ     "}
     hidden  = [i for i in range(N_NODES) if i not in SENSOR_NODES]
@@ -217,6 +221,7 @@ def print_comparison(cases: dict[str, dict], true_T: np.ndarray, disp_true: np.n
 def plot_comparison(cases: dict[str, dict], true_T: np.ndarray,
                     disp_true: np.ndarray, u_series: np.ndarray,
                     save_path: str = "results_disp_obs.png") -> None:
+    """観測構成ごとの比較グラフを保存する。"""
     time_min = np.arange(N_STEPS) * DT / 60.0
     t_start  = 2 * N_STEPS // 3
 

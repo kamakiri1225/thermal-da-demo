@@ -1,10 +1,8 @@
 """
-Round-bar mesh generator for the FrontISTR data-assimilation demo.
+FrontISTR データ同化デモ用の丸棒メッシュ生成器。
 
-The mesh is a simple structured hexahedral approximation of a cylindrical rod:
-one square center block and four outer sector blocks, extruded along the axial
-direction. The layout is intentionally similar in spirit to the OpenFOAM
-blockMesh setup used in the paired laplacianFoam example.
+円柱を、中央 1 ブロック + 外周 4 ブロックの構造六面体で近似し、
+軸方向へ押し出して作る。OpenFOAM 版の blockMesh に発想を合わせている。
 """
 
 from __future__ import annotations
@@ -15,6 +13,7 @@ import numpy as np
 
 
 def build_round_bar_mesh(n_axial: int, length: float, radius: float) -> dict[str, object]:
+    """丸棒の六面体メッシュを生成してノード・要素・境界グループを返す。"""
     inner = radius / 2.5
     s_in = inner / math.sqrt(2.0)
 
@@ -105,6 +104,7 @@ def build_round_bar_mesh(n_axial: int, length: float, radius: float) -> dict[str
 
 
 def _hex_orientation(conn: list[int], nodes: list[tuple[int, tuple[float, float, float]]]) -> float:
+    """Hex 要素の向きを判定するための符号付き体積を返す。"""
     coord = {node_id: np.array(xyz, dtype=float) for node_id, xyz in nodes}
     p0 = coord[conn[0]]
     return float(

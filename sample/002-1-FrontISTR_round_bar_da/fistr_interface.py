@@ -1,9 +1,8 @@
 """
-FrontISTR heat-analysis interface for the round-bar OI demo.
+丸棒 OI デモ用の FrontISTR 連携層。
 
-This module generates a small cylindrical hexahedral mesh, writes FrontISTR
-control files for one transient heat step, runs fistr1, and reads nodal
-temperature results.
+このモジュールは、円柱の六面体メッシュを作成し、1 ステップ分の
+FrontISTR 入力ファイルを書き出し、`fistr1` を実行し、節点温度を読む。
 """
 
 from __future__ import annotations
@@ -21,7 +20,7 @@ from round_bar_mesh import build_round_bar_mesh
 
 
 class FrontISTRInterface:
-    """Round-bar FrontISTR I/O wrapper used by the OI loop."""
+    """OI ループから使う、丸棒 FrontISTR の入出力ラッパー。"""
     def __init__(
         self,
         case_dir: Path,
@@ -53,7 +52,7 @@ class FrontISTRInterface:
         return len(self.node_ids)
 
     def reset(self) -> None:
-        """Recreate the case directory, mesh, and static FrontISTR control file."""
+        """case ディレクトリ、メッシュ、固定の制御ファイルを作り直す。"""
         if self.case_dir.exists():
             shutil.rmtree(self.case_dir)
         self.case_dir.mkdir(parents=True)
@@ -61,7 +60,7 @@ class FrontISTRInterface:
         self._write_hecmw_ctrl()
 
     def run_step(self, values: np.ndarray, left_flux: float, right_temp: float) -> np.ndarray:
-        """Write one .cnt file, run fistr1, and return the latest nodal temperature field."""
+        """`.cnt` を書き、`fistr1` を実行し、最新の節点温度を返す。"""
         self._ensure_mesh()
         values = np.asarray(values, dtype=float)
         if values.shape[0] != self.n_nodes:
@@ -86,7 +85,7 @@ class FrontISTRInterface:
         return self.read_result()
 
     def read_result(self) -> np.ndarray:
-        """Read the newest FrontISTR result file and map it back to nodal temperatures."""
+        """最新の FrontISTR 結果ファイルを読んで節点温度へ戻す。"""
         candidates = sorted(self.case_dir.glob("round_bar.res.0.*"))
         if not candidates:
             raise FileNotFoundError(f"FrontISTR result not found in {self.case_dir}")
@@ -95,7 +94,7 @@ class FrontISTRInterface:
         return np.array([vals[node_id] for node_id in self.node_ids], dtype=float)
 
     def axial_profile(self, values: np.ndarray) -> np.ndarray:
-        """Collapse nodal temperatures into axial averages for plotting and RMSE."""
+        """節点温度を軸方向平均に畳み込み、描画や RMSE に使える形にする。"""
         self._ensure_mesh()
         x = self.node_x
         assert x is not None
@@ -106,7 +105,7 @@ class FrontISTRInterface:
         for xi, vi in zip(x, values):
             idx = int(round(xi / dx))
             idx = max(0, min(self.n_axial, idx))
-            # Convert nodal positions to cell-center-like axial bins for plotting.
+            # 節点の位置を、描画用にセル中心に近い軸方向ビンへ丸める。
             if idx == self.n_axial:
                 bin_idx = self.n_axial - 1
             else:
@@ -116,11 +115,11 @@ class FrontISTRInterface:
         return profile / np.maximum(counts, 1)
 
     def axial_positions(self) -> np.ndarray:
-        """Return the x-position of each axial bin center."""
+        """各軸方向ビン中心の x 座標を返す。"""
         return (np.arange(self.n_axial) + 0.5) * (self.length_m / self.n_axial)
 
     def axial_representative_node_indices(self) -> list[int]:
-        """Pick one node per axial bin to act as a 1D measurement location."""
+        """各軸方向ビンから代表 1 節点を選び、1D の測定位置にする。"""
         self._ensure_mesh()
         x = self.node_x
         assert x is not None
@@ -133,7 +132,7 @@ class FrontISTRInterface:
         return indices
 
     def _ensure_mesh(self) -> None:
-        """Load the mesh from disk if this instance has not been initialized yet."""
+        """未初期化なら、ディスク上のメッシュを読み込む。"""
         if not self.node_ids:
             if not (self.case_dir / "round_bar.msh").exists():
                 self.reset()
@@ -141,14 +140,14 @@ class FrontISTRInterface:
                 self._load_mesh_nodes()
 
     def _cleanup_previous_outputs(self) -> None:
-        """Remove result and log files from the previous FrontISTR step."""
+        """前回の FrontISTR 実行で残った結果やログを消す。"""
         for pattern in ("round_bar.res.*", "round_bar.vis*", "FSTR.*", "*.log", "0.log"):
             for path in self.case_dir.glob(pattern):
                 if path.is_file():
                     path.unlink()
 
     def _write_hecmw_ctrl(self) -> None:
-        """Write the static HEC-MW control file that points FrontISTR to the case inputs."""
+        """FrontISTR が case 入力を読むための固定 HEC-MW 制御ファイルを書く。"""
         (self.case_dir / "hecmw_ctrl.dat").write_text(
             """\
 ##
@@ -166,11 +165,9 @@ round_bar_vis
         )
 
     def _write_cnt(self, values: np.ndarray, left_flux: float, right_temp: float) -> None:
-        # round_bar.cnt is tracked in the repo as a readable template.
-        # Each DA step overwrites it with the current nodal initial temperatures
-        # and boundary conditions before calling fistr1.
-        # Specifically, the script rewrites the full nodal temperature field,
-        # the right-end fixed temperature, and the left-end imposed heat flux.
+        # `round_bar.cnt` は読みやすいテンプレートとしてリポジトリに置いてある。
+        # 各 DA ステップでは `fistr1` 実行前にここを書き換える。
+        # 具体的には、節点初期温度全体、右端の固定温度、左端の熱流束を上書きする。
         lines = [
             "!STEP,INCMAX=10000",
             "!SOLUTION,TYPE=HEAT",
@@ -201,7 +198,7 @@ round_bar_vis
         (self.case_dir / "round_bar.cnt").write_text("\n".join(lines) + "\n")
 
     def _write_mesh(self) -> None:
-        """Build and write the hexahedral round-bar mesh in FrontISTR format."""
+        """丸棒の六面体メッシュを組み立て、FrontISTR 形式で書き出す。"""
         mesh = build_round_bar_mesh(self.n_axial, self.length_m, self.radius_m)
         self.node_ids = [node_id for node_id, _coord in mesh["nodes"]]
         self.node_x = np.array([coord[0] for _node_id, coord in mesh["nodes"]], dtype=float)
@@ -236,7 +233,7 @@ round_bar_vis
         (self.case_dir / "round_bar.msh").write_text("\n".join(lines) + "\n")
 
     def _load_mesh_nodes(self) -> None:
-        """Load node ids and x-coordinates from an existing .msh file."""
+        """既存の `.msh` から節点 ID と x 座標を読む。"""
         text = (self.case_dir / "round_bar.msh").read_text()
         nodes: list[tuple[int, float]] = []
         in_nodes = False
@@ -254,7 +251,7 @@ round_bar_vis
         self.node_x = np.array([x for _node_id, x in nodes], dtype=float)
 
     def _node_coordinates(self) -> np.ndarray:
-        """Return the full xyz coordinate array for all nodes in the mesh."""
+        """メッシュ全節点の xyz 座標配列を返す。"""
         text = (self.case_dir / "round_bar.msh").read_text()
         coords: list[tuple[float, float, float]] = []
         in_nodes = False
@@ -272,7 +269,7 @@ round_bar_vis
 
 
 def _format_group_ids(ids: list[int], per_line: int = 8) -> list[str]:
-    """Format node or element ids into FrontISTR group lines."""
+    """節点 ID / 要素 ID を FrontISTR の group 行に整形する。"""
     lines = []
     for i in range(0, len(ids), per_line):
         lines.append(" " + ", ".join(str(x) for x in ids[i:i + per_line]))
@@ -280,7 +277,7 @@ def _format_group_ids(ids: list[int], per_line: int = 8) -> list[str]:
 
 
 def _parse_frontistr_temperature(text: str) -> dict[int, float]:
-    """Parse a FrontISTR result file into a node_id -> temperature mapping."""
+    """FrontISTR の結果ファイルを node_id -> 温度 の対応に変換する。"""
     marker = re.search(r"^\s*TEMPERATURE\s*$", text, flags=re.MULTILINE)
     if not marker:
         raise ValueError("TEMPERATURE section not found in FrontISTR result")

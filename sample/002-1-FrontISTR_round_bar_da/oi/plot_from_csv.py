@@ -1,5 +1,5 @@
 """
-Create clear comparison plots from FrontISTR DA CSV results.
+FrontISTR データ同化の CSV 結果から比較図を作る。
 """
 
 from __future__ import annotations
@@ -21,12 +21,12 @@ ASSIM_NODES = {4, 16}
 
 
 def read_csv(path: Path) -> np.ndarray:
-    """Read a CSV file with headers into a structured NumPy array."""
+    """ヘッダ付き CSV を構造化 NumPy 配列として読む。"""
     return np.genfromtxt(path, delimiter=",", names=True)
 
 
 def plot_measurement_points() -> None:
-    """Plot truth / model-only / DA histories at the representative sensor nodes."""
+    """代表測定点で、真値・同化なし・同化ありを比較表示する。"""
     RESULTS_IMG_DIR.mkdir(parents=True, exist_ok=True)
     data = read_csv(RESULTS_DIR / "measurement_node_temperature_comparison.csv")
     fig, axes = plt.subplots(2, 2, figsize=(13, 8), sharex=True)
@@ -68,7 +68,7 @@ VALIDATION_NODES = {28, 36}
 
 
 def plot_all_axial_nodes_grid() -> None:
-    """Plot every axial node in a dense panel for quick inspection of the time history."""
+    """全軸方向節点の時系列を密に並べて確認する。"""
     RESULTS_IMG_DIR.mkdir(parents=True, exist_ok=True)
     data = read_csv(RESULTS_DIR / "axial_node_temperature_comparison.csv")
     y_min = min(float(np.min(data[key])) for key in ["truth", "without_da", "with_da"])
@@ -116,7 +116,7 @@ def plot_all_axial_nodes_grid() -> None:
 
 
 def plot_axial_heatmap() -> None:
-    """Plot temperature heatmaps for truth, model-only, and DA histories."""
+    """真値・同化なし・同化ありの温度ヒートマップを描く。"""
     RESULTS_IMG_DIR.mkdir(parents=True, exist_ok=True)
     data = read_csv(RESULTS_DIR / "axial_node_temperature_comparison.csv")
     time_values = np.unique(data["time_s"])
@@ -166,7 +166,7 @@ def plot_axial_heatmap() -> None:
 
 
 def plot_axial_error_heatmap() -> None:
-    """Plot error heatmaps for model-only and DA relative to truth."""
+    """真値との差分ヒートマップを、同化なし・同化ありで描く。"""
     RESULTS_IMG_DIR.mkdir(parents=True, exist_ok=True)
     data = read_csv(RESULTS_DIR / "axial_node_temperature_comparison.csv")
     time_values = np.unique(data["time_s"])
