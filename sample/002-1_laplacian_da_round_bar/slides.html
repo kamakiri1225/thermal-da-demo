@@ -1111,18 +1111,22 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 <section>
   <span class="sec-tag">Results — Node-by-Node Comparison</span>
   <h2>全節点温度時系列: OpenFOAM vs FrontISTR</h2>
-  <div class="image-scroll" style="max-height:380px; margin-bottom:6px;">
+  <div class="image-scroll" style="max-height:600px; margin-bottom:6px;">
     <img src="assets/comparison_of_vs_fistr.png" alt="全節点 OpenFOAM vs FrontISTR 比較">
   </div>
-  <p class="caption" style="margin-bottom:6px;">
+  <p class="caption">
     黄背景=[S]同化センサ (N4,N16) ／ 青背景=[V]検証節点 (N28,N36)<br>
     黒実線=Truth(OF) ／ 灰破線=Truth(FI) ／ 橙破線=Model only(OF) ／ 茶点線=Model only(FI) ／ 青実線=OI(OF) ／ 赤実線=OI(FI)
   </p>
-  <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d;">
+</section>
+<section>
+  <span class="sec-tag">Results — Animation</span>
+  <h2>温度場アニメーション: OI データ同化後</h2>
+  <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d; margin-top:12px;">
     <img src="assets/ani_OF_FI.gif" alt="OI データ同化後の温度場アニメーション"
          style="width:100%; display:block; border-radius:4px;">
   </div>
-  <p class="caption" style="margin-top:5px;">OI データ同化後の温度場アニメーション (OpenFOAM 左 / FrontISTR 右、時刻は秒で同期)</p>
+  <p class="caption" style="margin-top:8px;">OpenFOAM 左 / FrontISTR 右 ─ 時刻は秒で同期</p>
 </section>
 </section>
 
