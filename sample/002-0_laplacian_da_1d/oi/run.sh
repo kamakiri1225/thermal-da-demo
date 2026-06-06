@@ -1,11 +1,11 @@
 #!/bin/bash
 # run.sh  (oi/)
 # ==============
-# 002_laplacian_da_1d/oi の実行スクリプト。
+# 002-0_laplacian_da_1d/oi の実行スクリプト。
 # Optimal Interpolation によるデータ同化デモ。
 #
 # 実行方法:
-#   cd sample/002_laplacian_da_1d/oi
+#   cd sample/002-0_laplacian_da_1d/oi
 #   chmod +x run.sh
 #   ./run.sh
 

@@ -12,10 +12,10 @@ laplacianFoam を使った1次元熱モデルの Optimal Interpolation データ
   ただし境界勾配 G を意図的にずらして、モデル誤差がある状況を作る。
 
 【実行方法】
-    cd sample/002_laplacian_da_1d/oi
+    cd sample/002-0_laplacian_da_1d/oi
     python da_main.py
   または
-    cd sample/002_laplacian_da_1d/oi
+    cd sample/002-0_laplacian_da_1d/oi
     ./run.sh
 
 【比較内容】
@@ -37,7 +37,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-# of_interface.py は親ディレクトリ (002_laplacian_da_1d/) に置いてモデル共有
+# of_interface.py は親ディレクトリ (002-0_laplacian_da_1d/) に置いてモデル共有
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from of_interface import OFInterface
 

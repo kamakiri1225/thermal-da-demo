@@ -447,7 +447,7 @@ with_da    : データ同化ありの計算
 結果画像は次に保存されています。
 
 ```text
-sample/002_laplacian_da_1d/results/results_of_da.png
+sample/002-0_laplacian_da_1d/results/results_of_da.png
 ```
 
 ブログ上では、次の図が今回の結果です。

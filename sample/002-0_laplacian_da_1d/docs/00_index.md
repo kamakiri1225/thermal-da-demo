@@ -1,6 +1,6 @@
 # ドキュメント目次
 
-`002_laplacian_da_1d` — laplacianFoam + Optimal Interpolation データ同化サンプル
+`002-0_laplacian_da_1d` — laplacianFoam + Optimal Interpolation データ同化サンプル
 
 ---
 
@@ -220,7 +220,7 @@ $$
 ## フォルダ構成（参考）
 
 ```
-002_laplacian_da_1d/
+002-0_laplacian_da_1d/
 ├── case_base/              ← OpenFOAM テンプレート（実行しない）
 ├── of_interface.py         ← OpenFOAM-Python ブリッジ（モデル共有）
 ├── docs/                   ← このフォルダ

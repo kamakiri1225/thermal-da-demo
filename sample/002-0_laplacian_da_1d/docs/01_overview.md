@@ -1,4 +1,4 @@
-# 002_laplacian_da_1d: laplacianFoam + OI データ同化テスト
+# 002-0_laplacian_da_1d: laplacianFoam + OI データ同化テスト
 
 ## このサンプルの目的
 
@@ -67,7 +67,7 @@ OpenFOAM予測値 + センサ観測による補正
 OpenFOAM 2512 が WSL 側にある前提です。
 
 ```bash
-cd sample/002_laplacian_da_1d/oi
+cd sample/002-0_laplacian_da_1d/oi
 ./run.sh
 ```
 
