@@ -29,7 +29,7 @@
 | サンプル | 内容 | 主な手法 | スライド | 状態 |
 |---|---|---|---|---|
 | `sample/001_kalman_thermal_1d` | Python だけで動く 1 次元熱伝導デモ | Kalman filter | [▶ スライドを開く](https://kamakiri1225.github.io/thermal-da-demo/sample/001_kalman_thermal_1d/slides.html) | 実装済み |
-| `sample/002_laplacian_da_1d` | OpenFOAM `laplacianFoam` と Python をつなぐデータ同化デモ | optimal interpolation | [▶ スライドを開く](https://kamakiri1225.github.io/thermal-da-demo/sample/002_laplacian_da_1d/slides.html) | 実装済み |
+| `sample/002-0_laplacian_da_1d` | OpenFOAM `laplacianFoam` と Python をつなぐデータ同化デモ | optimal interpolation | [▶ スライドを開く](https://kamakiri1225.github.io/thermal-da-demo/sample/002-0_laplacian_da_1d/slides.html) | 実装済み |
 | `sample/002-1_laplacian_da_round_bar` | 丸棒の軸方向温度場を OpenFOAM / FrontISTR の2ソルバーで OI データ同化し比較するデモ | optimal interpolation | [▶ スライドを開く](https://kamakiri1225.github.io/thermal-da-demo/sample/002-1_laplacian_da_round_bar/slides.html) | 実装済み |
 
 ## リポジトリ構成
@@ -45,7 +45,7 @@ thermal-da-demo/
 │   │   ├── thermal_model.py
 │   │   ├── slides.html
 │   │   └── docs/
-│   ├── 002_laplacian_da_1d/
+│   ├── 002-0_laplacian_da_1d/
 │   │   ├── of_interface.py
 │   │   ├── case_base/
 │   │   ├── oi/
@@ -82,10 +82,10 @@ thermal-da-demo/
 
 - サンプル一覧と手法の説明: [sample/README.md](sample/README.md)
 - 001 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/001_kalman_thermal_1d/slides.html)
-- 002 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/002_laplacian_da_1d/slides.html)
+- 002 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/002-0_laplacian_da_1d/slides.html)
 - 002-1 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/002-1_laplacian_da_round_bar/slides.html)
 - 001 の詳細: [sample/001_kalman_thermal_1d/docs/00_index.md](sample/001_kalman_thermal_1d/docs/00_index.md)
-- 002 の詳細: [sample/002_laplacian_da_1d/docs/00_index.md](sample/002_laplacian_da_1d/docs/00_index.md)
+- 002 の詳細: [sample/002-0_laplacian_da_1d/docs/00_index.md](sample/002-0_laplacian_da_1d/docs/00_index.md)
 - 002-1 の詳細: [sample/002-1_laplacian_da_round_bar/README.md](sample/002-1_laplacian_da_round_bar/README.md)
 - 先行研究メモ: [docs/](docs/)
 

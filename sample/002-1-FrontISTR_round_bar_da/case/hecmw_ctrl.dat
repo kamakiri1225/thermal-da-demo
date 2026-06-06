@@ -1,0 +1,11 @@
+##
+## HEC-MW control file for FrontISTR round bar DA
+##
+!MESH, NAME=fstrMSH, TYPE=HECMW-ENTIRE
+round_bar.msh
+!CONTROL, NAME=fstrCNT
+round_bar.cnt
+!RESULT, NAME=fstrRES, IO=OUT
+round_bar.res
+!RESULT, NAME=vis_out, IO=OUT
+round_bar_vis

@@ -37,7 +37,7 @@ OpenFOAM 版 `sample/002-1_laplacian_da_round_bar` と同じ条件を使う予�
 ## 実行方法
 
 ```bash
-cd /mnt/d/work/002_CAE/openfoam/20260505_datadoka/sample/002-1-FrontISTR_round_bar_da/oi
+cd "$(git rev-parse --show-toplevel)/sample/002-1-FrontISTR_round_bar_da/oi"
 ./run.sh
 ```
 

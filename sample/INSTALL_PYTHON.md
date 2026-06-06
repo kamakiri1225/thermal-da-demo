@@ -14,13 +14,14 @@
 ### 1. 仮想環境の作成（初回のみ）
 
 ```bash
-cd /mnt/d/work/002_CAE/openfoam/20260505_datadoka/sample
+cd "$(git rev-parse --show-toplevel)/sample"
 python3 -m venv .venv
 ```
 
 Windows (PowerShell) の場合:
 ```powershell
-cd D:\work\002_CAE\openfoam\20260505_datadoka\sample
+$repoRoot = git rev-parse --show-toplevel
+Set-Location "$repoRoot\sample"
 python -m venv .venv
 ```
 
@@ -59,7 +60,7 @@ deactivate
 ### OpenFOAM 丸棒 DA (002-1_laplacian_da_round_bar)
 
 ```bash
-cd 002-1_laplacian_da_round_bar/oi
+cd "$(git rev-parse --show-toplevel)/sample/002-1_laplacian_da_round_bar/oi"
 python da_main.py          # データ同化実行
 python plot_nodes_from_csv.py  # グラフ生成
 ```
@@ -70,7 +71,7 @@ FrontISTR (`fistr1`) が別途必要です。
 インストール方法は `002-1-FrontISTR_round_bar_da/INSTALL.md` を参照してください。
 
 ```bash
-cd 002-1-FrontISTR_round_bar_da/oi
+cd "$(git rev-parse --show-toplevel)/sample/002-1-FrontISTR_round_bar_da/oi"
 python da_main.py          # データ同化実行
 python plot_from_csv.py    # グラフ生成
 ```

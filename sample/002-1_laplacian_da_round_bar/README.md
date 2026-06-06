@@ -1,6 +1,6 @@
 # 002-1: laplacianFoam + OI round bar data assimilation
 
-`002_laplacian_da_1d` を丸棒実験向けにした派生サンプルです。
+`002-0_laplacian_da_1d` を丸棒実験向けにした派生サンプルです。
 
 OpenFOAM の `laplacianFoam` を温度場予測器として使い、Python 側で optimal interpolation (OI) による補正を行います。丸棒は軸方向の温度分布を推定する目的に合わせ、長さ 0.3 m、直径 0.01 m の擬似 1 次元モデルとして扱います。
 
@@ -41,6 +41,10 @@ $$
 | 検証 | N36 | x = 0.274 m |
 
 同化センサだけを OI の観測 `y` に使います。検証センサは、同化に使っていない位置でも推定が改善しているかを見るために残しています。
+
+## 設定ファイル
+
+OpenFOAM の設定本体は `case_base/` に置いています。`oi/run.sh` はここから `oi/case/` を生成して実行します。`oi/case/` 自体は計算ごとの出力を含むため、GitHub には入れません。
 
 ## 実行方法
 

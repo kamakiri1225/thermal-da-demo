@@ -9,7 +9,7 @@
 | サンプル | 目的 | 使う手法 | OpenFOAM | スライド |
 |---|---|---|---|---|
 | `001_kalman_thermal_1d` | Python だけでデータ同化の基本動作を確認する | Kalman filter | 不要 | [slides.html](001_kalman_thermal_1d/slides.html) |
-| `002_laplacian_da_1d` | OpenFOAM の温度場予測をセンサ観測で補正する流れを確認する | optimal interpolation | 必要 | [slides.html](002_laplacian_da_1d/slides.html) |
+| `002-0_laplacian_da_1d` | OpenFOAM の温度場予測をセンサ観測で補正する流れを確認する | optimal interpolation | 必要 | [slides.html](002-0_laplacian_da_1d/slides.html) |
 | `002-1_laplacian_da_round_bar` | 丸棒の軸方向温度場を OpenFOAM / FrontISTR の2ソルバーで OI データ同化し比較する | optimal interpolation | 必要 | [slides.html](002-1_laplacian_da_round_bar/slides.html) |
 
 ## 001: Kalman filter による 1D 熱データ同化
@@ -72,7 +72,7 @@ python main_disp_obs.py
 場所:
 
 ```text
-sample/002_laplacian_da_1d/
+sample/002-0_laplacian_da_1d/
 ```
 
 ### 目的
@@ -116,14 +116,14 @@ $$
 
 ### スライド
 
-[002_laplacian_da_1d/slides.html](002_laplacian_da_1d/slides.html)
+[002-0_laplacian_da_1d/slides.html](002-0_laplacian_da_1d/slides.html)
 
 ### 実行例
 
 OpenFOAM 2512 が使える環境で実行します。
 
 ```bash
-cd sample/002_laplacian_da_1d/oi
+cd sample/002-0_laplacian_da_1d/oi
 ./run.sh
 ```
 

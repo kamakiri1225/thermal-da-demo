@@ -1326,7 +1326,7 @@ body.print-pdf #pdf-toast { display: none !important; }
           </div>
           <div class="card green">
             <strong>OI（Optimal Interpolation）</strong>&ensp;<span class="badge badge-green">002 実装済み</span><br>
-            <span style="color:var(--muted); font-size:0.78em;">sample/002_laplacian_da_1d/oi/</span><br>
+            <span style="color:var(--muted); font-size:0.78em;">sample/002-0_laplacian_da_1d/oi/</span><br>
             <span class="muted">固定 B、A_d 不要。CFD をブラックボックスとして使える</span>
           </div>
           <div class="card orange" style="margin-top:8px;">
@@ -1580,7 +1580,7 @@ Sensor                                              Sensor
         <span class="muted">→ KF の原理確認・少数センサからの温度場推定・変位推定</span>
       </div>
       <div class="card orange" style="margin-bottom:10px;">
-        <strong class="hl-orange">✅ 002_laplacian_da_1d（実装済み）</strong><br>
+        <strong class="hl-orange">✅ 002-0_laplacian_da_1d（実装済み）</strong><br>
         OpenFOAM laplacianFoam + Optimal Interpolation (OI)<br>
         <span class="muted">→ CFDソルバをブラックボックスとして扱うDAの原理実証</span>
       </div>
@@ -2899,7 +2899,7 @@ disp_est  = compute_displacement(kf_T[-1])
       <div>
         <h3>短期（次のステップ）</h3>
         <div class="card orange">
-          <strong>002_laplacian_da_1d</strong><br>
+          <strong>002-0_laplacian_da_1d</strong><br>
           <span class="muted">実装済み</span><br>
           OpenFOAM laplacianFoam + OI。
           A_d を使わず CFD をブラックボックスとして扱う DA の実証。

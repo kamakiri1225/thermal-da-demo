@@ -210,7 +210,7 @@ Python 版（001）から OpenFOAM 版（002）への橋渡しとなるドキュ
   05_program_guide.md  →  03_theory_to_code.md
 
 002 サンプルへ進む場合:
-  07_nextstep.md  →  002_laplacian_da_1d/docs/00_index.md
+  07_nextstep.md  →  002-0_laplacian_da_1d/docs/00_index.md
 ```
 
 ---
