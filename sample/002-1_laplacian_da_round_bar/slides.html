@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>丸棒熱伝導 OI データ同化 | OpenFOAM &amp; FrontISTR</title>
+
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg2:       #161b22;
+  --bg3:       #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --blue:      #58a6ff;
+  --blue2:     #79c0ff;
+  --green:     #3fb950;
+  --orange:    #e3b341;
+  --red:       #f85149;
+  --purple:    #bc8cff;
+  --cyan:      #39d0d8;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal {
+  background: var(--bg);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+  color: var(--text);
+  font-size: 18px;
+}
+.reveal .slides section {
+  text-align: left;
+  padding: 30px 40px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.reveal .slides section::-webkit-scrollbar { width: 5px; }
+.reveal .slides section::-webkit-scrollbar-track { background: transparent; }
+.reveal .slides section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.reveal .slides section::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.reveal .slides section.title-slide {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 28% 38%, #1a2744 0%, transparent 58%),
+    radial-gradient(ellipse at 72% 68%, #0f3027 0%, transparent 58%),
+    var(--bg);
+}
+.reveal h1 {
+  font-size: 1.95em;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.35em;
+  text-transform: none;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal h2 {
+  font-size: 1.42em;
+  font-weight: 700;
+  text-transform: none;
+  color: var(--blue2);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  text-align: left;
+}
+.reveal h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--orange);
+  margin: 0.2em 0 0.4em;
+  text-align: left;
+}
+.reveal p, .reveal li {
+  line-height: 1.55;
+  font-size: 0.88em;
+  text-align: left;
+}
+.reveal ul { margin-top: 0.3em; }
+.reveal li { margin-bottom: 0.28em; }
+.reveal strong { color: #fff; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 0.76em !important; }
+.center { text-align: center !important; }
+.sec-tag {
+  display: inline-block;
+  font-size: 0.62em;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.col-6-4 { display: grid; grid-template-columns: 6fr 4fr; gap: 18px; align-items: start; }
+.col-4-6 { display: grid; grid-template-columns: 4fr 6fr; gap: 18px; align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch; }
+.four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: stretch; }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.card.blue  { border-left: 4px solid var(--blue); }
+.card.green { border-left: 4px solid var(--green); }
+.card.orange{ border-left: 4px solid var(--orange); }
+.card.red   { border-left: 4px solid var(--red); }
+.card.purple{ border-left: 4px solid var(--purple); }
+.card.cyan  { border-left: 4px solid var(--cyan); }
+
+.info-box {
+  background: rgba(88,166,255,0.08);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.warn-box {
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.success-box {
+  background: rgba(63,185,80,0.08);
+  border: 1px solid rgba(63,185,80,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.math-box {
+  background: #0b1220;
+  border: 1px solid rgba(88,166,255,0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.badge-blue   { background: #1f6feb; color: #fff; }
+.badge-green  { background: #238636; color: #fff; }
+.badge-orange { background: #9e6a03; color: #fff; }
+.badge-gray   { background: #444c56; color: #e6edf3; }
+
+.flow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+.flow-item {
+  flex: 1;
+  min-height: 88px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.flow-item .num   { color: var(--cyan); font-weight: 700; font-size: 0.78em; }
+.flow-item .label { font-weight: 700; color: var(--text); margin-top: 4px; line-height: 1.35; }
+.flow-item .note  { color: var(--muted); font-size: 0.78em; line-height: 1.45; margin-top: 5px; }
+.flow-arrow { display: flex; align-items: center; color: var(--blue); font-size: 1.3em; }
+
+.timeline { list-style: none; padding: 0; margin: 10px 0; }
+.timeline li {
+  position: relative;
+  padding: 8px 0 8px 24px;
+  border-left: 2px solid var(--border);
+  margin-left: 10px;
+}
+.timeline li::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  background: var(--blue);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+}
+.timeline li.done::before { background: var(--green); }
+
+.reveal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78em;
+  margin: 0.45em 0;
+}
+.reveal table th {
+  background: var(--bg3);
+  color: var(--blue2);
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+.reveal table td {
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  line-height: 1.45;
+}
+.reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.reveal pre {
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  border-radius: 8px;
+  margin: 0.45em 0;
+}
+.reveal pre code.hljs {
+  max-height: 340px !important;
+  overflow-y: auto !important;
+  font-size: 0.80em;
+  line-height: 1.5;
+  border-radius: 8px;
+  padding: 14px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+.reveal code {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.metric {
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+}
+.metric .value {
+  display: block;
+  font-size: 1.65em;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1.15;
+}
+.metric .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75em;
+  margin-top: 6px;
+}
+
+.hl-blue   { color: var(--blue2); }
+.hl-green  { color: var(--green); }
+.hl-orange { color: var(--orange); }
+.hl-red    { color: var(--red); }
+.hl-purple { color: var(--purple); }
+.hl-cyan   { color: var(--cyan); }
+hr.dim { border: 0; border-top: 1px solid var(--border); margin: 12px 0; }
+
+.figure {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+}
+.figure img { width: 100%; display: block; border-radius: 4px; }
+.figure.large { max-width: 1120px; margin: 0 auto; padding: 6px; }
+.figure.large img { max-height: 560px; object-fit: contain; }
+
+.image-scroll {
+  max-height: 555px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg2);
+  padding: 8px;
+}
+.image-scroll img { display: block; width: 100%; max-width: 100%; height: auto; border-radius: 4px; }
+.image-scroll::-webkit-scrollbar { width: 8px; }
+.image-scroll::-webkit-scrollbar-track { background: var(--bg3); border-radius: 4px; }
+.image-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.image-scroll::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+.caption { color: var(--muted); font-size: 0.72em; margin-top: 5px; text-align: center !important; }
+
+#pdf-export-btn {
+  position: fixed; right: 10px; top: 10px; z-index: 50;
+  background: rgba(13,17,23,0.92); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 8px; font: 600 11px 'Noto Sans JP', sans-serif;
+  cursor: pointer; opacity: 0.38;
+  transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#pdf-export-btn:hover { border-color: var(--blue); color: var(--blue); opacity: 1; }
+#pdf-toast {
+  display: none; position: fixed; right: 10px; top: 44px; z-index: 60;
+  width: 360px; background: rgba(13,17,23,0.96); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 13px 15px; font: 13px/1.55 'Noto Sans JP', sans-serif;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+#pdf-toast.show { display: block; }
+#pdf-toast code { color: var(--cyan); }
+#pdf-toast .close-toast { float: right; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; }
+
+body.print-pdf,
+body.print-pdf .reveal-viewport,
+body.print-pdf .reveal,
+body.print-pdf .slides,
+body.print-pdf .slides section { background: #fff !important; }
+body.print-pdf .reveal,
+body.print-pdf .reveal p,
+body.print-pdf .reveal li,
+body.print-pdf .reveal td { color: #1a1a2e !important; }
+body.print-pdf .reveal h1 {
+  background: none !important; -webkit-background-clip: initial !important;
+  background-clip: initial !important; color: #1a5fb4 !important;
+}
+body.print-pdf .reveal h2 { color: #1a5fb4 !important; border-bottom-color: #ccc !important; }
+body.print-pdf .reveal h3 { color: #9a5000 !important; }
+body.print-pdf .card, body.print-pdf .flow-item, body.print-pdf .metric {
+  background: #f8fafc !important; border-color: #d0d7de !important; color: #1a1a2e !important;
+}
+body.print-pdf .info-box    { background: #eef6ff !important; border-color: #8bbff0 !important; }
+body.print-pdf .warn-box    { background: #fff7e6 !important; border-color: #d4a72c !important; }
+body.print-pdf .success-box { background: #eef8ef !important; border-color: #7bc47f !important; }
+body.print-pdf .math-box    { background: #f5f7fa !important; border-color: #c9d7e8 !important; }
+body.print-pdf .muted, body.print-pdf .caption,
+body.print-pdf .flow-item .note, body.print-pdf .metric .label { color: #555 !important; }
+body.print-pdf .sec-tag { color: #777 !important; }
+body.print-pdf .reveal table th { background: #e9eef5 !important; color: #1a5fb4 !important; border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table td { border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table tr:nth-child(even) td { background: #f5f7fa !important; }
+body.print-pdf .reveal pre,
+body.print-pdf .reveal pre code.hljs { background: #f0f0f0 !important; color: #1a1a2e !important; }
+body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !important; }
+</style>
+</head>
+
+<body>
+<button id="pdf-export-btn">PDF 出力</button>
+<div id="pdf-toast">
+  <span class="close-toast" onclick="this.parentElement.classList.remove('show')">&times;</span>
+  <strong>PDF 出力</strong><br>
+  URL に <code>?print-pdf</code> を付けてから、印刷先を PDF にしてください。
+</div>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══ タイトル ═══ -->
+<section class="title-slide">
+  <div class="sec-tag">002-1_laplacian_da_round_bar</div>
+  <h1>丸棒熱伝導 + Optimal Interpolation<br>データ同化: OpenFOAM &amp; FrontISTR</h1>
+  <div style="width:1100px; margin-top:8px; text-align:left;">
+    <!-- 上段: 目的・やったこと・ケース を横並び -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="card blue" style="margin:0;">
+        <h3>目的</h3>
+        <p>1D 相当の丸棒熱伝導を 2 種類のソルバー (OpenFOAM / FrontISTR) で OI データ同化し、温度場推定の精度向上を確認する。</p>
+      </div>
+      <div class="card green" style="margin:0;">
+        <h3>やったこと</h3>
+        <p>ツイン実験で境界勾配をずらしたモデルを用意し、2 点センサ観測で全節点を OI 補正。RMSE の改善率を計測した。</p>
+      </div>
+      <div class="card cyan" style="margin:0;">
+        <h3>ケース</h3>
+        <table style="font-size:0.82em;">
+          <tr><td><code>truth</code></td><td>G=120 degC/m (正解)</td></tr>
+          <tr><td><code>model only</code></td><td>G=80 (補正なし)</td></tr>
+          <tr><td><code>with DA</code></td><td>2 点 OI 補正あり</td></tr>
+        </table>
+      </div>
+    </div>
+    <!-- 下段: GIF を大きく表示 -->
+    <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d;">
+      <img src="assets/ani_OF_FI.gif" alt="OI データ同化 アニメーション"
+           style="width:100%; display:block; border-radius:4px;">
+    </div>
+    <p class="caption muted" style="margin-top:5px;">
+      OpenFOAM &amp; FrontISTR — OI データ同化後の温度場アニメーション (時刻は秒で同期)
+    </p>
+  </div>
+</section>
+
+<!-- ═══ 目次 ═══ -->
+<section>
+  <h2>目次</h2>
+  <div style="display:flex; flex-direction:column; gap:10px; max-width:760px;">
+    <div class="card blue">
+      <strong style="color:var(--blue);">01</strong>&ensp;問題設定と解析条件
+      <p class="muted" style="margin:4px 0 0; font-size:0.83em;">丸棒モデル / 境界条件・熱入力サイクル / ツイン実験 / OpenFOAM vs FrontISTR の条件統一</p>
+    </div>
+    <div class="card blue">
+      <strong style="color:var(--blue);">02</strong>&ensp;OI データ同化手法
+      <p class="muted" style="margin:4px 0 0; font-size:0.83em;">OI 式 / H 行列・K ゲイン行列の具体例 / DA ループ / Neumann BC が重要な理由</p>
+    </div>
+    <div class="card green">
+      <strong style="color:var(--green);">03</strong>&ensp;結果: OpenFOAM &amp; FrontISTR
+      <p class="muted" style="margin:4px 0 0; font-size:0.83em;">OpenFOAM +94.6% / FrontISTR +94.0% / 全節点温度グラフ / 両ソルバー比較</p>
+    </div>
+    <div class="card orange">
+      <strong style="color:var(--orange);">04</strong>&ensp;OI が効く条件の整理
+      <p class="muted" style="margin:4px 0 0; font-size:0.83em;">センサ配置 / 相関長 / モデルバイアスの性質 / まとめ</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 問題設定 ═══ -->
+<section>
+<section>
+  <span class="sec-tag">Problem Setup</span>
+  <h2>対象問題: 3D 丸棒の熱伝導</h2>
+  <div style="display:grid; grid-template-columns:5fr 4fr 3fr; gap:14px;">
+    <div>
+      <div class="card blue">
+        <h3>ジオメトリ・物性</h3>
+        <table>
+          <tr><th>項目</th><th>値</th></tr>
+          <tr><td>材質</td><td>アルミニウム (A1050)</td></tr>
+          <tr><td>直径 / 長さ</td><td>φ10 mm / L=300 mm</td></tr>
+          <tr><td>熱伝導率 λ</td><td>160 W/(m·K)</td></tr>
+          <tr><td>密度 ρ / 比熱 Cp</td><td>2700 kg/m³ / 900 J/(kg·K)</td></tr>
+          <tr><td>熱拡散率 α</td><td>6.6×10⁻⁵ m²/s</td></tr>
+        </table>
+      </div>
+      <div class="card green" style="margin-top:8px;">
+        <h3>境界条件</h3>
+        <table>
+          <tr><th>面</th><th>種類</th><th>値</th></tr>
+          <tr><td>左端 (x=0)</td><td>Neumann</td><td>G = 120 or 80 degC/m</td></tr>
+          <tr><td>右端 (x=L)</td><td>Dirichlet</td><td>T = 20 degC</td></tr>
+          <tr><td>側面</td><td>断熱</td><td>—</td></tr>
+        </table>
+      </div>
+      <div class="card cyan" style="margin-top:8px;">
+        <h3>ツイン実験</h3>
+        <table>
+          <tr><th>ケース</th><th>G [degC/m]</th><th>定常 T(x=0)</th></tr>
+          <tr><td>truth</td><td>120</td><td>56°C</td></tr>
+          <tr><td>model</td><td>80</td><td>44°C</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div style="background:#fff; border-radius:8px; padding:4px; border:1px solid #30363d;">
+        <img src="assets/round_bar_initial.png" alt="丸棒初期状態" style="width:100%; display:block; border-radius:4px;">
+      </div>
+      <p class="caption muted">初期状態 T=20°C (全体一様)</p>
+      <div style="background:#fff; border-radius:8px; padding:4px; border:1px solid #30363d; margin-top:8px;">
+        <img src="assets/round_bar_t450s.png" alt="丸棒加熱状態" style="width:100%; display:block; border-radius:4px;">
+      </div>
+      <p class="caption muted">t=450s: 左端から加熱中 (truth G=120)</p>
+    </div>
+    <div>
+      <div class="card orange">
+        <h3>時間設定</h3>
+        <table>
+          <tr><th>パラメータ</th><th>値</th></tr>
+          <tr><td>DT</td><td>5 s</td></tr>
+          <tr><td>ステップ数</td><td>180 (900 s)</td></tr>
+          <tr><td>ON/OFF</td><td>90 ON / 30 OFF</td></tr>
+          <tr><td>T_init</td><td>20°C</td></tr>
+        </table>
+      </div>
+      <div class="info-box" style="margin-top:8px;">
+        <strong>定常温度分布:</strong><br>
+        T(x) = 20 + G×(0.3−x)<br>
+        左端: T(0) = 20 + G×0.3<br>
+        右端: T(0.3) = 20°C (固定)
+      </div>
+      <div class="warn-box" style="margin-top:8px; font-size:0.84em;">
+        <strong>G(t) の切り替えロジック:</strong>
+        <code>(step % 120) &lt; 90</code> なら G=120、<br>
+        それ以外は <strong>G=0 (加熱停止)</strong>。<br>
+        → 次スライドで詳細を図示
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Boundary Condition &amp; Heat Input</span>
+  <h2>境界条件と熱入力 G(t) の ON/OFF サイクル</h2>
+  <div class="figure large" style="background:#0d1117; border:1px solid #30363d; padding:6px;">
+    <img src="assets/heat_input_cycle.png" alt="境界条件と熱入力 G(t)" style="width:100%; display:block; border-radius:4px;">
+  </div>
+  <div class="info-box" style="margin-top:8px; font-size:0.88em;">
+    <strong>G(t) の切り替えロジック:</strong>
+    各ステップで <code>(step % 120) &lt; 90</code> なら G=120、それ以外は <strong>G=0 (加熱停止)</strong>。
+    G=0 になると左端 Neumann BC の熱流束がゼロ（断熱相当）となり、棒全体が右端固定温度 (20°C) へ向かって冷却される。
+    これが N0 の温度が途中で下がる原因。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Solvers</span>
+  <h2>使用ソルバー: OpenFOAM vs FrontISTR</h2>
+  <div class="two-col">
+    <div>
+      <div class="card blue">
+        <h3>OpenFOAM laplacianFoam</h3>
+        <div class="math-box">
+          \[ \frac{\partial T}{\partial t} = \nabla \cdot (\alpha \nabla T) \]
+        </div>
+        <table>
+          <tr><th>項目</th><th>設定</th></tr>
+          <tr><td>方程式</td><td>熱拡散方程式 (α = DT = 6.6e-5)</td></tr>
+          <tr><td>メッシュ</td><td>円柱: 40×12 = 480 cells</td></tr>
+          <tr><td>左端 BC</td><td><code>fixedGradient</code> (Neumann)</td></tr>
+          <tr><td>右端 BC</td><td><code>fixedValue 20.0</code> (Dirichlet)</td></tr>
+          <tr><td>側面 BC</td><td><code>zeroGradient</code></td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>FrontISTR (熱伝導)</h3>
+        <div class="math-box">
+          \[ \rho C_p \frac{\partial T}{\partial t} = \nabla \cdot (\lambda \nabla T) \]
+        </div>
+        <table>
+          <tr><th>項目</th><th>設定</th></tr>
+          <tr><td>方程式</td><td>熱伝導方程式 (λ=160, ρ=2700, Cp=900)</td></tr>
+          <tr><td>メッシュ</td><td>Hex8 (TYPE=361): 697 nodes</td></tr>
+          <tr><td>左端 BC</td><td><code>!DFLUX</code> q = λ×G (Neumann)</td></tr>
+          <tr><td>右端 BC</td><td><code>!FIXTEMP 20.0</code> (Dirichlet)</td></tr>
+          <tr><td>側面</td><td>指定なし → 断熱 (デフォルト)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="info-box">
+    2 つの方程式は物理的に等価。α = λ/(ρ Cp) = 160/(2700×900) = 6.6×10⁻⁵ m²/s。
+    左端境界はどちらも Neumann: OpenFOAM は「温度勾配 G」、FrontISTR は「熱流束 q = λG」で等価指定。
+  </div>
+  <div class="info-box" style="margin-top:8px; font-size:0.85em;">
+    <strong>異なるメッシュを意図的に使用:</strong>
+    OpenFOAM (FVM・480 cells) と FrontISTR (FEM・697 nodes) でメッシュ構成が異なる状態でもOIが機能することを示す。<br>
+    観測演算子 <strong>H</strong> が「センサ位置 → 軸方向節点番号」の対応を担うため、
+    ソルバーやメッシュ種別を問わずループ構造は共通化できる。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Sensor Design</span>
+  <h2>センサ配置とツイン実験の構成</h2>
+  <div style="background:#fff; border-radius:8px; padding:5px; border:1px solid #30363d; margin-bottom:10px;">
+    <img src="assets/sensor_layout.png" alt="センサ配置図" style="width:100%; display:block; border-radius:4px;">
+  </div>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>センサ位置</h3>
+      <table>
+        <tr><th>節点</th><th>x [m]</th><th>役割</th></tr>
+        <tr><td>N4</td><td>0.034</td><td>同化 (assimilation)</td></tr>
+        <tr><td>N16</td><td>0.124</td><td>同化 (assimilation)</td></tr>
+        <tr><td>N28</td><td>0.214</td><td>検証 (validation)</td></tr>
+        <tr><td>N36</td><td>0.274</td><td>検証 (validation)</td></tr>
+      </table>
+    </div>
+    <div class="card orange">
+      <h3>OI パラメータ</h3>
+      <table>
+        <tr><th>パラメータ</th><th>値</th></tr>
+        <tr><td>相関長 L_c</td><td>0.05 m</td></tr>
+        <tr><td>σ_b (背景誤差)</td><td>3.0 °C</td></tr>
+        <tr><td>σ_o (観測ノイズ)</td><td>0.05 °C</td></tr>
+      </table>
+    </div>
+    <div class="card cyan">
+      <h3>設計意図</h3>
+      <ul>
+        <li>N4: 境界入力の影響が最も強い領域に配置</li>
+        <li>N16: 相関長 L_c=0.05m で N28, N36 まで補正を届かせる中継点</li>
+        <li>σ_b ≫ σ_o: 観測を強く信頼して大きく補正</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══ OI 手法 ═══ -->
+<section>
+<section>
+  <span class="sec-tag">Method</span>
+  <h2>Optimal Interpolation (OI) の基本</h2>
+  <div class="col-6-4">
+    <div>
+      <div class="math-box">
+        \[
+        \mathbf{x}_a = \mathbf{x}_f + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_f)
+        \]
+        \[
+        \mathbf{K} = \mathbf{B}\mathbf{H}^\top (\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R})^{-1}
+        \]
+      </div>
+      <table style="margin-top:8px;">
+        <tr><th>記号</th><th>意味</th><th>サイズ</th></tr>
+        <tr><td><strong>x_f</strong></td><td>ソルバー予測 (背景値)</td><td>N_nodes</td></tr>
+        <tr><td><strong>x_a</strong></td><td>OI 補正後の解析値</td><td>N_nodes</td></tr>
+        <tr><td><strong>y</strong></td><td>センサ観測値</td><td>n_obs=2</td></tr>
+        <tr><td><strong>H</strong></td><td>観測行列 (センサ位置を 1)</td><td>2 × N_nodes</td></tr>
+        <tr><td><strong>B</strong></td><td>背景誤差共分散 (Gauss 型)</td><td>N_nodes × N_nodes</td></tr>
+        <tr><td><strong>R</strong></td><td>観測誤差共分散 (対角)</td><td>2 × 2</td></tr>
+        <tr><td><strong>K</strong></td><td>OI ゲイン行列</td><td>N_nodes × 2</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="card cyan">
+        <h3>Gauss 型背景誤差共分散</h3>
+        <div class="math-box">
+          \[
+          B_{ij} = \sigma_b^2 \exp\!\left(-\frac{d_{ij}^2}{2 L_c^2}\right)
+          \]
+        </div>
+        <p>距離 d_ij が離れるほど相関が減衰する。<br>L_c = 0.05m は熱拡散スケールに合わせた値。</p>
+      </div>
+      <div class="card blue" style="margin-top:8px;">
+        <h3>P とは？ — 誤差共分散行列</h3>
+        <p style="font-size:0.88em; margin-bottom:4px;">
+          <strong>P = 状態推定の不確かさを表す行列</strong><br>
+          P<sub>ij</sub> が大きい → 節点 i と j の予測誤差が大きく、かつ相関している
+        </p>
+        <div class="math-box" style="font-size:0.8em;">
+          \[P = E\!\left[(\mathbf{x} - \hat{\mathbf{x}})(\mathbf{x} - \hat{\mathbf{x}})^T\right]\]
+        </div>
+        <p style="font-size:0.84em; margin-top:4px;">
+          対角成分 P<sub>ii</sub> = 節点 i の分散 (誤差の二乗期待値)<br>
+          KF では P を毎ステップ更新、OI では P の代わりに固定の B を使用
+        </p>
+      </div>
+      <div class="card green" style="margin-top:8px;">
+        <h3>OI と KF の違い</h3>
+        <table style="font-size:0.85em; width:100%; border-collapse:collapse;">
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="text-align:left; padding:4px 8px;"></th>
+            <th style="padding:4px 8px;">誤差共分散</th>
+            <th style="padding:4px 8px;">計算コスト</th>
+          </tr>
+          <tr>
+            <td style="padding:4px 8px;"><strong>KF</strong></td>
+            <td style="padding:4px 8px;">P を毎ステップ時間発展<br><code style="font-size:0.9em;">P⁺ = FPF<sup>T</sup> + Q</code></td>
+            <td style="padding:4px 8px;">高 (N²オーダー)</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.04);">
+            <td style="padding:4px 8px;"><strong>OI</strong></td>
+            <td style="padding:4px 8px;">B を固定 (事前設定のみ)</td>
+            <td style="padding:4px 8px;">低 (K を1回だけ計算)</td>
+          </tr>
+        </table>
+        <p style="font-size:0.84em; margin-top:6px;">
+          今回: 境界条件が定常サイクル → モデルバイアスが時間的に安定 → 固定 B で十分
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Method — H and K</span>
+  <h2>H 行列と K ゲイン行列の具体例（センサ 2 点）</h2>
+  <div class="two-col">
+    <div>
+      <div class="card blue">
+        <h3>観測行列 H (2 × N_AXIAL = 2 × 40)</h3>
+        <p>センサがある <strong>列だけ 1</strong>、それ以外は 0。</p>
+        <div class="math-box" style="font-size:0.82em;">
+          \[
+          \mathbf{H} =
+          \begin{pmatrix}
+          0 & \cdots & 0 & \underbrace{1}_{N4} & 0 & \cdots & 0 \\
+          0 & \cdots & 0 & 0 & \cdots & \underbrace{1}_{N16} & 0 & \cdots & 0
+          \end{pmatrix}
+          \]
+        </div>
+        <p>\(\mathbf{y} = \mathbf{H}\mathbf{x}_f\) は「N4 と N16 の温度を抽出する」操作。</p>
+        <div class="info-box" style="font-size:0.85em; margin-top:6px;">
+          <strong>Python 実装:</strong><br>
+          <code>H[0, axial_cell_index(4)] = 1.0</code><br>
+          <code>H[1, axial_cell_index(16)] = 1.0</code>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>ゲイン行列 K の役割 (N_AXIAL × 2)</h3>
+        <p>K の各行は「観測誤差を各節点に分配する重み」を表す。</p>
+        <div class="math-box" style="font-size:0.82em;">
+          \[
+          \mathbf{K} = \underbrace{\mathbf{B}\mathbf{H}^\top}_{N \times 2} \; \underbrace{(\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R})^{-1}}_{2 \times 2}
+          \]
+        </div>
+        <p>K の第 j 列 = センサ j のイノベーションが全節点に与える補正の空間パターン。</p>
+        <div class="success-box" style="font-size:0.85em; margin-top:6px;">
+          <strong>B の Gauss 相関が決める:</strong> センサから離れるほど K が小さくなり、補正が局所的に減衰する。L_c = 0.05m なら 3L_c = 0.15m 離れた節点への補正は exp(-4.5) ≈ 1% に減衰。
+        </div>
+      </div>
+      <div class="card orange" style="margin-top:8px;">
+        <h3>OI 更新式の意味</h3>
+        <table>
+          <tr><th>量</th><th>意味</th></tr>
+          <tr><td><strong>y − Hx_f</strong></td><td>イノベーション: 観測 − モデル予測</td></tr>
+          <tr><td><strong>K × d</strong></td><td>補正量を全節点に「塗り広げる」</td></tr>
+          <tr><td><strong>x_a</strong></td><td>モデル予測 + Gauss 加重補正</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">DA Loop</span>
+  <h2>OI + ソルバー の全体ループ（1 ステップ分）</h2>
+  <div class="flow" style="margin-top:16px;">
+    <div class="flow-item">
+      <div class="num">① 初期条件書き込み</div>
+      <div class="label">補正済み状態 x_a を<br>ソルバーに渡す</div>
+      <div class="note">of_interface.write_field() または<br>FrontISTRInterface.run_step(values=x_a)</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">② ソルバー実行</div>
+      <div class="label">laplacianFoam または<br>fistr1 を 1 ステップ</div>
+      <div class="note">G_model (=80 degC/m) の境界条件で<br>x_f を生成する</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">③ 観測値との比較</div>
+      <div class="label">イノベーション d を計算</div>
+      <div class="note">d = y − H x_f<br>y: truth に観測ノイズを加えた擬似センサ値</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">④ OI 更新</div>
+      <div class="label">\(\mathbf{x}_a = \mathbf{x}_f + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_f)\)</div>
+      <div class="note">補正後の x_a を次ステップの<br>初期条件として書き戻す</div>
+    </div>
+  </div>
+  <div class="info-box" style="margin-top:12px;">
+    \(\mathbf{K} = \mathbf{B}\mathbf{H}^\top(\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R})^{-1}\) はループ外で事前計算（B, R, H が固定なので毎ステップ同じ値）。
+    OpenFOAM と FrontISTR で状態ベクトルの定義は異なるが、ループ構造は同一。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Boundary Condition</span>
+  <h2>境界条件の設定: 左端は Neumann (Flux BC) が物理的に正しい</h2>
+  <div class="two-col">
+    <div>
+      <div class="card blue">
+        <h3>今回の物理問題</h3>
+        <p>左端 (x=0) に <strong>一定の熱流束 q = λG</strong> を与えて加熱する問題。</p>
+        <table style="margin-top:8px;">
+          <tr><th>BC 種類</th><th>意味</th><th>今回の適否</th></tr>
+          <tr><td>Neumann</td><td>q = λG を固定 (flux 指定)</td><td class="hl-green">✓ 物理的に正しい</td></tr>
+          <tr><td>Dirichlet</td><td>温度 T を固定</td><td class="hl-red">× 物理的に不適切</td></tr>
+        </table>
+        <div class="info-box" style="margin-top:8px; font-size:0.85em;">
+          「何 W/m² 与えるか」が分かっている問題に対しては Neumann (flux) を使うのが自然。
+          Dirichlet は「温度が分かっている」境界面に使う。
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>OI との相性</h3>
+        <p>Neumann BC は OI との組み合わせでも都合が良い。</p>
+        <ul>
+          <li>OI は内部節点の温度を直接補正する</li>
+          <li>Neumann BC は「流入量」を固定するだけで、温度値には干渉しない</li>
+          <li>補正された温度が次ステップにも保持される</li>
+        </ul>
+        <div class="warn-box" style="margin-top:8px; font-size:0.85em;">
+          <strong>参考:</strong> 今回 Dirichlet に誤って変更してテストしたところ RMSE が補正なしより悪化 (−108.9%)。
+          これは「OI 補正 vs. Dirichlet 強制」の干渉が原因。正しい物理条件 (Neumann) を使うことが前提。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══ 結果 ═══ -->
+<section>
+<section>
+  <span class="sec-tag">Results — OpenFOAM</span>
+  <h2>OpenFOAM + OI: 結果</h2>
+  <div class="col-6-4">
+    <div>
+      <div class="image-scroll" style="max-height:480px;">
+        <img src="assets/all_nodes_temperature_comparison.png" alt="OpenFOAM 全節点時系列">
+      </div>
+      <p class="caption">黄色背景 = 同化センサ節点 (N4, N16) ／ 横軸: 時間 [s]</p>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>RMSE 結果 (最終 1/3 区間の平均)</h3>
+        <table>
+          <tr><th>ケース</th><th style="text-align:right;">RMSE</th></tr>
+          <tr>
+            <td>OpenFOAM-only</td>
+            <td style="text-align:right; font-size:1.1em; font-weight:700; color:var(--red);">3.32°C</td>
+          </tr>
+          <tr>
+            <td>OpenFOAM + OI</td>
+            <td style="text-align:right; font-size:1.1em; font-weight:700; color:var(--green);">0.18°C</td>
+          </tr>
+          <tr>
+            <td><strong>改善率</strong></td>
+            <td style="text-align:right; font-size:1.3em; font-weight:700; color:var(--cyan);">+94.6%</td>
+          </tr>
+        </table>
+      </div>
+      <div class="card blue" style="margin-top:8px;">
+        <h3>各センサ節点での RMSE</h3>
+        <table>
+          <tr><th>節点</th><th>x [m]</th><th>役割</th><th>OI なし</th><th>OI あり</th></tr>
+          <tr><td>N4</td><td>0.034</td><td>同化センサ</td><td class="hl-red">6.28°C</td><td class="hl-green">0.050°C</td></tr>
+          <tr><td>N16</td><td>0.124</td><td>同化センサ</td><td class="hl-red">3.74°C</td><td class="hl-green">0.040°C</td></tr>
+          <tr><td>N28</td><td>0.214</td><td>検証用</td><td class="hl-red">1.75°C</td><td class="hl-green">0.149°C</td></tr>
+          <tr><td>N36</td><td>0.274</td><td>検証用</td><td class="hl-red">0.53°C</td><td class="hl-green">0.045°C</td></tr>
+        </table>
+        <p class="muted" style="font-size:0.82em; margin-top:4px;">検証用節点 (N28, N36) も大きく改善 → センサ外への補正伝播が効いている</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Results — FrontISTR</span>
+  <h2>FrontISTR + OI: 結果</h2>
+  <div class="col-6-4">
+    <div>
+      <div class="image-scroll" style="max-height:400px;">
+        <img src="assets/all_axial_nodes_timeseries_frontistr_da.png" alt="FrontISTR 全節点時系列">
+      </div>
+      <p class="caption">黄色背景 = 同化センサ節点 (N4, N16) ／ 横軸: 時間 [s]</p>
+      <div class="image-scroll" style="max-height:200px; margin-top:6px;">
+        <img src="assets/axial_nodes_error_heatmap_frontistr_da.png" alt="FrontISTR 誤差ヒートマップ">
+      </div>
+      <p class="caption">上: モデルのみの誤差 ／ 下: OI 補正後の誤差</p>
+    </div>
+    <div>
+      <div class="card blue" style="margin-bottom:10px;">
+        <h3>RMSE 結果 (最終 1/3 区間の平均)</h3>
+        <table>
+          <tr><th>ケース</th><th style="text-align:right;">RMSE</th></tr>
+          <tr>
+            <td>FrontISTR-only</td>
+            <td style="text-align:right; font-size:1.1em; font-weight:700; color:var(--red);">3.41°C</td>
+          </tr>
+          <tr>
+            <td>FrontISTR + OI</td>
+            <td style="text-align:right; font-size:1.1em; font-weight:700; color:var(--green);">0.20°C</td>
+          </tr>
+          <tr>
+            <td><strong>改善率</strong></td>
+            <td style="text-align:right; font-size:1.3em; font-weight:700; color:var(--cyan);">+94.0%</td>
+          </tr>
+        </table>
+      </div>
+      <div class="success-box">
+        2 点センサ観測で全 697 節点の温度場を補正し、<strong>+94.0% の大幅改善</strong>を達成した。
+      </div>
+      <div class="card orange" style="margin-top:8px;">
+        <h3>改善が出た理由</h3>
+        <ul>
+          <li>熱拡散率 α=6.6e-5 m²/s により全域に補正が伝播する</li>
+          <li>センサ N4, N16 が高温勾配の領域を観測</li>
+          <li>Neumann BC が OI 補正を次ステップへ保持する</li>
+          <li>σ_b=3.0°C ≫ σ_o=0.05°C で観測を強く信頼</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Results — Comparison</span>
+  <h2>両ソルバーの比較</h2>
+  <div class="two-col" style="margin-bottom:8px;">
+    <div class="card blue">
+      <h3>OpenFOAM + OI</h3>
+      <table>
+        <tr><th></th><th>値</th></tr>
+        <tr><td>DA なし RMSE</td><td class="hl-red">3.32°C</td></tr>
+        <tr><td>DA あり RMSE</td><td class="hl-green">0.18°C</td></tr>
+        <tr><td><strong>改善率</strong></td><td class="hl-cyan" style="font-weight:700;">+94.6%</td></tr>
+        <tr><td>N0 最大温度 (t=900s)</td><td>45.7°C</td></tr>
+      </table>
+    </div>
+    <div class="card green">
+      <h3>FrontISTR + OI</h3>
+      <table>
+        <tr><th></th><th>値</th></tr>
+        <tr><td>DA なし RMSE</td><td class="hl-red">3.41°C</td></tr>
+        <tr><td>DA あり RMSE</td><td class="hl-green">0.20°C</td></tr>
+        <tr><td>改善率</td><td class="hl-cyan" style="font-weight:700;">+94.0%</td></tr>
+        <tr><td>N0 最大温度</td><td>46.2°C</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="info-box" style="margin-bottom:8px; font-size:0.85em;">
+    <strong>両ソルバーの温度一致確認:</strong>
+    N0 最大温度は 45.7°C (OpenFOAM) vs 46.2°C (FrontISTR)、差 0.5°C で概ね一致。
+    残差はメッシュ構成の違い（OpenFOAM: 480 cells、FrontISTR: 697 nodes）による。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Results — Node-by-Node Comparison</span>
+  <h2>全節点温度時系列: OpenFOAM vs FrontISTR</h2>
+  <div class="image-scroll" style="max-height:380px; margin-bottom:6px;">
+    <img src="assets/comparison_of_vs_fistr.png" alt="全節点 OpenFOAM vs FrontISTR 比較">
+  </div>
+  <p class="caption" style="margin-bottom:6px;">
+    黄背景=[S]同化センサ (N4,N16) ／ 青背景=[V]検証節点 (N28,N36)<br>
+    黒実線=Truth(OF) ／ 灰破線=Truth(FI) ／ 橙破線=Model only(OF) ／ 茶点線=Model only(FI) ／ 青実線=OI(OF) ／ 赤実線=OI(FI)
+  </p>
+  <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d;">
+    <img src="assets/ani_OF_FI.gif" alt="OI データ同化後の温度場アニメーション"
+         style="width:100%; display:block; border-radius:4px;">
+  </div>
+  <p class="caption" style="margin-top:5px;">OI データ同化後の温度場アニメーション (OpenFOAM 左 / FrontISTR 右、時刻は秒で同期)</p>
+</section>
+</section>
+
+<!-- ═══ OI が効く条件 ═══ -->
+<section>
+<section>
+  <span class="sec-tag">Analysis</span>
+  <h2>OI が精度よく機能する条件</h2>
+  <div class="three-col">
+    <div class="card blue">
+      <h3>センサ配置</h3>
+      <ul>
+        <li>モデル誤差が大きい領域（今回は左端側）にセンサを置く</li>
+        <li>相関長 L_c 内に少なくとも 1 点あれば補正が全域に届く</li>
+        <li>2 点センサを適切に間隔を空けることで独立した情報を確保</li>
+      </ul>
+    </div>
+    <div class="card green">
+      <h3>モデルバイアスの性質</h3>
+      <ul>
+        <li>バイアスが<strong>空間的に滑らか</strong>で単調な場合に Gauss 型 B が有効</li>
+        <li>バイアスが<strong>時間的に安定</strong>（今回: 境界条件が固定）なので固定 K で十分</li>
+        <li>急激な時間変化があれば KF (動的 B) が必要</li>
+      </ul>
+    </div>
+    <div class="card orange">
+      <h3>σ_b / σ_o の設定</h3>
+      <ul>
+        <li>σ_b (=3.0) ≫ σ_o (=0.05) → OI ゲインが大きい → 観測を強く信頼</li>
+        <li>モデル誤差が大きく、センサ精度が高い場合に適切</li>
+        <li>σ_b が小さすぎると補正が弱くなり、σ_o が大きすぎると過補正が起きる</li>
+      </ul>
+    </div>
+  </div>
+  <hr class="dim">
+  <div class="three-col">
+    <div class="card cyan">
+      <h3>境界条件の種類</h3>
+      <p>入力側は <strong>Neumann (Flux) BC</strong> が必須。Dirichlet 境界は次ステップで補正を打ち消す逆熱流束を生む。</p>
+    </div>
+    <div class="card purple">
+      <h3>相関長の選択</h3>
+      <p>L_c は熱拡散長 √(αΔt) より大きく、棒の長さより小さい値を選ぶ。<br>L_c = 0.05m ≫ √(6.6e-5 × 5) = 0.018m ✓</p>
+    </div>
+    <div class="card blue">
+      <h3>H 行列の正確性</h3>
+      <p>センサ位置とセル/節点番号の対応が 1 対 1 でなければ OI は誤った場所に補正を与える。センサ節点番号とメッシュの対応を事前に必ず確認する。</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Analysis</span>
+  <h2>OI の改善が出にくい節点</h2>
+  <div class="two-col">
+    <div>
+      <div class="card red">
+        <h3>改善しにくいパターン</h3>
+        <ul>
+          <li>センサから 2L_c 以上離れた節点（Gauss 相関が指数的に減衰）</li>
+          <li>センサとバイアス構造が直交する方向（今回: x 方向のみバイアスがある）</li>
+          <li>境界 BC に直接影響される節点（右端固定端近傍）</li>
+        </ul>
+      </div>
+      <div class="info-box" style="margin-top:8px;">
+        今回のツイン実験では境界条件のバイアス (G_model ≠ G_true) が全域に一様に影響するため、
+        センサから遠い節点も相関が届けば補正できている。
+        実際、N28 (x=0.214m) も OI で相当改善している。
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>今回改善できた理由の整理</h3>
+        <ul>
+          <li><strong>バイアスが空間的に一様</strong>: 境界条件の違いが全節点に同じ方向の誤差を与える</li>
+          <li><strong>2 点センサが適切な間隔</strong>: N4 と N16 の組み合わせで L=0.3m を 2 段にカバー</li>
+          <li><strong>Neumann BC</strong>: 補正が次ステップに保持される</li>
+          <li><strong>σ_b/σ_o ≫ 1</strong>: 観測の信頼度が高く、大きな補正が入る</li>
+          <li><strong>ON/OFF サイクル</strong>: モデルと true の差が周期的に変化するが OI が毎ステップ追従する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══ まとめ ═══ -->
+<section>
+  <span class="sec-tag">Summary</span>
+  <h2>まとめ</h2>
+  <ul class="timeline">
+    <li class="done"><strong>問題設定:</strong> φ10mm × 300mm アルミ棒の熱伝導ツイン実験。G_TRUE=120, G_MODEL=80 degC/m で境界をずらした。</li>
+    <li class="done"><strong>2 ソルバー接続:</strong> OpenFOAM (laplacianFoam) と FrontISTR の両方に OI ループを接続した。</li>
+    <li class="done"><strong>Neumann BC の重要性を確認:</strong> Dirichlet に変えると OI 補正が次ステップで打ち消され RMSE が悪化することを確認。</li>
+    <li class="done"><strong>OpenFOAM + OI:</strong> RMSE 3.32°C → 0.18°C、<strong>+94.6% 改善</strong>。全節点が単調に改善し、センサ外の検証節点も大きく改善。</li>
+    <li class="done"><strong>FrontISTR + OI:</strong> RMSE 3.41°C → 0.20°C、<strong>+94.0% 改善</strong>。2 ソルバーとも同等の改善率を達成。</li>
+    <li><strong>次:</strong> 実測実験への接続 (実測 CSV を y として使う)。3D 空間的な観測演算子への拡張。</li>
+  </ul>
+  <div class="two-col" style="margin-top:12px;">
+    <div class="success-box">
+      <strong>両ソルバーの OI 改善率:</strong><br>
+      OpenFOAM: 3.32°C → 0.18°C &nbsp;<strong>+94.6%</strong><br>
+      FrontISTR: 3.41°C → 0.20°C &nbsp;<strong>+94.0%</strong>
+    </div>
+    <div class="info-box">
+      <strong>OI が効く条件 (手法の観点):</strong><br>
+      ① センサをモデル誤差の大きい領域に配置<br>
+      ② 入力境界は Neumann (Flux) を使う<br>
+      ③ σ_b ≫ σ_o でモデルを強く補正<br>
+      ④ L_c を熱拡散スケールに合わせる<br>
+      ⑤ H 行列のセル/節点対応を正確に
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/markdown/markdown.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/math/math.js"></script>
+<script>
+if (window.location.search.includes('print-pdf')) {
+  document.body.classList.add('print-pdf');
+}
+
+Reveal.initialize({
+  hash: true,
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  controls: true,
+  progress: true,
+  center: false,
+  transition: 'slide',
+  mouseWheel: false,
+  slideNumber: 'c/t',
+  plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+});
+
+document.querySelectorAll('.reveal .slides section').forEach(function(sec) {
+  sec.addEventListener('wheel', function(e) {
+    var atTop    = sec.scrollTop <= 0;
+    var atBottom = sec.scrollTop + sec.clientHeight >= sec.scrollHeight - 2;
+    if (!atTop || !atBottom) {
+      e.stopPropagation();
+    }
+  }, { passive: true });
+});
+
+document.getElementById('pdf-export-btn').addEventListener('click', () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('print-pdf', '');
+  history.replaceState(null, '', url.toString());
+  document.body.classList.add('print-pdf');
+  document.getElementById('pdf-toast').classList.add('show');
+});
+</script>
+</body>
+</html>

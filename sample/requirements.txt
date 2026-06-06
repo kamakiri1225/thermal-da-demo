@@ -1,0 +1,13 @@
+# Python ライブラリ (pip install -r requirements.txt)
+numpy>=1.24
+matplotlib>=3.7
+
+# 標準ライブラリ (追加インストール不要)
+# os, re, shutil, subprocess, math, pathlib, time, typing
+
+# システム側ソルバー (pip では管理しない)
+# - OpenFOAM 2512以降  : 002-1_laplacian_da_round_bar で必要
+#   インストール先: /usr/lib/openfoam/openfoam2512/
+# - FrontISTR 5.9以降  : 002-1-FrontISTR_round_bar_da で必要
+#   インストール先: ~/local/frontistr/bin/fistr1
+#   詳細: 002-1-FrontISTR_round_bar_da/INSTALL.md

@@ -38,3 +38,34 @@ sample/002_laplacian_da_1d/oi/results/**/post.foam
 # OS
 .DS_Store
 Thumbs.db
+
+# Node.js
+node_modules/
+package-lock.json
+slides.pdf
+
+# 001: generated PDF
+sample/001_kalman_thermal_1d/slides.pdf
+
+# 002-1_laplacian_da_round_bar: OpenFOAM simulation output (heavy)
+sample/002-1_laplacian_da_round_bar/oi/case/[0-9]*/
+sample/002-1_laplacian_da_round_bar/oi/results/truth/temperature_history.csv
+sample/002-1_laplacian_da_round_bar/oi/results/model_only/temperature_history.csv
+sample/002-1_laplacian_da_round_bar/oi/results/with_da/temperature_history.csv
+sample/002-1_laplacian_da_round_bar/oi/results/with_da/openfoam_forecast_before_oi.csv
+sample/002-1_laplacian_da_round_bar/oi/results/with_da/openfoam_time_dirs/
+sample/002-1_laplacian_da_round_bar/oi/results_of_da.png
+
+# 002-1-FrontISTR_round_bar_da: heavy results and FrontISTR run output
+sample/002-1-FrontISTR_round_bar_da/oi/results/frontistr_node_temperature_comparison.csv
+sample/002-1-FrontISTR_round_bar_da/oi/results/truth/temperature_history.csv
+sample/002-1-FrontISTR_round_bar_da/oi/results/model_only/temperature_history.csv
+sample/002-1-FrontISTR_round_bar_da/oi/results/with_da/temperature_history.csv
+sample/002-1-FrontISTR_round_bar_da/oi/results/with_da/vtk/
+sample/002-1-FrontISTR_round_bar_da/oi/results/with_da/ani/
+sample/002-1-FrontISTR_round_bar_da/case/*.log
+sample/002-1-FrontISTR_round_bar_da/case/FSTR.*
+sample/002-1-FrontISTR_round_bar_da/case/log.*
+sample/002-1-FrontISTR_round_bar_da/case/*.res.*
+sample/002-1-FrontISTR_round_bar_da/case/*_vis_psf.*
+sample/002-1-FrontISTR_round_bar_da/case/hecmw_vis.ini

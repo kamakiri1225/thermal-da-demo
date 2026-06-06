@@ -10,6 +10,7 @@
 |---|---|---|---|---|
 | `001_kalman_thermal_1d` | Python だけでデータ同化の基本動作を確認する | Kalman filter | 不要 | [slides.html](001_kalman_thermal_1d/slides.html) |
 | `002_laplacian_da_1d` | OpenFOAM の温度場予測をセンサ観測で補正する流れを確認する | optimal interpolation | 必要 | [slides.html](002_laplacian_da_1d/slides.html) |
+| `002-1_laplacian_da_round_bar` | 丸棒の軸方向温度場を OpenFOAM / FrontISTR の2ソルバーで OI データ同化し比較する | optimal interpolation | 必要 | [slides.html](002-1_laplacian_da_round_bar/slides.html) |
 
 ## 001: Kalman filter による 1D 熱データ同化
 
@@ -29,16 +30,15 @@ OpenFOAM は使いません。熱モデル、状態遷移行列、Kalman filter 
 
 Kalman filter は、モデル予測と観測値を誤差共分散に応じて混ぜる逐次推定手法です。
 
-```text
-予測:
-  x^- = A_d x + B_d u
-  P^- = A_d P A_d^T + Q
-
-更新:
-  K   = P^- H^T (H P^- H^T + R)^-1
-  x^+ = x^- + K(y - Hx^-)
-  P^+ = (I - KH)P^-
-```
+$$
+\begin{aligned}
+\text{予測:}\quad & \mathbf{x}^- = \mathbf{A}_d \mathbf{x} + \mathbf{B}_d \mathbf{u} \\
+& \mathbf{P}^- = \mathbf{A}_d \mathbf{P}\mathbf{A}_d^\top + \mathbf{Q} \\
+\text{更新:}\quad & \mathbf{K} = \mathbf{P}^- \mathbf{H}^\top \left(\mathbf{H}\mathbf{P}^- \mathbf{H}^\top + \mathbf{R}\right)^{-1} \\
+& \mathbf{x}^+ = \mathbf{x}^- + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}^-) \\
+& \mathbf{P}^+ = (\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}^-
+\end{aligned}
+$$
 
 001 では、Python 側で `A_d` を作ります。そのため、手法の理解や小規模モデルの検証に向いています。
 
@@ -93,12 +93,14 @@ OpenFOAM の `laplacianFoam` を温度場の予測器として使い、Python �
 
 002 では optimal interpolation を使います。
 
-```text
-x_a = x_f + K(y - Hx_f)
-K   = B H^T (H B H^T + R)^-1
-```
+$$
+\begin{aligned}
+\mathbf{x}_a &= \mathbf{x}_f + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_f) \\
+\mathbf{K} &= \mathbf{B}\mathbf{H}^\top \left(\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R}\right)^{-1}
+\end{aligned}
+$$
 
-ここで、`x_f` は OpenFOAM が 1 ステップ進めた予測温度場、`y` はセンサ観測、`H` はセンサ位置を取り出す行列、`B` は温度場の誤差が空間的にどう広がるかを仮定した行列、`R` はセンサノイズです。
+ここで、\(\mathbf{x}_f\) は OpenFOAM が 1 ステップ進めた予測温度場、\(\mathbf{y}\) はセンサ観測、\(\mathbf{H}\) はセンサ位置を取り出す行列、\(\mathbf{B}\) は温度場の誤差が空間的にどう広がるかを仮定した行列、\(\mathbf{R}\) はセンサノイズです。
 
 ### 主なファイル
 
@@ -128,6 +130,36 @@ cd sample/002_laplacian_da_1d/oi
 ### 注意
 
 `oi/results/` や `oi/paraview_cases/` には計算結果や ParaView 可視化用ファイルが生成されます。これらは重くなりやすいため、GitHub には基本的に push しません。
+
+## 002-1: 丸棒 laplacianFoam + FrontISTR + optimal interpolation
+
+場所:
+
+```text
+sample/002-1_laplacian_da_round_bar/       ← OpenFOAM 側
+sample/002-1-FrontISTR_round_bar_da/       ← FrontISTR 側
+```
+
+長さ 0.3 m、直径 0.01 m の丸棒を 2 種類のソルバー (OpenFOAM FVM / FrontISTR FEM) で解き、同じ OI ループを接続して温度場を同化します。
+
+- 同化センサ: N4, N16（2 点）
+- 検証センサ: N28, N36（2 点）
+- 熱入力: G=120 (ON 450s) → OFF (150s) のサイクル × 2
+- 結果: OpenFOAM +93.8% / FrontISTR +94.0% の RMSE 改善
+
+**スライド**: [▶ GitHub Pages で開く](https://kamakiri1225.github.io/thermal-da-demo/sample/002-1_laplacian_da_round_bar/slides.html)
+
+```bash
+# OpenFOAM 側
+cd sample/002-1_laplacian_da_round_bar/oi
+python da_main.py
+
+# FrontISTR 側
+cd sample/002-1-FrontISTR_round_bar_da/oi
+python da_main.py
+```
+
+詳細は [002-1_laplacian_da_round_bar/README.md](002-1_laplacian_da_round_bar/README.md) を参照してください。
 
 ## 次に進めること
 
