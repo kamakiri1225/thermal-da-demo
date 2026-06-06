@@ -591,17 +591,17 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <h3>OI パラメータ</h3>
       <table>
         <tr><th>パラメータ</th><th>値</th></tr>
-        <tr><td>相関長 L_c</td><td>0.05 m</td></tr>
-        <tr><td>σ_b (背景誤差)</td><td>3.0 °C</td></tr>
-        <tr><td>σ_o (観測ノイズ)</td><td>0.05 °C</td></tr>
+        <tr><td>相関長 \(L_c\)</td><td>0.05 m</td></tr>
+        <tr><td>\(\sigma_b\) (背景誤差)</td><td>3.0 °C</td></tr>
+        <tr><td>\(\sigma_o\) (観測ノイズ)</td><td>0.05 °C</td></tr>
       </table>
     </div>
     <div class="card cyan">
       <h3>設計意図</h3>
       <ul>
         <li>N4: 境界入力の影響が最も強い領域に配置</li>
-        <li>N16: 相関長 L_c=0.05m で N28, N36 まで補正を届かせる中継点</li>
-        <li>σ_b ≫ σ_o: 観測を強く信頼して大きく補正</li>
+        <li>N16: 相関長 \(L_c=0.05\,\text{m}\) で N28, N36 まで補正を届かせる中継点</li>
+        <li>\(\sigma_b \gg \sigma_o\): 観測を強く信頼して大きく補正</li>
       </ul>
     </div>
   </div>
@@ -610,6 +610,149 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <!-- ═══ OI 手法 ═══ -->
 <section>
+
+<section>
+  <span class="sec-tag">Method — What is DA</span>
+  <h2>データ同化とは何か</h2>
+  <div class="two-col" style="gap:14px;">
+    <div>
+      <div class="card blue">
+        <h3>一言でいうと</h3>
+        <p style="font-size:0.92em; line-height:1.65;">
+          <strong>「物理モデルの予測」と「センサ観測」を統計的に最適な方法で融合し、より正確な状態推定を得る手法</strong>
+        </p>
+        <div class="math-box" style="margin-top:8px; font-size:0.9em;">
+          \[
+          \mathbf{x}_a = \underbrace{\mathbf{x}_f}_{\text{モデル予測}}
+          + \mathbf{K}\!\underbrace{(\mathbf{y} - \mathbf{H}\mathbf{x}_f)}_{\text{観測残差 (innovation)}}
+          \]
+        </div>
+        <p style="font-size:0.82em; margin-top:6px; color:var(--muted);">
+          \(\mathbf{x}_f\): 背景値 (forecast)　／　\(\mathbf{y}\): 観測値　／　\(\mathbf{K}\): ゲイン行列
+        </p>
+      </div>
+      <div class="info-box" style="margin-top:10px; font-size:0.86em;">
+        <strong>なぜ必要か?</strong>
+        <ul style="margin-top:6px;">
+          <li>モデルには系統誤差がある:<br>
+            \(\mathbf{x}_f = \mathbf{x}_\text{true} + \boldsymbol{\varepsilon}_b\)
+            <span class="muted">(\(\boldsymbol{\varepsilon}_b \sim \mathcal{N}(\mathbf{0}, \mathbf{B})\))</span></li>
+          <li>観測にはノイズがある:<br>
+            \(\mathbf{y} = \mathbf{H}\mathbf{x}_\text{true} + \boldsymbol{\varepsilon}_o\)
+            <span class="muted">(\(\boldsymbol{\varepsilon}_o \sim \mathcal{N}(\mathbf{0}, \mathbf{R})\))</span></li>
+          <li>両者を組み合わせることで<strong>単独より高精度な推定</strong>が得られる</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-top:10px; font-size:0.85em;">
+        <h3>応用分野</h3>
+        <ul style="margin:0;">
+          <li>気象・海洋予報 (数値予報の標準技術)</li>
+          <li>地震動・地盤推定</li>
+          <li><strong>工学: 熱解析・構造解析モデルの較正</strong> ← 本研究</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card orange">
+        <h3>データ同化の 1 ステップ</h3>
+        <div style="display:flex; flex-direction:column; gap:5px; margin-top:8px; font-size:0.86em;">
+          <div style="background:rgba(255,255,255,0.06); border-radius:6px; padding:9px 12px;">
+            <span style="color:var(--orange); font-weight:700;">① 予測 (Forecast)</span><br>
+            物理モデルを 1 ステップ進める<br>
+            \(\mathbf{x}_f^{(k)} = \mathcal{M}\!\left(\mathbf{x}_a^{(k-1)}\right)\)
+          </div>
+          <div style="text-align:center; color:var(--muted); font-size:0.9em;">↓ モデル誤差 \(\boldsymbol{\varepsilon}_b\) を含む</div>
+          <div style="background:rgba(255,255,255,0.06); border-radius:6px; padding:9px 12px;">
+            <span style="color:var(--cyan); font-weight:700;">② 観測 (Observation)</span><br>
+            センサから実測値を取得<br>
+            \(\mathbf{y}^{(k)} = \mathbf{H}\mathbf{x}_\text{true}^{(k)} + \boldsymbol{\varepsilon}_o\)
+          </div>
+          <div style="text-align:center; color:var(--muted); font-size:0.9em;">↓ 観測残差 \(\mathbf{d} = \mathbf{y} - \mathbf{H}\mathbf{x}_f\) を計算</div>
+          <div style="background:rgba(88,166,255,0.12); border:1px solid rgba(88,166,255,0.4); border-radius:6px; padding:9px 12px;">
+            <span style="color:var(--blue); font-weight:700;">③ 同化 (Analysis)</span><br>
+            \(\mathbf{x}_a^{(k)} = \mathbf{x}_f^{(k)} + \mathbf{K}\mathbf{d}^{(k)}\)<br>
+            \(\mathbf{K} = \mathbf{B}\mathbf{H}^\top(\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R})^{-1}\)
+          </div>
+          <div style="text-align:center; color:var(--muted); font-size:0.9em;">↓ \(\mathbf{x}_a\) を次ステップ初期値として渡す</div>
+          <div style="background:rgba(63,185,80,0.08); border-radius:6px; padding:8px 12px; text-align:center;">
+            <strong style="color:var(--green);">より正確な状態推定 \(\mathbf{x}_a\)</strong><br>
+            <span class="muted small">未観測点の温度も改善される</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Method — Bayes</span>
+  <h2>データ同化とベイズの定理</h2>
+  <div class="two-col" style="gap:14px;">
+    <div>
+      <div class="card purple">
+        <h3>ベイズの定理</h3>
+        <div class="math-box">
+          \[
+          \underbrace{p(\mathbf{x} \mid \mathbf{y})}_{\text{事後分布}}
+          \;\propto\;
+          \underbrace{p(\mathbf{y} \mid \mathbf{x})}_{\text{尤度}}
+          \;\cdot\;
+          \underbrace{p(\mathbf{x})}_{\text{事前分布}}
+          \]
+        </div>
+        <table style="font-size:0.84em; margin-top:8px;">
+          <tr><th>項</th><th>DA での意味</th></tr>
+          <tr><td>\(p(\mathbf{x})\)</td><td><strong>事前分布</strong>: モデル予測 \(\mathbf{x}_f\) が従う分布 (\(\mathbf{B}\) で特徴づけ)</td></tr>
+          <tr><td>\(p(\mathbf{y} \mid \mathbf{x})\)</td><td><strong>尤度</strong>: 状態 \(\mathbf{x}\) のとき観測 \(\mathbf{y}\) が得られる確率 (\(\mathbf{R}\) で特徴づけ)</td></tr>
+          <tr><td>\(p(\mathbf{x} \mid \mathbf{y})\)</td><td><strong>事後分布</strong>: 観測を反映した更新後の状態 \(\mathbf{x}_a\)</td></tr>
+        </table>
+      </div>
+      <div class="info-box" style="margin-top:10px; font-size:0.86em;">
+        <strong>ガウス分布を仮定するとベイズ最適解が OI/KF の式と一致する</strong><br>
+        \(\mathbf{x}_f \sim \mathcal{N}(\mathbf{x}_\text{true},\,\mathbf{B})\)、
+        \(\boldsymbol{\varepsilon}_o \sim \mathcal{N}(\mathbf{0},\,\mathbf{R})\) を仮定すると、
+        事後分布 \(p(\mathbf{x}\mid\mathbf{y})\) もガウス分布になり、
+        その平均 (= MAP 推定 = 最も確からしい状態) が
+        \(\mathbf{x}_a = \mathbf{x}_f + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_f)\) に解析的に一致する。<br>
+        <span class="muted" style="font-size:0.92em;">
+          → OI の更新式は「ガウス分布の積の平均を求めた結果」であり、
+          数値的な近似ではなく厳密解。
+          \(\mathbf{B}\) と \(\mathbf{R}\) が正規分布の仮定を決める。
+        </span>
+      </div>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>直感的なイメージ</h3>
+        <p style="font-size:0.87em; margin-bottom:8px;">B と R の大小で「どちらを信頼するか」が決まる:</p>
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85em;">
+          <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:10px 12px;">
+            <strong style="color:var(--orange);">B 大 (モデル不確かさ大) → K 大</strong><br>
+            観測を強く信頼し、\(\mathbf{x}_f\) を大きく補正する
+          </div>
+          <div style="background:rgba(255,255,255,0.05); border-radius:6px; padding:10px 12px;">
+            <strong style="color:var(--cyan);">R 大 (観測ノイズ大) → K 小</strong><br>
+            モデル予測を信頼し、観測の影響を小さく抑える
+          </div>
+          <div style="background:rgba(88,166,255,0.08); border:1px solid rgba(88,166,255,0.3); border-radius:6px; padding:10px 12px;">
+            \(\mathbf{K} = \mathbf{B}\mathbf{H}^\top(\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R})^{-1}\)<br>
+            \(\mathbf{B}\) と \(\mathbf{R}\) の比がゲインを決める「重み」
+          </div>
+        </div>
+      </div>
+      <div class="card green" style="margin-top:10px; font-size:0.84em;">
+        <h3>OI の位置付け</h3>
+        <ul style="margin:0;">
+          <li>ベイズ更新の <strong>ガウス近似 + B 固定</strong> 版</li>
+          <li>B をガウス型相関行列で近似することで計算コストを低減</li>
+          <li>気象数値予報で標準的に使われてきた手法</li>
+          <li>KF は B を毎ステップ時間発展させる (動的ベイズ更新)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <span class="sec-tag">Method</span>
   <h2>Optimal Interpolation (OI) の基本</h2>
@@ -625,8 +768,8 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       </div>
       <table style="margin-top:8px;">
         <tr><th>記号</th><th>意味</th><th>サイズ</th></tr>
-        <tr><td><strong>x_f</strong></td><td>ソルバー予測 (背景値)</td><td>N_nodes</td></tr>
-        <tr><td><strong>x_a</strong></td><td>OI 補正後の解析値</td><td>N_nodes</td></tr>
+        <tr><td>\(\mathbf{x}_f\)</td><td>ソルバー予測 (背景値)</td><td>\(N_\text{nodes}\)</td></tr>
+        <tr><td>\(\mathbf{x}_a\)</td><td>OI 補正後の解析値</td><td>\(N_\text{nodes}\)</td></tr>
         <tr><td><strong>y</strong></td><td>センサ観測値</td><td>n_obs=2</td></tr>
         <tr><td><strong>H</strong></td><td>観測行列 (センサ位置を 1)</td><td>2 × N_nodes</td></tr>
         <tr><td><strong>B</strong></td><td>背景誤差共分散 (Gauss 型)</td><td>N_nodes × N_nodes</td></tr>
@@ -642,7 +785,36 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
           B_{ij} = \sigma_b^2 \exp\!\left(-\frac{d_{ij}^2}{2 L_c^2}\right)
           \]
         </div>
-        <p>距離 d_ij が離れるほど相関が減衰する。<br>L_c = 0.05m は熱拡散スケールに合わせた値。</p>
+        <p style="font-size:0.84em; margin-bottom:6px;">
+          距離 \(d_{ij}\) が大きいほど相関が減衰。<strong>\(L_c\) が補正の空間的な広がりを決める。</strong>
+        </p>
+        <table style="font-size:0.82em; width:100%; border-collapse:collapse;">
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="padding:4px 8px; text-align:left;">\(L_c\)</th>
+            <th style="padding:4px 8px;">B の形状</th>
+            <th style="padding:4px 8px;">補正の挙動</th>
+          </tr>
+          <tr>
+            <td style="padding:4px 8px;"><strong style="color:var(--orange);">大きい</strong></td>
+            <td style="padding:4px 8px;">広域まで高相関<br>(なだらかに減衰)</td>
+            <td style="padding:4px 8px;">センサ補正が遠方まで波及<br>→ 滑らかだが過補正のリスク</td>
+          </tr>
+          <tr style="background:rgba(255,255,255,0.03);">
+            <td style="padding:4px 8px;"><strong style="color:var(--cyan);">小さい</strong></td>
+            <td style="padding:4px 8px;">センサ近傍のみ相関<br>(急速に減衰)</td>
+            <td style="padding:4px 8px;">局所的な補正のみ<br>→ 遠方は修正されない</td>
+          </tr>
+        </table>
+        <div class="info-box" style="margin-top:7px; font-size:0.82em; padding:8px 12px;">
+          <strong>L_c の設定目安 — 物理的な特徴長さを使う</strong>
+          <ul style="margin:5px 0 0; padding-left:1.2em;">
+            <li><strong>熱拡散長</strong>: \(L_c \sim \sqrt{\alpha \cdot t_\text{char}}\)<br>
+              <span class="muted">α=6.6×10⁻⁵ m²/s、特性時間 t≈40s → L_c ≈ 0.05m</span></li>
+            <li><strong>センサ間距離の 1/3〜1/2</strong> 程度も実用的な目安</li>
+            <li>大きすぎると遠方の誤差を引きずる。小さすぎると局所しか効かない</li>
+            <li>原則として <strong>解析結果の感度確認</strong> (\(L_c\) を変えて RMSE を比較) が望ましい</li>
+          </ul>
+        </div>
       </div>
       <div class="card blue" style="margin-top:8px;">
         <h3>P とは？ — 誤差共分散行列</h3>
@@ -668,7 +840,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
           </tr>
           <tr>
             <td style="padding:4px 8px;"><strong>KF</strong></td>
-            <td style="padding:4px 8px;">P を毎ステップ時間発展<br><code style="font-size:0.9em;">P⁺ = FPF<sup>T</sup> + Q</code></td>
+            <td style="padding:4px 8px;">\(\mathbf{P}\) を毎ステップ時間発展<br>\(\mathbf{P}^+ = \mathbf{F}\mathbf{P}\mathbf{F}^\top + \mathbf{Q}\)</td>
             <td style="padding:4px 8px;">高 (N²オーダー)</td>
           </tr>
           <tr style="background:rgba(255,255,255,0.04);">
@@ -721,16 +893,16 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
         </div>
         <p>K の第 j 列 = センサ j のイノベーションが全節点に与える補正の空間パターン。</p>
         <div class="success-box" style="font-size:0.85em; margin-top:6px;">
-          <strong>B の Gauss 相関が決める:</strong> センサから離れるほど K が小さくなり、補正が局所的に減衰する。L_c = 0.05m なら 3L_c = 0.15m 離れた節点への補正は exp(-4.5) ≈ 1% に減衰。
+          <strong>\(\mathbf{B}\) の Gauss 相関が決める:</strong> センサから離れるほど \(\mathbf{K}\) が小さくなり、補正が局所的に減衰する。\(L_c = 0.05\,\text{m}\) なら \(3L_c = 0.15\,\text{m}\) 離れた節点への補正は \(e^{-4.5} \approx 1\%\) に減衰。
         </div>
       </div>
       <div class="card orange" style="margin-top:8px;">
         <h3>OI 更新式の意味</h3>
         <table>
           <tr><th>量</th><th>意味</th></tr>
-          <tr><td><strong>y − Hx_f</strong></td><td>イノベーション: 観測 − モデル予測</td></tr>
-          <tr><td><strong>K × d</strong></td><td>補正量を全節点に「塗り広げる」</td></tr>
-          <tr><td><strong>x_a</strong></td><td>モデル予測 + Gauss 加重補正</td></tr>
+          <tr><td>\(\mathbf{y} - \mathbf{H}\mathbf{x}_f\)</td><td>イノベーション: 観測 − モデル予測</td></tr>
+          <tr><td>\(\mathbf{K}\mathbf{d}\)</td><td>補正量を全節点に「塗り広げる」</td></tr>
+          <tr><td>\(\mathbf{x}_a\)</td><td>モデル予測 + Gauss 加重補正</td></tr>
         </table>
       </div>
     </div>
@@ -756,7 +928,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     <div class="flow-item">
       <div class="num">③ 観測値との比較</div>
       <div class="label">イノベーション d を計算</div>
-      <div class="note">d = y − H x_f<br>y: truth に観測ノイズを加えた擬似センサ値</div>
+      <div class="note">\(\mathbf{d} = \mathbf{y} - \mathbf{H}\mathbf{x}_f\)<br>\(\mathbf{y}\): truth に観測ノイズを加えた擬似センサ値</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-item">
@@ -964,7 +1136,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <h3>センサ配置</h3>
       <ul>
         <li>モデル誤差が大きい領域（今回は左端側）にセンサを置く</li>
-        <li>相関長 L_c 内に少なくとも 1 点あれば補正が全域に届く</li>
+        <li>相関長 \(L_c\) 内に少なくとも 1 点あれば補正が全域に届く</li>
         <li>2 点センサを適切に間隔を空けることで独立した情報を確保</li>
       </ul>
     </div>
@@ -977,11 +1149,11 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       </ul>
     </div>
     <div class="card orange">
-      <h3>σ_b / σ_o の設定</h3>
+      <h3>\(\sigma_b\) / \(\sigma_o\) の設定</h3>
       <ul>
-        <li>σ_b (=3.0) ≫ σ_o (=0.05) → OI ゲインが大きい → 観測を強く信頼</li>
+        <li>\(\sigma_b\,(=3.0) \gg \sigma_o\,(=0.05)\) → OI ゲインが大きい → 観測を強く信頼</li>
         <li>モデル誤差が大きく、センサ精度が高い場合に適切</li>
-        <li>σ_b が小さすぎると補正が弱くなり、σ_o が大きすぎると過補正が起きる</li>
+        <li>\(\sigma_b\) が小さすぎると補正が弱くなり、\(\sigma_o\) が大きすぎると過補正が起きる</li>
       </ul>
     </div>
   </div>
@@ -993,7 +1165,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     </div>
     <div class="card purple">
       <h3>相関長の選択</h3>
-      <p>L_c は熱拡散長 √(αΔt) より大きく、棒の長さより小さい値を選ぶ。<br>L_c = 0.05m ≫ √(6.6e-5 × 5) = 0.018m ✓</p>
+      <p>\(L_c\) は熱拡散長 \(\sqrt{\alpha\,\Delta t}\) より大きく、棒の長さより小さい値を選ぶ。<br>\(L_c = 0.05\,\text{m} \gg \sqrt{6.6\times10^{-5} \times 5} = 0.018\,\text{m}\) ✓</p>
     </div>
     <div class="card blue">
       <h3>H 行列の正確性</h3>
@@ -1010,7 +1182,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <div class="card red">
         <h3>改善しにくいパターン</h3>
         <ul>
-          <li>センサから 2L_c 以上離れた節点（Gauss 相関が指数的に減衰）</li>
+          <li>センサから \(2L_c\) 以上離れた節点（Gauss 相関が指数的に減衰）</li>
           <li>センサとバイアス構造が直交する方向（今回: x 方向のみバイアスがある）</li>
           <li>境界 BC に直接影響される節点（右端固定端近傍）</li>
         </ul>
@@ -1028,7 +1200,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
           <li><strong>バイアスが空間的に一様</strong>: 境界条件の違いが全節点に同じ方向の誤差を与える</li>
           <li><strong>2 点センサが適切な間隔</strong>: N4 と N16 の組み合わせで L=0.3m を 2 段にカバー</li>
           <li><strong>Neumann BC</strong>: 補正が次ステップに保持される</li>
-          <li><strong>σ_b/σ_o ≫ 1</strong>: 観測の信頼度が高く、大きな補正が入る</li>
+          <li>\(\sigma_b/\sigma_o \gg 1\): 観測の信頼度が高く、大きな補正が入る</li>
           <li><strong>ON/OFF サイクル</strong>: モデルと true の差が周期的に変化するが OI が毎ステップ追従する</li>
         </ul>
       </div>
@@ -1059,8 +1231,8 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <strong>OI が効く条件 (手法の観点):</strong><br>
       ① センサをモデル誤差の大きい領域に配置<br>
       ② 入力境界は Neumann (Flux) を使う<br>
-      ③ σ_b ≫ σ_o でモデルを強く補正<br>
-      ④ L_c を熱拡散スケールに合わせる<br>
+      ③ \(\sigma_b \gg \sigma_o\) でモデルを強く補正<br>
+      ④ \(L_c\) を熱拡散スケールに合わせる<br>
       ⑤ H 行列のセル/節点対応を正確に
     </div>
   </div>
