@@ -21,6 +21,7 @@ from round_bar_mesh import build_round_bar_mesh
 
 
 class FrontISTRInterface:
+    """Round-bar FrontISTR I/O wrapper used by the OI loop."""
     def __init__(
         self,
         case_dir: Path,
@@ -52,6 +53,7 @@ class FrontISTRInterface:
         return len(self.node_ids)
 
     def reset(self) -> None:
+        """Recreate the case directory, mesh, and static FrontISTR control file."""
         if self.case_dir.exists():
             shutil.rmtree(self.case_dir)
         self.case_dir.mkdir(parents=True)
@@ -59,6 +61,7 @@ class FrontISTRInterface:
         self._write_hecmw_ctrl()
 
     def run_step(self, values: np.ndarray, left_flux: float, right_temp: float) -> np.ndarray:
+        """Write one .cnt file, run fistr1, and return the latest nodal temperature field."""
         self._ensure_mesh()
         values = np.asarray(values, dtype=float)
         if values.shape[0] != self.n_nodes:
@@ -83,6 +86,7 @@ class FrontISTRInterface:
         return self.read_result()
 
     def read_result(self) -> np.ndarray:
+        """Read the newest FrontISTR result file and map it back to nodal temperatures."""
         candidates = sorted(self.case_dir.glob("round_bar.res.0.*"))
         if not candidates:
             raise FileNotFoundError(f"FrontISTR result not found in {self.case_dir}")
@@ -91,6 +95,7 @@ class FrontISTRInterface:
         return np.array([vals[node_id] for node_id in self.node_ids], dtype=float)
 
     def axial_profile(self, values: np.ndarray) -> np.ndarray:
+        """Collapse nodal temperatures into axial averages for plotting and RMSE."""
         self._ensure_mesh()
         x = self.node_x
         assert x is not None
@@ -111,9 +116,11 @@ class FrontISTRInterface:
         return profile / np.maximum(counts, 1)
 
     def axial_positions(self) -> np.ndarray:
+        """Return the x-position of each axial bin center."""
         return (np.arange(self.n_axial) + 0.5) * (self.length_m / self.n_axial)
 
     def axial_representative_node_indices(self) -> list[int]:
+        """Pick one node per axial bin to act as a 1D measurement location."""
         self._ensure_mesh()
         x = self.node_x
         assert x is not None
@@ -126,6 +133,7 @@ class FrontISTRInterface:
         return indices
 
     def _ensure_mesh(self) -> None:
+        """Load the mesh from disk if this instance has not been initialized yet."""
         if not self.node_ids:
             if not (self.case_dir / "round_bar.msh").exists():
                 self.reset()
@@ -133,12 +141,14 @@ class FrontISTRInterface:
                 self._load_mesh_nodes()
 
     def _cleanup_previous_outputs(self) -> None:
+        """Remove result and log files from the previous FrontISTR step."""
         for pattern in ("round_bar.res.*", "round_bar.vis*", "FSTR.*", "*.log", "0.log"):
             for path in self.case_dir.glob(pattern):
                 if path.is_file():
                     path.unlink()
 
     def _write_hecmw_ctrl(self) -> None:
+        """Write the static HEC-MW control file that points FrontISTR to the case inputs."""
         (self.case_dir / "hecmw_ctrl.dat").write_text(
             """\
 ##
@@ -159,6 +169,8 @@ round_bar_vis
         # round_bar.cnt is tracked in the repo as a readable template.
         # Each DA step overwrites it with the current nodal initial temperatures
         # and boundary conditions before calling fistr1.
+        # Specifically, the script rewrites the full nodal temperature field,
+        # the right-end fixed temperature, and the left-end imposed heat flux.
         lines = [
             "!STEP,INCMAX=10000",
             "!SOLUTION,TYPE=HEAT",
@@ -189,6 +201,7 @@ round_bar_vis
         (self.case_dir / "round_bar.cnt").write_text("\n".join(lines) + "\n")
 
     def _write_mesh(self) -> None:
+        """Build and write the hexahedral round-bar mesh in FrontISTR format."""
         mesh = build_round_bar_mesh(self.n_axial, self.length_m, self.radius_m)
         self.node_ids = [node_id for node_id, _coord in mesh["nodes"]]
         self.node_x = np.array([coord[0] for _node_id, coord in mesh["nodes"]], dtype=float)
@@ -223,6 +236,7 @@ round_bar_vis
         (self.case_dir / "round_bar.msh").write_text("\n".join(lines) + "\n")
 
     def _load_mesh_nodes(self) -> None:
+        """Load node ids and x-coordinates from an existing .msh file."""
         text = (self.case_dir / "round_bar.msh").read_text()
         nodes: list[tuple[int, float]] = []
         in_nodes = False
@@ -240,6 +254,7 @@ round_bar_vis
         self.node_x = np.array([x for _node_id, x in nodes], dtype=float)
 
     def _node_coordinates(self) -> np.ndarray:
+        """Return the full xyz coordinate array for all nodes in the mesh."""
         text = (self.case_dir / "round_bar.msh").read_text()
         coords: list[tuple[float, float, float]] = []
         in_nodes = False
@@ -254,7 +269,10 @@ round_bar_vis
                 parts = [p.strip() for p in stripped.split(",")]
                 coords.append((float(parts[1]), float(parts[2]), float(parts[3])))
         return np.array(coords, dtype=float)
+
+
 def _format_group_ids(ids: list[int], per_line: int = 8) -> list[str]:
+    """Format node or element ids into FrontISTR group lines."""
     lines = []
     for i in range(0, len(ids), per_line):
         lines.append(" " + ", ".join(str(x) for x in ids[i:i + per_line]))
@@ -262,6 +280,7 @@ def _format_group_ids(ids: list[int], per_line: int = 8) -> list[str]:
 
 
 def _parse_frontistr_temperature(text: str) -> dict[int, float]:
+    """Parse a FrontISTR result file into a node_id -> temperature mapping."""
     marker = re.search(r"^\s*TEMPERATURE\s*$", text, flags=re.MULTILINE)
     if not marker:
         raise ValueError("TEMPERATURE section not found in FrontISTR result")

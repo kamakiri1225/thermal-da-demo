@@ -51,16 +51,19 @@ RESULTS_IMG_DIR = RESULTS_DIR / "img"
 
 
 def make_gradient_series(n_steps: int, g_on: float) -> np.ndarray:
+    """Create the heat-input on/off schedule for the round-bar twin experiment."""
     cycle = CYCLE_ON + CYCLE_OFF
     return np.array([g_on if (k % cycle) < CYCLE_ON else 0.0 for k in range(n_steps)])
 
 
 def make_left_flux_series(gradient_series: np.ndarray) -> np.ndarray:
+    """Convert the imposed temperature gradient series into a heat flux series."""
     conductivity = 160.0  # W/(mK) aluminum
     return conductivity * gradient_series
 
 
 def save_history(path: Path, time_s: np.ndarray, values: np.ndarray, prefix: str) -> None:
+    """Save a time-history matrix to CSV with one column per axial node."""
     path.parent.mkdir(parents=True, exist_ok=True)
     data = np.column_stack([time_s, values])
     header = "time_s," + ",".join(f"{prefix}{i}" for i in range(values.shape[1]))
@@ -68,6 +71,7 @@ def save_history(path: Path, time_s: np.ndarray, values: np.ndarray, prefix: str
 
 
 def load_frontistr_mesh(mesh_path: Path) -> tuple[np.ndarray, list[list[int]]]:
+    """Load points and cell connectivity from the generated FrontISTR mesh file."""
     points: list[tuple[float, float, float]] = []
     cells: list[list[int]] = []
     mode: str | None = None
@@ -93,6 +97,7 @@ def load_frontistr_mesh(mesh_path: Path) -> tuple[np.ndarray, list[list[int]]]:
 
 
 def write_legacy_vtk(path: Path, points: np.ndarray, cells: list[list[int]], temperature: np.ndarray) -> None:
+    """Write one legacy VTK file for ParaView post-processing."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
         f.write("# vtk DataFile Version 3.0\n")
@@ -116,6 +121,7 @@ def write_legacy_vtk(path: Path, points: np.ndarray, cells: list[list[int]], tem
 
 
 def export_vtk_series(case_name: str, history: np.ndarray) -> None:
+    """Export a whole time series as a VTK folder tree for ParaView."""
     points, cells = load_frontistr_mesh(CASE_DIR / "round_bar.msh")
     out_dir = RESULTS_DIR / case_name / "vtk"
     if out_dir.exists():
@@ -128,6 +134,7 @@ def export_vtk_series(case_name: str, history: np.ndarray) -> None:
 
 
 def build_oi_matrices(fistr: FrontISTRInterface) -> tuple[np.ndarray, np.ndarray, np.ndarray, list[int]]:
+    """Build the OI observation matrix, background covariance, and noise covariance."""
     representative = fistr.axial_representative_node_indices()
     n_nodes = fistr.n_nodes
     H = np.zeros((len(ASSIM_SENSOR_AXIAL_NODES), n_nodes))
@@ -142,6 +149,7 @@ def build_oi_matrices(fistr: FrontISTRInterface) -> tuple[np.ndarray, np.ndarray
 
 
 def run_sequence(label: str, fistr: FrontISTRInterface, left_series: np.ndarray) -> np.ndarray:
+    """Run a pure FrontISTR sequence without data assimilation and record the state history."""
     print(f"--- {label} ---")
     fistr.reset()
     state = np.full(fistr.n_nodes, T_INIT)
@@ -164,6 +172,7 @@ def run_da(
     B: np.ndarray,
     R: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Run the FrontISTR forecast step followed by an OI correction step."""
     print("--- FrontISTR + OI data assimilation ---")
     fistr.reset()
     gain = B @ H.T @ np.linalg.inv(H @ B @ H.T + R)
@@ -191,10 +200,12 @@ def run_da(
 
 
 def axial_history(fistr: FrontISTRInterface, values: np.ndarray) -> np.ndarray:
+    """Collapse a nodal temperature history into axial averages."""
     return np.vstack([fistr.axial_profile(row) for row in values])
 
 
 def save_summary(fistr: FrontISTRInterface, truth_t: np.ndarray, model_t: np.ndarray, da_t: np.ndarray) -> None:
+    """Save axial RMSE statistics for the model-only and DA cases."""
     t_start = 2 * N_STEPS // 3
     truth = axial_history(fistr, truth_t)
     model = axial_history(fistr, model_t)
@@ -226,6 +237,7 @@ def save_node_temperature_comparison(
     model_t: np.ndarray,
     da_t: np.ndarray,
 ) -> None:
+    """Save per-node temperature comparison CSVs for the nodal and axial views."""
     time_s = (np.arange(N_STEPS) + 1) * DT
     assert fistr.node_x is not None
     coords = fistr._node_coordinates()

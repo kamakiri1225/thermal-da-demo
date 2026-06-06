@@ -58,8 +58,8 @@ cd "$(git rev-parse --show-toplevel)/sample/002-1-FrontISTR_round_bar_da/oi"
 
 ## 関連リンク
 
-- [FrontISTR の比較画像](oi/results/img/results_frontistr_da.png)
-- [FrontISTR の測定点比較](oi/results/img/measurement_points_frontistr_da.png)
+- <img src="oi/results/img/results_frontistr_da.png" alt="FrontISTR の比較画像" width="960">
+- <img src="oi/results/img/measurement_points_frontistr_da.png" alt="FrontISTR の測定点比較" width="960">
 - [FrontISTR の cnt 設定](case/round_bar.cnt)
 - [OpenFOAM 版スライド](../002-1_laplacian_da_round_bar/slides.html)
 
