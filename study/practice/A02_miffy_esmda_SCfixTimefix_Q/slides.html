@@ -527,7 +527,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     </tr>
   </table>
   <p class="small muted">「ESMDA」はアルゴリズム（更新のしかた）の名前であり、状態変数に何を選ぶかは自由。
-  実験 1 と 3 で更新式は 1 文字も変わらない（§6.2 で実証）。OI・KF・EnKF との違いは §3 で導出付きで整理する。</p>
+  実験 1 と 3 で更新式は 1 文字も変わらない（§6.3 で実証）。OI・KF・EnKF との違いは §3 で導出付きで整理する。</p>
 </section>
 
 <!-- ═══════════════════ §1 問題設定 ═══════════════════ -->
@@ -858,9 +858,20 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     <tr><th></th><th>B の初期値</th><th>B への物理の反映</th><th>B の更新</th></tr>
     <tr><td><strong>OI</strong></td><td>決め打ち（σ_b, L_c の関数形）</td><td>なし</td><td>なし（毎回同じ B を使い回す）</td></tr>
     <tr><td><strong>KF</strong></td><td>決め打ち（P₀）</td><td>行列演算 \( \mathbf{M}\mathbf{P}\mathbf{M}^{\!\top}+\mathbf{Q} \) で厳密に伝播</td><td>解析で \( (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P} \)</td></tr>
-    <tr><td><strong>アンサンブル法</strong></td><td>決め打ちの<strong>分布からサンプリング</strong>（300 本）</td><td><strong>サンプルを順モデルに通す</strong>（モンテカルロ）</td><td>メンバー更新に伴い自動</td></tr>
+    <tr><td><strong>アンサンブル法</strong></td><td>決め打ちの<strong>分布からサンプリング</strong>（<strong>N = 300 本</strong>。決め方は下記）</td><td><strong>サンプルを順モデルに通す</strong>（モンテカルロ）</td><td>メンバー更新に伴い自動</td></tr>
   </table>
-  <p class="small muted">つまり「決め打ち」が消えるわけではない — 初期の散らばり方（σ_q・相関長）は今も設計者が与える（§3.7 の表）。
+  <div class="info-box small">
+    <strong>メンバー数 N はいくつにするのか</strong>: 今回は <strong>N = 300</strong>。これも設計変数で、決め方は次の通り。<br>
+    ① 標本共分散の誤差は \( O(1/\sqrt{N}) \) — N=100 で約 10%、N=300 で約 6% のゆらぎ。局所化（§3.2）で遠方の偽相関を殺す前提なら、
+    この規模の問題では<strong>数百本</strong>が相場。<br>
+    ② <strong>「300 ケースも計算するのか？」→ する</strong>。毎反復、300 メンバー全員の順計算を実行し、
+    合計 N × N_a = 300×30 = 9000 回の順モデル呼び出しになる。これがアンサンブル法のコスト構造そのもの。
+    救いは 2 つ: (a) 各メンバーは<strong>完全に独立</strong>なので並列実行が容易（実 CAE ではクラスタで N 本同時流し）、
+    (b) 本デモは線形なので LU 分解を 1 回して 300 本まとめて 1 回の後退代入で済み、全 9000 回でも数秒。
+    実 CAE で順解析が重い場合は、局所化とセットで N を 50〜200 に抑えるのが常套。<br>
+    ③ 実務の決め方は「<strong>倍にして結果が変わらなくなる点</strong>で打ち切る」— 今回 N=600 で再実行して結果不変を確認済み（§3.7 の表）。
+  </div>
+  <p class="small muted">つまり「決め打ち」が消えるわけではない — 初期の散らばり方（σ_q・相関長）と<strong>メンバー数 N</strong> は今も設計者が与える（§3.7 の表）。
   アンサンブルの利点は初期値ではなく、<strong>その後の物理反映（n×n 行列なしで）と事後への更新が自動になる</strong>こと。</p>
 </section>
 
@@ -1117,8 +1128,46 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
-  <h2>5.2 逆問題の不適切性 — 何が原理的に復元できないか</h2>
-  <p>実験 2 と同じ固有値解析を、今度は<strong>順方向</strong>に使う。熱源の波数成分 \( q_k \) がセンサ温度に作る信号は</p>
+  <h2>5.2 何が起きたか: 「38.8 の壁」と、その原因を掴む 2 つの実験</h2>
+  <div class="warn-box">
+    <strong>観測された事実</strong>: Q-state ESMDA を走らせると、熱源 q の RMSE は <strong>38.8 で止まる</strong>
+    （何も推定しないときの水準 = q_true の std 40.0 とほぼ同じ）。そこで原因切り分けのため
+    設定を振って再実行した: センサ 300→400 点 / アンサンブル 300→600 本 / 反復 30→60 回 / 事前分散 40→120
+    — <strong>すべて効果なし</strong>。つまりアルゴリズムの調整不足ではない。原因は問題そのものにある。
+  </div>
+  <p>それを確かめるために、順モデル \( \mathbf{x} = \mathbf{L}^{-1}(-\mathbf{q}/\alpha) \) に<strong>試験入力を入れて応答を実測</strong>した。</p>
+  <div class="two-col">
+    <div class="card red">
+      <h3>実験 A: 市松模様の熱源はセンサに見えるか</h3>
+      <p class="small">1 セルおきに +12 / −12 を並べた熱源（最も細かい空間パターン）を順モデルに入れると、
+      温度場の変化は<strong>全域で ±3.0 °C</strong>しかない。</p>
+      <p class="small">これは観測ノイズ \( \sigma_r = 3\,^\circ\mathrm{C} \) と<strong>同じ大きさ</strong>。
+      つまりセンサをどこに何個置いても、「±12 の市松熱源がある世界」と「ない世界」を
+      <strong>統計的に区別できない</strong>。q_true のエッジ（振幅 50〜190）はまさにこの
+      セルスケール成分でできている。</p>
+    </div>
+    <div class="card orange">
+      <h3>実験 B: 点熱源の応答はどれだけ「ぼやける」か</h3>
+      <p class="small">1 セルだけ +100 の熱源を置くと、温度は
+      源セル 141 °C / 1 セル隣 91 °C / 3 セル隣 55 °C / 6 セル隣 32 °C —
+      <strong>幅広いなだらかな山</strong>になる。</p>
+      <p class="small">熱源を 1 点に集中させても、周囲数セルに分散させても、
+      センサ位置の温度は<strong>ほぼ同じ</strong>。→ 温度からは熱源の「細かい置き方」を
+      一意に逆算できない（解の非一意性）。逆問題とは、この「ぼやけ」を
+      解消しようとする操作であり、そこが不適切（ill-posed）。</p>
+    </div>
+  </div>
+  <div class="info-box small">
+    <strong>ここまでで分かったこと</strong>: 順モデルが平滑化として働くため、熱源の細かい成分は
+    (A) 観測ノイズに埋もれ、(B) そもそも温度に痕跡をほとんど残さない。
+    次のスライドでこれを波数ごとの式として一般化し、「どのスケールまでなら復元できるか」の境界を引く。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
+  <h2>5.3 一般化: どのスケールまで復元できるか（スペクトル解析）</h2>
+  <p>前スライドの実験 A・B を、実験 2（§4.2）で使った固有値解析の<strong>順方向</strong>として統一的に書く。熱源の波数成分 \( q_k \) がセンサ温度に作る信号は</p>
   <div class="derive-box">
     <div class="step"><span class="no">(1)</span><span>
       \[ x_k = \frac{q_k}{\alpha\,|\lambda(k)|}, \qquad |\lambda(k)| \approx k^2 \;(\text{低波数}) \;\to\; 8 \;(\text{最高波数}) \]
@@ -1127,7 +1176,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     <div class="step"><span class="no">(2)</span><span>
       この信号が観測ノイズ \( \sigma_r = 3\,{}^\circ\mathrm{C} \) より小さければ、その成分は観測から<strong>統計的に識別不能</strong>:
       \[ |q_k| \lesssim \alpha\,|\lambda(k)|\,\sigma_r \quad\Rightarrow\quad \text{復元不能。最高波数では } |q_k| \lesssim 0.5 \times 8 \times 3 = 12 \]
-      <span class="why">q_true のエッジはセルスケール（高波数）に振幅 50〜190 を持つが、観測に残る痕跡は数 °C 以下 → ノイズに沈む。</span>
+      <span class="why">前スライドの実験 A はこの式の実測版: 市松 ±12（最高波数）→ 温度 ±3.0 °C = ちょうど検出限界。</span>
     </span></div>
     <div class="step"><span class="no">(3)</span><span>
       さらにセンサは空間サンプリングなので、センサ間隔 \( \Delta \) より短い波長は捉えられない（ナイキスト制約: 波長 \( \gtrsim 2\Delta \)）。
@@ -1137,9 +1186,8 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
   <div class="two-col">
     <div class="warn-box small">
       <strong>帰結（限界）</strong>: セルスケールのエッジ場である \( \mathbf{q}_{\rm true} \) の
-      ポイントワイズな復元は<strong>どんな手法でも不可能</strong>。実測でも q RMSE は 38.8 で飽和
-      （何も推定しない場合の水準 = 真値の std 40.0 とほぼ同じ）。N や \( N_a \) を増やしても不変 —
-      これはアルゴリズムの欠陥ではなく<strong>観測が持つ情報の上限</strong>。
+      ポイントワイズな復元は<strong>どんな手法でも不可能</strong>。5.2 の「38.8 の壁」は
+      アルゴリズムの欠陥ではなく<strong>観測が持つ情報の上限</strong>だった、というのがこの節の結論。
     </div>
     <div class="success-box small">
       <strong>帰結（達成可能な目標）</strong>: 低波数（平滑化スケール）の成分は復元できる。
@@ -1154,7 +1202,56 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 <section>
 <section>
   <span class="sec-tag">§6 — Math ↔ Code</span>
-  <h2>6.1 数式とコードの対応 (1/2): モデルの構築</h2>
+  <h2>6.1 アンサンブル法はプログラム上で何をするのか — 配列の動きを追う</h2>
+  <div class="info-box small">
+    <strong>データ構造がすべての出発点</strong>: 状態は 1 本のベクトルではなく行列
+    <code>Q (900 × 300)</code>。<strong>1 列 = 1 つの仮説（アンサンブルメンバー）= 「あり得る熱源場の候補」</strong>。
+    プログラムがやることは「この 300 列の集団を、観測に合う方向へ一括で動かす」だけ。
+  </div>
+  <table style="font-size:0.70em;">
+    <tr><th style="width:4%;">#</th><th style="width:30%;">コード（1 反復分）</th><th style="width:13%;">配列サイズ</th><th style="width:53%;">プログラムは何をしているのか</th></tr>
+    <tr><td>1</td><td><code>T = LU.solve(-Q/ALPHA)</code></td><td>(900, 300)</td>
+      <td><strong>300 個の仮説それぞれについて</strong>「その熱源なら温度場はこうなる」を順モデルで計算（全列一括の後退代入）</td></tr>
+    <tr><td>2</td><td><code>Qp = Q - Q.mean(axis=1)</code><br><code>Tp = T - T.mean(axis=1)</code></td><td>(900, 300)</td>
+      <td>各仮説から集団平均を引き、<strong>仮説間のばらつきだけ</strong>を取り出す（共分散の材料）</td></tr>
+    <tr><td>3</td><td><code>HTp = Tp[obs_idx, :]</code></td><td>(m, 300)</td>
+      <td>センサのある行だけ抜き出す = <strong>各仮説が予測する「センサ読み値」のばらつき</strong></td></tr>
+    <tr><td>4</td><td><code>S = HTp@HTp.T/(N-1) + α σ_r² I</code><br><code>PHt = Qp@HTp.T/(N-1)</code></td><td>(m, m)<br>(900, m)</td>
+      <td>300 仮説の中で「センサ j とセンサ j′」「セル i とセンサ j」が<strong>一緒に動く度合い</strong>を数える = 標本共分散。ここに順モデルの物理が入る（§3.3）</td></tr>
+    <tr><td>5</td><td><code>K = solve(S.T, PHt.T).T</code></td><td>(900, m)</td>
+      <td>ゲイン = 「センサ j の残差 1 °C につき、セル i の熱源を何単位直すか」の<strong>換算表</strong></td></tr>
+    <tr><td>6</td><td><code>eps = rng.normal(0, σ_eff, (m, 300))</code><br><code>innov = y + eps - T[obs_idx, :]</code></td><td>(m, 300)</td>
+      <td>仮説ごとの「観測とのずれ」。メンバーごとに違うノイズを載せる摂動観測（§3.4 — 載せないと集団が縮みすぎる）</td></tr>
+    <tr><td>7</td><td><code>Q += (K * rho) @ innov</code></td><td>(900, 300)</td>
+      <td><strong>300 仮説を一括修正</strong>。観測に拘束された方向の散らばりは自動的に縮む。rho は遠距離の偽相関を殺す局所化（§3.2）</td></tr>
+  </table>
+  <div class="two-col">
+    <div class="card cyan small">
+      <h3>EnKF のプログラム構造（時間ループ）</h3>
+      <pre style="box-shadow:none; margin:4px 0;"><code class="language-python" data-trim>
+for k in range(n_steps):        # 時刻ループ
+    X = time_step(X)            # 予報: 各メンバーを力学で前進
+    y_k = get_obs(k)            # 新しい観測が届く
+    X = update(X, y_k, R)       # 上の表の #2-7（σ_eff → σ_r）
+      </code></pre>
+      <p class="small muted">リアルタイム追跡。毎回<strong>新しい観測</strong>を使う。</p>
+    </div>
+    <div class="card green small">
+      <h3>ESMDA のプログラム構造（反復ループ）← 今回</h3>
+      <pre style="box-shadow:none; margin:4px 0;"><code class="language-python" data-trim>
+for it in range(N_ITER):        # 反復ループ（時間は進まない）
+    T = forward(Q)              # 予報の代わりに順問題を解き直す
+    Q = update(Q, y, N_ITER*R)  # 上の表の #2-7、同じ y を弱く
+      </code></pre>
+      <p class="small muted">静的問題。<strong>同じ観測</strong>を膨張 R で繰り返す（§3.5）。</p>
+    </div>
+  </div>
+  <p class="small muted">更新関数 #2-7 は両者で<strong>完全に同一</strong>。違いはループの意味（時間 vs 反復）と、観測が新しいか同じかだけ。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§6 — Math ↔ Code</span>
+  <h2>6.2 数式とコードの対応 (1/2): モデルの構築</h2>
   <p class="small muted">実装: <code>python/esmda_qfull.py</code>。§2-5 の数式がコードのどの行かを 1:1 で示す。</p>
   <table style="font-size:0.72em;">
     <tr><th style="width:34%;">数式（§ 参照）</th><th style="width:44%;">コード</th><th style="width:22%;">備考</th></tr>
@@ -1197,7 +1294,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§6 — Math ↔ Code</span>
-  <h2>6.2 数式とコードの対応 (2/2): ESMDA 更新ループ</h2>
+  <h2>6.3 数式とコードの対応 (2/2): ESMDA 更新ループ</h2>
   <pre><code class="language-python" data-trim>
 SIGMA_R_EFF = SIGMA_R * np.sqrt(N_ITER)     # sqrt(α_k)·σ_r : 膨張観測誤差 (§3.5)
 
@@ -1243,11 +1340,11 @@ for it in range(1, N_ITER+1):
 
 <section>
   <span class="sec-tag">§7 — Results</span>
-  <h2>7.2 熱源場 — §5.2 の理論予測どおりの結果</h2>
+  <h2>7.2 熱源場 — §5.3 の理論予測どおりの結果</h2>
   <div class="image-scroll" style="max-height:420px;">
     <img src="img/fig08_qfull_vs_derived.png" alt="熱源比較">
   </div>
-  <p class="caption">左から: 正解（エッジ場）／ 正解の σ=1 平滑化（= §5.2 で導いた「復元可能スケール」）／ 実験 3 (Q-state) ／ 実験 2 (後処理)。各パネル独自の robust スケール。</p>
+  <p class="caption">左から: 正解（エッジ場）／ 正解の σ=1 平滑化（= §5.3 で導いた「復元可能スケール」）／ 実験 3 (Q-state) ／ 実験 2 (後処理)。各パネル独自の robust スケール。</p>
   <table style="font-size:0.75em;">
     <tr><th>m</th><th>corr(実験 3, 平滑化真値)</th><th>corr(実験 2, 平滑化真値)</th><th>解釈</th></tr>
     <tr><td>30</td><td>0.33</td><td>0.29</td><td rowspan="4" style="font-size:0.95em;">両者の<strong>情報量はほぼ同じ</strong>（線形問題では §2 の事後分布が引き出せる情報の上限を共有するため、理論と整合）。
@@ -1268,7 +1365,7 @@ for it in range(1, N_ITER+1):
   <p class="caption">左: 熱源 RMSE ／ 右: 温度 RMSE。エラーバーはシード間の標準偏差。</p>
   <ul class="small">
     <li>温度: センサ増で単調改善し 300 点で 20 °C に飽和（実験 1 と同じ傾向・同じ水準）</li>
-    <li>熱源 RMSE: 黄破線（ゼロ情報水準 = 真値 std 40.0）からわずかしか下がらない — §5.2 の「ポイントワイズ RMSE は適切な指標ではない」ことの実証。構造の回復は相関（7.2 の表）で見る</li>
+    <li>熱源 RMSE: 黄破線（ゼロ情報水準 = 真値 std 40.0）からわずかしか下がらない — §5.3 の「ポイントワイズ RMSE は適切な指標ではない」ことの実証。構造の回復は相関（7.2 の表）で見る</li>
   </ul>
 </section>
 
@@ -1338,7 +1435,7 @@ for it in range(1, N_ITER+1):
         <h3>次の展開</h3>
         <ul class="small">
           <li>非定常化: 時系列観測での熱源追跡（ES → EnKS / 逐次 ESMDA）</li>
-          <li>エッジを表現できる事前分布（全変動正則化・非ガウス）→ §5.2 の限界は「ガウス事前 + 点観測」の限界であり、事前情報を強くすれば動く余地がある</li>
+          <li>エッジを表現できる事前分布（全変動正則化・非ガウス）→ §5.3 の限界は「ガウス事前 + 点観測」の限界であり、事前情報を強くすれば動く余地がある</li>
           <li>OpenFOAM / FrontISTR ケース (sample/002-1) への Q-state 同化の展開</li>
         </ul>
       </div>
