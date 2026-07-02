@@ -250,7 +250,8 @@ $$
 \right)^{-1}
 $$
 
-です。観測誤差共分散 $\mathbf{R}$ は、センサノイズ $\sigma_r=3\,^\circ\mathrm{C}$ なら
+です。観測誤差共分散 $\mathbf{R}$ は、センサノイズの標準偏差が
+3 °C、つまり $\sigma_r=3$ なら
 
 $$
 \mathbf{R}
@@ -413,7 +414,7 @@ std は 40.0。推定 $\mathbf{q}$ の RMSE は $m=400$ でも 38.8 までしか
 $\sigma=1$ セルでガウス平滑化した $\mathbf{q}_{\rm true}$ と比較すると、
 推定 $\mathbf{q}$ との相関はセンサ数とともに単調に向上します。
 
-| センサ数 $m$ | $\mathrm{corr}(\mathbf{q}_{\rm est}, \mathbf{q}_{\rm true,smoothed})$ |
+| センサ数 $m$ | corr($\mathbf{q}_{\rm est}$, $\mathbf{q}_{\rm true,smoothed}$) |
 |---:|---:|
 | 30 | 0.33 |
 | 100 | 0.59 |
