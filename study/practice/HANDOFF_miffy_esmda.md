@@ -1,6 +1,6 @@
 # 引き継ぎメモ: ミッフィー固定センサ ESMDA
 
-更新日: 2026-06-14
+更新日: 2026-06-15
 
 この文書は、他のPCへそのまま引き継ぐための作業メモです。  
 現時点の主対象は [A02_miffy_esmda_SCfixTimefix_Q](./A02_miffy_esmda_SCfixTimefix_Q) です。
@@ -130,9 +130,14 @@ python3 enkf_heatid.py
 
 ---
 
-## 8. 追加でやるなら
+## 8. 引き継ぎ後に完了した作業
 
-- `README_demo_summary.md` を最新の引き継ぎメモへリンクし直す
-- 他PCで必要な実行依存を明記する
-- もし温度場ではなく熱源場を主対象にしたいなら、状態変数を `Q_full` に変更する
+- `practice/README.md` のESMDA節を現行設定・最新結果へ更新
+- `README_demo_summary.md` を `README.md` への互換リンクに変更
+- 実行依存（`numpy`, `scipy`, `matplotlib`, `Pillow`）をケースREADMEへ追記
+- ケースREADMEの存在しない関連デモリンクを修正
 
+## 9. 次の技術課題
+
+温度場ではなく熱源場を主対象にする場合は、状態変数を `Q_full` に変更し、
+`L^-1` の順問題を組み込んだ完全逆問題へ進めます。

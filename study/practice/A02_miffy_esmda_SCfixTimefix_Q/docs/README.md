@@ -28,6 +28,8 @@ ESMDA（Ensemble Smoother with Multiple Data Assimilation）で同化し、
 
 ## 実行
 
+必要なPythonパッケージは `numpy`、`scipy`、`matplotlib`、`Pillow` です。
+
 ```bash
 cd python
 python3 enkf_heatid.py
@@ -58,6 +60,6 @@ python3 enkf_heatid.py
 
 ## 関連デモ
 
-- [`A003_miffy_enkfT_fixsensor`](../../A003_miffy_enkfT_fixsensor/docs/README.md) — 固定センサ数比較（ケース1）
-- [`A02_miffy_enkf_T`](../../A02_miffy_enkf_T/docs/enkf_method.md) — 基本 EnKF（時間発展）
+- [`A02_miffy_enkf_SCrandomTimefix_T`](../../A02_miffy_enkf_SCrandomTimefix_T/) — EnKF固定センサ数比較
+- [`A02_miffy_enkf_SCrandomTime_T`](../../A02_miffy_enkf_SCrandomTime_T/docs/enkf_method.md) — 基本EnKF
 - [`A02_miffy_deterministic_esmda_oi_SCfixTimefix_Q`](../../A02_miffy_deterministic_esmda_oi_SCfixTimefix_Q/docs/README.md) — 決定論的ESMDA/OI版
