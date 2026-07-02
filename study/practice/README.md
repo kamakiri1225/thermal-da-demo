@@ -2,9 +2,13 @@
 
 > **場所：** `practice/`  
 > **対象：** ミッフィー / おっさん の温度場・熱源場同定  
-> **更新：** 2026-06-14
+> **更新：** 2026-07-02
 
-> **引き継ぎ用：** [HANDOFF_miffy_esmda.md](HANDOFF_miffy_esmda.md)
+| 読みたいもの | 場所 |
+|---|---|
+| 引き継ぎメモ（現状と次課題） | [HANDOFF_miffy_esmda.md](HANDOFF_miffy_esmda.md) |
+| ESMDA の理論解説スライド（reveal.js） | [A02_miffy_esmda_SCfixTimefix_Q/slides.html](A02_miffy_esmda_SCfixTimefix_Q/slides.html) |
+| 最新セッションの作業ログ | [WORKLOG_20260702_esmda_qfull.md](WORKLOG_20260702_esmda_qfull.md) |
 
 ---
 
@@ -19,9 +23,29 @@ A{連番}_{対象}_{手法}_{SCセンサ配置}_{同定対象}
 | `oi` / `enkf` / `kf` / `esmda` | 同化手法 |
 | `SCrandomTime` | センサ位置をランダムに選び、**毎サイクル再抽選** |
 | `SCrandomTimefix` | センサ位置をランダムに**一度だけ**選び、以降固定 |
-| `SCfixTimefix` | センサ位置をユーザーが**手動指定**し固定 |
+| `SCfixTimefix` | センサ位置を**固定**（真値を見ない空間充填配置で決定） |
 | `T` | 温度場を同定 |
 | `Q` | 熱源場を同定（または逆算） |
+
+---
+
+## ケース一覧（インデックス）
+
+| ケース | 手法 | センサ | 同定対象 | 判定 | 一言 |
+|---|---|---|---|---|---|
+| [A02_miffy_oi_SCrandomTime_T](#a02_miffy_oi_scrandomtime_t) | OI | random/毎回 | T | ○ | 解析 B・最小構成のベースライン |
+| [A02_miffy_enkf_SCrandomTime_T](#a02_miffy_enkf_scrandomtime_t) | EnKF | random/毎回 | T | ○ | データドリブン B |
+| [A02_miffy_enkf_SCrandomTime_Q](#a02_miffy_enkf_scrandomtime_q) | EnKF+順問題 | random/毎回 | Q | ○ | 熱源直接同定の初版 |
+| [A02_miffy_kf_SCrandomTime_T](#a02_miffy_kf_scrandomtime_t) | KF | random/毎回 | T | ○ | 線形厳密・動的前進 |
+| [A02_miffy_enkf_SCrandomTimefix_T](#a02_miffy_enkf_scrandomtimefix_t) | EnKF+Infl | random/固定 | T | **×発散** | 固定センサ×インフレーションの失敗例 |
+| [A02_miffy_esmda_SCfixTimefix_Q](#a02_miffy_esmda_scfixtimefix_q--現セッションのメイン) | **ESMDA** | 空間充填/固定 | T と **Q直接** | **◎** | **本命ケース**。完全逆問題・スライドあり |
+| [A03_ossan_enkf_SCrandomTime_Q](#a03_ossan_enkf_scrandomtime_q) | EnKF+順問題 | random/毎回 | Q | ○ | おっさん熱源同定 |
+| [A03_ossan_esmda_SCfixTimefix_Q](#a03_ossan_esmda_scfixtimefix_q) | **ESMDA** | 空間充填/固定 | **Q直接** | **◎** | 本命手法をおっさん（60×60）へ展開 |
+
+**結論の要約**: 固定センサ×静的場の推定では **ESMDA が最も安定・実用的**。
+EnKF は固定センサで発散し（インフレーション暴走）、OI は 1 回更新の特殊ケース。
+熱源はセルスケールのエッジまでは復元できないが（逆問題の不適切性）、
+平滑化スケールなら直接読める形で復元できる。
 
 ---
 
@@ -269,6 +293,39 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
 
 **課題・改善策**
 - ミッフィーと同様。ESMDA + 固定センサに移行すれば安定性が向上
+  → **移行済み: 下記 `A03_ossan_esmda_SCfixTimefix_Q`**
+
+---
+
+### A03_ossan_esmda_SCfixTimefix_Q
+**ESMDA × 空間充填固定センサ × 熱源場（完全逆問題）— 本命手法のおっさん展開（2026-07-02 追加）**
+
+<img src="A03_ossan_esmda_SCfixTimefix_Q/img/fig08_qfull_vs_derived.png" width="800" alt="おっさん熱源同定の比較">
+
+<img src="A03_ossan_esmda_SCfixTimefix_Q/img/anim_esmda_qfull.gif" width="640" alt="おっさん完全逆問題版アニメーション">
+
+| 項目 | 内容 |
+|------|------|
+| 手法 | 確率的ESMDA（状態変数 = 熱源場 q、順モデル `x = L⁻¹(−q/α)`） |
+| グリッド | **60×60 = 3600 セル**（ミッフィーの 4 倍の未知数） |
+| センサ | m=[100,300,600,1200]。真値を使わない空間充填配置で固定 |
+| 初期分布 | 平均 0 + 空間相関ノイズ（σ_q = q_true の std ≈ 28.6） |
+| パラメータ | N=300、σ_r=3°C、CORR_L=1.5、**R_loc=20**、N_ITER=30 |
+
+**結果**
+
+| m センサ数 | 温度 RMSE | corr(q_est, 平滑化 q_true) |
+|-----------:|----------:|---------------------------:|
+| 100 | 30.8°C | 0.18 |
+| 300 | 27.5°C | 0.29 |
+| 600 | 20.8°C | 0.55 |
+| 1200 | **17.1°C** | **0.72** |
+
+**わかったこと**
+- ミッフィーで確立した完全逆問題版がそのままスケールアップできる（変更は格子・真値・R_loc のみ）
+- 局所化半径はドメインサイズに追従して広げる必要がある（30×30 で 10 → 60×60 で 20。10 のままだと過渡暴走が再発）
+- センサ**密度**で見るとミッフィーと対応: 密度 1/3 で相関 0.72（ミッフィー 0.76）
+- 詳細: [ケースREADME](A03_ossan_esmda_SCfixTimefix_Q/docs/README.md)
 
 ---
 
@@ -283,6 +340,7 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
 | `A02_miffy_enkf_SCrandomTimefix_T` | EnKF+局所Infl | random/固定 | T | **×発散** | — | 固定センサでInflが暴走 |
 | `A02_miffy_esmda_SCfixTimefix_Q` | ESMDA | 空間充填/固定 | T→Q / **Q直接** | **◎安定** | **19.82°C(m=300)** | 一様初期場、センサ数を定量評価、完全逆問題版あり |
 | `A03_ossan_enkf_SCrandomTime_Q` | EnKF+PDE | random/毎回 | Q | ○ | 中 | おっさん熱源同定 |
+| `A03_ossan_esmda_SCfixTimefix_Q` | ESMDA | 空間充填/固定 | **Q直接** | **◎安定** | **17.1°C(m=1200)** | 60×60 へのスケールアップ、R_loc=20 |
 
 ---
 
@@ -310,17 +368,17 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
    `A02_miffy_esmda_SCfixTimefix_Q/python/esmda_qfull.py` 参照。
    [作業ログ](WORKLOG_20260702_esmda_qfull.md)
 
-2. **センサ最適化（OED）**  
-   不確実性（アンサンブル分散）が最大のセルにセンサを動的配置 → 情報量最大化
+2. ~~**おっさん版 ESMDA**~~ → **実施済み（2026-07-02）**  
+   `A03_ossan_esmda_SCfixTimefix_Q` 参照（60×60 への展開を兼ねる）。
 
-3. **高解像度化（60×60）**  
-   ミッフィーの細部（目・口・耳）をより精細に再現
+3. **センサ最適化（OED）**  
+   不確実性（アンサンブル分散）が最大のセルにセンサを動的配置 → 情報量最大化
 
 4. **非定常化 / 実CAEケースへの展開**  
    時系列観測での熱源追跡、OpenFOAM / FrontISTR（sample/002-1 系）への Q-state 同化
 
-4. **おっさん版 ESMDA**  
-   `A03_ossan_enkf_SCrandomTime_Q` → `A03_ossan_esmda_SCfixTimefix_Q` に移行
+5. **エッジを表現できる事前分布**  
+   全変動正則化・非ガウス事前で、平滑化スケールを超えた熱源復元に挑む
 
 ---
 

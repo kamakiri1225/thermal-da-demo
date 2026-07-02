@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESMDA 入門 | ミッフィー熱源同定でわかるアンサンブルスムーザー</title>
+<title>ESMDA によるミッフィー熱源同定 | 理論と実装の完全解説</title>
 
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
 <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
@@ -160,6 +160,24 @@
   margin: 8px 0;
   text-align: center;
 }
+.derive-box {
+  background: #0b1220;
+  border: 1px solid rgba(188,140,255,0.3);
+  border-radius: 8px;
+  padding: 12px 18px;
+  margin: 8px 0;
+}
+.derive-box .step {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(139,148,158,0.2);
+}
+.derive-box .step:last-child { border-bottom: none; }
+.derive-box .step .no { color: var(--purple); font-weight: 700; font-size: 0.8em; }
+.derive-box .step .why { color: var(--muted); font-size: 0.72em; margin-top: 2px; }
 
 .badge {
   display: inline-block;
@@ -291,6 +309,17 @@ hr.dim { border: 0; border-top: 1px solid var(--border); margin: 12px 0; }
 
 .caption { color: var(--muted); font-size: 0.72em; margin-top: 5px; text-align: center !important; }
 
+.breadcrumb {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.7em;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.breadcrumb b { color: var(--cyan); font-weight: 600; }
+
 #pdf-export-btn {
   position: fixed; right: 10px; top: 10px; z-index: 50;
   background: rgba(13,17,23,0.92); color: var(--text);
@@ -333,6 +362,8 @@ body.print-pdf .info-box    { background: #eef6ff !important; border-color: #8bb
 body.print-pdf .warn-box    { background: #fff7e6 !important; border-color: #d4a72c !important; }
 body.print-pdf .success-box { background: #eef8ef !important; border-color: #7bc47f !important; }
 body.print-pdf .math-box    { background: #f5f7fa !important; border-color: #c9d7e8 !important; }
+body.print-pdf .derive-box  { background: #f5f7fa !important; border-color: #d8c9e8 !important; }
+body.print-pdf .breadcrumb  { background: #f0f3f7 !important; border-color: #d0d7de !important; color: #555 !important; }
 body.print-pdf .muted, body.print-pdf .caption,
 body.print-pdf .flow-item .note, body.print-pdf .metric .label { color: #555 !important; }
 body.print-pdf .sec-tag { color: #777 !important; }
@@ -356,23 +387,28 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 <div class="reveal">
 <div class="slides">
 
-<!-- ═══ タイトル ═══ -->
+<!-- ═══════════════════ タイトル ═══════════════════ -->
 <section class="title-slide">
   <div class="sec-tag">A02_miffy_esmda_SCfixTimefix_Q</div>
-  <h1>ESMDA 入門<br><span style="font-size:0.62em;">ミッフィー熱源同定でわかるアンサンブルスムーザー</span></h1>
+  <h1>ESMDA によるミッフィー熱源同定<br><span style="font-size:0.60em;">ベイズ推定から完全逆問題まで — 理論と実装の解説</span></h1>
+  <p style="text-align:center; margin:2px 0 6px;">
+    <span class="badge badge-blue" style="font-size:0.85em; padding:5px 14px;">
+      使用手法: 確率的 ESMDA（Ensemble Smoother with Multiple Data Assimilation）× 状態変数 = 熱源場
+    </span>
+  </p>
   <div style="width:1120px; margin-top:8px; text-align:left;">
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
       <div class="card blue" style="margin:0;">
         <h3>目的</h3>
-        <p>形状を知らない状態から、<strong>固定温度センサの観測だけ</strong>で温度場と熱源場を復元する（静的逆問題のデータ同化）。</p>
+        <p>固定温度センサの点観測だけから、<strong>①温度場</strong>（900 未知数）と<strong>②それを作っている熱源場</strong>を推定する。形状の事前知識は使わない。</p>
       </div>
       <div class="card green" style="margin:0;">
-        <h3>やったこと</h3>
-        <p>ESMDA で温度場を復元 → さらに状態変数を熱源 q に変えて <strong>L⁻¹ 順問題を組み込んだ完全逆問題</strong>へ拡張。</p>
+        <h3>結論</h3>
+        <p>静的逆問題では <strong>ESMDA が最適</strong>。温度場は RMSE 20 °C で復元、熱源場は「観測が原理的に持つ情報の上限」（平滑化スケール）まで復元できた。</p>
       </div>
       <div class="card cyan" style="margin:0;">
-        <h3>結論</h3>
-        <p>固定センサ×静的場では <strong>ESMDA が最も安定・実用的</strong>。EnKF は発散、OI は 1 回更新の特殊ケース。</p>
+        <h3>この資料で示すこと</h3>
+        <p>ベイズ推定 → カルマンゲインの導出 → EnKF / OI / ESMDA の位置づけ → 完全逆問題の不適切性 → コードとの 1:1 対応。</p>
       </div>
     </div>
     <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d;">
@@ -380,575 +416,860 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
            style="width:100%; display:block; border-radius:4px;">
     </div>
     <p class="caption muted" style="margin-top:5px;">
-      完全逆問題版 ESMDA — 上段: 推定熱源からの温度場 / 下段: 推定熱源場（反復とともにミッフィーが現れる）
+      完全逆問題版 ESMDA — 上段: 推定熱源から順解析した温度場 / 下段: 推定熱源場。反復とともにミッフィーが現れる
     </p>
   </div>
 </section>
 
-<!-- ═══ 目次 ═══ -->
+<!-- ═══════════════════ ストーリー ═══════════════════ -->
 <section>
-  <h2>目次</h2>
-  <div style="display:flex; flex-direction:column; gap:10px; max-width:800px;">
-    <div class="card blue"><strong style="color:var(--blue);">01</strong>&ensp;目的と問題設定 — ツイン実験</div>
-    <div class="card green"><strong style="color:var(--green);">02</strong>&ensp;何をしたか — 温度場復元から完全逆問題へ</div>
-    <div class="card cyan"><strong style="color:var(--cyan);">03</strong>&ensp;ESMDA とは何か — 直感と理論</div>
-    <div class="card purple"><strong style="color:var(--purple);">04</strong>&ensp;手法ファミリー比較 — KF / EnKF / OI / ESMDA とパラメータの決め方</div>
-    <div class="card orange"><strong style="color:var(--orange);">05</strong>&ensp;数式とコードの対応 — esmda_qfull.py</div>
-    <div class="card red"><strong style="color:var(--red);">06</strong>&ensp;結果と教訓 — 復元できるもの・できないもの</div>
+  <span class="sec-tag">Roadmap</span>
+  <h2>この資料の流れ — 3 つの実験と 1 本の理論</h2>
+  <p>本ケースは 3 つの実験で構成される。<strong>どこで何を推定しているのか</strong>を先に固定する。</p>
+  <table>
+    <tr>
+      <th style="width:10%;"></th>
+      <th style="width:22%;">推定対象（状態変数）</th>
+      <th style="width:30%;">観測演算子 \( \mathcal{H} \)</th>
+      <th style="width:14%;">結果</th>
+      <th style="width:24%;">対応スクリプト</th>
+    </tr>
+    <tr>
+      <td><strong>実験 1</strong></td>
+      <td>温度場 \( \mathbf{x} \in \mathbb{R}^{900} \)</td>
+      <td>センサ位置の抜き出し \( \mathbf{H}\mathbf{x} \)（線形・局所）</td>
+      <td><span class="hl-green">成功</span> 19.8 °C</td>
+      <td><code>enkf_heatid.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>実験 2</strong></td>
+      <td>（推定なし）実験 1 の結果から熱源を<strong>後処理で逆算</strong></td>
+      <td>— \( \;\mathbf{q}_{\rm der} = -\alpha \mathbf{L}\bar{\mathbf{x}} \)</td>
+      <td><span class="hl-red">失敗</span> ノイズ増幅</td>
+      <td><code>enkf_heatid.py</code> の出力</td>
+    </tr>
+    <tr>
+      <td><strong>実験 3</strong></td>
+      <td>熱源場 \( \mathbf{q} \in \mathbb{R}^{900} \)</td>
+      <td>順問題を含む \( \mathcal{H}(\mathbf{q}) = \mathbf{H}\,\mathbf{L}^{-1}(-\mathbf{q}/\alpha) \)（線形・<strong>非局所</strong>）</td>
+      <td><span class="hl-green">成功</span>（限界も定量化）</td>
+      <td><code>esmda_qfull.py</code></td>
+    </tr>
+  </table>
+  <div class="info-box">
+    3 実験とも<strong>同化アルゴリズムは同一の「確率的 ESMDA」</strong>（次スライドで手法名と系譜を明示）。変わるのは「何を状態に取り、\( \mathcal{H} \) に何を入れるか」だけ。
+    だから理論は 1 本で済む: <strong>線形ガウスのベイズ更新式</strong>を導出し（§2）、その共分散の作り方・使い方の違いが
+    KF / OI / EnKF / ESMDA の違いであることを示す（§3）。実験 2 の失敗と実験 3 の限界は、
+    どちらもラプラシアンのスペクトル特性から定量的に説明できる（§5）。
+  </div>
+  <div class="flow">
+    <div class="flow-item"><div class="num">§1</div><div class="label">問題設定</div><div class="note">ツイン実験・観測モデル</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">§2</div><div class="label">理論の土台</div><div class="note">ベイズ推定 → 更新式の導出</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">§3</div><div class="label">手法ファミリー</div><div class="note">KF/OI/EnKF/ESMDA の導出と比較</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">§4-5</div><div class="label">3 つの実験</div><div class="note">実施内容と失敗の解析</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">§6-7</div><div class="label">実装と結果</div><div class="note">コード対応・結果・教訓</div></div>
   </div>
 </section>
 
-<!-- ═══ 01 目的と問題設定 ═══ -->
+<!-- ═══════════════════ 手法の明示 ═══════════════════ -->
 <section>
-  <span class="sec-tag">01 — Problem Setup</span>
-  <h2>目的: センサ温度だけで「見えない場」を当てる</h2>
+  <span class="sec-tag">The Method</span>
+  <h2>先に答え: 今回使った手法</h2>
+  <div class="success-box" style="font-size:1.05em;">
+    <strong>確率的 ESMDA</strong>（Stochastic <strong>E</strong>nsemble <strong>S</strong>moother with <strong>M</strong>ultiple <strong>D</strong>ata <strong>A</strong>ssimilation、
+    Emerick &amp; Reynolds 2013）を、<strong>状態変数 = 熱源場 q、順モデル = 定常熱伝導 \( \mathbf{L}^{-1} \)</strong> という
+    完全逆問題の設定で使った。本資料ではこれを <strong>Q-state ESMDA</strong> と呼ぶ。
+  </div>
+  <h3>手法の系譜 — どの家系の何代目か</h3>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">1960s</div>
+      <div class="label">カルマンフィルタ (KF)</div>
+      <div class="note">線形ガウスの逐次ベイズ更新。共分散を行列で厳密に伝播</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">1994</div>
+      <div class="label">アンサンブル KF (EnKF)</div>
+      <div class="note">共分散を N 本のサンプルで近似。非線形・大規模へ</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">2000s</div>
+      <div class="label">アンサンブルスムーザー (ES)</div>
+      <div class="note">逐次をやめ、全観測を一括同化。静的問題・パラメータ推定用</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item" style="border-color:var(--green); border-width:2px;">
+      <div class="num">2013</div>
+      <div class="label">ESMDA ← 今回これ</div>
+      <div class="note">ES の 1 回更新を「観測誤差を膨らませた弱い更新 × 複数回」に分割して安定化</div>
+    </div>
+  </div>
+  <h3>同じ ESMDA を 2 通りの状態変数で使った（これが本ケースの構成）</h3>
+  <table>
+    <tr><th style="width:16%;"></th><th style="width:26%;">状態変数</th><th style="width:34%;">観測演算子</th><th style="width:24%;">呼び名（本資料）</th></tr>
+    <tr>
+      <td><strong>実験 1</strong></td>
+      <td>温度場 x</td>
+      <td>センサ位置の抜き出し（順モデルなし）</td>
+      <td>T-state ESMDA</td>
+    </tr>
+    <tr>
+      <td><strong>実験 3</strong></td>
+      <td><strong>熱源場 q</strong></td>
+      <td><strong>順問題 \( \mathbf{L}^{-1} \) を解いてから</strong>センサ位置を抜き出し</td>
+      <td><strong>Q-state ESMDA（本命）</strong></td>
+    </tr>
+  </table>
+  <p class="small muted">「ESMDA」はアルゴリズム（更新のしかた）の名前であり、状態変数に何を選ぶかは自由。
+  実験 1 と 3 で更新式は 1 文字も変わらない（§6.2 で実証）。OI・KF・EnKF との違いは §3 で導出付きで整理する。</p>
+</section>
+
+<!-- ═══════════════════ §1 問題設定 ═══════════════════ -->
+<section>
+<section>
+  <span class="sec-tag">§1 — Problem Setup</span>
+  <h2>1.1 問題設定: ツイン実験</h2>
   <div class="col-6-4">
     <div>
-      <div class="info-box">
-        <strong>ツイン実験</strong> — 正解（ミッフィー温度場）を自分で作り、そこから
-        センサ観測を合成して、逆推定がどこまで正解に迫れるかを測る枠組み。
-        実務前の手法検証の定番。
-      </div>
-      <ul>
-        <li>格子: 30×30 = <strong>900 セル</strong>（未知数 900 個）</li>
-        <li>観測: 固定温度センサ <strong>m = 30〜400 点</strong> + ノイズ σ<sub>r</sub> = 3 °C</li>
-        <li>初期推定: 全セル 20 °C 一様 — <strong>ミッフィー形状の事前知識はゼロ</strong></li>
-        <li>センサ配置も真値を見ずに決める（格子座標だけの空間充填配置）</li>
+      <p><strong>ツイン実験</strong> = 正解場を自分で作り、そこから観測を合成して、推定手法が正解にどこまで迫れるかを検証する枠組み。手法の性能だけを切り出して評価できる。</p>
+      <h3>正解場（真値）の定義</h3>
+      <ul class="small">
+        <li>30×30 格子にミッフィー形状の温度場 \( \mathbf{x}_{\rm true} \)（0〜100 °C、区分一定）</li>
+        <li>定常熱伝導を仮定し、この温度場を作る熱源を
+          \( \mathbf{q}_{\rm true} = -\alpha \mathbf{L}\, \mathbf{x}_{\rm true} \) で定義（\( \alpha = 0.5 \)、L は 5 点ラプラシアン）</li>
+        <li>したがって \( \mathbf{x}_{\rm true} \) と \( \mathbf{q}_{\rm true} \) は順問題
+          \( \mathbf{L}\mathbf{x} = -\mathbf{q}/\alpha \) で厳密に整合（逆問題は inverse crime 設定 = 手法検証に集中）</li>
       </ul>
-      <div class="warn-box">
-        <strong>本質的な難しさ</strong>: 900 未知数 &gt; 観測数。問題は<strong>劣決定</strong>で、
-        「観測に合う場」は無数にある。事前分布（滑らかさの仮定）で残りを埋めるのが
-        データ同化の役割。
+      <h3>観測の定義</h3>
+      <div class="math-box">
+        \( \mathbf{y} = \mathbf{H}\,\mathbf{x}_{\rm true} + \boldsymbol{\varepsilon}, \qquad
+           \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0}, \sigma_r^2 \mathbf{I}), \quad \sigma_r = 3\,{}^\circ\mathrm{C} \)
       </div>
+      <ul class="small">
+        <li>\( \mathbf{H} \in \mathbb{R}^{m \times 900} \): センサ位置の行を抜き出す 0/1 行列（各行に 1 が 1 個）</li>
+        <li>センサは <strong>m = 30〜400 点で固定</strong>。配置は真値を見ずに、格子座標だけの greedy 空間充填（farthest-point）で決定</li>
+      </ul>
     </div>
     <div>
       <div class="figure"><img src="img/fig00_sensor_layout.png" alt="センサ配置"></div>
-      <p class="caption">固定センサ配置（色 = センサ数 m のケース別）。背景がミッフィー温度場の正解。</p>
+      <p class="caption">センサ配置。色はセンサ数 m のケース。背景が正解温度場。</p>
+      <div class="warn-box small">
+        <strong>難しさの本質</strong>: 未知数 900 に対し観測は最大 400。<strong>劣決定</strong>なので
+        「観測に合う場」は無限にある。何らかの事前情報（滑らかさ）で残り自由度を埋める必要があり、
+        その定式化がベイズ推定（§2）。
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 02 何をしたか ═══ -->
+<section>
+  <span class="sec-tag">§1 — Problem Setup</span>
+  <h2>1.2 何を推定したいのか（2 段階の目標）</h2>
+  <div class="two-col">
+    <div class="card blue">
+      <h3>目標 A: 温度場の再構成（実験 1）</h3>
+      <p class="small">センサのない場所の温度を知りたい。
+      監視・可視化・ホットスポット検出が動機。状態 = 温度場そのもの。
+      観測と状態が同じ物理量なので \( \mathcal{H} \) は単なるサンプリング。</p>
+    </div>
+    <div class="card purple">
+      <h3>目標 B: 熱源場の同定（実験 2, 3）</h3>
+      <p class="small">「なぜその温度になっているのか」= どこで発熱・吸熱しているかを知りたい。
+      故障診断・設計検証が動機。<strong>観測（温度）と推定対象（熱源）が別の物理量</strong>で、
+      両者を物理モデルがつなぐ。これが逆問題・パラメータ同定の一般形。</p>
+    </div>
+  </div>
+  <div class="info-box">
+    <strong>なぜ目標 B が本命か</strong>: 温度場は結果、熱源場は原因。実務（熱設計・異常検知）で欲しいのは
+    原因の分布である。目標 A を達成した後に「温度から熱源を微分で逆算すればよい」と考えたのが実験 2 —
+    これが失敗し（§5 で誤差増幅を定量化）、状態変数そのものを熱源に変える実験 3（完全逆問題）に至った。
+    この経緯が本ケースの主題。
+  </div>
+  <p class="small muted">記号の約束: 太字小文字 = ベクトル、太字大文字 = 行列。\( n = 900 \)（状態次元）、\( m \)（観測数）、
+  \( N \)（アンサンブル数）、\( N_a \)（ESMDA 反復数）。</p>
+</section>
+</section>
+
+<!-- ═══════════════════ §2 理論の土台 ═══════════════════ -->
 <section>
 <section>
-  <span class="sec-tag">02 — What We Did</span>
-  <h2>ステップ 1: 温度場を ESMDA で復元（うまくいった）</h2>
+  <span class="sec-tag">§2 — Theory Foundation</span>
+  <h2>2.1 データ同化 = ベイズ推定</h2>
+  <div class="breadcrumb">ここから理論。まず<b>全手法に共通する 1 本の更新式</b>を、ベイズの定理から仮定を明示して導出する。</div>
+  <p><strong>仮定 (G1)</strong> 事前分布はガウス: 状態の推定値 \( \mathbf{x}_b \)（background）とその誤差共分散 \( \mathbf{B} \) を持つ。</p>
+  <div class="math-box">
+    \( p(\mathbf{x}) \propto \exp\!\left[-\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top} \mathbf{B}^{-1} (\mathbf{x}-\mathbf{x}_b)\right] \)
+  </div>
+  <p><strong>仮定 (G2)</strong> 観測誤差はガウスで状態と独立: \( \mathbf{y} = \mathbf{H}\mathbf{x} + \boldsymbol{\varepsilon} \)、\( \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{R}) \)。よって尤度は</p>
+  <div class="math-box">
+    \( p(\mathbf{y}\,|\,\mathbf{x}) \propto \exp\!\left[-\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top} \mathbf{R}^{-1} (\mathbf{y}-\mathbf{H}\mathbf{x})\right] \)
+  </div>
+  <p>ベイズの定理 \( p(\mathbf{x}|\mathbf{y}) \propto p(\mathbf{x})\, p(\mathbf{y}|\mathbf{x}) \) より、事後分布は 2 つの指数の積。指数部をまとめると</p>
+  <div class="math-box">
+    \( p(\mathbf{x}|\mathbf{y}) \propto e^{-J(\mathbf{x})}, \qquad
+       J(\mathbf{x}) = \underbrace{\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top} \mathbf{B}^{-1} (\mathbf{x}-\mathbf{x}_b)}_{\text{事前からの逸脱ペナルティ}}
+       + \underbrace{\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top} \mathbf{R}^{-1} (\mathbf{y}-\mathbf{H}\mathbf{x})}_{\text{観測との不一致ペナルティ}} \)
+  </div>
+  <div class="info-box small">
+    \( J \) は \( \mathbf{x} \) の 2 次形式なので事後分布もガウス。ガウス分布は<strong>最頻値 = 平均</strong>だから、
+    「事後平均を求める」=「\( J \) を最小化する」。正則化付き最小二乗と同じ構造であり、
+    <strong>B が正則化（劣決定の 900−m 自由度を埋める滑らかさ仮定）の役割</strong>を担うことがここで確定する。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§2 — Theory Foundation</span>
+  <h2>2.2 更新式の導出（1/2）: 停留条件から増分形へ</h2>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      \( J \) の勾配を取る（2 次形式の微分 \( \nabla_x \tfrac12 (\mathbf{x}-\mathbf{a})^\top \mathbf{M} (\mathbf{x}-\mathbf{a}) = \mathbf{M}(\mathbf{x}-\mathbf{a}) \) を各項に適用）:
+      \[ \nabla J = \mathbf{B}^{-1}(\mathbf{x}-\mathbf{x}_b) - \mathbf{H}^{\!\top}\mathbf{R}^{-1}(\mathbf{y}-\mathbf{H}\mathbf{x}) = \mathbf{0} \]
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      \( \mathbf{x} \) について整理（\( \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H}\mathbf{x} \) を左辺へ）:
+      \[ \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)\mathbf{x}_a = \mathbf{B}^{-1}\mathbf{x}_b + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \]
+      <span class="why">左辺の括弧 = 事後の精度行列（後で使う）。右辺 = 事前と観測の「情報」の和。</span>
+    </span></div>
+    <div class="step"><span class="no">(3)</span><span>
+      両辺から \( (\mathbf{B}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})\,\mathbf{x}_b \) を引くと、右辺は
+      \( \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{y} - \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H}\mathbf{x}_b \) となり:
+      \[ \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)(\mathbf{x}_a - \mathbf{x}_b) = \mathbf{H}^{\!\top}\mathbf{R}^{-1}\underbrace{(\mathbf{y}-\mathbf{H}\mathbf{x}_b)}_{\mathbf{d}\;(\text{イノベーション})} \]
+      <span class="why">「解 = 事前値 + 観測残差に比例する修正」という増分形が現れる。</span>
+    </span></div>
+    <div class="step"><span class="no">(4)</span><span>
+      よって解析値（事後平均）は
+      \[ \boxed{\;\mathbf{x}_a = \mathbf{x}_b + \mathbf{K}\,\mathbf{d}\;}, \qquad
+         \mathbf{K} = \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)^{-1}\mathbf{H}^{\!\top}\mathbf{R}^{-1} \]
+      <span class="why">ただしこの形は n×n = 900×900 の逆行列が必要。次のスライドで m×m に変換する。</span>
+    </span></div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§2 — Theory Foundation</span>
+  <h2>2.3 更新式の導出（2/2）: ゲインの m×m 形（push-through 恒等式）</h2>
+  <p>ゲイン \( \mathbf{K} \) を「観測空間（m 次元）の逆行列」だけで書き直す。次の恒等式を示せば十分:</p>
+  <div class="math-box">
+    \( \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)^{-1}\mathbf{H}^{\!\top}\mathbf{R}^{-1}
+       \;=\; \mathbf{B}\mathbf{H}^{\!\top}\left(\mathbf{H}\mathbf{B}\mathbf{H}^{\!\top} + \mathbf{R}\right)^{-1} \)
+  </div>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      出発点として次を展開する（両辺とも \( \mathbf{H}^\top + \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H}\mathbf{B}\mathbf{H}^\top \) になることを確認）:
+      \[ \mathbf{H}^{\!\top}\mathbf{R}^{-1}\left(\mathbf{H}\mathbf{B}\mathbf{H}^{\!\top} + \mathbf{R}\right)
+         = \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)\mathbf{B}\mathbf{H}^{\!\top} \]
+      <span class="why">左辺 \(= \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{H}^\top\)、右辺 \(= \mathbf{H}^\top + \mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H}\mathbf{B}\mathbf{H}^\top\)。一致。</span>
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      左から \( (\mathbf{B}^{-1}+\mathbf{H}^\top\mathbf{R}^{-1}\mathbf{H})^{-1} \)、右から \( (\mathbf{H}\mathbf{B}\mathbf{H}^\top+\mathbf{R})^{-1} \) を掛けると恒等式を得る。∎
+    </span></div>
+  </div>
+  <div class="math-box">
+    \( \boxed{\;\mathbf{x}_a = \mathbf{x}_b + \mathbf{K}(\mathbf{y}-\mathbf{H}\mathbf{x}_b), \qquad
+       \mathbf{K} = \mathbf{B}\mathbf{H}^{\!\top}\left(\mathbf{H}\mathbf{B}\mathbf{H}^{\!\top} + \mathbf{R}\right)^{-1}\;} \)
+  </div>
+  <div class="two-col">
+    <div class="info-box small">
+      <strong>各因子の意味</strong>:
+      \( \mathbf{B}\mathbf{H}^\top = \mathrm{Cov}(\mathbf{x}, \mathbf{H}\mathbf{x}) \) は<strong>状態と観測予測値の共分散</strong>（n×m）—
+      「センサ j の残差を、セル i にどれだけ伝えるか」の配線図。
+      \( \mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R} \) は<strong>イノベーションの共分散</strong>(m×m) — 残差の「信用度」で割る正規化。
+    </div>
+    <div class="success-box small">
+      <strong>計算上の意義</strong>: 逆行列は m×m だけ。今回 m ≤ 400 ≪ n = 900。
+      さらに \( \mathrm{Cov}(\mathbf{x},\mathbf{H}\mathbf{x}) \) と \( \mathrm{Cov}(\mathbf{H}\mathbf{x}) \) は
+      <strong>サンプル（アンサンブル）から直接推定できる形</strong>をしている — これが §3 のアンサンブル法への橋。
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§2 — Theory Foundation</span>
+  <h2>2.4 事後共分散と、手法が分岐するポイント</h2>
+  <p>2.2 の (2) 式の左辺括弧が事後の精度行列だったから、事後共分散は</p>
+  <div class="math-box">
+    \( \mathbf{P}_a = \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)^{-1}
+       \;\overset{\text{(Woodbury)}}{=}\; (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{B} \)
+  </div>
+  <p class="small">— 観測した方向の分散だけが縮む。精度（分散の逆数）で見ると「事前の精度 + 観測の精度」の<strong>足し算</strong>になっている。この加法性が後で ESMDA の等価性証明（§3.4）の鍵になる。</p>
+  <hr class="dim">
+  <h3>ここまでの式は全手法共通。違いは 3 つの設計判断だけ</h3>
+  <table>
+    <tr><th style="width:26%;">設計判断</th><th style="width:37%;">選択肢</th><th style="width:37%;">対応する手法</th></tr>
+    <tr>
+      <td><strong>① B をどう作るか</strong></td>
+      <td>解析的な関数で与える ／ 力学で時間発展させる ／ サンプル（アンサンブル）で近似する</td>
+      <td>OI ／ KF ／ EnKF・ESMDA</td>
+    </tr>
+    <tr>
+      <td><strong>② 時間をどう扱うか</strong></td>
+      <td>観測が来るたび逐次更新（フィルタ）／ 全観測を一括同化（スムーザー）</td>
+      <td>KF・EnKF ／ ES・ESMDA・(OI)</td>
+    </tr>
+    <tr>
+      <td><strong>③ 更新を分割するか</strong></td>
+      <td>1 回で全部 ／ R を膨らませて複数回に分割</td>
+      <td>OI・ES ／ ESMDA</td>
+    </tr>
+  </table>
+</section>
+</section>
+
+<!-- ═══════════════════ §3 手法ファミリー ═══════════════════ -->
+<section>
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.1 OI と KF: B を「与える」か「発展させる」か</h2>
+  <div class="two-col">
+    <div class="card orange">
+      <h3>OI（最適内挿）: B を手で与える</h3>
+      <p class="small">分散 \( \sigma_b^2 \) と距離相関関数（例: ガウス型）で B をモデル化:</p>
+      <div class="math-box small">
+        \( B_{ij} = \sigma_b^2 \exp\!\left(-\dfrac{d_{ij}^2}{2 L_c^2}\right) \)
+      </div>
+      <ul class="small">
+        <li>\( \sigma_b \): 事前推定をどれだけ信じないか。\( L_c \): 修正が空間に広がる幅</li>
+        <li>これを §2.3 の式に入れて<strong>1 回更新して終わり</strong></li>
+        <li>長所: 最小の計算量。短所: B が実際の誤差構造（流れ・形状依存）を反映しない</li>
+        <li>sample/002-0, 002-1 の丸棒ケース（OpenFOAM / FrontISTR）はこの方式で成功</li>
+      </ul>
+    </div>
+    <div class="card cyan">
+      <h3>KF（カルマンフィルタ）: B を力学で運ぶ</h3>
+      <p class="small">線形力学 \( \mathbf{x}_{k+1} = \mathbf{M}\mathbf{x}_k + \boldsymbol{\eta}_k \)、\( \boldsymbol{\eta}_k \sim \mathcal{N}(\mathbf{0},\mathbf{Q}) \) のとき、共分散も厳密に伝播できる:</p>
+      <div class="math-box small">
+        予報: \( \mathbf{x}_f = \mathbf{M}\mathbf{x}_a, \quad \mathbf{P}_f = \mathbf{M}\mathbf{P}_a\mathbf{M}^{\!\top} + \mathbf{Q} \)<br>
+        解析: §2.3 の式で \( \mathbf{B} \to \mathbf{P}_f \)
+      </div>
+      <ul class="small">
+        <li>線形・ガウスなら<strong>厳密な事後分布</strong>を逐次的に与える（最良の意味で「正解」）</li>
+        <li>短所: \( \mathbf{P} \) は n×n。n=900 でも保持・伝播は O(n²)〜O(n³)。実CAE規模（10⁶ 節点）では不可能</li>
+        <li>非線形力学では \( \mathbf{M} \) が存在しない → 接線形化（EKF）が必要になり頑健性を失う</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted">パラメータの位置づけ: OI の \( \sigma_b, L_c \) は「決め打ちの設計変数」。KF ではそれが \( \mathbf{P}_0, \mathbf{Q} \)（初期共分散・モデル誤差）に置き換わる。どちらも観測される量ではなく、感度解析で決めるしかない点は同じ。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.2 EnKF: B をアンサンブルで近似する</h2>
+  <p>n×n の \( \mathbf{B} \) を持てないなら、状態の<strong>標本集合（アンサンブル）</strong> \( \{\mathbf{x}_i\}_{i=1}^{N} \) で共分散を暗黙に表現する。偏差行列を \( \mathbf{X}' = [\mathbf{x}_1-\bar{\mathbf{x}}, \dots, \mathbf{x}_N-\bar{\mathbf{x}}] \) として</p>
+  <div class="math-box">
+    \( \mathbf{B} \approx \dfrac{\mathbf{X}'\mathbf{X}'^{\top}}{N-1}, \qquad
+       \mathbf{B}\mathbf{H}^{\!\top} \approx \dfrac{\mathbf{X}'(\mathbf{H}\mathbf{X}')^{\top}}{N-1}, \qquad
+       \mathbf{H}\mathbf{B}\mathbf{H}^{\!\top} \approx \dfrac{(\mathbf{H}\mathbf{X}')(\mathbf{H}\mathbf{X}')^{\top}}{N-1} \)
+  </div>
+  <div class="info-box small">
+    <strong>決定的に重要な点</strong>: ゲインに必要なのは \( \mathbf{B} \) 単体ではなく
+    \( \mathbf{B}\mathbf{H}^\top \)（n×m）と \( \mathbf{H}\mathbf{B}\mathbf{H}^\top \)（m×m）だけ。
+    どちらも「メンバーごとに \( \mathbf{H} \) を評価した結果」から作れるので、<strong>n×n 行列は一度も現れない</strong>。
+    さらに \( \mathbf{H} \) が非線形関数 \( \mathcal{H}(\cdot) \) でも \( \mathbf{H}\mathbf{X}' \to \) 「\( \mathcal{H}(\mathbf{x}_i) \) の偏差」と置き換えれば
+    そのまま動く — 順問題ソルバーをブラックボックスのまま使える理由。
+  </div>
+  <h3>有限サンプルの 2 つの病理と対処</h3>
+  <table>
+    <tr><th style="width:22%;">病理</th><th style="width:44%;">メカニズム</th><th style="width:34%;">対処</th></tr>
+    <tr>
+      <td><strong>偽相関</strong></td>
+      <td>N 本の標本ノイズで、物理的に無関係な遠方セル・センサ間に \( O(1/\sqrt{N}) \) の相関が乗る → 遠方に間違った修正が飛ぶ</td>
+      <td><strong>局所化</strong>: 距離テーパー \( \rho_{ij} = \exp(-d_{ij}^2/2R_{\rm loc}^2) \) をゲインに Schur 積 \( \mathbf{K} \circ \rho \)</td>
+    </tr>
+    <tr>
+      <td><strong>分散の過小評価</strong></td>
+      <td>更新のたびにアンサンブルが縮む（次スライドで定量化）。逐次サイクルで累積すると観測を無視し始め、最悪発散</td>
+      <td><strong>摂動観測</strong>（次スライド）+ 逐次型では<strong>インフレーション</strong>（分散を毎回 α&gt;1 倍）</td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.3 摂動観測はなぜ必要か — 導出</h2>
+  <p>全メンバーを<strong>同じ観測 y</strong> で更新した場合の解析アンサンブルの共分散を計算してみる。
+  各メンバー \( \mathbf{x}_{a,i} = \mathbf{x}_{f,i} + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_{f,i}) \) から平均を引くと、y は消えて</p>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      \( \mathbf{X}'_a = (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{X}'_f \) より
+      \[ \mathbf{P}_a^{\rm ens} = (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{P}_f\,(\mathbf{I}-\mathbf{K}\mathbf{H})^{\!\top}
+         \;\ne\; (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{P}_f = \mathbf{P}_a \]
+      <span class="why">正しい事後共分散より必ず小さい（\( (\mathbf{I}-\mathbf{K}\mathbf{H})^\top \) がもう 1 回掛かる分）。→ 自信過剰。</span>
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      そこでメンバーごとに独立な擬似観測ノイズ \( \boldsymbol{\varepsilon}_i \sim \mathcal{N}(\mathbf{0},\mathbf{R}) \) を足す（<strong>摂動観測</strong>）:
+      \[ \mathbf{x}_{a,i} = \mathbf{x}_{f,i} + \mathbf{K}(\mathbf{y} + \boldsymbol{\varepsilon}_i - \mathbf{H}\mathbf{x}_{f,i})
+         \;\Rightarrow\; \mathbf{X}'_a = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{X}'_f + \mathbf{K}\mathbf{E}' \]
+    </span></div>
+    <div class="step"><span class="no">(3)</span><span>
+      \( \boldsymbol{\varepsilon}_i \) は \( \mathbf{X}'_f \) と独立だから期待値で交差項が消え:
+      \[ \mathbf{P}_a^{\rm ens} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}_f(\mathbf{I}-\mathbf{K}\mathbf{H})^{\!\top} + \mathbf{K}\mathbf{R}\mathbf{K}^{\!\top} \]
+    </span></div>
+    <div class="step"><span class="no">(4)</span><span>
+      展開して \( \mathbf{K}(\mathbf{H}\mathbf{P}_f\mathbf{H}^\top+\mathbf{R}) = \mathbf{P}_f\mathbf{H}^\top \)（K の定義そのもの）を代入すると:
+      \[ \mathbf{P}_a^{\rm ens} = \mathbf{P}_f - \mathbf{K}\mathbf{H}\mathbf{P}_f - \mathbf{P}_f\mathbf{H}^{\!\top}\mathbf{K}^{\!\top}
+         + \mathbf{K}(\mathbf{H}\mathbf{P}_f\mathbf{H}^{\!\top}+\mathbf{R})\mathbf{K}^{\!\top}
+         = (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{P}_f \;=\; \mathbf{P}_a \;\;\checkmark \]
+      <span class="why">摂動観測を入れて初めて、アンサンブルの広がりが正しい事後共分散（期待値の意味で）になる。</span>
+    </span></div>
+  </div>
+  <p class="small muted">今回の実装が「確率的 (stochastic) ESMDA」と呼ばれるのはこの摂動観測を使うため。摂動を使わず変換行列で対処する系統（ETKF など決定論的手法）もある。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.4 ESMDA の定義と等価性の証明</h2>
+  <p><strong>定義</strong>: 膨張係数 \( \alpha_k > 0 \)（\( k = 1,\dots,N_a \)）を \( \sum_{k=1}^{N_a} \alpha_k^{-1} = 1 \) を満たすように取り、
+  <strong>同じ観測 y</strong> を、観測誤差を \( \alpha_k \mathbf{R} \) に膨らませて \( N_a \) 回同化する。今回は一様 \( \alpha_k = N_a = 30 \)。</p>
+  <p><strong>主張</strong>: 線形・ガウスのとき、この \( N_a \) 回の更新は「\( \mathbf{R} \) のままの 1 回更新（= §2 の厳密なベイズ更新）」と同一の事後分布を与える。</p>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      §2.4 で示した通り、ガウスのベイズ更新は<strong>精度行列の足し算</strong>である。ステップ k の事前を \( \mathcal{N}(\mathbf{m}_k, \mathbf{P}_k) \) とすると、観測誤差 \( \alpha_k\mathbf{R} \) での更新後は
+      \[ \mathbf{P}_{k+1}^{-1} = \mathbf{P}_k^{-1} + \mathbf{H}^{\!\top}(\alpha_k \mathbf{R})^{-1}\mathbf{H}
+         = \mathbf{P}_k^{-1} + \tfrac{1}{\alpha_k}\,\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H} \]
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      \( k = 1, \dots, N_a \) を繰り返して畳み込むと（初期値 \( \mathbf{P}_1 = \mathbf{B} \)）:
+      \[ \mathbf{P}_{N_a+1}^{-1} = \mathbf{B}^{-1} + \left(\textstyle\sum_k \tfrac{1}{\alpha_k}\right)\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}
+         = \mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H} \]
+      <span class="why">条件 \( \sum 1/\alpha_k = 1 \) はまさにこの和を 1 にするためにある。1 回更新の事後精度と一致。</span>
+    </span></div>
+    <div class="step"><span class="no">(3)</span><span>
+      平均も同様。情報ベクトル \( \mathbf{b}_k = \mathbf{P}_k^{-1}\mathbf{m}_k \) は各更新で
+      \( \mathbf{b}_{k+1} = \mathbf{b}_k + \tfrac{1}{\alpha_k}\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \) と加算され（§2.2 式(2) の右辺そのもの）:
+      \[ \mathbf{b}_{N_a+1} = \mathbf{B}^{-1}\mathbf{x}_b + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \]
+      これは 1 回更新の式 §2.2(2) の右辺と同一。精度・情報ベクトルが一致するので<strong>事後分布は完全に一致</strong>。∎
+    </span></div>
+  </div>
+  <p class="small muted">摂動観測ノイズも各ステップで \( \boldsymbol{\varepsilon}_i \sim \mathcal{N}(\mathbf{0}, \alpha_k\mathbf{R}) \) と膨らませて整合を取る（実装では \( \sigma_{\rm eff} = \sigma_r\sqrt{N_a} \)）。Emerick &amp; Reynolds (2013), <i>Computers &amp; Geosciences</i> 55。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.5 答えが同じなら、なぜわざわざ分割するのか</h2>
+  <div class="two-col">
+    <div>
+      <h3>理由 1: 非線形への頑健性（本質）</h3>
+      <p class="small">等価性が成り立つのは線形のときだけ。非線形 \( \mathcal{H} \) では、アンサンブル共分散は
+      「現在のアンサンブルの位置での局所線形化」に相当する。1 回で大きく動かすと線形化した点から外れて誤差が出る。
+      ESMDA は<strong>毎反復、順問題を解き直して線形化をやり直す</strong> — 減衰付き Gauss-Newton 反復に対応し、
+      1 ステップの移動量が \( 1/\alpha_k \) に抑えられる。</p>
+      <h3>理由 2: 逐次フィルタの病理を持たない</h3>
+      <p class="small">EnKF を固定センサ・定常場に使うと「同じ観測で何度も更新 → 分散の過小評価が累積 →
+      インフレーションで無理やり膨らませる → その調整が暴走」という経路で発散し得る
+      （本リポジトリ A02_miffy_enkf_SCrandomTimefix_T で実際に発散）。
+      ESMDA は総情報量を \( \sum 1/\alpha_k = 1 \) で<strong>設計時に固定</strong>するため、
+      同じ観測を使い回しても情報を二重計上しない。インフレーション調整が不要。</p>
+    </div>
+    <div>
+      <h3>フィルタとスムーザーの整理</h3>
+      <table style="font-size:0.72em;">
+        <tr><th></th><th>フィルタ (KF/EnKF)</th><th>スムーザー (ES/ESMDA)</th></tr>
+        <tr><td>時間</td><td>逐次前進しながら修正</td><td>全観測を一括同化</td></tr>
+        <tr><td>目的</td><td>リアルタイム追跡・予報</td><td>静的な場・パラメータの推定</td></tr>
+        <tr><td>今回</td><td>定常問題なので逐次性は不要</td><td class="hl-green"><strong>自然な選択</strong></td></tr>
+      </table>
+      <div class="info-box small">
+        <strong>相互の関係（統一図式）</strong><br>
+        ・OI = B 固定 + 1 回更新<br>
+        ・ES = アンサンブル B + 1 回更新（= \( N_a{=}1 \) の ESMDA）<br>
+        ・ESMDA = アンサンブル B + \( N_a \) 分割更新<br>
+        ・EnKF = アンサンブル B + 時間逐次更新<br>
+        全部 §2.3 の同じ箱形の式 \( \mathbf{x}_a = \mathbf{x}_b + \mathbf{K}\mathbf{d} \) を使っている。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.6 パラメータはどう決めるか（実務ガイド）</h2>
+  <table>
+    <tr><th style="width:15%;">パラメータ</th><th style="width:14%;">現れる手法</th><th style="width:39%;">決め方の考え方</th><th style="width:32%;">今回の値と根拠</th></tr>
+    <tr>
+      <td>観測誤差 \( \sigma_r \)</td><td>全手法</td>
+      <td>センサ仕様・校正データから。<strong>唯一、測定で決められる</strong></td>
+      <td>3 °C（ツイン実験の設定値）</td>
+    </tr>
+    <tr>
+      <td>背景分散 \( \sigma_b \)</td><td>OI / KF / アンサンブル初期化</td>
+      <td>推定対象の変動幅のオーダー。過大 → 観測に過剰追従・ノイズ拾い、過小 → 更新が効かない</td>
+      <td>温度 40 °C（場の振幅 0-100 °C）／ 熱源 40（\( \mathbf{q}_{\rm true} \) の std と同程度）</td>
+    </tr>
+    <tr>
+      <td>相関長 \( L_c \)（CORR_L）</td><td>OI の B ／ 初期アンサンブル</td>
+      <td>推定したい構造の空間スケール。OI では解析場の滑らかさを直接支配。アンサンブル法では「事前分布が表現できる場の族」を決める</td>
+      <td>1.5 セル（ミッフィーの目・口のスケール）</td>
+    </tr>
+    <tr>
+      <td>アンサンブル数 N</td><td>EnKF / ESMDA</td>
+      <td>標本誤差は \( O(1/\sqrt{N}) \)。局所化併用で「有効自由度」あたり十分な数を確保。<strong>倍にして結果が変わらない点</strong>で打ち切る</td>
+      <td>300（600 で結果不変を確認済み）</td>
+    </tr>
+    <tr>
+      <td>局所化半径 \( R_{\rm loc} \)</td><td>EnKF / ESMDA</td>
+      <td>下限: <strong>観測が状態に物理的に影響する到達距離</strong>（\( \mathcal{H} \) の感度の広がり）。上限: 偽相関が乗り始める距離。<strong>\( \mathcal{H} \) が非局所なら広げる</strong>（§7 の教訓）</td>
+      <td>温度状態 5 ／ <strong>熱源状態 10</strong>（5 では過渡発散: §7.4）</td>
+    </tr>
+    <tr>
+      <td>反復数 \( N_a \)</td><td>ESMDA</td>
+      <td>多いほど 1 回の更新が弱く安定（文献の定番 4〜10）。<strong>増やして頭打ちの点</strong>で止める。線形なら理論上は結果不変</td>
+      <td>30（60 で結果不変を確認済み）</td>
+    </tr>
+    <tr>
+      <td>インフレーション</td><td>EnKF のみ</td>
+      <td>逐次サイクルの分散過小の補償。調整失敗が発散に直結する最難関パラメータ</td>
+      <td>ESMDA では<strong>構造的に不要</strong>（採用理由の一つ）</td>
+    </tr>
+  </table>
+  <div class="info-box small">
+    <strong>手順の型</strong>: ① \( \sigma_r \) は測って固定 → ② 残りは物理スケールで初期値を置く → ③ 1 パラメータずつスイープし「破綻の壁」と「頭打ち」を確認 → ④ 壁から余裕を取った側に置く。今回の \( R_{\rm loc} = 10 \) もこの手順の産物。
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ §4 実験1・2 ═══════════════════ -->
+<section>
+<section>
+  <span class="sec-tag">§4 — Experiments 1 &amp; 2</span>
+  <h2>4.1 実験 1: 温度場の ESMDA 復元（成功）</h2>
+  <div class="breadcrumb">ここから実験。まず<b>目標 A（温度場）</b>。状態 = 温度、\( \mathcal{H} \) = センサ位置の抜き出し。§2-3 の理論をそのまま適用する。</div>
   <div class="col-4-6">
     <div>
-      <ul>
-        <li>状態変数 = 温度場 x（900 セル）</li>
-        <li>観測演算子 H = センサ位置の抜き出しだけ</li>
-        <li>N = 300 メンバー、30 反復</li>
+      <h3>設定</h3>
+      <ul class="small">
+        <li>状態: \( \mathbf{x} \in \mathbb{R}^{900} \)（温度場）</li>
+        <li>初期アンサンブル: 平均 20 °C 一様 + 相関長 1.5 セルのガウスランダム場（\( \sigma_b = 40 \) °C）。<strong>ミッフィー形状の情報はゼロ</strong></li>
+        <li>N = 300, \( N_a \) = 30, \( \sigma_{\rm eff} = 3\sqrt{30} = 16.4 \) °C</li>
+        <li>局所化 \( R_{\rm loc} = 5 \)（観測が温度そのものなので感度は局所的 → 狭くてよい）</li>
       </ul>
-      <div class="success-box">
-        <strong>結果</strong>: m=300 で RMSE <strong>19.8 °C</strong>。
-        一様 20 °C から始めてミッフィーの輪郭・服・目がはっきり復元。
-        センサ数 10〜400 のスイープで必要点数も定量化
-        （概形 75 点 / 実用 150 点 / 高精度 300 点）。
+      <div class="success-box small">
+        <strong>結果</strong>: m=300 で RMSE <strong>19.8 °C</strong>（初期 ≈44 °C）。
+        輪郭・服・目まで復元。全反復で発散なし・インフレーション不要。
+        センサ数スイープ: 概形 75 点／実用 150 点／高精度 300 点、400 点でほぼ飽和。
       </div>
     </div>
     <div>
       <div class="image-scroll" style="max-height:520px;">
         <img src="img/fig02_xpred_final.png" alt="最終温度場">
       </div>
-      <p class="caption">最終推定温度場（m = 30 / 100 / 200 / 300）。緑 + がセンサ。</p>
+      <p class="caption">実験 1 の最終温度場（m = 30 / 100 / 200 / 300）。緑 + がセンサ位置。</p>
     </div>
   </div>
 </section>
 
 <section>
-  <span class="sec-tag">02 — What We Did</span>
-  <h2>しかし熱源場の「後付け逆算」は失敗</h2>
-  <div class="col-4-6">
+  <span class="sec-tag">§4 — Experiments 1 &amp; 2</span>
+  <h2>4.2 実験 2: 熱源の後処理逆算（失敗）と、その定量的な理由</h2>
+  <div class="col-6-4">
     <div>
-      <p>推定温度場から熱源を逆算すると…</p>
+      <p>目標 B のための最短ルートに見えるのは、実験 1 の解析温度場 \( \bar{\mathbf{x}} \) にラプラシアンを当てる後処理:</p>
       <div class="math-box">
-        \( \mathbf{q}_{\text{derived}} = -\alpha \, \mathbf{L}\, \bar{\mathbf{x}} \)
+        \( \mathbf{q}_{\rm der} = -\alpha \mathbf{L}\,\bar{\mathbf{x}} \)
       </div>
-      <div class="warn-box">
-        <strong>ノイズ増幅</strong> — ラプラシアン L は差分オペレータ。
-        推定温度場に残るセルスケールの誤差を微分して<strong>強烈に増幅</strong>する。
-        結果はノイズが支配的で、熱源図として読めない。
+      <h3>なぜ壊れるか — 誤差増幅の計算</h3>
+      <div class="derive-box small">
+        <div class="step"><span class="no">(1)</span><span>
+          解析温度場を「真値 + 推定誤差」に分解: \( \bar{\mathbf{x}} = \mathbf{x}_{\rm true} + \boldsymbol{\epsilon} \)。代入すると
+          \[ \mathbf{q}_{\rm der} = \underbrace{-\alpha\mathbf{L}\mathbf{x}_{\rm true}}_{=\,\mathbf{q}_{\rm true}} \;\underbrace{-\;\alpha \mathbf{L}\boldsymbol{\epsilon}}_{\text{増幅されたノイズ}} \]
+        </span></div>
+        <div class="step"><span class="no">(2)</span><span>
+          離散ラプラシアン（格子幅 1）の固有値は波数 \( (k_x, k_y) \) 成分に対して
+          \[ |\lambda(k_x,k_y)| = 4\left[\sin^2\tfrac{k_x}{2} + \sin^2\tfrac{k_y}{2}\right] \;\le\; 8 \]
+          <span class="why">低波数（滑らかな誤差）では \(|\lambda| \approx k^2 \ll 1\)、最高波数（セル単位の市松ノイズ）で最大 8。</span>
+        </span></div>
+        <div class="step"><span class="no">(3)</span><span>
+          つまりセルスケールの推定誤差成分 \( \epsilon_k \) は最大 \( \alpha \cdot 8 = 4 \) 倍に増幅される。
+          実験 1 の誤差はセルスケール成分を多く含む（RMSE ≈ 20 °C）ので、ノイズ項は \( \sim \pm 70 \) —
+          真値のエッジ振幅（±50〜190）と同オーダーで、<strong>信号がノイズに埋没</strong>する。
+        </span></div>
       </div>
-      <p class="small muted">これが「うまくいっていなかった部分」。
-      HANDOFF に残されていた次課題 =「状態変数を Q にして順問題を組み込む」へ。</p>
     </div>
     <div>
-      <div class="image-scroll" style="max-height:520px;">
-        <img src="img/fig03_qest_final.png" alt="後付け逆算の熱源場">
+      <div class="image-scroll" style="max-height:430px;">
+        <img src="img/fig03_qest_final.png" alt="後処理逆算の熱源場">
       </div>
-      <p class="caption">後付け逆算した熱源場。ノイズだらけでミッフィーは読み取れない。</p>
+      <p class="caption">実験 2 の結果。市松状の増幅ノイズが支配的で熱源分布として読めない。</p>
+      <div class="warn-box small">
+        <strong>一般則</strong>: 「推定した場を微分して別の量を出す」後処理は、微分オペレータの
+        高波数増幅特性（\(|\lambda| \sim k^2\)）によって推定誤差を選択的に増幅する。
+        微分量が欲しいなら<strong>微分量そのものを状態変数にする</strong>べき — これが実験 3。
+      </div>
     </div>
   </div>
 </section>
+</section>
 
+<!-- ═══════════════════ §5 実験3 完全逆問題 ═══════════════════ -->
 <section>
-  <span class="sec-tag">02 — What We Did</span>
-  <h2>ステップ 2: 完全逆問題 — 状態変数を熱源 q に</h2>
-  <div class="flow">
-    <div class="flow-item">
-      <div class="num">STEP 1</div>
-      <div class="label">熱源アンサンブル q<sub>i</sub></div>
-      <div class="note">0 中心の滑らかなランダム場 × 300 本（形状知識なし）</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item">
-      <div class="num">STEP 2</div>
-      <div class="label">順問題を解く</div>
-      <div class="note">x(q) = L⁻¹(−q/α)。各メンバーの温度場を計算</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item">
-      <div class="num">STEP 3</div>
-      <div class="label">センサ温度と比較</div>
-      <div class="note">予測センサ温度と観測の差（イノベーション）</div>
-    </div>
-    <div class="flow-arrow">→</div>
-    <div class="flow-item">
-      <div class="num">STEP 4</div>
-      <div class="label">q を ESMDA 更新</div>
-      <div class="note">×30 反復。温度は見るだけ、直す対象は熱源</div>
-    </div>
-  </div>
-  <div class="info-box">
-    <strong>ポイント</strong>: 観測されるのは温度、推定したいのは熱源。
-    両者を順モデル（物理）がつなぐ。「観測と推定対象が別物」なのが<strong>完全逆問題</strong>で、
-    パラメータ推定・履歴マッチングと同じ構図。
-  </div>
+<section>
+  <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
+  <h2>5.1 実験 3 の定式化: 状態変数を熱源に変える</h2>
+  <div class="breadcrumb">実験 2 の失敗を受け、<b>推定対象そのものを熱源 q に変更</b>する。観測は同じセンサ温度。両者を順問題がつなぐ。</div>
   <div class="math-box">
-    \( \mathbf{y} = \mathcal{H}(\mathbf{q}) + \boldsymbol{\varepsilon}
-       = \left[\mathbf{L}^{-1}(-\mathbf{q}/\alpha)\right]_{\text{sensors}} + \boldsymbol{\varepsilon} \)
+    状態: \( \mathbf{q} \in \mathbb{R}^{900} \) ／ 順モデル: \( \mathbf{x}(\mathbf{q}) = \mathbf{L}^{-1}\!\left(-\mathbf{q}/\alpha\right) \) ／
+    観測演算子: \( \mathcal{H}(\mathbf{q}) = \mathbf{H}\,\mathbf{x}(\mathbf{q}) = \underbrace{\mathbf{H}\mathbf{L}^{-1}(-1/\alpha)}_{\text{線形・非局所}}\,\mathbf{q} \)
   </div>
-  <p class="small muted">実装は <code>python/esmda_qfull.py</code>。L は一度だけ LU 分解し、毎反復は後退代入のみ（1 ラン数秒）。</p>
-</section>
-</section>
-
-<!-- ═══ 03 ESMDA とは ═══ -->
-<section>
-<section>
-  <span class="sec-tag">03 — What is ESMDA?</span>
-  <h2>ESMDA とは — 一言でいうと</h2>
-  <div class="info-box" style="font-size:1.0em;">
-    <strong>ESMDA</strong> (Ensemble Smoother with Multiple Data Assimilation)<br>
-    = <strong>同じ観測を「弱め」に「何回も」同化するアンサンブル法</strong>
-    <span class="muted">（Emerick &amp; Reynolds 2013、油層の履歴マッチングが出自）</span>
-  </div>
-  <div class="two-col">
-    <div class="card red">
-      <h3>1 回で強く引っ張ると（EnKF 的更新）</h3>
-      <ul class="small">
-        <li>観測誤差 R をそのまま使い、観測に一気に寄せる</li>
-        <li>1 ステップの更新量が大きい → アンサンブルが潰れる・発散する</li>
-        <li>非線形な順モデルでは線形化誤差が一度に効く</li>
-      </ul>
-    </div>
-    <div class="card green">
-      <h3>ESMDA は分割払い</h3>
-      <ul class="small">
-        <li>観測誤差を <strong>N<sub>a</sub> 倍に膨らませて</strong>（R → N<sub>a</sub>R）弱い更新にする</li>
-        <li>その代わり <strong>N<sub>a</sub> 回繰り返す</strong></li>
-        <li>毎回、順モデルを解き直してから更新 → 非線形でも壊れにくい</li>
-      </ul>
-    </div>
-  </div>
-  <div class="success-box">
-    <strong>理論保証</strong>: 線形・ガウスの場合、「R を N<sub>a</sub> 倍にして N<sub>a</sub> 回更新」は
-    「R のままの 1 回更新（ベイズ更新そのもの）」と<strong>同一の事後分布</strong>になる。
-    分割しても答えは変わらず、安定性だけが手に入る。
-  </div>
-</section>
-
-<section>
-  <span class="sec-tag">03 — What is ESMDA?</span>
-  <h2>理論: 更新式</h2>
-  <p>アンサンブル \( \{\mathbf{q}_i\}_{i=1}^{N} \) と膨張係数 \( \alpha_k \)（ここでは全反復一定 \( \alpha_k = N_a \)、\( \sum_k 1/\alpha_k = 1 \)）に対し、反復 k で:</p>
-  <div class="math-box small">
-    \[ \mathbf{q}_i \leftarrow \mathbf{q}_i + \mathbf{K}_k\left(\mathbf{y} + \boldsymbol{\varepsilon}_i - \mathcal{H}(\mathbf{q}_i)\right), \qquad
-       \boldsymbol{\varepsilon}_i \sim \mathcal{N}(\mathbf{0}, \alpha_k \mathbf{R}) \]
-    \[ \mathbf{K}_k = \mathbf{C}^{qy}\left(\mathbf{C}^{yy} + \alpha_k \mathbf{R}\right)^{-1} \]
-  </div>
-  <ul class="small">
-    <li>\( \mathbf{C}^{qy} \): 状態とセンサ予測値の<strong>アンサンブル共分散</strong>（q の偏差 × 予測温度の偏差から推定）</li>
-    <li>\( \mathbf{C}^{yy} \): センサ予測値どうしのアンサンブル共分散</li>
-    <li>\( \boldsymbol{\varepsilon}_i \): <strong>摂動観測</strong>。メンバーごとに観測へノイズを足し、事後分散が過小にならないようにする（確率的 EnKF と同じ工夫）</li>
-    <li>随伴コード（アジョイント）も接線形モデルも不要 — <strong>順モデルを N 回呼べれば動く</strong></li>
-  </ul>
-  <div class="info-box small">
-    <strong>共分散局所化</strong>: サンプル数 N が有限なので、遠く離れたセル・センサ間には偽の相関が乗る。
-    距離に応じたテーパー \( \rho \)（ガウス関数）をゲインに掛けて偽相関を殺す:
-    \( \mathbf{K} \to \mathbf{K} \circ \rho \)。ただし半径の選び方に落とし穴がある（後述）。
-  </div>
-</section>
-
-<section>
-  <span class="sec-tag">03 — What is ESMDA?</span>
-  <h2>「スムーザー」と「フィルタ」の違い</h2>
-  <div class="two-col">
-    <div class="card cyan">
-      <h3>フィルタ（KF / EnKF）</h3>
-      <ul class="small">
-        <li>時間を前に進めながら、<strong>観測が来るたび</strong>に状態を逐次修正</li>
-        <li>リアルタイム追跡・予報が目的</li>
-        <li>過去の観測は「現在の状態」に集約済み</li>
-      </ul>
-    </div>
-    <div class="card purple">
-      <h3>スムーザー（ES / ESMDA）</h3>
-      <ul class="small">
-        <li>観測を<strong>全部まとめて一括で</strong>使い、静的な場やパラメータを推定</li>
-        <li>時間発展の追跡はしない（今回の定常熱伝導にぴったり）</li>
-        <li>「一括」を安定にするための反復版が ESMDA</li>
-      </ul>
-    </div>
-  </div>
-  <div class="info-box">
-    今回の問題は「定常温度場を作る熱源はどれか」という<strong>静的な逆問題</strong>。
-    時間発展がないのでフィルタの逐次性は不要 — スムーザー系が自然な選択。
-  </div>
-  <p class="small muted">実際、このリポジトリでは EnKF を固定センサに使ったケース
-  （A02_miffy_enkf_SCrandomTimefix_T）が<strong>発散</strong>している。同じ観測を毎サイクル使い続けると
-  誤差共分散が現実とずれていき、インフレーション調整が暴走した。ESMDA は设计上この問題が起きない。</p>
-</section>
-</section>
-
-<!-- ═══ 04 手法比較 ═══ -->
-<section>
-<section>
-  <span class="sec-tag">04 — Method Family</span>
-  <h2>手法ファミリー比較: KF / EnKF / OI / ESMDA</h2>
-  <table>
-    <tr>
-      <th style="width:12%;">手法</th>
-      <th style="width:24%;">誤差共分散 B の扱い</th>
-      <th style="width:20%;">適する問題</th>
-      <th style="width:22%;">弱点</th>
-      <th style="width:22%;">このリポジトリでの実績</th>
-    </tr>
-    <tr>
-      <td><strong>KF</strong><br><span class="muted small">カルマンフィルタ</span></td>
-      <td>P を行列として<strong>厳密に時間発展</strong>（予報式で更新）</td>
-      <td>線形・ガウス・小規模の逐次推定</td>
-      <td>n×n 行列の保持 O(n²)、非線形は不可（拡張KFへ）</td>
-      <td>A02_miffy_kf: 動的前進で復元 ○</td>
-    </tr>
-    <tr>
-      <td><strong>OI</strong><br><span class="muted small">最適内挿</span></td>
-      <td><strong>固定の B を手で与える</strong>（分散×距離相関関数）。時間発展させない</td>
-      <td>1 回の静的解析、計算資源が乏しい場合</td>
-      <td>B が現実の誤差構造を反映しない。強い観測で一発更新 → 場が歪むことも</td>
-      <td>sample/002-0, 002-1: OpenFOAM/FrontISTR 丸棒で ○</td>
-    </tr>
-    <tr>
-      <td><strong>EnKF</strong><br><span class="muted small">アンサンブルKF</span></td>
-      <td>P を<strong>アンサンブルで近似</strong>し逐次サイクル</td>
-      <td>非線形・大規模の逐次推定（気象・海洋）</td>
-      <td>サンプリング誤差 → 局所化・インフレーション必須。固定センサ×繰り返し観測で発散リスク</td>
-      <td>ランダムセンサ ○ / <strong>固定センサ ×発散</strong></td>
-    </tr>
-    <tr>
-      <td><strong>ESMDA</strong><br><span class="muted small">今回の主役</span></td>
-      <td>P をアンサンブルで近似 + <strong>膨張 R で反復更新</strong></td>
-      <td>静的逆問題・パラメータ推定・履歴マッチング</td>
-      <td>反復回数分の順モデル計算（N×N<sub>a</sub> 回）</td>
-      <td><strong>固定センサで ◎安定</strong>、完全逆問題まで拡張</td>
-    </tr>
-  </table>
-  <div class="success-box small">
-    <strong>関係性</strong>: OI は「B を固定した 1 回更新」、EnKF は「B をアンサンブルで見積もる逐次更新」、
-    ESMDA は「アンサンブル B + 1 回分の更新を N<sub>a</sub> 分割」。
-    N<sub>a</sub>=1 の ESMDA はアンサンブル版 OI と同じ形になる — 同じ更新式の一族。
-  </div>
-</section>
-
-<section>
-  <span class="sec-tag">04 — Method Family</span>
-  <h2>パラメータはどう決めるか</h2>
-  <table>
-    <tr><th style="width:16%;">パラメータ</th><th style="width:14%;">どの手法</th><th style="width:38%;">決め方の考え方</th><th style="width:32%;">今回の値と根拠</th></tr>
-    <tr>
-      <td>観測誤差 σ<sub>r</sub></td><td>全手法</td>
-      <td>センサの仕様・校正から。<strong>唯一「測って決められる」</strong>パラメータ</td>
-      <td>3 °C（ツイン実験で既知）</td>
-    </tr>
-    <tr>
-      <td>背景分散 σ<sub>b</sub></td><td>OI / KF / 初期アンサンブル</td>
-      <td>推定対象の変動幅のオーダー。大きすぎ→観測に過剰追従、小さすぎ→動かない</td>
-      <td>温度 40 °C（場の振幅 0〜100 °C）/ 熱源 40（q_true の std に一致）</td>
-    </tr>
-    <tr>
-      <td>相関長 CORR_L</td><td>OI の B / 初期アンサンブル</td>
-      <td>場の構造のスケール。OI では解析場の滑らかさを直接支配</td>
-      <td>1.5 セル（ミッフィーの細部スケール）</td>
-    </tr>
-    <tr>
-      <td>アンサンブル数 N</td><td>EnKF / ESMDA</td>
-      <td>大きいほど共分散が正確。目安は「局所化併用で数百」。増やして結果が変わらなくなる点を探す</td>
-      <td>300（600 にしても結果不変を確認）</td>
-    </tr>
-    <tr>
-      <td>局所化半径 R_LOC</td><td>EnKF / ESMDA</td>
-      <td><strong>観測が状態に効く物理的な到達距離</strong>より広く、偽相関の距離より狭く</td>
-      <td>温度状態 5 / <strong>熱源状態 10</strong>（順モデルが非局所なため。5 では過渡発散！）</td>
-    </tr>
-    <tr>
-      <td>反復数 N<sub>a</sub></td><td>ESMDA</td>
-      <td>多いほど 1 回の更新が弱く安定。文献の定番は 4〜10、増やして頭打ちの点で止める</td>
-      <td>30（60 でも結果不変を確認）</td>
-    </tr>
-    <tr>
-      <td>インフレーション</td><td>EnKF</td>
-      <td>逐次サイクルでの分散過小を補う倍率 (&gt;1)。<strong>チューニングが難しく暴走の元</strong></td>
-      <td>ESMDA では<strong>不要</strong>（これが採用理由の一つ）</td>
-    </tr>
-  </table>
-  <div class="info-box small">
-    <strong>実践の鉄則</strong>: σ<sub>r</sub> 以外は「原理では決まらない」設計変数。
-    ①物理スケールで初期値を置く → ②感度スイープで頭打ち・破綻の境界を見る → ③破綻側から余裕を取る。
-    今回の R_LOC=10 もこの手順で決めた。
-  </div>
-</section>
-</section>
-
-<!-- ═══ 05 適用場面と利点 ═══ -->
-<section>
-<section>
-  <span class="sec-tag">05 — When to Use</span>
-  <h2>ESMDA はどういう場合に使えるか</h2>
   <div class="two-col">
     <div>
-      <h3>向いている問題</h3>
-      <div class="card green small">
-        <ul>
-          <li><strong>静的な逆問題・パラメータ推定</strong><br>
-            <span class="muted">熱源・透水係数・材料定数・境界条件の同定。油層の履歴マッチングが出自</span></li>
-          <li><strong>順モデルがブラックボックス</strong><br>
-            <span class="muted">OpenFOAM / FrontISTR など商用・既存ソルバーをそのまま使える（随伴コード不要）</span></li>
-          <li><strong>順モデルが高コストでも並列可能</strong><br>
-            <span class="muted">N メンバーは完全に独立 → クラスタで同時実行</span></li>
-          <li><strong>穏やかな非線形</strong><br>
-            <span class="muted">反復のたびに順モデルを解き直すので、1 回線形化の EnKF 更新より頑健</span></li>
-        </ul>
-      </div>
+      <h3>§2-3 の理論はそのまま適用できる</h3>
+      <ul class="small">
+        <li>\( \mathcal{H} \) は線形なので、ESMDA の等価性（§3.4）が厳密に成立</li>
+        <li>ゲインの構成要素はアンサンブルから: \( \mathbf{C}^{qy} = \frac{\mathbf{Q}'(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)、
+            \( \mathbf{C}^{yy} = \frac{(\mathcal{H}\mathbf{Q}')(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)</li>
+        <li>\( \mathbf{L}^{-1} \) は明示的に作らない: \( \mathbf{L} \) を 1 回だけ LU 分解し、
+            アンサンブル行列（900×300）をまとめて後退代入</li>
+        <li>事前分布: 平均 0 + 相関長 1.5 セルのガウス場、\( \sigma_{q} = 40 \)（\( \mathbf{q}_{\rm true} \) の std ≈ 40 に整合）</li>
+      </ul>
     </div>
     <div>
-      <h3>向いていない問題</h3>
-      <div class="card red small">
-        <ul>
-          <li><strong>リアルタイムの逐次追跡</strong><br>
-            <span class="muted">時々刻々の状態推定・予報はフィルタ（EnKF/KF）の領分</span></li>
-          <li><strong>強い非ガウス・マルチモーダル</strong><br>
-            <span class="muted">更新式がガウス前提。粒子フィルタ等の領分</span></li>
-          <li><strong>不連続・エッジの復元</strong><br>
-            <span class="muted">ガウス事前分布は滑らかな場しか表現できない（今回の教訓でも実証）</span></li>
-          <li><strong>順モデル呼び出しが N×N<sub>a</sub> 回も許されない</strong><br>
-            <span class="muted">その場合は決定論的 ES 1 回 or 随伴法（4DVar）を検討</span></li>
-        </ul>
+      <h3>実験 1 との違いは 1 点だけ</h3>
+      <div class="card purple small">
+        更新式・反復構造・センサ・パラメータの型はすべて実験 1 と共通。
+        変わるのは<strong>「メンバーの観測予測値を作るときに順問題を 1 回解く」</strong>ことだけ。<br><br>
+        ただしこの 1 点が 2 つの重要な帰結を持つ:<br>
+        ① \( \mathcal{H} \) が<strong>非局所</strong>になる → 局所化半径の要求が変わる（§7.4 の教訓）<br>
+        ② \( \mathbf{L}^{-1} \) が<strong>平滑化オペレータ</strong> → 復元可能な情報に上限が生じる（次スライド）
       </div>
     </div>
   </div>
 </section>
 
 <section>
-  <span class="sec-tag">05 — When to Use</span>
-  <h2>今回どんな利点があったか</h2>
-  <div class="four-col" style="margin-bottom:10px;">
-    <div class="metric"><span class="value">◎</span><span class="label">固定センサで発散しない<br>（EnKF は発散した）</span></div>
-    <div class="metric"><span class="value">0</span><span class="label">インフレーション調整<br>不要</span></div>
-    <div class="metric"><span class="value">19.8→20.1°C</span><span class="label">温度 RMSE<br>T 同化と同等のまま q を直接推定</span></div>
-    <div class="metric"><span class="value">数秒</span><span class="label">1 ラン計算時間<br>（LU 分解 1 回 + 後退代入）</span></div>
+  <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
+  <h2>5.2 逆問題の不適切性 — 何が原理的に復元できないか</h2>
+  <p>実験 2 と同じ固有値解析を、今度は<strong>順方向</strong>に使う。熱源の波数成分 \( q_k \) がセンサ温度に作る信号は</p>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      \[ x_k = \frac{q_k}{\alpha\,|\lambda(k)|}, \qquad |\lambda(k)| \approx k^2 \;(\text{低波数}) \;\to\; 8 \;(\text{最高波数}) \]
+      <span class="why">実験 2 の増幅（×\( \alpha|\lambda| \)）のちょうど逆数。順問題は高波数を \( 1/k^2 \) で減衰させる平滑化作用を持つ。</span>
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      この信号が観測ノイズ \( \sigma_r = 3\,{}^\circ\mathrm{C} \) より小さければ、その成分は観測から<strong>統計的に識別不能</strong>:
+      \[ |q_k| \lesssim \alpha\,|\lambda(k)|\,\sigma_r \quad\Rightarrow\quad \text{復元不能。最高波数では } |q_k| \lesssim 0.5 \times 8 \times 3 = 12 \]
+      <span class="why">q_true のエッジはセルスケール（高波数）に振幅 50〜190 を持つが、観測に残る痕跡は数 °C 以下 → ノイズに沈む。</span>
+    </span></div>
+    <div class="step"><span class="no">(3)</span><span>
+      さらにセンサは空間サンプリングなので、センサ間隔 \( \Delta \) より短い波長は捉えられない（ナイキスト制約: 波長 \( \gtrsim 2\Delta \)）。
+      m=300 でも \( \Delta \approx 1.7 \) セル → セル単位のエッジは解像不可。
+    </span></div>
   </div>
-  <ul class="small">
-    <li><strong>安定性が設計で保証される</strong> — 「弱い更新 × 反復」なので、固定センサで同じ観測を繰り返し使っても
-      共分散が暴走しない。EnKF で必要だったインフレーションの職人芸が丸ごと消えた。</li>
-    <li><strong>順モデルの差し替えが自由</strong> — 状態を温度 → 熱源に変えるとき、変更は「H の抜き出し」を
-      「L⁻¹ を解いてから抜き出し」に差し替えただけ。更新式は 1 行も変わらない。</li>
-    <li><strong>計算予算が事前に読める</strong> — 順モデル呼び出しは必ず N × N<sub>a</sub> = 300 × 30 回。
-      実 CAE ソルバーに移行するときの見積もりが立てやすい。</li>
-    <li><strong>アンサンブル分散がそのまま不確実性マップ</strong> — センサから遠い場所ほど分散が残り、
-      「どこが信用できないか」も同時に得られる。</li>
-  </ul>
+  <div class="two-col">
+    <div class="warn-box small">
+      <strong>帰結（限界）</strong>: セルスケールのエッジ場である \( \mathbf{q}_{\rm true} \) の
+      ポイントワイズな復元は<strong>どんな手法でも不可能</strong>。実測でも q RMSE は 38.8 で飽和
+      （何も推定しない場合の水準 = 真値の std 40.0 とほぼ同じ）。N や \( N_a \) を増やしても不変 —
+      これはアルゴリズムの欠陥ではなく<strong>観測が持つ情報の上限</strong>。
+    </div>
+    <div class="success-box small">
+      <strong>帰結（達成可能な目標）</strong>: 低波数（平滑化スケール）の成分は復元できる。
+      評価指標もそれに合わせ、<strong>σ=1 セルで平滑化した \( \mathbf{q}_{\rm true} \) との相関</strong>で測る。
+      結果は m=300 で <strong>0.76</strong> — 目・鼻・輪郭が視認できる（§7.2）。
+    </div>
+  </div>
 </section>
 </section>
 
-<!-- ═══ 06 数式とコードの対応 ═══ -->
+<!-- ═══════════════════ §6 実装 ═══════════════════ -->
 <section>
 <section>
-  <span class="sec-tag">06 — Math ↔ Code</span>
-  <h2>数式とコードの対応 (1/2): 順モデルと事前アンサンブル</h2>
+  <span class="sec-tag">§6 — Math ↔ Code</span>
+  <h2>6.1 数式とコードの対応 (1/2): モデルの構築</h2>
+  <p class="small muted">実装: <code>python/esmda_qfull.py</code>。§2-5 の数式がコードのどの行かを 1:1 で示す。</p>
   <table style="font-size:0.72em;">
-    <tr><th style="width:34%;">数式</th><th style="width:44%;">esmda_qfull.py</th><th style="width:22%;">補足</th></tr>
+    <tr><th style="width:34%;">数式（§ 参照）</th><th style="width:44%;">コード</th><th style="width:22%;">備考</th></tr>
     <tr>
-      <td>\( \mathbf{q}_{\text{true}} = -\alpha \mathbf{L} \mathbf{x}_{\text{truth}} \)</td>
+      <td>\( \mathbf{q}_{\rm true} = -\alpha \mathbf{L}\mathbf{x}_{\rm true} \)（§1.1）</td>
       <td><code>q_true = -ALPHA * (L @ x_ss)</code></td>
-      <td>ツイン実験の正解熱源（輪郭線状のエッジ場）</td>
+      <td>ツイン実験の正解定義</td>
     </tr>
     <tr>
-      <td>\( \mathbf{x}(\mathbf{q}) = \mathbf{L}^{-1}(-\mathbf{q}/\alpha) \)</td>
-      <td><code>LU = spl.splu(L.tocsc())</code><br><code>def forward_x(Q):</code><br><code>&nbsp;&nbsp;return LU.solve(-Q / ALPHA)</code></td>
-      <td>LU 分解は 1 回だけ。(900×300) をまとめて後退代入</td>
+      <td>\( \mathbf{x}(\mathbf{q}) = \mathbf{L}^{-1}(-\mathbf{q}/\alpha) \)（§5.1）</td>
+      <td><code>LU = spl.splu(L.tocsc())</code><br>
+          <code>def forward_x(Q):</code><br>
+          <code>&nbsp;&nbsp;return LU.solve(-Q / ALPHA)</code></td>
+      <td>LU 分解 1 回、毎反復は後退代入のみ。列方向に全メンバー同時処理</td>
     </tr>
     <tr>
-      <td>\( \mathbf{q}_i \sim \) 平滑ガウス場, \( \sigma = \) SIGMA_QB</td>
-      <td><code>noise = rng.normal(0, 1, (NY, NX))</code><br><code>Q[:, i] = gaussian_filter(noise, sigma=CORR_L).ravel()</code><br><code>Q *= SIGMA_QB / Q.std()</code></td>
-      <td>形状知識ゼロの事前分布。CORR_L が滑らかさ、SIGMA_QB が振幅</td>
+      <td>事前 \( \mathbf{q}_i \sim \mathcal{N}(\mathbf{0}, \mathbf{B}_q) \)、\( \mathbf{B}_q \): 相関長 \(L_c\)・分散 \( \sigma_q^2 \)（§3.6）</td>
+      <td><code>noise = rng.normal(0, 1, (NY, NX))</code><br>
+          <code>Q[:,i] = gaussian_filter(noise, sigma=CORR_L).ravel()</code><br>
+          <code>Q *= SIGMA_QB / Q.std()</code></td>
+      <td>B を行列で作らず<strong>サンプラーとして実装</strong>（ガウスフィルタ = 相関の畳み込み）</td>
     </tr>
     <tr>
-      <td>局所化 \( \rho_{ij} = \exp\!\left(-\tfrac{d_{ij}^2}{2 R_{\text{loc}}^2}\right) \)</td>
+      <td>局所化 \( \rho_{ij} = \exp\!\big({-d_{ij}^2}/{2R_{\rm loc}^2}\big) \)（§3.2）</td>
       <td><code>rho = np.exp(-0.5*(dy**2 + dx**2)/R_LOC**2)</code></td>
-      <td>セル i とセンサ j の距離テーパー (900×m)</td>
+      <td>(900 × m)。セル i–センサ j の距離テーパー</td>
+    </tr>
+    <tr>
+      <td>検証: \( \mathbf{x}(\mathbf{q}_{\rm true}) \overset{!}{=} \mathbf{x}_{\rm true} \)</td>
+      <td><code>assert np.abs(forward_x(q_true) - x_ss).max() &lt; 1e-9</code></td>
+      <td>順・逆の整合性チェック（実測 1e-13）</td>
     </tr>
   </table>
   <div class="info-box small">
-    <strong>読み方のコツ</strong>: 行列式のまま numpy に写している。
-    アンサンブルは列方向に並べた行列 <code>Q (n × N)</code> なので、
-    「全メンバーの順問題」= 1 回の行列ソルブになり、for ループが消える。
+    <strong>設計の要点</strong>: アンサンブルは列に並べた行列 <code>Q (n × N)</code>。
+    「全メンバーへの操作」がすべて行列演算 1 回になり、Python レベルのループが消える。
+    BLAS スレッドは冒頭で 4 に制限（このサイズでは全コアスレッド化が逆効果になることを実測）。
   </div>
 </section>
 
 <section>
-  <span class="sec-tag">06 — Math ↔ Code</span>
-  <h2>数式とコードの対応 (2/2): ESMDA 更新ループ</h2>
+  <span class="sec-tag">§6 — Math ↔ Code</span>
+  <h2>6.2 数式とコードの対応 (2/2): ESMDA 更新ループ</h2>
   <pre><code class="language-python" data-trim>
-SIGMA_R_EFF = SIGMA_R * np.sqrt(N_ITER)          # α_k R の平方根: R を N_a 倍に膨張
+SIGMA_R_EFF = SIGMA_R * np.sqrt(N_ITER)     # sqrt(α_k)·σ_r : 膨張観測誤差 (§3.4)
 
 for it in range(1, N_ITER+1):
-    X_temp = forward_x(Q)                        # 順問題: 全メンバーの温度場 H(q_i)
-    Qp  = Q - Q.mean(axis=1, keepdims=True)      # 状態の偏差 (n × N)
+    X_temp = forward_x(Q)                   # 順問題: 全メンバーの H(q_i)  (§5.1)
+    Qp  = Q - Q.mean(axis=1, keepdims=True)         # 状態偏差 Q'
     Tp  = X_temp - X_temp.mean(axis=1, keepdims=True)
-    HTp = Tp[obs_idx, :]                         # センサ位置の温度偏差 (m × N)
+    HTp = Tp[obs_idx, :]                            # 観測空間の偏差 H(Q)'
 
     S   = (HTp @ HTp.T)/(N_ENS-1) \
-          + SIGMA_R_EFF**2 * np.eye(m_obs)       # C^yy + α_k R
-    PHt = (Qp @ HTp.T)/(N_ENS-1)                 # C^qy
-    K   = np.linalg.solve(S.T, PHt.T).T          # K = C^qy (C^yy + α_k R)^-1
+          + SIGMA_R_EFF**2 * np.eye(m_obs)  # C^yy + α_k R   (§2.3 の HBHᵀ+R)
+    PHt = (Qp @ HTp.T)/(N_ENS-1)            # C^qy           (§2.3 の BHᵀ)
+    K   = np.linalg.solve(S.T, PHt.T).T     # K = C^qy (C^yy + α_k R)^-1
 
-    eps = rng.normal(0.0, SIGMA_R_EFF, (m_obs, N_ENS))   # 摂動観測 ε_i
+    eps = rng.normal(0.0, SIGMA_R_EFF, (m_obs, N_ENS))   # 摂動観測 (§3.3)
     innovation = x_ss[obs_idx, None] + eps - X_temp[obs_idx, :]
-    Q += (K * rho) @ innovation                  # 局所化ゲインで q を更新
+    Q += (K * rho) @ innovation             # 局所化ゲインで更新 (§3.2)
   </code></pre>
   <ul class="small">
-    <li><code>SIGMA_R_EFF² = N_ITER × σ_r²</code> が「膨張した観測誤差 α<sub>k</sub>R」。これで 30 回更新 = 膨張なし 1 回更新と同じ事後分布（線形ガウス時）</li>
-    <li><code>np.linalg.solve(S.T, PHt.T).T</code> — 逆行列を作らず連立方程式で解く定石</li>
-    <li>温度状態版 <code>enkf_heatid.py</code> との違いは <code>X_temp = forward_x(Q)</code> の 1 行だけ。<strong>更新式は完全に共通</strong></li>
+    <li><code>S</code>, <code>PHt</code> が §2.3 の \( \mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R} \), \( \mathbf{B}\mathbf{H}^\top \) の標本版（§3.2）。n×n 行列はどこにも現れない</li>
+    <li><code>np.linalg.solve(S.T, PHt.T).T</code> — 逆行列を陽に作らず m×m 連立を解く（数値的定石）</li>
+    <li><code>eps</code> の分散も \( \alpha_k \mathbf{R} \) に膨張させ §3.4 の等価性と整合させる</li>
+    <li>実験 1（温度状態版 <code>enkf_heatid.py</code>）との差分は <code>X_temp = forward_x(Q)</code> を <code>X_temp = X</code> に変えるだけ。<strong>更新式は 1 文字も変わらない</strong> — §2 の「共通の 1 本の式」の実証</li>
   </ul>
 </section>
 </section>
 
-<!-- ═══ 07 結果 ═══ -->
+<!-- ═══════════════════ §7 結果 ═══════════════════ -->
 <section>
 <section>
-  <span class="sec-tag">07 — Results</span>
-  <h2>結果 1: 収束 — 安定・速い</h2>
-  <div class="image-scroll" style="max-height:480px;">
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.1 収束挙動 — 安定・実質 5 反復で収束</h2>
+  <div class="image-scroll" style="max-height:470px;">
     <img src="img/fig05_qfull_rmse.png" alt="RMSE 収束">
   </div>
-  <p class="caption">左: 熱源 RMSE / 右: 温度 RMSE。実質 5 反復で収束し、その後も発散しない。点線は旧方式（後付け逆算）の水準。</p>
+  <p class="caption">左: 熱源 RMSE ／ 右: 温度 RMSE（推定熱源から順解析した温度場）。点線 = 実験 2（後処理逆算）の水準。</p>
   <div class="success-box small">
-    温度 RMSE は m=300 で <strong>20.1 °C</strong> — 温度場を直接同化した場合（19.8 °C）と同等。
-    「熱源を推定して温度を説明する」遠回りをしても、温度の説明能力は失われない。
+    温度 RMSE は m=300 で <strong>20.1 °C</strong> — 温度を直接状態にした実験 1（19.8 °C）と同等。
+    「熱源を推定して温度を説明する」遠回りをしても温度の説明能力は落ちない。
+    全カーブが単調・無発散で、インフレーションなどの補正は一切入れていない。
   </div>
 </section>
 
 <section>
-  <span class="sec-tag">07 — Results</span>
-  <h2>結果 2: 熱源場 — 復元できるスケールには限界がある</h2>
-  <div class="image-scroll" style="max-height:430px;">
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.2 熱源場 — §5.2 の理論予測どおりの結果</h2>
+  <div class="image-scroll" style="max-height:420px;">
     <img src="img/fig08_qfull_vs_derived.png" alt="熱源比較">
   </div>
-  <p class="caption">左から: 正解（エッジ場）/ 正解を σ=1 で平滑化 / Q-state ESMDA / 旧方式（後付け逆算）。各パネル独自スケール。</p>
-  <div class="two-col">
-    <div class="warn-box small" style="margin-top:6px;">
-      <strong>限界</strong>: 正解の熱源はセル幅の「輪郭線」。順問題 L⁻¹ の平滑化作用で
-      高周波情報は温度に残らず、<strong>点温度観測からエッジは原理的に復元不可</strong>
-      （q RMSE は 38.8 で飽和、正解の std は 40.0）。N や反復を増やしても改善しない。
-    </div>
-    <div class="success-box small" style="margin-top:6px;">
-      <strong>成果</strong>: 平滑化スケールなら相関 <strong>0.76</strong>（m=300）で復元。
-      目・鼻・輪郭が視認できる。旧方式は同じ情報を持つ（相関 0.73）が
-      増幅ノイズに埋もれて読めない — <strong>差は情報量ではなく可読性</strong>。
-    </div>
-  </div>
+  <p class="caption">左から: 正解（エッジ場）／ 正解の σ=1 平滑化（= §5.2 で導いた「復元可能スケール」）／ 実験 3 (Q-state) ／ 実験 2 (後処理)。各パネル独自の robust スケール。</p>
+  <table style="font-size:0.75em;">
+    <tr><th>m</th><th>corr(実験 3, 平滑化真値)</th><th>corr(実験 2, 平滑化真値)</th><th>解釈</th></tr>
+    <tr><td>30</td><td>0.33</td><td>0.29</td><td rowspan="4" style="font-size:0.95em;">両者の<strong>情報量はほぼ同じ</strong>（線形問題では §2 の事後分布が引き出せる情報の上限を共有するため、理論と整合）。
+    差は場の性格: 実験 2 は信号が ±70 の増幅ノイズに埋もれて読めない。実験 3 は事前分布が q 自体を正則化するため、
+    <strong>そのまま表示・利用できる滑らかな場</strong>が得られる。</td></tr>
+    <tr><td>100</td><td>0.59</td><td>0.52</td></tr>
+    <tr><td>200</td><td>0.65</td><td>0.65</td></tr>
+    <tr><td>300</td><td><strong>0.76</strong></td><td>0.74</td></tr>
+  </table>
 </section>
 
 <section>
-  <span class="sec-tag">07 — Results</span>
-  <h2>結果 3: センサ数スイープ</h2>
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.3 センサ数スイープ（10〜400 点 × 3 シード）</h2>
   <div class="image-scroll" style="max-height:460px;">
     <img src="img/fig09_qfull_sensor_count_sweep.png" alt="センサ数スイープ">
   </div>
-  <p class="caption">センサ数 10〜400 点 × 3 シード。左: 熱源 RMSE / 右: 温度 RMSE。</p>
+  <p class="caption">左: 熱源 RMSE ／ 右: 温度 RMSE。エラーバーはシード間の標準偏差。</p>
   <ul class="small">
-    <li>温度は 300 点で頭打ち（20 °C）。400 点に増やしてもほぼ改善しない</li>
-    <li>熱源 RMSE は黄破線（= 何も推定しないときの水準 40.0）よりわずかに下がる程度 — ポイントワイズな熱源の値ではなく<strong>平滑化スケールの構造</strong>を見るべき指標であることが分かる</li>
+    <li>温度: センサ増で単調改善し 300 点で 20 °C に飽和（実験 1 と同じ傾向・同じ水準）</li>
+    <li>熱源 RMSE: 黄破線（ゼロ情報水準 = 真値 std 40.0）からわずかしか下がらない — §5.2 の「ポイントワイズ RMSE は適切な指標ではない」ことの実証。構造の回復は相関（7.2 の表）で見る</li>
   </ul>
 </section>
 
 <section>
-  <span class="sec-tag">07 — Results</span>
-  <h2>教訓: 局所化半径の落とし穴（開発中に踏んだ）</h2>
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.4 教訓: 非局所な \( \mathcal{H} \) と局所化の干渉（開発中に踏んだ罠）</h2>
   <div class="two-col">
     <div class="card red">
-      <h3>R_LOC = 5（温度状態と同じ値）のまま使うと…</h3>
+      <h3>現象（\( R_{\rm loc} = 5 \)、実験 1 と同じ値のまま）</h3>
       <ul class="small">
-        <li>反復 4〜7 で温度 RMSE が <strong>最大 5000 °C 超へ暴走</strong>してから収束</li>
-        <li>センサが少ない（m=30〜50）と最終値でも<strong>同化しない場合より悪化</strong>（62 °C &gt; 38 °C）</li>
+        <li>反復 4〜7 で温度 RMSE が<strong>最大 5000 °C 超へ暴走</strong>してから収束</li>
+        <li>m=30〜50 では最終値も 47〜62 °C — <strong>同化しない場合（≈38 °C）より悪化</strong></li>
+        <li>\( R_{\rm loc} = 3 \) では完全発散（RMSE 3 桁）</li>
       </ul>
     </div>
     <div class="card green">
-      <h3>R_LOC = 10 に広げると…</h3>
+      <h3>対処（\( R_{\rm loc} = 10 \) へ拡大）</h3>
       <ul class="small">
-        <li>過渡暴走が<strong>完全に消滅</strong>（単調収束）</li>
-        <li>少数センサでの悪化も解消、最終精度は同等以上</li>
+        <li>過渡暴走が<strong>完全に消滅</strong>、単調収束に</li>
+        <li>少数センサでの悪化も解消。最終精度は同等以上</li>
+        <li>N=600・\( N_a \)=60・\( \sigma_q \)=80〜120 はいずれも効果なし — 原因は局所化<strong>のみ</strong>だった</li>
       </ul>
     </div>
   </div>
   <div class="info-box">
-    <strong>なぜか</strong>: 局所化はセンサ近傍の熱源だけを更新するが、更新された熱源は
-    L⁻¹ を通じて<strong>遠方の温度まで</strong>変えてしまう。半径が狭いとこの遠隔効果が
-    観測で拘束されず、センサ空白域の温度場が崩れる。<br>
-    <strong>一般則</strong>: 順モデルが非局所な逆問題では、局所化半径は
-    「観測が状態に効く物理的到達距離」に合わせて広げること。
+    <strong>メカニズム</strong>: 真のゲイン \( \mathbf{C}^{qy}(\mathbf{C}^{yy}+\alpha\mathbf{R})^{-1} \) は、
+    \( \mathcal{H} = \mathbf{H}\mathbf{L}^{-1} \) の非局所性（熱源はグリーン関数を通じて遠方の温度に効く）を反映して
+    <strong>長距離成分を持つ</strong>。狭い \( \rho \) はこの実在する共分散を切り落とすため、
+    「センサ近傍の q を直す → その遠隔温度効果が補正されない → 次の反復で別のセンサが誤った残差を見る」という
+    正帰還が過渡的に成長する。<br>
+    <strong>一般則</strong>: 局所化半径の下限は「観測演算子の感度の物理的到達距離」で決まる（§3.6 の表）。
+    観測が状態と同じ場所の量なら狭くてよい（実験 1）。順問題を挟むなら、その到達距離まで広げる（実験 3）。
   </div>
 </section>
 </section>
 
-<!-- ═══ まとめ ═══ -->
+<!-- ═══════════════════ まとめ ═══════════════════ -->
 <section>
   <span class="sec-tag">Summary</span>
   <h2>まとめ</h2>
   <div class="two-col">
     <div>
       <div class="card cyan">
-        <h3>ESMDA とは</h3>
-        <p class="small">観測誤差を N<sub>a</sub> 倍に膨らませて同じ観測を N<sub>a</sub> 回同化するアンサンブルスムーザー。
-        線形ガウスなら 1 回のベイズ更新と同一の答えを、はるかに安定に得る。
-        随伴不要・順モデル差し替え自由・並列容易。</p>
+        <h3>理論（§2-3）</h3>
+        <p class="small">全手法の土台は 1 本のベイズ更新式
+        \( \mathbf{x}_a = \mathbf{x}_b + \mathbf{B}\mathbf{H}^\top(\mathbf{H}\mathbf{B}\mathbf{H}^\top+\mathbf{R})^{-1}\mathbf{d} \)。
+        OI は B を決め打ち、KF は力学で伝播、EnKF/ESMDA は標本近似。
+        ESMDA は精度行列の加法性により「\( \alpha_k \mathbf{R} \) で \( N_a \) 回 = \( \mathbf{R} \) で 1 回」が厳密に成立し、
+        分割によって非線形頑健性と逐次フィルタ病理の回避を同時に得る。</p>
       </div>
       <div class="card green">
-        <h3>今回の成果</h3>
-        <p class="small">固定センサ温度だけからミッフィー温度場を復元（19.8 °C）。
-        状態変数を熱源に変えた完全逆問題でも同等の温度精度を保ち、
-        平滑化スケールの熱源構造（相関 0.76）を直接読める形で取得。</p>
+        <h3>実験（§4-5, 7）</h3>
+        <p class="small">実験 1: 温度場 19.8 °C で復元。実験 2: 後処理逆算は \( \alpha|\lambda| \le 4 \) 倍の誤差増幅で失敗。
+        実験 3: 状態を q に変えた完全逆問題で、温度説明能力を保ったまま（20.1 °C）、
+        観測が原理的に持つ情報の上限（平滑化スケール、相関 0.76）まで熱源を復元。</p>
       </div>
     </div>
     <div>
       <div class="card orange">
-        <h3>使い分けの指針</h3>
+        <h3>使い分けと設計指針（§3.6）</h3>
         <p class="small">逐次追跡 → KF/EnKF ／ 一発の静的解析 → OI ／
         <strong>静的逆問題・パラメータ同定 → ESMDA</strong>。
-        パラメータは σ<sub>r</sub> 以外すべて設計変数: 物理スケールで置き、スイープで境界を見る。</p>
+        パラメータは \( \sigma_r \) 以外すべて設計変数: 物理スケールで置き、スイープで破綻の壁と頭打ちを見る。
+        局所化半径は「観測演算子の感度の到達距離」が下限（§7.4）。</p>
       </div>
       <div class="card purple">
         <h3>次の展開</h3>
         <ul class="small">
-          <li>非定常化: 時系列観測で熱源の時間変化を追う</li>
-          <li>エッジを表現できる事前分布（TV 正則化・非ガウス）</li>
+          <li>非定常化: 時系列観測での熱源追跡（ES → EnKS / 逐次 ESMDA）</li>
+          <li>エッジを表現できる事前分布（全変動正則化・非ガウス）→ §5.2 の限界は「ガウス事前 + 点観測」の限界であり、事前情報を強くすれば動く余地がある</li>
           <li>OpenFOAM / FrontISTR ケース (sample/002-1) への Q-state 同化の展開</li>
         </ul>
       </div>
     </div>
   </div>
-  <p class="caption muted">資料: docs/esmda_qfull_method.md ・ docs/esmda_explanation.md ・ WORKLOG_20260702_esmda_qfull.md ／ 実装: python/esmda_qfull.py</p>
+  <p class="caption muted">実装: python/esmda_qfull.py ／ 手法詳細: docs/esmda_qfull_method.md ／ 作業記録: ../WORKLOG_20260702_esmda_qfull.md ／ 参考: Emerick &amp; Reynolds (2013) Computers &amp; Geosciences 55</p>
 </section>
 
 </div>
