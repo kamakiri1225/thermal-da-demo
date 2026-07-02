@@ -1096,31 +1096,66 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 <section>
   <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
   <h2>5.1 実験 3 の定式化: 状態変数を熱源に変える</h2>
-  <div class="breadcrumb">実験 2 の失敗を受け、<b>推定対象そのものを熱源 q に変更</b>する。観測は同じセンサ温度。両者を順問題がつなぐ。</div>
-  <div class="math-box">
-    状態: \( \mathbf{q} \in \mathbb{R}^{900} \) ／ 順モデル: \( \mathbf{x}(\mathbf{q}) = \mathbf{L}^{-1}\!\left(-\mathbf{q}/\alpha\right) \) ／
-    観測演算子: \( \mathcal{H}(\mathbf{q}) = \mathbf{H}\,\mathbf{x}(\mathbf{q}) = \underbrace{\mathbf{H}\mathbf{L}^{-1}(-1/\alpha)}_{\text{線形・非局所}}\,\mathbf{q} \)
+  <div class="breadcrumb">ここでやりたいことは単純: <b>温度センサの値だけを見て、どの場所にどれだけ熱源があるかを当てる</b>。</div>
+  <div class="info-box small">
+    <strong>初心者向けに言うと</strong>: 30×30 の盤面があり、各マスに「発熱量」が入っている。
+    しかし直接見えるのは発熱量ではなく、いくつかの場所に置いた温度センサの値だけ。
+    そこで「この熱源分布なら温度はどうなるか」をコンピュータで計算し、実際のセンサ温度に近づくように
+    熱源分布を少しずつ直す。これが実験 3。
+  </div>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">1</div>
+      <div class="label">当てたいもの</div>
+      <div class="note">900 マス分の熱源<br>\( \mathbf{q} \)</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">2</div>
+      <div class="label">物理計算</div>
+      <div class="note">熱源から温度場を計算<br>\( \mathbf{x}(\mathbf{q}) \)</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">3</div>
+      <div class="label">センサだけ読む</div>
+      <div class="note">計算した温度のうち<br>観測点だけ抜き出す</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">4</div>
+      <div class="label">実測と比べる</div>
+      <div class="note">ずれていれば<br>熱源 \( \mathbf{q} \) を修正</div>
+    </div>
+  </div>
+  <div class="math-box small">
+    <strong>同じことを数式で書くと</strong><br>
+    状態: \( \mathbf{q} \in \mathbb{R}^{900} \)
+    <span class="muted">= 900 個のマスそれぞれの熱源を並べたリスト</span><br>
+    順モデル: \( \mathbf{x}(\mathbf{q}) = \mathbf{L}^{-1}\!\left(-\mathbf{q}/\alpha\right) \)
+    <span class="muted">= 熱源 \( \mathbf{q} \) を入れると、全マスの温度 \( \mathbf{x} \) が出る計算</span><br>
+    観測予測: \( \mathcal{H}(\mathbf{q}) = \mathbf{H}\mathbf{x}(\mathbf{q}) \)
+    <span class="muted">= 全マスの温度から、センサ位置の温度だけを取り出したもの</span>
   </div>
   <div class="two-col">
     <div>
-      <h3>§2-3 の理論はそのまま適用できる</h3>
+      <h3>なぜ「Full Inverse」なのか</h3>
       <ul class="small">
-        <li>\( \mathcal{H} \) は線形なので、ESMDA の等価性（§3.5）が厳密に成立</li>
-        <li>ゲインの構成要素はアンサンブルから: \( \mathbf{C}^{qy} = \frac{\mathbf{Q}'(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)、
-            \( \mathbf{C}^{yy} = \frac{(\mathcal{H}\mathbf{Q}')(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)</li>
-        <li>\( \mathbf{L}^{-1} \) は明示的に作らない: \( \mathbf{L} \) を 1 回だけ LU 分解し、
-            アンサンブル行列（900×300）をまとめて後退代入</li>
-        <li>事前分布: 平均 0 + 相関長 1.5 セルのガウス場、\( \sigma_{q} = 40 \)（\( \mathbf{q}_{\rm true} \) の std ≈ 40 に整合）</li>
+        <li><strong>順問題</strong>: 熱源を知っている → 温度を計算する。これは普通のシミュレーション。</li>
+        <li><strong>逆問題</strong>: 温度だけを知っている → 原因である熱源を推定する。今回はこちら。</li>
+        <li><strong>Full</strong>: 1 個の係数ではなく、900 マスすべての熱源を同時に推定する、という意味。</li>
+        <li>実験 2 では「温度を先に推定してから熱源を後処理で計算」した。実験 3 では最初から熱源そのものを推定対象にする。</li>
       </ul>
     </div>
     <div>
-      <h3>実験 1 との違いは 1 点だけ</h3>
+      <h3>ESMDA は具体的に何をするか</h3>
       <div class="card purple small">
-        更新式・反復構造・センサ・パラメータの型はすべて実験 1 と共通。
-        変わるのは<strong>「メンバーの観測予測値を作るときに順問題を 1 回解く」</strong>ことだけ。<br><br>
-        ただしこの 1 点が 2 つの重要な帰結を持つ:<br>
-        ① \( \mathcal{H} \) が<strong>非局所</strong>になる → 局所化半径の要求が変わる（§7.4 の教訓）<br>
-        ② \( \mathbf{L}^{-1} \) が<strong>平滑化オペレータ</strong> → 復元可能な情報に上限が生じる（次スライド）
+        まず「あり得そうな熱源分布」を 300 個作る。
+        それぞれについて温度シミュレーションを行い、センサ位置の温度を予測する。
+        予測温度と実測温度を比べて、合っていない仮説は合う方向に修正する。<br><br>
+        重要なのは、ESMDA が直接見ているのは温度だけという点。
+        熱源は見えないので、<strong>「熱源 → 温度」という物理計算を何度も使って間接的に探す</strong>。
+        そのため、温度にほとんど影響しない細かい熱源パターンは、次スライド以降で見るように復元しにくい。
       </div>
     </div>
   </div>
