@@ -9,11 +9,12 @@ L⁻¹ の順問題を組み込んだ完全逆問題へ進める）を実装し�
 
 ## 1. 何が問題だったか
 
-`enkf_heatid.py` は温度場 x を同化し、熱源は最後に
+`enkf_heatid.py` は温度場 \( \mathbf{x} \) を同化し、熱源は最後に
 
-```
-q_derived = -α · L · x_mean
-```
+$$
+\mathbf{q}_{\rm derived}
+= -\alpha \mathbf{L}\mathbf{x}_{\rm mean}
+$$
 
 で逆算していました。ラプラシアン L は差分オペレータなので、
 同化後の温度場に残るセルスケールのノイズを強く増幅します。
@@ -26,16 +27,20 @@ q_derived = -α · L · x_mean
 
 | 項目 | 温度場版 (`enkf_heatid.py`) | 完全逆問題版 (`esmda_qfull.py`) |
 |---|---|---|
-| 状態変数 | x（温度、900セル） | q（熱源、900セル） |
-| 観測演算子 | H = I_obs（恒等の抜き出し） | H(q) = [L⁻¹(−q/α)]_obs（順問題） |
+| 状態変数 | \( \mathbf{x} \)（温度、900セル） | \( \mathbf{q} \)（熱源、900セル） |
+| 観測演算子 | \( \mathbf{H} = \mathbf{I}_{\rm obs} \)（恒等の抜き出し） | \( \mathcal{H}(\mathbf{q}) = [\mathbf{L}^{-1}(-\mathbf{q}/\alpha)]_{\rm obs} \)（順問題） |
 | 事前分布 | 20 °C 一様 + 相関ノイズ | 0 中心 + 相関ノイズ |
-| 熱源の出し方 | 事後に q = −αLx で逆算 | q が直接の推定対象 |
+| 熱源の出し方 | 事後に \( \mathbf{q} = -\alpha\mathbf{L}\mathbf{x} \) で逆算 | \( \mathbf{q} \) が直接の推定対象 |
 
 順問題は定常熱伝導（ポアソン方程式）です。
 
-```
-L x = −q / α   →   x(q) = L⁻¹(−q/α)
-```
+$$
+\mathbf{L}\mathbf{x}
+= -\frac{\mathbf{q}}{\alpha}
+\quad\Longrightarrow\quad
+\mathbf{x}(\mathbf{q})
+= \mathbf{L}^{-1}\left(-\frac{\mathbf{q}}{\alpha}\right)
+$$
 
 L は一度だけ LU 分解（`scipy.sparse.linalg.splu`）しておき、
 毎反復はアンサンブル行列 (900×300) をまとめて後退代入するだけなので
@@ -45,13 +50,314 @@ ESMDA の更新式は温度場版と同一で、アンサンブル摂動の取�
 異なります。温度場版は HXp = Xp[obs] でしたが、完全逆問題版は
 順問題を通した温度摂動 HTp = Tp[obs] を使います。
 
-```
-S    = HTp HTpᵀ/(N−1) + N_ITER σ_r² I
-K    = [Qp HTpᵀ/(N−1)] S⁻¹
-Q   += (K ∘ ρ)(y + ε − T[obs])       ρ: 局所化、ε ~ N(0, N_ITER σ_r²)
-```
+$$
+\mathbf{S}
+=
+\frac{\mathbf{HT}'{\mathbf{HT}'}^{\!\top}}{N-1}
++ N_{\rm iter}\sigma_r^2\mathbf{I}
+$$
 
-## 3. 実行
+$$
+\mathbf{K}
+=
+\left(
+\frac{\mathbf{Q}'{\mathbf{HT}'}^{\!\top}}{N-1}
+\right)
+\mathbf{S}^{-1}
+$$
+
+$$
+\mathbf{Q}
+\leftarrow
+\mathbf{Q}
++
+(\mathbf{K}\circ\boldsymbol{\rho})
+\left(
+\mathbf{y}
++
+\boldsymbol{\varepsilon}
+-
+\mathbf{T}_{\rm obs}
+\right),
+\qquad
+\boldsymbol{\varepsilon}
+\sim
+\mathcal{N}
+\left(
+\mathbf{0},
+N_{\rm iter}\sigma_r^2\mathbf{I}
+\right)
+$$
+
+## 3. これはなぜデータ同化なのか
+
+「熱源 q の候補をたくさん作り、それぞれが予測するセンサ温度と
+実測センサ温度のズレを使って q を更新する」と書くと、単なる
+試行錯誤に見えます。しかし実際には、データ同化の標準形
+
+$$
+\text{解析値}
+=
+\text{背景値}
++
+\text{ゲイン}
+\times
+\text{観測残差}
+$$
+
+を、状態変数を熱源 q にして実行しています。
+
+データ同化に必要な要素は次の 4 つです。
+
+| 要素 | 一般のデータ同化 | 今回の完全逆問題版 |
+|---|---|---|
+| 状態 | 推定したい変数 \( \mathbf{x} \) | 熱源場 \( \mathbf{q} \) |
+| 背景 | 観測前の推定値・候補 | 300 本の熱源候補 \( \mathbf{Q} \) |
+| 観測 | 実測データ \( \mathbf{y} \) | 固定センサ温度 \( \mathbf{y}_{\rm obs} \) |
+| 観測演算子 | 状態から観測値を予測する \( \mathbf{H} \) | \( \mathcal{H}(\mathbf{q})=\mathbf{H}\mathbf{L}^{-1}(-\mathbf{q}/\alpha) \) |
+
+ポイントは、観測が熱源 q を直接測っていないことです。
+観測しているのは温度なので、候補 q をいったん順問題に通して
+「その熱源ならセンサ温度は何度になるか」を計算します。
+
+順問題は
+
+$$
+\mathbf{L}\mathbf{x}
+=
+-\frac{\mathbf{q}}{\alpha}
+$$
+
+なので、温度場は
+
+$$
+\mathbf{x}(\mathbf{q})
+=
+\mathbf{L}^{-1}
+\left(
+-\frac{\mathbf{q}}{\alpha}
+\right)
+$$
+
+です。センサ位置だけを取り出す行列を H とすると、熱源 q が予測する
+センサ温度は
+
+$$
+\mathbf{y}_{\rm pred}(\mathbf{q})
+=
+\mathbf{H}\mathbf{x}(\mathbf{q})
+=
+\mathbf{H}\mathbf{L}^{-1}
+\left(
+-\frac{\mathbf{q}}{\alpha}
+\right)
+$$
+
+です。この写像を観測演算子として
+
+$$
+\mathcal{H}(\mathbf{q})
+=
+\mathbf{H}\mathbf{L}^{-1}
+\left(
+-\frac{\mathbf{q}}{\alpha}
+\right)
+$$
+
+と置きます。すると、今回の逆問題は
+
+$$
+\mathbf{y}_{\rm obs}
+\approx
+\mathcal{H}(\mathbf{q})
+$$
+
+を満たす q を探す問題になります。
+
+ESMDA では q を 1 本だけ持たず、N 本の候補を持ちます。
+
+$$
+\mathbf{Q}
+=
+\begin{bmatrix}
+\mathbf{q}_1 & \mathbf{q}_2 & \cdots & \mathbf{q}_N
+\end{bmatrix}
+$$
+
+各候補を観測演算子に通すと、
+
+$$
+\mathbf{Y}
+=
+\mathcal{H}(\mathbf{Q})
+=
+\begin{bmatrix}
+\mathcal{H}(\mathbf{q}_1) &
+\mathcal{H}(\mathbf{q}_2) &
+\cdots &
+\mathcal{H}(\mathbf{q}_N)
+\end{bmatrix}
+$$
+
+です。ここで Q は「熱源候補の集団」、Y は「各候補が予測した
+センサ温度の集団」です。
+
+まず平均を引いた偏差を作ります。
+
+$$
+\mathbf{Q}'
+=
+\mathbf{Q}
+-
+\bar{\mathbf{q}}\mathbf{1}^{\top},
+\qquad
+\mathbf{Y}'
+=
+\mathbf{Y}
+-
+\bar{\mathbf{y}}\mathbf{1}^{\top}
+$$
+
+この 2 つから、アンサンブル標本共分散を作ります。
+
+$$
+\mathbf{C}^{qy}
+=
+\frac{1}{N-1}
+\mathbf{Q}'{\mathbf{Y}'}^{\!\top}
+$$
+
+$$
+\mathbf{C}^{yy}
+=
+\frac{1}{N-1}
+\mathbf{Y}'{\mathbf{Y}'}^{\!\top}
+$$
+
+\( \mathbf{C}^{qy} \) は「どのセルの熱源 q が、どのセンサ温度 y と一緒に動くか」
+を表します。\( \mathbf{C}^{yy} \) は「センサ温度同士がどう一緒に動くか」を表します。
+
+カルマンゲインは
+
+$$
+\mathbf{K}
+=
+\mathbf{C}^{qy}
+\left(
+\mathbf{C}^{yy}
++
+\alpha_k\mathbf{R}
+\right)^{-1}
+$$
+
+です。観測誤差共分散 R は、センサノイズ σ_r=3 °C なら
+
+$$
+\mathbf{R}
+=
+\sigma_r^2\mathbf{I}
+=
+9\mathbf{I}
+$$
+
+です。ESMDA では同じ観測を N_ITER 回に分けて使うため、
+各反復では観測誤差を α_k 倍に膨らませます。今回の一様分割では
+
+$$
+\alpha_k
+=
+N_{\rm iter}
+=
+30
+$$
+
+です。
+
+各メンバーの更新式は
+
+$$
+\mathbf{q}_i^{a}
+=
+\mathbf{q}_i^{b}
++
+\mathbf{K}
+\left(
+\mathbf{y}_{\rm obs}
++
+\boldsymbol{\varepsilon}_i
+-
+\mathcal{H}(\mathbf{q}_i^{b})
+\right)
+$$
+
+です。
+
+ここで、
+
+- `b` は before（更新前）
+- `a` は after（更新後）
+- \( \mathbf{y}_{\rm obs}-\mathcal{H}(\mathbf{q}_i^b) \) は観測残差、または innovation
+- \( \boldsymbol{\varepsilon}_i \) は摂動観測ノイズで、\( \boldsymbol{\varepsilon}_i \sim \mathcal{N}(\mathbf{0},\alpha_k\mathbf{R}) \)
+
+です。摂動観測を入れるのは、更新後のアンサンブルの広がりを
+正しい事後分布の広がりに保つためです。
+
+さらに実装では局所化を入れています。セル i とセンサ j の距離を
+`d_ij` とすると、
+
+$$
+\rho_{ij}
+=
+\exp
+\left(
+-\frac{d_{ij}^2}{2R_{\rm loc}^2}
+\right)
+$$
+
+を作り、ゲインに要素ごとに掛けます。
+
+$$
+\mathbf{K}_{\rm loc}
+=
+\mathbf{K}
+\circ
+\boldsymbol{\rho}
+$$
+
+したがって実装上の更新は
+
+$$
+\mathbf{q}_i^{a}
+=
+\mathbf{q}_i^{b}
++
+\mathbf{K}_{\rm loc}
+\left(
+\mathbf{y}_{\rm obs}
++
+\boldsymbol{\varepsilon}_i
+-
+\mathcal{H}(\mathbf{q}_i^{b})
+\right)
+$$
+
+です。
+
+以上をまとめると、今回の計算は
+
+1. 観測前の熱源候補 \( \mathbf{Q} \) を作る
+2. 物理モデル \( \mathbf{x}(\mathbf{q})=\mathbf{L}^{-1}(-\mathbf{q}/\alpha) \) で各候補の温度場を計算する
+3. センサ位置だけを抜き出して観測予測 \( \mathcal{H}(\mathbf{q}) \) を作る
+4. 実測センサ温度との差 \( \mathbf{y}_{\rm obs}-\mathcal{H}(\mathbf{q}) \) を計算する
+5. アンサンブル共分散から作ったゲイン \( \mathbf{K} \) で \( \mathbf{q} \) を更新する
+6. これを 30 回繰り返す
+
+という流れです。これは、観測と物理モデルを組み合わせて状態を更新する
+データ同化そのものです。違いは、通常の天気予報のように時刻を進めながら
+逐次同化するのではなく、静的な逆問題に対して同じ観測を複数回に分けて
+使うスムーザー型のデータ同化、つまり ESMDA である点です。
+
+## 4. 実行
 
 ```bash
 cd python
@@ -62,7 +368,7 @@ python3 esmda_qfull.py
 BLAS スレッドはスクリプト内で 4 に制限しています
 （このサイズの行列では全コアスレッド化はかえって大幅に遅くなるため）。
 
-## 4. 設定
+## 5. 設定
 
 | パラメータ | 値 | 備考 |
 |---|---|---|
@@ -86,15 +392,15 @@ BLAS スレッドはスクリプト内で 4 に制限しています
 - SIGMA_QB を 80, 120 に増やしても、N=600 にしても、N_ITER=60 にしても
   q RMSE は改善しない（≈ 39 で飽和）。
 
-## 5. 結果と解釈
+## 6. 結果と解釈
 
-### 5.1 温度場は同等の精度で復元できる
+### 6.1 温度場は同等の精度で復元できる
 
 m=300 で x(q_mean) の温度 RMSE は **20.06 °C**。
 温度場を直接同化した場合（19.82 °C）とほぼ同じです。
 収束も速く、実質 5 反復で最終値に達します。
 
-### 5.2 熱源のセルスケールのエッジは原理的に復元できない
+### 6.2 熱源のセルスケールのエッジは原理的に復元できない
 
 q_true = −αLx_ss はミッフィーの「輪郭線」状のエッジ場で、
 std は 40.0。推定 q の RMSE は m=400 でも 38.8 までしか下がりません。
@@ -102,7 +408,7 @@ std は 40.0。推定 q の RMSE は m=400 でも 38.8 までしか下がりま�
 熱源の高周波成分の情報がほとんど残っていない
 （逆問題の不適切性 ill-posedness）ためです。
 
-### 5.3 復元できるのは「平滑化されたスケール」まで
+### 6.3 復元できるのは「平滑化されたスケール」まで
 
 σ=1 セルでガウス平滑化した q_true と比較すると、
 推定 q との相関はセンサ数とともに単調に向上します。
@@ -117,7 +423,7 @@ std は 40.0。推定 q の RMSE は m=400 でも 38.8 までしか下がりま�
 m=300 の推定 q には目・鼻・輪郭の構造が視認できます
 （`fig08_qfull_vs_derived.png`）。
 
-### 5.4 旧方式との違いは「情報量」ではなく「使いやすさ」
+### 6.4 旧方式との違いは「情報量」ではなく「使いやすさ」
 
 意外なことに、温度場版の q_derived も平滑化真値との相関は
 大差ありません（m=300 で 0.74、Q-state は 0.76）。線形問題なので、
@@ -131,7 +437,7 @@ m=300 の推定 q には目・鼻・輪郭の構造が視認できます
 - Q-state: 事前分布が q 自体を正則化するため、滑らかで
   そのまま表示・利用できる熱源場が得られる
 
-### 5.5 局所化半径が狭いと同化が温度場を壊す（R_LOC=5 の教訓）
+### 6.5 局所化半径が狭いと同化が温度場を壊す（R_LOC=5 の教訓）
 
 開発中、温度場版と同じ R_LOC=5 で走らせたところ、
 
@@ -145,7 +451,7 @@ m=300 の推定 q には目・鼻・輪郭の構造が視認できます
 崩れるためです。R_LOC=10 に広げると両方とも解消しました。
 順問題が非局所な逆問題に局所化を使うときの代表的な落とし穴です。
 
-## 6. 出力ファイル
+## 7. 出力ファイル
 
 | ファイル | 内容 |
 |---|---|
@@ -157,7 +463,7 @@ m=300 の推定 q には目・鼻・輪郭の構造が視認できます
 | `img/anim_esmda_qfull.gif` | 同化過程アニメーション |
 | `docs/sensor_count_sweep_qfull.csv` | スイープ数値データ |
 
-## 7. 関連
+## 8. 関連
 
 - [`enkf_heatid_method.md`](enkf_heatid_method.md) — 温度場版の手法
 - [`esmda_explanation.md`](esmda_explanation.md) — ESMDA 一般論

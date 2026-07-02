@@ -1163,6 +1163,55 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
+  <h2>5.1b これはなぜ「データ同化」なのか</h2>
+  <div class="breadcrumb">単なる試行錯誤ではなく、<b>背景情報（事前の候補）と観測データを、物理モデルを介して統計的に混ぜる</b>のでデータ同化。</div>
+  <div class="two-col">
+    <div>
+      <h3>データ同化の 4 要素</h3>
+      <table style="font-size:0.72em;">
+        <tr><th>要素</th><th>今回の中身</th></tr>
+        <tr><td>状態</td><td>熱源場 \( \mathbf{q} \)（900 セル、各セルの発熱量）</td></tr>
+        <tr><td>背景</td><td>観測前に作る 300 個の候補 \( \mathbf{q}_1,\ldots,\mathbf{q}_{300} \)</td></tr>
+        <tr><td>観測</td><td>固定センサで測った温度 \( \mathbf{y}_{\rm obs} \)</td></tr>
+        <tr><td>観測演算子</td><td>\( \mathcal{H}(\mathbf{q})=\mathbf{H}\mathbf{L}^{-1}(-\mathbf{q}/\alpha) \)</td></tr>
+      </table>
+      <div class="info-box small">
+        観測演算子は「この熱源ならセンサ温度は何度になるか」を計算する写像。
+        熱源 \( \mathbf{q} \) は直接観測できないので、温度予測を通して観測と照合する。
+      </div>
+    </div>
+    <div>
+      <h3>更新式の意味</h3>
+      <div class="math-box small">
+        \[
+        \mathbf{q}_i^{a}
+        =
+        \mathbf{q}_i^{b}
+        +
+        \mathbf{K}
+        \left(
+        \mathbf{y}_{\rm obs}
+        -
+        \mathcal{H}(\mathbf{q}_i^{b})
+        \right)
+        \]
+      </div>
+      <ul class="small">
+        <li>\( \mathcal{H}(\mathbf{q}_i^{b}) \): 候補 \(i\) が予測するセンサ温度</li>
+        <li>\( \mathbf{y}_{\rm obs}-\mathcal{H}(\mathbf{q}_i^{b}) \): 観測とのズレ（innovation）</li>
+        <li>\( \mathbf{K} \): センサ温度のズレを熱源修正量へ変換する表。アンサンブルの共分散から作る</li>
+      </ul>
+      <div class="success-box small">
+        したがって「候補を作ってズレで直す」は、データ同化の標準形
+        <strong>背景 + ゲイン × 観測残差</strong>そのもの。
+        ESMDA はこの同化更新を、同じ観測を弱く分けて 30 回行う方法。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">§5 — Experiment 3: Full Inverse</span>
   <h2>5.2 何が起きたか: 「38.8 の壁」と、その原因を掴む 2 つの実験</h2>
   <div class="warn-box">
     <strong>観測された事実</strong>: Q-state ESMDA を走らせると、熱源 q の RMSE は <strong>38.8 で止まる</strong>
