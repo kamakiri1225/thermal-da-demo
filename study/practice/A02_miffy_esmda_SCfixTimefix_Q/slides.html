@@ -600,32 +600,62 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 <section>
 <section>
   <span class="sec-tag">§2 — Theory Foundation</span>
-  <h2>2.1 データ同化 = ベイズ推定</h2>
-  <div class="breadcrumb">ここから理論。まず<b>全手法に共通する 1 本の更新式</b>を、ベイズの定理から仮定を明示して導出する。</div>
-  <p><strong>仮定 (G1)</strong> 事前分布はガウス: 状態の推定値 \( \mathbf{x}_b \)（background）とその誤差共分散 \( \mathbf{B} \) を持つ。</p>
+  <h2>2.1 部品を揃える: 事前分布と尤度（2 つの仮定）</h2>
+  <div class="breadcrumb">ここから理論。まず<b>全手法に共通する 1 本の更新式</b>を導出する。このスライドは材料の準備、次のスライドでベイズの定理に代入する。</div>
+  <p class="small muted">1 次元の復習: ガウス分布は \( p(z) \propto \exp\!\left[-\frac{(z-\mu)^2}{2\sigma^2}\right] \)。
+  以下はその多変量版で、\( 1/\sigma^2 \)（precision, 確からしさ）の役割を逆行列 \( \mathbf{B}^{-1} \), \( \mathbf{R}^{-1} \) が担う。</p>
+  <p><strong>仮定 (G1)</strong> 事前分布はガウス: 観測を見る前の推定値 \( \mathbf{x}_b \)（background）と、その信頼度を表す誤差共分散 \( \mathbf{B} \) を持つ。</p>
   <div class="math-box">
     \( p(\mathbf{x}) \propto \exp\!\left[-\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top} \mathbf{B}^{-1} (\mathbf{x}-\mathbf{x}_b)\right] \)
+    <div class="caption" style="margin-top:6px;">「x が \( \mathbf{x}_b \) から（B の尺度で）離れるほど、事前確率は指数的に下がる」</div>
   </div>
-  <p><strong>仮定 (G2)</strong> 観測誤差はガウスで状態と独立: \( \mathbf{y} = \mathbf{H}\mathbf{x} + \boldsymbol{\varepsilon} \)、\( \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{R}) \)。よって尤度は</p>
+  <p><strong>仮定 (G2)</strong> 観測はノイズ付きで得られる: \( \mathbf{y} = \mathbf{H}\mathbf{x} + \boldsymbol{\varepsilon} \)、\( \boldsymbol{\varepsilon} \sim \mathcal{N}(\mathbf{0},\mathbf{R}) \)、\( \boldsymbol{\varepsilon} \) は x と独立。
+  すると「状態が x だったとき観測値 y が出る確率」（尤度）は、\( \boldsymbol{\varepsilon} = \mathbf{y}-\mathbf{H}\mathbf{x} \) の出現確率そのものだから</p>
   <div class="math-box">
     \( p(\mathbf{y}\,|\,\mathbf{x}) \propto \exp\!\left[-\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top} \mathbf{R}^{-1} (\mathbf{y}-\mathbf{H}\mathbf{x})\right] \)
+    <div class="caption" style="margin-top:6px;">「x の予測するセンサ値 \( \mathbf{H}\mathbf{x} \) が実測 y から（R の尺度で）外れるほど、その x は観測と整合しない」</div>
   </div>
-  <p>ベイズの定理 \( p(\mathbf{x}|\mathbf{y}) \propto p(\mathbf{x})\, p(\mathbf{y}|\mathbf{x}) \) より、事後分布は 2 つの指数の積。指数部をまとめると</p>
-  <div class="math-box">
-    \( p(\mathbf{x}|\mathbf{y}) \propto e^{-J(\mathbf{x})}, \qquad
-       J(\mathbf{x}) = \underbrace{\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top} \mathbf{B}^{-1} (\mathbf{x}-\mathbf{x}_b)}_{\text{事前からの逸脱ペナルティ}}
-       + \underbrace{\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top} \mathbf{R}^{-1} (\mathbf{y}-\mathbf{H}\mathbf{x})}_{\text{観測との不一致ペナルティ}} \)
+  <p class="small">知りたいのはこの逆向き、「観測 y を見た<strong>後</strong>の x の分布」 \( p(\mathbf{x}|\mathbf{y}) \)。それを繋ぐのがベイズの定理（次スライド）。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§2 — Theory Foundation</span>
+  <h2>2.2 ベイズの定理から J(x) が出てくるまで（式変形を省かずに）</h2>
+  <div class="derive-box">
+    <div class="step"><span class="no">(1)</span><span>
+      ベイズの定理そのまま:
+      \[ p(\mathbf{x}|\mathbf{y}) = \frac{p(\mathbf{y}|\mathbf{x})\,p(\mathbf{x})}{p(\mathbf{y})} \]
+      <span class="why">分母 \( p(\mathbf{y}) \) は x を含まない定数（全 x で積分した正規化項）。x の形を知りたいだけなら無視でき、\( p(\mathbf{x}|\mathbf{y}) \propto p(\mathbf{y}|\mathbf{x})\, p(\mathbf{x}) \)。</span>
+    </span></div>
+    <div class="step"><span class="no">(2)</span><span>
+      2.1 で用意した 2 つの指数関数を代入し、\( e^{-A}\,e^{-B} = e^{-(A+B)} \) で 1 つの指数にまとめる:
+      \[ p(\mathbf{x}|\mathbf{y}) \propto
+         \exp\!\left[-\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top}\mathbf{R}^{-1}(\mathbf{y}-\mathbf{H}\mathbf{x})\right]\cdot
+         \exp\!\left[-\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top}\mathbf{B}^{-1}(\mathbf{x}-\mathbf{x}_b)\right]
+         = \exp\!\left[-\left(\text{2 つの 2 次形式の和}\right)\right] \]
+    </span></div>
+    <div class="step"><span class="no">(3)</span><span>
+      その「指数の中身」に名前を付けたものが \( J(\mathbf{x}) \)。<strong>新しい仮定や量ではなく、事後分布の指数部（= 負の対数事後確率 + 定数）の略記</strong>にすぎない:
+      \[ p(\mathbf{x}|\mathbf{y}) \propto e^{-J(\mathbf{x})}, \qquad
+         J(\mathbf{x}) = \underbrace{\tfrac{1}{2}(\mathbf{x}-\mathbf{x}_b)^{\!\top} \mathbf{B}^{-1} (\mathbf{x}-\mathbf{x}_b)}_{\text{事前からの逸脱ペナルティ}}
+         + \underbrace{\tfrac{1}{2}(\mathbf{y}-\mathbf{H}\mathbf{x})^{\!\top} \mathbf{R}^{-1} (\mathbf{y}-\mathbf{H}\mathbf{x})}_{\text{観測との不一致ペナルティ}} \]
+    </span></div>
+    <div class="step"><span class="no">(4)</span><span>
+      \( e^{-J} \) は J について単調減少だから、<strong>確率が最大の x ⟺ J が最小の x</strong>。
+      さらに J は x の 2 次形式なので事後分布はガウスであり、ガウスは最頻値 = 平均。
+      ∴「事後平均を求める」=「J を最小化する」に帰着。
+      <span class="why">わざわざ J に書き換える理由: ①最小化問題なら勾配 = 0 で解ける（次スライド）②この J は正則化付き最小二乗・4DVar のコスト関数と同一物で、データ同化と最適化を繋ぐ共通言語になる。</span>
+    </span></div>
   </div>
   <div class="info-box small">
-    \( J \) は \( \mathbf{x} \) の 2 次形式なので事後分布もガウス。ガウス分布は<strong>最頻値 = 平均</strong>だから、
-    「事後平均を求める」=「\( J \) を最小化する」。正則化付き最小二乗と同じ構造であり、
-    <strong>B が正則化（劣決定の 900−m 自由度を埋める滑らかさ仮定）の役割</strong>を担うことがここで確定する。
+    劣決定（未知数 900 &gt; 観測 m）でも解が一意に決まる理由もここにある: 第 2 項だけなら最小解は無数にあるが、
+    第 1 項（<strong>B による正則化</strong>）が「事前に近い滑らかな場」を選び出す。
   </div>
 </section>
 
 <section>
   <span class="sec-tag">§2 — Theory Foundation</span>
-  <h2>2.2 更新式の導出（1/2）: 停留条件から増分形へ</h2>
+  <h2>2.3 更新式の導出（1/2）: 停留条件から増分形へ</h2>
   <div class="derive-box">
     <div class="step"><span class="no">(1)</span><span>
       \( J \) の勾配を取る（2 次形式の微分 \( \nabla_x \tfrac12 (\mathbf{x}-\mathbf{a})^\top \mathbf{M} (\mathbf{x}-\mathbf{a}) = \mathbf{M}(\mathbf{x}-\mathbf{a}) \) を各項に適用）:
@@ -653,7 +683,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§2 — Theory Foundation</span>
-  <h2>2.3 更新式の導出（2/2）: ゲインの m×m 形（push-through 恒等式）</h2>
+  <h2>2.4 更新式の導出（2/2）: ゲインの m×m 形（push-through 恒等式）</h2>
   <p>ゲイン \( \mathbf{K} \) を「観測空間（m 次元）の逆行列」だけで書き直す。次の恒等式を示せば十分:</p>
   <div class="math-box">
     \( \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)^{-1}\mathbf{H}^{\!\top}\mathbf{R}^{-1}
@@ -691,13 +721,13 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§2 — Theory Foundation</span>
-  <h2>2.4 事後共分散と、手法が分岐するポイント</h2>
-  <p>2.2 の (2) 式の左辺括弧が事後の精度行列だったから、事後共分散は</p>
+  <h2>2.5 事後共分散と、手法が分岐するポイント</h2>
+  <p>2.3 の (2) 式の左辺括弧が事後の精度行列だったから、事後共分散は</p>
   <div class="math-box">
     \( \mathbf{P}_a = \left(\mathbf{B}^{-1} + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H}\right)^{-1}
        \;\overset{\text{(Woodbury)}}{=}\; (\mathbf{I}-\mathbf{K}\mathbf{H})\,\mathbf{B} \)
   </div>
-  <p class="small">— 観測した方向の分散だけが縮む。精度（分散の逆数）で見ると「事前の精度 + 観測の精度」の<strong>足し算</strong>になっている。この加法性が後で ESMDA の等価性証明（§3.4）の鍵になる。</p>
+  <p class="small">— 観測した方向の分散だけが縮む。精度（分散の逆数）で見ると「事前の精度 + 観測の精度」の<strong>足し算</strong>になっている。この加法性が後で ESMDA の等価性証明（§3.5）の鍵になる。</p>
   <hr class="dim">
   <h3>ここまでの式は全手法共通。違いは 3 つの設計判断だけ</h3>
   <table>
@@ -735,7 +765,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       </div>
       <ul class="small">
         <li>\( \sigma_b \): 事前推定をどれだけ信じないか。\( L_c \): 修正が空間に広がる幅</li>
-        <li>これを §2.3 の式に入れて<strong>1 回更新して終わり</strong></li>
+        <li>これを §2.4 の式に入れて<strong>1 回更新して終わり</strong></li>
         <li>長所: 最小の計算量。短所: B が実際の誤差構造（流れ・形状依存）を反映しない</li>
         <li>sample/002-0, 002-1 の丸棒ケース（OpenFOAM / FrontISTR）はこの方式で成功</li>
       </ul>
@@ -745,7 +775,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <p class="small">線形力学 \( \mathbf{x}_{k+1} = \mathbf{M}\mathbf{x}_k + \boldsymbol{\eta}_k \)、\( \boldsymbol{\eta}_k \sim \mathcal{N}(\mathbf{0},\mathbf{Q}) \) のとき、共分散も厳密に伝播できる:</p>
       <div class="math-box small">
         予報: \( \mathbf{x}_f = \mathbf{M}\mathbf{x}_a, \quad \mathbf{P}_f = \mathbf{M}\mathbf{P}_a\mathbf{M}^{\!\top} + \mathbf{Q} \)<br>
-        解析: §2.3 の式で \( \mathbf{B} \to \mathbf{P}_f \)
+        解析: §2.4 の式で \( \mathbf{B} \to \mathbf{P}_f \)
       </div>
       <ul class="small">
         <li>線形・ガウスなら<strong>厳密な事後分布</strong>を逐次的に与える（最良の意味で「正解」）</li>
@@ -791,7 +821,52 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§3 — Method Family</span>
-  <h2>3.3 摂動観測はなぜ必要か — 導出</h2>
+  <h2>3.3 アンサンブルの共分散はどこから来るのか（ライフサイクル）</h2>
+  <div class="info-box">
+    <strong>よくある疑問</strong>: OI は B を決め打ちで与える。KF は物理方程式で B を伝播する。
+    ではアンサンブルの B は？ —「初期から N 条件ぶん計算してから散らばりを測っている」<strong>という理解でほぼ正しい</strong>。
+    正確には次の 3 段階で、初期だけは決め打ち・以降は物理と観測が形を変える。
+  </div>
+  <div class="flow">
+    <div class="flow-item">
+      <div class="num">STEP 1 — 初期化（ここは OI と同じ「決め打ち」）</div>
+      <div class="label">事前分布からサンプリング</div>
+      <div class="note">設計者が σ_q（振幅 40）と相関長（1.5 セル）を決め、その分布に従う候補場を <strong>N = 300 本</strong>乱数生成。
+      この時点の標本共分散 ≈ 与えた B。OI との違いは「B を行列で持つ」か「B に従う 300 本で暗黙に持つ」かだけ。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">STEP 2 — 物理の織り込み（KF の M P Mᵀ に相当）</div>
+      <div class="label">300 本全部を順モデルに通す</div>
+      <div class="note">毎反復、各候補 q_i について温度 x_i = L⁻¹(−q_i/α) を計算。「入力がこれだけ違えば
+      センサ温度はこれだけ違う」という<strong>物理の感度が 300 対のペア (q_i, H(q_i)) の散らばりに写る</strong>。
+      共分散はこのペアから毎回計算し直す = 行列伝播のモンテカルロ版。</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">
+      <div class="num">STEP 3 — 更新で共分散も進化</div>
+      <div class="label">メンバーごと更新 → 自動で縮む</div>
+      <div class="note">ESMDA 更新は平均だけでなく 300 本それぞれを動かす。観測に拘束された方向の
+      散らばりが縮み、<strong>次の反復の B は自動的に「観測を反映した事後」になる</strong>。B は固定ではない。</div>
+    </div>
+  </div>
+  <div class="math-box small">
+    \( \mathbf{C}^{qy} = \dfrac{1}{N-1}\sum_{i=1}^{N} (\mathbf{q}_i - \bar{\mathbf{q}})\,\big(\mathcal{H}(\mathbf{q}_i) - \overline{\mathcal{H}(\mathbf{q})}\big)^{\!\top} \)
+    — 「300 条件を計算してから共分散を決める」の式そのもの。毎反復これを再計算する。
+  </div>
+  <table style="font-size:0.72em;">
+    <tr><th></th><th>B の初期値</th><th>B への物理の反映</th><th>B の更新</th></tr>
+    <tr><td><strong>OI</strong></td><td>決め打ち（σ_b, L_c の関数形）</td><td>なし</td><td>なし（毎回同じ B を使い回す）</td></tr>
+    <tr><td><strong>KF</strong></td><td>決め打ち（P₀）</td><td>行列演算 \( \mathbf{M}\mathbf{P}\mathbf{M}^{\!\top}+\mathbf{Q} \) で厳密に伝播</td><td>解析で \( (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P} \)</td></tr>
+    <tr><td><strong>アンサンブル法</strong></td><td>決め打ちの<strong>分布からサンプリング</strong>（300 本）</td><td><strong>サンプルを順モデルに通す</strong>（モンテカルロ）</td><td>メンバー更新に伴い自動</td></tr>
+  </table>
+  <p class="small muted">つまり「決め打ち」が消えるわけではない — 初期の散らばり方（σ_q・相関長）は今も設計者が与える（§3.7 の表）。
+  アンサンブルの利点は初期値ではなく、<strong>その後の物理反映（n×n 行列なしで）と事後への更新が自動になる</strong>こと。</p>
+</section>
+
+<section>
+  <span class="sec-tag">§3 — Method Family</span>
+  <h2>3.4 摂動観測はなぜ必要か — 導出</h2>
   <p>全メンバーを<strong>同じ観測 y</strong> で更新した場合の解析アンサンブルの共分散を計算してみる。
   各メンバー \( \mathbf{x}_{a,i} = \mathbf{x}_{f,i} + \mathbf{K}(\mathbf{y} - \mathbf{H}\mathbf{x}_{f,i}) \) から平均を引くと、y は消えて</p>
   <div class="derive-box">
@@ -823,13 +898,13 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§3 — Method Family</span>
-  <h2>3.4 ESMDA の定義と等価性の証明</h2>
+  <h2>3.5 ESMDA の定義と等価性の証明</h2>
   <p><strong>定義</strong>: 膨張係数 \( \alpha_k > 0 \)（\( k = 1,\dots,N_a \)）を \( \sum_{k=1}^{N_a} \alpha_k^{-1} = 1 \) を満たすように取り、
   <strong>同じ観測 y</strong> を、観測誤差を \( \alpha_k \mathbf{R} \) に膨らませて \( N_a \) 回同化する。今回は一様 \( \alpha_k = N_a = 30 \)。</p>
   <p><strong>主張</strong>: 線形・ガウスのとき、この \( N_a \) 回の更新は「\( \mathbf{R} \) のままの 1 回更新（= §2 の厳密なベイズ更新）」と同一の事後分布を与える。</p>
   <div class="derive-box">
     <div class="step"><span class="no">(1)</span><span>
-      §2.4 で示した通り、ガウスのベイズ更新は<strong>精度行列の足し算</strong>である。ステップ k の事前を \( \mathcal{N}(\mathbf{m}_k, \mathbf{P}_k) \) とすると、観測誤差 \( \alpha_k\mathbf{R} \) での更新後は
+      §2.5 で示した通り、ガウスのベイズ更新は<strong>精度行列の足し算</strong>である。ステップ k の事前を \( \mathcal{N}(\mathbf{m}_k, \mathbf{P}_k) \) とすると、観測誤差 \( \alpha_k\mathbf{R} \) での更新後は
       \[ \mathbf{P}_{k+1}^{-1} = \mathbf{P}_k^{-1} + \mathbf{H}^{\!\top}(\alpha_k \mathbf{R})^{-1}\mathbf{H}
          = \mathbf{P}_k^{-1} + \tfrac{1}{\alpha_k}\,\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{H} \]
     </span></div>
@@ -841,9 +916,9 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     </span></div>
     <div class="step"><span class="no">(3)</span><span>
       平均も同様。情報ベクトル \( \mathbf{b}_k = \mathbf{P}_k^{-1}\mathbf{m}_k \) は各更新で
-      \( \mathbf{b}_{k+1} = \mathbf{b}_k + \tfrac{1}{\alpha_k}\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \) と加算され（§2.2 式(2) の右辺そのもの）:
+      \( \mathbf{b}_{k+1} = \mathbf{b}_k + \tfrac{1}{\alpha_k}\mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \) と加算され（§2.3 式(2) の右辺そのもの）:
       \[ \mathbf{b}_{N_a+1} = \mathbf{B}^{-1}\mathbf{x}_b + \mathbf{H}^{\!\top}\mathbf{R}^{-1}\mathbf{y} \]
-      これは 1 回更新の式 §2.2(2) の右辺と同一。精度・情報ベクトルが一致するので<strong>事後分布は完全に一致</strong>。∎
+      これは 1 回更新の式 §2.3(2) の右辺と同一。精度・情報ベクトルが一致するので<strong>事後分布は完全に一致</strong>。∎
     </span></div>
   </div>
   <p class="small muted">摂動観測ノイズも各ステップで \( \boldsymbol{\varepsilon}_i \sim \mathcal{N}(\mathbf{0}, \alpha_k\mathbf{R}) \) と膨らませて整合を取る（実装では \( \sigma_{\rm eff} = \sigma_r\sqrt{N_a} \)）。Emerick &amp; Reynolds (2013), <i>Computers &amp; Geosciences</i> 55。</p>
@@ -851,7 +926,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§3 — Method Family</span>
-  <h2>3.5 答えが同じなら、なぜわざわざ分割するのか</h2>
+  <h2>3.6 答えが同じなら、なぜわざわざ分割するのか</h2>
   <div class="two-col">
     <div>
       <h3>理由 1: 非線形への頑健性（本質）</h3>
@@ -880,7 +955,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
         ・ES = アンサンブル B + 1 回更新（= \( N_a{=}1 \) の ESMDA）<br>
         ・ESMDA = アンサンブル B + \( N_a \) 分割更新<br>
         ・EnKF = アンサンブル B + 時間逐次更新<br>
-        全部 §2.3 の同じ箱形の式 \( \mathbf{x}_a = \mathbf{x}_b + \mathbf{K}\mathbf{d} \) を使っている。
+        全部 §2.4 の同じ箱形の式 \( \mathbf{x}_a = \mathbf{x}_b + \mathbf{K}\mathbf{d} \) を使っている。
       </div>
     </div>
   </div>
@@ -888,7 +963,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
 
 <section>
   <span class="sec-tag">§3 — Method Family</span>
-  <h2>3.6 パラメータはどう決めるか（実務ガイド）</h2>
+  <h2>3.7 パラメータはどう決めるか（実務ガイド）</h2>
   <table>
     <tr><th style="width:15%;">パラメータ</th><th style="width:14%;">現れる手法</th><th style="width:39%;">決め方の考え方</th><th style="width:32%;">今回の値と根拠</th></tr>
     <tr>
@@ -1019,7 +1094,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
     <div>
       <h3>§2-3 の理論はそのまま適用できる</h3>
       <ul class="small">
-        <li>\( \mathcal{H} \) は線形なので、ESMDA の等価性（§3.4）が厳密に成立</li>
+        <li>\( \mathcal{H} \) は線形なので、ESMDA の等価性（§3.5）が厳密に成立</li>
         <li>ゲインの構成要素はアンサンブルから: \( \mathbf{C}^{qy} = \frac{\mathbf{Q}'(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)、
             \( \mathbf{C}^{yy} = \frac{(\mathcal{H}\mathbf{Q}')(\mathcal{H}\mathbf{Q}')^\top}{N-1} \)</li>
         <li>\( \mathbf{L}^{-1} \) は明示的に作らない: \( \mathbf{L} \) を 1 回だけ LU 分解し、
@@ -1096,7 +1171,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
       <td>LU 分解 1 回、毎反復は後退代入のみ。列方向に全メンバー同時処理</td>
     </tr>
     <tr>
-      <td>事前 \( \mathbf{q}_i \sim \mathcal{N}(\mathbf{0}, \mathbf{B}_q) \)、\( \mathbf{B}_q \): 相関長 \(L_c\)・分散 \( \sigma_q^2 \)（§3.6）</td>
+      <td>事前 \( \mathbf{q}_i \sim \mathcal{N}(\mathbf{0}, \mathbf{B}_q) \)、\( \mathbf{B}_q \): 相関長 \(L_c\)・分散 \( \sigma_q^2 \)（§3.7）</td>
       <td><code>noise = rng.normal(0, 1, (NY, NX))</code><br>
           <code>Q[:,i] = gaussian_filter(noise, sigma=CORR_L).ravel()</code><br>
           <code>Q *= SIGMA_QB / Q.std()</code></td>
@@ -1124,7 +1199,7 @@ body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !impor
   <span class="sec-tag">§6 — Math ↔ Code</span>
   <h2>6.2 数式とコードの対応 (2/2): ESMDA 更新ループ</h2>
   <pre><code class="language-python" data-trim>
-SIGMA_R_EFF = SIGMA_R * np.sqrt(N_ITER)     # sqrt(α_k)·σ_r : 膨張観測誤差 (§3.4)
+SIGMA_R_EFF = SIGMA_R * np.sqrt(N_ITER)     # sqrt(α_k)·σ_r : 膨張観測誤差 (§3.5)
 
 for it in range(1, N_ITER+1):
     X_temp = forward_x(Q)                   # 順問題: 全メンバーの H(q_i)  (§5.1)
@@ -1133,18 +1208,18 @@ for it in range(1, N_ITER+1):
     HTp = Tp[obs_idx, :]                            # 観測空間の偏差 H(Q)'
 
     S   = (HTp @ HTp.T)/(N_ENS-1) \
-          + SIGMA_R_EFF**2 * np.eye(m_obs)  # C^yy + α_k R   (§2.3 の HBHᵀ+R)
-    PHt = (Qp @ HTp.T)/(N_ENS-1)            # C^qy           (§2.3 の BHᵀ)
+          + SIGMA_R_EFF**2 * np.eye(m_obs)  # C^yy + α_k R   (§2.4 の HBHᵀ+R)
+    PHt = (Qp @ HTp.T)/(N_ENS-1)            # C^qy           (§2.4 の BHᵀ)
     K   = np.linalg.solve(S.T, PHt.T).T     # K = C^qy (C^yy + α_k R)^-1
 
-    eps = rng.normal(0.0, SIGMA_R_EFF, (m_obs, N_ENS))   # 摂動観測 (§3.3)
+    eps = rng.normal(0.0, SIGMA_R_EFF, (m_obs, N_ENS))   # 摂動観測 (§3.4)
     innovation = x_ss[obs_idx, None] + eps - X_temp[obs_idx, :]
     Q += (K * rho) @ innovation             # 局所化ゲインで更新 (§3.2)
   </code></pre>
   <ul class="small">
-    <li><code>S</code>, <code>PHt</code> が §2.3 の \( \mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R} \), \( \mathbf{B}\mathbf{H}^\top \) の標本版（§3.2）。n×n 行列はどこにも現れない</li>
+    <li><code>S</code>, <code>PHt</code> が §2.4 の \( \mathbf{H}\mathbf{B}\mathbf{H}^\top + \mathbf{R} \), \( \mathbf{B}\mathbf{H}^\top \) の標本版（§3.2）。n×n 行列はどこにも現れない</li>
     <li><code>np.linalg.solve(S.T, PHt.T).T</code> — 逆行列を陽に作らず m×m 連立を解く（数値的定石）</li>
-    <li><code>eps</code> の分散も \( \alpha_k \mathbf{R} \) に膨張させ §3.4 の等価性と整合させる</li>
+    <li><code>eps</code> の分散も \( \alpha_k \mathbf{R} \) に膨張させ §3.5 の等価性と整合させる</li>
     <li>実験 1（温度状態版 <code>enkf_heatid.py</code>）との差分は <code>X_temp = forward_x(Q)</code> を <code>X_temp = X</code> に変えるだけ。<strong>更新式は 1 文字も変わらない</strong> — §2 の「共通の 1 本の式」の実証</li>
   </ul>
 </section>
@@ -1224,7 +1299,7 @@ for it in range(1, N_ITER+1):
     <strong>長距離成分を持つ</strong>。狭い \( \rho \) はこの実在する共分散を切り落とすため、
     「センサ近傍の q を直す → その遠隔温度効果が補正されない → 次の反復で別のセンサが誤った残差を見る」という
     正帰還が過渡的に成長する。<br>
-    <strong>一般則</strong>: 局所化半径の下限は「観測演算子の感度の物理的到達距離」で決まる（§3.6 の表）。
+    <strong>一般則</strong>: 局所化半径の下限は「観測演算子の感度の物理的到達距離」で決まる（§3.7 の表）。
     観測が状態と同じ場所の量なら狭くてよい（実験 1）。順問題を挟むなら、その到達距離まで広げる（実験 3）。
   </div>
 </section>
@@ -1253,7 +1328,7 @@ for it in range(1, N_ITER+1):
     </div>
     <div>
       <div class="card orange">
-        <h3>使い分けと設計指針（§3.6）</h3>
+        <h3>使い分けと設計指針（§3.7）</h3>
         <p class="small">逐次追跡 → KF/EnKF ／ 一発の静的解析 → OI ／
         <strong>静的逆問題・パラメータ同定 → ESMDA</strong>。
         パラメータは \( \sigma_r \) 以外すべて設計変数: 物理スケールで置き、スイープで破綻の壁と頭打ちを見る。
