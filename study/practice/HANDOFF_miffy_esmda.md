@@ -26,6 +26,7 @@
 
 - [python/enkf_heatid.py](./A02_miffy_esmda_SCfixTimefix_Q/python/enkf_heatid.py) — 温度場版
 - [python/esmda_qfull.py](./A02_miffy_esmda_SCfixTimefix_Q/python/esmda_qfull.py) — **完全逆問題版（2026-07-02 追加）**
+- [slides.html — ESMDA 理論解説スライド（ブラウザで表示）](https://kamakiri1225.github.io/thermal-da-demo/study/practice/A02_miffy_esmda_SCfixTimefix_Q/slides.html)
 - [docs/README.md](./A02_miffy_esmda_SCfixTimefix_Q/docs/README.md)
 - [docs/enkf_heatid_method.md](./A02_miffy_esmda_SCfixTimefix_Q/docs/enkf_heatid_method.md)
 - [docs/esmda_qfull_method.md](./A02_miffy_esmda_SCfixTimefix_Q/docs/esmda_qfull_method.md)

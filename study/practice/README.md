@@ -7,7 +7,7 @@
 | 読みたいもの | 場所 |
 |---|---|
 | 引き継ぎメモ（現状と次課題） | [HANDOFF_miffy_esmda.md](HANDOFF_miffy_esmda.md) |
-| ESMDA の理論解説スライド（reveal.js） | [A02_miffy_esmda_SCfixTimefix_Q/slides.html](A02_miffy_esmda_SCfixTimefix_Q/slides.html) |
+| ESMDA の理論解説スライド（reveal.js） | [ブラウザで表示 (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/study/practice/A02_miffy_esmda_SCfixTimefix_Q/slides.html)（[ソース](A02_miffy_esmda_SCfixTimefix_Q/slides.html)） |
 | 最新セッションの作業ログ | [WORKLOG_20260702_esmda_qfull.md](WORKLOG_20260702_esmda_qfull.md) |
 
 ---

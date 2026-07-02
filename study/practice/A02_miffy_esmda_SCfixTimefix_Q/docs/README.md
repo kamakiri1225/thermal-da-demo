@@ -18,6 +18,7 @@ ESMDA（Ensemble Smoother with Multiple Data Assimilation）で同化し、
 
 | ファイル | 内容 |
 |---------|------|
+| [理論解説スライド (reveal.js)](https://kamakiri1225.github.io/thermal-da-demo/study/practice/A02_miffy_esmda_SCfixTimefix_Q/slides.html) | ESMDA の理論と実装の解説（GitHub Pages でブラウザ表示） |
 | [`enkf_heatid_method.md`](enkf_heatid_method.md) | 温度場版の手法詳細・精度改善策 |
 | [`esmda_qfull_method.md`](esmda_qfull_method.md) | 完全逆問題版の手法・チューニング記録・結果解釈 |
 | [`esmda_explanation.md`](esmda_explanation.md) | ESMDAの仕組みを図と数式で解説 |

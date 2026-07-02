@@ -75,4 +75,4 @@ python3 esmda_qfull_ossan.py
 - [`A02_miffy_esmda_SCfixTimefix_Q`](../../A02_miffy_esmda_SCfixTimefix_Q/docs/README.md) — 手法確立元（ミッフィー、30×30）
 - [`esmda_qfull_method.md`](../../A02_miffy_esmda_SCfixTimefix_Q/docs/esmda_qfull_method.md) — 手法の詳細解説
 - [`A03_ossan_enkf_SCrandomTime_Q`](../../A03_ossan_enkf_SCrandomTime_Q/) — 同じおっさん場の EnKF 版（ランダムセンサ）
-- [ESMDA 理論解説スライド](../../A02_miffy_esmda_SCfixTimefix_Q/slides.html)
+- [ESMDA 理論解説スライド（ブラウザで表示）](https://kamakiri1225.github.io/thermal-da-demo/study/practice/A02_miffy_esmda_SCfixTimefix_Q/slides.html)
