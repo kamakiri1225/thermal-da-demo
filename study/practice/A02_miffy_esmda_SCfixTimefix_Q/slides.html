@@ -1435,6 +1435,41 @@ for it in range(1, N_ITER+1):
     観測が状態と同じ場所の量なら狭くてよい（実験 1）。順問題を挟むなら、その到達距離まで広げる（実験 3）。
   </div>
 </section>
+
+<section>
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.5 おっさんへの展開 — 同じ完全逆問題でどこまで出るか</h2>
+  <div class="image-scroll" style="max-height:360px;">
+    <img src="../A03_ossan_esmda_SCfixTimefix_Q/img/fig08_qfull_vs_derived.png" alt="おっさん熱源場の完全逆問題結果">
+  </div>
+  <p class="caption">左から: 真の熱源（セルスケールのエッジ場）／ σ=1 平滑化真値 ／ Q-state ESMDA ／ 温度同化後の後処理逆算。おっさん形状は事前分布には入れていない。</p>
+  <div class="two-col">
+    <div>
+      <h3>使った手法</h3>
+      <ul class="small">
+        <li>ミッフィーで確立した<strong>Q-state ESMDA（状態 = 熱源 q）</strong>をそのまま使用</li>
+        <li>グリッドは 60×60、未知数は \( q \in \mathbb{R}^{3600} \)（ミッフィーの 4 倍）</li>
+        <li>各アンサンブルで \( \mathbf{x}(\mathbf{q})=\mathbf{L}^{-1}(-\mathbf{q}/\alpha) \) を解き、固定センサ温度と比較して q を更新</li>
+        <li>事前分布は平均 0 のガウス場。おっさんの輪郭・帽子・顔などの形状情報は入れていない</li>
+        <li>非局所な順モデルに合わせ、局所化半径はミッフィーの 10 cells から <strong>20 cells</strong> に拡大</li>
+      </ul>
+    </div>
+    <div>
+      <h3>結果の読み方</h3>
+      <table style="font-size:0.72em;">
+        <tr><th>指標</th><th>値</th></tr>
+        <tr><td>温度 RMSE（m=1200）</td><td><strong>17.1 °C</strong></td></tr>
+        <tr><td>熱源 q RMSE</td><td>27.7（真値 std 28.6 とほぼ同じ）</td></tr>
+        <tr><td>corr(q_est, σ=1 平滑化真値)</td><td>m=100/300/600/1200: 0.18 / 0.29 / 0.55 / <strong>0.72</strong></td></tr>
+      </table>
+      <div class="warn-box small">
+        <strong>結論</strong>: ピクセル単位のシャープなおっさんは復元できない。
+        ただし平滑化スケールでは外形・耳あて・帽子・口が見え、ミッフィーと同じ
+        「細部は不可、低波数構造は可」という限界を再現している。
+      </div>
+    </div>
+  </div>
+</section>
 </section>
 
 <!-- ═══════════════════ まとめ ═══════════════════ -->
@@ -1455,7 +1490,8 @@ for it in range(1, N_ITER+1):
         <h3>実験（§4-5, 7）</h3>
         <p class="small">実験 1: 温度場 19.8 °C で復元。実験 2: 後処理逆算は \( \alpha|\lambda| \le 4 \) 倍の誤差増幅で失敗。
         実験 3: 状態を q に変えた完全逆問題で、温度説明能力を保ったまま（20.1 °C）、
-        観測が原理的に持つ情報の上限（平滑化スケール、相関 0.76）まで熱源を復元。</p>
+        観測が原理的に持つ情報の上限（平滑化スケール、相関 0.76）まで熱源を復元。
+        60×60 のおっさん場でも同じ手法で、m=1200 の平滑化相関 0.72 まで到達。</p>
       </div>
     </div>
     <div>
