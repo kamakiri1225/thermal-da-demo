@@ -222,13 +222,30 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
 **課題**
 - 900セルの任意温度場に対して、少数の固定観測だけでは問題が不定
 - 300点から400点ではRMSEが19.82°Cから19.78°Cにしか改善しない
-- 現状は温度場を同化し、熱量を事後的に導出しているため、熱源の直接同定ではない
+- ~~現状は温度場を同化し、熱量を事後的に導出しているため、熱源の直接同定ではない~~
+  → **完全逆問題版 `esmda_qfull.py` を実装済み（下記）**
 
-**改善策**
-1. 状態変数を Q_full（全格子の熱源）に変更し、L⁻¹順問題を組み込む
-2. 初期アンサンブルの相関モデルを改善し、鋭い温度境界を表現する
-3. センサ設置不能領域を含む現実的な配置制約で再評価する
-4. アンサンブル数・局所化半径・相関長の感度解析を行う
+**完全逆問題版（2026-07-02 追加）**
+
+状態変数を熱源場 Q に変更し、順モデル `x = L⁻¹(−q/α)` を組み込んだ
+完全逆問題として同じ固定センサ観測を同化するスクリプトを追加。
+
+<img src="A02_miffy_esmda_SCfixTimefix_Q/img/fig08_qfull_vs_derived.png" width="800" alt="熱源同定の比較">
+
+<img src="A02_miffy_esmda_SCfixTimefix_Q/img/anim_esmda_qfull.gif" width="640" alt="完全逆問題版アニメーション">
+
+- 温度場は m=300 で RMSE 20.06°C（温度場版と同等）
+- 熱源のセルスケールのエッジは点温度観測から原理的に復元不可
+  （q RMSE は 38.8 で飽和、q_true の std は 40.0）
+- σ=1 平滑化スケールなら相関 0.76 で復元でき、目・鼻・輪郭が視認できる
+- 局所化半径は温度場版の 5 だと過渡発散するため 10 に拡大が必要
+- 詳細: [`esmda_qfull_method.md`](A02_miffy_esmda_SCfixTimefix_Q/docs/esmda_qfull_method.md) /
+  [作業ログ](WORKLOG_20260702_esmda_qfull.md)
+
+**残る改善策**
+1. 初期アンサンブルの相関モデルを改善し、鋭い温度境界を表現する
+2. センサ設置不能領域を含む現実的な配置制約で再評価する
+3. エッジを表現できる事前分布（非ガウス・全変動正則化系）の検討
 
 ---
 
@@ -264,7 +281,7 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
 | `A02_miffy_enkf_SCrandomTime_Q` | EnKF+PDE | random/毎回 | Q | ○ | 中 | 熱源直接同定、遅い |
 | `A02_miffy_kf_SCrandomTime_T` | KF(dynamics) | random/毎回 | T | ○ | 中 | 線形厳密、動的前進 |
 | `A02_miffy_enkf_SCrandomTimefix_T` | EnKF+局所Infl | random/固定 | T | **×発散** | — | 固定センサでInflが暴走 |
-| `A02_miffy_esmda_SCfixTimefix_Q` | ESMDA | 空間充填/固定 | T→Q | **◎安定** | **19.82°C(m=300)** | 一様初期場、センサ数を定量評価 |
+| `A02_miffy_esmda_SCfixTimefix_Q` | ESMDA | 空間充填/固定 | T→Q / **Q直接** | **◎安定** | **19.82°C(m=300)** | 一様初期場、センサ数を定量評価、完全逆問題版あり |
 | `A03_ossan_enkf_SCrandomTime_Q` | EnKF+PDE | random/毎回 | Q | ○ | 中 | おっさん熱源同定 |
 
 ---
@@ -289,15 +306,18 @@ ESMDA:     R_eff = N_ITER × σ_r² で N_ITER 回更新 → 1 ステップ更�
 
 ## 今後の推奨実験
 
-1. **ESMDA + 固定センサ + 状態=Q_full**  
-   `A02_miffy_esmda_SCfixTimefix_Q` の状態変数を Q（全格子）に変更し、
-   L⁻¹ 順問題を組み込む → 熱源の完全逆問題として解く
+1. ~~**ESMDA + 固定センサ + 状態=Q_full**~~ → **実施済み（2026-07-02）**  
+   `A02_miffy_esmda_SCfixTimefix_Q/python/esmda_qfull.py` 参照。
+   [作業ログ](WORKLOG_20260702_esmda_qfull.md)
 
 2. **センサ最適化（OED）**  
    不確実性（アンサンブル分散）が最大のセルにセンサを動的配置 → 情報量最大化
 
 3. **高解像度化（60×60）**  
    ミッフィーの細部（目・口・耳）をより精細に再現
+
+4. **非定常化 / 実CAEケースへの展開**  
+   時系列観測での熱源追跡、OpenFOAM / FrontISTR（sample/002-1 系）への Q-state 同化
 
 4. **おっさん版 ESMDA**  
    `A03_ossan_enkf_SCrandomTime_Q` → `A03_ossan_esmda_SCfixTimefix_Q` に移行
