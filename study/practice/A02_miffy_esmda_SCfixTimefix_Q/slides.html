@@ -1470,6 +1470,53 @@ for it in range(1, N_ITER+1):
     </div>
   </div>
 </section>
+
+<section>
+  <span class="sec-tag">§7 — Results</span>
+  <h2>7.6 Q-state と derived q、相関係数の読み方</h2>
+  <div class="two-col">
+    <div>
+      <h3>2 つの熱源推定の違い</h3>
+      <table style="font-size:0.72em;">
+        <tr><th>名前</th><th>何をしているか</th><th>弱点</th></tr>
+        <tr>
+          <td><strong>Q-state ESMDA</strong></td>
+          <td>最初から熱源 \( \mathbf{q} \) を状態変数にする。各候補 \( \mathbf{q} \) から温度 \( \mathbf{x}(\mathbf{q}) \) を計算し、センサ温度に合うように \( \mathbf{q} \) を直接更新する。</td>
+          <td>温度に現れない細かい熱源成分は推定できない。</td>
+        </tr>
+        <tr>
+          <td><strong>derived q</strong></td>
+          <td>先に温度場 \( \mathbf{x} \) を同化で推定し、最後に \( \mathbf{q}=-\alpha\mathbf{L}\mathbf{x} \) で熱源へ変換する。</td>
+          <td>最後の微分演算 \( \mathbf{L}\mathbf{x} \) が温度の細かい誤差を増幅し、熱源がノイズっぽくなる。</td>
+        </tr>
+      </table>
+      <div class="info-box small">
+        つまり、Q-state は<strong>熱源を直接探す</strong>方法、derived q は<strong>温度を先に当ててから熱源に直す</strong>方法。
+        線形問題なので取り出せる情報量は近いが、表示される熱源場のノイズの出方が違う。
+      </div>
+    </div>
+    <div>
+      <h3>相関係数はどう計算するか</h3>
+      <pre style="box-shadow:none; margin:4px 0;"><code class="language-python" data-trim>
+q_true_sm = gaussian_filter(q_true.reshape(NY, NX), sigma=1.0).ravel()
+c_qfull  = corr(q_est,     q_true_sm)
+c_deriv  = corr(q_derived, q_true_sm)
+      </code></pre>
+      <ul class="small">
+        <li>まず正解熱源 \( \mathbf{q}_{\rm true} \) を σ=1 セルでぼかす。セル単位のギザギザは観測から復元不能なので、復元可能な大まかな形だけを見る。</li>
+        <li>推定熱源と、ぼかした正解を 3600 個の数値リストとして並べる。</li>
+        <li>その 2 つのリストの相関係数を計算する。赤・青・白の<strong>配置パターンが似ているか</strong>を見る指標。</li>
+      </ul>
+      <table style="font-size:0.72em;">
+        <tr><th>相関</th><th>意味</th></tr>
+        <tr><td>0 付近</td><td>ほぼ似ていない</td></tr>
+        <tr><td>0.5 前後</td><td>なんとなく構造が見える</td></tr>
+        <tr><td>0.7 以上</td><td>大まかな形がかなり合っている</td></tr>
+        <tr><td>1.0</td><td>完全一致</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
 </section>
 
 <!-- ═══════════════════ まとめ ═══════════════════ -->
