@@ -1,5 +1,8 @@
 # 【日本語訳】工作機械の熱誤差補償のためのデジタルツインを活用したセンサ配置最適化
 
+> このファイルは **日本語訳版** です。論文本文の構成に沿って、背景、手法、結果を詳しく追えるようにしています。
+> 短く要点だけ確認したい場合は `paper2_sensor_placement.md` を参照してください。
+
 **原題**: Sensor Placement Utilizing a Digital Twin for Thermal Error Compensation of Machine Tools  
 **著者**: Sebastian Lang, Mario Zavator, Stephan Schäfer, Stefan Blaser, Josef Mayr, Markus Bambach  
 **掲載誌**: Journal of Manufacturing Systems  

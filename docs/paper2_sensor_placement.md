@@ -1,5 +1,8 @@
 # 論文2：Sensor Placement Utilizing a Digital Twin for Thermal Error Compensation of Machine Tools
 
+> このファイルは **要約・解説版** です。論文の流れを短く整理し、研究の要点・提案手法・結果がすぐ分かるようにまとめています。
+> 論文本文に沿った詳しい日本語訳は `paper2_sensor_placement_ja.md` を参照してください。
+
 **著者**: Sebastian Lang, Mario Zavator, Stephan Schäfer, Stefan Blaser, Josef Mayr, Markus Bambach  
 **掲載誌**: Journal of Manufacturing Systems  
 **年**: 2024
