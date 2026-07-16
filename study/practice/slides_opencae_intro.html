@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データ同化入門 ― 工作機械の熱変位予測へ向けて | ミッフィーちゃんで試した数値実験</title>
+
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/reveal.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/dist/theme/black.css">
+<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/monokai.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg:        #0d1117;
+  --bg2:       #161b22;
+  --bg3:       #1c2128;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --blue:      #58a6ff;
+  --blue2:     #79c0ff;
+  --green:     #3fb950;
+  --orange:    #e3b341;
+  --red:       #f85149;
+  --purple:    #bc8cff;
+  --cyan:      #39d0d8;
+}
+
+.reveal-viewport { background: var(--bg); }
+.reveal {
+  background: var(--bg);
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+  color: var(--text);
+  font-size: 18px;
+}
+.reveal .slides section {
+  text-align: left;
+  padding: 30px 40px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.reveal .slides section::-webkit-scrollbar { width: 5px; }
+.reveal .slides section::-webkit-scrollbar-track { background: transparent; }
+.reveal .slides section::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.reveal .slides section::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.reveal .slides section.title-slide {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 28% 38%, #1a2744 0%, transparent 58%),
+    radial-gradient(ellipse at 72% 68%, #0f3027 0%, transparent 58%),
+    var(--bg);
+}
+.reveal h1 {
+  font-size: 1.95em;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.35em;
+  text-transform: none;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.reveal .slides section.divider-slide {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 30% 30%, #1a2744 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 75%, #0f3027 0%, transparent 55%),
+    var(--bg);
+}
+.divider-slide .div-num {
+  font-size: 3.4em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cyan);
+  opacity: 0.45;
+  margin-bottom: 10px;
+}
+.divider-slide h1 { font-size: 1.7em; margin-bottom: 0.2em; }
+.divider-slide p { text-align: center !important; color: var(--muted); }
+body.print-pdf .divider-slide .div-num { color: #1a5fb4 !important; }
+.reveal h2 {
+  font-size: 1.42em;
+  font-weight: 700;
+  text-transform: none;
+  color: var(--blue2);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.25em;
+  margin-bottom: 0.6em;
+  text-align: left;
+}
+.reveal h3 {
+  font-size: 1.05em;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--orange);
+  margin: 0.2em 0 0.4em;
+  text-align: left;
+}
+.reveal p, .reveal li {
+  line-height: 1.55;
+  font-size: 0.88em;
+  text-align: left;
+}
+.reveal ul { margin-top: 0.3em; }
+.reveal li { margin-bottom: 0.28em; }
+.reveal strong { color: #fff; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: 0.76em !important; }
+.center { text-align: center !important; }
+.sec-tag {
+  display: inline-block;
+  font-size: 0.62em;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.col-6-4 { display: grid; grid-template-columns: 6fr 4fr; gap: 18px; align-items: start; }
+.col-4-6 { display: grid; grid-template-columns: 4fr 6fr; gap: 18px; align-items: start; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch; }
+.four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: stretch; }
+
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.card.blue  { border-left: 4px solid var(--blue); }
+.card.green { border-left: 4px solid var(--green); }
+.card.orange{ border-left: 4px solid var(--orange); }
+.card.red   { border-left: 4px solid var(--red); }
+.card.purple{ border-left: 4px solid var(--purple); }
+.card.cyan  { border-left: 4px solid var(--cyan); }
+
+.info-box {
+  background: rgba(88,166,255,0.08);
+  border: 1px solid rgba(88,166,255,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.warn-box {
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.success-box {
+  background: rgba(63,185,80,0.08);
+  border: 1px solid rgba(63,185,80,0.3);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  font-size: 0.88em;
+}
+.math-box {
+  background: #0b1220;
+  border: 1px solid rgba(88,166,255,0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.badge-blue   { background: #1f6feb; color: #fff; }
+.badge-green  { background: #238636; color: #fff; }
+.badge-orange { background: #9e6a03; color: #fff; }
+.badge-gray   { background: #444c56; color: #e6edf3; }
+
+.flow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  justify-content: space-between;
+  margin: 14px 0;
+}
+.flow-item {
+  flex: 1;
+  min-height: 88px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.flow-item .num   { color: var(--cyan); font-weight: 700; font-size: 0.78em; }
+.flow-item .label { font-weight: 700; color: var(--text); margin-top: 4px; line-height: 1.35; }
+.flow-item .note  { color: var(--muted); font-size: 0.78em; line-height: 1.45; margin-top: 5px; }
+.flow-arrow { display: flex; align-items: center; color: var(--blue); font-size: 1.3em; }
+
+.reveal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78em;
+  margin: 0.45em 0;
+}
+.reveal table th {
+  background: var(--bg3);
+  color: var(--blue2);
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+}
+.reveal table td {
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  line-height: 1.45;
+}
+.reveal table tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+.metric {
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 10px;
+}
+.metric .value {
+  display: block;
+  font-size: 1.65em;
+  font-weight: 700;
+  color: var(--cyan);
+  line-height: 1.15;
+}
+.metric .label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.75em;
+  margin-top: 6px;
+}
+
+.hl-blue   { color: var(--blue2); }
+.hl-green  { color: var(--green); }
+.hl-orange { color: var(--orange); }
+.hl-red    { color: var(--red); }
+.hl-purple { color: var(--purple); }
+.hl-cyan   { color: var(--cyan); }
+hr.dim { border: 0; border-top: 1px solid var(--border); margin: 12px 0; }
+
+.figure {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+}
+.figure img { width: 100%; display: block; border-radius: 4px; }
+.figure.large { max-width: 1120px; margin: 0 auto; padding: 6px; }
+.figure.large img { max-height: 560px; object-fit: contain; }
+
+/* 高さを揃えた比較用フィギュア */
+.fig-uniform {
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fig-uniform img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+}
+
+.caption { color: var(--muted); font-size: 0.72em; margin-top: 5px; text-align: center !important; }
+
+/* 手法マップの現在地ナビ */
+.method-nav { display: flex; gap: 8px; margin: 0 0 12px; flex-wrap: wrap; align-items: center; }
+.method-nav .mn-item {
+  padding: 3px 12px; border-radius: 14px; font-size: 0.68em; font-weight: 600;
+  background: var(--bg3); border: 1px solid var(--border); color: var(--muted);
+}
+.method-nav .mn-item.done   { color: var(--green); border-color: rgba(63,185,80,0.45); }
+.method-nav .mn-item.failed { color: var(--red); border-color: rgba(248,81,73,0.45); }
+.method-nav .mn-item.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+body.print-pdf .method-nav .mn-item { background: #f0f3f7 !important; border-color: #d0d7de !important; color: #555 !important; }
+body.print-pdf .method-nav .mn-item.active { background: #1a5fb4 !important; border-color: #1a5fb4 !important; color: #fff !important; }
+
+#pdf-export-btn {
+  position: fixed; right: 10px; top: 10px; z-index: 50;
+  background: rgba(13,17,23,0.92); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 8px; font: 600 11px 'Noto Sans JP', sans-serif;
+  cursor: pointer; opacity: 0.38;
+  transition: opacity 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#pdf-export-btn:hover { border-color: var(--blue); color: var(--blue); opacity: 1; }
+#pdf-toast {
+  display: none; position: fixed; right: 10px; top: 44px; z-index: 60;
+  width: 360px; background: rgba(13,17,23,0.96); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 13px 15px; font: 13px/1.55 'Noto Sans JP', sans-serif;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+#pdf-toast.show { display: block; }
+#pdf-toast code { color: var(--cyan); }
+#pdf-toast .close-toast { float: right; cursor: pointer; color: var(--muted); font-size: 18px; line-height: 1; }
+
+body.print-pdf,
+body.print-pdf .reveal-viewport,
+body.print-pdf .reveal,
+body.print-pdf .slides,
+body.print-pdf .slides section { background: #fff !important; }
+body.print-pdf .reveal,
+body.print-pdf .reveal p,
+body.print-pdf .reveal li,
+body.print-pdf .reveal td { color: #1a1a2e !important; }
+body.print-pdf .reveal h1 {
+  background: none !important; -webkit-background-clip: initial !important;
+  background-clip: initial !important; color: #1a5fb4 !important;
+}
+body.print-pdf .reveal h2 { color: #1a5fb4 !important; border-bottom-color: #ccc !important; }
+body.print-pdf .reveal h3 { color: #9a5000 !important; }
+body.print-pdf .card, body.print-pdf .flow-item, body.print-pdf .metric {
+  background: #f8fafc !important; border-color: #d0d7de !important; color: #1a1a2e !important;
+}
+body.print-pdf .info-box    { background: #eef6ff !important; border-color: #8bbff0 !important; }
+body.print-pdf .warn-box    { background: #fff7e6 !important; border-color: #d4a72c !important; }
+body.print-pdf .success-box { background: #eef8ef !important; border-color: #7bc47f !important; }
+body.print-pdf .math-box    { background: #f5f7fa !important; border-color: #c9d7e8 !important; }
+body.print-pdf .muted, body.print-pdf .caption,
+body.print-pdf .flow-item .note, body.print-pdf .metric .label { color: #555 !important; }
+body.print-pdf .sec-tag { color: #777 !important; }
+body.print-pdf .reveal table th { background: #e9eef5 !important; color: #1a5fb4 !important; border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table td { border-color: #c9d1d9 !important; }
+body.print-pdf .reveal table tr:nth-child(even) td { background: #f5f7fa !important; }
+body.print-pdf #pdf-export-btn, body.print-pdf #pdf-toast { display: none !important; }
+</style>
+</head>
+
+<body>
+<button id="pdf-export-btn">PDF 出力</button>
+<div id="pdf-toast">
+  <span class="close-toast" onclick="this.parentElement.classList.remove('show')">&times;</span>
+  <strong>PDF 出力</strong><br>
+  URL に <code>?print-pdf</code> を付けてから、印刷先を PDF にしてください。
+</div>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════ タイトル ═══════════════════ -->
+<section class="title-slide">
+  <div class="sec-tag">オープンCAE勉強会 発表資料</div>
+  <h1>実測データからCAEの"見えない値"を求める<br><span style="font-size:0.58em;">データ同化入門 ― ミッフィーちゃんで試した数値実験</span></h1>
+  <p style="text-align:center; margin:2px 0 6px;">
+    <span class="badge badge-blue" style="font-size:0.85em; padding:5px 14px;">
+      モチベーション: 工作機械の熱変位予測 ／ 試した手法: OI・KF・EnKF・ESMDA
+    </span>
+  </p>
+  <div style="width:1120px; margin-top:8px; text-align:left;">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="card blue" style="margin:0;">
+        <h3>きっかけ</h3>
+        <p>工作機械の熱変位は加工精度に直結するが、<strong>実測できる温度・角度はごく一部</strong>。全体の温度分布・変位は見えない。</p>
+      </div>
+      <div class="card green" style="margin:0;">
+        <h3>着目した技術</h3>
+        <p><strong>データ同化</strong>：シミュレーションと一部の実測を統計的に融合し、未観測の場を最良推定する枠組み。</p>
+      </div>
+      <div class="card cyan" style="margin:0;">
+        <h3>今回やったこと</h3>
+        <p>ミッフィーちゃんの2Dドット絵を「真の温度場」に見立て、疎な固定センサだけから復元できるか数値実験で確認した。</p>
+      </div>
+    </div>
+    <div style="border-radius:8px; overflow:hidden; border:1px solid #30363d;">
+      <img src="A02_miffy_esmda_SCfixTimefix_Q/img/anim_esmda_qfull.gif" alt="ESMDA によるミッフィー熱源同定アニメーション"
+           style="width:100%; display:block; border-radius:4px;">
+    </div>
+    <p class="caption muted" style="margin-top:5px;">
+      固定センサの温度観測だけから、ミッフィーちゃんの温度場・熱源場が徐々に浮かび上がる（ESMDA 完全逆問題版）
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════ 発表の流れ ═══════════════════ -->
+<section>
+  <span class="sec-tag">Roadmap</span>
+  <h2>発表の流れ</h2>
+  <div class="flow">
+    <div class="flow-item"><div class="num">1</div><div class="label">モチベーション</div><div class="note">工作機械の熱変位問題<br>＋先行研究（KF×デジタルツイン）</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">2</div><div class="label">データ同化とは</div><div class="note">直感的な導入</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">3</div><div class="label">検証題材</div><div class="note">なぜミッフィーちゃんか</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">4</div><div class="label">試した手法</div><div class="note">OI/KF/EnKF/ESMDA<br>前提と誤差共分散の整理</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">5</div><div class="label">結果と教訓</div><div class="note">安定手法・失敗例</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">6</div><div class="label">今後の展開</div><div class="note">実CAEケースへ</div></div>
+  </div>
+  <div class="info-box">
+    本題は「ミッフィーちゃんの絵を当てる遊び」に見えるが、狙いは<strong>固定・少数の実測点から、未観測の場全体を統計的に復元する技術（データ同化）の基礎を、
+    工作機械の熱変位予測に応用する前段の練習</strong>として行った。
+  </div>
+</section>
+
+<!-- ═══════════════════ モチベーション ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">1</div>
+  <h1>モチベーション</h1>
+  <p>工作機械の熱変位問題と、先行研究が示した可能性</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+<section>
+  <span class="sec-tag">Motivation</span>
+  <h2>1.1 工作機械の加工精度と熱変位</h2>
+  <div class="flow">
+    <div class="flow-item"><div class="num">①</div><div class="label">熱解析</div><div class="note">機内の温度分布を計算</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">②</div><div class="label">構造解析（熱膨張）</div><div class="note">温度分布から熱変位を計算</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">③</div><div class="label">加工精度</div><div class="note">熱変位が主軸・工具位置のズレに直結</div></div>
+  </div>
+  <div class="card orange">
+    <h3>問題意識</h3>
+    <p>この一連の流れを精度よく予測できれば、加工誤差の補正やリアルタイム熱変位補正が可能になる。
+    しかし実機で得られる情報は、<strong>限られた点の温度センサと、限られた角度・変位センサ</strong>だけ。
+    知りたい「全体の温度分布」「全体の変位分布」は直接には見えない。</p>
+  </div>
+  <p class="small muted">※ 熱変位は加工誤差の最大75%を占めるとの報告もある（Mayr et al., Lang et al. 2024 より）。</p>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation</span>
+  <h2>1.2 「傾向が合えばよい」が通用しない理由</h2>
+  <div class="two-col">
+    <div class="card blue">
+      <h3>熱解析だけなら</h3>
+      <p>条件が多少ズレても、温度分布の<strong>傾向</strong>（どこが高温か・熱がどう伝わるか）さえ合っていれば実用上は十分なことが多い。</p>
+    </div>
+    <div class="card red">
+      <h3>熱構造解析（熱変位）になると</h3>
+      <p>温度分布の傾向が同じでも、<strong>熱変位の傾向は条件によって変わりやすい</strong>。
+      固定点でのばね合成（拘束条件・剛性の非対称性）などが変位の向き・大きさに強く効くため。</p>
+    </div>
+  </div>
+  <div class="warn-box">
+    つまり「温度の傾向が合っている」ことは、「変位の傾向が合っている」ことを保証しない。
+    <strong>変位を精度よく求めるには、温度分布そのものをできるだけ正確に、かつ実測と矛盾なく求める必要がある。</strong>
+  </div>
+  <div class="success-box">
+    <h3>着目した技術</h3>
+    <p>一部の実測温度・角度情報から、シミュレーションと矛盾しない形で<strong>温度分布・変位を推定する技術＝データ同化</strong>。
+    将来的には「温度＋角度情報 → 温度分布＋変位」の同時推定を目指す。</p>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation — Prior Work</span>
+  <h2>1.3 先行研究：カルマンフィルタ×熱デジタルツイン（ETH Zurich）</h2>
+  <p class="small" style="margin-bottom:4px;">
+    Lang et al., <em>"Kalman Filter-Driven State Observer for Thermal Error Compensation in Machine Tool Digital Twins"</em>,
+    Manufacturing Letters 41 (2024) 208–218（NAMRC 52, オープンアクセス CC BY-NC-ND）
+  </p>
+  <div class="two-col" style="margin-bottom:8px;">
+    <div class="card orange" style="margin:0;">
+      <h3>何を解決したかった研究か（背景）</h3>
+      <p class="small">熱変位補正の既存手段には、それぞれ実用上の壁がある：
+      ①<strong>恒温化・強制冷却</strong>はエネルギーコストが大きい。
+      ②<strong>データ駆動の補正モデル</strong>（機械学習系）は高品質な学習データの取得に数週間の計測と数百〜数千kWhを要し、
+      さらに<strong>学習に含まれない運転条件では精度が保証されない</strong>（ロバスト性の欠如）。</p>
+    </div>
+    <div class="card green" style="margin:0;">
+      <h3>この研究の意義（狙い）</h3>
+      <p class="small"><strong>学習データを一切使わず</strong>、物理モデル（FE）＋カルマンフィルタだけで熱状態全体を観測し、
+      熱変位を<strong>リアルタイム</strong>に補正できることを実証すること。
+      物理ベースなので未経験の運転条件にも原理的に対応でき、
+      学習データ取得のコストと期間をまるごと省ける。</p>
+    </div>
+  </div>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="img_lang2024/fig2_kf_loop.png" alt="カルマンフィルタによる熱状態推定の全体構成"></div>
+      <p class="caption">縮約FEモデル（デジタルツイン）が予測を、実機センサ（Real system）が観測 z を供給し、KFが熱状態 x 全体を推定する ― Lang et al. 2024, Fig.2</p>
+    </div>
+    <div>
+      <div class="card cyan">
+        <h3>アイデア</h3>
+        <p class="small">ANSYSのFEモデルを<strong>モード縮約</strong>（35万節点→214モード）し、
+        カルマンフィルタで<strong>少数センサから熱状態全体</strong>を逐次推定。
+        推定した温度場で力学モデルを解き、熱変位を<strong>リアルタイム</strong>に計算・補正する。</p>
+      </div>
+      <div class="card green">
+        <h3>ポイント</h3>
+        <ul class="small">
+          <li><strong>学習データ不要</strong>（純粋に物理モデルベース）</li>
+          <li>熱入力 u は「実機では測れない」として未知扱い → KFの補正に任せる</li>
+          <li>まさに「一部の実測から全体を推定する」データ同化そのもの</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation — Prior Work</span>
+  <h2>1.4 先行研究の結果：13点のセンサで35万要素の熱状態を再現</h2>
+  <div class="two-col">
+    <div>
+      <div class="figure"><img src="img_lang2024/fig4_5axis_mt.png" alt="5軸MTの温度センサ配置"></div>
+      <p class="caption">5軸マシニングセンタ（Mori Seiki NMV5000 DCG）のFEモデルとセンサ位置（青球）― Lang et al. 2024, Fig.4</p>
+    </div>
+    <div>
+      <div class="figure"><img src="img_lang2024/fig6_temp_recon.png" alt="未観測センサ位置の温度再構成"></div>
+      <p class="caption">KFに入れていない「未観測センサ」位置の温度（実線=実測、破線=推定）がよく一致 ― Lang et al. 2024, Fig.6</p>
+    </div>
+  </div>
+  <div class="four-col">
+    <div class="metric"><span class="value">13 / 25</span><span class="label">5軸MTで観測に使ったセンサ数</span></div>
+    <div class="metric"><span class="value">1.3 °C</span><span class="label">未観測センサ12点の温度RMSE</span></div>
+    <div class="metric"><span class="value">67.4→33.3 μm</span><span class="label">熱変位誤差RMSE（テストベンチ）</span></div>
+    <div class="metric"><span class="value">−52.7 %</span><span class="label">熱誤差の低減率</span></div>
+  </div>
+  <div class="info-box">
+    <strong>この論文が示したこと＝我々のやりたいことの実在証明。</strong>
+    少数の温度センサ＋物理モデル＋カルマンフィルタで、未観測の温度場全体と熱変位が推定できる。
+    本発表は、この枠組みの土台にある「データ同化」を基礎から確認した数値実験の報告。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation — Prior Work</span>
+  <h2>1.5 先行研究の結果：熱変位の予測</h2>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="img_lang2024/fig7_thermal_error.png" alt="熱変位の実測と予測"></div>
+      <p class="caption">5つの変位プローブでの熱変位。実線=実測、破線=KF推定温度場からの予測 ― Lang et al. 2024, Fig.7</p>
+    </div>
+    <div>
+      <div class="card purple" style="margin-top:0;">
+        <h3>熱変位はどう計算しているか</h3>
+        <p class="small">熱構造FEMを毎回解き直すのではなく、KFが推定した温度場 $\mathbf{x}(t)$ から<strong>行列積一発</strong>で計算する（論文 式(2)）：</p>
+        <div class="math-box small" style="margin:6px 0;">
+          $$\mathbf{y}_{\rm mech}(t) = \mathbf{C}_i\, \mathbf{K}^{-1} \mathbf{K}_{th}\, \mathbf{x}(t)$$
+        </div>
+        <ul class="small">
+          <li>$\mathbf{x}(t)$：KFが推定した温度場（熱状態）</li>
+          <li>$\mathbf{K}_{th}$：熱→力学の結合行列。熱膨張係数 $\alpha$ に基づき、温度を等価な体積力（熱荷重）に変換</li>
+          <li>$\mathbf{K}^{-1}$：機械剛性行列の逆。荷重→変形の変換（材質・メッシュで決まる）</li>
+          <li>$\mathbf{C}_i$：着目点の変位だけを取り出す行列（工具先端 TCP とワーク側 WCP の相対変位）</li>
+        </ul>
+        <p class="small muted">行列はすべて事前に構築（＋モード縮約）できるので、温度場さえ推定できれば熱変位は<strong>リアルタイム</strong>に出せる。</p>
+      </div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="success-box small">
+      支配的なZ方向で誤差低減 62%。温度場を正しく推定できれば、熱変位も物理モデル経由で予測できることを実証。
+    </div>
+    <div class="warn-box small">
+      一方で、ヒートマットの接触状態（エアギャップ）などモデル化されていない現実の不確かさが残誤差の主因 → <strong>モデル誤差をどう扱うかがデータ同化の本質的課題</strong>。
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation — Prior Work（補足）</span>
+  <h2>1.6 補足：$\mathbf{y}_{\rm mech} = \mathbf{C}_i\,\mathbf{K}^{-1}\mathbf{K}_{th}\,\mathbf{x}$ の導出と計算手順</h2>
+  <div class="two-col">
+    <div>
+      <h3>導出（熱応力FEMの基本式から4行）</h3>
+      <div class="math-box small" style="text-align:left; padding:8px 14px;">
+        <p class="small" style="margin:3px 0;">① 温度が $\Delta T$ 上がった材料は等方に伸びようとする（<strong>熱ひずみ</strong>）：
+        $\boldsymbol{\varepsilon}_{th} = \alpha\, \Delta T$（$\alpha$：熱膨張係数）</p>
+        <p class="small" style="margin:3px 0;">② FEMではこの「伸びようとする作用」を<strong>等価節点力</strong>に変換する：
+        $\mathbf{f}_{th} = \displaystyle\int \mathbf{B}^\top \mathbf{D}\, \boldsymbol{\varepsilon}_{th}\, dV$。
+        $\boldsymbol{\varepsilon}_{th}$ は節点温度に線形なので、まとめて $\mathbf{f}_{th} = \mathbf{K}_{th}\,\mathbf{x}$ と行列で書ける</p>
+        <p class="small" style="margin:3px 0;">③ 熱荷重だけが作用する静的つり合い：
+        $\mathbf{K}\,\mathbf{u} = \mathbf{f}_{th} = \mathbf{K}_{th}\,\mathbf{x}$ → 解いて $\mathbf{u} = \mathbf{K}^{-1}\mathbf{K}_{th}\,\mathbf{x}$</p>
+        <p class="small" style="margin:3px 0;">④ 欲しいのは全節点変位 $\mathbf{u}$ ではなく着目点（TCP–WCP間の相対変位）だけ。
+        抜き出し行列 $\mathbf{C}_i$ を掛けて：
+        $\mathbf{y}_{\rm mech} = \mathbf{C}_i\,\mathbf{u} = \mathbf{C}_i\,\mathbf{K}^{-1}\mathbf{K}_{th}\,\mathbf{x}$ ∎</p>
+      </div>
+      <p class="small muted">$\mathbf{B}$：ひずみ-変位マトリクス、$\mathbf{D}$：応力-ひずみ（弾性）マトリクス、$\mathbf{K}$：剛性行列</p>
+    </div>
+    <div>
+      <h3>具体的な計算手順（なぜリアルタイムで出せるか）</h3>
+      <div class="card cyan">
+        <h3>オフライン（事前に1回だけ）</h3>
+        <p class="small">メッシュ・物性から $\mathbf{K}$, $\mathbf{K}_{th}$, $\mathbf{C}_i$ を構築し、
+        $\mathbf{G} \equiv \mathbf{C}_i\mathbf{K}^{-1}\mathbf{K}_{th}$ をまとめて計算しておく。
+        逆行列を陽に作る必要はなく、$\mathbf{K}\mathbf{G}' = \mathbf{K}_{th}$ の連立一次方程式を解けばよい。
+        モード縮約後なら行列サイズは214×214程度で軽い。</p>
+      </div>
+      <div class="card green">
+        <h3>オンライン（毎時刻）</h3>
+        <p class="small">KFが推定した温度場 $\mathbf{x}(t)$ に対し
+        $\mathbf{y}_{\rm mech} = \mathbf{G}\,\mathbf{x}(t)$ の<strong>行列ベクトル積1回だけ</strong>。
+        熱構造FEMを解き直す必要がない → リアルタイム熱変位補正が成立する。</p>
+      </div>
+      <div class="warn-box small">
+        この分解が成り立つのは<strong>線形弾性・小変形・物性の温度依存なし</strong>の仮定の下で「温度→変位」が完全に線形になるから。
+        接触状態の変化（1.5の残誤差の原因）はこの線形性を破る要因の一例。
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Motivation — Prior Work（補足）</span>
+  <h2>1.7 行列で具体的に書くと（サイズと中身）</h2>
+  <p class="small">節点数 $n$（温度自由度 $n$、変位自由度 $3n$）、着目量2つ（例：X方向とZ方向の相対変位）の場合：</p>
+  <div class="math-box small">
+    $$\underbrace{\begin{pmatrix} y_X \\ y_Z \end{pmatrix}}_{2\times 1}
+    = \underbrace{\mathbf{C}_i}_{2\times 3n}\;
+      \underbrace{\mathbf{K}^{-1}}_{3n\times 3n}\;
+      \underbrace{\mathbf{K}_{th}}_{3n\times n}\;
+      \underbrace{\begin{pmatrix} T_1 \\ T_2 \\ \vdots \\ T_n \end{pmatrix}}_{n\times 1}$$
+  </div>
+  <div class="two-col">
+    <div>
+      <h3>④ $\mathbf{C}_i$ の中身 ― 「引き算するだけの行列」</h3>
+      <p class="small">全節点変位 $\mathbf{u} = (u_{1x}, u_{1y}, u_{1z}, u_{2x}, \ldots)^\top \in \mathbb{R}^{3n}$ のうち、
+      欲しいのは<strong>工具先端（TCP、節点番号 $p$ とする）とワーク側（WCP、節点番号 $q$）の相対変位</strong>だけ。
+      たとえば Z 方向なら：</p>
+      <div class="math-box small">
+        $$y_Z = u_{pz} - u_{qz}
+        = \underbrace{(0 \; \cdots \; 0 \; \overset{\overset{\large u_{pz}\text{の列}}{\downarrow}}{+1} \; 0 \; \cdots \; 0 \; \overset{\overset{\large u_{qz}\text{の列}}{\downarrow}}{-1} \; 0 \; \cdots \; 0)}_{\mathbf{C}_i \text{の1行（ほぼ全部ゼロ）}} \; \mathbf{u}$$
+      </div>
+      <p class="small">つまり $\mathbf{C}_i$ は、該当する自由度の列に $+1$ と $-1$ が立つだけの<strong>疎な抜き出し行列</strong>。
+      「行列」といっても実体は「$p$ 番の変位から $q$ 番の変位を引く」という操作を式の形にしただけ。</p>
+    </div>
+    <div>
+      <h3>まとめて1つの行列 $\mathbf{G}$ にする</h3>
+      <div class="math-box small">
+        $$\mathbf{G} \equiv \mathbf{C}_i \mathbf{K}^{-1} \mathbf{K}_{th} \in \mathbb{R}^{2\times n},
+        \qquad \mathbf{y}_{\rm mech} = \mathbf{G}\,\mathbf{x}(t)$$
+      </div>
+      <p class="small">成分で書くと：</p>
+      <div class="math-box small">
+        $$y_k = \sum_{j=1}^{n} G_{kj}\, T_j$$
+      </div>
+      <p class="small">$G_{kj}$ ＝「<strong>節点 $j$ の温度が 1°C 上がったとき、着目変位 $k$ が何 μm 動くか</strong>」という感度（影響係数）。
+      つまり熱変位は「各節点温度 × その節点の影響係数」の総和にすぎない。
+      $\mathbf{G}$ は 2×$n$ の小さな行列なので、温度場さえ分かれば掛け算一発で変位が出る。</p>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ データ同化とは ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">2</div>
+  <h1>データ同化とは</h1>
+  <p>シミュレーションと実測の「いいとこ取り」の仕組み</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+<section>
+  <span class="sec-tag">What is DA</span>
+  <h2>2.1 データ同化とは？ ― シミュレーションと実測、それぞれの弱点</h2>
+  <div class="two-col">
+    <div class="card blue">
+      <h3>シミュレーション（予測値）</h3>
+      <p>境界条件・物性値・初期値には必ず誤差がある。全格子点の値は計算できるが、<strong>現実とズレていく</strong>。</p>
+    </div>
+    <div class="card orange">
+      <h3>実測（観測値）</h3>
+      <p>現実の値そのものだが、<strong>センサを置ける場所は一部だけ</strong>で、ノイズも乗る。</p>
+    </div>
+  </div>
+  <div class="info-box">
+    <strong>データ同化</strong>：この2つを、誤差の統計的な大きさ（分散・共分散）に応じて重み付けし、
+    「最も確からしい状態」を求める枠組み。詳しい数式の導入は下記の解説記事も参照。
+  </div>
+  <p class="caption muted" style="text-align:left !important;">参考記事: 「データ同化入門」 <a href="https://takun-physics.net/19375/" style="color:var(--blue2);">https://takun-physics.net/19375/</a></p>
+</section>
+
+<section>
+  <span class="sec-tag">What is DA</span>
+  <h2>2.2 なぜ1点の観測から全体を直せるのか</h2>
+  <div class="two-col">
+    <div>
+      <p>状態ベクトル $\mathbf{x}$ は各格子点の物理量（例：各点の温度 $T_1, T_2, \ldots$）。
+      予報誤差共分散行列 $\mathbf{P}^f$ は「どこがどれだけ間違いやすいか」「どの点とどの点の間違い方が連動するか」を表す<strong>間違い方の地図</strong>。</p>
+      <p>この地図（空間相関）があるおかげで、<strong>1点の温度観測だけでも、相関の強い周辺の点まで一緒に補正できる</strong>。これがカルマンゲイン $\mathbf{K}$ の役割。</p>
+    </div>
+    <div class="card purple">
+      <h3>カルマンゲインによる更新</h3>
+      <p class="small">$$\mathbf{x}^a = \mathbf{x}^f + \mathbf{K}(\mathbf{y} - H\mathbf{x}^f)$$</p>
+      <p class="small">$$\mathbf{K} = \mathbf{P}^f H^\top (H\mathbf{P}^f H^\top + \mathbf{R})^{-1}$$</p>
+      <p class="small muted">観測残差（実測 − 予測）を、共分散の形に応じて空間全体に配分する。</p>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ 検証題材 ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">3</div>
+  <h1>検証題材</h1>
+  <p>なぜミッフィーちゃんなのか</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+<section>
+  <span class="sec-tag">Test Case</span>
+  <h2>3. 検証題材：なぜミッフィーちゃんか</h2>
+  <div class="col-6-4">
+    <div>
+      <p>いきなり工作機械の実問題で試すのは難しいため、まず<strong>2Dドット絵を「真の温度場」に見立てた簡単な題材</strong>で、
+      データ同化の基礎（B行列・カルマンゲイン・アンサンブル・局所化）を体で確認することにした。</p>
+      <ul>
+        <li>複雑な輪郭を持つ画像 → 少数の固定観測点でどこまで復元できるか、<strong>目で見て</strong>評価できる</li>
+        <li>真値が既知（ツイン実験）なので RMSE で定量評価できる</li>
+        <li>グリッド 30×30〜60×60、状態変数は数百〜数千次元 → 実機の熱・変位場と同程度のオーダー感</li>
+      </ul>
+      <div class="info-box">推定対象は「温度場そのもの（T）」と「その場を作っている熱源（Q）」の2種類を試した。
+      Q の直接推定は、工作機械での「発熱源（軸受・モータなど）を実測温度から逆推定する」問題に対応する。</div>
+    </div>
+    <div>
+      <div class="figure">
+        <img src="img_concept/miffy_true_field.png" alt="ミッフィーちゃん真の温度場（30×30）">
+      </div>
+      <p class="caption">真の温度場（現行ケースの30×30=900セル版）</p>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ 試した手法マップ ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">4</div>
+  <h1>試した手法と前提の整理</h1>
+  <p>OI・KF・EnKF・ESMDA ― 違いは「誤差共分散 B のもらい方」</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+<section>
+  <span class="sec-tag">Methods</span>
+  <h2>4.1 試した手法の全体マップ</h2>
+  <table>
+    <tr><th style="width:5%;"></th><th>手法</th><th>B（誤差共分散）の扱い</th><th>センサ</th><th>結果</th></tr>
+    <tr><td><strong>①</strong></td><td>OI（最適内挿法）</td><td>解析的ガウス型で固定</td><td>ランダム／毎回</td><td><span class="hl-green">○</span> シンプル・安定</td></tr>
+    <tr><td><strong>②</strong></td><td>KF（カルマンフィルタ）</td><td>P行列を厳密に時間発展</td><td>ランダム／毎回</td><td><span class="hl-green">○</span> 線形厳密だが大規模には不向き</td></tr>
+    <tr><td><strong>③</strong></td><td>EnKF（アンサンブルKF）</td><td>アンサンブルから推定</td><td>ランダム／毎回</td><td><span class="hl-green">○</span> データドリブンでOIより高精度</td></tr>
+    <tr><td><strong>④</strong></td><td>EnKF + 固定センサ + インフレーション</td><td>アンサンブルから推定</td><td><strong>固定</strong></td><td><span class="hl-red">× 発散</span> インフレーション暴走</td></tr>
+    <tr><td><strong>⑤</strong></td><td><strong>ESMDA</strong>（本命）</td><td>アンサンブル＋反復で緩やかに更新</td><td><strong>固定</strong></td><td><span class="hl-green">◎ 安定・高精度</span></td></tr>
+  </table>
+  <div class="warn-box">
+    工作機械では<strong>センサ位置は動かせない（固定）</strong>ことが前提になる。
+    ランダムセンサ手法はこの実務条件に合わないため、<strong>固定センサでも安定するESMDA</strong>に的を絞って検証を進めた。
+  </div>
+  <p class="small muted">結果パート（5章）では、この表の <strong>①→②→③→④→⑤ の順に1つずつ</strong>結果を見ていく。</p>
+</section>
+
+<section>
+  <span class="sec-tag">Methods — Assumptions</span>
+  <h2>4.2 前提の整理：どこまで「線形ガウス」を仮定しているか</h2>
+  <p class="small">今回試した手法の更新式はすべて同じカルマンゲイン型（＝<strong>線形ガウスのベイズ更新</strong>）。手法ごとに「何を線形・ガウスと仮定しているか」を整理する。</p>
+  <table>
+    <tr>
+      <th style="width:12%;">手法</th>
+      <th>システムモデル（時間発展）</th>
+      <th>観測モデル $H$</th>
+      <th>システムノイズ</th>
+      <th>観測ノイズ $\mathbf{R}$</th>
+    </tr>
+    <tr>
+      <td><strong>OI</strong></td>
+      <td>なし（静的。背景場を所与とする）</td>
+      <td>線形（センサ位置の抜き出し）</td>
+      <td>―（背景誤差 $\mathbf{B}$ に一括して押し込む）</td>
+      <td>ガウス</td>
+    </tr>
+    <tr>
+      <td><strong>KF</strong></td>
+      <td><strong>線形必須</strong> $\mathbf{x}_k = \mathbf{M}\mathbf{x}_{k-1}$</td>
+      <td>線形</td>
+      <td>ガウス $\mathbf{Q}$（加法）</td>
+      <td>ガウス</td>
+    </tr>
+    <tr>
+      <td><strong>EnKF</strong></td>
+      <td><strong>非線形でも可</strong>（各メンバーを非線形モデルで伝播）</td>
+      <td>線形が基本（拡張状態で非線形対応も可）</td>
+      <td>サンプル（アンサンブル）で表現</td>
+      <td>ガウス（摂動観測）</td>
+    </tr>
+    <tr>
+      <td><strong>ESMDA</strong></td>
+      <td>静的問題・パラメータ推定向き</td>
+      <td><strong>非線形 $\mathcal{H}(\mathbf{x})$ でも可</strong>（反復で徐々に近づく）</td>
+      <td>―（事前アンサンブルに含める）</td>
+      <td>ガウス（$\alpha_k \mathbf{R}$ に膨張して反復）</td>
+    </tr>
+  </table>
+  <div class="info-box small">
+    <strong>共通の前提：</strong>更新の瞬間はどの手法も「誤差がガウス分布」「観測と状態の関係が（局所的に）線形」を仮定している。
+    この仮定の下でカルマンゲイン $\mathbf{K} = \mathbf{P}^f H^\top (H \mathbf{P}^f H^\top + \mathbf{R})^{-1}$ がベイズ推定の最適解（MAP＝最小分散推定）になる。
+    アンサンブル系は「非線形なモデルの伝播」と「線形ガウスの更新」を組み合わせたハイブリッド。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Methods — Where does B come from?</span>
+  <h2>4.3 予報誤差共分散 $\mathbf{P}^f$（$\mathbf{B}$）はどこから来るか ― 3つの流儀</h2>
+  <div class="three-col">
+    <div class="card blue" style="margin:0;">
+      <h3>① 事前に定義する（OI）</h3>
+      <p class="small">距離のガウス関数などの<strong>解析形を決め打ち</strong>：
+      $$B_{ij} = \sigma_b^2 \exp\!\left(-\frac{r_{ij}^2}{2L^2}\right)$$
+      分散 $\sigma_b^2$ と相関長 $L$ の2パラメータだけ。計算は軽いが、場の構造は学習できない。</p>
+    </div>
+    <div class="card purple" style="margin:0;">
+      <h3>② 物理方程式で逐次伝播（KF）</h3>
+      <p class="small">システムモデル $\mathbf{M}$ で共分散ごと時間発展：
+      $$\mathbf{P}^f_k = \mathbf{M}\mathbf{P}^a_{k-1}\mathbf{M}^\top + \mathbf{Q}$$
+      物理法則に忠実で厳密。ただし $n\times n$ 行列の格納・演算が必要で大規模場では破綻（$n$=35万なら不可能）。</p>
+    </div>
+    <div class="card green" style="margin:0;">
+      <h3>③ アンサンブルで推定（EnKF/ESMDA）</h3>
+      <p class="small">$N$ 本のサンプル場から標本共分散：
+      $$\mathbf{P}^f \approx \frac{1}{N-1}\mathbf{X}'\mathbf{X}'^\top$$
+      非線形モデルもそのまま使え、大規模でも $N\times n$ で済む。サンプリング誤差（偽相関）への対策＝局所化が必要。</p>
+    </div>
+  </div>
+  <div class="warn-box small">
+    手法選択の実体は「<strong>$\mathbf{B}$ をどう用意するか</strong>」の選択。①は知識で置く、②は物理で運ぶ、③はサンプルで測る。
+    先行研究（Lang et al.）は②を縮約モデル（214モード）に落とすことで大規模FEでも成立させた、という位置づけ。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Methods — Physics behind OI</span>
+  <h2>4.4 なぜ熱解析ならOIでいけるのか ①熱伝導方程式は「ガウス的な平滑化装置」</h2>
+  <p class="small" style="margin-bottom:4px;">熱伝導方程式 $\dfrac{\partial T}{\partial t} = \alpha \nabla^2 T$ の基本解（グリーン関数）は<strong>ガウス核</strong>になる。導出はフーリエ変換で3行：</p>
+  <div class="math-box small" style="text-align:left; padding:8px 14px;">
+    <p class="small" style="margin:2px 0;">① 空間をフーリエ変換（波数 $k$ 空間へ）すると $\nabla^2 \to -k^2$ で、各モードが独立なODEに：
+    $\dfrac{\partial \hat{T}}{\partial t} = -\alpha k^2 \hat{T}$</p>
+    <p class="small" style="margin:2px 0;">② これはすぐ解けて $\hat{T}(k,t) = \hat{T}(k,0)\, e^{-\alpha k^2 t}$。
+    <span class="hl-orange">細かい凹凸（大きい $k$）ほど指数的に速く消える</span> ＝ 平滑化</p>
+    <p class="small" style="margin:2px 0;">③ $e^{-\alpha k^2 t}$ は $k$ のガウス関数。ガウスの逆フーリエ変換もガウスなので：
+    $G(r, t) = \dfrac{1}{(4\pi\alpha t)^{d/2}} \exp\!\left(-\dfrac{r^2}{4\alpha t}\right)$</p>
+  </div>
+  <div class="figure"><img src="img_concept/heat_kernel_gauss.png" alt="熱伝導方程式のガウス平滑化の図解"></div>
+  <p class="caption">左：波数空間で見ると細かい成分（大きい$k$）ほど速く減衰 ／ 中央：ギザギザの誤差場が時間とともに滑らかになり、隣同士が連動（＝正の空間相関）／ 右：点熱源は幅 $\sqrt{2\alpha t}$ のガウス山に広がる（グリーン関数そのもの）</p>
+</section>
+
+<section>
+  <span class="sec-tag">Methods — Physics behind OI</span>
+  <h2>4.5 なぜ熱解析ならOIでいけるのか ②Bの「形」と「スケール」を物理から決められる</h2>
+  <div class="two-col">
+    <div>
+      <p class="small">初期値や境界条件の<strong>誤差も同じ熱伝導方程式に従って拡散する</strong>。
+      前ページの図のとおり、誤差場は必ず滑らかにされ、近くの点同士の誤差は自然に連動する（＝正の相関を持つ）。</p>
+      <ul class="small">
+        <li><strong>形</strong>：誤差相関は距離とともに単調減衰 → ガウス型 $\exp(-r^2/2L^2)$ が良い近似になる（グリーン関数と同形）</li>
+        <li><strong>スケール</strong>：相関長 $L$ は熱拡散長 $\sqrt{\alpha t}$（非定常）や熱源から境界までの代表長さ（定常）から<strong>物理的に見積もれる</strong></li>
+      </ul>
+    </div>
+    <div>
+      <div class="success-box small">
+        つまり熱伝導が支配する問題では、$\mathbf{B}$ の構造（ガウス相関＋相関長）が熱伝導方程式そのものから予測できる。
+        「ガウス相関のBを決め打ちするOI」が機能する物理的根拠はここにある。
+        実際、今回のミッフィー実験でも OI（$L$=8セル）で真値に収束した。
+      </div>
+    </div>
+  </div>
+  <div class="warn-box small">
+    <strong>通用しなくなる条件：</strong>①材料境界・エッジなど相関が急変する場、②対流・移流が卓越し相関が非等方に流される場、
+    ③非線形性が強い場（熱伝導率の温度依存など）、④誤差が非ガウスな場。
+    → こうなると固定ガウスBでは表現できず、<strong>アンサンブルでBをデータドリブンに測る</strong>（EnKF/ESMDA）必要が出てくる。
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ 数値実験の結果 ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">5</div>
+  <h1>数値実験の結果</h1>
+  <p>4章の表の順に、①OI → ②KF → ③EnKF → ④EnKF×固定センサ → ⑤ESMDA と1つずつ見ていく</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+
+<!-- ═══════════════════ 結果① OI ═══════════════════ -->
+<section>
+  <span class="sec-tag">Result — 1 / 5</span>
+  <h2>結果① OI（最適内挿法）× ランダムセンサ</h2>
+  <div class="method-nav">
+    <span class="mn-item active">① OI</span>
+    <span class="mn-item">② KF</span>
+    <span class="mn-item">③ EnKF</span>
+    <span class="mn-item">④ EnKF×固定</span>
+    <span class="mn-item">⑤ ESMDA×固定</span>
+  </div>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="A02_miffy_oi_SCrandomTime_T/img/anim_oi_miffy.gif" alt="OI アニメーション"></div>
+      <p class="caption">毎サイクル60点のセンサをランダムに置き直しながら、OI更新を50回繰り返す</p>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>設定（§4.3の流儀①）</h3>
+        <p class="small">$\mathbf{B}$ ＝ガウス相関（相関長 $L$=8セル）を<strong>決め打ち</strong>。40×60格子、ランダムノイズの初期場から開始。</p>
+      </div>
+      <div class="card green">
+        <h3>結果：○ 安定に収束</h3>
+        <p class="small">ミッフィーちゃんが滑らかに浮かび上がる。アンサンブル不要で高速・教育的。
+        ただし $\mathbf{B}$ が固定なので場の構造を学習できず、精度の天井は EnKF より低い。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ 結果② KF ═══════════════════ -->
+<section>
+  <span class="sec-tag">Result — 2 / 5</span>
+  <h2>結果② KF（線形カルマンフィルタ）× ランダムセンサ</h2>
+  <div class="method-nav">
+    <span class="mn-item done">① OI</span>
+    <span class="mn-item active">② KF</span>
+    <span class="mn-item">③ EnKF</span>
+    <span class="mn-item">④ EnKF×固定</span>
+    <span class="mn-item">⑤ ESMDA×固定</span>
+  </div>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="A02_miffy_kf_SCrandomTime_T/img/anim_kf_miffy.gif" alt="KF アニメーション"></div>
+      <p class="caption">熱伝導ダイナミクスを予測ステップに組み込んだ線形KF（100ステップ）</p>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3>設定（§4.3の流儀②）</h3>
+        <p class="small">予測ステップで熱伝導方程式により状態を伝播し、$\mathbf{P}$ も
+        $\mathbf{P}^f = \mathbf{M}\mathbf{P}^a\mathbf{M}^\top + \mathbf{Q}$ で<strong>厳密に</strong>時間発展（900セル）。</p>
+      </div>
+      <div class="card green">
+        <h3>結果：○ 線形厳密で安定</h3>
+        <p class="small">物理則で誤差共分散を運ぶ「教科書どおりの最適推定」。
+        ただし $\mathbf{P}$ は $n \times n$ 行列 → 実機FEモデル（35万要素）では格納すら不可能。
+        先行研究（Lang et al.）が<strong>モード縮約</strong>で解決したのはまさにこの問題。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ 結果③ EnKF ═══════════════════ -->
+<section>
+  <span class="sec-tag">Result — 3 / 5</span>
+  <h2>結果③ EnKF（アンサンブルKF）× ランダムセンサ</h2>
+  <div class="method-nav">
+    <span class="mn-item done">① OI</span>
+    <span class="mn-item done">② KF</span>
+    <span class="mn-item active">③ EnKF</span>
+    <span class="mn-item">④ EnKF×固定</span>
+    <span class="mn-item">⑤ ESMDA×固定</span>
+  </div>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="A02_miffy_enkf_SCrandomTime_T/img/anim_enkf_miffy.gif" alt="EnKF アニメーション"></div>
+      <p class="caption">N=50メンバーの確率的EnKF（毎サイクル30点をランダム再配置、50サイクル）</p>
+    </div>
+    <div>
+      <div class="card cyan">
+        <h3>設定（§4.3の流儀③）</h3>
+        <p class="small">$\mathbf{B}$ を50本のアンサンブルから<strong>標本推定</strong>（60×60格子）。
+        局所化（R_loc=8セル）で遠距離の偽相関を除去。</p>
+      </div>
+      <div class="card green">
+        <h3>結果：○ OIより高精度</h3>
+        <p class="small">$\mathbf{B}$ がデータドリブンに更新されるため、後半サイクルの精度がOIを上回る。
+        大規模でも $N \times n$ で済み、非線形モデルにも拡張できる。</p>
+      </div>
+      <div class="warn-box small" style="margin-top:8px;">
+        ここまで（①〜③）は「センサを毎回動かせる」前提。<strong>実機のセンサは固定</strong> → 次の④で現実の条件を試す。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ 結果④ 固定センサでの失敗例 ═══════════════════ -->
+<section>
+  <span class="sec-tag">Result — 4 / 5 : Lesson Learned</span>
+  <h2>結果④ EnKF × 固定センサ + インフレーション ― 発散（失敗）</h2>
+  <div class="method-nav">
+    <span class="mn-item done">① OI</span>
+    <span class="mn-item done">② KF</span>
+    <span class="mn-item done">③ EnKF</span>
+    <span class="mn-item active">④ EnKF×固定</span>
+    <span class="mn-item">⑤ ESMDA×固定</span>
+  </div>
+  <div class="figure large" style="max-width:900px;"><img src="A02_miffy_enkf_SCrandomTimefix_T/img/anim_enkf_fixsensor.gif" alt="EnKF 固定センサ 発散" style="max-height:430px; margin:0 auto;"></div>
+  <p class="caption">センサ固定のEnKF＋乗法インフレーション：サイクル後半で場が崩壊していく</p>
+  <div class="three-col">
+    <div class="card red" style="margin:0;">
+      <h3>何が起きたか</h3>
+      <p class="small">センサ位置を固定し、乗法インフレーション（1.10倍/サイクル）を適用したところ、
+      サイクル40以降にすべてのセンサ数設定で発散（RMSE: 63°C → 137°C）。</p>
+    </div>
+    <div class="card orange" style="margin:0;">
+      <h3>原因</h3>
+      <p class="small">センサ周辺の共分散が <strong>1.21 倍/サイクル</strong> で増幅され続け、
+      50サイクルで理論上 <strong>1.21<sup>50</sup> ≈ 12,100倍</strong> に。
+      カルマンゲインが暴走し、観測ノイズのランダムウォークが蓄積した。</p>
+    </div>
+    <div class="card blue" style="margin:0;">
+      <h3>教訓</h3>
+      <p class="small"><strong>固定センサ × 乗法インフレーション × 多サイクル</strong>は危険な組み合わせ。
+      実機のセンサは動かせないため、この失敗パターンを避ける手法選定が重要。</p>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ 結果⑤ ESMDA 本命 ═══════════════════ -->
+<section>
+<section>
+  <span class="sec-tag">Result — 5 / 5 : Main</span>
+  <h2>結果⑤ ESMDA とは何か ―「一気に補正せず、薄めて何回も」</h2>
+  <div class="method-nav">
+    <span class="mn-item done">① OI</span>
+    <span class="mn-item done">② KF</span>
+    <span class="mn-item done">③ EnKF</span>
+    <span class="mn-item failed">④ EnKF×固定</span>
+    <span class="mn-item active">⑤ ESMDA×固定</span>
+  </div>
+  <p class="small" style="margin-bottom:4px;">ESMDA = <strong>Ensemble Smoother with Multiple Data Assimilation</strong>（Emerick &amp; Reynolds 2013。石油貯留層の履歴マッチング分野で生まれた手法）</p>
+  <div class="two-col">
+    <div>
+      <div class="card red">
+        <h3>EnKF（1回で強く補正）</h3>
+        <p class="small">観測誤差 $\mathbf{R}$ をそのまま使って一気に更新：</p>
+        <p class="small">$$\mathbf{K} = \mathbf{P}H^\top(H\mathbf{P}H^\top + \mathbf{R})^{-1}$$</p>
+        <p class="small">1回の更新量が大きい → アンサンブルの広がりが急収縮し「過信」状態に。固定センサだと同じ場所ばかり強く引っ張られ、暴走の温床になる。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>ESMDA（薄めて N 回に分けて補正）</h3>
+        <p class="small">観測誤差を $\alpha_k$ 倍に膨らませ（例：$\alpha_k = N_{\rm iter}$）、同じ観測を $N_{\rm iter}$ 回同化：</p>
+        <p class="small">$$\mathbf{K}_k = \mathbf{P}H^\top(H\mathbf{P}H^\top + \alpha_k\mathbf{R})^{-1}, \quad \sum_k \frac{1}{\alpha_k} = 1$$</p>
+        <p class="small">1回あたりの更新量が小さい → 安定。しかも線形ガウスなら<strong>「薄めて N 回」=「原液で 1 回」と同じ答え</strong>になることが理論的に保証される。</p>
+      </div>
+    </div>
+  </div>
+  <div class="info-box small">
+    <strong>例えるなら</strong>：濃い薬を一気に飲む（ショックが大きい）か、水で薄めて数回に分けて飲む（総量は同じで体に優しい）か。
+    どちらも「効き目の総量」は同じだが、後者は途中で様子を見ながら進める。
+    各反復で順問題（熱伝導計算）を解き直すため、観測演算子が非線形でも徐々に正解へ近づけるという利点もある。
+    今回の設定：$N_{\rm iter}=30$、$\sigma_r=3$°C → 1回あたりの実効観測誤差 $3\times\sqrt{30}\approx16.4$°C。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result — 5 / 5 : Main</span>
+  <h2>結果⑤ ESMDA × 固定センサ ― 安定・高精度（◎）</h2>
+  <div class="method-nav">
+    <span class="mn-item done">① OI</span>
+    <span class="mn-item done">② KF</span>
+    <span class="mn-item done">③ EnKF</span>
+    <span class="mn-item failed">④ EnKF×固定</span>
+    <span class="mn-item active">⑤ ESMDA×固定</span>
+  </div>
+  <div class="col-4-6">
+    <div class="figure"><img src="A02_miffy_esmda_SCfixTimefix_Q/img/fig00_sensor_layout.png" alt="センサ配置"></div>
+    <div>
+      <div class="success-box">
+        <h3>なぜ安定するか</h3>
+        <p class="small">標準EnKFは観測誤差 $R$ を毎サイクルそのまま使うため更新が積み重なって発散しやすい。
+        ESMDAは $R_{\rm eff} = N_{\rm iter}\times R$ に膨らませて $N_{\rm iter}$ 回に分けて更新するため、
+        <strong>1回あたりの更新量が小さく、累積しても発散しない</strong>（Emerick &amp; Reynolds 2013）。</p>
+      </div>
+      <p class="small">グリッド30×30=900セル、初期分布は一様20°C＋空間相関ノイズ、
+      センサは<strong>真値を見ない空間充填配置で固定</strong>（実機のセンサ設置と同じ制約条件）。</p>
+    </div>
+  </div>
+  <table>
+    <tr><th>センサ数 m</th><th>30</th><th>100</th><th>200</th><th>300</th></tr>
+    <tr><td>最終 RMSE [°C]</td><td>40.50</td><td>26.30</td><td>22.87</td><td><strong>19.82</strong></td></tr>
+  </table>
+  <p class="small muted">センサを増やすほど単調に改善。300点以降は改善が頭打ち（400点でも19.78°Cとほぼ変わらず）。</p>
+</section>
+
+<section>
+  <span class="sec-tag">Result — Side Question</span>
+  <h2>補足：「OI × 固定センサ」でもいけるのでは？ → いける</h2>
+  <div class="col-6-4">
+    <div>
+      <div class="figure"><img src="A02_miffy_deterministic_esmda_oi_SCfixTimefix_Q/img/fig02_xpred_final.png" alt="決定論的OI 固定センサの最終温度場"></div>
+      <p class="caption">決定論的OI（Matérn-3/2共分散を決め打ち）× 固定センサの最終温度場</p>
+    </div>
+    <div>
+      <table>
+        <tr><th>センサ数 m</th><th>30</th><th>100</th><th>300</th><th>600</th></tr>
+        <tr><td>最終 RMSE [°C]</td><td>45.1</td><td>28.3</td><td><strong>18.2</strong></td><td>11.9</td></tr>
+      </table>
+      <div class="success-box small">
+        <h3>なぜOIは固定センサで発散しないのか</h3>
+        <p class="small">結果④の発散は「<strong>データから推定した共分散</strong>がセンサ周辺で増幅され続ける」正のフィードバックが原因。
+        OIの $\mathbf{B}$ は<strong>固定（決め打ち）</strong>なのでこのループ自体が存在せず、決定論的更新ならノイズも入らない → 原理的に発散しようがない。</p>
+      </div>
+      <p class="small">m=300 で 18.2°C と、確率的ESMDA（19.8°C）より<strong>わずかに良い</strong>。線形ガウス問題ではサンプリング誤差ゼロの決定論的OIが有利 ― §4.4「熱的な場は滑らか → B を物理から決め打ちできる」の理論どおりの結果。</p>
+      <p class="small muted">ではアンサンブルは何のため？ → ①Bをデータドリブンに学習できる、②非線形の順問題（次の熱源推定）にそのまま拡張できる、③不確かさ（分散）も同時に得られる。</p>
+      <p class="small muted">実装：<code>A02_miffy_deterministic_esmda_oi_SCfixTimefix_Q/python/enkf_heatid.py</code>（Matérn-3/2共分散・尤度テンパリングによる決定論的OI/GP回帰）</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result — Advanced</span>
+  <h2>発展：温度ではなく「熱源」を当てる（逆問題）</h2>
+  <p class="small" style="margin-bottom:6px;">結果⑤と<strong>同じケース・同じ固定センサ・同じESMDAアルゴリズム</strong>の続き。変えたのは「<strong>何を状態変数（推定対象）にするか</strong>」だけ。</p>
+  <div class="two-col">
+    <div class="card blue" style="margin:0;">
+      <h3>ここまで（結果⑤）</h3>
+      <p class="small">推定対象 = <strong>温度場そのもの</strong>。<br>
+      センサの温度から、センサの無い場所の温度を埋める「補間」に近い問題。</p>
+    </div>
+    <div class="card orange" style="margin:0;">
+      <h3>ここから（発展）</h3>
+      <p class="small">推定対象 = <strong>熱源の分布 q</strong>（どこで・どれだけ発熱しているか）。<br>
+      温度は測れるが、熱源は直接測れない。<strong>結果（温度）から原因（熱源）を遡る逆問題</strong>。</p>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="flow-item"><div class="num">①</div><div class="label">熱源の候補を N 本用意</div><div class="note">「こういう発熱分布かも」というラフな推測をアンサンブルで300通り</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">②</div><div class="label">それぞれ熱伝導を解く</div><div class="note">各候補 q から温度場を順計算<br>$\mathbf{x}=\mathbf{L}^{-1}(-\mathbf{q}/\alpha)$</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">③</div><div class="label">センサ位置で答え合わせ</div><div class="note">計算した温度と実測温度のズレを見る</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">④</div><div class="label">熱源の候補を修正</div><div class="note">ズレが減る方向に q を更新（ESMDA）して②へ戻る × 30反復</div></div>
+  </div>
+  <div class="info-box small">
+    <strong>ポイント：温度センサしか使っていないのに、修正されるのは熱源。</strong>
+    「温度がこうズレているなら、熱源がこうズレているはず」という関係（感度）を、アンサンブルの共分散が自動的に教えてくれる。
+    工作機械でいえば「限られた温度センサの読みから、軸受・モータなど<strong>どこがどれだけ発熱しているか</strong>を推定する」問題に対応する。
+  </div>
+</section>
+
+<section>
+  <span class="sec-tag">Result — Advanced</span>
+  <h2>発展の結果：熱源はどこまで当たったか</h2>
+  <div class="col-6-4">
+    <div class="figure"><img src="A02_miffy_esmda_SCfixTimefix_Q/img/fig08_qfull_vs_derived.png" alt="熱源同定の比較"></div>
+    <div>
+      <ul class="small">
+        <li>推定熱源から計算した温度場は m=300 で RMSE 20.06°C（温度場を直接推定した場合と同等）→ <strong>観測を説明する能力は落ちていない</strong></li>
+        <li>熱源のセル単位の鋭いエッジは、点の温度観測からは<strong>原理的に復元不可</strong>（q RMSE は 38.8 で飽和、真値 std=40.0）。熱伝導が細かい凹凸を消してしまうため、観測に痕跡が残らない</li>
+        <li>ただし<strong>少し平滑化したスケール（σ=1）なら相関0.76</strong>で復元でき、輪郭・目・鼻が視認できる</li>
+      </ul>
+      <p class="small muted">局所化半径は温度場版の5では過渡的に発散するため10に拡大が必要だった。熱源→温度の関係が「非局所」（遠くの熱源も温度に効く）であることが原因（開発中に踏んだ罠）。</p>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ Round 2 ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">Round 2</div>
+  <h1 style="font-size:1.55em;">ミッフィーちゃんでうまくいったので、<br>おっさんでもやってみた</h1>
+  <p>同じ手法（完全逆問題ESMDA）・同じセンサ設計ポリシーを、<br>未知数4倍（60×60=3600セル）・多段階の温度レベルを持つ温度場へそのまま適用</p>
+  <div style="width:420px; margin-top:10px;">
+    <div class="figure"><img src="img_concept/ossan_true_field.png" alt="おっさん真の温度場（60×60）"></div>
+    <p class="caption">第2の真値場：おっさん（実験で実際に使った60×60温度場。肌100°C・シャツ50°C・襟65°C・帽子25°C・目5°C・口10°Cなど多段階）</p>
+  </div>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+
+<!-- ═══════════════════ おっさんへのスケールアップ ═══════════════════ -->
+<section>
+  <span class="sec-tag">Round 2 — Scale-up</span>
+  <h2>Round 2 の結果：おっさん（60×60）</h2>
+  <p class="small" style="margin-bottom:6px;">ミッフィーちゃん（30×30=900セル）で確立した完全逆問題ESMDAを、コードほぼそのまま（変更は格子サイズ・真値・局所化半径のみ）で<strong>60×60=3600セル</strong>へ展開。</p>
+  <div class="figure large" style="max-width:1000px;"><img src="A03_ossan_esmda_SCfixTimefix_Q/img/anim_esmda_qfull.gif" alt="おっさん完全逆問題ESMDAのアニメーション" style="max-height:420px; margin:0 auto;"></div>
+  <p class="caption">上段：推定熱源から順解析した温度場 ／ 下段：推定熱源場。反復とともにおっさんが浮かび上がる</p>
+  <div class="two-col">
+    <div>
+      <table>
+        <tr><th>センサ数 m</th><th>100</th><th>300</th><th>600</th><th>1200</th></tr>
+        <tr><td>温度 RMSE</td><td>30.8°C</td><td>27.5°C</td><td>20.8°C</td><td><strong>17.1°C</strong></td></tr>
+        <tr><td>熱源相関</td><td>0.18</td><td>0.29</td><td>0.55</td><td><strong>0.72</strong></td></tr>
+      </table>
+      <p class="small muted">センサ<strong>密度</strong>で比較するとミッフィーの結果（相関0.76）とほぼ対応。手法自体はそのままスケールアップできた。</p>
+    </div>
+    <div>
+      <div class="card red" style="margin:0;">
+        <h3>うまくいっていない点（正直な限界）</h3>
+        <ul class="small">
+          <li><strong>m=100〜300では顔がほぼ判別できない</strong>（熱源相関 0.18〜0.29）。未知数4倍に対しセンサ密度が足りない</li>
+          <li>m=1200 まで増やしても温度RMSEは <strong>17.1°C 残る</strong>。メガネ・目などの細部は平滑化スケールでもぼやける</li>
+          <li>局所化半径をミッフィーの10のまま流用すると<strong>過渡的に発散</strong>。ドメインに合わせ20へ再調整が必要だった（自動では決まらない）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ 教訓と今後の展開 ═══════════════════ -->
+<section>
+<section class="divider-slide">
+  <div class="div-num">6</div>
+  <h1>教訓と今後の展開</h1>
+  <p>実CAE・実機（工作機械）への道筋</p>
+  <p class="small muted">↓ キーで解説へ</p>
+</section>
+<section>
+  <span class="sec-tag">Lessons Learned</span>
+  <h2>わかったこと・教訓</h2>
+  <div class="two-col">
+    <div class="card red">
+      <h3>危険な組み合わせ</h3>
+      <p class="small">固定センサ × 乗法インフレーション（&gt;1.0）× 多サイクル<br>
+      → 共分散が指数的に増幅 → カルマンゲイン暴走</p>
+      <p class="small">初期アンサンブルが白色ノイズ<br>
+      → 偽の長距離相関 → 局所化しても大きな誤更新</p>
+    </div>
+    <div class="card green">
+      <h3>安全な組み合わせ</h3>
+      <p class="small">固定センサ × ESMDA（$R_{\rm eff}=N_{\rm iter}\times R$）<br>
+      → 更新量を制限して安定</p>
+      <p class="small">初期アンサンブルはガウス相関ノイズを使う（白色ノイズを避ける）</p>
+    </div>
+  </div>
+  <div class="info-box">
+    <strong>実務的な結論：</strong>センサ位置を固定せざるを得ない実機の問題（工作機械もこれに該当）では、
+    逐次フィルタ（EnKF）よりも<strong>ESMDAのような反復スムーザー型手法が安定・実用的</strong>。
+    熱源のようなセルスケールの分布は点観測だけでは原理的に限界があり、<strong>平滑化スケールでの復元</strong>を目標に据えるのが現実的。
+  </div>
+</section>
+
+<!-- ═══════════════════ 今後の展開 ═══════════════════ -->
+<section>
+  <span class="sec-tag">Next Steps</span>
+  <h2>今後の展開 ― 工作機械の熱変位予測へ</h2>
+  <div class="flow">
+    <div class="flow-item"><div class="num">Step 1</div><div class="label">温度分布の同化（完了）</div><div class="note">ミッフィー/おっさんで基礎検証済み</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">Step 2</div><div class="label">変位の推定</div><div class="note">温度分布から熱変位を同化・推定</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item"><div class="num">Step 3</div><div class="label">温度＋角度の同時推定</div><div class="note">実測の温度・角度情報から<br>温度分布と変位を同時推定</div></div>
+  </div>
+  <ul>
+    <li><strong>非定常化</strong>：時系列観測での熱源・温度分布の追跡（加工中の熱変化を追う）</li>
+    <li><strong>実CAEケースへの展開</strong>：OpenFOAM / FrontISTR（<code>sample/002-1系</code>）へQ-state同化を適用し、実際の熱伝導・熱応力解析にデータ同化を組み込む</li>
+    <li><strong>縮約モデルとの組み合わせ</strong>：先行研究（Lang et al.）のようにモード縮約＋KFで実規模FEモデルへ</li>
+    <li><strong>エッジを表現できる事前分布</strong>：全変動正則化・非ガウス事前分布で、平滑化スケールを超えた復元に挑戦</li>
+  </ul>
+  <div class="success-box">
+    ミッフィーちゃんでの基礎検証を土台に、次は「熱解析→構造解析→熱変位」という実際の工作機械の問題に、
+    同じデータ同化の考え方（ESMDAを軸に）を適用していく。
+  </div>
+</section>
+</section>
+
+<!-- ═══════════════════ まとめ ═══════════════════ -->
+<section>
+  <span class="sec-tag">Summary</span>
+  <h2>まとめ</h2>
+  <div class="two-col">
+    <div>
+      <div class="card blue">
+        <h3>モチベーション</h3>
+        <p class="small">工作機械の加工精度は熱変位に強く依存するが、実測できる温度・角度は一部のみ。
+        温度分布の傾向が合っていても熱変位の傾向は異なりうるため、データ同化で全体の場を精度よく推定したい。
+        先行研究（Lang et al. 2024）は13センサ＋KFで35万要素の熱状態と熱変位（誤差−52.7%）の推定を実証済み。</p>
+      </div>
+      <div class="card cyan">
+        <h3>やったこと</h3>
+        <p class="small">ミッフィーちゃんの2Dドット絵を真の温度場に見立て、OI・KF・EnKF・ESMDAを比較。
+        全手法が線形ガウス更新を共有し、違いは誤差共分散Bの入手法（事前定義／物理伝播／アンサンブル）にあることを整理。
+        固定センサではESMDAが安定・高精度であることを確認した。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3>わかったこと</h3>
+        <p class="small">熱伝導が支配する問題ではBの構造（ガウス相関・相関長√αt）を物理から見積もれるため、OIでも実用になる。
+        固定センサ問題ではESMDAが実用的。熱源のセルスケールのエッジ復元には原理的限界があるが、
+        平滑化スケールでは十分な情報が復元できる。</p>
+      </div>
+      <div class="card purple">
+        <h3>次の一歩</h3>
+        <ul class="small">
+          <li>温度分布 → 熱変位の推定へ拡張</li>
+          <li>温度＋角度の同時推定</li>
+          <li>実CAEケース（OpenFOAM/FrontISTR）への展開</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="caption muted">詳細: study/practice/README.md ／ 各ケースdocs ／ 参考: Lang et al., Manufacturing Letters 41 (2024) 208–218 ／ 解説記事: https://takun-physics.net/19375/</p>
+</section>
+
+</div>
+</div>
+
+<script src="https://unpkg.com/reveal.js@4.6.1/dist/reveal.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/markdown/markdown.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+<script src="https://unpkg.com/reveal.js@4.6.1/plugin/math/math.js"></script>
+<script>
+if (window.location.search.includes('print-pdf')) {
+  document.body.classList.add('print-pdf');
+}
+
+Reveal.initialize({
+  hash: true,
+  width: 1280,
+  height: 720,
+  margin: 0.04,
+  controls: true,
+  progress: true,
+  center: false,
+  transition: 'slide',
+  mouseWheel: false,
+  slideNumber: 'c/t',
+  plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+});
+
+document.querySelectorAll('.reveal .slides section').forEach(function(sec) {
+  sec.addEventListener('wheel', function(e) {
+    var atTop    = sec.scrollTop <= 0;
+    var atBottom = sec.scrollTop + sec.clientHeight >= sec.scrollHeight - 2;
+    if (!atTop || !atBottom) {
+      e.stopPropagation();
+    }
+  }, { passive: true });
+});
+
+document.getElementById('pdf-export-btn').addEventListener('click', () => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('print-pdf', '');
+  history.replaceState(null, '', url.toString());
+  document.body.classList.add('print-pdf');
+  document.getElementById('pdf-toast').classList.add('show');
+});
+</script>
+</body>
+</html>
