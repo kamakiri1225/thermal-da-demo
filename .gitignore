@@ -21,6 +21,11 @@ venv/
 # LaTeX build intermediates only (final PDFs are kept)
 sample/*/docs/pdf/_build/
 
+# Personal / business documents (do not publish to public repo)
+docs/キャリア.md
+docs/キャリア.html
+IoT/docs/business_plan.md
+
 # Heavy reference materials (papers, screenshots)
 docs/*.pdf
 sample/002-0_laplacian_da_1d/docs/*.pdf

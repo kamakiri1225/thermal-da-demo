@@ -22,6 +22,14 @@
 
 実機で全点の温度を測ることは現実的ではありません。そこで、物理モデルの予測とセンサ観測を組み合わせ、測っていない場所の状態を推定する方法を検証します。
 
+## 発表スライド（オープンCAE勉強会）
+
+データ同化の入門から、ミッフィー温度場の数値実験（OI / KF / EnKF / ESMDA 比較・熱源逆問題）、工作機械の熱変位予測への応用構想までをまとめた発表資料です。
+
+**[▶ データ同化入門スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/study/practice/slides_opencae_intro.html)**
+
+関連資料: [ESMDA 理論解説スライド](https://kamakiri1225.github.io/thermal-da-demo/study/practice/A02_miffy_esmda_SCfixTimefix_Q/slides.html) ／ [数値実験の全ケース一覧](study/practice/README.md)
+
 ## 現在のサンプル
 
 各サンプルの手法、目的、実行方法は [sample/README.md](sample/README.md) にまとめています。
@@ -85,6 +93,7 @@ thermal-da-demo/
 ## ドキュメント
 
 - サンプル一覧と手法の説明: [sample/README.md](sample/README.md)
+- オープンCAE勉強会スライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/study/practice/slides_opencae_intro.html)
 - 001 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/001_kalman_thermal_1d/slides.html)
 - 002 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/002-0_laplacian_da_1d/slides.html)
 - 002-1 のスライド: [▶ スライドを開く (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/sample/002-1_laplacian_da_round_bar/slides.html)
