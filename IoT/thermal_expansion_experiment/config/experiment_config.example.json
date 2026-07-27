@@ -1,0 +1,41 @@
+{
+  "_comment": "実験条件のテンプレート。実験ごとにコピーして experiment_config.json 等の名前で使う（本ファイル自体は編集しないことを推奨）。",
+  "experiment_id": "EXP_YYYYMMDD_HHMM_SAMPLE",
+  "operator": "要記入",
+  "specimen": {
+    "material": "SUS304",
+    "diameter_mm": 20.0,
+    "length_mm": 300.0,
+    "note": "実測値に置き換えること。ノギス/マイクロメータで3箇所以上測定し平均を推奨。"
+  },
+  "sensor_positions_mm_from_heated_end": {
+    "T1_heated_side": 20,
+    "T2_center": 150,
+    "T3_free_end_side": 280,
+    "note": "丸棒の加熱端を原点(0mm)とした熱電対取付位置。実際の取付後にメジャー等で実測し更新すること（要実機確認）。"
+  },
+  "sampling": {
+    "measurement_interval_ms": 1000,
+    "zero_calibration_seconds": 30,
+    "zero_calibration_hz": 1
+  },
+  "heater": {
+    "type": "シリコンラバーヒーター",
+    "target_temperature_C": 100,
+    "hold_time_minutes": 30,
+    "note": "目標最高温度は仮案。ヒーター定格・温調器設定と整合させること（要確認）。"
+  },
+  "indicator": {
+    "model": "Mitutoyo 543-790B-10 (仮案)",
+    "resolution_mm": 0.001,
+    "range_mm": 12.7,
+    "unit_mode": "mm",
+    "note": "型番の最終適合は購入前にメーカー最新資料で要確認。"
+  },
+  "fixture": {
+    "support_span_mm": 260,
+    "support_type": "ベアリングV支持 (仮案)",
+    "left_stopper_preload_note": "軽い予圧のみ。強くクランプしない。"
+  },
+  "material_properties_file": "material_properties_sus304.json"
+}
