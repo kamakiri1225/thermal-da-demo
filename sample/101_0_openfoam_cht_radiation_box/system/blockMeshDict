@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 背景メッシュ(region0)。固体・流体の区別はまだ付けない(単一ブロック)。
+// 固体/流体の切り分けは system/topoSetDict の boxToCell + setToCellZone、
+// 続く splitMeshRegions -cellZones で行う(multiRegionHeaterチュートリアル方式)。
+//
+// サイズ変更は system/include/caseSettings の数値を変えるだけでよい。
+
+#include "include/caseSettings"
+
+convertToMeters 1;
+
+vertices
+(
+    (0        0        0)
+    ($domainLx 0        0)
+    ($domainLx $domainLy 0)
+    (0        $domainLy 0)
+    (0        0        $domainLz)
+    ($domainLx 0        $domainLz)
+    ($domainLx $domainLy $domainLz)
+    (0        $domainLy $domainLz)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($nx $ny $nz) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    minX
+    {
+        type    patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    maxX
+    {
+        type    patch;
+        faces
+        (
+            (2 6 5 1)
+        );
+    }
+    minY
+    {
+        type    patch;
+        faces
+        (
+            (1 5 4 0)
+        );
+    }
+    maxY
+    {
+        type    patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
+    floor
+    {
+        type    wall;
+        faces
+        (
+            (0 3 2 1)
+        );
+    }
+    top
+    {
+        type    wall;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //

@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/solid";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 固体内部は不透明体として輻射計算を行わない(表面輻射は流体側
+// boundaryRadiationProperties の fluid_to_solid 設定で扱う)。
+
+radiation       off;
+
+radiationModel  none;
+
+absorptionEmissionModel none;
+
+scatterModel    none;
+
+sootModel       none;
+
+
+// ************************************************************************* //

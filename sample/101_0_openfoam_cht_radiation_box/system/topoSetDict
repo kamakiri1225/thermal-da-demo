@@ -1,0 +1,92 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 背景メッシュ(region0)を、固体直方体・ヒートマット・流体の3つの
+// cellZoneに分割する(互いに排他的である必要がある。splitMeshRegions
+// -cellZones はメッシュ上の全cellZoneを領域分割に使うため、重複があると
+// FATAL ERRORになる)。
+// heaterMatは固体の+X面の一部を占める薄い直方体で、solidの範囲からは
+// 差し引く(action subtract)ことで、solid/heaterMatが重ならないようにする。
+// box座標は system/include/caseSettings と共有しており、blockMeshDict の
+// セル境界と厳密に一致する(cellSizeがdomain/solid/heaterMatの寸法の
+// 整数分の1のため)。
+
+#include "include/caseSettings"
+
+actions
+(
+    // heaterMat: 固体+X面の一部、厚さ1セル分の薄い直方体
+    {
+        name    heaterMatCellSet;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        box     ($heaterX0 $heaterY0 $heaterZ0) ($heaterX1 $heaterY1 $heaterZ1);
+    }
+    {
+        name    heaterMat;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        set     heaterMatCellSet;
+    }
+
+    // solid: 固体直方体全体からheaterMatを除いたセル
+    {
+        name    solidCellSet;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        box     ($solidX0 $solidY0 $solidZ0) ($solidX1 $solidY1 $solidZ1);
+    }
+    {
+        name    solidCellSet;
+        type    cellSet;
+        action  subtract;
+        source  cellToCell;
+        set     heaterMatCellSet;
+    }
+    {
+        name    solid;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        set     solidCellSet;
+    }
+
+    // fluid: 固体直方体(heaterMat含む)の外側の全セル
+    {
+        name    fluidCellSet;
+        type    cellSet;
+        action  new;
+        source  boxToCell;
+        box     ($solidX0 $solidY0 $solidZ0) ($solidX1 $solidY1 $solidZ1);
+    }
+    {
+        name    fluidCellSet;
+        type    cellSet;
+        action  invert;
+    }
+    {
+        name    fluid;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        set     fluidCellSet;
+    }
+);
+
+
+// ************************************************************************* //

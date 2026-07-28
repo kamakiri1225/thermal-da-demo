@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/fluid";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// fvDOM(Discrete Ordinates Method)による輻射計算。
+// 空気自体はほぼ輻射を吸収・放射しない(absorptivity/emissivityを小さい値に設定)。
+// 各壁面の輻射率(グレー拡散面としての扱い)は
+// constant/fluid/boundaryRadiationProperties で個別に設定する。
+
+radiation       on;
+
+radiationModel  fvDOM;
+
+fvDOMCoeffs
+{
+    nPhi        3;      // X-Y平面内の方位角分割数
+    nTheta      5;      // 極角分割数
+    tolerance   1e-3;   // 輻射反復の収束判定
+    maxIter     10;     // 輻射反復の最大回数
+}
+
+// 何回の流れ反復ごとに輻射を解くか
+solverFreq      10;
+
+absorptionEmissionModel constantAbsorptionEmission;
+
+constantAbsorptionEmissionCoeffs
+{
+    absorptivity    absorptivity    [ m^-1 ]         0.01;
+    emissivity      emissivity      [ m^-1 ]         0.01;
+    E               E               [ kg m^-1 s^-3 ] 0;
+}
+
+scatterModel    none;
+
+sootModel       none;
+
+
+// ************************************************************************* //

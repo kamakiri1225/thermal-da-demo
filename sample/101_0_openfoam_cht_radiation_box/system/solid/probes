@@ -1,0 +1,48 @@
+// -*- C++ -*-
+// 固体表面の温度をpatchProbesで計測する(system/controlDictからinclude)。
+// 計測点はスナップ先の面の面中心に自動的に吸着されるため、座標は目安でよい。
+//
+// ヒートマットは独立リージョン(heaterMat)になったため、その表面温度は
+// solidリージョンのpatchProbesでは拾えない(patchProbesのregionは
+// そのリージョン自身のパッチしか検索できないため)。そのため
+// heaterMat表面用に別のpatchProbesインスタンスを用意している。
+
+#include "../include/caseSettings"
+
+solidSurfaceProbes
+{
+    type            patchProbes;
+    libs            (sampling);
+    region          solid;
+    patches         (solid_to_fluid floor);
+
+    fields          (T);
+
+    writeControl    timeStep;
+    writeInterval   1;
+
+    probeLocations
+    (
+        ($solidX1  $heaterYc  $heaterZc)          // P1: ヒートマット近傍(solid側、+X面のノッチ縁)
+        ($solidX0  $heaterYc  $heaterZc)          // P2: 反対側面(-X面)
+        ($solidXc  $heaterYc  $solidZ1)           // P3: 上面中央
+    );
+}
+
+heaterMatSurfaceProbes
+{
+    type            patchProbes;
+    libs            (sampling);
+    region          heaterMat;
+    patches         (heaterMat_to_fluid);
+
+    fields          (T);
+
+    writeControl    timeStep;
+    writeInterval   1;
+
+    probeLocations
+    (
+        ($solidX1  $heaterYc  $heaterZc)          // P0: ヒートマット外側面(発熱面そのもの)
+    );
+}

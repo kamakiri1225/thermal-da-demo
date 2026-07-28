@@ -1,0 +1,13 @@
+# OpenFOAM generated time directories. Initial conditions are kept in 0.orig/.
+/0/
+/[1-9]*/
+
+# Generated meshes and solver output
+/constant/polyMesh/
+/constant/*/polyMesh/
+/constant/cellToRegion
+/postProcessing/
+/processor*/
+/VTK/
+/log.*
+/post.foam

@@ -1,0 +1,83 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/heaterMat";
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// heaterMat は厚さ1セル分の薄い直方体で、2つの面を持つ:
+//   heaterMat_to_fluid : 外側面(+X面、fluidと接する) → 熱量の境界条件
+//   heaterMat_to_solid : 内側面(solidと接する)        → 熱伝導結合
+//
+// heaterMat_to_fluid は externalWallHeatFluxTemperature を mode=power で
+// 使い、Qを時間テーブル(Function1 table)で与えることで、
+// 「0-heaterOnTime秒はheaterWattage[W]、heaterOnTime-heaterOffTime秒は0W」
+// という時間変化するヒーターを表現する(既定: 0-300s=20W, 300-600s=0W)。
+// 立ち上がり/立ち下がりは矩形に近づけるため短い遷移幅(数秒)を持たせている。
+//
+// mode=powerでは、この面はfluid側と直接熱結合しない(=ヒートマットの
+// 外側はケーシングで断熱されており、投入した熱量はすべて固体側へ
+// 伝導する、という想定)。fluid側の対応パッチ(fluid_to_heaterMat)は
+// system/fluid/changeDictionaryDict 側で断熱壁として設定する。
+//
+// 【要注意】下のQテーブルの数値はリテラルで書いている(system/include/
+// caseSettingsのheaterWattage/heaterOnTime/heaterOffTimeと値を揃えること)。
+// #includeで$var展開しても、changeDictionaryが0/heaterMat/Tへ書き出す際に
+// "$heaterWattage"という文字列がそのまま(未展開で)書き込まれてしまい、
+// ソルバー起動時に「変数が見つからない」旨のFATAL ERRORになった
+// (実機確認済み)。fvOptions等、ソルバーが直接読むファイルでは
+// #include/$varが問題なく機能する一方、changeDictionaryDictの内容が
+// 別ファイルへ書き出される場合はリテラル値を使う必要があるようだ。
+// caseSettingsの値を変更したら、必ずこのファイルも手動で更新すること。
+
+T
+{
+    internalField   uniform 293.15;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            zeroGradient;
+        }
+
+        heaterMat_to_fluid
+        {
+            type            externalWallHeatFluxTemperature;
+            mode            power;
+            Q               table
+            (
+                (0      20)
+                (300    20)
+                (302    0)
+                (600    0)
+            );
+            kappaMethod     solidThermo;
+            kappa           none;
+            value           uniform 293.15;
+        }
+
+        "heaterMat_to_.*"
+        {
+            type            compressible::turbulentTemperatureRadCoupledMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            kappa           none;
+            qrNbr           none;
+            qr              none;
+            value           uniform 293.15;
+        }
+    }
+}
+
+
+// ************************************************************************* //

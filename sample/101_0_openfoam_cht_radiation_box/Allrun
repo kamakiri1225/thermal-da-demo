@@ -1,0 +1,15 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication ./Allrun.pre
+
+# Serial run (mesh is small; ~8000 cells with default cellSize).
+# For a finer mesh, decompose and run in parallel instead:
+#   runApplication decomposePar -allRegions
+#   runParallel $(getApplication)
+#   runApplication reconstructPar -allRegions
+runApplication $(getApplication)
+
+#------------------------------------------------------------------------------

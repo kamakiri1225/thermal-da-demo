@@ -1,0 +1,139 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/fluid";
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// splitMeshRegions直後は各フィールドが"calculated"のままなので、
+// ここで実際の境界条件に置き換える。
+// fluid_to_solid は splitMeshRegions が自動生成する結合パッチ名。
+
+U
+{
+    internalField   uniform (0 0 0);
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            noSlip;
+        }
+    }
+}
+
+T
+{
+    internalField   uniform 293.15;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            fixedValue;
+            value           uniform 293.15;
+        }
+
+        "fluid_to_.*"
+        {
+            type            compressible::turbulentTemperatureRadCoupledMixed;
+            Tnbr            T;
+            kappaMethod     fluidThermo;
+            kappa           none;
+            qrNbr           none;
+            qr              qr;
+            value           uniform 293.15;
+        }
+
+        fluid_to_heaterMat
+        {
+            // heaterMatの外側面はmode=powerの熱量境界条件(ケーシングで
+            // 断熱されている想定)としたため、fluid側はここでは
+            // 単純な断熱壁として扱う(solid_to_fluid等とは異なりTnbrで
+            // 結合しない。文字列完全一致でfluid_to_.*正規表現より優先)。
+            type            zeroGradient;
+        }
+    }
+}
+
+p_rgh
+{
+    internalField   uniform 1e5;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            fixedFluxPressure;
+            value           uniform 1e5;
+        }
+    }
+}
+
+p
+{
+    internalField   uniform 1e5;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 1e5;
+        }
+    }
+}
+
+G
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+    }
+}
+
+qr
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+    }
+}
+
+IDefault
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            wideBandDiffusiveRadiation;
+            value           uniform 0;
+        }
+    }
+}
+
+
+// ************************************************************************* //

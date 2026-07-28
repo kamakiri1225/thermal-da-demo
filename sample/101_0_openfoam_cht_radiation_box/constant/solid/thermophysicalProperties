@@ -1,0 +1,54 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/solid";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 一般構造用鋼材相当の代表値(仮値、実材料に合わせて要調整)。
+// のちのFrontISTR熱膨張解析(101_1)でもこの温度分布を使うため、
+// 実在材料を想定する場合はここと101_1側の物性値を整合させること。
+
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight   55.8;
+    }
+    transport
+    {
+        kappa       50;      // 熱伝導率 [W/(m K)] (鋼材代表値)
+    }
+    thermodynamics
+    {
+        Hf          0;
+        Cp          460;     // 比熱 [J/(kg K)] (鋼材代表値)
+    }
+    equationOfState
+    {
+        rho         7850;    // 密度 [kg/m^3] (鋼材代表値)
+    }
+}
+
+
+// ************************************************************************* //

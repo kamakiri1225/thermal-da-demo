@@ -1,0 +1,76 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  ============================================================================
+  ケース寸法・メッシュ解像度パラメータ (単位: m)
+  blockMeshDict と topoSetDict の両方から #include して共有する。
+  ここの数値だけを変更すればジオメトリ・メッシュサイズを自由に変更できる。
+
+  形状: 立方体の流体ドメインの中央、床面(z=0)に固体の直方体が立っている。
+        画像(ユーザー提供)の寸法: 流体1000x1000x1000mm、固体200x200x400mm。
+  ============================================================================
+\*---------------------------------------------------------------------------*/
+
+// ---- 流体ドメイン(立方体)全体の寸法 ----
+domainLx    1.0;   // X方向 [m] (元図: 1000mm)
+domainLy    1.0;   // Y方向 [m] (元図: 1000mm)
+domainLz    1.0;   // Z方向 [m] (元図: 1000mm、高さ)
+
+// ---- 固体直方体の寸法 (床面 z=0 に設置、X,Y中央) ----
+solidLx     0.2;   // X方向 [m] (元図: 200mm)
+solidLy     0.2;   // Y方向 [m] (元図: 200mm)
+solidLz     0.4;   // Z方向 [m] (元図: 400mm、高さ)
+
+// ---- メッシュ解像度: 1セルの目安の一辺長さ ----
+// domainLx/Ly/Lz と solidLx/Ly/Lz の両方が cellSize の整数倍になるように
+// 選ぶと、topoSetDict の boxToCell によるセル分割がジオメトリ境界と厳密に
+// 一致する(既定値0.05は1.0にも0.2/0.4にも整合する)。
+// 細かくしたい場合は cellSize を小さくするだけでよい(例: 0.025, 0.01)。
+cellSize    0.05;  // [m]
+
+nx  #eval #{ round($domainLx / $cellSize) #};
+ny  #eval #{ round($domainLy / $cellSize) #};
+nz  #eval #{ round($domainLz / $cellSize) #};
+
+// ---- 固体直方体の配置(X,Y中央、Z=0が床) ----
+solidX0 #eval #{ 0.5 * ($domainLx - $solidLx) #};
+solidX1 #eval #{ 0.5 * ($domainLx + $solidLx) #};
+solidY0 #eval #{ 0.5 * ($domainLy - $solidLy) #};
+solidY1 #eval #{ 0.5 * ($domainLy + $solidLy) #};
+solidZ0 0.0;
+solidZ1 $solidLz;
+
+// ---- 発熱源(ヒートマット、固体の+X側面に設置) ----
+// heaterMat という独立リージョンとして実装する(solidのサブゾーンではない)。
+// heaterMatは厚さ1セル分の薄い直方体で、固体(solid)の+X面の一部を
+// 占める形で solid から切り出す。heaterMatの外側面(heaterMat_to_fluid、
+// splitMeshRegionsが自動生成)は面積が既知の独立した境界パッチになるため、
+// そこへ externalWallHeatFluxTemperature (mode=power)で熱量[W]を直接
+// 面に与える(system/heaterMat/changeDictionaryDict参照)。
+// heaterMatの内側面(heaterMat_to_solid)はsolidと熱伝導結合する。
+//
+// heaterMatWidth / heaterMatHeight は cellSize の偶数倍にすること
+// (中心座標がグリッド線に一致し、topoSetDictのboxToCellが意図した
+// セル列/行だけを過不足なく選択できるため)。
+heaterWattage     20.0;   // [W] ヒーターON時の出力(仮値・要調整)
+heaterOnTime      300;    // [s] ヒーターONの継続時間(既定: 0-300s=0-5分)
+heaterOffTime     600;    // [s] ヒーターOFFに切り替わった状態を保持する時刻(既定: 300-600s=5-10分)
+// ON/OFFの遷移幅[s](矩形に近いステップ状変化にするため短くしている)
+heaterTransitionEnd #eval #{ $heaterOnTime + 2 #};
+heaterMatWidth    0.10;   // ヒートマットのY方向幅 [m] (仮値、cellSizeの偶数倍にする)
+heaterMatHeight   0.20;   // ヒートマットのZ方向高さ [m] (仮値、cellSizeの偶数倍にする)
+
+heaterYc #eval #{ 0.5 * ($solidY0 + $solidY1) #};
+heaterZc #eval #{ 0.5 * ($solidZ0 + $solidZ1) #};
+
+// 固体のX中心(patchProbesの上面計測点等で使用)
+solidXc #eval #{ 0.5 * ($solidX0 + $solidX1) #};
+
+heaterY0 #eval #{ $heaterYc - 0.5 * $heaterMatWidth #};
+heaterY1 #eval #{ $heaterYc + 0.5 * $heaterMatWidth #};
+heaterZ0 #eval #{ $heaterZc - 0.5 * $heaterMatHeight #};
+heaterZ1 #eval #{ $heaterZc + 0.5 * $heaterMatHeight #};
+
+// 側面(+X面)から厚さ1セル分だけ内側の薄い層
+heaterX0 #eval #{ $solidX1 - $cellSize #};
+heaterX1 $solidX1;
+
+// ************************************************************************* //

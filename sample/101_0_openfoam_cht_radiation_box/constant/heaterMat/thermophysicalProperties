@@ -1,0 +1,55 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/heaterMat";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// ヒートマット自体の物性。ここでは簡単のため固体(solid)と同じ
+// 鋼材相当の代表値を使っている(constant/solid/thermophysicalProperties と
+// 同一)。実際のヒートマット(シリコンラバーヒーター等)の物性に
+// 置き換えたい場合はここを変更する(要確認)。
+
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        molWeight   55.8;
+    }
+    transport
+    {
+        kappa       50;      // 熱伝導率 [W/(m K)]
+    }
+    thermodynamics
+    {
+        Hf          0;
+        Cp          460;     // 比熱 [J/(kg K)]
+    }
+    equationOfState
+    {
+        rho         7850;    // 密度 [kg/m^3]
+    }
+}
+
+
+// ************************************************************************* //

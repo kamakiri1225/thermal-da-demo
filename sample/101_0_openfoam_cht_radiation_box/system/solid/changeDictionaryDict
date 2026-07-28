@@ -1,0 +1,64 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/solid";
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 固体ブロックは床(floor)、fluidとの結合パッチ(solid_to_fluid)、
+// heaterMatとの結合パッチ(solid_to_heaterMat、+X面の一部)を持つ。
+// 発熱源はheaterMatリージョンの外側面(externalWallHeatFluxTemperature)
+// に変更したため、floorは断熱(zeroGradient)として扱う
+// (=固体は断熱スタンドの上に置かれている想定)。floorは101_1の
+// FrontISTR解析で「固定端」として使う面でもあるため、パッチ自体は
+// そのまま残している。
+
+T
+{
+    internalField   uniform 293.15;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            zeroGradient;
+        }
+
+        "solid_to_.*"
+        {
+            type            compressible::turbulentTemperatureRadCoupledMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            kappa           none;
+            qrNbr           qr;
+            qr              none;
+            value           uniform 293.15;
+        }
+
+        solid_to_heaterMat
+        {
+            // heaterMatは輻射off(qrフィールドを持たない)のため、
+            // 上のsolid_to_.*正規表現とは別にqrNbr/qrをnoneで上書きする
+            // (文字列完全一致は正規表現より優先される)。
+            type            compressible::turbulentTemperatureRadCoupledMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            kappa           none;
+            qrNbr           none;
+            qr              none;
+            value           uniform 293.15;
+        }
+    }
+}
+
+
+// ************************************************************************* //

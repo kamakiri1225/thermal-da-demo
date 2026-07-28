@@ -1,0 +1,34 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+runApplication blockMesh
+runApplication topoSet
+
+# Restore initial fields (0.orig -> 0)
+restore0Dir
+
+runApplication splitMeshRegions -cellZones -overwrite
+
+# Remove fluid-only / radiation-only fields from the solid-family regions
+# (solid + heaterMat, per constant/regionProperties)
+# (avoid brace expansion: /bin/sh may be dash, which does not support it)
+for region in $(foamListRegions solid)
+do
+    for f in nut alphat epsilon k U p_rgh G IDefault qr
+    do
+        rm -f 0/$region/$f
+        rm -f processor*/0/$region/$f
+    done
+done
+
+for region in $(foamListRegions)
+do
+    runApplication -s $region changeDictionary -region $region
+done
+
+echo
+echo "End"
+
+#------------------------------------------------------------------------------
