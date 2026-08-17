@@ -1,0 +1,27 @@
+case: 102_0_openfoam_hollow_cylinder_heat_transfer
+solver: chtMultiRegionFoam
+status: completed
+time_range_s: [0, 600]
+output_interval_s: 5
+output_time_count: 121
+heater:
+  power_W: 15.0
+  on_from_s: 0.0
+  off_at_s: 300.0
+mesh:
+  total_cells: 67276
+  solid_cells: 20696
+  fluid_cells: 46580
+  heater_patch_faces: 2694
+  heater_patch_area_m2: 0.0050722394
+  solid_volume_m3: 0.0003169756
+  check_mesh: OK
+results:
+  solid_max_temperature_K: 298.92573
+  solid_max_temperature_C: 25.77573
+  solid_max_temperature_time_s: 300.0
+  heater_side_probe_max_C: 25.58053
+  heater_side_probe_max_time_s: 300.0
+  opposite_side_probe_max_C: 23.59486
+  opposite_side_probe_max_time_s: 530.0
+  solid_temperature_at_600_s_K: [296.70296, 296.75795]

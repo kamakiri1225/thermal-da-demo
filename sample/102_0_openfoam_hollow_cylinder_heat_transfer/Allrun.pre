@@ -1,0 +1,85 @@
+#!/bin/sh
+cd "${0%/*}" || exit
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions
+
+FREECADCMD=${FREECADCMD:-/home/kamakiri/apps/FreeCAD-1.1.1/usr/bin/freecadcmd}
+test -x "$FREECADCMD" || {
+    echo "FreeCAD command not found: $FREECADCMD" >&2
+    exit 1
+}
+
+mkdir -p constant/triSurface cad/generated
+
+cadReady=false
+if [ -f cad/generated/hollow_cylinder_heater.FCStd ] \
+    && [ -f cad/generated/specimen_mm.stl ] \
+    && [ -f cad/generated/heaterSelection_mm.stl ]
+then
+    cadReady=true
+fi
+
+rebuildCad=false
+if [ "${FORCE_CAD_REBUILD:-0}" = "1" ]
+then
+    rebuildCad=true
+elif [ "$cadReady" = false ]
+then
+    rebuildCad=true
+elif [ -t 0 ]
+then
+    printf "Existing FreeCAD model found. Rebuild it? [y/N]: "
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES)
+            rebuildCad=true
+            ;;
+    esac
+fi
+
+if [ "$rebuildCad" = true ]
+then
+    runApplication -o -s freecad "$FREECADCMD" cad/create_model.py
+else
+    echo "Reusing existing FreeCAD model."
+fi
+
+runApplication -s specimenScale surfaceTransformPoints \
+    -read-scale 0.001 cad/generated/specimen_mm.stl constant/triSurface/specimen.stl
+runApplication -s heaterSelectionScale surfaceTransformPoints \
+    -read-scale 0.001 cad/generated/heaterSelection_mm.stl constant/triSurface/heaterSelection.stl
+
+runApplication -s specimenCheck surfaceCheck constant/triSurface/specimen.stl
+runApplication -s heaterSelectionCheck surfaceCheck constant/triSurface/heaterSelection.stl
+runApplication blockMesh
+runApplication surfaceFeatureExtract
+runApplication snappyHexMesh -overwrite
+runApplication checkMesh
+runApplication topoSet
+
+restore0Dir
+runApplication splitMeshRegions -cellZonesOnly -overwrite
+
+for field in nut alphat epsilon k U p_rgh G IDefault qr
+do
+    rm -f 0/solid/$field processor*/0/solid/$field
+done
+
+runApplication -s heaterFaces.solid topoSet -region solid -dict "$PWD/system/solid/heaterFaceSetDict"
+runApplication -s heaterPatch.solid createPatch -region solid -dict "$PWD/system/solid/createHeaterPatchDict" -overwrite
+runApplication -s heaterFaces.fluid topoSet -region fluid -dict "$PWD/system/fluid/heaterFaceSetDict"
+runApplication -s heaterPatch.fluid createPatch -region fluid -dict "$PWD/system/fluid/createHeaterPatchDict" -overwrite
+
+# splitMeshRegions writes this diagnostic field before the heater patches exist.
+# It is not used by chtMultiRegionFoam and would prevent later decomposition.
+rm -f constant/cellToRegion 0/cellToRegion 0/fluid/cellToRegion 0/solid/cellToRegion
+
+for region in fluid solid
+do
+    runApplication -s $region changeDictionary -region $region
+done
+
+runApplication -s heaterPowerVTK foamToVTK \
+    -region solid -time 0 -patches '(heaterPower)' \
+    -no-internal -no-fields -name VTK_heaterPower -overwrite
+
+echo "CHT mesh and initial fields are ready."

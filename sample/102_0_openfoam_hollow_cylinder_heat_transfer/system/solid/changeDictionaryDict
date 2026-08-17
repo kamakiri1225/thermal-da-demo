@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/solid";
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// heaterPowerはheaterSelection.stlで選んだ固体外周面の一部であり、
+// 独立した材料リージョンではない。この面へ合計15 Wを直接入力する。
+
+T
+{
+    internalField   uniform 293.15;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            zeroGradient;
+        }
+
+        "solid_to_.*"
+        {
+            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            Tnbr            T;
+            kappaMethod     solidThermo;
+            kappa           none;
+            value           uniform 293.15;
+        }
+
+        heaterPower
+        {
+            type            externalWallHeatFluxTemperature;
+            mode            power;
+            Q               table
+            (
+                (0      15)
+                (299.999 15)
+                (300    0)
+                (600    0)
+            );
+            kappaMethod     solidThermo;
+            kappa           none;
+            value           uniform 293.15;
+        }
+    }
+}
+
+p
+{
+    internalField   uniform 1e5;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 1e5;
+        }
+
+        heaterPower
+        {
+            type            calculated;
+            value           uniform 1e5;
+        }
+    }
+}
+
+
+// ************************************************************************* //

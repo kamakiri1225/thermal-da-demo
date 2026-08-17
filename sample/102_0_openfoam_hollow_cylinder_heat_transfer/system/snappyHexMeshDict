@@ -1,0 +1,115 @@
+FoamFile
+{
+    format ascii;
+    class dictionary;
+    object snappyHexMeshDict;
+}
+
+castellatedMesh true;
+snap true;
+addLayers false;
+
+geometry
+{
+    specimen.stl
+    {
+        type triSurfaceMesh;
+        name specimen;
+    }
+
+    heaterSelection.stl
+    {
+        type triSurfaceMesh;
+        name heaterSelection;
+    }
+}
+
+castellatedMeshControls
+{
+    maxLocalCells 500000;
+    maxGlobalCells 1000000;
+    minRefinementCells 5;
+    nCellsBetweenLevels 2;
+
+    features
+    (
+        {
+            file "specimen.eMesh";
+            level 3;
+        }
+    );
+
+    refinementSurfaces
+    {
+        specimen
+        {
+            level (2 3);
+            faceZone specimen;
+            cellZone solid;
+            cellZoneInside inside;
+        }
+    }
+
+    refinementRegions
+    {
+        heaterSelection
+        {
+            mode inside;
+            levels
+            (
+                (1e15 3)
+            );
+        }
+    }
+    resolveFeatureAngle 30;
+    locationInMesh (0.12 0.11 0.18);
+    allowFreeStandingZoneFaces false;
+}
+
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 1.0;
+    nSolveIter 30;
+    nRelaxIter 5;
+    nFeatureSnapIter 0;
+    implicitFeatureSnap false;
+    explicitFeatureSnap false;
+    multiRegionFeatureSnap false;
+}
+
+addLayersControls
+{
+    relativeSizes true;
+    layers
+    {
+    }
+    expansionRatio 1.2;
+    finalLayerThickness 0.3;
+    minThickness 0.1;
+    nGrow 0;
+    featureAngle 60;
+    nRelaxIter 3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedialAxisAngle 90;
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+}
+
+meshQualityControls
+{
+    #includeEtc "caseDicts/meshQualityDict"
+    nSmoothScale 4;
+    errorReduction 0.75;
+    relaxed
+    {
+        maxNonOrtho 75;
+    }
+}
+
+debug 0;
+mergeTolerance 1e-6;

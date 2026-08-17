@@ -1,0 +1,17 @@
+solidTemperatureProbes
+{
+    type            probes;
+    libs            (sampling);
+    region          solid;
+    fields          (T);
+    writeControl    adjustableRunTime;
+    writeInterval   5;
+
+    probeLocations
+    (
+        ( 0.032  0      0.05025)  // T_hot: ヒータ側、鋼材内部
+        (-0.032  0      0.05025)  // T_cold: 反ヒータ側、鋼材内部
+        ( 0      0.024  0.05025)  // T_mid: 周方向90度、鋼材内部
+        ( 0.025  0      0.095)    // T_top: 上面近傍、鋼材内部
+    );
+}

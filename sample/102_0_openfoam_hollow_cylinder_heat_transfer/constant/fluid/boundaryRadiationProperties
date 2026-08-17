@@ -1,0 +1,45 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/fluid";
+    object      boundaryRadiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// 各壁面を不透明・拡散反射面(opaqueDiffusive)として扱い、輻射率(emissivity)を
+// 個別に設定する。ドメイン外周壁は部屋の壁を想定した値、固体表面
+// (fluid_to_solid、splitMeshRegionsが自動生成する結合パッチ)は固体表面の
+// 仕上げを想定した値としている。いずれも代表値であり要調整。
+
+".*"
+{
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type            constantAbsorption;
+        absorptivity    0.9;
+        emissivity      0.9;
+    }
+}
+
+fluid_to_solid
+{
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type            constantAbsorption;
+        absorptivity    0.8;
+        emissivity      0.8;
+    }
+}
+
+
+// ************************************************************************* //

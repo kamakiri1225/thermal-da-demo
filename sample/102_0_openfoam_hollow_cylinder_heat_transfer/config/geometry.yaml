@@ -1,0 +1,36 @@
+specimen:
+  outer_diameter_mm: 75.0
+  inner_diameter_mm: 40.0
+  height_mm: 100.5
+  measured_mass_kg: 2.5
+
+heater:
+  axial_height_mm: 50.0
+  circumferential_length_mm: 100.0
+  thickness_mm: 1.5  # 仮定値。実物を測定後に更新する。
+  center_height_mm: 50.25
+  center_angle_deg: 0.0
+  rated_voltage_V: 12.0
+  rated_power_W: 15.0
+  duty_ratio: 1.0
+  on_until_s: 300.0
+  off_until_s: 600.0
+
+domain:
+  min_mm: [-150.0, -150.0, -50.0]
+  max_mm: [150.0, 150.0, 250.0]
+  background_cell_mm: 12.5
+
+mesh:
+  specimen_surface_level: [2, 2]
+  heater_surface_level: [3, 3]
+  resolve_feature_angle_deg: 30
+
+temperature:
+  initial_K: 293.15
+
+assumptions:
+  - 内周のねじ山は滑らかな直径40 mmの貫通穴へ簡略化する。
+  - ヒートマットは外周の+X方向を中心に配置する。
+  - ヒートマット厚さは未測定のため1.5 mmと仮定する。
+  - 0から300秒まで15 W、300から600秒まで0 Wとする。

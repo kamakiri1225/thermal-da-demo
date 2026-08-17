@@ -1,0 +1,44 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+meshReady=false
+if [ -d constant/fluid/polyMesh ] \
+    && [ -d constant/solid/polyMesh ] \
+    && [ -f 0/fluid/T ] \
+    && [ -f 0/solid/T ]
+then
+    meshReady=true
+fi
+
+runPre=false
+if [ "${FORCE_PREPROCESS:-0}" = "1" ] || [ "$meshReady" = false ]
+then
+    runPre=true
+elif [ -t 0 ]
+then
+    printf "Existing CAD and CHT mesh found. Rebuild preprocessing? [y/N]: "
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES)
+            runPre=true
+            ;;
+    esac
+fi
+
+if [ "$runPre" = true ]
+then
+    ./Allrun.pre
+else
+    echo "Reusing existing FreeCAD geometry and CHT mesh."
+fi
+
+# Serial run (default mesh is approximately 83000 cells).
+# For a finer mesh, decompose and run in parallel instead:
+#   runApplication decomposePar -allRegions
+#   runParallel $(getApplication)
+#   runApplication reconstructPar -allRegions
+runApplication $(getApplication)
+
+#------------------------------------------------------------------------------

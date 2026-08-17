@@ -1,0 +1,25 @@
+FoamFile
+{
+    format ascii;
+    class dictionary;
+    object topoSetDict;
+}
+
+actions
+(
+    {
+        name heaterFaces;
+        type faceSet;
+        action new;
+        source patchToFace;
+        patch solid_to_fluid;
+    }
+    {
+        name heaterFaces;
+        type faceSet;
+        action subset;
+        source searchableSurfaceToFace;
+        surfaceType triSurfaceMesh;
+        surfaceName heaterSelection.stl;
+    }
+);

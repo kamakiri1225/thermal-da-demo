@@ -1,0 +1,33 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// splitMeshRegions前の背景メッシュ用。実際の境界条件は
+// system/<region>/changeDictionaryDict で分割後に設定する。
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform 293.15; // 20 degC
+
+boundaryField
+{
+    ".*"
+    {
+        type            calculated;
+        value           $internalField;
+    }
+}
+
+
+// ************************************************************************* //

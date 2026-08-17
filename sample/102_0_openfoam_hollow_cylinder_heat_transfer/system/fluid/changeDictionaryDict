@@ -1,0 +1,168 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2512                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/fluid";
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// splitMeshRegions直後は各フィールドが"calculated"のままなので、
+// ここで実際の境界条件に置き換える。
+// fluid_to_solid は splitMeshRegions が自動生成する結合パッチ名。
+
+U
+{
+    internalField   uniform (0 0 0);
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            noSlip;
+        }
+
+        heaterCover
+        {
+            type            noSlip;
+        }
+    }
+}
+
+T
+{
+    internalField   uniform 293.15;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            fixedValue;
+            value           uniform 293.15;
+        }
+
+        "fluid_to_.*"
+        {
+            type            compressible::turbulentTemperatureCoupledBaffleMixed;
+            Tnbr            T;
+            kappaMethod     fluidThermo;
+            kappa           none;
+            value           uniform 293.15;
+        }
+
+        heaterCover
+        {
+            type            zeroGradient;
+        }
+    }
+}
+
+p_rgh
+{
+    internalField   uniform 1e5;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            fixedFluxPressure;
+            value           uniform 1e5;
+        }
+
+        heaterCover
+        {
+            type            fixedFluxPressure;
+            value           uniform 1e5;
+        }
+    }
+}
+
+p
+{
+    internalField   uniform 1e5;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 1e5;
+        }
+
+        heaterCover
+        {
+            type            calculated;
+            value           uniform 1e5;
+        }
+    }
+}
+
+G
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+
+        heaterCover
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+    }
+}
+
+qr
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+
+        heaterCover
+        {
+            type            calculated;
+            value           uniform 0;
+        }
+    }
+}
+
+IDefault
+{
+    internalField   uniform 0;
+
+    boundaryField
+    {
+        ".*"
+        {
+            type            wideBandDiffusiveRadiation;
+            value           uniform 0;
+        }
+
+        heaterCover
+        {
+            type            wideBandDiffusiveRadiation;
+            value           uniform 0;
+        }
+    }
+}
+
+
+// ************************************************************************* //
