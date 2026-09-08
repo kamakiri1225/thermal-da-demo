@@ -1,0 +1,12 @@
+filter: PF (field-space, OpenFOAM-in-the-loop)
+n_particles: 5
+solid_cells: 20696
+obs_probes:
+- hot
+- cold
+t_end_s: 20.0
+obs_interval_s: 10.0
+rmse_field_initial_K: 7.609085283013257
+rmse_field_final_K: 2.3824680893629493
+Q_final_W: 20.22955876585258
+Q_true_W: 15.0
