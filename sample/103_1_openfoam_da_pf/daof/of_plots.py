@@ -72,9 +72,9 @@ def field_snapshots(fields_dir, title, out_path):
                     key=lambda p: float(p.split("ensmean_t")[1][:-4]))
     da_final = np.load(finals[-1])
 
-    panels = [("でたらめ初期場 (ensemble mean)", t0),
-              ("データ同化後 (ensemble mean)", da_final),
-              ("真値場 (truth)", truth)]
+    panels = [("initial guess (garbage, ensemble mean)", t0),
+              ("after DA (ensemble mean)", da_final),
+              ("truth", truth)]
     clim = [min(truth.min(), da_final.min()) - K,
             max(truth.max(), da_final.max()) - K]
 
