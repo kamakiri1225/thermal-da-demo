@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OpenFOAM 連成の重い生成物(再実行で作り直せる)
+# base_case は 102_0 から setup_base_case.sh で複製するメッシュ入りケース
+# run_enkf / run_pf は真値・各メンバーのケース(メッシュ・時間ディレクトリ・中間場)
+openfoam/base_case/
+openfoam/run_enkf/
+openfoam/run_pf/
+openfoam/smoke_member/
+openfoam/*.log

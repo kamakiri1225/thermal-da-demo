@@ -1,0 +1,8 @@
+enkf:
+  n: 60
+  rmse_all_final_K: 0.07605275861464078
+  rmse_unobs_final_K: 0.07937901487602277
+pf:
+  n: 400
+  rmse_all_final_K: 0.45796748291560513
+  rmse_unobs_final_K: 0.5134270409606174

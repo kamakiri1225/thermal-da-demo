@@ -1,0 +1,34 @@
+# データ同化(双子実験 / OSSE)の設定 — 粒子フィルタ(PF)版
+# 103_0 (EnKF) と同じ問題設定。粒子フィルタは必要標本数が多いため
+# n_members を増やしている。真値・観測は seed が同じなので EnKF と一致する。
+
+experiment:
+  t_end_s: 600.0
+  model_dt_s: 1.0
+  obs_interval_s: 20.0
+  seed: 20260908
+
+truth:
+  T0_C: 20.0
+
+observation:
+  nodes: [hot, cold]
+  noise_C: 0.30
+
+ensemble:
+  n_members: 400        # PF は次元の呪いに弱いので EnKF より多めの粒子を使う
+  init_T_min_C: 10.0
+  init_T_max_C: 50.0
+  init_q_scale_mean: 2.0
+  init_q_scale_std: 0.8
+  init_h_mean: 0.50
+  init_h_std: 0.30
+
+filter:
+  inflation: 1.0        # PF では未使用
+  param_jitter_q: 0.02  # リサンプリング後の貧困化を防ぐパラメータ揺動
+  param_jitter_h: 0.005
+  q_scale_bounds: [0.0, 5.0]
+  h_bounds: [0.0, 5.0]
+  pf_ess_frac: 0.5      # ESS < 0.5*N でリサンプリング
+  pf_jitter_T_C: 0.30   # リサンプリング後に温度へ加える正則化ジッタ [degC]

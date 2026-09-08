@@ -1,0 +1,5 @@
+numpy>=1.24
+scipy>=1.10
+matplotlib>=3.6
+PyYAML>=6.0
+pyvista>=0.44        # 観測点/未観測点の3D可視化(run/plot_probe_locations.py)のみ

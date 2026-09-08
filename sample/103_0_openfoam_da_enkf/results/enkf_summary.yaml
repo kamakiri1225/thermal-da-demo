@@ -1,0 +1,13 @@
+filter: EnKF
+n_members: 60
+obs_nodes:
+- hot
+- cold
+obs_interval_s: 20.0
+rmse_all_initial_K: 9.738172199313764
+rmse_all_final_K: 0.07605275861464078
+rmse_unobs_final_K: 0.07937901487602277
+q_scale_final: 0.9764272859676916
+q_scale_true: 1.0
+h_final: 0.04837210657330165
+h_true: 0.023636759649249713

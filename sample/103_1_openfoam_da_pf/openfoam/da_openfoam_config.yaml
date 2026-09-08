@@ -1,0 +1,37 @@
+# OpenFOAM-in-the-loop データ同化(field-space)設定
+# 既存(102_0)メッシュ・輻射あり fvDOM・直列実行を前提とした「最小実行」。
+# 1メンバーの短ウィンドウでも数分かかるため、規模は控えめにしている。
+# スケールアップは n_members / t_end_s / obs_interval_s を増やすだけ。
+
+experiment:
+  t_end_s: 20.0          # 同化する時間範囲 [s]
+  obs_interval_s: 10.0   # 観測(同化)間隔 [s] -> 2 サイクル
+  seed: 20260908
+
+truth:
+  T0_K: 293.15           # 真の初期温度(20 degC 一様, 102_0 と同じ)
+  Q_true_W: 15.0         # 真のヒータ発熱 [W]
+
+observation:
+  # 観測プローブ(固体表面近傍)。最近傍セルを観測点とする。
+  probes:
+    hot:  [0.032, 0.0, 0.05025]
+    cold: [-0.032, 0.0, 0.05025]
+  noise_C: 0.30          # 観測ノイズ 標準偏差 [degC]
+
+ensemble:
+  n_members: 5
+  # でたらめな初期状態: 各メンバー一様温度をランダムに与える(真の 293.15 K を知らない)
+  init_T_min_K: 280.0
+  init_T_max_K: 320.0
+  # ヒータ発熱の初期分布(真値 15 W からずらす)
+  init_Q_min_W: 5.0
+  init_Q_max_W: 30.0
+
+filter:
+  inflation: 1.05        # EnKF 乗算インフレーション
+  T_clip_K: [250.0, 400.0]
+  Q_bounds_W: [0.0, 60.0]
+  pf_ess_frac: 0.5       # PF リサンプリング閾値
+  pf_jitter_T_K: 0.3     # PF リサンプリング後の温度ジッタ [K]
+  pf_jitter_Q_W: 1.0     # PF リサンプリング後の Q ジッタ [W]

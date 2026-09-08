@@ -1,0 +1,14 @@
+filter: PF
+n_particles: 400
+obs_nodes:
+- hot
+- cold
+obs_interval_s: 20.0
+rmse_all_initial_K: 9.79781433487877
+rmse_all_final_K: 0.45796748291560513
+rmse_unobs_final_K: 0.5134270409606174
+ess_min: 1.0226173878564524
+q_scale_final: 1.7181823679683321
+q_scale_true: 1.0
+h_final: 0.8055902192360651
+h_true: 0.023636759649249713
