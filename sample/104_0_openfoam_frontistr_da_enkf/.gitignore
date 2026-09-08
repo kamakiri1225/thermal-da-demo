@@ -6,5 +6,6 @@ __pycache__/
 openfoam/base_case/
 openfoam/run_fem_enkf/
 openfoam/fem_smoke/
+openfoam/fem_disp_*/
 openfoam/smoke_member/
 openfoam/*.log
