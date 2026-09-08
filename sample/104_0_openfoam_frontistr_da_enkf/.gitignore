@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# OpenFOAM/FrontISTR 連成の重い生成物(再実行で作り直せる)
+openfoam/base_case/
+openfoam/run_fem_enkf/
+openfoam/fem_smoke/
+openfoam/smoke_member/
+openfoam/*.log
