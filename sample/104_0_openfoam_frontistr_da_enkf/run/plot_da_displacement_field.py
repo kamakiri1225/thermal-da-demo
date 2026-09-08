@@ -112,11 +112,11 @@ def main():
         cloud = pv.PolyData(warped)
         cloud[bar_titles[j]] = uz_um
         pl.add_mesh(cloud, scalars=bar_titles[j], cmap="coolwarm", clim=clims[j],
-                    render_points_as_spheres=True, point_size=6,
+                    render_points_as_spheres=True, point_size=9,
                     scalar_bar_args={"title": bar_titles[j],
-                                     "title_font_size": 16, "label_font_size": 13})
+                                     "title_font_size": 22, "label_font_size": 18})
         rng = f"Uz {uz_um.min():.2f}..{uz_um.max():.2f} um"
-        pl.add_text(f"{lab}\n{rng}", font_size=9, color="black")
+        pl.add_text(f"{lab}\n{rng}", font_size=20, color="black")
         pl.camera_position = [(0.22, -0.18, 0.19), (0.0, 0.0, 0.05), (0, 0, 1)]
     pl.set_background("white")
     out = os.path.join(IMG, "da_displacement_field.png")

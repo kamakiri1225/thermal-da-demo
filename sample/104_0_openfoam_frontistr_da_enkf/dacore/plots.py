@@ -48,6 +48,18 @@ def _setup_japanese_font():
 
 _FONT = _setup_japanese_font()
 
+# 図の文字を全体的に大きくする(可読性優先)
+plt.rcParams.update({
+    "font.size": 16,
+    "axes.titlesize": 19,
+    "axes.labelsize": 17,
+    "xtick.labelsize": 15,
+    "ytick.labelsize": 15,
+    "legend.fontsize": 14,
+    "figure.titlesize": 22,
+    "lines.linewidth": 2.2,
+})
+
 
 def plot_state_convergence(hist, title, out_path):
     """5ノードそれぞれについて 真値 vs 解析平均±1σ + 観測 を描く(補正の時刻歴)."""
@@ -76,13 +88,13 @@ def plot_state_convergence(hist, title, out_path):
         ax.set_title(f"{name}  ({tag})")
         ax.grid(alpha=0.3)
         if i == 0:
-            ax.legend(fontsize=8, loc="upper right")
+            ax.legend(fontsize=14, loc="upper right")
     axes[-1].axis("off")
     for ax in axes[3:]:
         ax.set_xlabel("time [s]")
     for ax in (axes[0], axes[3]):
         ax.set_ylabel("temperature [degC]")
-    fig.suptitle(title, fontsize=13)
+    fig.suptitle(title, fontsize=20)
     fig.tight_layout()
     fig.savefig(out_path, dpi=130)
     plt.close(fig)
@@ -120,8 +132,8 @@ def plot_params(hist, title, out_path):
         ax.set_xlabel("time [s]")
         ax.set_title(lab)
         ax.grid(alpha=0.3)
-        ax.legend(fontsize=9)
-    fig.suptitle(title, fontsize=13)
+        ax.legend(fontsize=14)
+    fig.suptitle(title, fontsize=20)
     fig.tight_layout()
     fig.savefig(out_path, dpi=130)
     plt.close(fig)

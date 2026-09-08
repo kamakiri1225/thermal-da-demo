@@ -80,9 +80,9 @@ def main():
         pl.add_mesh(clipped, scalars="T [degC]", cmap="turbo", clim=clims[lab],
                     show_edges=False, scalar_bar_args={
                         "title": f"T {lab.split('(')[0].strip()[:6]} [degC]",
-                        "title_font_size": 15, "label_font_size": 12})
+                        "title_font_size": 22, "label_font_size": 18})
         pl.add_text(f"{lab}\nT {fields[lab].min():.1f}..{fields[lab].max():.1f}C",
-                    font_size=9, color="black")
+                    font_size=20, color="black")
         pl.camera_position = [(0.24, -0.20, 0.20), (0.0, -0.01, 0.05), (0, 0, 1)]
     pl.set_background("white")
     out = os.path.join(IMG, "da_temperature_field3d.png")

@@ -46,7 +46,7 @@ def plot_displacement(hist, out_path):
     ax.set_ylabel("上面変位 Uz [um]")
     ax.set_title("OpenFOAM×FrontISTR×EnKF: 変位観測の予報値と真値")
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=9)
+    ax.legend(fontsize=14)
     fig.tight_layout()
     fig.savefig(out_path, dpi=130)
     plt.close(fig)

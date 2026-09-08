@@ -9,3 +9,6 @@ openfoam/fem_smoke/
 openfoam/fem_disp_*/
 openfoam/smoke_member/
 openfoam/*.log
+
+# ParaView 出力(再生成可能, run/export_paraview.py)
+paraview/

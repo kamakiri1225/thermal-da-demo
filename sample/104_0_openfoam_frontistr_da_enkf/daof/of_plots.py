@@ -84,9 +84,9 @@ def field_snapshots(fields_dir, title, out_path):
         cloud = pv.PolyData(centres)
         cloud["T_degC"] = field - K
         pl.add_mesh(cloud, scalars="T_degC", cmap="turbo", clim=clim,
-                    render_points_as_spheres=True, point_size=6,
+                    render_points_as_spheres=True, point_size=9,
                     scalar_bar_args={"title": "T [degC]"})
-        pl.add_text(lab, font_size=9, color="black")
+        pl.add_text(lab, font_size=20, color="black")
         pl.camera_position = [(0.22, -0.18, 0.19), (0.0, 0.0, 0.05), (0, 0, 1)]
     pl.set_background("white")
     pl.screenshot(out_path)

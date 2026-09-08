@@ -63,14 +63,14 @@ def plot_temperature(hist, out):
         ax.set_title(f"{name} ({tag})")
         ax.grid(alpha=0.3)
         if i == 0:
-            ax.legend(fontsize=8, loc="upper right")
+            ax.legend(fontsize=14, loc="upper right")
     axes[-1].axis("off")
     for ax in axes[3:]:
         ax.set_xlabel("time [s]")
     for ax in (axes[0], axes[3]):
         ax.set_ylabel("温度 [degC]")
     fig.suptitle("ROM版 温度の時刻歴(0→600s, ヒータON 0-300s→OFF): "
-                 "でたらめ初期→データ同化で真値へ", fontsize=13)
+                 "でたらめ初期→データ同化で真値へ", fontsize=20)
     fig.tight_layout()
     fig.savefig(out, dpi=130)
     plt.close(fig)
@@ -94,9 +94,9 @@ def plot_displacement(hist, out):
         ax.set_ylabel("上面変位 Uz [um]")
         ax.grid(alpha=0.3)
         if j == 0:
-            ax.legend(fontsize=9)
+            ax.legend(fontsize=14)
     fig.suptitle("ROM版 上面変位の時刻歴(FrontISTR校正): でたらめ初期→データ同化で真値へ",
-                 fontsize=13)
+                 fontsize=20)
     fig.tight_layout()
     fig.savefig(out, dpi=130)
     plt.close(fig)
