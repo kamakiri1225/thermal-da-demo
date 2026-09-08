@@ -44,7 +44,7 @@ def plot_displacement(hist, out_path):
         ax.plot(t, tr, "--", color=colors[j], lw=2, label=f"{lab} (真値)")
     ax.set_xlabel("time [s]")
     ax.set_ylabel("上面変位 Uz [um]")
-    ax.set_title("OpenFOAM×FrontISTR×EnKF: 変位観測の予報値と真値")
+    ax.set_title("上面変位観測の予報アンサンブルと真値 (OpenFOAM-FrontISTR-EnKF)")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=14)
     fig.tight_layout()
@@ -72,10 +72,10 @@ def main():
         {**hist_c, "times": hist["times"]},
         os.path.join(RESULTS, "openfoam_fem_enkf_history.csv"))
     of_plots.plot_field_rmse(
-        hist_c, "OpenFOAM×FrontISTR×EnKF: 固体温度場 RMSE(温度2点+変位2点観測)",
+        hist_c, "固体温度場 RMSE の時間変化 (温度2点+変位2点観測, OpenFOAM-FrontISTR-EnKF)",
         os.path.join(IMG, "openfoam_fem_enkf_rmse.png"))
     of_plots.plot_Q(
-        hist, "OpenFOAM×FrontISTR×EnKF: ヒータ発熱 Q の推定",
+        hist, "ヒータ発熱量 Q の推定 (OpenFOAM-FrontISTR-EnKF)",
         os.path.join(IMG, "openfoam_fem_enkf_Q.png"))
     of_plots.field_snapshots(
         os.path.join(WORKDIR, "fields"), "",

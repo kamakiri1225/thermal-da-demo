@@ -69,8 +69,7 @@ def plot_temperature(hist, out):
         ax.set_xlabel("time [s]")
     for ax in (axes[0], axes[3]):
         ax.set_ylabel("温度 [degC]")
-    fig.suptitle("ROM版 温度の時刻歴(0→600s, ヒータON 0-300s→OFF): "
-                 "でたらめ初期→データ同化で真値へ", fontsize=20)
+    fig.suptitle("縮約モデルによる固体温度の時刻歴 (0-600 s, ヒータ通電 0-300 s / 遮断 300-600 s)", fontsize=20)
     fig.tight_layout()
     fig.savefig(out, dpi=130)
     plt.close(fig)
@@ -95,7 +94,7 @@ def plot_displacement(hist, out):
         ax.grid(alpha=0.3)
         if j == 0:
             ax.legend(fontsize=14)
-    fig.suptitle("ROM版 上面変位の時刻歴(FrontISTR校正): でたらめ初期→データ同化で真値へ",
+    fig.suptitle("縮約モデルによる上面変位の時刻歴 (FrontISTR 校正)",
                  fontsize=20)
     fig.tight_layout()
     fig.savefig(out, dpi=130)
@@ -112,7 +111,7 @@ def plot_rmse(hist, out):
     ax.plot(t, da, "-o", ms=3, color="tab:blue", label="データ同化あり")
     ax.set_xlabel("time [s]"); ax.set_ylabel("温度RMSE(全5ノード) [K]")
     ax.set_yscale("log"); ax.grid(alpha=0.3, which="both"); ax.legend()
-    ax.set_title("ROM版 温度RMSEの収束: 同化ありは数十秒で真値に到達")
+    ax.set_title("縮約モデルにおける温度 RMSE の時間変化 (データ同化あり / なし)")
     fig.tight_layout(); fig.savefig(out, dpi=130); plt.close(fig)
 
 
