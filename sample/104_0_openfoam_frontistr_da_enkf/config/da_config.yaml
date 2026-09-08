@@ -1,0 +1,44 @@
+# ROM 版 データ同化(双子実験 / OSSE)の設定 — 104(温度＋変位観測)
+# 0→600s(ヒータON 300s→OFF)を数秒で回す高速版。OpenFOAM 版と別に、
+# 分かりやすい全ストーリーを見るために使う。
+
+experiment:
+  t_end_s: 600.0          # 同化する時間範囲(102_0 と同じ 0-600 s)
+  model_dt_s: 1.0         # ROM 前進積分の時間刻み [s]
+  obs_interval_s: 20.0    # 観測(同化)を行う間隔 [s] -> 30 サイクル
+  seed: 20260908          # 乱数シード(再現性のため固定)
+
+# 真値(truth)= 校正済み ROM に真パラメータを与えたラン。
+# h_true, q_scale_true は config/rom_calibrated.yaml から読む。
+truth:
+  T0_C: 20.0              # 真の初期温度(全ノード 20 degC = 102_0 と一致)
+
+# 観測: 真値ランの「数点」ノード温度にノイズを乗せたもの
+observation:
+  nodes: [hot, cold]      # 観測する固体ノード温度(数点)。mid/top/core は未観測。
+  noise_C: 0.30           # 温度観測ノイズ 標準偏差 [degC]
+  disp_noise_mm: 1.0e-4   # 変位観測ノイズ 標準偏差 [mm] (=0.1um, レーザ変位計クラス)
+
+# アンサンブル初期分布:「でたらめな状態」から出発する
+ensemble:
+  n_members: 60
+  # 温度: 各ノード・各メンバーを一様乱数で散らす(真の 20 degC を全く知らない)
+  init_T_min_C: 10.0
+  init_T_max_C: 50.0
+  # パラメータ初期分布(真値からわざとずらす)
+  init_q_scale_mean: 2.0    # 真値 1.0 に対し過大にスタート
+  init_q_scale_std: 0.8
+  init_h_mean: 0.50         # 真値 ~0.024 W/K に対し過大にスタート
+  init_h_std: 0.30
+
+# フィルタ調整パラメータ
+filter:
+  inflation: 1.02           # EnKF 乗算的共分散インフレーション
+  param_jitter_q: 0.01      # 各サイクルでパラメータに加える微小ランダムウォーク std
+  param_jitter_h: 0.003
+  # パラメータの物理的な下限・上限(更新後にクリップ)
+  q_scale_bounds: [0.0, 5.0]
+  h_bounds: [0.0, 5.0]
+  # PF 専用
+  pf_ess_frac: 0.5          # 有効サンプル数がこの割合を下回ったらリサンプリング
+  pf_jitter_T_C: 0.20       # リサンプリング後に温度へ加えるジッタ std [degC]
