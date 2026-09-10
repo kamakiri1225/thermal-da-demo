@@ -172,7 +172,7 @@ def main():
     os.makedirs(tmp, exist_ok=True)
 
     cfg = yaml.safe_load(open(os.path.join(ROOT, "config", "da_config.yaml")))
-    hist = run_rom_fem_twin(cfg, load_calibrated(), load_operator())
+    hist = run_rom_fem_twin(cfg, load_calibrated(), load_operator(), assim_disp=True)
     grid, coords, node_ids = cylinder_grid()
     W = idw_weights(coords, np.array(list(NODE_XYZ.values())))
 

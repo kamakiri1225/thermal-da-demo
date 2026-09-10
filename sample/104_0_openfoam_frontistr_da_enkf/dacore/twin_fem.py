@@ -1,15 +1,10 @@
-"""ROM 版 双子実験: 0→600s の分かりやすい全ストーリー(温度同化＋変位の予測).
+"""ROM 版 双子実験: 0→600s の全ストーリー(assim_disp=True で変位もデータ同化).
 
-温度2点を同化して固体温度場(5ノード)を真値へ補正し、補正後の温度から
-FrontISTR 校正済みの線形写像 uz=D(T-T_ref) で上面変位を予測する。
-「温度を直せば変位も自動的に真値に一致する」ことを見せる。
-
-なぜ変位を「同化」しないか(重要な教訓):
-    縮約した5ノードROMでは、上面変位は一様加熱モードにほぼ比例し、既に観測している
-    温度2点とほとんど一次従属(collinear)になる。そのため変位を観測に足しても
-    新しい情報がほぼ増えず、逆に条件数が悪化して推定を乱す。変位が真に効くのは、
-    全セル温度場を積分する OpenFOAM 版(run_openfoam_fem_enkf.py)の方。
-    → ROM: 温度を同化 / 変位は予測、 OpenFOAM: 変位も同化。
+既定(assim_disp=False)は温度2点のみ同化し、変位は補正後温度からの予測。
+assim_disp=True にすると、IDW→FrontISTR で構築した演算子 M(µm/K,
+config/M_frontistr_operator.npy) によるアフィン観測 uz=M(T-T_ref) を
+温度と一緒に同化する(温度のみ0.076K→温度+変位0.004K、docs/11参照)。
+注意: 校正線形写像Dでの同化や、絶対温度 M@T での評価は発散する(過去のバグ)。
 
 さらに「同化なし(free run)」も同じ初期アンサンブルで走らせ、
 温度・変位の時刻歴を [真値 / 同化あり / 同化なし] で比較する。
@@ -48,7 +43,7 @@ def _disp_traj(traj_T, op):
     return displacement(traj_T, op)
 
 
-def run_rom_fem_twin(cfg, calib, op):
+def run_rom_fem_twin(cfg, calib, op, assim_disp=False, M_um=None, sigU_um=0.3):
     """戻り値 hist: 温度(5)・変位(2)の [真値/同化あり/同化なし] 時刻歴."""
     seed = cfg["experiment"]["seed"]
     rng_obs = np.random.default_rng(seed)
@@ -57,6 +52,10 @@ def run_rom_fem_twin(cfg, calib, op):
 
     H, R, n_t = build_H_R(cfg)
     tnodes = obs_node_indices(cfg)
+    if assim_disp and M_um is None:
+        import os as _os
+        M_um = np.load(_os.path.join(_os.path.dirname(__file__), "..", "config",
+                                     "M_frontistr_operator.npy")) * 1e6  # µm/K
     n_d = np.asarray(op["D"]).shape[0]
     sigU = cfg["observation"].get("disp_noise_mm", 1e-4)
     fb = cfg["filter"]
@@ -86,7 +85,18 @@ def run_rom_fem_twin(cfg, calib, op):
     for k, (t1, ci) in enumerate(zip(cyc_t, cyc_idx)):
         Zda = forecast(Zda, t_prev, t1, calib, cfg, rng_da)
         Zfree = forecast(Zfree, t_prev, t1, calib, cfg, rng_free)  # 同化しない
-        Zda = enkf_update(Zda, obs[k], H, R, rng_da, inflation=fb["inflation"])
+        if assim_disp:
+            # 変位も同化: 観測=温度2点+変位2点(アフィン M(T-Tref) [µm])
+            ci_t = cyc_idx[k]
+            du_true = M_um @ (truth[ci_t] - T_AIR_K)
+            y4 = np.concatenate([obs[k], du_true + rng_obs.normal(0, sigU_um, len(du_true))])
+            R4 = np.diag(list(np.diag(R)) + [sigU_um**2]*len(du_true))
+            Yf = np.zeros((len(Zda), len(y4)))
+            Yf[:, :n_t] = Zda[:, tnodes]
+            Yf[:, n_t:] = (Zda[:, :N_NODES] - T_AIR_K) @ M_um.T
+            Zda = enkf_update(Zda, y4, None, R4, rng_da, inflation=fb["inflation"], Yf=Yf)
+        else:
+            Zda = enkf_update(Zda, obs[k], H, R, rng_da, inflation=fb["inflation"])
         clip_params(Zda, cfg)
         rec_t.append(float(t1))
         da_T.append(Zda[:, :N_NODES].mean(0))
