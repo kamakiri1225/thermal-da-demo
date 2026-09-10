@@ -1,0 +1,20 @@
+{
+  "slides": 51,
+  "pdf_pages": 51,
+  "page_size_pt": [
+    960,
+    540
+  ],
+  "aspect_ratio": "16:9",
+  "all_takeaways_present": true,
+  "text_within_page_bounds": true,
+  "review": "全ページ一覧の目視確認、ページ数・本文境界・要点テキストの検査",
+  "solver_rerun": false,
+  "rom_rerun": true,
+  "rom_rmse_K": {
+    "initial": 9.738172199313764,
+    "analysis_final": 0.03884687184192219,
+    "free_final": 2.6144472257957423
+  },
+  "main_slides": 22
+}

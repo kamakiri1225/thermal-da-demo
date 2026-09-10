@@ -1,0 +1,5 @@
+assets/eq_*.svg
+conference_slides.html
+__pycache__/
+*.pyc
+slide_overview.jpg
