@@ -4,6 +4,23 @@
 実験(熱電対＋変位センサ)と同じ観測構成で、でたらめな初期状態から固体温度場と
 ヒータ発熱 Q を補正する双子実験(OSSE)。
 
+## 📊 発表スライド（ブラウザで閲覧）
+
+**[reveal.js プレゼンをブラウザで開く（GitHub Pages）](https://kamakiri1225.github.io/thermal-da-demo/sample/104_0_openfoam_frontistr_da_enkf/presentation/conference_reveal.html)**
+― 章＝横スクロール(←→)、章内＝縦スクロール(↑↓)、数式はTeX、温度/流速/変形のGIFアニメつき。
+配布用は `presentation/conference_slides.pdf`。構成: 第1部 OpenFOAM＋FrontISTR →
+第2部 ROM → 全体まとめ。
+
+## 解説書（`docs/`, データ同化を理解するために）
+
+- `09_what_104_does.md` … まず全体像 / `02_beginner_guide.md` … 初学者向け超ていねい
+- `08_what_was_computed.md` … 何をどこで計算したか（作業の流れ・成果物の由来）
+- `05_folder_structure.md` … フォルダ地図 / `07_cycle_and_timing_faq.md` … サイクル・分散のFAQ
+- `00_temp_displacement_da.md`・`10_q_estimation_explained.md` … 手法の数式（Q推定の全記号定義）
+- `03_rom_derivation.md`・`11_rom_concept.md` … ROMの導出・発想・変位同化の成否
+- `01_method_walkthrough.md`・`06_ensemble_calculation.md` … 実装の流れ・アンサンブル計算
+- `04_paraview.md` … ParaViewでの分布・時刻歴の見方
+
 ## 観測構成
 
 | 観測 | 由来 | ノイズ |
