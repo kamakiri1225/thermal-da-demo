@@ -4,6 +4,11 @@
 どの関数を通って流れるか**を、実際の数値とともに追う。理論の数式は
 `00_temp_displacement_da.md` と `../103_0_openfoam_da_enkf/docs/05_theory_to_code.md`。
 
+**5ケースをどこで実行し、平均・分散・共分散をどう計算するか**は
+[`06_ensemble_calculation.md`](06_ensemble_calculation.md) を参照。
+ケース別初期値、実行フォルダ、配列サイズ、対応するファイル・関数、
+EnKF共分散の分母N−1と表示用標準偏差の分母Nの違いまで記載している。
+
 ---
 
 ## 全体像(1枚で)

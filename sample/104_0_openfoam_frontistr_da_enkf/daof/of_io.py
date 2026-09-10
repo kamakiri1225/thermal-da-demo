@@ -47,7 +47,15 @@ _SOLID_BF = """boundaryField
     {{
         type            externalWallHeatFluxTemperature;
         mode            power;
-        Q               constant {Q:.8g};
+        // ヒータ通電 0-300 s は推定 Q [W]、以降(300-600 s)は遮断(0 W)。
+        // 102_0 / ROM 版と同じ加熱→冷却スケジュール。20 s 実行時は全区間 ON。
+        Q               table
+        (
+            (0        {Q:.8g})
+            (299.999  {Q:.8g})
+            (300      0)
+            (600      0)
+        );
         kappaMethod     solidThermo;
         kappa           none;
         value           uniform 293.15;
