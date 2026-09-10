@@ -42,11 +42,15 @@
 
 ## 2つのやり方で実施している
 
-同じEnKFを、前進計算の「モデル」を変えて2通りで回している。
+同じEnKFを、**前進モデル**を変えて2通りで回している。
+
+> **前進モデル**とは「今の温度 → 少し後の温度」と**時間を前へ進める計算**のこと
+> (予報モデル)。天気予報で「今の大気から明日を計算するシミュレーション」に相当。
+> EnKFの①予報の工程がこれ。
 
 | | ROM版 | OpenFOAM実機版 |
 |---|---|---|
-| 前進モデル | 5点の集中定数モデル(NumPy) | chtMultiRegionFoam(実CFD, 20696セル) |
+| 前進モデル(時間を進める計算) | 5点の集中定数モデル(NumPy) | chtMultiRegionFoam(実CFD, 20696セル) |
 | 変位 | 温度→変位の線形写像 | FrontISTR(実FEM) |
 | 規模 | 60メンバー × 30サイクル | 5メンバー × 2サイクル |
 | 速さ | 数秒 | 数十分 |
@@ -55,6 +59,29 @@
 
 ROMは本物(102_0/102_1)に校正済みなので挙動は本物そっくり。
 「軽くて分かりやすいROM」と「重くて正確なOpenFOAM」を住み分けている。
+
+### どのフォルダでやっているのか
+
+両方とも同じ104フォルダの中。使うサブフォルダが違うだけ。
+
+| 役割 | ROM版 | OpenFOAM実機版 |
+|------|-------|----------------|
+| 実行の入口 | `run/run_rom_fem.py` | `run/run_openfoam_fem_enkf.py` |
+| 前進モデル | `dacore/cht_rom.py` | `daof/of_case.py` → `chtMultiRegionFoam` |
+| 実ケースの置き場 | (不要, 純NumPy) | `openfoam/run_fem_enkf/`(Git管理外) |
+| 変位 | `dacore/displacement.py` | `fem/fem_obs.py` → `fistr1` |
+| 双子実験の司令塔 | `dacore/twin_fem.py` | `daof/of_fem_twin.py` |
+| 解析(EnKF) | `dacore/enkf.py` | `dacore/enkf.py`(同じファイル) |
+
+まとめると:
+- **ROM版 = `dacore/` の中**(実ソルバを呼ばない)
+- **OpenFOAM版 = `daof/` + `fem/` + `openfoam/`**
+- **EnKF解析だけは両方とも `dacore/enkf.py` を共有**
+
+```
+ROM版      : run/run_rom_fem.py          → dacore/(cht_rom, displacement, twin_fem, enkf)
+OpenFOAM版 : run/run_openfoam_fem_enkf.py → daof/ + fem/ + openfoam/  ＋  dacore/enkf.py(解析のみ共有)
+```
 
 ---
 
