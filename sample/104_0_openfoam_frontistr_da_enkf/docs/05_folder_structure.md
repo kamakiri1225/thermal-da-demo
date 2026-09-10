@@ -78,6 +78,8 @@
 | `03_rom_derivation.md` | ROMの数学的導出(PDE→ODE、校正、なぜ5点で一致するか) |
 | `04_paraview.md` | ParaViewでの見方(分布・時刻歴アニメ) |
 | `05_folder_structure.md` | このファイル(フォルダ地図) |
+| [`06_ensemble_calculation.md`](06_ensemble_calculation.md) | 5ケースの計算場所・初期値・平均と共分散の計算式・対応プログラム。ROM版60メンバーとの違い |
+| `07_cycle_and_timing_faq.md` | よくある疑問(観測点のばらつき・分散は毎秒か・サイクルとは・計算回数・すぐ直る理由) |
 
 #### `docs/img/` … 図(PNG、GitHubで表示される)
 | 図 | 内容 |
