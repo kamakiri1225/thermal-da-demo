@@ -80,6 +80,7 @@
 | `05_folder_structure.md` | このファイル(フォルダ地図) |
 | [`06_ensemble_calculation.md`](06_ensemble_calculation.md) | 5ケースの計算場所・初期値・平均と共分散の計算式・対応プログラム。ROM版60メンバーとの違い |
 | `07_cycle_and_timing_faq.md` | よくある疑問(観測点のばらつき・分散は毎秒か・サイクルとは・計算回数・すぐ直る理由) |
+| `08_what_was_computed.md` | **何を・どこで計算し、いま104に何があるか(作業全体の流れと成果物の由来早見表)** |
 
 #### `docs/img/` … 図(PNG、GitHubで表示される)
 | 図 | 内容 |
