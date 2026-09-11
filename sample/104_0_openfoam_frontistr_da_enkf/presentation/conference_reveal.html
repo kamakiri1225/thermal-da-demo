@@ -998,7 +998,32 @@ OpenFOAM連成（ケース生成・実行・場の読み書き・双子実験ド
 <li>20秒：<strong>0.02030 K</strong></li>
 </ul>
 <p>5メンバー・単一シードの結果。</p>
-</div></div><div class="takeaway">この双子実験では、初期の大きな温度ずれを補正できた。</div></section><section class="visual"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>発熱量Qは、真値15 Wの近傍へ</h2><div class="content"><figure><img src="assets/q.png"><figcaption>真値：15 W。10秒・20秒の統計は更新・クリップ後。</figcaption></figure><div class="body"><ul>
+</div></div><div class="takeaway">この双子実験では、初期の大きな温度ずれを補正できた。</div></section><section class="visual"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>【600秒フル実行】加熱→冷却の全過程で真値に追従</h2><div class="content"><figure><img src="assets/openfoam_fem_enkf_Q.png"><figcaption>発熱量Qの推定: 60sで急収束→240s以降は真値15Wに固定(0-600s)</figcaption></figure><div class="body"><p>最小実行(20s)の後、<strong>0→600s(ヒータON
+0-300s→OFF)を10サイクル</strong>で完走:</p>
+<table>
+<thead>
+<tr class="header">
+<th>指標</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場RMSE</td>
+<td>13K(でたらめ) → 1サイクルで0.04K → <strong>最終0.011K</strong></td>
+</tr>
+<tr class="even">
+<td>発熱量Q</td>
+<td>t=240sで <strong>15.08±0.16W</strong>、以降真値15Wに固定</td>
+</tr>
+<tr class="odd">
+<td>冷却フェーズ</td>
+<td>Q感度が消えても温度場は真値に張り付いたまま</td>
+</tr>
+</tbody>
+</table>
+<p>実ソルバ(chtMultiRegionFoam+FrontISTR)5メンバー直列で約13時間。</p>
+</div></div><div class="takeaway">600s全過程でも同化は破綻せず、Qは加熱中に確定し冷却中も場が真値追従。</div></section><section class="visual"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>発熱量Qは、真値15 Wの近傍へ</h2><div class="content"><figure><img src="assets/q.png"><figcaption>真値：15 W。10秒・20秒の統計は更新・クリップ後。</figcaption></figure><div class="body"><ul>
 <li>初期平均：10.264 W</li>
 <li>10秒：16.359 W</li>
 <li>20秒：<strong>14.444 W</strong></li>
