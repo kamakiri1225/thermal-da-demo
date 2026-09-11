@@ -62,7 +62,7 @@ FrontISTRで実計算した感度分布と、5×2条件×5seedの同化実験か
 （`run/displacement_point_selection.py`。5単位モード×FrontISTR5回で全5040節点の
 感度 M_all を取得し、選び方を変えて同化）。
 
-![変位点の感度と選定](img/disp_point_sensitivity_3d.png)
+![FrontISTR感度(W行/W列)](img/sensitivity_frontistr.png)
 
 ![選び方別の精度](img/disp_point_selection_rmse.png)
 

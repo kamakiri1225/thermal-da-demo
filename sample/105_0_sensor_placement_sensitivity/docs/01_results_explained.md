@@ -17,7 +17,7 @@
 
 ## 図1: 熱感度の3D分布 ― 「どこを温めると変位計が動くか」
 
-![感度3D](img/sensitivity_3d.png)
+![FrontISTR感度](img/sensitivity_frontistr.png)
 
 **読み方:**
 - 私たちは上面の**変位2点**（黄色い球＝そのパネルの観測点）を測っている
