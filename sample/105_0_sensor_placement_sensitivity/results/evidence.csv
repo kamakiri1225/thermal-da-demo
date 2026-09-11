@@ -1,3 +1,3 @@
-case,theta_deg,z_mm,sens_um_per_K,final_rmse_K
-high,15,5,0.1545,0.02279
-low,255,85,0.0004,0.02552
+case,x_mm,y_mm,z_mm,absWz_umK,final_rmse_K
+high,37.5,0.0,5.0,0.0540,0.02249
+low,-19.8,2.6,35.2,0.00000,0.02510

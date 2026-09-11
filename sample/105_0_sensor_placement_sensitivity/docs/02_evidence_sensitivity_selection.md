@@ -14,8 +14,13 @@ Wは1つの行列だが、**行で読むか列で読むかで使い道が変わ�
 | **Wの行** | ある変位DOFが温度場全体にどれだけ敏感か | **変位観測点を選ぶ** | 実験2（本命・下記） |
 | **Wの列** | ある場所の温度が観測変位をどれだけ動かすか | **温度センサ位置を選ぶ** | 実験1・証拠実験B |
 
-本ケースではWの行を、5つの単位温度モードへのFrontISTR応答 M_all（全5040節点×5）
-として実計算した（`run/displacement_point_selection.py`）。
+本ケースでは2通りで計算し、相互検証した:
+- **KinvHのDUMPWパッチ版FrontISTRを直接適用**（`run/dumpw_cylinder.py`）:
+  六面体メッシュを6分割テトラ化(23,040四面体)し、`!SOLVER,...,DUMPW=YES` と
+  `sensitivity_points.dat`(Point A/O) で **W_diff を FrontISTR内で直接出力**
+  → `paraview/sensitivity_Wdiff_cylinder.vtk`(ParaView用, フィールド`Sensitivity`)
+- 摂動法（`run/displacement_point_selection.py`）: 5単位モード×fistr1実行で M_all
+- **両者はROMモード射影で符号・分布とも一致**（最大差5.8%＝六面体vs四面体の離散化差）
 
 ---
 
@@ -102,8 +107,10 @@ QoIの定義点（KinvH検証の Point_A − Point_O と同型）:
 ## 2. 【補足の証拠B】温度センサ位置をWの列（感度マップ）で選ぶ
 
 変位2点は**常に同化**した上で、温度センサ1点だけを
-感度マップ最大の場所（θ=15°, z=5mm, 0.155µm/K）と最小の場所（θ=255°, z=85mm,
-0.0004µm/K）に置き分けた（`run/evidence_field_reproduction.py`）。
+**FrontISTR DUMPWが出力した感度場 W_diff**（QoI=Uz(A)−Uz(O) の温度感度）の
+|Wz|最大の場所（ヒータ側外周下部 x=+37.5mm, z=5mm, 0.054µm/K）と
+|Wz|最小の場所（x=−20mm, z=35mm, ≈0）に置き分けた
+（`run/dumpw_cylinder.py` → `run/evidence_field_reproduction.py`）。
 
 ![センサ候補位置](img/evidence_sensor_points.png)
 
@@ -113,7 +120,7 @@ QoIの定義点（KinvH検証の Point_A − Point_O と同型）:
 
 ![分布アニメ](img/evidence_field_compare.gif)
 
-**結果: 差は小さい**（最終0.023K vs 0.026K、加熱序盤に高感度側がやや速い）。
+**結果: 差は小さい**（最終0.0225K vs 0.0251K、加熱序盤に高感度側がやや速い）。
 
 **正直な解釈:** 変位2点を同化している時点で、Wの列方向の情報（変位が見ている温度）
 は既に取り込まれている。だから温度センサをその「列感度」で選んでも上積みは小さい。
