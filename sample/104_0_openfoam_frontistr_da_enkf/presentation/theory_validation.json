@@ -1,0 +1,44 @@
+{
+  "oi_normal_equation_and_gain_equivalent": true,
+  "oi_gradient_zero": true,
+  "oi_joseph_and_inverse_hessian_equal": true,
+  "kf": [
+    {
+      "forecast_mean": 20.0,
+      "forecast_variance": 3.4000000000000004,
+      "gain": 0.7727272727272727,
+      "analysis_mean": 21.545454545454547,
+      "analysis_variance": 0.7727272727272727
+    },
+    {
+      "forecast_mean": 21.390909090909094,
+      "forecast_variance": 0.785909090909091,
+      "gain": 0.44006108424535506,
+      "analysis_mean": 21.218885212522274,
+      "analysis_variance": 0.44006108424535506
+    }
+  ],
+  "pf": {
+    "weights": [
+      1.8704324433382033e-11,
+      3.0442184217884714e-06,
+      0.009074687218729907,
+      0.49546113427207195,
+      0.49546113427207195
+    ],
+    "mean": 21.486380358560382,
+    "ess": 2.0364698303474653,
+    "resampled": [
+      21.0,
+      21.0,
+      21.0,
+      22.0,
+      22.0
+    ]
+  },
+  "theory_pdf_pages": 20,
+  "theory_topics": 50,
+  "theory_equations": 83,
+  "reveal_slides": 157,
+  "pdf_text_in_bounds": true
+}

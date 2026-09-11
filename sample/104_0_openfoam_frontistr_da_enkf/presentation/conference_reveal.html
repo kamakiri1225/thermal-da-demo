@@ -26,6 +26,12 @@
     .reveal .body p{margin:.35em 0}
     .reveal mjx-container{font-size:.82em !important;margin:.25em 0 !important}
     .reveal .body>*:first-child{margin-top:0}
+    .reveal .reference{font-size:14px;text-align:left;margin-top:8px;color:#53677a}
+    .reveal .theory-note{font-size:18px;text-align:left;color:#53677a}
+    .reveal .theory mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+    .reveal .numeric-example pre{font-size:21px;line-height:1.35;width:100%;margin:12px 0;box-shadow:none;background:#f1f5f7;padding:12px;}
+    .reveal .numeric-example pre code{max-height:none;padding:0;white-space:pre;overflow-x:auto;}
+    .reveal .numeric-example{font-size:22px;line-height:1.45;}
     /* 万一あふれたら縦スクロールで全文読めるようにする */
     .reveal .slides section{max-height:92vh;overflow-y:auto}
     .reveal .slides section::-webkit-scrollbar{width:8px}
@@ -36,7 +42,376 @@
 <p>初期温度とヒーター発熱量を外した予測を、観測で補正する</p>
 <p>OpenFOAM × FrontISTR × EnKF</p>
 <p>発表者・所属：［記入欄］</p>
-</div></div><div class="takeaway">知りたい量は、円筒内部を含む温度分布と、実際のヒーター発熱量。</div></section></section><section><section class="cover"><h2>第1部　OpenFOAM ＋ FrontISTR でデータ同化</h2><div class="content"><div class="body"><p><strong>実ソルバで温度と変位を観測し、状態を補正（正確だが重い）</strong></p>
+</div></div><div class="takeaway">知りたい量は、円筒内部を含む温度分布と、実際のヒーター発熱量。</div></section></section><section><section class="cover theory"><div class="eyebrow">理論 / 共通</div><h2>第0部　予報と観測を統合する理論</h2><div class="content"><div class="body"><p><strong>OI → KF → EnKF → PF</strong></p>
+<p>記号 → 仮定 → 式の展開 → 数値例 → 104の実装</p>
+<p>理論式と具体例を両方残し、式の各項が何をしているかを追う。</p>
+</div></div><div class="takeaway">前提を置き、導出し、数値を代入する。この順で理解する。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>まず、何を推定する問題なのか</h2><div class="content"><div class="body"><p>観測できない状態xを、時刻kまでの観測から推定する。</p>
+<p><span class="math display">\[x_k=f_k(x_{k-1})+\eta_k,\qquad
+y_k=h_k(x_k)+\nu_k\]</span></p>
+<p>x：温度場など、f：時間発展、h：観測に対応する量の計算。</p>
+<p>η：モデル・過程の誤差、ν：測定誤差。状態と観測は次元が違ってよい。</p>
+<details class="theory-note"><summary>補足説明</summary><p>ここでは加法ノイズの状態空間モデルを導入する。一般の非加法モデルにもベイズフィルタは拡張できる。</p></details></div></div><div class="takeaway">104ではxに固体温度と発熱量Qを含め、hで温度・変位を計算する。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>記号と単位：発熱量Qと誤差共分散を混同しない</h2><div class="content"><div class="body"><table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>xᶠ, xᵃ</td>
+<td>観測を使う前の予報／使った後の解析（同化結果）</td>
+</tr>
+<tr class="even">
+<td>Pᶠ, Pᵃ</td>
+<td>状態の予報／解析誤差共分散</td>
+</tr>
+<tr class="odd">
+<td>B</td>
+<td>OIで与える背景誤差共分散</td>
+</tr>
+<tr class="even">
+<td>Ω, R</td>
+<td>過程ノイズ／観測ノイズの共分散</td>
+</tr>
+<tr class="odd">
+<td>F, H</td>
+<td>線形な時間発展／観測の行列</td>
+</tr>
+<tr class="even">
+<td>K</td>
+<td>カルマンゲイン（残差から状態補正への係数）</td>
+</tr>
+</tbody>
+</table>
+<details class="theory-note"><summary>補足説明</summary><p>文献で過程ノイズ共分散をQと表す場合が多いため、ここでは混同防止のためΩを使用する。</p></details></div></div><div class="takeaway">過程ノイズ共分散はΩと表記する。104の発熱量Q [W]とは別物。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>分散と共分散が表すもの</h2><div class="content"><div class="body"><p><span class="math display">\[\bar{x}=\mathrm{E}[x],\qquad
+P=\mathrm{E}[(x-\bar{x})(x-\bar{x})^T]\]</span></p>
+<p><span
+class="math display">\[P_{ij}=\mathrm{E}[(x_i-\bar{x}_i)(x_j-\bar{x}_j)]\]</span></p>
+<p>対角Piiは成分iの分散。非対角Pijはiとjの変動の関係。</p>
+<p>相関係数は Pij / √(Pii
+Pjj)。共分散には単位があり、相関係数は無次元。</p>
+<details class="theory-note"><summary>補足説明</summary><p>以下のPは推定誤差についての共分散。EnKFではメンバーのばらつきでこれを近似する。</p></details></div></div><div class="takeaway">未観測の温度やQを更新できるのは、観測量との共分散を使うため。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>逐次推定：予報してから、新しい観測で更新する</h2><div class="content"><div class="body"><pre class="text"><code>前時刻の解析 → モデルで予報 → 現時刻の観測を同化 → 現時刻の解析
+      ↑                                                    │
+      └──────────────── 次の時刻へ ───────────────────────┘</code></pre>
+<p>KF・EnKF・PFは、状態と不確かさをこのループで伝える。
+OIも逐次解析に使えるが、通常は予報誤差共分散を所与のBで近似する。</p>
+</div></div><div class="takeaway">「逐次」は観測が来るたびに更新すること。OI単独は時間発展の方程式ではない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>ベイズ更新：どの状態が観測を説明しやすいか</h2><div class="content"><div class="body"><p><span class="math display">\[p(x_k\mid y_{1:k})=\frac{p(y_k\mid
+x_k)\,p(x_k\mid y_{1:k-1})}{p(y_k\mid y_{1:k-1})}\]</span></p>
+<p>右辺の分子は <strong>尤度 × 事前分布</strong>、左辺が事後分布。</p>
+<p>尤度：その状態なら、この観測が出る確からしさ。
+事前分布：観測を使う前の状態の不確かさ。
+分母：全体の確率を1にする正規化。</p>
+</div></div><div class="takeaway">予報に合うかと、観測に合うかを合わせて状態を評価する。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>予報分布：前の事後分布をモデルで伝える</h2><div class="content"><div class="body"><p><span class="math display">\[p(x_k\mid y_{1:k-1})=\int p(x_k\mid
+x_{k-1})p(x_{k-1}\mid y_{1:k-1})\,dx_{k-1}\]</span></p>
+<p>全ての前状態について「そこにいる確率×そこから進む確率」を足す。</p>
+<p>KF：線形ガウスの平均・共分散を計算する。
+EnKF：各メンバーを前進する。PF：各粒子を前進し、重みを引き継ぐ。</p>
+</div></div><div class="takeaway">同じ予報・更新の問題を、違う表現と近似で解く。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section></section><section><section class="cover theory"><div class="eyebrow">理論 / OI</div><h2>第0部A　最適内挿法（OI）</h2><div class="content"><div class="body"><p><strong>Optimal Interpolation：最適内挿法／最適補間法</strong></p>
+<p>背景値と観測を、誤差共分散に基づいて統合する。</p>
+<p>まず1時刻での「最も妥当な補正」を導出する。</p>
+</div></div><div class="takeaway">IDWの距離補間とOIの統計的な解析は、目的も重みの由来も異なる。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OIの前提：背景と観測は誤差を持つ</h2><div class="content"><div class="body"><p><span class="math display">\[x^b=x^{true}+e_b,\qquad
+y=Hx^{true}+e_o\]</span></p>
+<p><span
+class="math display">\[\mathrm{E}[e_b]=\mathrm{E}[e_o]=0,\quad\mathrm{Cov}(e_b)=B,\quad\mathrm{Cov}(e_o)=R\]</span></p>
+<p>背景誤差と観測誤差は無相関とする。Hは既知の線形観測行列。
+BとRは正定値として導出する。</p>
+<details class="theory-note"><summary>補足説明</summary><p>ガウス分布を仮定すれば後の解は事後平均かつMAP。ガウス性なしでも線形不偏推定の最小分散として同じゲインを導ける。</p></details></div></div><div class="takeaway">不偏な誤差と共分散を仮定し、どちらをどれだけ信頼するかを決める。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OI導出①：背景と観測からのずれを評価する</h2><div class="content"><div class="body"><p><span
+class="math display">\[J(x)=\frac{1}{2}(x-x^b)^TB^{-1}(x-x^b)+\frac{1}{2}(y-Hx)^TR^{-1}(y-Hx)\]</span></p>
+<p>第1項：背景からのずれ。第2項：観測からのずれ。</p>
+<p>誤差分散が小さい方向のずれほど、強く罰する。
+ガウス仮定なら、これは事後確率の負の対数（定数を除く）。</p>
+</div></div><div class="takeaway">背景と観測の両方を、誤差の大きさで重み付けして合わせる。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OI導出②：Jを微分して0と置く</h2><div class="content"><div class="body"><p><span
+class="math display">\[\nabla_xJ=B^{-1}(x-x^b)-H^TR^{-1}(y-Hx)\]</span></p>
+<p><span class="math display">\[\nabla_xJ=0\ \Longrightarrow\
+(B^{-1}+H^TR^{-1}H)x^a=B^{-1}x^b+H^TR^{-1}y\]</span></p>
+<p>転置Hᵀは、観測空間の残差を状態空間へ戻す役割を持つ。</p>
+</div></div><div class="takeaway">最小化の条件から、解析値xᵃの連立一次方程式が得られる。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OI導出③：背景との差δxで書き直す</h2><div class="content"><div class="body"><p><span class="math display">\[\delta x=x^a-x^b,\qquad
+d=y-Hx^b\]</span></p>
+<p><span class="math display">\[(B^{-1}+H^TR^{-1}H)\delta
+x=H^TR^{-1}d\]</span></p>
+<p><span class="math display">\[\delta
+x=(B^{-1}+H^TR^{-1}H)^{-1}H^TR^{-1}d\]</span></p>
+<p>dは観測−背景の残差（イノベーション）。</p>
+</div></div><div class="takeaway">状態全体を解き直す式を、「背景＋残差に応じた補正」の式へ変える。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OI導出④：観測空間の逆行列へ変形する</h2><div class="content"><div class="body"><p><span class="math display">\[A=B^{-1}+H^TR^{-1}H,\quad
+S=HBH^T+R\]</span></p>
+<p><span
+class="math display">\[A(BH^TS^{-1})=H^TR^{-1}(R+HBH^T)S^{-1}=H^TR^{-1}\]</span></p>
+<p><span class="math display">\[A^{-1}H^TR^{-1}=BH^TS^{-1}\]</span></p>
+<p>候補BHᵀS⁻¹を左辺に代入すると同じ連立方程式を満たす。</p>
+</div></div><div class="takeaway">状態数nの逆行列から、観測数mの系へ計算を移せる。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OIの更新式とゲイン</h2><div class="content"><div class="body"><p><span class="math display">\[K=BH^T(HBH^T+R)^{-1}\]</span></p>
+<p><span class="math display">\[x^a=x^b+K(y-Hx^b)\]</span></p>
+<p>B：n×n、H：m×n、R：m×m、K：n×m。</p>
+<p>Kの第i行は、m個の残差から状態iをどれだけ直すかを表す。</p>
+</div></div><div class="takeaway">104のQ更新も「ゲインのQ行×4成分の残差」という同じ構造。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OI導出⑤：更新後の誤差共分散</h2><div class="content"><div class="body"><p><span class="math display">\[e_a=(I-KH)e_b+Ke_o\]</span></p>
+<p><span class="math display">\[P^a=(I-KH)B(I-KH)^T+KRK^T\]</span></p>
+<p><span class="math display">\[P^a=B-BH^T(HBH^T+R)^{-1}HB\]</span></p>
+<p>無相関なので交差項が消える。第2式はJoseph形で、最適Kなら第3式へ簡約できる。</p>
+</div></div><div class="takeaway">観測誤差Rの寄与を残すことが、解析の不確かさを正しく計算する要点。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>「最適」の意味：線形不偏推定の誤差を最小化する</h2><div class="content"><div class="body"><p><span class="math display">\[P^a=B-KHB-BH^TK^T+KSK^T\]</span></p>
+<p><span
+class="math display">\[\frac{\partial\,\mathrm{tr}(P^a)}{\partial
+K}=-2BH^T+2KS=0\]</span></p>
+<p><span class="math display">\[K=BH^TS^{-1}\]</span></p>
+<p>共分散のトレースは、各状態成分の誤差分散の和。</p>
+<details class="theory-note"><summary>補足説明</summary><p>ガウス性がない場合、これが全ての非線形推定を含むMMSE解とは限らない。</p></details></div></div><div class="takeaway">ガウス性がなくても、ここで仮定した線形不偏推定の範囲で最適なKを導ける。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OIの数値例：温度予報20 ℃、観測22 ℃</h2><div class="content"><div class="body"><p><span class="math display">\[x^b=20,\quad B=4,\quad y=22,\quad
+R=1,\quad H=1\]</span></p>
+<p><span class="math display">\[K=\frac{4}{4+1}=0.8,\qquad
+x^a=20+0.8(22-20)=21.6\]</span></p>
+<p><span
+class="math display">\[P^a=(1-0.8)^2\,4+0.8^2\,1=0.8\]</span></p>
+<p>予報の標準偏差2 K、観測の標準偏差1
+Kなので、観測に近い側へ補正する。</p>
+</div></div><div class="takeaway">重み0.8は任意の調整値ではなく、背景と観測の誤差分散から決まる。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section><section class="text theory"><div class="eyebrow">理論 / OI</div><h2>OIは何を省略しているか</h2><div class="content"><div class="body"><p>通常のOIではBを統計・相関モデルなどから与える。</p>
+<ul>
+<li>背景の状態はモデルで時間発展させてもよい。</li>
+<li>ただしBそのものを、毎時刻のモデルで厳密に予報するわけではない。</li>
+<li>場所・季節などでBを変える実装もある。</li>
+</ul>
+<p>次のKFは、<strong>誤差共分散の時間発展</strong>も計算する。</p>
+</div></div><div class="takeaway">OIとKFの解析式は共通。違いは主に背景・予報共分散の作り方にある。</div><div class="reference">参考：<a href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">Bouttier &amp; Courtier, Data Assimilation Concepts and Methods, §4–7 (ECMWF)</a></div></section></section><section><section class="cover theory"><div class="eyebrow">理論 / KF</div><h2>第0部B　カルマンフィルタ（KF）</h2><div class="content"><div class="body"><p><strong>状態の平均と誤差共分散を、時刻ごとに予報・更新する。</strong></p>
+<p>線形モデルとガウス誤差なら、ベイズフィルタを平均と共分散だけで厳密に表せる。</p>
+</div></div><div class="takeaway">OIの解析式に、状態と共分散の予報式を組み合わせる。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KFの線形状態空間モデル</h2><div class="content"><div class="body"><p><span class="math display">\[x_k=F_kx_{k-1}+b_k+\eta_k,\qquad
+y_k=H_kx_k+\nu_k\]</span></p>
+<p><span
+class="math display">\[\eta_k\sim\mathcal{N}(0,\Omega_k),\quad\nu_k\sim\mathcal{N}(0,R_k)\]</span></p>
+<p>初期状態もガウス。ノイズは過去の状態推定誤差と独立、時刻間でも独立とする。
+bkは既知入力による項。</p>
+</div></div><div class="takeaway">未知の発熱量を推定したい場合は、入力を固定せず状態へ含める拡張が必要。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KF導出①：平均の予報</h2><div class="content"><div class="body"><p><span class="math display">\[\hat{x}_{k-1}^a=\mathrm{E}[x_{k-1}\mid
+y_{1:k-1}]\]</span></p>
+<p><span
+class="math display">\[\hat{x}_k^f=\mathrm{E}[F_kx_{k-1}+b_k+\eta_k\mid
+y_{1:k-1}]\]</span></p>
+<p><span
+class="math display">\[\hat{x}_k^f=F_k\hat{x}_{k-1}^a+b_k\]</span></p>
+<p>線形変換では期待値とFの積を入れ替えられ、平均0のηは消える。</p>
+</div></div><div class="takeaway">観測を受け取る前に、前時刻の解析平均をモデルで進める。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KF導出②：共分散の予報</h2><div class="content"><div class="body"><p><span class="math display">\[e_k^f=F_ke_{k-1}^a-\eta_k\]</span></p>
+<p><span
+class="math display">\[P_k^f=\mathrm{E}[(F_ke_{k-1}^a-\eta_k)(F_ke_{k-1}^a-\eta_k)^T]\]</span></p>
+<p><span
+class="math display">\[P_k^f=F_kP_{k-1}^aF_k^T+\Omega_k\]</span></p>
+<p>独立・平均0のため交差項は0。既存誤差を伝播する項と、新たなモデル誤差の項が残る。</p>
+<details class="theory-note"><summary>補足説明</summary><p>誤差を推定値−真値で定義する。真値には過程ノイズηが加わるため予報誤差には−ηが入るが、共分散の寄与は＋Ωとなる。</p></details></div></div><div class="takeaway">KFは状態だけでなく、不確かさが時間とともにどう変わるかも予報する。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KF導出③：予報を背景としてOIの式を適用</h2><div class="content"><div class="body"><p><span class="math display">\[S_k=H_kP_k^fH_k^T+R_k,\qquad
+K_k=P_k^fH_k^TS_k^{-1}\]</span></p>
+<p><span
+class="math display">\[\hat{x}_k^a=\hat{x}_k^f+K_k(y_k-H_k\hat{x}_k^f)\]</span></p>
+<p><span
+class="math display">\[P_k^a=(I-K_kH_k)P_k^f(I-K_kH_k)^T+K_kR_kK_k^T\]</span></p>
+<p>OIのBを、その時刻に予報したPᶠへ置き換えた式。</p>
+</div></div><div class="takeaway">解析値と解析共分散の両方を、次の時刻へ引き継ぐ。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KFの数値例①：1回目の予報と更新</h2><div class="content"><div class="body"><p><span class="math display">\[F=0.9,\ b=2,\ \Omega=0.16,\ H=1,\
+R=1\]</span></p>
+<p><span class="math display">\[\hat{x}_0^a=20,\ P_0^a=4\
+\Longrightarrow\ \hat{x}_1^f=20,\
+P_1^f=0.9^2\cdot4+0.16=3.4\]</span></p>
+<p><span class="math display">\[y_1=22,\
+K_1=\frac{3.4}{4.4}=0.772727\]</span></p>
+<p><span class="math display">\[\hat{x}_1^a=21.545455,\qquad
+P_1^a=0.772727\]</span></p>
+<p>説明用の1温度モデル。Fとbは20 ℃へ緩和する時間発展を表す。</p>
+</div></div><div class="takeaway">同じ22 ℃の観測でも、OI例と予報共分散が違えば重みも変わる。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>KFの数値例②：2回目は前回の結果から再開</h2><div class="content"><div class="body"><p><span
+class="math display">\[\hat{x}_2^f=0.9\cdot21.545455+2=21.390909\]</span></p>
+<p><span
+class="math display">\[P_2^f=0.9^2\cdot0.772727+0.16=0.785909\]</span></p>
+<p><span class="math display">\[y_2=21,\qquad
+K_2=\frac{0.785909}{1.785909}=0.440061\]</span></p>
+<p><span class="math display">\[\hat{x}_2^a=21.218885,\qquad
+P_2^a=0.440061\]</span></p>
+<p>前回の同化で誤差が減ったため、今回のゲインも変わる。</p>
+</div></div><div class="takeaway">同じRでもKは固定とは限らない。予報Pᶠに応じて変わる。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / KF</div><h2>非線形・高次元になると何が難しいか</h2><div class="content"><div class="body"><p>非線形fでは、一般に <strong>E[f(x)] ≠ f(E[x])</strong>。</p>
+<ul>
+<li>平均と共分散だけで分布の変化を閉じられない。</li>
+<li>拡張KFはヤコビアンで線形化する近似。</li>
+<li>104の20,697状態ではPに約4.28億要素。倍精度なら約3.43 GB。</li>
+</ul>
+<p>EnKFは、各メンバーの前進と標本共分散を使う。</p>
+<details class="theory-note"><summary>補足説明</summary><p>メモリは共分散1枚の概算であり、行列積やソルバ全体の使用量ではない。</p></details></div></div><div class="takeaway">高次元の共分散を全要素で保持する代わりに、有限個の状態で近似する。</div><div class="reference">参考：<a href="https://doi.org/10.1115/1.3662552">Kalman (1960); Särkkä &amp; Svensson (2023)</a></div></section></section><section><section class="cover theory"><div class="eyebrow">理論 / EnKF</div><h2>第0部C　アンサンブルカルマンフィルタ（EnKF）</h2><div class="content"><div class="body"><p><strong>多数の状態候補を前進し、そのばらつきからKを計算する。</strong></p>
+<p>非線形モデルは各メンバーで直接実行できる。</p>
+<p>ただし、観測更新は共分散を使うカルマン型の近似である。</p>
+</div></div><div class="takeaway">非線形モデルを前進できることと、任意の非ガウス事後分布を厳密に求めることは別。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>EnKF導出①：各メンバーを予報する</h2><div class="content"><div class="body"><p><span
+class="math display">\[x_k^{f,(i)}=f_k(x_{k-1}^{a,(i)})+\eta_k^{(i)},\qquad
+i=1,\ldots,N\]</span></p>
+<p><span class="math display">\[\bar{x}_k^f=\frac{1}{N}\sum_i
+x_k^{f,(i)}\]</span></p>
+<p>予報分布をN個の状態候補で表す。
+104の実ソルバ版は5ケースを個別に前進。明示的な全状態過程ノイズは加えず、初期ばらつき等を使う。</p>
+</div></div><div class="takeaway">104の1メンバー＝1つのOpenFOAMケース。EnKF本体はPython側。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>EnKF導出②：KFのPを標本共分散で近似する</h2><div class="content"><div class="body"><p><span
+class="math display">\[a_x^{(i)}=x^{f,(i)}-\bar{x}^f\]</span></p>
+<p><span class="math display">\[\widehat{P}^f=\frac{1}{N-1}\sum_i
+a_x^{(i)}(a_x^{(i)})^T\]</span></p>
+<p>平均を同じN標本から推定するので、偏差の和は0で自由度が1減る。</p>
+<p>独立同分布の標本なら、この分母で共分散推定は不偏。フィルタ中のメンバーは更新により依存し得る。</p>
+</div></div><div class="takeaway">N−1は標本共分散の正規化。有限メンバーによる推定誤差は残る。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>EnKF導出③：予報観測の偏差を作る</h2><div class="content"><div class="body"><p><span
+class="math display">\[y_f^{(i)}=h(x^{f,(i)}),\quad\bar{y}_f=\frac{1}{N}\sum_i
+y_f^{(i)},\quad a_y^{(i)}=y_f^{(i)}-\bar{y}_f\]</span></p>
+<p><span class="math display">\[\widehat{C}_{xy}=\frac{1}{N-1}\sum_i
+a_x^{(i)}(a_y^{(i)})^T\]</span></p>
+<p><span class="math display">\[\widehat{C}_{yy}=\frac{1}{N-1}\sum_i
+a_y^{(i)}(a_y^{(i)})^T\]</span></p>
+<p>104ではhが温度の抜き出しとFrontISTRによる変位評価を含む。</p>
+</div></div><div class="takeaway">状態の全共分散を作らず、観測との交差共分散だけを計算できる。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>EnKF導出④：線形観測ならKFの式に一致する構造</h2><div class="content"><div class="body"><p><span class="math display">\[h(x)=Hx+c\ \Longrightarrow\
+a_y^{(i)}=Ha_x^{(i)}\]</span></p>
+<p><span
+class="math display">\[\widehat{C}_{xy}=\widehat{P}^fH^T,\qquad\widehat{C}_{yy}=H\widehat{P}^fH^T\]</span></p>
+<p><span
+class="math display">\[\widehat{K}=\widehat{C}_{xy}(\widehat{C}_{yy}+R)^{-1}\]</span></p>
+<p>定数cは偏差を取ると消える。非線形hでは、同じ式を標本による近似として使う。</p>
+</div></div><div class="takeaway">KFのPᶠを標本から作るとEnKFのゲインになる。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>EnKF導出⑤：確率的EnKFのメンバー更新</h2><div class="content"><div class="body"><p><span
+class="math display">\[\varepsilon^{(i)}\sim\mathcal{N}(0,R)\]</span></p>
+<p><span
+class="math display">\[x^{a,(i)}=x^{f,(i)}+\widehat{K}(y+\varepsilon^{(i)}-y_f^{(i)})\]</span></p>
+<p>実観測yは全メンバー共通。各メンバーに独立の観測摂動εを与える。</p>
+<p>これは観測を作る際の模擬測定ノイズとは別。</p>
+</div></div><div class="takeaway">各メンバーを更新し、更新後の分布を次の予報へ残す。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>なぜ観測摂動を入れるのか：共分散の展開</h2><div class="content"><div class="body"><p><span
+class="math display">\[a_a^{(i)}=(I-KH)a_f^{(i)}+K(\varepsilon^{(i)}-\bar{\varepsilon})\]</span></p>
+<p><span
+class="math display">\[\mathrm{E}[\widehat{P}^a\mid\mathrm{ensemble}]=(I-KH)\widehat{P}^f(I-KH)^T+KRK^T\]</span></p>
+<p>線形H・摂動が予報アンサンブルから独立という条件で、摂動について期待値を取る。</p>
+<p>εを単に省くとKRKᵀが失われ、ばらつきを小さく見積もる。</p>
+<details class="theory-note"><summary>補足説明</summary><p>決定論的平方根EnKFは、摂動を使わず別の変換で目標共分散を実現する。単にεを削除する方法とは違う。</p></details></div></div><div class="takeaway">有限Nの1回の更新では理論共分散と厳密一致しない。期待値・近似を区別する。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>理論の列ベクトルを、NumPyの行配列へ直す</h2><div class="content"><div class="body"><p><span class="math display">\[Z_f\in\mathbb{R}^{N\times n},\quad
+Y_f\in\mathbb{R}^{N\times m}\]</span></p>
+<p><span class="math display">\[C_{zy}=\frac{dZ^TdY}{N-1},\qquad
+C_{yy}=\frac{dY^TdY}{N-1}\]</span></p>
+<p><span
+class="math display">\[Z_a=Z_f+(\mathbf{1}y^T+E-Y_f)K^T\]</span></p>
+<p>Zfの1行が1メンバー。Eの1行が観測摂動。
+104：N＝5、n＝20,697、m＝4。</p>
+</div></div><div class="takeaway">式のKがコードではK.Tとして右から掛かるのは、行と列の持ち方が違うため。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>低ランク・インフレーション・局所化</h2><div class="content"><div class="body"><p><span class="math display">\[\mathrm{rank}(dZ)\le N-1,\qquad
+a^{(i)}\leftarrow\lambda a^{(i)}\]</span></p>
+<ul>
+<li>5メンバーでは、表現できる偏差の方向は最大4。</li>
+<li>偏差をλ倍すると共分散はλ²倍。104はλ＝1.05。</li>
+<li>局所化は遠隔の見かけの相関を抑える工夫。今回の実ソルバ実装では使用していない。</li>
+</ul>
+</div></div><div class="takeaway">高次元の場を更新していても、全ての独立した誤差を表現できるわけではない。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section><section class="text theory"><div class="eyebrow">理論 / EnKF</div><h2>未知のQも状態に入れる：拡大状態</h2><div class="content"><div class="body"><p><span class="math display">\[z=[T_1,\ldots,T_{N_c},Q]^T\]</span></p>
+<p><span
+class="math display">\[[C_{zy}]_{Q,:}=\frac{1}{N-1}\sum_i(Q^{(i)}-\bar
+Q)(y_f^{(i)}-\bar y_f)^T\]</span></p>
+<p><span
+class="math display">\[K_Q=[C_{zy}]_{Q,:}(C_{yy}+R)^{-1}\]</span></p>
+<p><span
+class="math display">\[Q_a^{(i)}=Q_f^{(i)}+K_Q(y+\varepsilon^{(i)}-y_f^{(i)})\]</span></p>
+<p>Qと観測の共分散が0なら、この更新式ではQを補正できない。</p>
+</div></div><div class="takeaway">Qの更新方向は、ゲインのQ行と全観測残差の内積で決まる。</div><div class="reference">参考：<a href="https://doi.org/10.1007/s10236-003-0036-9">Evensen (2003); 104/dacore/enkf.py</a></div></section></section><section><section class="cover theory"><div class="eyebrow">理論 / PF</div><h2>第0部D　粒子フィルタ（PF）</h2><div class="content"><div class="body"><p><strong>状態候補に重みを付けて、事後分布を表す。</strong></p>
+<p>EnKF：候補をゲインで移動する。
+PF：候補の尤度から重みを変え、必要に応じて再標本化する。</p>
+</div></div><div class="takeaway">ガウス分布に限定しない表現ができるが、有限粒子で十分に表せるとは限らない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PF導出①：確率分布を重み付き粒子で近似</h2><div class="content"><div class="body"><p><span class="math display">\[p(x_k\mid
+y_{1:k})\approx\sum_{i=1}^{N}w_k^{(i)}\delta(x_k-x_k^{(i)})\]</span></p>
+<p><span
+class="math display">\[w_k^{(i)}\ge0,\qquad\sum_iw_k^{(i)}=1\]</span></p>
+<p><span
+class="math display">\[\hat{x}_k=\sum_iw_k^{(i)}x_k^{(i)}\]</span></p>
+<p>δは粒子位置に集中した確率質量を表す記号。重み付きの分布が主役。</p>
+</div></div><div class="takeaway">重みが不均一なら、状態の平均も単純平均ではなく重み付き平均。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PF導出②：提案分布から粒子を生成する</h2><div class="content"><div class="body"><p><span class="math display">\[x_k^{(i)}\sim q_k(x_k\mid
+x_{k-1}^{(i)},y_k)\]</span></p>
+<p><span class="math display">\[\widetilde
+w_k^{(i)}=w_{k-1}^{(i)}\frac{p(y_k\mid x_k^{(i)})p(x_k^{(i)}\mid
+x_{k-1}^{(i)})}{q_k(x_k^{(i)}\mid x_{k-1}^{(i)},y_k)}\]</span></p>
+<p>目標の「尤度×遷移密度」と、実際に標本を引いた提案密度の比で補正する。</p>
+<p>これは祖先を同じ番号で引き継ぐ逐次重要度サンプリングの式。</p>
+</div></div><div class="takeaway">一般のPFは、モデル予報からしか粒子を出せないわけではない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PF導出③：ブートストラップPFでは遷移密度が消える</h2><div class="content"><div class="body"><p><span class="math display">\[q_k(x_k\mid x_{k-1},y_k)=p(x_k\mid
+x_{k-1})\]</span></p>
+<p><span class="math display">\[\widetilde
+w_k^{(i)}=w_{k-1}^{(i)}p(y_k\mid x_k^{f,(i)})\]</span></p>
+<p><span class="math display">\[w_k^{(i)}=\frac{\widetilde
+w_k^{(i)}}{\sum_j\widetilde w_k^{(j)}}\]</span></p>
+<p>モデルで前進し、観測の尤度を前の重みに掛ける。
+前回に再標本化していれば、開始重みは1/N。</p>
+</div></div><div class="takeaway">再標本化しない場合、前の重みを引き継ぐ必要がある。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PF導出④：ガウス観測誤差から尤度を作る</h2><div class="content"><div class="body"><p><span class="math display">\[r^{(i)}=y-h(x^{f,(i)})\]</span></p>
+<p><span
+class="math display">\[L^{(i)}=\frac{\exp[-\tfrac12(r^{(i)})^TR^{-1}r^{(i)}]}{(2\pi)^{m/2}|R|^{1/2}}\]</span></p>
+<p><span class="math display">\[\log\widetilde w^{(i)}=\log
+w_{prev}^{(i)}-\tfrac12(r^{(i)})^TR^{-1}r^{(i)}+c\]</span></p>
+<p>Rが全粒子で同じなら、定数cは正規化で消える。</p>
+</div></div><div class="takeaway">ガウスなのはこの例の観測ノイズ。PFの状態事後分布をガウスに限定していない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PFの数値例①：5つの温度候補に尤度を付ける</h2><div class="content"><div class="body"><p>候補温度：[18, 19, 20, 21, 22] ℃。観測21.5 ℃、σ＝0.5
+K。初期重みは1/5。</p>
+<p><span class="math display">\[\log
+L_i=c-\frac{(21.5-x_i)^2}{2\cdot0.5^2}\]</span></p>
+<pre class="text"><code>候補       18        19        20       21       22
+log L−c  −24.5     −12.5      −4.5     −0.5     −0.5
+重み      ≈0      0.000003   0.009075  0.495461  0.495461</code></pre>
+<p>観測を説明しやすい21 ℃・22 ℃へ、重みが集まる。</p>
+</div></div><div class="takeaway">PFでは、この段階で粒子の温度そのものをゲインで変更していない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PFの数値例②：重み付き平均とESS</h2><div class="content"><div class="body"><p><span class="math display">\[\hat{x}=\sum_iw_ix_i=21.486380\
+^\circ\mathrm{C}\]</span></p>
+<p><span
+class="math display">\[N_{eff}=\frac{1}{\sum_iw_i^2}=2.036470\]</span></p>
+<p>ESSは有効サンプル数の指標。 等重みならN、1粒子に全重みが集まれば1。
+閾値をN/2＝2.5とすれば、この例では再標本化する。</p>
+</div></div><div class="takeaway">粒子が5個あっても、実質的には約2個に重みが集中している。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PF導出⑤：系統リサンプリングを具体的に追う</h2><div class="content"><div class="body"><p><span class="math display">\[c_j=\sum_{i=1}^{j}w_i,\quad
+u_i=u_0+\frac{i-1}{N},\quad u_0\sim U(0,1/N)\]</span></p>
+<pre class="text"><code>累積重み ≈ [0, 0.000003, 0.009078, 0.504539, 1]
+u₀=0.08 とすると位置=[0.08, 0.28, 0.48, 0.68, 0.88]
+選ぶ粒子温度       =[21,   21,   21,   22,   22]
+新しい重み         =[1/5, 1/5, 1/5, 1/5, 1/5]</code></pre>
+<details class="theory-note"><summary>補足説明</summary><p>この1回の再標本化後の平均は21.4℃。再標本化前の重み付き平均と毎回ぴったり同じになるわけではない。</p></details></div></div><div class="takeaway">累積重みが各位置を初めて超える粒子を選び、重みを等しく戻す。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>PFの弱点：重みの退化と粒子の重複</h2><div class="content"><div class="body"><ul>
+<li>多数の観測に同時に合う粒子が少ないと、重みが一部へ集中する。</li>
+<li>再標本化は重みを均等にするが、同じ粒子が複製される。</li>
+<li>モデル誤差や移動ステップがなければ、多様性が戻らない場合がある。</li>
+<li>ジッタは多様性を増やすが、事後分布も変えるため設定根拠が必要。</li>
+</ul>
+</div></div><div class="takeaway">非ガウスを扱える利点と、高次元で必要粒子数が増える難しさを併せて理解する。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / PF</div><h2>104のPF参考コードと、標準理論の差</h2><div class="content"><div class="body"><p><code>dacore/pf.py</code>
+は尤度・ESS・系統再標本化を実装している。</p>
+<p>ただし、現状は <strong>前時刻の重みを引数で受け取らない</strong>。
+<code>dacore/twin.py</code>
+も返った重みを平均計算に使わず、単純平均する。</p>
+<p>再標本化しない時刻では、一般の逐次重要度更新を正しく表すには修正が必要。</p>
+<details class="theory-note"><summary>補足説明</summary><p>本作業は資料の改訂であり、PFソルバコードや過去の解析結果を変更しない。pf_updateは一様事前重みからの一回更新としては理解できる。</p></details></div></div><div class="takeaway">PFの理論は解説するが、現コードをそのまま標準PFの検証済み結果とは扱わない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson (2023); 104/dacore/pf.py（実装との相違は本文参照）</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>4手法の違いを、同じ軸で比較する</h2><div class="content"><div class="body"><table>
+<thead>
+<tr class="header">
+<th>方法</th>
+<th>不確かさの表現</th>
+<th>観測で行う処理</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>OI</td>
+<td>所与の背景共分散B</td>
+<td>共分散からKを作り補正</td>
+</tr>
+<tr class="even">
+<td>KF</td>
+<td>予報する平均・共分散</td>
+<td>Kで平均と共分散を更新</td>
+</tr>
+<tr class="odd">
+<td>EnKF</td>
+<td>等重みメンバーの標本統計</td>
+<td>メンバーをKで移動</td>
+</tr>
+<tr class="even">
+<td>PF</td>
+<td>粒子と重み</td>
+<td>尤度で重み更新・再標本化</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="takeaway">どれも観測を使うが、不確かさの伝え方と更新の近似が異なる。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>「最適」「非線形」「非ガウス」の意味を整理する</h2><div class="content"><div class="body"><ul>
+<li>OI：与えた共分散と線形不偏推定の範囲で最小分散。</li>
+<li>KF：線形ガウスなら事後分布を平均・共分散で厳密に計算。</li>
+<li>EnKF：非線形モデルを使えても、更新は共分散に基づく近似。</li>
+<li>PF：非ガウス・多峰な分布を表現できるが、有限粒子の近似誤差がある。</li>
+</ul>
+<p>どの方法でも、モデル・観測誤差の設定が間違えば推定は偏り得る。</p>
+</div></div><div class="takeaway">手法の名前だけで精度が保証されるわけではない。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>104の説明を読む順番：式→行列→ファイル</h2><div class="content"><div class="body"><ol type="1">
+<li>EnKFの理論式で、どの共分散と残差を使うかを把握する。</li>
+<li>5メンバーの具体行列で、平均→偏差→共分散→K→Q更新を計算する。</li>
+<li><code>dacore/enkf.py</code> と <code>daof/of_fem_twin.py</code>
+で実装を確認する。</li>
+<li>実ソルバ結果とROMの別実験を、各条件の下で読む。</li>
+</ol>
+</div></div><div class="takeaway">理論章はここまで。次は同じ式を104の物理量とコードに結び付ける。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section><section class="text theory"><div class="eyebrow">理論 / 共通</div><h2>理論の参考資料と本資料の位置付け</h2><div class="content"><div class="body"><ul>
+<li><a
+href="https://www.ecmwf.int/sites/default/files/elibrary/2002/16928-data-assimilation-concepts-and-methods.pdf">OI：Bouttier
+&amp; Courtier, ECMWF講義 §4–7</a></li>
+<li><a href="https://doi.org/10.1115/1.3662552">KF：Kalman
+(1960)</a></li>
+<li><a href="https://doi.org/10.1007/s10236-003-0036-9">EnKF：Evensen
+(2003)</a></li>
+<li><a
+href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">ベイズフィルタ・PF：Särkkä
+&amp; Svensson (2023), 著者公開版</a></li>
+</ul>
+<p>式は本資料の記号に統一して展開。数値例は説明用で、104の解析結果とは区別する。</p>
+</div></div><div class="takeaway">出典の文章や図を転載せず、導出・数値例・実装対応を組み合わせて説明した。</div><div class="reference">参考：<a href="https://users.aalto.fi/~ssarkka/pub/bfs_book_2023_online.pdf">Särkkä &amp; Svensson, Bayesian Filtering and Smoothing (2023)</a></div></section></section><section><section class="cover"><h2>第1部　OpenFOAM ＋ FrontISTR でデータ同化</h2><div class="content"><div class="body"><p><strong>実ソルバで温度と変位を観測し、状態を補正（正確だが重い）</strong></p>
 </div></div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>出発点：内部の温度と、実際の発熱量がわからない</h2><div class="content"><div class="body"><p>円筒を片側からヒーターで温める状況を考える。</p>
 <ul>
 <li><strong>直接測れる量</strong>：表面近傍の温度と、上面の伸び。</li>
@@ -242,15 +617,69 @@ class="math display">\[z=[T_0,T_1,\ldots,T_{20695},Q]^{\mathsf{T}}\]</span></p>
                                       ↓
                                  Yf の1行に格納</code></pre>
 <p>EnKFには、各メンバーで評価した <strong>Yf</strong> を渡す。</p>
-</div></div><div class="takeaway">観測演算子を巨大な行列として明示せず、ソルバ評価で実装する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>平均と偏差をメンバー方向に計算する</h2><div class="content"><div class="body"><p><span
-class="math display">\[\bar{z}_j=\frac{1}{N}\sum_{i=1}^{N}z_j^{(i)},\quad
-dZ_{ij}=z_j^{(i)}-\bar{z}_j\]</span></p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>zbar <span class="op">=</span> Zf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ybar <span class="op">=</span> Yf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dZ <span class="op">=</span> Zf <span class="op">-</span> zbar</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>dY <span class="op">=</span> Yf <span class="op">-</span> ybar</span></code></pre></div>
-</div></div><div class="takeaway">同じセル・同じ観測成分の5個の値から平均とばらつきを得る。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>偏差を1.05倍して、過度な収縮を緩和する</h2><div class="content"><div class="body"><p><span
+</div></div><div class="takeaway">観測演算子を巨大な行列として明示せず、ソルバ評価で実装する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>平均・偏差の理論式を確認してから、数値を代入する</h2><div class="content"><div class="body"><p><span class="math display">\[\bar z=\frac1N\sum_i z_f^{(i)},\quad\bar
+y_f=\frac1N\sum_i y_f^{(i)}\]</span></p>
+<p><span class="math display">\[dZ_{i,:}=(z_f^{(i)}-\bar z)^T,\quad
+dY_{i,:}=(y_f^{(i)}-\bar y_f)^T\]</span></p>
+<p>実コードは先に偏差拡大を行う。次の説明用数値例では、手計算を追うため倍率1で示す。</p>
+</div></div><div class="takeaway">理論式の各成分を、次の5行の行列で確認する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>平均の具体例①：5メンバーを行に並べる</h2><div class="content"><div class="body"><div class="numeric-example">
+<p><strong>説明用の仮想データ</strong>。全20,696温度の代わりに温度2列だけを表示。</p>
+<p>行：member_00〜04。列：T₁ [K]、T₂ [K]、Q [W]。</p>
+<pre class="text"><code>Zf (5×3) =
+[ 290  296  10 ]
+[ 292  294  14 ]
+[ 294  298  12 ]
+[ 296  300  18 ]
+[ 298  292  16 ]</code></pre>
+<p><code>axis=0</code> は、各列を上から下へ5個集計する指定。</p>
+</div>
+</div></div><div class="takeaway">この例は計算手順の説明用。104の計算結果ではない（偏差拡大倍率は1）。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>平均の具体例②：列ごとの合計を5で割る</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>T₁: (290 + 292 + 294 + 296 + 298) / 5 = 294 K
+T₂: (296 + 294 + 298 + 300 + 292) / 5 = 296 K
+ Q: ( 10 +  14 +  12 +  18 +  16) / 5 =  14 W
+
+zbar = [ 294  296  14 ]       # 3成分
+zbar = Zf.mean(axis=0)</code></pre>
+<p>温度とQを混ぜて平均せず、<strong>同じ列の5メンバー</strong>を平均する。</p>
+</div>
+</div></div><div class="takeaway">平均は「1ケースの全セル平均」でも「時刻平均」でもない。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>偏差の具体例：各行から同じ平均ベクトルを引く</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>dZ = Zf - zbar
+
+[ 290  296  10 ]  -  [294  296  14]  =  [ -4   0  -4 ]
+[ 292  294  14 ]  -  [294  296  14]  =  [ -2  -2   0 ]
+[ 294  298  12 ]  -  [294  296  14]  =  [  0   2  -2 ]
+[ 296  300  18 ]  -  [294  296  14]  =  [  2   4   4 ]
+[ 298  292  16 ]  -  [294  296  14]  =  [  4  -4   2 ]</code></pre>
+<p>member_00では
+<code>[290−294, 296−296, 10−14] = [−4, 0, −4]</code>。</p>
+<p>NumPyは <code>zbar</code> を5行に共通適用する（broadcast）。</p>
+</div>
+</div></div><div class="takeaway">偏差の各列を足すと0。平均から上・下にどれだけ外れるかを表す。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>予報観測も同じ計算：Yf → ybar → dY</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>列：温度2成分 [K]、上面変位2成分 [mm]。<code>ybar</code>
+は予報の平均。</p>
+<pre class="text"><code>Yf (5×4) =
+[ 290  296  0.001  -0.002 ]
+[ 292  294  0.002  -0.001 ]
+[ 294  298  0.003       0 ]
+[ 296  300  0.004   0.001 ]
+[ 298  292  0.005   0.002 ]
+
+ybar = [294  296  0.003  0]
+ybar = Yf.mean(axis=0)</code></pre>
+<p>変位1列目の平均：(0.001＋0.002＋0.003＋0.004＋0.005) / 5。</p>
+</div>
+</div></div><div class="takeaway">ybarは5ケースの予報観測平均。センサから得る観測yとは別。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>観測偏差dY：温度と変位を列ごとに中心化する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>dY = Yf - ybar
+
+[ -4   0  -0.002  -0.002 ]
+[ -2  -2  -0.001  -0.001 ]
+[  0   2       0       0 ]
+[  2   4   0.001   0.001 ]
+[  4  -4   0.002   0.002 ]</code></pre>
+<p>member_00：<code>[290−294, 296−296, 0.001−0.003, −0.002−0]</code>。</p>
+<p><strong>dZ：5×3、dY：5×4</strong>。同じ行が同じメンバーに対応する。</p>
+</div>
+</div></div><div class="takeaway">次に、このdZとdYの列同士を掛けて足し、共分散を作る。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>偏差を1.05倍して、過度な収縮を緩和する</h2><div class="content"><div class="body"><p><span
 class="math display">\[z^{(i)}\leftarrow\bar{z}+1.05(z^{(i)}-\bar{z})\]</span></p>
 <ul>
 <li>平均値を変えず、平均からの差を拡大する。</li>
@@ -258,14 +687,66 @@ class="math display">\[z^{(i)}\leftarrow\bar{z}+1.05(z^{(i)}-\bar{z})\]</span></
 <li>共分散は拡大前の <strong>1.05²＝1.1025倍</strong>。</li>
 <li>この段階でFrontISTRを再実行はしない。</li>
 </ul>
-</div></div><div class="takeaway">設定値1.05は、このコードでは「偏差」に掛ける倍率である。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>共分散は N−1＝4 で割る</h2><div class="content"><div class="body"><p><span
-class="math display">\[C_{zy}=\frac{dZ^{\mathsf{T}}dY}{N-1},\qquad
-C_{yy}=\frac{dY^{\mathsf{T}}dY}{N-1}\]</span></p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>C_zy <span class="op">=</span> dZ.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)  <span class="co"># 20,697 × 4</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>C_yy <span class="op">=</span> dY.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)  <span class="co"># 4 × 4</span></span></code></pre></div>
-<p>Cyyの対角は各観測成分の標本分散、非対角は成分間の標本共分散。</p>
-</div></div><div class="takeaway">温度場・Qと観測の「一緒に変わる関係」を、5ケースから推定する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>観測誤差共分散Rは、想定した測定誤差</h2><div class="content"><div class="body"><p><span
+</div></div><div class="takeaway">設定値1.05は、このコードでは「偏差」に掛ける倍率である。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>共分散の理論式：成分の和を行列積へ書き直す</h2><div class="content"><div class="body"><p><span class="math display">\[[C_{zy}]_{ja}=\frac1{N-1}\sum_i
+dZ_{ij}dY_{ia},\quad C_{zy}=\frac{dZ^TdY}{N-1}\]</span></p>
+<p><span class="math display">\[[C_{yy}]_{ab}=\frac1{N-1}\sum_i
+dY_{ia}dY_{ib},\quad C_{yy}=\frac{dY^TdY}{N-1}\]</span></p>
+<p>添字i：メンバー、j：状態成分、a・b：観測成分。</p>
+</div></div><div class="takeaway">成分表示と行列表示は同じ式。次は各項に数値を入れる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>共分散①：転置すると、状態ごとの偏差が1行になる</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>dZ.T (3×5) =
+[ -4  -2   0  2   4 ]
+[  0  -2   2  4  -4 ]
+[ -4   0  -2  4   2 ]
+
+dY (5×4) =
+[ -4   0  -0.002  -0.002 ]
+[ -2  -2  -0.001  -0.001 ]
+[  0   2       0       0 ]
+[  2   4   0.001   0.001 ]
+[  4  -4   0.002   0.002 ]</code></pre>
+<p><code>dZ.T @ dY</code>：各状態の偏差と各観測の偏差を、同じメンバー同士で掛けて合計。</p>
+</div>
+</div></div><div class="takeaway">行列積は (3×5) @ (5×4) → (3×4)。5メンバー分を内積で集約する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>共分散②：C_zyの全要素を計算する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>dZ.T @ dY =
+[ 40  -4    0.02    0.02 ]
+[ -4  40  -0.002  -0.002 ]
+[ 32   4   0.016   0.016 ]
+
+C_zy = (dZ.T @ dY) / 4 =
+[ 10  -1    0.005    0.005 ]
+[ -1  10  -0.0005  -0.0005 ]
+[  8   1    0.004    0.004 ]</code></pre>
+<p>行：T₁、T₂、Q。列：温度1、温度2、変位1、変位2。</p>
+<p>例：<code>cov(Q,T₁) = {(-4)(-4)+0(-2)+(-2)0+4×2+2×4}/4 = 8</code>。</p>
+</div>
+</div></div><div class="takeaway">N−1＝4で割る。Qの行 [8, 1, 0.004, 0.004] もここで得られる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>共分散③：C_yyは、dY同士の内積から作る</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>dY.T @ dY =
+[   40      -4    0.02    0.02 ]
+[   -4      40  -0.002  -0.002 ]
+[ 0.02  -0.002   1e-05   1e-05 ]
+[ 0.02  -0.002   1e-05   1e-05 ]
+
+C_yy = (dY.T @ dY) / 4 =
+[    10       -1    0.005    0.005 ]
+[    -1       10  -0.0005  -0.0005 ]
+[ 0.005  -0.0005  2.5e-06  2.5e-06 ]
+[ 0.005  -0.0005  2.5e-06  2.5e-06 ]</code></pre>
+<p><code>2.5e-06 = 0.0000025</code>。単位は温度同士K²、温度×変位K·mm、変位同士mm²。</p>
+</div>
+</div></div><div class="takeaway">C_yyは4×4の対称行列。対角は分散、非対角は異なる成分間の共分散。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>共分散④：対角と非対角を1要素ずつ手計算する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>温度1の分散（対角）
+[(-4)² + (-2)² + 0² + 2² + 4²] / 4 = 10 K²
+
+温度1と変位1の共分散（非対角）
+[(-4)(-0.002) + (-2)(-0.001) + 0×0
+             + 2×0.001 + 4×0.002] / 4 = 0.005 K·mm
+
+変位1の分散（対角）
+[(-0.002)² + (-0.001)² + 0² + 0.001² + 0.002²] / 4
+= 0.0000025 mm²</code></pre>
+<p>平均を標本から求めたため、偏差には「合計0」の制約が1個あり、分母はN−1。</p>
+</div>
+</div></div><div class="takeaway">偏差拡大1.05を実施すれば、この例のC_zyとC_yyは1.1025倍になる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>観測誤差共分散Rは、想定した測定誤差</h2><div class="content"><div class="body"><p><span
 class="math display">\[R=\mathrm{diag}(0.30^2,0.30^2,10^{-8},10^{-8})\]</span></p>
 <table>
 <thead>
@@ -289,38 +770,140 @@ class="math display">\[R=\mathrm{diag}(0.30^2,0.30^2,10^{-8},10^{-8})\]</span></
 </tbody>
 </table>
 <p>異なる観測の測定誤差は、ここでは無相関と仮定する。</p>
-</div></div><div class="takeaway">Cyyは予報のばらつき、Rは測定誤差。由来が異なる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>カルマンゲインを求め、各メンバーを更新</h2><div class="content"><div class="body"><p><span class="math display">\[K=C_{zy}(C_{yy}+R)^{-1}\]</span></p>
+</div></div><div class="takeaway">Cyyは予報のばらつき、Rは測定誤差。由来が異なる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>ゲインと更新の理論式：なぜsolveを使うのか</h2><div class="content"><div class="body"><p><span class="math display">\[S=C_{yy}+R,\quad K=C_{zy}S^{-1}\
+\Longleftrightarrow\ SK^T=C_{zy}^T\]</span></p>
 <p><span
 class="math display">\[z_a^{(i)}=z_f^{(i)}+K(y+\varepsilon^{(i)}-y_f^{(i)})\]</span></p>
-<p>観測摂動：各メンバーで ε⁽ⁱ⁾ ∼ N(0, R) を生成。</p>
-<p>実装は逆行列を作らず、<code>np.linalg.solve()</code>
-で4×4の系を解く。</p>
-</div></div><div class="takeaway">平均だけでなく、5個のメンバーそれぞれを補正する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>同化後の書き戻しが、次の予報に反映される</h2><div class="content"><div class="body"><div class="sourceCode" id="cb1"><pre
+<p>Sは対称。コードは右の連立方程式を解いてKᵀを得る。
+4個の観測ならSは4×4。次の数値例でも同じ操作を行う。</p>
+</div></div><div class="takeaway">solveは理論式を省略した別手法ではなく、同じ式を安定に計算する実装。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>ゲイン①：観測誤差Rを足してSを作る</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>説明用の観測：<code>y = [293, 295, 0.0025, −0.0005]</code>（K、K、mm、mm）。</p>
+<pre class="text"><code>R = diag(0.09, 0.09, 1e-08, 1e-08)
+
+S = C_yy + R =
+[ 10.09       -1     0.005     0.005 ]
+[    -1    10.09   -0.0005   -0.0005 ]
+[ 0.005  -0.0005  2.51e-06   2.5e-06 ]
+[ 0.005  -0.0005   2.5e-06  2.51e-06 ]</code></pre>
+<p>Rはセンサ誤差の想定。C_yyは5メンバーの予報のばらつき。</p>
+</div>
+</div></div><div class="takeaway">この例のC_yyには従属する列があるが、正の対角Rを足してSを解く。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>ゲイン②：S @ K.T = C_zy.T を解く</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>gain_T = np.linalg.solve(S, C_zy.T)   # 4×3
+K = gain_T.T                         # 3×4
+
+K ≈
+[    0.181518  -0.00016353    816.832    816.832 ]
+[ -0.00016353     0.990991  -0.735885  -0.735885 ]
+[    0.148485     0.180046    668.183    668.183 ]</code></pre>
+<p>行：T₁、T₂、Q。列：温度1、温度2、変位1、変位2。</p>
+<p>変位列の大きな値はmm単位の残差に掛かる係数。数値の大きさだけで寄与を比べない。</p>
+</div>
+</div></div><div class="takeaway">逆行列を保存する代わりに、4元連立方程式を3列分まとめて解く。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>更新①：member_00の「観測−予報」を計算する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>y       = [293      295       0.0025       -0.0005     ]
+Yf[0]   = [290      296       0.001        -0.002      ]
+eps[0] ≈ [0.168635  0.168060 -0.000062246 -0.000000982]
+
+innov[0] = y + eps[0] - Yf[0]
+         ≈ [3.168635  -0.831940  0.001437754  0.001499018]</code></pre>
+<p>観測摂動は <code>default_rng(104)</code> と
+<code>multivariate_normal(0, R, size=5)</code> で生成。</p>
+<p>他の4メンバーも、それぞれ別の摂動と予報から残差を作る。</p>
+</div>
+</div></div><div class="takeaway">観測yは共通。各メンバーのYfと観測摂動epsが異なる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>更新②：全メンバーにゲインを掛けて補正する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>Za = Zf + innov @ K.T
+
+ member     T₁: 予報 → 更新 [K]   T₂: 予報 → 更新 [K]   Q: 予報 → 更新 [W]
+   00       290 → 292.974          296 → 295.173         10 → 12.283
+   01       292 → 293.153          294 → 295.007         14 → 15.127
+   02       294 → 293.037          298 → 294.892         12 → 10.647
+   03       296 → 292.984          300 → 295.310         18 → 14.679
+   04       298 → 293.211          292 → 295.060         16 → 12.638</code></pre>
+<p>行列サイズ：<code>(5×4) @ (4×3) → (5×3)</code>
+の補正を、元の5×3行列に加える。</p>
+</div>
+</div></div><div class="takeaway">更新後も5つの状態を保持する。全メンバーを同じ平均値に置き換えない。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>実データで手計算：変位1点がメンバー全員を真値へ戻す</h2><div class="content"><div class="body"><p>600s計算サイクル1の<strong>実ログ値</strong>で、変位による補正を手計算再現:</p>
+<table>
+<thead>
+<tr class="header">
+<th>member</th>
+<th>T@hot</th>
+<th>uz予報(FrontISTR)</th>
+<th>ズレ(観測1.79µm−予報)</th>
+<th>補正後</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>47.8℃</td>
+<td>+32.96µm</td>
+<td>−31.2µm</td>
+<td><strong>22.0℃</strong></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>11.9℃</td>
+<td>−10.05µm</td>
+<td>+11.8µm</td>
+<td><strong>21.7℃</strong></td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>38.1℃</td>
+<td>+21.38µm</td>
+<td>−19.6µm</td>
+<td><strong>21.9℃</strong></td>
+</tr>
+</tbody>
+</table>
+<p>5メンバーの並びから</p>
+<p><span
+class="math display">\[K=\frac{\mathrm{cov}(T,u_z)}{\mathrm{var}(u_z)+R}=0.827\
+\mathrm{K/\mu m}\]</span></p>
+<p>、更新</p>
+<p><span
+class="math display">\[T_a=T_f+K(u_z^{obs}-u_z^{f})\]</span></p>
+<p>だけで<strong>47.8℃も11.9℃も全員22℃前後（真値）へ</strong>。</p>
+<p>本番はこれを全20,696セルで同時に行う（セルごとに cov(T_cell,
+uz)）。</p>
+</div></div><div class="takeaway">『伸びすぎ→冷やす／縮みすぎ→温める』が相関から自動で決まる（docs/13で再現コード）。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>同化後の書き戻しが、次の予報に反映される</h2><div class="content"><div class="body"><div class="sourceCode" id="cb1"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, R, rng,</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                 inflation<span class="op">=</span><span class="fl">1.05</span>, Yf<span class="op">=</span>Yf)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 温度とQの範囲を制限した後</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(members):</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    of_case.set_solid_state(m, t1, Za[i, :Nc], Za[i, iQ])</span></code></pre></div>
 <p>温度：250〜400 K、Q：0〜60 Wにクリップする。</p>
-</div></div><div class="takeaway">5ケースを平均場で置き換えず、それぞれの同化後状態から再開する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>発熱量 Q はどう求めたか（前ページの H・K を使う）</h2><div class="content"><div class="body"><p>Qは直接測れない。<strong>Qを状態に入れ、温度との相関から逆算</strong>する（既出のH・R・Kをそのまま使う）。</p>
-<p>・状態にQを含める：</p>
-<p><span class="math display">\[z=[T_1,\dots,T_{N_c},\,Q]\]</span></p>
-<p>。各メンバーは違うQ→「Q大→温度高」の相関。</p>
-<p>・その相関は共分散</p>
-<p><span
-class="math display">\[C_{zy}=\frac{1}{N-1}\sum_i(z_f^{(i)}-\bar
-z)(y_f^{(i)}-\bar y)^{T}\]</span></p>
-<p>の<strong>Qの行</strong> cov(Q,T) に入る。</p>
-<p>・前ページの</p>
-<p><span class="math display">\[K=C_{zy}(C_{yy}+R)^{-1}\]</span></p>
-<p>の<strong>Qの行</strong>が K_Q（1×4）:</p>
-<p><span
-class="math display">\[K_Q=[C_{zy}]_{Q,:}\,(C_{yy}+R)^{-1}\]</span></p>
-<p>（[C_{zy}]_{Q,:}=Qと各観測の共分散の行）</p>
-<p><span
-class="math display">\[Q_a^{(i)}=Q_f^{(i)}+K_Q\,(y+\varepsilon^{(i)}-H(z_f^{(i)}))\]</span></p>
-<p>cov(Q,T)&gt;0 なので、温度が観測より高すぎ→Q下げ、低すぎ→Q上げ。</p>
-</div></div><div class="takeaway">Qは温度との相関で逆算。10.3→14.4 W（真値15）へ収束（加熱中のみ推定可）。詳細=docs/10。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>フォルダ構成（実ソルバ版）</h2><div class="content"><div class="body"><p>実ソルバ版のデータ同化はこの構成（104フォルダ内）：</p>
+</div></div><div class="takeaway">5ケースを平均場で置き換えず、それぞれの同化後状態から再開する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>Q更新の理論式：4成分の残差の重み付き和</h2><div class="content"><div class="body"><p><span
+class="math display">\[K_Q=[C_{zy}]_{Q,:}(C_{yy}+R)^{-1}\]</span></p>
+<p><span class="math display">\[\Delta
+Q^{(i)}=\sum_{a=1}^{4}(K_Q)_a(y_a+\varepsilon_a^{(i)}-y_{f,a}^{(i)})\]</span></p>
+<p><span class="math display">\[Q_a^{(i)}=Q_f^{(i)}+\Delta
+Q^{(i)}\]</span></p>
+<p>次の例で各成分の寄与を1つずつ計算する。</p>
+</div></div><div class="takeaway">cov(Q,T)の符号だけではなく、KのQ行と全残差から更新方向が決まる。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>Qの更新①：C_zyとKの「Qの行」を取り出す</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>C_zy のQ行 = [8      1      0.004       0.004]
+
+K_Q ≈ [0.148485  0.180046  668.183134  668.183134]
+
+member_00 の残差
+r₀ ≈ [3.168635  -0.831940  0.001437754  0.001499018]</code></pre>
+<p><code>K_Q = C_zy[Q, :] @ S⁻¹</code>（実装では連立方程式として解く）。</p>
+<p><strong>Qの共分散は、Qの偏差と各観測の偏差から計算した値</strong>。</p>
+</div>
+</div></div><div class="takeaway">Qは観測しない。Qと4成分の観測の関係を使って更新する。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>Qの更新②：4成分の寄与を足してQを修正する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>ΔQ₀ = K_Q @ r₀
+ ≈ 0.148485 × 3.168635      （温度1）
+  + 0.180046 × (-0.831940)   （温度2）
+  + 668.183134 × 0.001437754 （変位1）
+  + 668.183134 × 0.001499018 （変位2）
+ ≈ 0.470495 - 0.149788 + 0.960683 + 1.001619
+ = 2.283009 W
+
+Q_a[0] = 10 + 2.283009 = 12.283009 W</code></pre>
+<p>単一温度観測なら、正の共分散・正の残差はQを増やす。
+<strong>4成分同時の場合はゲインの符号と全残差で決まり、cov(Q,T)だけでは決まらない。</strong></p>
+</div>
+</div></div><div class="takeaway">この例のmember_00はQを増やす。他のメンバーでは下がる場合もある。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR</div><h2>フォルダ構成（実ソルバ版）</h2><div class="content"><div class="body"><p>実ソルバ版のデータ同化はこの構成（104フォルダ内）：</p>
 <ul>
 <li><code>daof/</code> …
 OpenFOAM連成（ケース生成・実行・場の読み書き・双子実験ドライバ）</li>
@@ -466,7 +1049,60 @@ s 全時間は現実的でない。</li>
 同じデータ同化を<strong>軽い代用モデル（ROM）</strong>でも回せるようにする（第2部）。</li>
 </ul>
 </div></div><div class="takeaway">実ソルバ版は正確だが重い。全時間・多数試行には軽いROMが要る。</div></section></section><section><section class="cover"><h2>第2部　ROM にした</h2><div class="content"><div class="body"><p><strong>同じ方程式を5点に縮約した軽い前進モデル（数秒）</strong></p>
-</div></div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>何の方程式を、どうROMにしたか</h2><div class="content"><div class="body"><p>実ソルバは重いので、<strong>同じ物理を5点に縮約</strong>した軽い前進モデル(ROM)を作る。</p>
+</div></div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM章の目的：軽いモデルで、何を比較するのか</h2><div class="content"><div class="body"><p><strong>目的：600秒の推定を軽く試し、観測の組合せと可視化の意味を確かめる。</strong></p>
+<ol type="1">
+<li><strong>A：モデルの校正</strong> —
+5点ROMはOpenFOAMの温度履歴を近似できるか。</li>
+<li><strong>B：温度のみ同化</strong> —
+同化なしに比べ、温度と予測変位がどう変わるか。</li>
+<li><strong>C：変位追加の比較</strong> —
+温度1点／2点に変位を加えると、温度RMSEはどう変わるか。</li>
+<li><strong>D：分布の可視化</strong> —
+5温度をIDW補間し、温度・変位のGIFにする。</li>
+</ol>
+</div></div><div class="takeaway">この章の図は同じ計算の出力ではない。A〜Dの目的と入力を分けて読む。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM章の図の地図：何を入力し、何と比較するか</h2><div class="content"><div class="body"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>計算</th>
+<th>同化・入力</th>
+<th>比較する相手</th>
+<th>示す量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A 校正</td>
+<td>OpenFOAMの温度履歴</td>
+<td>ROMの温度履歴</td>
+<td>当てはめ誤差</td>
+</tr>
+<tr class="even">
+<td>B 温度のみ</td>
+<td>hot・cold温度</td>
+<td>同化なし／ROM真値</td>
+<td>温度履歴・RMSE・Dの変位</td>
+</tr>
+<tr class="odd">
+<td>C 観測条件比較</td>
+<td>温度1/2点、変位の有無</td>
+<td>4つの観測条件</td>
+<td>全5温度のRMSE</td>
+</tr>
+<tr class="even">
+<td>D 分布GIF</td>
+<td>現行は温度＋変位同化</td>
+<td>真値ROMも同じ後処理</td>
+<td>補間温度・FEM変位</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="takeaway">Bの変位はDによる予測、Cの観測はM、Dの全変位分布はFrontISTRで求める。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>何の方程式を、どうROMにしたか</h2><div class="content"><div class="body"><p>実ソルバは重いので、<strong>同じ物理を5点に縮約</strong>した軽い前進モデル(ROM)を作る。</p>
 <p>固体の熱伝導PDEを有限体積で粗くし、5つの代表ノードの常微分方程式にする：</p>
 <p><span class="math display">\[C_i\frac{dT_i}{dt}=\sum_j
 K_{ij}(T_j-T_i)-h(T_i-T_{air})+Q_i(t)\]</span></p>
@@ -491,14 +1127,7 @@ K_{ij}(T_j-T_i)-h(T_i-T_{air})+\dot{Q}_i\]</span></p>
 <li>総熱容量：約1191 J/K。</li>
 <li>この誤差は<strong>校正データへの当てはめ誤差</strong>。</li>
 </ul>
-</div></div><div class="takeaway">校正誤差と、未知条件に対する予測精度は分けて評価する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROMで温度・変位の分布を作る手順</h2><div class="content"><div class="body"><p>5点しか持たないが、<strong>逆距離加重補間(IDW)</strong>でメッシュ全体へ再構成できる。</p>
-<p>重み行列 W（節点数×5、行和1）を1度作り、各時刻は行列積1発：</p>
-<p><span class="math display">\[T_{mesh}=W\,T_{node},\quad
-W_{p,i}=\frac{1/|p-x_i|^2}{\sum_j 1/|p-x_j|^2}\]</span></p>
-<p>変位は再構成温度をFrontISTRに通す（または線形写像</p>
-<p><span class="math display">\[u_z=D(T-T_{ref})\]</span></p>
-<p>）。分布・アニメを数秒で生成。</p>
-</div></div><div class="takeaway">5点→IDWで全メッシュに再構成。分布・動画もROMで作れる（粗いが高速）。</div></section><section class="text"><div class="eyebrow">補足 ROMによる別の検証</div><h2>ROM版のアンサンブルは60行×7列</h2><div class="content"><div class="body"><table>
+</div></div><div class="takeaway">校正誤差と、未知条件に対する予測精度は分けて評価する。</div></section><section class="text"><div class="eyebrow">補足 ROMによる別の検証</div><h2>ROM版のアンサンブルは60行×7列</h2><div class="content"><div class="body"><table>
 <thead>
 <tr class="header">
 <th>項目</th>
@@ -544,31 +1173,255 @@ W_{p,i}=\frac{1/|p-x_i|^2}{\sum_j 1/|p-x_j|^2}\]</span></p>
 <li><code>run/run_rom_fem.py</code> … 実行の入口（数秒）</li>
 </ul>
 <p>実ケースフォルダは作らず、メモリ上のNumPy配列（60×7）で計算する。</p>
-</div></div><div class="takeaway">ROM版=dacore/だけで完結（純NumPy、実ケース不要）。EnKFは共通。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：未観測ノードの温度も真値に近づく</h2><div class="content"><figure><img src="assets/rom_fem_temperature.png"><figcaption>5ノードの温度履歴。観測点：hot/cold、未観測点：mid/top/core。</figcaption></figure><div class="body"><p>同化するのはhot・cold。mid・top・coreは観測に含めない。0〜300秒で加熱し、300〜600秒で遮断。</p>
-</div></div><div class="takeaway">温度観測とモデルの結合を通じて、未観測の代表温度を推定する。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：同化あり・なしの誤差を比較</h2><div class="content"><figure><img src="assets/rom_fem_rmse.png"><figcaption>ROMの5ノード平均二乗誤差。縦軸は対数。</figcaption></figure><div class="body"><p>再計算による確認値</p>
+</div></div><div class="takeaway">ROM版=dacore/だけで完結（純NumPy、実ケース不要）。EnKFは共通。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>計算Bの条件：温度2点だけで同化し、同化なしと比較</h2><div class="content"><div class="body"><table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>設定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>状態・メンバー</td>
+<td>5温度＋q＋h、60メンバー</td>
+</tr>
+<tr class="even">
+<td>時間</td>
+<td>0〜600秒、20秒ごとに30回更新</td>
+</tr>
+<tr class="odd">
+<td>同化入力</td>
+<td>hot・coldの温度、ノイズ標準偏差0.30 K</td>
+</tr>
+<tr class="even">
+<td>比較</td>
+<td>同じ初期分布の同化なし、別計算のROM真値</td>
+</tr>
+<tr class="odd">
+<td>変位の扱い</td>
+<td>補正後温度からDで上面2値を予測（同化には不使用）</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="takeaway">次の温度履歴・RMSE・Dの計算例は「温度のみ同化」の計算B。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>計算Bの結果：観測していない代表温度も補正される</h2><div class="content"><figure><img src="assets/rom_fem_temperature.png"><figcaption>5ノードの温度履歴。観測点：hot/cold、未観測点：mid/top/core。</figcaption></figure><div class="body"><p>同化するのはhot・cold。mid・top・coreは観測に含めない。0〜300秒で加熱し、300〜600秒で遮断。</p>
+</div></div><div class="takeaway">温度観測とモデルの結合を通じて、未観測の代表温度を推定する。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>計算Bの結果：同化なしと温度RMSEを比較</h2><div class="content"><figure><img src="assets/rom_fem_rmse.png"><figcaption>ROMの5ノード平均二乗誤差。縦軸は対数。</figcaption></figure><div class="body"><p>再計算による確認値</p>
 <ul>
 <li>初期：9.738 K</li>
 <li>同化あり最終：<strong>0.03885 K</strong></li>
 <li>同化なし最終：<strong>2.614 K</strong></li>
 </ul>
 <p>同じ初期アンサンブルから比較。</p>
-</div></div><div class="takeaway">ROMでは、同化なしの比較軌道に対して温度推定が改善した。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROMの変位は、同化後温度からの予測</h2><div class="content"><figure><img src="assets/rom_fem_displacement.png"><figcaption>温度のみ同化したROMからの変位予測。同化なし・真値・表示用の合成観測との比較。</figcaption></figure><div class="body"><p>変位は校正済みの線形写像 <strong>u＝D(T−Tref)</strong>
-で算出。図中の変位観測は表示用で、更新には使わない。</p>
-</div></div><div class="takeaway">ROMの変位精度を、変位観測追加の同化効果として解釈しない。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：温度分布の時刻歴（データ同化 vs 真値, 0→600s）</h2><div class="content"><figure><img src="assets/da_vs_truth_temperature.gif"><figcaption>ROM温度分布：データ同化 vs 真値（0→600s）</figcaption></figure><div class="body"><p>でたらめ初期からデータ同化した温度分布（左）と真値（右）を、加熱→冷却の全過程で比較。5点をIDWでメッシュに再構成して表示。同化後は分布まで真値に一致する。</p>
-</div></div><div class="takeaway">でたらめ初期→同化で温度分布が真値に一致（全時間）。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：変位分布の時刻歴（データ同化 vs 真値, 0→600s）</h2><div class="content"><figure><img src="assets/da_vs_truth_displacement.gif"><figcaption>ROM変位分布：データ同化 vs 真値（0→600s）</figcaption></figure><div class="body"><p>同化後の温度から計算した変形（左）と真値の変形（右）。温度が真値に一致するにつれ、そこから決まる変位分布も真値に一致していく。</p>
-</div></div><div class="takeaway">温度が直れば、そこから決まる変位分布も真値に一致。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROMでも変位を同化に使えた（2つのバグ修正後）</h2><div class="content"><figure><img src="assets/rom_disp_comparison.png"><figcaption>温度のみ vs 温度＋変位M</figcaption></figure><div class="body"><p>当初は発散したが、原因は実装バグ2つ：①校正Dが悪条件→IDW→FrontISTRの演算子Mに、②観測を
-M(T-T_ref) とアフィンで評価。修正後は変位が効く：</p>
-<p>温度2点のみ 0.076 K → <strong>温度2点＋変位 0.004
-K（18倍）</strong>、温度1点のみ 0.236 K → <strong>温度1点＋変位 0.002
-K（100倍）</strong>。温度点が少ないほど効く。</p>
-</div></div><div class="takeaway">正しい演算子M＋アフィン評価なら、ROMでも変位は効く（特に温度点が少ないほど）。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>第2部まとめ：軽くて全時間を可視化できる</h2><div class="content"><div class="body"><ul>
-<li>同じEnKFをROMで回すと <strong>0→600 s
-が数秒</strong>。加熱→冷却の全ストーリーを可視化。</li>
-<li>未観測点も真値に収束（<strong>RMSE 9.7→0.04
-K</strong>）。分布・アニメも5点→補間で生成。</li>
-<li>注意：5点縮約なので分布は粗い。細かい分布は実ソルバ版が正確。</li>
+</div></div><div class="takeaway">ROMでは、同化なしの比較軌道に対して温度推定が改善した。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>ROM変位の理論式：温度差の線形写像</h2><div class="content"><div class="body"><p><span class="math display">\[\Delta T=T-T_{ref}\mathbf1,\qquad
+u=D\Delta T\]</span></p>
+<p><span
+class="math display">\[u_a=\sum_{i=1}^{5}D_{ai}(T_i-T_{ref}),\qquad
+a=1,2\]</span></p>
+<p>Dは2×5の校正行列。単位はmm/K。基準温度で全成分の変位を0とする。
+次の例は実際のDに説明用温度差を代入する。</p>
+</div></div><div class="takeaway">Dによる上面2成分の予測と、FrontISTRでの全変位場の計算は別。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM変位①：実際のDと、説明用の温度差を用意する</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>ノード順：hot、mid、cold、top、core。基準温度20 ℃（293.15 K）。</p>
+<pre class="text"><code>T      = [25, 23, 21, 24, 22] ℃
+ΔT     = [ 5,  3,  1,  4,  2] K
+
+D_um = 1000 × D_mm   （表示をµm/Kに換算）
+     ≈
+[ 0.702239  -0.859683  0.693381  1.932833  -1.265536 ]
+[-1.267132   2.957526  0.082972  0.760667  -1.325910 ]</code></pre>
+<p>1行目：ヒータ側上面Uz。2行目：反対側上面Uz。DはFrontISTR結果に校正した係数。</p>
+</div>
+</div></div><div class="takeaway">実装のDはmm/K。ここでは読みやすさのため1000倍し、µm/Kで表示する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM変位②：ヒータ側はDの1行目と温度差の内積</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>u_heater = D_um[0] @ ΔT
+ ≈ 0.702239 × 5 - 0.859683 × 3 + 0.693381 × 1
+  + 1.932833 × 4 - 1.265536 × 2
+ ≈ 3.511193 - 2.579048 + 0.693381 + 7.731332 - 2.531072
+ = 6.825786 µm
+ = 0.006825786 mm</code></pre>
+<p>係数には正負がある。Wのような非負・行和1の補間重みではなく、<strong>変位を近似する回帰係数</strong>。</p>
+</div>
+</div></div><div class="takeaway">温度そのものではなく「基準20 ℃からの温度差」を掛ける。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM変位③：2行まとめて計算すると、上面2成分が得られる</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>u_opposite ≈ (-1.267132)×5 + 2.957526×3 + 0.082972×1
+             + 0.760667×4 - 1.325910×2
+           = 3.010740 µm
+
+u = D_um (2×5) @ ΔT (5×1)
+  = [6.825786, 3.010740].T  µm
+
+実装：u_mm = (T_K - 293.15) @ D_mm.T</code></pre>
+<p>これは<strong>上面の2成分</strong>だけ。全節点の変位分布が必要なら、別途FrontISTRで解析する。</p>
+</div>
+</div></div><div class="takeaway">Dによる2成分予測と、FrontISTRによる全変位場の計算を区別する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>ROM変位④：同化との関係を数値例で確認する</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>温度同化で得られた5温度が、仮に <code>[25,23,21,24,22] ℃</code>
+なら、</p>
+<pre class="text"><code>温度5成分 → 基準温度を引く → Dに掛ける
+          → 上面Uz = [6.825786, 3.010740] µm</code></pre>
+<ul>
+<li>既定のROMグラフ（assim_disp=False）が使うのは
+<strong>hot・coldの温度観測</strong>。</li>
+<li>変位は補正後の温度から予測し、図で比較する。</li>
+<li>上の温度は説明用であり、特定時刻の同化結果ではない。</li>
 </ul>
-</div></div><div class="takeaway">ROMは軽く全時間を見られる。分布は粗いが仕組み理解に最適。</div></section></section><section><section class="cover"><h2>全体のまとめ</h2><div class="content"><div class="body"><p><strong>少数観測で温度場とQを推定。実ソルバ=正確・重い/ROM=軽い・全時間</strong></p>
+</div>
+</div></div><div class="takeaway">Dによる温度のみ同化のグラフと、assim_disp=Trueで作る現在のGIFを区別する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>計算Cの目的：温度観測に変位を足すとどう変わるか</h2><div class="content"><div class="body"><p><strong>比較するのは4条件。出力は全5温度のRMSEで統一する。</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>同化する温度</th>
+<th>同化する変位</th>
+<th>変位ノイズσ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>C1</td>
+<td>hot・cold</td>
+<td>なし</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>C2</td>
+<td>hot・cold</td>
+<td>上面2点（M）</td>
+<td>0.30 µm</td>
+</tr>
+<tr class="odd">
+<td>C3</td>
+<td>hotのみ</td>
+<td>なし</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>C4</td>
+<td>hotのみ</td>
+<td>上面2点（M）</td>
+<td>0.10 µm</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="takeaway">基本比較はC1↔C2とC3↔C4。C2とC4では変位ノイズも違う。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>計算Cの前処理：Dではなく、単位応答からMを作る</h2><div class="content"><div class="body"><ol type="1">
+<li>hotだけ＋1 K、ほかは基準温度にする。</li>
+<li>IDWで構造節点へ補間し、FrontISTRで上面2点のUzを求める。</li>
+<li>mid、cold、top、coreも同様に計算し、5列を並べる。</li>
+<li><strong>Mは2×5</strong>。各メンバーの予報変位を
+<code>M @ (T − Tref)</code> で評価する。</li>
+</ol>
+<p>上面2点は指定座標の最近傍節点。Dの上面節点群平均と観測位置の定義も異なる。</p>
+</div></div><div class="takeaway">Mは固定モデルの単位温度応答。Dは温度・変位履歴から当てはめた係数。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>計算Cの読み方：同じRMSEでも、計算Bとは別系列</h2><div class="content"><div class="body"><ul>
+<li>Cは <code>compare_rom_disp.py</code>、Bは
+<code>run_rom_fem.py</code> で計算する。</li>
+<li>BとCでは観測ノイズの乱数消費順序が異なるため、温度2点のみの数値も異なる。</li>
+<li>Cの4条件は同じ初期アンサンブルから始めるが、観測数が違うためノイズ系列は完全共通ではない。</li>
+<li>まず個々の条件での結果として読む。追加効果の安定性には複数シードの検証が必要。</li>
+</ul>
+</div></div><div class="takeaway">0.039 Kと0.076 Kを、同じ計算の矛盾した値として扱わない。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>計算Cの結果：4つの観測条件で温度RMSEを比較</h2><div class="content"><figure><img src="assets/rom_disp_comparison.png"><figcaption>温度のみ vs 温度＋変位M</figcaption></figure><div class="body"><p>C1 温度2点：0.076 K → C2 ＋変位：0.004 K。</p>
+<p>C3 温度1点：0.236 K → C4 ＋変位：0.002 K。</p>
+<p>演算子をMに変更し、基準温度を引いて評価した設定での結果。C2とC4は変位ノイズが異なるため、「温度点が少ないほど効く」とは断定しない。</p>
+</div></div><div class="takeaway">このROMの各比較では誤差が低下。実ソルバ版の比較結果とは別。</div></section><section class="text"><div class="eyebrow">第1部 OpenFOAM＋FrontISTR / 理論と具体例</div><h2>IDWの理論式：距離の重みから温度場へ</h2><div class="content"><div class="body"><p><span class="math display">\[d_{pi}=\|p-x_i\|,\quad
+W_{pi}=\frac{d_{pi}^{-2}}{\sum_{j=1}^{5}d_{pj}^{-2}}\]</span></p>
+<p><span
+class="math display">\[T_{mesh,p}=\sum_{i=1}^{5}W_{pi}T_i,\qquad
+T_{mesh}=WT\]</span></p>
+<p>距離0に近い場合は一致ノードの重みを1にする。Wは非負・行和1。</p>
+</div></div><div class="takeaway">この補間の式と、OIの誤差共分散に基づく解析の式を区別する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>IDW①：5点の座標と、補間したい位置を決める</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>ROMの実座標を使用。温度は<strong>説明用に25、23、21、24、22
+℃</strong>とする。</p>
+<pre class="text"><code>           hot      mid      cold     top       core
+x [mm]      32        0       -32       25          0
+y [mm]       0       24         0        0      -28.75
+z [mm]   50.25    50.25     50.25       95       50.25
+T [℃]       25       23        21       24         22
+
+補間先 p₁ = (30, 0, 50.25) mm
+各点までの距離 d₁ ≈ [2, 38.4187, 62, 45.0285, 41.5519] mm</code></pre>
+</div>
+</div></div><div class="takeaway">温度の観測を増やすのではなく、5つの代表温度から空間上の値を補間する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>IDW②：距離の二乗の逆数を、合計1に正規化する</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>w₁ᵢ = 1 / d₁ᵢ²      （距離をmで計算）
+
+w₁ ≈ [250000, 677.5068, 260.1457, 493.2030, 579.1855]
+sum(w₁) ≈ 252010.0410
+
+W₁ = w₁ / sum(w₁)
+   ≈ [0.99202397, 0.00268841, 0.00103228, 0.00195708, 0.00229826]
+
+例：hotの重み = 250000 / 252010.0410 ≈ 0.99202397</code></pre>
+<p>近いhot（距離2
+mm）の重みが大きい。重みは全て非負で、行の合計は1。</p>
+</div>
+</div></div><div class="takeaway">コード：w = 1.0 / d**2、W[i] = w / w.sum()。単位をそろえれば距離比で決まる。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>IDW③：Wの1行と5温度の内積で、1点の温度を求める</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>T(p₁) = W₁ @ T
+ ≈ 0.99202397 × 25 + 0.00268841 × 23
+  + 0.00103228 × 21 + 0.00195708 × 24
+  + 0.00229826 × 22
+ = 24.981642 ℃</code></pre>
+<p><strong>補間先がROMノードと一致する場合</strong>は、距離0で割らない。</p>
+<p>例：p₃＝topなら <code>W₃ = [0, 0, 0, 1, 0]</code>
+とし、<code>T(p₃)=24 ℃</code>。</p>
+</div>
+</div></div><div class="takeaway">実装は最短距離が10⁻⁹ m未満なら、一致ノードの重みを1にする。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>IDW④：補間先を並べれば、温度分布は行列積になる</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>説明用の3点：p₁=(30,0,50.25)、p₂=(−30,0,50.25)、p₃=top［mm］。</p>
+<pre class="text"><code>W (3×5) ≈
+[0.992024  0.002688  0.001032  0.001957  0.002298]
+[0.001033  0.002692  0.993184  0.000790  0.002301]
+[0         0         0         1         0       ]
+
+T_mesh = W @ [25, 23, 21, 24, 22].T
+       ≈ [24.981642, 21.014189, 24.000000].T  ℃</code></pre>
+<p>実際は節点数だけ行を作る。位置が固定ならWは共通で、各時刻のTだけ更新する。</p>
+</div>
+</div></div><div class="takeaway">これは5点から作る可視化用の補間場。全セルで熱方程式を解いた結果とは異なる。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>温度GIFの生成過程①：各時刻の5温度をメッシュへ補間</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>run_rom_fem_twin(...)
+  → da_T[k]    ：同化後の60メンバー平均、5成分 [K]
+  → truth_T[k] ：真値用ROMの5成分 [K]
+
+k = 0, 1, ..., 30   （t = 0, 20, ..., 600 s）
+  左：T_mesh_da = W @ (da_T[k] - 273.15)
+  右：T_mesh_tr = W @ (truth_T[k] - 273.15)
+  → メッシュを断面表示 → PNG → 31枚をGIFへ</code></pre>
+<p><strong>現行生成設定</strong>は
+<code>assim_disp=True</code>（温度＋変位同化）。温度のみの既定ROMグラフと別。</p>
+</div>
+</div></div><div class="takeaway">GIFの左右とも、5温度を同じWで補間した場。右も高解像度OpenFOAM解ではない。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>温度GIFの生成過程②：20秒の温度で1フレームを追う</h2><div class="content"><div class="body"><div class="numeric-example">
+<p>現行生成設定でROMを再計算した例。前のIDW例と同じ補間先3点を使う。</p>
+<pre class="text"><code>ノード順：hot, mid, cold, top, core
+同化後 [℃] ≈ [21.05307, 20.22698, 20.04302, 19.54085, 20.00176]
+真値   [℃] ≈ [21.07532, 20.32450, 20.01729, 20.17473, 20.11592]
+
+W @ T_da    ≈ [21.044427, 20.044064, 19.540852] ℃
+W @ T_truth ≈ [21.068238, 20.019562, 20.174733] ℃</code></pre>
+<p>差の場も
+<code>W @ (T_da − T_truth)</code>。補間は独立した観測情報を追加しない。</p>
+</div>
+</div></div><div class="takeaway">温度5点の差が重み付きで空間へ広がる。「分布の完全一致」を保証する計算ではない。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：温度分布の時刻歴（データ同化 vs 真値, 0→600s）</h2><div class="content"><figure><img src="assets/da_vs_truth_temperature.gif"><figcaption>ROM温度分布：データ同化 vs 真値（0→600s）</figcaption></figure><div class="body"><p>左：同化後ROMの5温度をIDW補間。右：真値ROMの5温度を同じWで補間。0〜600秒の31フレームを比較する。</p>
+<p>現行生成コードは温度＋変位同化（assim_disp=True）。既存GIFの作成設定はファイルだけでは確定できない。</p>
+</div></div><div class="takeaway">補間した2つの温度場の比較であり、高解像度の真値場との独立検証ではない。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>変位GIFの生成過程①：補間した節点温度をFrontISTRへ渡す</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>同化後5温度 [K]  → W @ da_T[k]    → 全節点温度 [K]
+真値の5温度 [K]  → W @ truth_T[k] → 全節点温度 [K]
+
+それぞれについて fistr_U(node_T_K) を実行
+  1. write_cnt(...)         温度荷重・物性・拘束を書き出す
+  2. run_fistr(...)         線形静的な熱膨張解析
+  3. read_displacement(...) 節点ごとのUx, Uy, Uz [m]を読む</code></pre>
+<p>作業先：<code>openfoam/fem_gif/</code>。Wは全構造節点数×5。Dによる上面2値だけの予測とは別。</p>
+</div>
+</div></div><div class="takeaway">質問への答え：はい。ROMの同化温度 → IDW補間 → FrontISTR → 全変位場、の順。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>変位GIFの生成過程②：熱ひずみ・構造解析・描画</h2><div class="content"><div class="body"><div class="numeric-example">
+<pre class="text"><code>例：20秒、p₁の補間温度 = 21.044426 ℃ = 294.194426 K
+温度差 = 294.194426 - 293.15 = 1.044426 K
+熱ひずみ αΔT = 1.2e-5 × 1.044426 ≈ 1.25331e-5
+
+FrontISTR：各節点温度を使い、拘束条件下で全体の変位を解く
+描画座標：coords + U × scale    （変形を拡大して表示）
+色の値  ：Uz [µm] = U[:, 2] × 1e6</code></pre>
+<p>31時刻×左右2ケース＝<strong>62回の静解析</strong>を呼ぶ設計。全フレームの真値から共通色範囲を決める。</p>
+</div>
+</div></div><div class="takeaway">各フレームは温度荷重に対する静的応答。変位の動的時間積分をしているわけではない。</div></section><section class="visual"><div class="eyebrow">第2部 ROM</div><h2>ROM：変位分布の時刻歴（データ同化 vs 真値, 0→600s）</h2><div class="content"><figure><img src="assets/da_vs_truth_displacement.gif"><figcaption>ROM変位分布：データ同化 vs 真値（0→600s）</figcaption></figure><div class="body"><p>左：同化後の5温度→IDW→FrontISTR。右：真値ROMの5温度→IDW→FrontISTR。各時刻に全節点変位を計算して描画する。</p>
+<p>変形は拡大表示。上面2成分をDで求める折れ線グラフとは別の生成経路。</p>
+</div></div><div class="takeaway">このGIFは補間温度を荷重として、FrontISTRで求めた全変位場を表示する。</div></section><section class="text"><div class="eyebrow">第2部 ROM</div><h2>第2部まとめ：軽くて全時間を可視化できる</h2><div class="content"><div class="body"><ul>
+<li><strong>A</strong>：OpenFOAM温度履歴に合わせて、5点のROMを校正した。</li>
+<li><strong>B</strong>：温度のみ同化と同化なしを比較し、Dで上面変位を予測した。</li>
+<li><strong>C</strong>：温度1点／2点にMによる変位観測を追加し、4条件のRMSEを比較した。</li>
+<li><strong>D</strong>：温度をIDW補間し、変位はFrontISTRで求めてGIFにした。</li>
+</ul>
+</div></div><div class="takeaway">モデルの校正・観測追加の比較・分布の可視化は、それぞれ別の検証。</div></section></section><section><section class="cover"><h2>全体のまとめ</h2><div class="content"><div class="body"><p><strong>少数観測で温度場とQを推定。実ソルバ=正確・重い/ROM=軽い・全時間</strong></p>
 </div></div></section><section class="text"><div class="eyebrow">全体のまとめ</div><h2>全体のまとめ</h2><div class="content"><div class="body"><ul>
 <li><strong>目的</strong>：少数の温度・変位観測から、円筒内部を含む温度分布と発熱量Qを推定。</li>
 <li><strong>手法</strong>：アンサンブルカルマンフィルタ（EnKF）。前進モデルを観測で補正。</li>
@@ -950,6 +1803,6 @@ href="https://www.ecmwf.int/en/elibrary/74424-ensemble-kalman-filter-theoretical
 Reveal.initialize({hash:true, controls:true, progress:true, slideNumber:'c/t',
   width:1280, height:720, margin:0.06,
   plugins:[RevealMath.MathJax3],
-  math:{mathjax:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js',
+  mathjax3:{mathjax:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js',
          tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]}}});
 </script></body></html>

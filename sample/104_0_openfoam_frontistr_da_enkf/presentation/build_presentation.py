@@ -44,9 +44,15 @@ def uri(p):
  return 'data:'+mime+';base64,'+base64.b64encode(p.read_bytes()).decode()
 def render(md,i):
  def equation(m):
-  tex=m.group(1);path=ASSETS/f'eq_{i}_{m.start()}.svg'
-  fig=plt.figure(figsize=(1,1));fig.text(0,0,'$'+tex+'$',fontsize=25)
-  fig.savefig(path,bbox_inches='tight',pad_inches=.12,transparent=True);plt.close(fig)
+  tex=m.group(1)
+  tex=re.sub(r'\\le(?![a-zA-Z])','\\\\leq',tex);tex=re.sub(r'\\ge(?![a-zA-Z])','\\\\geq',tex)  # mathtext_fix
+  path=ASSETS/f'eq_{i}_{m.start()}.svg'
+  try:
+   fig=plt.figure(figsize=(1,1));fig.text(0,0,'$'+tex+'$',fontsize=25)
+   fig.savefig(path,bbox_inches='tight',pad_inches=.12,transparent=True);plt.close(fig)
+  except Exception:
+   plt.close('all')
+   return '\n<pre class="equation-fallback">'+html.escape(tex)+'</pre>\n'  # mathtextで描けない式はTeX原文
   return '\n<img class="equation" src="'+uri(path)+'" alt="'+html.escape(tex,quote=True)+'">\n'
  md=re.sub(r'<eq>(.*?)</eq>',equation,md,flags=re.S)
  return subprocess.check_output(['pandoc','-f','markdown','-t','html5'],input=md,text=True)

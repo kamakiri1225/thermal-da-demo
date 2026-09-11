@@ -1,0 +1,12 @@
+{
+  "slides": 101,
+  "numeric_slides": 27,
+  "enkf_example_matches_implementation": true,
+  "ensemble_deviations_sum_zero": true,
+  "gain_linear_system_residual_ok": true,
+  "idw_rows_sum_one": true,
+  "displacement_matrix_units_checked": true,
+  "solver_rerun": false,
+  "rom_comparison_rerun": true,
+  "scope": "conference_reveal.html / slides.json。別形式のconference_slides.pdfは今回の更新対象外。"
+}

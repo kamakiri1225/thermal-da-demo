@@ -1,0 +1,40 @@
+[
+  {
+    "label": "hot+cold",
+    "temp_nodes": [
+      0,
+      2
+    ],
+    "use_disp": false,
+    "disp_noise_um": 0,
+    "rmse_final_K": 0.07605275861464078
+  },
+  {
+    "label": "hot+cold+u",
+    "temp_nodes": [
+      0,
+      2
+    ],
+    "use_disp": true,
+    "disp_noise_um": 0.3,
+    "rmse_final_K": 0.00419107483134717
+  },
+  {
+    "label": "hot",
+    "temp_nodes": [
+      0
+    ],
+    "use_disp": false,
+    "disp_noise_um": 0,
+    "rmse_final_K": 0.23612404380647964
+  },
+  {
+    "label": "hot+u",
+    "temp_nodes": [
+      0
+    ],
+    "use_disp": true,
+    "disp_noise_um": 0.1,
+    "rmse_final_K": 0.002089749912249901
+  }
+]

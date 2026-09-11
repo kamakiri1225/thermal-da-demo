@@ -22,6 +22,12 @@ def slide_html(s):
     take = (f'<div class="takeaway">{html.escape(s["takeaway"])}</div>'
             if s.get("takeaway") else "")
     cls = "cover" if s.get("cover") else ("visual" if fig else "text")
+    if s.get("theory"):
+        cls += " theory"
+        if s.get("notes"):
+            body += '<details class="theory-note"><summary>補足説明</summary><p>' + html.escape(s["notes"]) + '</p></details>'
+        if s.get("source_url"):
+            take += '<div class="reference">参考：<a href="' + html.escape(s["source_url"], quote=True) + '">' + html.escape(s["source"]) + '</a></div>'
     return (f'<section class="{cls}">{eyebrow}<h2>{html.escape(s["title"])}</h2>'
             f'<div class="content">{fig}<div class="body">{body}</div></div>{take}</section>')
 
@@ -67,6 +73,12 @@ def main():
     .reveal .body p{margin:.35em 0}
     .reveal mjx-container{font-size:.82em !important;margin:.25em 0 !important}
     .reveal .body>*:first-child{margin-top:0}
+    .reveal .reference{font-size:14px;text-align:left;margin-top:8px;color:#53677a}
+    .reveal .theory-note{font-size:18px;text-align:left;color:#53677a}
+    .reveal .theory mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+    .reveal .numeric-example pre{font-size:21px;line-height:1.35;width:100%;margin:12px 0;box-shadow:none;background:#f1f5f7;padding:12px;}
+    .reveal .numeric-example pre code{max-height:none;padding:0;white-space:pre;overflow-x:auto;}
+    .reveal .numeric-example{font-size:22px;line-height:1.45;}
     /* 万一あふれたら縦スクロールで全文読めるようにする */
     .reveal .slides section{max-height:92vh;overflow-y:auto}
     .reveal .slides section::-webkit-scrollbar{width:8px}
@@ -84,7 +96,7 @@ def main():
 Reveal.initialize({{hash:true, controls:true, progress:true, slideNumber:'c/t',
   width:1280, height:720, margin:0.06,
   plugins:[RevealMath.MathJax3],
-  math:{{mathjax:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js',
+  mathjax3:{{mathjax:'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js',
          tex:{{inlineMath:[['\\\\(','\\\\)']],displayMath:[['\\\\[','\\\\]']]}}}}}});
 </script></body></html>"""
     (HERE/"conference_reveal.html").write_text(doc)

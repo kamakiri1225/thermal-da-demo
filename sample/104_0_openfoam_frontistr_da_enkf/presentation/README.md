@@ -1,5 +1,25 @@
 # 学会発表資料：温度・変位観測を用いた中空円筒の温度場・発熱量推定
 
+## 理論式を含む最新資料（2026-09-11）
+
+- [revealスライド：157枚](conference_reveal.html)：共通のベイズ推定から、OI → KF → EnKF → PFを導出する理論章50枚を冒頭に追加。既存の具体計算・実験結果は保持しています。
+- [理論解説PDF](theory_guide.pdf)／[理論解説HTML](theory_guide.html)／[Markdown](theory_guide.md)：式の展開を続けて読める読み物版。HTMLとPDFには数式を埋め込んでいます。
+- [理論例の検算コード](verify_theory_examples.py)：OIの正規方程式・ゲイン・共分散の等価性、KFの2時刻計算、PFの尤度・ESS・再標本化を検算。
+
+理論章は「記号 → 仮定 → 式の導出 → 数値例 → 104との対応」の順です。EnKFの具体計算直前にも理論式を戻し、IDWとDも式から数値例へつなげています。OIは通常、所与の背景共分散を使う解析法であり、KFのように共分散を時間発展させる方法との違いを明記しています。
+
+参考PFコードは重み継承と重み付き平均に制約があるため、一般のPF理論と現実装を区別して説明しています。解析ソルバや過去の計算結果は変更していません。
+
+理論読み物の再生成：`python3 presentation/build_theory_guide.py`。reveal版の再生成：`python3 presentation/build_reveal.py`。以下は以前の版の作成記録です。
+
+
+## 2026-09-11：reveal版の具体計算・ROM章を更新
+
+[最新のrevealスライド](conference_reveal.html)は101枚です。平均・偏差・共分散・ゲイン・Q更新、IDW補間、Dによる変位予測、GIF生成過程を具体例で追加しました。ROM章はA：校正、B：温度のみ同化、C：変位追加比較、D：分布可視化の順で条件を示します。
+
+[具体計算の原稿](numerical_walkthrough.md)、[EnKFの再現コード](ensemble_numeric_example.py)、[ROM補間・変位の再現コード](rom_numeric_example.py)。今回の更新対象はreveal版です。以下の固定スライドPDF・HTMLのページ数とは異なります。
+
+
 ページ数を制限せずに作成した、日本語・16:9・51枚の詳細版です。対象は `104_0_openfoam_frontistr_da_enkf`。所属・発表者・学会名は未指定のため、発表者欄は記入欄にしています。
 
 ## 開くファイル
