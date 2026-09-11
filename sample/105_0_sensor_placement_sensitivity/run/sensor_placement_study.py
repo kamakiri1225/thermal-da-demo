@@ -7,8 +7,8 @@
   温度センサ1点を 5候補(hot/mid/cold/top/core) のそれぞれに置き、
   (a) 温度1点のみ同化   (b) 温度1点 + 変位2点(M演算子, 104の手法) を
   複数seedで回して最終温度RMSEを比較。
-  各候補位置の「熱感度」は run/sensitivity_map.py の FrontISTR 感度分布
-  S(x)=∂uz/∂T(x) から読む。
+  各候補位置の「熱感度」は FrontISTR(KinvH) の感度行列 W=K⁻¹H の列
+  (∂uz_obs/∂T(x), run/kinvh_sensitivity.py が保存) から読む。
 
 出力:
   results/sensor_placement.csv
@@ -57,14 +57,21 @@ def run_da(cfg,calib,sensor_idx,use_disp,seed):
 
 
 def sensitivity_at_nodes():
-    """FrontISTR感度分布から、各ROMノード位置の |∂uz/∂T| (2観測平均) を読む [µm/K]."""
-    d=np.load(os.path.join(RES,"sensitivity_uz.npz"))
-    S=d["S_um"]; NTH_P=int(d["NTH_P"]); NZ_P=int(d["NZ_P"])
+    """FrontISTR(KinvH W=K⁻¹H)のW列から、各ROMノード位置の |∂uz_obs/∂T| を読む [µm/K].
+
+    W は DUMPWダンプの K,H から構築(run/build_W_from_dumps.py)し DUMPW出力と1.9e-7一致。
+    列 = 「その場所の温度が観測変位(Point A/O)をどれだけ動かすか」。2観測(A,O)の平均。
+    """
+    sys.path.insert(0, os.path.abspath(os.path.join(
+        ROOT,"..","102_1_frontistr_hollow_cylinder_thermal_expansion","python")))
+    import cylinder_mesh
+    kv=np.load(os.path.join(RES,"kinvh_sensitivity.npz"))
+    mesh=cylinder_mesh.build_cylinder_mesh(4,48,20,0.020,0.0375,0.1005)
+    coords=np.array([xyz for _n,xyz in mesh["nodes"]])
     out={}
-    for name,(x,y,z) in NODE_XYZ.items():
-        th=np.arctan2(y,x)%(2*np.pi)
-        a=min(int(th/(2*np.pi)*NTH_P),NTH_P-1); b=min(int(z/HEIGHT*NZ_P),NZ_P-1)
-        out[name]=float(np.abs(S[:,a,b]).mean())
+    for name,p in NODE_XYZ.items():
+        i=int(np.linalg.norm(coords-np.array(p),axis=1).argmin())
+        out[name]=float((abs(kv["colA"][i])+abs(kv["colO"][i]))/2)
     return out
 
 
@@ -112,7 +119,7 @@ def main():
     for n,xx,y1,y2 in zip(names,sv,rt,rd):
         ax.annotate(n,(xx,y1),textcoords="offset points",xytext=(6,6),fontsize=13)
         ax.annotate(n,(xx,y2),textcoords="offset points",xytext=(6,-14),fontsize=13,color="tab:blue")
-    ax.set_yscale("log"); ax.set_xlabel("センサ位置の変位熱感度 |∂uz/∂T| [µm/K] (FrontISTR実計算)")
+    ax.set_yscale("log"); ax.set_xlabel("センサ位置の変位熱感度 |∂uz_obs/∂T| [µm/K] (FrontISTR W=K^-1H)")
     ax.set_ylabel("最終温度RMSE [K]"); ax.grid(alpha=0.3,which="both")
     ax.set_title("熱感度が高い場所ほどデータ同化の精度が出るか？")
     ax.legend(); fig.tight_layout()

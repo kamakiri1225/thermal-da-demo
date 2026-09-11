@@ -8,5 +8,6 @@ __pycache__/
 openfoam/base_case/
 openfoam/run_enkf/
 openfoam/run_pf/
+openfoam/run_free/
 openfoam/smoke_member/
 openfoam/*.log

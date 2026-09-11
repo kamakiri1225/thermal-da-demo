@@ -4,16 +4,17 @@
 が示された。同じ検証を本ケース(中空円筒×ROM×M演算子同化)で行う。
 
 方法:
- 1. 5つの単位温度モードをFrontISTRに通し、全5040節点のuz応答 M_all (n_nodes×5) を取得
-    (5回の実行で全点の感度が得られる)
- 2. 感度指標 s_i = ||M_all[i,:]|| で節点をランク付け。底面固定近傍(z<5mm)は除外
-    (別セッションの教訓: 固定節点の感度はアーティファクト)
+ 1. 感度指標 = FrontISTR(KinvH) の W=K⁻¹H の行感度 Σ_j|Wz[i,j]|。
+    W は DUMPWパッチ版fistr1がダンプした K,H から構築(run/build_W_from_dumps.py)し、
+    DUMPWのWdiff_zと最大相対差1.9e-7で一致検証済み。選点は run/kinvh_sensitivity.py が
+    確定して results/kinvh_sensitivity.npz に保存(固定節点アーティファクト除外・方向分散込み)。
+ 2. 観測演算子は104と同じ M_all 行(5単位温度モード×FrontISTR5回, ROM5モード→uz)。
  3. 変位観測2点を {高感度2点 / 低感度2点 / 現行(上面ヒータ側+反対側) / ランダム2点}
     で選び、ROMデータ同化(温度hot1点+変位2点, 5seed)の精度を比較
 出力:
-  docs/img/disp_point_sensitivity_3d.png … 全節点の感度と選定点
   docs/img/disp_point_selection_rmse.png … 選び方별の精度
   results/disp_point_selection.csv
+(選定点の3D図は run/kinvh_sensitivity.py が docs/img/disp_point_sensitivity_3d.png に出力)
 """
 from __future__ import annotations
 import os, sys
@@ -93,19 +94,10 @@ def main():
     cfg=yaml.safe_load(open(os.path.join(ROOT,"config","da_config.yaml")))
     calib=load_calibrated()
     coords,M=build_M_all()
-    sens=np.abs(M).sum(axis=1)                      # 感度指標 [µm/K]
-    free=coords[:,2]>0.005                          # 底面固定近傍を除外(教訓)
-    order=np.argsort(sens)[::-1]
-    order_free=[i for i in order if free[i]]
-    hi=[order_free[0]]
-    # 2点目は1点目と方向(モード応答)が異なる高感度点(冗長回避, 別セッションの知見)
-    v0=M[hi[0]]/np.linalg.norm(M[hi[0]])
-    for i in order_free[1:]:
-        v=M[i]/max(np.linalg.norm(M[i]),1e-12)
-        if abs(v@v0)<0.9: hi.append(i); break
-    lo=[i for i in order[::-1] if free[i] and sens[i]>1e-4][:2]
-    cur=[int(np.linalg.norm(coords-np.array(p),axis=1).argmin())
-         for p in [[0.028,0,H],[-0.028,0,H]]]        # 現行(104)の2点
+    # 選点と感度は FrontISTR(KinvH W=K^-1 H) 由来 (run/kinvh_sensitivity.py が確定済み)
+    kv=np.load(os.path.join(RES,"kinvh_sensitivity.npz"))
+    sens=kv["row_sens"]; free=kv["valid"]
+    hi=[int(i) for i in kv["hi"]]; lo=[int(i) for i in kv["lo"]]; cur=[int(i) for i in kv["cur"]]
     rng=np.random.default_rng(0)
     rnd_sets=[list(rng.choice(np.where(free)[0],2,replace=False)) for _ in range(3)]
 
@@ -124,37 +116,7 @@ def main():
         f.write("case,sens_um_per_K,rmse_K,std_K\n")
         for r in rows: f.write(",".join(str(x) for x in r)+"\n")
 
-    # 3D: 感度分布と選定点
-    import pyvista as pv
-    pv.OFF_SCREEN=True
-    try: pv.start_xvfb()
-    except Exception: pass
-    pl=pv.Plotter(off_screen=True,window_size=(1000,820))
-    # 面表示: FEM六面体メッシュに感度を貼りサーフェスとして描く(点群は分かりにくい)
-    mesh2=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
-    idr={nid:i for i,(nid,_x) in enumerate(mesh2["nodes"])}
-    cls=[]
-    for _e,conn in mesh2["elements"]: cls.append(8); cls.extend(idr[n] for n in conn)
-    import vtk as _vtk
-    ug=None
-    try:
-        ug=pv.UnstructuredGrid(np.array(cls),
-            np.full(len(mesh2["elements"]),_vtk.VTK_HEXAHEDRON,np.uint8),coords)
-        ug.point_data["sens [um/K]"]=sens
-        pl.add_mesh(ug,scalars="sens [um/K]",cmap="viridis",show_edges=False,
-                    scalar_bar_args={"title":"|dUz/dmode| sum [um/K]","title_font_size":18,"label_font_size":14})
-    except Exception:
-        cloud=pv.PolyData(coords); cloud["sens [um/K]"]=sens
-        pl.add_mesh(cloud,scalars="sens [um/K]",cmap="viridis",point_size=6,
-                    render_points_as_spheres=True)
-    for p,c,lab in [(hi,"red","high"),(lo,"blue","low"),(cur,"orange","current")]:
-        for i in p: pl.add_mesh(pv.Sphere(radius=0.0035,center=coords[i]),color=c)
-    pl.add_text("displacement-point sensitivity\nred=high2  orange=current  blue=low2",
-                font_size=16,color="black")
-    pl.camera_position=[(0.24,-0.22,0.20),(0,0,0.05),(0,0,1)]; pl.set_background("white")
-    pl.screenshot(os.path.join(IMG,"disp_point_sensitivity_3d.png")); pl.close()
-
-    # 棒グラフ
+    # 棒グラフ (選定点の3D図は run/kinvh_sensitivity.py 側で生成)
     names=[r[0] for r in rows]; vals=[r[2] for r in rows]; errs=[r[3] for r in rows]
     fig,ax=plt.subplots(figsize=(10.5,5.4))
     ax.bar(range(len(rows)),vals,yerr=errs,capsize=4,

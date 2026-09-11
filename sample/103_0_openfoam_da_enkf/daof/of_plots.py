@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import glob
 import os
+import sys
 
 import numpy as np
 
@@ -57,13 +58,23 @@ def save_history_csv(hist, out_path):
 
 
 def field_snapshots(fields_dir, title, out_path):
-    """でたらめ初期 / DA後 / 真値 の固体温度場を点群で3面比較(PyVista)."""
+    """でたらめ初期 / DA後 / 真値 の固体温度場をコンタ面で3面比較(PyVista).
+
+    OpenFOAMのセル中心値を、同一形状の六面体FEMメッシュ節点へ最近傍で写して
+    サーフェス表示する（点群表示は分かりにくいため廃止）。
+    """
     import pyvista as pv
+    import vtk
+    from scipy.spatial import cKDTree
     pv.OFF_SCREEN = True
     try:
         pv.start_xvfb()
     except Exception:
         pass
+    sys.path.insert(0, os.path.abspath(os.path.join(
+        os.path.dirname(__file__), "..", "..",
+        "102_1_frontistr_hollow_cylinder_thermal_expansion", "python")))
+    import cylinder_mesh
 
     centres = np.load(os.path.join(fields_dir, "cell_centres.npy"))
     t0 = np.load(os.path.join(fields_dir, "ensmean_t0.npy"))
@@ -71,6 +82,18 @@ def field_snapshots(fields_dir, title, out_path):
     finals = sorted(glob.glob(os.path.join(fields_dir, "ensmean_t*.npy")),
                     key=lambda p: float(p.split("ensmean_t")[1][:-4]))
     da_final = np.load(finals[-1])
+
+    mesh = cylinder_mesh.build_cylinder_mesh(4, 48, 20, 0.020, 0.0375, 0.1005)
+    coords = np.array([xyz for _n, xyz in mesh["nodes"]])
+    idr = {nid: i for i, (nid, _x) in enumerate(mesh["nodes"])}
+    cells = []
+    for _e, conn in mesh["elements"]:
+        cells.append(8)
+        cells.extend(idr[n] for n in conn)
+    grid = pv.UnstructuredGrid(
+        np.array(cells),
+        np.full(len(mesh["elements"]), vtk.VTK_HEXAHEDRON, np.uint8), coords)
+    _, nearest = cKDTree(centres).query(coords)   # 節点→最寄りセル中心
 
     panels = [("initial guess (garbage, ensemble mean)", t0),
               ("after DA (ensemble mean)", da_final),
@@ -81,10 +104,9 @@ def field_snapshots(fields_dir, title, out_path):
     pl = pv.Plotter(off_screen=True, shape=(1, 3), window_size=(1650, 620))
     for j, (lab, field) in enumerate(panels):
         pl.subplot(0, j)
-        cloud = pv.PolyData(centres)
-        cloud["T_degC"] = field - K
-        pl.add_mesh(cloud, scalars="T_degC", cmap="turbo", clim=clim,
-                    render_points_as_spheres=True, point_size=6,
+        g = grid.copy()
+        g.point_data["T_degC"] = field[nearest] - K
+        pl.add_mesh(g, scalars="T_degC", cmap="turbo", clim=clim, n_colors=14,
                     scalar_bar_args={"title": "T [degC]"})
         pl.add_text(lab, font_size=9, color="black")
         pl.camera_position = [(0.22, -0.18, 0.19), (0.0, 0.0, 0.05), (0, 0, 1)]

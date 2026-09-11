@@ -53,13 +53,9 @@ def main():
     cfg=yaml.safe_load(open(os.path.join(ROOT,"config","da_config.yaml")))
     calib=load_calibrated()
     coords,M=build_M_all()
-    sens=np.abs(M).sum(axis=1); free=coords[:,2]>0.005
-    order=np.argsort(sens)[::-1]; of=[i for i in order if free[i]]
-    hi=[of[0]]; v0=M[of[0]]/np.linalg.norm(M[of[0]])
-    for i in of[1:]:
-        v=M[i]/max(np.linalg.norm(M[i]),1e-12)
-        if abs(v@v0)<0.9: hi.append(i); break
-    lo=[i for i in order[::-1] if free[i] and sens[i]>1e-4][:2]
+    # 選点は FrontISTR(KinvH W=K^-1 H) 行感度による確定値 (run/kinvh_sensitivity.py)
+    kv=np.load(os.path.join(ROOT,"results","kinvh_sensitivity.npz"))
+    hi=[int(i) for i in kv["hi"]]; lo=[int(i) for i in kv["lo"]]
     ts,da_hi,tr=run_da_traj(cfg,calib,M[hi])
     _,da_lo,_=run_da_traj(cfg,calib,M[lo])
 
@@ -78,18 +74,23 @@ def main():
         else: w=1/d**2; W[i]=w/w.sum()
 
     clim=[float(tr.min()-K),float(tr.max()-K)]
-    panels=[("high-sensitivity 2pts",da_hi,hi,"red"),
-            ("low-sensitivity 2pts",da_lo,lo,"blue"),("truth",tr,None,None)]
+    panels=[("DA with HIGH-sens 2pts (red)",da_hi,hi,"red","HIGH"),
+            ("DA with LOW-sens 2pts (blue)",da_lo,lo,"blue","LOW"),
+            ("truth",tr,None,None,None)]
     for k,t in enumerate(ts):
         pl=pv.Plotter(off_screen=True,shape=(1,3),window_size=(1500,620))
-        for j,(lab,traj,pts,col) in enumerate(panels):
+        for j,(lab,traj,pts,col,tag) in enumerate(panels):
             pl.subplot(0,j)
             g=grid.copy(); g.point_data["T"]=W@(traj[k]-K)
             clip=g.clip(normal="y",origin=(0,0,0.05025))
-            pl.add_mesh(clip,scalars="T",cmap="turbo",clim=clim,
+            pl.add_mesh(clip,scalars="T",cmap="turbo",clim=clim,n_colors=14,
                         scalar_bar_args={"title":"T [degC]","title_font_size":18,"label_font_size":14})
             if pts is not None:
-                for i in pts: pl.add_mesh(pv.Sphere(radius=0.0035,center=coords[i]),color=col)
+                for n,i in enumerate(pts):
+                    pl.add_mesh(pv.Sphere(radius=0.0035,center=coords[i]),color=col)
+                pl.add_point_labels([coords[i] for i in pts],
+                    [f"{tag}{n+1}" for n in range(len(pts))],
+                    font_size=15,text_color=col,shape=None,always_visible=True)
             pl.add_text(lab,font_size=17,color="black")
             pl.camera_position=[(0.24,-0.20,0.20),(0,-0.01,0.05),(0,0,1)]
         pl.add_text(f"t = {t:g} s",position="lower_edge",font_size=16,color="black")
@@ -153,15 +154,18 @@ def main():
     scale=0.02/max(abs(np.array(clim2)).max(),1e-9)*1e6
     for k,t in enumerate(ts):
         pl=pv.Plotter(off_screen=True,shape=(1,3),window_size=(1500,640))
-        for j,(lab,U,pts,col) in enumerate([("high-sens 2pts DA",U_hi[k],hi,"red"),
-                                            ("low-sens 2pts DA",U_lo[k],lo,"blue"),
-                                            ("truth",U_tr[k],None,None)]):
+        for j,(lab,U,pts,col,tag) in enumerate([("DA with HIGH-sens 2pts (red)",U_hi[k],hi,"red","HIGH"),
+                                            ("DA with LOW-sens 2pts (blue)",U_lo[k],lo,"blue","LOW"),
+                                            ("truth",U_tr[k],None,None,None)]):
             pl.subplot(0,j)
             g=grid.copy(); g.points=mcoords+U*scale; g["Uz [um]"]=U[:,2]*1e6
-            pl.add_mesh(g,scalars="Uz [um]",cmap="coolwarm",clim=clim2,
+            pl.add_mesh(g,scalars="Uz [um]",cmap="coolwarm",clim=clim2,n_colors=12,
                         scalar_bar_args={"title":"Uz [um]","title_font_size":18,"label_font_size":14})
             if pts is not None:
                 for i in pts: pl.add_mesh(pv.Sphere(radius=0.0035,center=coords[i]),color=col)
+                pl.add_point_labels([coords[i] for i in pts],
+                    [f"{tag}{n+1}" for n in range(len(pts))],
+                    font_size=15,text_color=col,shape=None,always_visible=True)
             pl.add_text(lab,font_size=17,color="black")
             pl.camera_position=[(0.24,-0.20,0.20),(0,-0.01,0.05),(0,0,1)]
         pl.add_text(f"t = {t:g} s  (warp x{scale:.0f})",position="lower_edge",font_size=16,color="black")

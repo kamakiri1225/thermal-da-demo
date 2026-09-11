@@ -34,14 +34,9 @@ def main():
     coords,M=build_M_all()
     qa=int(np.linalg.norm(coords-A_XYZ,axis=1).argmin())
     qo=int(np.linalg.norm(coords-O_XYZ,axis=1).argmin())
-    # 選点(高/低感度)を再現
-    sens=np.abs(M).sum(axis=1); free=coords[:,2]>0.005
-    order=np.argsort(sens)[::-1]; of=[i for i in order if free[i]]
-    hi=[of[0]]; v0=M[of[0]]/np.linalg.norm(M[of[0]])
-    for i in of[1:]:
-        v=M[i]/max(np.linalg.norm(M[i]),1e-12)
-        if abs(v@v0)<0.9: hi.append(i); break
-    lo=[i for i in order[::-1] if free[i] and sens[i]>1e-4][:2]
+    # 選点は FrontISTR(KinvH W=K^-1 H) 行感度による確定値 (run/kinvh_sensitivity.py)
+    kv=np.load(os.path.join(ROOT,"results","kinvh_sensitivity.npz"))
+    hi=[int(i) for i in kv["hi"]]; lo=[int(i) for i in kv["lo"]]
     ts,da_hi,tr=run_da_traj(cfg,calib,M[hi]); _,da_lo,_=run_da_traj(cfg,calib,M[lo])
     wq=M[qa]-M[qo]                      # QoI行 [µm/K]
     qoi=lambda A:(A-T_AIR_K)@wq
