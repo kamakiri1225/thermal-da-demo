@@ -82,12 +82,13 @@
 
 - 実行: `sh openfoam/setup_base_case.sh` → `python3 run/run_openfoam_fem_enkf.py`
 - 場所: **このマシンで chtMultiRegionFoam と fistr1 を実際に起動**
-- 中身: 5メンバー×2サイクル、0→20s。状態=固体全20696セル温度＋Q
+- 中身: **5メンバー×10サイクル、0→600s**(ヒータON 0-300s→OFF)。状態=固体全20696セル温度＋Q
+  (初回は0→20s・2サイクルの最小実行で検証し、その後600sフルで再実行)
   - 前進=`daof/of_case.py`(chtMultiRegionFoam を subprocess 実行)
   - 変位観測=`fem/fem_obs.py`(FrontISTR を実行)
   - 解析=`dacore/enkf.py`(ROMと共通)
 - **いま104にある成果物**:
-  - `results/openfoam_fem_enkf_summary.yaml`(RMSE 7.61→0.020K, Q=14.44W)
+  - `results/openfoam_fem_enkf_summary.yaml`(600s: **RMSE 7.61→0.011K, Q=14.93W**。20s版のバックアップは `*_20s.*`)
   - `results/openfoam_fem_enkf_history.csv`(サイクルごとの記録)
   - `docs/img/openfoam_fem_enkf_rmse.png` / `_Q.png` / `_disp.png` / `_field.png`
   - `openfoam/run_fem_enkf/fields/*.npy`(でたらめ/同化後/真値の温度場。Git管理外)

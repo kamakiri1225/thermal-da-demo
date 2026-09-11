@@ -6,8 +6,8 @@ obs:
 - T_cold
 - uz_heater(FrontISTR)
 - uz_opposite(FrontISTR)
-t_end_s: 600.0
+t_end_s: 20.0
 rmse_field_initial_K: 7.609085283013257
-rmse_field_final_K: 0.010637818985173663
-Q_final_W: 14.926428113147505
+rmse_field_final_K: 0.02029754586580281
+Q_final_W: 14.44421510816203
 Q_true_W: 15.0
