@@ -35,7 +35,13 @@ Wは1つの行列だが、**行で読むか列で読むかで使い道が変わ�
 感度（uzの温度応答）は**上に行くほど大きい**（底面固定で上端が最も動くため）。
 高感度2点は上端ヒータ側に選ばれた。
 
-### 証拠①：変位QoI（上面の傾き）の時刻歴
+### 証拠①：変位QoIの時刻歴 — QoI = Uz(Point A) − Uz(Point O)
+
+QoIの定義点（KinvH検証の Point_A − Point_O と同型）:
+- **Point A**: ヒータ側 上面 (+X, x=+28mm, z=100.5mm)
+- **Point O**: 反ヒータ側 上面 (−X, x=−28mm)
+
+![QoI定義点](img/qoi_points.png)
 
 ![QoI時刻歴](img/selection_qoi_timehistory.png)
 
