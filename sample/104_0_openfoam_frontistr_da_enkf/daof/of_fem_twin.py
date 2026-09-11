@@ -145,6 +145,12 @@ def run_fem_twin(cfg, workdir):
             _log(f"[twin]   member {i} done: T@hot={Tm[obs_cells[0]]-K:.2f}C "
                  f"uz_heater={yv[n_t]*1000:.2f}um")
 
+        # 解析で solid/T を上書きする前に、予報(補正前)のアンサンブル平均場を保存する。
+        # 「解析の瞬間に場がどれだけ動いたか」(イノベーションの空間分布)を後から
+        # 可視化できるようにするため(1サイクル約166KB)。
+        np.save(os.path.join(fields_dir, f"foremean_t{t1:g}.npy"),
+                Z[:, :Nc].mean(axis=0))
+
         y = obs_values[t1]
         Za = enkf_update(Z, y, None, R, rng, inflation=fb["inflation"], Yf=Yf)
         Za[:, :Nc] = np.clip(Za[:, :Nc], *fb["T_clip_K"])

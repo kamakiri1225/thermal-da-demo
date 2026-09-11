@@ -137,6 +137,10 @@ def run_openfoam_twin(cfg, filter_kind, workdir):
         for i, m in enumerate(members):
             Z[i, :Nc] = of_case.read_solid_T(m, t1)
             Z[i, iQ] = Q[i]
+        # 解析前の予報(補正前)平均場を保存(イノベーション可視化用)
+        np.save(os.path.join(fields_dir, f"foremean_t{t1:g}.npy"),
+                Z[:, :Nc].mean(axis=0))
+
         y = obs_values[t1]
 
         # 解析更新

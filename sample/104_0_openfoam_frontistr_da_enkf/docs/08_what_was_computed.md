@@ -114,7 +114,8 @@ D-2が保存した温度場npyを入力に、後処理として実行した:
 | `docs/img/rom_fem_*.png`, `da_vs_truth_*.gif` | 段階D-1 `run_rom_fem.py` / `make_da_gifs.py` | ROM(NumPy)のEnKF |
 | `results/openfoam_fem_enkf_*` | 段階D-2 `run_openfoam_fem_enkf.py` | chtMultiRegionFoam+FrontISTR の実EnKF |
 | `docs/img/openfoam_fem_enkf_*.png` | 段階D-2 | 同上 |
-| `openfoam/run_fem_enkf/fields/*.npy` | 段階D-2(Git管理外) | 同上 |
+| `openfoam/run_fem_enkf/fields/ensmean_t*.npy` | 段階D-2(Git管理外) | 解析後(補正済み)の平均温度場 |
+| `openfoam/run_fem_enkf/fields/foremean_t*.npy` | 段階D-2(Git管理外) | **予報(補正前)の平均温度場**。解析でsolid/Tを上書きする前に保存し、補正量(イノベーション)の空間分布を後から可視化できる |
 | `docs/img/da_temperature_field3d.png` | 段階D-3 | D-2の温度場を後処理 |
 | `docs/img/da_displacement_field.png` | 段階D-3 | D-2の温度場→FrontISTR |
 | `paraview/*`(Git管理外) | 段階D-3 `export_paraview.py` | D-2の温度場＋ROM時刻歴 |
