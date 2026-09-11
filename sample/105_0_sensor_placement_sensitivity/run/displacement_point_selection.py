@@ -130,10 +130,23 @@ def main():
     try: pv.start_xvfb()
     except Exception: pass
     pl=pv.Plotter(off_screen=True,window_size=(1000,820))
-    cloud=pv.PolyData(coords); cloud["sens [um/K]"]=sens
-    pl.add_mesh(cloud,scalars="sens [um/K]",cmap="viridis",point_size=6,
-                render_points_as_spheres=True,
-                scalar_bar_args={"title":"|dUz/dmode| sum [um/K]","title_font_size":18,"label_font_size":14})
+    # 面表示: FEM六面体メッシュに感度を貼りサーフェスとして描く(点群は分かりにくい)
+    mesh2=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
+    idr={nid:i for i,(nid,_x) in enumerate(mesh2["nodes"])}
+    cls=[]
+    for _e,conn in mesh2["elements"]: cls.append(8); cls.extend(idr[n] for n in conn)
+    import vtk as _vtk
+    ug=None
+    try:
+        ug=pv.UnstructuredGrid(np.array(cls),
+            np.full(len(mesh2["elements"]),_vtk.VTK_HEXAHEDRON,np.uint8),coords)
+        ug.point_data["sens [um/K]"]=sens
+        pl.add_mesh(ug,scalars="sens [um/K]",cmap="viridis",show_edges=False,
+                    scalar_bar_args={"title":"|dUz/dmode| sum [um/K]","title_font_size":18,"label_font_size":14})
+    except Exception:
+        cloud=pv.PolyData(coords); cloud["sens [um/K]"]=sens
+        pl.add_mesh(cloud,scalars="sens [um/K]",cmap="viridis",point_size=6,
+                    render_points_as_spheres=True)
     for p,c,lab in [(hi,"red","high"),(lo,"blue","low"),(cur,"orange","current")]:
         for i in p: pl.add_mesh(pv.Sphere(radius=0.0035,center=coords[i]),color=c)
     pl.add_text("displacement-point sensitivity\nred=high2  orange=current  blue=low2",

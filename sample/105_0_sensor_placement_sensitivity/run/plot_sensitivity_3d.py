@@ -21,23 +21,24 @@ def main():
     S=d["S_um"]; NTH_P=int(d["NTH_P"]); NZ_P=int(d["NZ_P"])
 
     # 円筒表面を細かい点群にして、各点に属するパッチの感度を割り当て
-    nth,nz=180,80
-    th=np.linspace(0,2*np.pi,nth,endpoint=False); zz=np.linspace(0,HEIGHT,nz)
+    # 連続した円筒サーフェス(StructuredGrid)にして面で塗る(点群は分かりにくいため)
+    nth,nz=181,81
+    th=np.linspace(0,2*np.pi,nth); zz=np.linspace(0,HEIGHT,nz)
     TH,ZZ=np.meshgrid(th,zz,indexing="ij")
     X=OUTER_RADIUS*np.cos(TH); Y=OUTER_RADIUS*np.sin(TH)
-    pts=np.column_stack([X.ravel(),Y.ravel(),ZZ.ravel()])
-    a=np.minimum((TH.ravel()/(2*np.pi)*NTH_P).astype(int),NTH_P-1)
-    b=np.minimum((ZZ.ravel()/HEIGHT*NZ_P).astype(int),NZ_P-1)
+    # StructuredGrid はFortran順でフラット化されるため order='F' で対応付ける
+    a=np.minimum((TH.ravel(order='F')%(2*np.pi)/(2*np.pi)*NTH_P).astype(int),NTH_P-1)
+    b=np.minimum((ZZ.ravel(order='F')/HEIGHT*NZ_P).astype(int),NZ_P-1)
 
     vmax=abs(S).max()
     obs=[(0.028,0,HEIGHT,"uz_heater"),(-0.028,0,HEIGHT,"uz_opp")]
     pl=pv.Plotter(off_screen=True,shape=(1,2),window_size=(1500,760))
     for j,name in enumerate(["uz_heater(ヒータ側上面)","uz_opp(反対側上面)"]):
         pl.subplot(0,j)
-        cloud=pv.PolyData(pts)
-        cloud["sens"]=S[j,a,b]
-        pl.add_mesh(cloud,scalars="sens",cmap="coolwarm",clim=[-vmax,vmax],
-                    render_points_as_spheres=True,point_size=7,
+        surf=pv.StructuredGrid(X,Y,ZZ)
+        surf["sens"]=S[j,a,b]
+        pl.add_mesh(surf,scalars="sens",cmap="coolwarm",clim=[-vmax,vmax],
+                    smooth_shading=False,show_edges=False,
                     scalar_bar_args={"title":"dUz/dT [um/K]","title_font_size":20,"label_font_size":16})
         # 観測点マーカー
         for x,y,z,nm in obs:
