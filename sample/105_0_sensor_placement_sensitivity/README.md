@@ -50,6 +50,7 @@ OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/make_selection_gif.py      
   （`results/Wz_full.npy` ≈100MB は git 管理外・`build_W_from_dumps.py`で再生成）
 
 考察は `docs/00_discussion.md`、証拠計算の詳細は `docs/02_evidence_sensitivity_selection.md`、
+**実務ガイド（実験前のセンサ配置設計・資料作り用）は `docs/03_sensor_design_guide.md`**、
 作業ログ（成功も失敗も）は `docs/90_worklog_103-105.md`。
 
 ## 前提
