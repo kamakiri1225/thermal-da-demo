@@ -1446,7 +1446,120 @@ FrontISTR：各節点温度を使い、拘束条件下で全体の変位を解�
 <li><strong>C</strong>：温度1点／2点にMによる変位観測を追加し、4条件のRMSEを比較した。</li>
 <li><strong>D</strong>：温度をIDW補間し、変位はFrontISTRで求めてGIFにした。</li>
 </ul>
-</div></div><div class="takeaway">モデルの校正・観測追加の比較・分布の可視化は、それぞれ別の検証。</div></section></section><section><section class="cover"><h2>全体のまとめ</h2><div class="content"><div class="body"><p><strong>少数観測で温度場とQを推定。実ソルバ=正確・重い/ROM=軽い・全時間</strong></p>
+</div></div><div class="takeaway">モデルの校正・観測追加の比較・分布の可視化は、それぞれ別の検証。</div></section></section><section><section class="cover"><h2>第3部　センサはどこに貼るべきか
+FrontISTRの感度行列 W=K⁻¹H で実験前に決める</h2><div class="content"><div class="body">
+</div></div></section><section class="text"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>問い：感度の悪い場所の観測は精度が出ないのでは？</h2><div class="content"><div class="body"><ul>
+<li>ここまでの同化は観測点を<strong>経験で</strong>決めていた（温度hot/cold、変位は上面2点）</li>
+<li>仮説：「熱感度が高い場所を観測に選べば精度が出る／低い場所では出ない」</li>
+<li>これを <strong>FrontISTRで実計算した熱感度</strong> と
+<strong>実際のデータ同化</strong> で検証した</li>
+</ul>
+</div></div><div class="takeaway">観測点の善し悪しを、勘ではなく感度の計算で決められるか？が第3部のテーマ。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>熱感度とは：感度行列 W=K⁻¹H</h2><div class="content"><figure><img src="assets/s105_guide_w_matrix.png"><figcaption>感度行列Wの読み方</figcaption></figure><div class="body"><p>熱変形は <span class="math inline">\(u = W\,\Delta T\)</span>（<span
+class="math inline">\(W=K^{-1}H\)</span>、K=剛性行列・H=熱ひずみ荷重行列）。</p>
+<ul>
+<li><strong>行で読む</strong>：この点の変位は温度場にどれだけ敏感か →
+<strong>変位計をどこに貼るか</strong></li>
+<li><strong>列で読む</strong>：この場所の温度が動くと観測変位がどれだけ動くか
+→ <strong>温度を管理すべき場所</strong></li>
+<li>Wは<strong>形状・材料・拘束だけで決まる</strong>（ヒータ位置・運転条件に依存しない）</li>
+</ul>
+</div></div><div class="takeaway">1つの行列が「測る場所の地図」と「温める場所の地図」の両方になる。装置を作る前に計算できる。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>変位計1本の読み値＝温度場についての方程式1本</h2><div class="content"><figure><img src="assets/s105_guide_equation.png"><figcaption>変位計1本=方程式1本の図解</figcaption></figure><div class="body"><p>推定したいのは<strong>円筒全体の温度分布（5040節点）</strong>と発熱量Q。直接測れるのは数点だけ。</p>
+<p>変位計の読み値は <span class="math inline">\(u_i = \sum_j
+W[i,j]\,\Delta T_j\)</span>（未知の温度5040個の重み付き合計）。</p>
+</div></div><div class="takeaway">係数W[i,:]が大きい点の変位計は「使える方程式」、ほぼゼロの点は「0≈0＋ノイズ」で何も教えない。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>実際に計算したW（DUMPWパッチ版FrontISTR）</h2><div class="content"><figure><img src="assets/s105_sensitivity_frontistr.png"><figcaption>W行ノルム(左)とW_diff(右)、表裏2アングル</figcaption></figure><div class="body"><p>六面体メッシュを6分割テトラ化(23,040四面体)し、DUMPWパッチ版fistr1を1回実行(15秒)→K,Hダンプ→W全体(5040×5040)を構築(2分)。</p>
+<ul>
+<li>左列＝<strong>行ノルム</strong>：上端ほど大（底面固定・自由端が動く）</li>
+<li>右列＝<strong>W_diff</strong>（QoI=Uz(A)−Uz(O)の温度感度）：Point
+A側下部が最も効く</li>
+</ul>
+</div></div><div class="takeaway">検証：構築したWの行差はDUMPW直接出力と最大相対差1.9e-7で一致。摂動法(120回実行)とも5.8%で整合。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>実験：変位2点の貼り場所をWの行感度で選び分ける</h2><div class="content"><figure><img src="assets/s105_disp_point_sensitivity_3d.png"><figcaption>W行感度と観測点候補</figcaption></figure><div class="body"><p>変位観測2点を4通りで選び、<strong>他は全く同じ条件</strong>で温度hot1点＋変位2点のデータ同化(EnKF,
+5seed)：</p>
+<ul>
+<li>赤=<strong>高感度2点</strong>（行感度上位、2点目は方向分散|cos|&lt;0.9）</li>
+<li>青=<strong>低感度2点</strong>（有効節点の下位）</li>
+<li>橙=現行(104のA/O)、ほかにランダム2点</li>
+</ul>
+</div></div><div class="takeaway">固定部近傍の偽の感度は除外済み。選点はすべてW行感度から機械的に決定。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>なぜ差が出るか：信号とノイズの闘い</h2><div class="content"><figure><img src="assets/s105_guide_snr.png"><figcaption>信号の大きさvsノイズ(実測値)</figcaption></figure><div class="body"><p>変位計のノイズはσ=0.3µm。W行感度は高感度点6.3µm/K vs
+低感度点0.12µm/K（<strong>50倍差</strong>）。</p>
+</div></div><div class="takeaway">低感度点は「役に立たない」だけでなく**害になる**：ノイズを偶然の相関で本物と誤解し、逆方向に補正する。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>結果①：変位QoI（上面の傾き）の時刻歴</h2><div class="content"><figure><img src="assets/s105_selection_qoi_timehistory.png"><figcaption>QoI時刻歴：観測点の選び方で追従が変わる</figcaption></figure><div class="body"><p>QoI = Uz(Point A: ヒータ側上面+X) − Uz(Point O: 反対側上面−X)。</p>
+</div></div><div class="takeaway">高感度2点(赤)は最初のサイクルから真値に追従。低感度2点(青)は序盤に−1µmまで逆振れし200秒まで蛇行。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>結果②：温度分布の時刻歴（アニメ）</h2><div class="content"><figure><img src="assets/s105_selection_da_compare.gif"><figcaption>温度分布：高感度/低感度/真値</figcaption></figure><div class="body"><p>左=高感度2点でDA / 中=低感度2点でDA /
+右=真値。球=変位観測点(HIGH/LOWラベル付き)。</p>
+</div></div><div class="takeaway">序盤の加熱期に中パネル(低感度)だけ分布が真値からずれる。左(高感度)は最初から見分けがつかない。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>結果③：変形の時刻歴（アニメ、誇張表示）</h2><div class="content"><figure><img src="assets/s105_selection_deform_compare.gif"><figcaption>変形：高感度/低感度/真値</figcaption></figure><div class="body"><p>各フレームでFrontISTRを実行した本物の変形。低感度選点(中)は<strong>傾きの向きまで</strong>誤る。</p>
+</div></div><div class="takeaway">変位で見ても結論は同じ：観測点の選び方が過渡の再現性を決める。</div></section><section class="text"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>数値まとめと独立検証</h2><div class="content"><div class="body"><table>
+<thead>
+<tr class="header">
+<th>変位2点の選び方</th>
+<th>W行感度平均</th>
+<th>温度RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>高感度2点(方向分散)</td>
+<td>5.39 µm/K</td>
+<td><strong>0.0237 K</strong></td>
+</tr>
+<tr class="even">
+<td>現行(104のA/O)</td>
+<td>2.87 µm/K</td>
+<td>0.0269 K</td>
+</tr>
+<tr class="odd">
+<td>ランダム2点</td>
+<td>―</td>
+<td>0.0371 K</td>
+</tr>
+<tr class="even">
+<td>低感度2点</td>
+<td>0.125 µm/K</td>
+<td><strong>0.0400 K</strong></td>
+</tr>
+</tbody>
+</table>
+<p>並行検証（KinvH実FEM 570節点）：高感度選点でQoI誤差
+<strong>89%→8%（12倍）</strong></p>
+</div></div><div class="takeaway">W行感度の順に精度が並ぶ。モデル自由度が大きいほど差は開く(ROM 1.7倍→実FEM 12倍)。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>では温度センサはどこに置くべきか（実験1）</h2><div class="content"><figure><img src="assets/s105_sensor_placement_rmse.png"><figcaption>センサ位置別の同化精度</figcaption></figure><div class="body"><p>温度センサ1点をhot/mid/cold/top/coreに置き分けて同化（5seed×2条件）。</p>
+<ul>
+<li>精度の順位を決めたのは熱感度ではなく
+<strong>dT/dQ（推定したい未知量への感度）</strong>：順位が5点完全一致</li>
+<li>W列感度最大のtopは2位止まり</li>
+</ul>
+</div></div><div class="takeaway">温度センサは熱源近傍(hot)へ。反対側(cold)だけは最悪(1.4〜1.6倍悪い)。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>なぜ熱感度では温度センサの位置が決まらないのか</h2><div class="content"><figure><img src="assets/s105_sensitivity_vs_rmse.png"><figcaption>熱感度vs精度：部分相関どまり</figcaption></figure><div class="body"><p>熱感度(W列)が高い場所の温度は、<strong>変位観測がすでに間接的に見ている</strong>→温度センサを足しても情報が重複（冗長）。</p>
+<p>実際にW_diff最大/最小の場所に温度センサを置き分けても 0.0225K vs
+0.0251K と差はわずか。</p>
+</div></div><div class="takeaway">センサの価値 = 推定したい量への感度 × 他の観測との非冗長性。</div></section><section class="text"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>第3部の結論：どちらの感度で選ぶか</h2><div class="content"><div class="body"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>選ぶ対象</th>
+<th>使う指標</th>
+<th>効果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>変位計の位置</strong></td>
+<td><strong>熱感度（Wの行）</strong></td>
+<td><strong>決定的</strong>(1.7倍〜12倍)</td>
+</tr>
+<tr class="even">
+<td>温度センサの位置</td>
+<td>熱感度（Wの列）</td>
+<td>補助的(差わずか)</td>
+</tr>
+<tr class="odd">
+<td><strong>温度センサの位置</strong></td>
+<td><strong>未知量への感度 dT/dQ</strong></td>
+<td><strong>推奨</strong>(順位完全一致)</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="takeaway">熱感度マップは変位計の配置には決定的、温度センサの配置には補助的。温度センサはdT/dQで。</div></section><section class="visual"><div class="eyebrow">第3部 センサ配置の設計(105)</div><h2>実務ワークフロー：装置を作る前にセンサ配置を決める</h2><div class="content"><figure><img src="assets/s105_guide_workflow.png"><figcaption>実験前センサ設計の6ステップ</figcaption></figure><div class="body"><p>計算だけ（合計数分）で「どこに変位計を貼れば1本の測定で温度場をよく縛れるか」が決まる。センサの貼り直し・実験のやり直しコストがゼロに。</p>
+</div></div><div class="takeaway">W=K⁻¹Hは実験前に1回計算すればよい。工作機械なら主軸QoIを指定してW_diff=主軸熱変位の温度感度マップ。</div></section></section><section><section class="cover"><h2>全体のまとめ</h2><div class="content"><div class="body"><p><strong>少数観測で温度場とQを推定。実ソルバ=正確・重い/ROM=軽い・全時間</strong></p>
 </div></div></section><section class="text"><div class="eyebrow">全体のまとめ</div><h2>全体のまとめ</h2><div class="content"><div class="body"><ul>
 <li><strong>目的</strong>：少数の温度・変位観測から、円筒内部を含む温度分布と発熱量Qを推定。</li>
 <li><strong>手法</strong>：アンサンブルカルマンフィルタ（EnKF）。前進モデルを観測で補正。</li>
