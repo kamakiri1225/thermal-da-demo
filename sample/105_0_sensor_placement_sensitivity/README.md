@@ -1,5 +1,11 @@
 # 105_0 センサ配置と熱感度 ― FrontISTRの感度行列 W=K⁻¹H で観測点を選ぶ
 
+> **ドキュメントは画像付きで読めるリンクから開くこと**（github.io の `.md` URLは
+> 生テキスト表示になり画像が出ない）:
+> - GitHub上で読む（推奨）: [docs/03 実務ガイド](https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.md) ・ [docs/02 証拠計算](https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/105_0_sensor_placement_sensitivity/docs/02_evidence_sensitivity_selection.md) ・ [docs/00 考察](https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/105_0_sensor_placement_sensitivity/docs/00_discussion.md) ・ [docs/01 図の読み方](https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/105_0_sensor_placement_sensitivity/docs/01_results_explained.md) ・ [docs/90 作業ログ](https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/105_0_sensor_placement_sensitivity/docs/90_worklog_103-105.md)
+> - ブラウザ(GitHub Pages)で読む場合は末尾を `.html` に:
+>   [03](https://kamakiri1225.github.io/thermal-da-demo/sample/105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.html) ・ [02](https://kamakiri1225.github.io/thermal-da-demo/sample/105_0_sensor_placement_sensitivity/docs/02_evidence_sensitivity_selection.html) ・ [00](https://kamakiri1225.github.io/thermal-da-demo/sample/105_0_sensor_placement_sensitivity/docs/00_discussion.html) ・ [01](https://kamakiri1225.github.io/thermal-da-demo/sample/105_0_sensor_placement_sensitivity/docs/01_results_explained.html) ・ [90](https://kamakiri1225.github.io/thermal-da-demo/sample/105_0_sensor_placement_sensitivity/docs/90_worklog_103-105.html)
+
 104（温度＋変位2点のデータ同化）の発展。**熱感度 = FrontISTR(KinvH)の感度行列
 W=K⁻¹H**（DUMPWパッチ版fistr1がダンプするK・Hから構築）を本ケース円筒に適用し、
 「感度が高い場所を観測に選ぶとデータ同化の精度が出る／低い場所では出ない」を
