@@ -134,5 +134,66 @@ def fig_snr():
     print("[guide] guide_snr.png")
 
 
+def fig_equation():
+    """変位計1本の読み値 = 未知の温度5040個の重み付き合計 = 方程式1本、の図解."""
+    fig,ax=plt.subplots(figsize=(14,8.6)); ax.set_xlim(0,14); ax.set_ylim(0,8.6); ax.axis("off")
+    ax.text(7,8.25,"変位計1本の読み値は「温度場についての方程式1本」",
+            ha="center",fontsize=17,weight="bold")
+
+    # --- 左: 円筒と変位計 ---
+    ax.add_patch(Rectangle((0.9,3.3),2.2,3.4,fc="#eef3f8",ec="k"))
+    rng=np.random.default_rng(3)
+    for xx,zz in zip(rng.uniform(1.05,2.95,26),rng.uniform(3.45,6.55,26)):
+        ax.plot(xx,zz,"o",ms=7,color="#f5b942",mec="orange")
+        ax.text(xx,zz-0.02,"?",ha="center",va="center",fontsize=7,color="k")
+    ax.text(2.0,2.85,"円筒の温度 $\\Delta T_1 \\cdots \\Delta T_{5040}$\n＝知りたい未知数(5040個)",
+            ha="center",fontsize=12)
+    # 変位計
+    ax.add_patch(Rectangle((1.7,7.0),0.6,0.55,fc="#d9ead3",ec="k"))
+    ax.annotate("",xy=(2.0,6.75),xytext=(2.0,7.0),
+                arrowprops=dict(arrowstyle="-|>",color="k",lw=2))
+    ax.text(2.0,7.85,"変位計(点i)\n読み値 $u_i$=4.2µm ←既知",ha="center",fontsize=12)
+
+    # --- 右: 方程式の図解 ---
+    y=5.0
+    def box(x,w,txt,fc,ec,sub=None,subc="gray"):
+        ax.add_patch(FancyBboxPatch((x,y-0.62),w,1.24,boxstyle="round,pad=0.07",fc=fc,ec=ec,lw=1.6))
+        ax.text(x+w/2,y,txt,ha="center",va="center",fontsize=13)
+        if sub: ax.text(x+w/2,y-1.05,sub,ha="center",fontsize=10.5,color=subc)
+    box(4.0,1.5,"$u_i$\n読み値","#d9ead3","green","既知(測る)","green")
+    ax.text(5.75,y,"=",ha="center",fontsize=20)
+    box(6.0,1.35,"$W[i,1]$","#f4cccc","crimson","既知(事前計算)","crimson")
+    ax.text(7.5,y,"×",ha="center",fontsize=15)
+    box(7.65,1.2,"$\\Delta T_1$","#fff2cc","orange","未知","darkorange")
+    ax.text(9.0,y,"+",ha="center",fontsize=15)
+    box(9.2,1.35,"$W[i,2]$","#f4cccc","crimson","既知","crimson")
+    ax.text(10.7,y,"×",ha="center",fontsize=15)
+    box(10.85,1.2,"$\\Delta T_2$","#fff2cc","orange","未知","darkorange")
+    ax.text(12.45,y,"+ … +",ha="center",fontsize=13)
+    box(12.9,1.0,"5040\n項目","#f4cccc","crimson")
+    ax.annotate("",xy=(4.0,y),xytext=(3.15,6.2),
+                arrowprops=dict(arrowstyle="->",color="k",lw=1.5))
+
+    # --- 下: 高感度 vs 低感度 ---
+    ax.add_patch(FancyBboxPatch((3.9,1.9),4.7,1.6,boxstyle="round,pad=0.12",
+                                fc="#fdecec",ec="crimson",lw=1.5))
+    ax.text(6.25,3.15,"高感度点に貼ると(係数Wが大きい)",fontsize=12.5,ha="center",
+            color="crimson",weight="bold")
+    ax.text(6.25,2.4,"4.2µm = 大きな係数×温度たち\n→ 温度場の当たりが強く絞れる「使える方程式」",
+            fontsize=11,ha="center")
+    ax.add_patch(FancyBboxPatch((9.0,1.9),4.7,1.6,boxstyle="round,pad=0.12",
+                                fc="#eaf0fb",ec="royalblue",lw=1.5))
+    ax.text(11.35,3.15,"低感度点に貼ると(係数がほぼ全部0)",fontsize=12.5,ha="center",
+            color="royalblue",weight="bold")
+    ax.text(11.35,2.4,"読み値 ≈ 0×温度たち＋ノイズ\n→「0≈0」の式。温度場について何も教えない",
+            fontsize=11,ha="center")
+    ax.text(7,0.9,"変位計を1本貼る＝未知数5040個へ方程式を1本追加すること。"
+            "係数(＝W行感度)が大きい場所ほど、その方程式は温度場を強く縛る",
+            ha="center",fontsize=13,bbox=dict(boxstyle="round",fc="#fffbe6",ec="orange"))
+    fig.tight_layout()
+    fig.savefig(os.path.join(IMG,"guide_equation.png"),dpi=140); plt.close(fig)
+    print("[guide] guide_equation.png")
+
+
 if __name__=="__main__":
-    fig_w_matrix(); fig_workflow(); fig_snr()
+    fig_w_matrix(); fig_workflow(); fig_snr(); fig_equation()
