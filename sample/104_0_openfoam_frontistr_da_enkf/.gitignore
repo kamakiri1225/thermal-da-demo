@@ -12,3 +12,7 @@ openfoam/*.log
 
 # ParaView 出力(再生成可能, run/export_paraview.py)
 paraview/
+
+# 参考文献PDF(著作権のためGitHubに上げない)
+docs/references/
+*.pdf

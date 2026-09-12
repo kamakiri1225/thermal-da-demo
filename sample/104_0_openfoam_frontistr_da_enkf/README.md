@@ -20,6 +20,8 @@
 - `03_rom_derivation.md`・`11_rom_concept.md` … ROMの導出・発想・変位同化の成否
 - `01_method_walkthrough.md`・`06_ensemble_calculation.md` … 実装の流れ・アンサンブル計算
 - `04_paraview.md` … ParaViewでの分布・時刻歴の見方
+- `14_pod_and_rom_dof.md` … PODでROMの自由度・分布保存を検証（何点必要か／分布は失われるか）
+- `15_novelty_and_prior_art.md` … 先行研究調査（新規性の位置づけ・近接文献・PF/変分法比較・投稿先）
 
 ## 観測構成
 
