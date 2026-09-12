@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+openfoam/
+results/Wz_full.npy

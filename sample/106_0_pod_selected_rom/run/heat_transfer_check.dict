@@ -1,0 +1,23 @@
+FoamFile { version 2.0; format ascii; class dictionary; object controlDict; }
+functions
+{
+    checkWallHeatFlux
+    {
+        type wallHeatFlux;
+        libs (fieldFunctionObjects);
+        region solid;
+        patches (solid_to_fluid);
+        qr none;
+    }
+    checkHeatTransferCoeff
+    {
+        type heatTransferCoeff;
+        libs (fieldFunctionObjects);
+        region solid;
+        field T;
+        patches (solid_to_fluid);
+        htcModel fixedReferenceTemperature;
+        TRef 293.15;
+        qr none;
+    }
+}

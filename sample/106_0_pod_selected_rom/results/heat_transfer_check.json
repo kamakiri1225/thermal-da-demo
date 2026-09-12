@@ -1,0 +1,20 @@
+[
+  {
+    "time_s": 300,
+    "area_m2": 0.037095645656497755,
+    "outward_heat_W": 1.1098241574387824,
+    "wall_mean_T_K": 296.6385232153585,
+    "effective_htc_W_m2_K": 8.576080760001132,
+    "area_mean_local_htc_W_m2_K": 8.81062555245638,
+    "max_abs_output_vs_formula_W_m2_K": 0.000240325927734375
+  },
+  {
+    "time_s": 600,
+    "area_m2": 0.037095645656497755,
+    "outward_heat_W": 0.4727995710168179,
+    "wall_mean_T_K": 296.7342189494364,
+    "effective_htc_W_m2_K": 3.555976385413048,
+    "area_mean_local_htc_W_m2_K": 3.5599849420274756,
+    "max_abs_output_vs_formula_W_m2_K": 6.389617919921875e-05
+  }
+]

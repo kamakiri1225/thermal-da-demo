@@ -1,0 +1,12 @@
+{
+  "h_true_W_K": 0.015351040936249992,
+  "h_perturbed_W_K": 0.021491457310749987,
+  "max_abs_temperature_difference_K": 0.04907857673640592,
+  "max_abs_displacement_difference_um": 0.0579183585689405,
+  "approx_uniform_cooling_time_constant_s": 15779.30177910406,
+  "temperature_observation_sigma_K": 0.3,
+  "displacement_observation_sigma_um": 0.3,
+  "evaluation_interval_s": 2,
+  "end_time_s": 600,
+  "note": "No assimilation; identical initial temperature and Q. Displacements use cached FrontISTR POD responses."
+}
