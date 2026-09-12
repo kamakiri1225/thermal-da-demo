@@ -98,7 +98,7 @@ def fig_workflow():
     # 独立な3つの準備(横並び・矢印なし)。各箱に「どのデータ源から」を明記
     prep=[("W = K^-1 H","温度→変形の感度行列","← 構造FEM (剛性K,H)"),
           ("ROM係数 C,k,h","熱容量・熱抵抗・放熱","← 熱解析に校正"),
-          ("PODモード","温度場の型(何自由度か)","← 熱スナップショット")]
+          ("POD (任意)","何自由度要るか等の診断","← 省略可。使うなら熱ｽﾅｯﾌﾟｼｮｯﾄ")]
     x=0.9
     for i,(t,s,src) in enumerate(prep):
         ax.add_patch(FancyBboxPatch((x,6.75),3.0,1.15,boxstyle="round,pad=0.06",fc="white",ec="tab:green"))
@@ -106,7 +106,7 @@ def fig_workflow():
         ax.text(x+1.5,7.24,s,fontsize=9.2,color="dimgray",ha="center",va="center")
         ax.text(x+1.5,6.95,src,fontsize=8.8,color="tab:green",ha="center",va="center",style="italic")
         x+=3.25
-    ax.text(11.9,7.33,"※3つは\n互いに独立\n(Wから\nPODは\n出せない)",fontsize=8.6,
+    ax.text(11.9,7.33,"※互いに独立\n(Wから\nPODは出せない)\nPODは診断用で\n無くてもROMは\n作れる",fontsize=8.4,
             color="crimson",ha="center",va="center")
     # 3つ → 観測点を決める箱へ集約
     ax.add_patch(FancyBboxPatch((3.5,6.05),6.0,0.55,boxstyle="round,pad=0.05",fc="#f6fbf4",ec="tab:green"))
