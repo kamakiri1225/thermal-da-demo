@@ -59,7 +59,7 @@ Wは1つの行列だが、**行で読むか列で読むかで使い道が変わ�
 
 ![FrontISTR感度(W行/W列)](img/sensitivity_frontistr.png)
 
-![FrontISTR感度(裏側から)](img/sensitivity_frontistr_back.png)
+（上段=+X側から、下段=−X側から。各パネル左下のx-y-z軸マーカーで向きが分かる）
 
 > **ParaViewで見る場合**: `paraview/sensitivity_Wdiff_cylinder.vtk`（DUMPW直接出力、
 > フィールド`Sensitivity`）または `paraview/sensitivity_nodal.vtu` を開く

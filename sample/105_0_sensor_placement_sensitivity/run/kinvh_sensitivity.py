@@ -81,32 +81,33 @@ def main():
     wdiff=colA-colO
     g2=ug.copy(); v=float(np.percentile(np.abs(wdiff[valid]),90)); g2.point_data["col"]=wdiff
     CAM_BACK=[(-0.24,0.22,0.20),(0,0,0.05),(0,0,1)]   # 反対側(−X)から
-    for cam,fname,angle in [(CAM,"sensitivity_frontistr.png","Point A側(+X)から見たアングル"),
-                            (CAM_BACK,"sensitivity_frontistr_back.png","反対側(Point O側, −X)から見たアングル")]:
+    def shot(g,scalars,cmap,clim,nc,bar,cam,fname):
         pl=pv.Plotter(off_screen=True,window_size=(780,780))
-        pl.add_mesh(g1,scalars="row",cmap="turbo",clim=[0,float(row[valid].max())],
-                    n_colors=8,nan_color="gray",
-                    scalar_bar_args={"title":"row-sens [um/K]","title_font_size":20,"label_font_size":16})
+        pl.add_mesh(g,scalars=scalars,cmap=cmap,clim=clim,n_colors=nc,nan_color="gray",
+                    scalar_bar_args={"title":bar,"title_font_size":20,"label_font_size":16})
         mark_AO(pl)
+        pl.add_axes(line_width=4,labels_off=False,xlabel="X",ylabel="Y",zlabel="Z")
         pl.camera_position=cam; pl.set_background("white")
-        p1=os.path.join(TMPD,"p1.png"); pl.screenshot(p1); pl.close()
-
-        pl=pv.Plotter(off_screen=True,window_size=(780,780))
-        pl.add_mesh(g2,scalars="col",cmap="coolwarm",clim=[-v,v],n_colors=11,
-                    scalar_bar_args={"title":"dQoI/dT [um/K]","title_font_size":20,"label_font_size":16})
-        mark_AO(pl)
-        pl.camera_position=cam; pl.set_background("white")
-        p2=os.path.join(TMPD,"p2.png"); pl.screenshot(p2); pl.close()
-
-        fig,axes=plt.subplots(1,2,figsize=(15,8.2))
-        for ax,img,title in [
-            (axes[0],p1,"Wの「行」ノルム: どこの変位を測ると情報が多いか\n（灰色=候補外。固定部のすぐ近くは計算の都合で非物理な巨大値が出るため）"),
-            (axes[1],p2,"Wの「列」の差: QoI=Uz(A)−Uz(O) はどこの温度に敏感か\n（=DUMPWが出力するW_diff。赤=温めるとQoI+、青=QoI−）")]:
-            ax.imshow(plt.imread(img)); ax.axis("off"); ax.set_title(title,fontsize=15)
-        fig.suptitle(f"FrontISTR(KinvH)の熱感度行列 $W=K^{{-1}}H$ — {angle}。黄球=Point A、緑球=Point O",
-                     fontsize=14.5)
-        fig.tight_layout(rect=[0,0,1,0.94])
-        fig.savefig(os.path.join(IMG,fname),dpi=130); plt.close(fig)
+        p=os.path.join(TMPD,fname); pl.screenshot(p); pl.close(); return p
+    clim_row=[0,float(row[valid].max())]
+    p11=shot(g1,"row","turbo",clim_row,8,"row-sens [um/K]",CAM,"p11.png")
+    p12=shot(g2,"col","coolwarm",[-v,v],11,"dQoI/dT [um/K]",CAM,"p12.png")
+    p21=shot(g1,"row","turbo",clim_row,8,"row-sens [um/K]",CAM_BACK,"p21.png")
+    p22=shot(g2,"col","coolwarm",[-v,v],11,"dQoI/dT [um/K]",CAM_BACK,"p22.png")
+    fig,axes=plt.subplots(2,2,figsize=(15,15.6))
+    col_titles=["Wの「行」ノルム: どこの変位を測ると情報が多いか\n（灰色=候補外。固定部のすぐ近くは計算の都合で非物理な巨大値が出るため）",
+                "Wの「列」の差: QoI=Uz(A)−Uz(O) はどこの温度に敏感か\n（=DUMPWが出力するW_diff。赤=温めるとQoI+、青=QoI−）"]
+    row_titles=["【表】Point A側(+X)から見る","【裏】Point O側(−X)から見る"]
+    for r,(pa,pb) in enumerate([(p11,p12),(p21,p22)]):
+        for c,img in enumerate([pa,pb]):
+            ax=axes[r][c]; ax.imshow(plt.imread(img)); ax.axis("off")
+            if r==0: ax.set_title(col_titles[c],fontsize=15)
+        axes[r][0].text(-0.04,0.5,row_titles[r],transform=axes[r][0].transAxes,
+                        fontsize=16,weight="bold",rotation=90,va="center",ha="center")
+    fig.suptitle("FrontISTR(KinvH)の熱感度行列 $W=K^{-1}H$ — 上段=+X側から/下段=−X側から（各パネル左下に座標軸）。"
+                 "黄球=Point A、緑球=Point O",fontsize=14.5)
+    fig.tight_layout(rect=[0.02,0,1,0.96])
+    fig.savefig(os.path.join(IMG,"sensitivity_frontistr.png"),dpi=120); plt.close(fig)
 
     # --- 図2: 実験2の選定点(全点ラベル、離散バンド) ---
     pl=pv.Plotter(off_screen=True,window_size=(1050,880))

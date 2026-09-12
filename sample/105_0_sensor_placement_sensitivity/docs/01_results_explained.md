@@ -21,9 +21,8 @@ DUMPW直接出力`sensitivity_Wdiff.vtk`と最大相対差1.9e-7で一致）
 
 ![FrontISTR感度](img/sensitivity_frontistr.png)
 
-反対側（Point O側, −X）から見たアングル：
-
-![FrontISTR感度(裏側)](img/sensitivity_frontistr_back.png)
+（上段=Point A側(+X)から、下段=反対のPoint O側(−X)から。
+各パネル左下のx-y-z軸マーカーで向きが分かる）
 
 **読み方:**（黄球=Point A（ヒータ側上面+X）、緑球=Point O（反対側上面−X））
 - **左パネル（Wの行ノルム）**: 「その場所の**変位を測る**と、温度場の情報を

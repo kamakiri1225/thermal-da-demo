@@ -43,9 +43,8 @@ $$u = W \, \Delta T, \qquad W = K^{-1} H$$
 
 ![FrontISTR感度](img/sensitivity_frontistr.png)
 
-反対側（Point O側, −X）から見たアングル：
-
-![FrontISTR感度(裏側)](img/sensitivity_frontistr_back.png)
+（上段=Point A側(+X)から、下段=反対のPoint O側(−X)から。各パネル左下の
+x-y-z軸マーカーで向きが分かる）
 
 **そもそも「情報が多い」の情報とは何か？**
 
