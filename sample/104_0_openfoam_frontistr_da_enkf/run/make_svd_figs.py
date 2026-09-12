@@ -92,20 +92,29 @@ def fig_workflow():
                                 fc="#eef5ec",ec="tab:green",lw=2.5))
     ax.text(0.75,8.55,"STEP 1｜準備（装置を動かす“前”に、計算機で1回だけ）",fontsize=14.5,
             color="tab:green",weight="bold")
-    ax.text(0.75,8.15,"形状・材料・固定方法だけで決まる → ヒータ位置や運転が変わっても作り直さない。結果は保存して使い回す",
-            fontsize=10.3,color="dimgray")
-    prep=[("W = K^-1 H","感度行列\n(構造のみ)"),
-          ("ROM係数\nC, k, h","熱容量・熱抵抗\n(材料/形状)"),
-          ("PODモード","場の型\n(数ケースから)"),
-          ("観測点を決める","POD最適点\n/W感度")]
+    ax.text(0.75,8.15,"下の3つは別々のデータから独立に作る(順番ではない)。それを使って観測点を決める。"
+            "形状・材料由来なので条件が変わっても作り直さない",
+            fontsize=10.0,color="dimgray")
+    # 独立な3つの準備(横並び・矢印なし)。各箱に「どのデータ源から」を明記
+    prep=[("W = K^-1 H","温度→変形の感度行列","← 構造FEM (剛性K,H)"),
+          ("ROM係数 C,k,h","熱容量・熱抵抗・放熱","← 熱解析に校正"),
+          ("PODモード","温度場の型(何自由度か)","← 熱スナップショット")]
     x=0.9
-    for i,(t,s) in enumerate(prep):
-        ax.add_patch(FancyBboxPatch((x,6.35),2.7,1.5,boxstyle="round,pad=0.06",fc="white",ec="tab:green"))
-        ax.text(x+1.35,7.5,t,fontsize=12,weight="bold",ha="center",va="center")
-        ax.text(x+1.35,6.85,s,fontsize=9.3,color="dimgray",ha="center",va="center")
-        if i<3: ax.annotate("",xy=(x+3.0,7.1),xytext=(x+2.72,7.1),
-                            arrowprops=dict(arrowstyle="-|>",color="tab:green",lw=2))
-        x+=3.05
+    for i,(t,s,src) in enumerate(prep):
+        ax.add_patch(FancyBboxPatch((x,6.75),3.0,1.15,boxstyle="round,pad=0.06",fc="white",ec="tab:green"))
+        ax.text(x+1.5,7.62,t,fontsize=12,weight="bold",ha="center",va="center")
+        ax.text(x+1.5,7.24,s,fontsize=9.2,color="dimgray",ha="center",va="center")
+        ax.text(x+1.5,6.95,src,fontsize=8.8,color="tab:green",ha="center",va="center",style="italic")
+        x+=3.25
+    ax.text(11.9,7.33,"※3つは\n互いに独立\n(Wから\nPODは\n出せない)",fontsize=8.6,
+            color="crimson",ha="center",va="center")
+    # 3つ → 観測点を決める箱へ集約
+    ax.add_patch(FancyBboxPatch((3.5,6.05),6.0,0.55,boxstyle="round,pad=0.05",fc="#f6fbf4",ec="tab:green"))
+    ax.text(6.5,6.32,"→ 観測点を決める（温度＝POD最適点／変位＝W行感度）",fontsize=10.5,
+            weight="bold",ha="center",va="center",color="tab:green")
+    for xc in [2.4,5.65,8.9]:
+        ax.annotate("",xy=(6.0,6.6),xytext=(xc,6.72),
+                    arrowprops=dict(arrowstyle="-|>",color="tab:green",lw=1.3,alpha=0.6))
 
     ax.annotate("",xy=(6.75,5.95),xytext=(6.75,5.35),
                 arrowprops=dict(arrowstyle="-|>",color="k",lw=3))
