@@ -18,12 +18,12 @@
 
 本レポートは**査読付き学術論文を想定した"厳しめ"の新規性評価**である。発表の場に応じて使い分ける:
 
-- **オープンCAE学会など"オープンソース適用事例"の発表**：新規性の防御は不要。
+- **オープンCAE学会など"オープンソース適用事例"の発表**：新規性を強く主張する必要はない。
   価値は**「OpenFOAM＋FrontISTR＋Python(EnKF) を連成し、データ同化・逆推定を実装した事例」**
   そのものにある。強調すべきは ①**オープンソースだけで作った連成の実装**（誰でも再現できる）、
   ②**全コード・全ドキュメントの公開性・再現性**、③データ同化の実装知見・つまずきと解決
   （103_1のPF退化、変位同化の3つのバグなど）、④教育的な分かりやすさ。
-  → この場では下記の「新規性の防御」「識別可能性の厳密検証」は**必須ではない**（背景知識として持っておく程度でよい）。
+  → この場では下記の「新規性の主張」「識別可能性の厳密検証」は**必須ではない**（背景知識として持っておく程度でよい）。
 - **査読論文（IJMTM / Precision Eng / Applied Thermal Eng 等）に投稿する場合**：
   以下の新規性の切り分け・近接文献との差分・識別可能性の検証がそのまま必要になる。
 
@@ -70,15 +70,15 @@ $W$ の行（＝温度場→変位のヤコビアン）を用いて逆熱同化�
 上記のとおり**既知の $W$ を観測設計に使う**という位置づけに留めるのが安全です
 （2026年には一般構造デジタルツインで Fisher-information 型センサ配置も存在するため）。
 
-最も重要な反証文献は、Ansari et al. の変位／ひずみから温度場を逆算する随伴法、Dileep et al. の変位から熱源まで同定する熱弾性逆問題、Tan et al. の熱流束・機械荷重・物性の同時同定、Lang et al. の工作機械における KF＋ROM＋熱機械デジタルツイン、そして2026年の Lang et al. による**複数ROM＋Kalman filter ensemble**です。したがって、「変位から温度を推定する」「熱源を同定する」「工作機械にKalman filterを使う」「ROMを使う」「熱伝達係数の不確かさを扱う」「FEMで熱変位を計算する」のいずれも単独では新規性になりません。
+本研究の新しさを最も脅かす（＝先に似たことをやっている）文献は、Ansari et al. の変位／ひずみから温度場を逆算する随伴法、Dileep et al. の変位から熱源まで同定する熱弾性逆問題、Tan et al. の熱流束・機械荷重・物性の同時同定、Lang et al. の工作機械における KF＋ROM＋熱機械デジタルツイン、そして2026年の Lang et al. による**複数ROM＋Kalman filter ensemble**です。したがって、「変位から温度を推定する」「熱源を同定する」「工作機械にKalman filterを使う」「ROMを使う」「熱伝達係数の不確かさを扱う」「FEMで熱変位を計算する」のいずれも単独では新規性になりません。
 
 一方で、2026年の Lang et al. は名称として “ensemble Kalman filtering” を用いていますが、論文の数式では**500個の異なるROMそれぞれに通常のKalman filterを走らせ、観測尤度でモデル重みを更新する multiple-model / ensemble-of-KFs 型**です。典型的な Evensen 型 EnKF、すなわち状態アンサンブルから標本共分散を作って非線形モデルを同化する方式とは区別すべきです。さらに同論文で同化に使われるのは温度観測であり、5本の変位プローブは熱変位評価に使われ、変位が Kalman 更新の観測ベクトルに入っているわけではありません。
 
-したがって、現時点で最も防御しやすい新規性は**アルゴリズム単体ではなく、異種物理・異種観測・パラメータ推定の統合アーキテクチャ**にあります。
+したがって、現時点で最も無理なく主張できる新規性は**アルゴリズム単体ではなく、異種物理・異種観測・パラメータ推定の統合アーキテクチャ**にあります。
 
 ## 調査範囲と新規性判定の基準
 
-主対象は2020–2026年の査読論文・査読会議論文で、2026年9月12日までに公開されているものを対象としました。新規性判定に重要な場合は、2019年以前の基礎的な先行研究も「期間外の反証」として確認しています。特に、2019年の Khosravifard & Hematiyan は、**ひずみ計測を利用して未知熱流束を同定する逆熱弾性問題**をすでに扱っており、このアイデア自体は2020年以前から存在します。DOI は [10.1016/j.ijthermalsci.2019.06.001](https://doi.org/10.1016/j.ijthermalsci.2019.06.001) です。
+主対象は2020–2026年の査読論文・査読会議論文で、2026年9月12日までに公開されているものを対象としました。新規性判定に重要な場合は、2019年以前の基礎的な先行研究も「調査期間外だが関係する先行研究」として確認しています。特に、2019年の Khosravifard & Hematiyan は、**ひずみ計測を利用して未知熱流束を同定する逆熱弾性問題**をすでに扱っており、このアイデア自体は2020年以前から存在します。DOI は [10.1016/j.ijthermalsci.2019.06.001](https://doi.org/10.1016/j.ijthermalsci.2019.06.001) です。
 
 本調査では、提案法を次の構成要素に分解して「単独既出」と「組合せ既出」を区別しました。
 
@@ -146,11 +146,11 @@ $$
 | 論点 | 先行研究 | 書誌情報・DOI | 方法と本提案との差 |
 |---|---|---|---|
 | **変位・ひずみ→温度／熱源** | **Ansari et al. (2025), “Adjoint-based recovery of thermal fields from displacement or strain measurements”** | T. S. A. Ansari, R. Löhner, R. Wüchner, H. Antil, S. Warnakulasuriya, I. Antonau, F. Airaudo, *Computer Methods in Applied Mechanics and Engineering*, 438, 117818. DOI [10.1016/j.cma.2025.117818](https://doi.org/10.1016/j.cma.2025.117818).  | 有限要素＋**決定論的随伴法**で少数の変位／ひずみから温度場を直接最適化。提案法との最大の重複。違いは EnKF ではなく gradient/adjoint、基本的には「温度場復元」であって $Q,h$ の joint posterior（事後） estimation ではない。 |
-| | **Dileep, Hasanov & Kumarasamy (2024)** | “Simultaneous identification of spatial load and external heat source in thermoelastic plate from final time measured displacement,” *Inverse Problems and Imaging*, 18(4), 751–775. DOI [10.3934/ipi.2023053](https://doi.org/10.3934/ipi.2023053).  | 最終時刻の**変位**から機械的荷重 $F(x,t)$ と熱源 $G(x,t)$ を同時同定。Tikhonov正則化＋**随伴問題**で勾配を求める。したがって「変位から熱源」という主張はすでに反証される。 |
-| | **Tan et al. (2025)** | C.-H. Tan, W.-W. Jiang, Y.-T. Zhou, S.-Q. Zhang, K. Yang, X.-W. Gao, “A new method for simultaneous identification of thermal-mechanical loading and thermophysical properties in dynamic coupled thermoelasticity problems based on Levenberg-Marquardt method,” *International Communications in Heat and Mass Transfer*, 169, 109869. DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | 動的連成熱弾性問題で熱流束・機械荷重・物性を**Levenberg–Marquardt＋感度行列**で同定。確率的EnKFではないが、「熱機械応答を利用した複数未知量同時同定」への強い反証。 |
+| | **Dileep, Hasanov & Kumarasamy (2024)** | “Simultaneous identification of spatial load and external heat source in thermoelastic plate from final time measured displacement,” *Inverse Problems and Imaging*, 18(4), 751–775. DOI [10.3934/ipi.2023053](https://doi.org/10.3934/ipi.2023053).  | 最終時刻の**変位**から機械的荷重 $F(x,t)$ と熱源 $G(x,t)$ を同時同定。Tikhonov正則化＋**随伴問題**で勾配を求める。したがって「変位から熱源」という新しさは主張できない（先行研究が既にある）。 |
+| | **Tan et al. (2025)** | C.-H. Tan, W.-W. Jiang, Y.-T. Zhou, S.-Q. Zhang, K. Yang, X.-W. Gao, “A new method for simultaneous identification of thermal-mechanical loading and thermophysical properties in dynamic coupled thermoelasticity problems based on Levenberg-Marquardt method,” *International Communications in Heat and Mass Transfer*, 169, 109869. DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | 動的連成熱弾性問題で熱流束・機械荷重・物性を**Levenberg–Marquardt＋感度行列**で同定。確率的EnKFではないが、「熱機械応答を利用した複数未知量同時同定」を先に行っている（新しさの主張を弱める）。 |
 | | **Ansari et al. (2026, preprint)** | T. S. A. Ansari et al., “One-Way Thermo-Mechanical Coupled System Identification Using Displacement and Temperature Measurements,” arXiv:2603.09526. 査読誌DOIは今回確認できず。 | 変位＋温度の複合観測を使う optimization-driven thermo-mechanical system identification。温度分布と Young率を同定するため、**「温度＋変位を融合して場＋パラメータを同定」そのものも広くは既出**。ただし $Q,h$ ではなく、EnKFでもCHTでもない。 |
 | **工作機械 KF/ROM/DT** | **Lang et al. (2024)** | S. Lang, S. Talleri, J. Mayr, K. Wegener, M. Bambach, “Kalman filter-driven state observer for thermal error compensation in machine tool digital twins,” *Manufacturing Letters*, 41, 208–218. DOI [10.1016/j.mfglet.2024.09.025](https://doi.org/10.1016/j.mfglet.2024.09.025).  | reduced FE state-space model＋**通常のKalman filter**で工作機械全体の温度状態を少数温度センサから再構成し、熱機械モデルで熱変位を予測。提案との差は、変位を同化しないこと、$Q,h$ の augmented EnKF 推定をしないこと、高忠実CHTをfilter loopに置かないこと。 |
-| | **Lang, Schneider, Rhiner & Bambach (2026)** | “Overcoming Uncertainty With an Ensemble of Physical Models and Real-Time Measurements: Thermal Error Compensation Using Kalman Filters In a Digital Twin,” *Lecture Notes in Production Engineering / ICTIMT2025 Proceedings*, pp.385–412. DOI [10.1007/978-3-032-01194-7_25](https://doi.org/10.1007/978-3-032-01194-7_25).  | 500個の境界条件違いROMに**個別KF**を走らせ尤度で重み付け。10温度センサから熱状態を推定し、FEMで変位を算出。非常に近い反証だが、canonical EnKFではなく、変位計測は同化更新に用いず、$h$ は連続的なaugmented-stateとして更新せずモデルアンサンブルで表現。 |
+| | **Lang, Schneider, Rhiner & Bambach (2026)** | “Overcoming Uncertainty With an Ensemble of Physical Models and Real-Time Measurements: Thermal Error Compensation Using Kalman Filters In a Digital Twin,” *Lecture Notes in Production Engineering / ICTIMT2025 Proceedings*, pp.385–412. DOI [10.1007/978-3-032-01194-7_25](https://doi.org/10.1007/978-3-032-01194-7_25).  | 500個の境界条件違いROMに**個別KF**を走らせ尤度で重み付け。10温度センサから熱状態を推定し、FEMで変位を算出。非常に近い先行研究だが、canonical EnKFではなく、変位計測は同化更新に用いず、$h$ は連続的なaugmented-stateとして更新せずモデルアンサンブルで表現。 |
 | | **Hernández-Becerro, Spescha & Wegener (2020)** | “Model order reduction of thermo-mechanical models with parametric convective boundary conditions: focus on machine tools,” *Computational Mechanics*, 67, 167–184. DOI [10.1007/s00466-020-01926-x](https://doi.org/10.1007/s00466-020-01926-x).  | 対流境界条件をパラメトリックに含む熱–機械FEMのROM。工作機械で $h$ を含むモデル低次元化の先行例だが、データ同化・逆推定ではない。 |
 | **センサ配置・感度** | **Teshima et al. (2024)** | Y. Teshima, S. Tanaka, T. Kizaki, N. Sugita, “Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools,” *CIRP Journal of Manufacturing Science and Technology*, 55, 403–410. DOI [10.1016/j.cirpj.2024.10.015](https://doi.org/10.1016/j.cirpj.2024.10.015).  | ROMを利用して、熱誤差推定に有効な**温度センサ位置**を選ぶ。提案法の「変位観測点」を選ぶ問題とは観測チャネルが逆。 |
 | | **Ando et al., ICTIMT2025 proceedings** | S. Ando, S. Tanaka, Y. Teshima, J. Morishita, T. Kizaki, “Strategy for Sensor Placement to Estimate Thermal Errors Using Temperature-Sensitivity Distribution Based on a Reduced-Order Model of Machine Tools.” Springer LNPE. DOI [10.1007/978-3-032-01194-7_31](https://doi.org/10.1007/978-3-032-01194-7_31).  | 温度感度分布＋ROMから**温度計測点**を配置。会議名はICTIMT2025だが、対応するSpringer proceedings は2026年公開系列。$W$ を使った変位センサ位置設計ではない。 |
@@ -164,7 +164,7 @@ $$
 | | **Zhang et al. (2026)** | Y. Zhang, H. Long, Y. Xia, C. Huang, W. Wang, Y. Liu, “Reduced-order driven improved EnKF method for online estimation of time-varying convective heat transfer coefficient and temperature field in lithography masks,” *Applied Thermal Engineering*, 300, 131272. DOI [10.1016/j.applthermaleng.2026.131272](https://doi.org/10.1016/j.applthermaleng.2026.131272).  | ROM＋改良EnKFで**温度場 $T$ と時間変動 $h$** を逐次同時推定。提案の $T+h$ 部分をほぼ直接先取りするが、$Q$、変位、CHT-FEM連成はない。 |
 | | **Bakhshaei et al. (2026)** | 上記、DOI [10.1007/s44207-026-00009-8](https://doi.org/10.1007/s44207-026-00009-8).  | ensemble filterで**温度場＋未知熱流束**を同時推定。すなわち $T+Q$ 側は既出。ただし $h$ は同じaugmented stateで同時推定していない。 |
 | | **Kim, Bucci & Cetiner (2025)** | H. Kim, M. Bucci, S. Cetiner, “Ensemble Kalman Smoothing for a transient one-dimensional inverse heat conduction problem with gap thermal resistance,” *Applied Thermal Engineering*, 281, 128682. DOI [10.1016/j.applthermaleng.2025.128682](https://doi.org/10.1016/j.applthermaleng.2025.128682).  | augmented-state EnKSで未知過渡熱源を温度／熱流束観測から同定し、非線形な gap thermal resistance の不確かさも扱う。変位観測および $Q+h$ の双方を未知量とした同時推定ではない。 |
-| | **Tan et al. (2025)** | *Int. Commun. Heat Mass Transfer*, DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | coupled thermoelasticity で熱流束と物性・機械荷重を同時同定するため、「複数熱・構造パラメータ同定」自体への反証。ただし LM 型決定論的逆解析であり $Q+h$ のEnKF joint posterior ではない。 |
+| | **Tan et al. (2025)** | *Int. Commun. Heat Mass Transfer*, DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | coupled thermoelasticity で熱流束と物性・機械荷重を同時同定するため、「複数熱・構造パラメータ同定」を先取りしている。ただし LM 型決定論的逆解析であり $Q+h$ のEnKF joint posterior ではない。 |
 
 ### 変位・ひずみ逆解析に関する重要な差分
 
@@ -194,7 +194,7 @@ $$
 
 さらに [Dileep et al. 2024](https://doi.org/10.3934/ipi.2023053) は final-time displacement から熱源まで復元しているため、「従来は場だけで源は扱わない」と書くことも危険です。正確には、**熱源逆推定も随伴／正則化系では既出だが、CHTの $Q$ と $h$ を温度＋変位の逐次EnKFで同時推定する構成が見当たらない**、という差分にすべきです。
 
-さらに [Tan et al. 2025](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869) は LM（Levenberg–Marquardt）法ながら、熱流束だけでなく熱機械荷重・物性を同時識別しています。この論文を引用せずに「従来は単一未知量のみ」と主張すると、かなり高い確率で査読者から反証されます。
+さらに [Tan et al. 2025](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869) は LM（Levenberg–Marquardt）法ながら、熱流束だけでなく熱機械荷重・物性を同時識別しています。この論文を引用せずに「従来は単一未知量のみ」と主張すると、高い確率で査読者から「それは既出だ」と指摘されます。
 
 ### 工作機械分野で最も近い系列
 
@@ -251,7 +251,7 @@ $$
 | **上記すべてを中空円筒／工作機械主軸で一体化** | **今回の検索では未確認** | 各部分技術は別々の文献系列に分散している。特に変位同化＋$Q,h$ joint estimation が欠落。 |
 
 ここから分かる重要な点は、「新規要素」が存在するというより、
-**既存の4つの研究の流れを初めて1つに交差させるところ**に論文価値があることです。
+**既存の4つの研究の流れを初めて1つに組み合わせるところ**に論文価値があることです。
 その4つとは:
 
 1. **変位からの熱弾性逆解析**（変位・ひずみを手がかりに温度や熱源を逆算する）
@@ -326,11 +326,11 @@ $$
 
 の Fisher information、D-optimality $\log\det F$、A-optimality $\operatorname{tr}(F^{-1})$、あるいは posterior covariance reduction を選点基準にした方が、「推定したいのは温度ではなく $Q,h$ も含む」という提案法との整合性が高くなります。一般構造デジタルツインでは2026年に Fisher-information-based sensor placement がすでに報告されているため、この方向へ拡張する場合も「FIMそのもの」は新規とはせず、**thermoelastic augmented-state inverse problem への適用**を差分とするべきです。
 
-## 最小限かつ防御可能な新規性 claim と反証
+## 無理なく主張できる新規性と、その反例になりうる文献
 
 ### 推奨する新規性 claim
 
-英語論文なら、現時点では次の程度が最も防御しやすい表現です。
+英語論文なら、現時点では次の程度が最も無理なく主張できる表現です。
 
 > **To the best of our literature survey, the distinctive contribution is not the individual use of EnKF, thermoelastic inversion, or CFD/FEM coupling, but their integration into an augmented-state sequential estimator in which sparse temperature and thermoelastic displacement measurements jointly update the thermal field, heat input $Q$, and convective heat-transfer parameter $h$ through a CHT–structural forward chain（前進計算の連鎖）.**
 
@@ -348,21 +348,21 @@ $$
 
 ### 避けるべき claim
 
-「変位から温度を初めて推定する」は [Ansari et al. 2025](https://doi.org/10.1016/j.cma.2025.117818) によって反証されます。
+「変位から温度を初めて推定する」は [Ansari et al. 2025](https://doi.org/10.1016/j.cma.2025.117818) が既に行っているため、主張できません。
 
-「変位から熱源を初めて同定する」は [Dileep et al. 2024](https://doi.org/10.3934/ipi.2023053)、さらに期間外ですが Khosravifard & Hematiyan 2019 によって反証されます。
+「変位から熱源を初めて同定する」は [Dileep et al. 2024](https://doi.org/10.3934/ipi.2023053)、さらに期間外ですが Khosravifard & Hematiyan 2019 が既に行っているため、主張できません。
 
-「EnKFで熱伝達係数を初めて推定する」は [Oka & Ohno 2020](https://doi.org/10.1016/j.ijheatmasstransfer.2019.119232)、および [Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) によって明確に反証されます。
+「EnKFで熱伝達係数を初めて推定する」は [Oka & Ohno 2020](https://doi.org/10.1016/j.ijheatmasstransfer.2019.119232)、および [Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) が明確に行っているため、主張できません。
 
-「EnKFで熱源と温度場を同時推定する」は [Bakhshaei et al. 2026](https://doi.org/10.1007/s44207-026-00009-8) や [Kim et al. 2025](https://doi.org/10.1016/j.applthermaleng.2025.128682) によって反証されます。
+「EnKFで熱源と温度場を同時推定する」は [Bakhshaei et al. 2026](https://doi.org/10.1007/s44207-026-00009-8) や [Kim et al. 2025](https://doi.org/10.1016/j.applthermaleng.2025.128682) が既に行っているため、主張できません。
 
-「OpenFOAMをEnKFと初めて結合する」は [Wu et al. 2021](https://doi.org/10.1016/j.ssci.2021.105263) や CONES 系の Villanueva et al. によって反証されます。
+「OpenFOAMをEnKFと初めて結合する」は [Wu et al. 2021](https://doi.org/10.1016/j.ssci.2021.105263) や CONES 系の Villanueva et al. が既に行っているため、主張できません。
 
 「工作機械のthermal digital twinにensemble Kalman法を初めて導入する」も、2026年の Lang et al. がある現在は非常に危険です。むしろ同論文との差を明示することが必須です。
 
-「$W=K^{-1}H$ を初めて導出した」も [Mayr et al. 2015](https://doi.org/10.1016/j.cirp.2015.04.001) が直接の反証です。
+「$W=K^{-1}H$ を初めて導出した」も、[Mayr et al. 2015](https://doi.org/10.1016/j.cirp.2015.04.001) が既に導出しているため主張できません。
 
-### 最も危険な反証文献の優先順位
+### 特に注意すべき（先行性が近い）文献の優先順位
 
 投稿前の Related Work では、少なくとも以下は正面から扱うべきです。
 
@@ -370,7 +370,7 @@ $$
 
 **[Dileep et al. 2024](https://doi.org/10.3934/ipi.2023053)** は「変位→熱源」まで行っているため、source estimation の novelty claim を狭めます。
 
-**[Tan et al. 2025](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869)** は熱流束・荷重・物性の同時識別まで進んでおり、「複数未知量同定」の反証になります。
+**[Tan et al. 2025](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869)** は熱流束・荷重・物性の同時識別まで進んでおり、「複数の未知量を同時に同定する」という新しさを弱めます。
 
 **Lang et al. [2024](https://doi.org/10.1016/j.mfglet.2024.09.025)/[2026](https://doi.org/10.1007/978-3-032-01194-7_25)** は工作機械＋ROM＋KF＋thermal digital twin、さらに2026年版では model ensemble＋境界条件不確かさまで扱います。提案研究の工作機械側で最も近い競合です。
 
@@ -378,7 +378,7 @@ $$
 
 **[Bakhshaei et al. 2026](https://doi.org/10.1007/s44207-026-00009-8)** は ensemble-based simultaneous input/state filtering＋OpenFOAM＋ $T,$ heat-flux estimation を実現しているので、$T,Q$ 側の最重要競合です。
 
-この6系列を引用した上でなお残る交差部分が、提案法の実質的な novelty space です。
+この6系列を引用した上でなお残る「まだ誰もやっていない組み合わせ」が、本研究で新しさを主張できる範囲です。
 
 ## EnKFの代わりに粒子フィルタ・変分法は使えるか（手法選択）
 
@@ -436,20 +436,20 @@ $$
   「既知手法を実機に適用した」だけでは incremental と評価されやすい（Lang 2024/2026 が
   実機検証済みのため要求水準が上がっている）。
 - **本当に新規性が出るのは、実機の"難しさ"が新しい要素を要求するとき**。単なる適用でなく、
-  次を組み合わせると防御可能な貢献になる:
+  次を組み合わせると無理なく主張できる貢献になる:
   1. **多熱源（前後軸受・モータ）で $Q$ をベクトル化**し、温度＋変位から
      **各源を分離推定できるかの識別可能性（observability（可観測性））を正面から扱う**
      （既存の $T+h$ や $T+Q$ 単独推定が避けている難所。ユーザー自身が指摘した多熱源が鍵）。
   2. **変位観測を熱状態の更新に実際に戻す**（Lang系は変位を評価出力に留める）＋
-     **$Q,h$ を同一 augmented state で同時推定**（この2点が近接文献に欠けている交差部）。
+     **$Q,h$ を同一 augmented state で同時推定**（この2点が近接文献に欠けている組み合わせ）。
   3. **実機主軸での実験検証**（inverse crimeを避けた model discrepancy（モデルと現実のズレ） 込み）。
   4. **回転数・冷却流量など"励起の違い"で $Q$ と $h$ を分離**できることを示す
      （識別可能性の実証。これが無いと「都合よくnoiseで調整」と突かれる）。
 
 > **結論（戦略）**：POD・実機適用は"単独では新規性が弱い"。
 > しかし **「多熱源で $Q$ をベクトル推定＋変位を熱状態更新に同化＋$Q,h$識別可能性を実機で実証」**
-> まで踏み込めば、近接文献（Ansari 2025／Lang 2026／Zhang 2026）が揃って欠く交差点に入り、
-> 防御可能な新規性になる。POD は「必要自由度と観測設計を数値で根拠づける裏方」として
+> まで踏み込めば、近接文献（Ansari 2025／Lang 2026／Zhang 2026）のいずれにも無い組み合わせになり、
+> 無理なく主張できる新規性になる。POD は「必要自由度と観測設計を数値で根拠づける裏方」として
 > その物語を支える位置づけが最も効く。
 
 ## 投稿先の位置づけ
