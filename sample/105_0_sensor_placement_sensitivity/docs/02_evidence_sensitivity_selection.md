@@ -43,7 +43,7 @@ Wは1つの行列だが、**行で読むか列で読むかで使い道が変わ�
    （`run/build_W_from_dumps.py`, splu約2分）。検証: `Wz[A]-Wz[O]` は
    DUMPW直接出力の Wdiff_z と**最大相対差1.9e-7で一致**（同一行列由来を機械精度で確認）
 3. 行感度・列感度・観測点の選定は `run/kinvh_sensitivity.py` が
-   `results/kinvh_sensitivity.npz` に確定（固定節点アーティファクト除外込み）
+   `results/kinvh_sensitivity.npz` に確定（固定部近傍に出る非物理な巨大値＝偽の感度の除外込み）
 - 交差検証: 摂動法（120パッチ, `run/sensitivity_map.py`）ともROMモード射影で
   符号・分布一致（最大差5.8%＝六面体vs四面体の離散化差）
 

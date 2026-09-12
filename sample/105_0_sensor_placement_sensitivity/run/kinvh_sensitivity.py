@@ -99,7 +99,7 @@ def main():
     import matplotlib.pyplot as plt
     fig,axes=plt.subplots(1,2,figsize=(15,8.2))
     for ax,img,title in [
-        (axes[0],p1,"Wの「行」ノルム: どこの変位を測ると情報が多いか\n（変位観測点の選定マップ。灰色=固定節点アーティファクト除外）"),
+        (axes[0],p1,"Wの「行」ノルム: どこの変位を測ると情報が多いか\n（灰色=候補外。固定部のすぐ近くは計算の都合で非物理な巨大値が出るため）"),
         (axes[1],p2,"Wの「列」の差: QoI=Uz(A)−Uz(O) はどこの温度に敏感か\n（=DUMPWが出力するW_diff。赤=温めるとQoI+、青=QoI−）")]:
         ax.imshow(plt.imread(img)); ax.axis("off"); ax.set_title(title,fontsize=15)
     fig.suptitle("FrontISTR(KinvH)の熱感度行列 $W=K^{-1}H$ — DUMPWダンプのK,Hから構築(DUMPW出力と1.9e-7一致)。黄球=Point A、緑球=Point O",
