@@ -1,0 +1,9 @@
+cells: 20696
+field_temp_span_K: 5.77573000000001
+idw_5pt_rmse_max_K: 0.6073135836639141
+idw_5pt_rmse_mean_K: 0.3112686208407659
+modes_for_90pct: 1
+modes_for_99_9pct: 3
+modes_for_99pct: 2
+pod5_rmse_max_K: 0.003119412611880518
+snapshots: 121
