@@ -83,58 +83,61 @@ def fig_svd():
 
 
 def fig_workflow():
-    fig,ax=plt.subplots(figsize=(14,8.6)); ax.set_xlim(0,14); ax.set_ylim(0,8.6); ax.axis("off")
-    ax.text(7,8.3,"条件が変わっても作り直さない実用フロー",ha="center",fontsize=17,weight="bold")
-    ax.text(7,7.8,"― 何が「構造だけで決まる(一度きり)」で、何が「条件ごと(安い)」かを分ける ―",
-            ha="center",fontsize=12,color="dimgray")
+    fig,ax=plt.subplots(figsize=(13.5,10)); ax.set_xlim(0,13.5); ax.set_ylim(0,10); ax.axis("off")
+    ax.text(6.75,9.6,"実用の計算フロー ― 「1回だけの準備」と「毎回の本番」に分ける",
+            ha="center",fontsize=17,weight="bold")
 
-    # 左: 一度だけ(オフライン, 条件によらない)
-    ax.add_patch(FancyBboxPatch((0.4,2.4),6.3,4.7,boxstyle="round,pad=0.15",
-                                fc="#eef5ec",ec="tab:green",lw=2))
-    ax.text(3.55,6.75,"① 一度だけ計算(オフライン)",fontsize=14,ha="center",
+    # ===== フェーズ1: 準備(装置を動かす前に、計算機で1回だけ) =====
+    ax.add_patch(FancyBboxPatch((0.4,6.0),12.7,3.0,boxstyle="round,pad=0.1",
+                                fc="#eef5ec",ec="tab:green",lw=2.5))
+    ax.text(0.75,8.55,"STEP 1｜準備（装置を動かす“前”に、計算機で1回だけ）",fontsize=14.5,
             color="tab:green",weight="bold")
-    ax.text(3.55,6.35,"形状・材料・拘束だけで決まる → 条件が変わっても不変",
-            fontsize=10.5,ha="center",color="dimgray")
-    items=[
-        ("W = K^-1 H (感度行列)","構造のみ。ヒータ位置・出力に依存しない",5.7),
-        ("ROMの回路係数 C, k, h","熱容量・熱抵抗・放熱=材料/形状の物性",4.75),
-        ("PODモード(場の型)","運転範囲を張る数ケースのスナップショットから",3.8),
-        ("代表点/観測点の選定","POD最適点・W行感度で決める(105,14章)",2.9),
-    ]
-    for txt,sub,y in items:
-        ax.add_patch(FancyBboxPatch((0.7,y-0.32),5.7,0.72,boxstyle="round,pad=0.05",
-                                    fc="white",ec="tab:green"))
-        ax.text(1.0,y+0.06,txt,fontsize=11.5,weight="bold",va="center")
-        ax.text(1.0,y-0.19,sub,fontsize=9,color="dimgray",va="center")
+    ax.text(0.75,8.15,"形状・材料・固定方法だけで決まる → ヒータ位置や運転が変わっても作り直さない。結果は保存して使い回す",
+            fontsize=10.3,color="dimgray")
+    prep=[("W = K^-1 H","感度行列\n(構造のみ)"),
+          ("ROM係数\nC, k, h","熱容量・熱抵抗\n(材料/形状)"),
+          ("PODモード","場の型\n(数ケースから)"),
+          ("観測点を決める","POD最適点\n/W感度")]
+    x=0.9
+    for i,(t,s) in enumerate(prep):
+        ax.add_patch(FancyBboxPatch((x,6.35),2.7,1.5,boxstyle="round,pad=0.06",fc="white",ec="tab:green"))
+        ax.text(x+1.35,7.5,t,fontsize=12,weight="bold",ha="center",va="center")
+        ax.text(x+1.35,6.85,s,fontsize=9.3,color="dimgray",ha="center",va="center")
+        if i<3: ax.annotate("",xy=(x+3.0,7.1),xytext=(x+2.72,7.1),
+                            arrowprops=dict(arrowstyle="-|>",color="tab:green",lw=2))
+        x+=3.05
 
-    ax.annotate("",xy=(7.5,4.6),xytext=(6.75,4.6),
-                arrowprops=dict(arrowstyle="-|>",color="k",lw=2.5))
+    ax.annotate("",xy=(6.75,5.95),xytext=(6.75,5.35),
+                arrowprops=dict(arrowstyle="-|>",color="k",lw=3))
+    ax.text(6.95,5.62,"準備完了。あとは本番で使い回すだけ",fontsize=11,va="center",style="italic")
 
-    # 右: 条件ごと(オンライン, 安い)
-    ax.add_patch(FancyBboxPatch((7.5,2.4),6.1,4.7,boxstyle="round,pad=0.15",
-                                fc="#eef2fb",ec="tab:blue",lw=2))
-    ax.text(10.55,6.75,"② 条件ごと(オンライン, 安い)",fontsize=14,ha="center",
+    # ===== フェーズ2: 本番(運転しながら、何度も繰り返す) =====
+    ax.add_patch(FancyBboxPatch((0.4,1.25),12.7,4.05,boxstyle="round,pad=0.1",
+                                fc="#eef2fb",ec="tab:blue",lw=2.5))
+    ax.text(0.75,4.85,"STEP 2｜本番（装置を動かし“ながら”、一定間隔で繰り返す）",fontsize=14.5,
             color="tab:blue",weight="bold")
-    ax.text(10.55,6.35,"ヒータ位置・出力・運転が変わるたびに、ここだけ回す",
-            fontsize=10.5,ha="center",color="dimgray")
-    items2=[
-        ("観測を取得(温度数点+変位)","実機センサ or その条件の1回計算",5.7),
-        ("ROM前進予測(数秒)","校正済み回路に、その条件の入力Qを与える",4.75),
-        ("データ同化(EnKF)で Q・場を推定","①で決めた観測演算子をそのまま使用",3.8),
-        ("必要なら分布/変位を復元","PODモード or FrontISTRで場を再構成",2.9),
-    ]
-    for txt,sub,y in items2:
-        ax.add_patch(FancyBboxPatch((7.8,y-0.32),5.5,0.72,boxstyle="round,pad=0.05",
-                                    fc="white",ec="tab:blue"))
-        ax.text(8.1,y+0.06,txt,fontsize=11.5,weight="bold",va="center")
-        ax.text(8.1,y-0.19,sub,fontsize=9,color="dimgray",va="center")
+    ax.text(0.75,4.45,"温度を数点測るだけで、全体の温度分布と熱変位・発熱量を毎サイクル推定する（1周＝数秒）",
+            fontsize=10.3,color="dimgray")
+    loop=[("① 測る","温度2点＋変位\n(実機センサ)",1.5),
+          ("② ROMで予測","校正済みROMを\n数秒回す",4.2),
+          ("③ データ同化","測定で予測を補正\nQ・全体温度を推定",6.9),
+          ("④ 使う","分布/熱変位を出力\n→補正に反映",9.6)]
+    for i,(t,s,x) in enumerate(loop):
+        ax.add_patch(FancyBboxPatch((x,2.2),2.5,1.5,boxstyle="round,pad=0.06",fc="white",ec="tab:blue"))
+        ax.text(x+1.25,3.35,t,fontsize=12.5,weight="bold",ha="center",va="center")
+        ax.text(x+1.25,2.65,s,fontsize=9.3,color="dimgray",ha="center",va="center")
+        if i<3: ax.annotate("",xy=(x+2.8,2.95),xytext=(x+2.52,2.95),
+                            arrowprops=dict(arrowstyle="-|>",color="tab:blue",lw=2.2))
+    # ループの戻り矢印(④→①)
+    ax.annotate("",xy=(2.6,2.15),xytext=(11.0,2.15),
+                arrowprops=dict(arrowstyle="-|>",color="tab:blue",lw=2,
+                                connectionstyle="arc3,rad=-0.06",ls="--"))
+    ax.text(6.75,1.62,"④まで済んだら、次のタイミングでまた①へ（何度でも繰り返す＝リアルタイム推定）",
+            fontsize=10.5,ha="center",color="tab:blue",style="italic")
 
-    ax.text(7,1.55,"条件が「①で想定した運転範囲の中」なら②だけで済む(作り直しゼロ)。",
-            ha="center",fontsize=12.5,color="black",
+    ax.text(6.75,0.62,"条件（ヒータ位置・出力・運転）が変わっても、変えるのはSTEP2の入力だけ。"
+            "STEP1は作り直さない。",ha="center",fontsize=12,
             bbox=dict(boxstyle="round",fc="#fffbe6",ec="orange"))
-    ax.text(7,0.75,"範囲を外れた新条件(例:ヒータを全く別の位置へ)だけ、①のPODに"
-            "その1ケースを足して再SVD(数秒)。W・回路係数はそれでも不変。",
-            ha="center",fontsize=11,color="dimgray")
     fig.tight_layout()
     fig.savefig(os.path.join(IMG,"practical_workflow.png"),dpi=135); plt.close(fig)
     print("[svd] practical_workflow.png")
