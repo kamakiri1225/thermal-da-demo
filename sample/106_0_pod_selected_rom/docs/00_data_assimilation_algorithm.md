@@ -117,7 +117,7 @@ $$\boxed{w=\frac{\partial(u_A-u_O)}{\partial T_5}
 - 左：他のROM4点を固定し、1点だけ温度を変えたときの、全場復元を介したA/O変位差の感度w。
 - 右：5点の誤差が平均0、互いに独立、共通標準偏差 $\sigma_T$ という仮定の計算。
   $\delta d=w\delta T_5$ なので、 $\operatorname{Var}(\delta d)=\sigma_T^2ww^\top$ 、
-  $\sigma_d=\sigma_T\|w\|_2$ となる。0.5 Kなら約0.55 µmという値は、この仮定に限る。
+  $\sigma_d=\sigma_T\lVert w\rVert_2$ となる。0.5 Kなら約0.55 µmという値は、この仮定に限る。
 - 一般には $\operatorname{Var}(\delta d)=wC_Tw^\top$ 。誤差が残る位置や相関によって結果は変わる。
 - 旧図の0.45 K／0.98 µm等の同化結果は、別の高W観測点の平均絶対誤差であり、
   A/O変位差の標準偏差と比較できないため、この図から除いた。
@@ -255,10 +255,10 @@ OpenFOAMで固体と周囲流体を連成して解き、界面の温度と熱流
 - 流体領域の外側 `roomWalls` は温度 293.15 K（20 ℃）の固定値。この値は壁面熱伝達率ではなく、周囲領域の温度境界条件。
 - ヒータ面は `externalWallHeatFluxTemperature` の `mode power` で、同化した発熱量 $Q$ を加熱区間に与える。
 
-したがって、壁面からの放熱は予報計算の中で求まる。必要なら計算後に、外向き熱流束を $q''_{\rm out}$ 、
+したがって、壁面からの放熱は予報計算の中で求まる。必要なら計算後に、外向き熱流束を $q^{\prime\prime}_{\rm out}$ 、
 壁面温度を $T_w$ 、選んだ参照温度を $T_{\rm ref}$ として、
 
-$$h_{\rm eff}(\boldsymbol{x},t)=\frac{q''_{\rm out}(\boldsymbol{x},t)}{T_w(\boldsymbol{x},t)-T_{\rm ref}}
+$$h_{\rm eff}(\boldsymbol{x},t)=\frac{q^{\prime\prime}_{\rm out}(\boldsymbol{x},t)}{T_w(\boldsymbol{x},t)-T_{\rm ref}}
 \quad [\mathrm{W/(m^2 K)}]$$
 
 という**結果から評価する熱伝達率**を定義できる（温度差がゼロ付近では評価が不安定）。
@@ -461,7 +461,7 @@ $$\ell_d\propto\sqrt{\alpha\tau}$$
 この距離を $L$ の初期候補にし、予報誤差の経験相関と未観測セルのRMSEで調整する。
 
 今回の固体物性（OpenFOAMの `constant/solid/thermophysicalProperties`）は
-$k=50$ W/(m K)、 $\rho=7850$ kg/m$^3$ 、 $c_p=480$ J/(kg K)なので、
+$k=50$ W/(m K)、 $\rho=7850$ kg/m³ 、 $c_p=480$ J/(kg K)なので、
 
 $$\alpha=\frac{50}{7850\times480}=1.33\times10^{-5}\ \mathrm{m^2/s}.$$
 
