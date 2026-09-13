@@ -86,8 +86,10 @@ FrontISTRの節点温度を直接変えた感度とは、入力の定義が異�
 
 FrontISTRの線形熱弾性を $K_su=H_T\Delta T_{\rm FEM}$ と書くと、
 
-$$W_{\rm FEM}=K_s^{-1}H_T,\qquad
-[W_{\rm FEM}]_{ij}=\frac{\partial u_i}{\partial T_{{\rm FEM},j}}.$$
+```math
+W_{\rm FEM}=K_s^{-1}H_T,\qquad
+[W_{\rm FEM}]_{ij}=\frac{\partial u_i}{\partial T_{{\rm FEM},j}}.
+```
 
 これは他の節点温度を固定して、FEM節点jの温度を変えたときの変位自由度iの応答。
 105の`kinvh_sensitivity.npz`は、この全節点温度に対する感度から作ったデータである。
@@ -255,7 +257,7 @@ OpenFOAMで固体と周囲流体を連成して解き、界面の温度と熱流
 - 流体領域の外側 `roomWalls` は温度 293.15 K（20 ℃）の固定値。この値は壁面熱伝達率ではなく、周囲領域の温度境界条件。
 - ヒータ面は `externalWallHeatFluxTemperature` の `mode power` で、同化した発熱量 $Q$ を加熱区間に与える。
 
-したがって、壁面からの放熱は予報計算の中で求まる。必要なら計算後に、外向き熱流束を $q^{\prime\prime}_{\rm out}$ 、
+したがって、壁面からの放熱は予報計算の中で求まる。必要なら計算後に、外向き熱流束を $q_{\rm out}^{\prime\prime}$ 、
 壁面温度を $T_w$ 、選んだ参照温度を $T_{\rm ref}$ として、
 
 $$h_{\rm eff}(\boldsymbol{x},t)=\frac{q^{\prime\prime}_{\rm out}(\boldsymbol{x},t)}{T_w(\boldsymbol{x},t)-T_{\rm ref}}
