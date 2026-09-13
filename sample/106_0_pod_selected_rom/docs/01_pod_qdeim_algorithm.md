@@ -206,7 +206,7 @@ $X_r=\sum_{k=1}^r\sigma_k u_k v_k^\top$ は、
 空間 $N$ ≫時間 $m$ （本ケース 20696≫121）なので、 $N\times N$ でなく
 **小さい $m\times m$ の $X^\top X$ の固有問題**を解けばよい。
 $X^\top X\,v_k=\sigma_k^2 v_k$ を解き、モードは
-$$\varphi_k=\frac{1}{\sigma_k}X v_k\quad(\text{＝スナップショットの重み付き和})$$
+$$\varphi_k=\frac{1}{\sigma_k}X v_k\quad(\text{weighted sum of snapshots})$$
 で得る。economy SVD（`full_matrices=False`）が実質これを行う。
 
 ---

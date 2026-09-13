@@ -214,9 +214,9 @@ A/O変位差は同化後温度から計算して比較しただけである。�
 平均・偏差や共分散の行列積そのものは、5メンバー分をまとめて計算するため数秒程度であり、
 13時間の主因ではない。重いのは、各サイクルで5メンバーについて
 \[
-5\ \text{回のOpenFOAM(CHT)前進}
+5\ \text{ OpenFOAM(CHT) forecasts}
 \;+
-5\ \text{回のFrontISTR熱弾性解析}
+5\ \text{ FrontISTR analyses}
 \]
 を実行したことである。さらに、観測を作る真値ランも別に必要である。
 10サイクルでは、少なくともメンバー予報50窓（OpenFOAM）とFrontISTRの多数回の
@@ -233,7 +233,7 @@ EnKF が重いのは「アンサンブル $N$ 本を毎サイクル走らせて�
 そこで **OI（最適内挿）** が候補になる。OIは**背景誤差共分散 $B$ を事前に決め打ちで固定**し、
 毎サイクルはアンサンブルでなく **背景トラジェクトリ1本**だけを実ソルバ（OpenFOAM＋FrontISTR）で回す:
 
-$$z_a=z_b+K\,(y-h(z_b)),\qquad K=B H^\top (H B H^\top+R)^{-1}\ \text{（ $B$ 固定なら $K$ も固定）}.$$
+$$z_a=z_b+K\,(y-h(z_b)),\qquad K=B H^\top (H B H^\top+R)^{-1}\quad (B,K\ \text{fixed}).$$
 
 **要点：OIはアンサンブルで何ケースも回さなくてよい**。予報は背景1本なので、実ソルバの実行本数は
 EnKFの $1/N$ 。104（5メンバー・約13時間）に対し、**OIなら概ね $13\text{h}/5\approx2.6$ 時間**の見込み
@@ -274,10 +274,10 @@ ROMの放熱係数 $h$ [W/K] とも単位・定義が異なり、そのまま数
 
 $$
 \text{OpenFOAM (CHT)}
-\;\xrightarrow[\text{固体セル温度 }T_s(\boldsymbol{x},t)]{}
-\text{温度の写像・補間}
+\;\xrightarrow[\text{solid cell temp }T_s(\boldsymbol{x},t)]{}
+\text{temperature mapping}
 \;\xrightarrow{}
-\text{FrontISTR (熱弾性)}
+\text{FrontISTR (thermoelastic)}
 \;\xrightarrow{}
 \boldsymbol{u}(\boldsymbol{x},t).
 $$
@@ -867,7 +867,7 @@ Za = Zf + innov @ gain_T                            # 解析アンサンブル
 
 ### D-2. 104のEnKFでも、未知パラメータはQのみ
 
-104の実ソルバEnKFは $z=[T_{\mathrm{全セル}},Q]$ を5メンバーで更新する。
+104の実ソルバEnKFは $z=[T_{\text{all}},Q]$ を5メンバーで更新する。
 OIのQ更新との違いは、固定した共分散ではなく、その時刻の標本共分散を使う点である。
 
 $$Q_a^{(i)}=Q_f^{(i)}+[C_{zy}]_{Q,:}(C_{yy}+R)^{-1}
@@ -893,7 +893,7 @@ hの更新はこの計算にはない。周辺化の意味はOI節で説明し�
 |---|---|---|
 | 予報モデル | OpenFOAM(CHT) 全2万セル | POD選定5点の一般化集中定数ROM |
 | 変位観測 | 各メンバーFrontISTR実行 | PODモード応答で近似 |
-| 状態 | $[T_\text{全セル},Q]$ | $[T_0..T_4,Q,h]$ |
+| 状態 | $[T_{\text{all}},Q]$ | $[T_0..T_4,Q,h]$ |
 | 同化 | 確率的EnKF（摂動観測） | **同じ**確率的EnKF |
 | 速度 | 10分の現象に約13時間 | 0→600s が数秒 |
 

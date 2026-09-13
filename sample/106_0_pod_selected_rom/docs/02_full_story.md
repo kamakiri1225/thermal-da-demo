@@ -384,7 +384,7 @@ z=\begin{bmatrix}T_0&T_1&T_2&T_3&T_4&Q&h\end{bmatrix}^{\mathsf T}
    \[
    y_f^{(m)}=H(z_f^{(m)})=
    [T_2^{(m)},u_{z,A}^{(m)},u_{z,O}^{(m)}]^{\mathsf T}
-   \quad(\text{条件により温度観測点数は異なる}).
+   \quad(\text{obs count varies}).
    \]
 3. 60メンバーの $z_f^{(m)}$ と $y_f^{(m)}$ の平均・偏差から
    $C_{zy},C_{yy}$ を計算し、カルマンゲインで7変数を更新する。変位はこの更新式の中で
@@ -418,9 +418,9 @@ $\overline{\widehat T}=N^{-1}\sum_m\widehat T^{(m)}$ を計算する。
 とする。FrontISTRを毎回実行する場合も入力は同じ $\widehat T$ であり、
 温度分布を熱荷重として与えて $u_z$ を解く。したがって、ROM同化の計算順は
 \[
-\text{5点温度・}Q,h\text{をEnKF更新}
-\rightarrow \text{POD復元で全温度場}
-\rightarrow \text{FrontISTR（または }D\text{）で変位}
+\text{5-pt temp, }Q,h\text{ (EnKF)}
+\rightarrow \text{POD reconstruction}
+\rightarrow \text{FrontISTR or }D\text{ (disp)}
 \]
 である。変位を同化に使うケースでは、この最後の変位計算を**予報段階でも先に行い**、
 その値を観測残差へ含めてからEnKF更新する。
@@ -538,7 +538,7 @@ $\overline{\widehat T}=N^{-1}\sum_m\widehat T^{(m)}$ を計算する。
 **① ベイズ更新**。推定したい拡大状態 $z=[T_0..T_4,Q,h]$ について、
 観測 $y$ （温度センサ値）を得た後の確率分布（事後分布）は
 
-$$\underbrace{p(z\mid y)}_{\text{事後}}\;\propto\;\underbrace{p(y\mid z)}_{\text{尤度}}\;\underbrace{p(z)}_{\text{事前}}.$$
+$$\underbrace{p(z\mid y)}_{\text{posterior}}\;\propto\;\underbrace{p(y\mid z)}_{\text{likelihood}}\;\underbrace{p(z)}_{\text{prior}}.$$
 
 - **事前** $p(z)=\mathcal N(z_f,\,P)$ ：ROMで時間発展させた予報アンサンブルの平均 $z_f$ と共分散 $P$ 。
 - **尤度** $p(y\mid z)=\mathcal N(H z,\,R)$ ：観測は真値＋計測ノイズ、 $R$ ＝観測誤差共分散（センサ精度）。
@@ -558,7 +558,7 @@ $$p(Q\mid y)=\int p(Q,\,T\mid y)\,\mathrm dT.$$
 
 同時分布がガウスなら、この積分は解析的に解けて再びガウスになり、その平均は
 
-$$\mathbb E[Q\mid y]=\underbrace{\mathbb E[Q]}_{\text{事前}}+\underbrace{\mathrm{Cov}(Q,y)\,\mathrm{Cov}(y,y)^{-1}}_{\text{回帰係数}}\,\big(y-\mathbb E[y]\big).$$
+$$\mathbb E[Q\mid y]=\underbrace{\mathbb E[Q]}_{\text{prior}}+\underbrace{\mathrm{Cov}(Q,y)\,\mathrm{Cov}(y,y)^{-1}}_{\text{regression}}\,\big(y-\mathbb E[y]\big).$$
 
 つまり **「観測 $y$ の予測外れ $(y-\bar y)$ を、 $Q$ と $y$ の共分散比だけ $Q$ に配分する」**線形回帰。
 $\mathrm{Cov}(Q,y)\neq0$ （発熱が変われば温度も変わる）である限り、**温度の観測が $Q$ を動かす**。
@@ -824,7 +824,7 @@ Q-DEIM で **モード数と同じ5点**を選んでいる。だから「全セ�
    モード形は $5\times5$ の**正方行列** $U_r[P,:]$ になる。連立方程式は
 
    ```math
-   \underbrace{U_r[P,:]}_{5\times5}\begin{bmatrix}a_1\\\vdots\\a_5\end{bmatrix}\;=\;\underbrace{u[P]-\bar u[P]}_{\text{5点の「平均からのズレ」}}
+   \underbrace{U_r[P,:]}_{5\times5}\begin{bmatrix}a_1\\\vdots\\a_5\end{bmatrix}\;=\;\underbrace{u[P]-\bar u[P]}_{\text{5-pt deviation}}
    ```
 
    で、**式が5本・未知数が5個**の**正方（ちょうど決まる）問題**なので、原理的に一意に解ける。
@@ -1201,7 +1201,7 @@ $$C_{\mathrm{tot}}\frac{d\theta}{dt}\approx-5h\theta,
 今回の $C_{\mathrm{tot}}=1211.14$ J/Kから、
 
 $$\tau\approx\frac{1211.14}{5\times0.015351}
-=15779\ \mathrm{s}\approx4.4\ \mathrm{時間}.$$
+=15779\ \mathrm{s}\approx4.4\ \text{hours}.$$
 
 これは**温度がほぼ一様な場合の概算**であり、5点モデル全体の厳密な単一時定数ではない。
 それでも、今回の冷却観測300秒（5分）はこの尺度に比べ短い。
