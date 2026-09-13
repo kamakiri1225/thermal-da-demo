@@ -40,13 +40,20 @@ def is_cjk(c: str) -> bool:
     return (0x3040<=o<=0x30FF or 0x4E00<=o<=0x9FFF or 0x3400<=o<=0x4DBF
             or 0x3000<=o<=0x303F or 0xFF00<=o<=0xFFEF)
 
+# GitHubのMathJaxが禁止するマクロ（使うと "macros are not allowed" エラー表示になる）
+DISALLOWED=["operatorname","newcommand","def","let","require","class",
+            "cssId","style","href","renewcommand","providecommand"]
+
 def check_expr_content(expr: str):
-    """1つの数式内容の R7-R10 を返す（issue文字列のリスト）"""
+    """1つの数式内容の R7-R11 を返す（issue文字列のリスト）"""
     iss=[]
     if any(c in GREEK for c in expr): iss.append("R10 生ギリシャ文字")
     if any(is_cjk(c) for c in expr): iss.append("R7 数式内CJK")
     if re.search(r'(?<!\\)%', expr): iss.append("R8 生%コメント")
     if expr.count('{')!=expr.count('}'): iss.append("R9 波括弧不一致")
+    for mac in DISALLOWED:
+        if re.search(r'\\'+mac+r'[^A-Za-z]', expr+" "):
+            iss.append(f"R11 GitHub禁止マクロ \\{mac}")
     return iss
 
 def lint(path: str):

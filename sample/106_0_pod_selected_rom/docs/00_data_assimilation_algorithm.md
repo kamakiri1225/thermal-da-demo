@@ -118,9 +118,9 @@ $$\boxed{w=\frac{\partial(u_A-u_O)}{\partial T_5}
   実際の追従の比較は、上の「同一計算で比較する温度5点と2点間変位差」の時刻歴を見る。
 - 左：他のROM4点を固定し、1点だけ温度を変えたときの、全場復元を介したA/O変位差の感度w。
 - 右：5点の誤差が平均0、互いに独立、共通標準偏差 $\sigma_T$ という仮定の計算。
-  $\delta d=w\delta T_5$ なので、 $\operatorname{Var}(\delta d)=\sigma_T^2ww^\top$ 、
+  $\delta d=w\delta T_5$ なので、 $\mathrm{Var}(\delta d)=\sigma_T^2ww^\top$ 、
   $\sigma_d=\sigma_T\lVert w\rVert_2$ となる。0.5 Kなら約0.55 µmという値は、この仮定に限る。
-- 一般には $\operatorname{Var}(\delta d)=wC_Tw^\top$ 。誤差が残る位置や相関によって結果は変わる。
+- 一般には $\mathrm{Var}(\delta d)=wC_Tw^\top$ 。誤差が残る位置や相関によって結果は変わる。
 - 旧図の0.45 K／0.98 µm等の同化結果は、別の高W観測点の平均絶対誤差であり、
   A/O変位差の標準偏差と比較できないため、この図から除いた。
 
@@ -342,10 +342,10 @@ x=\begin{bmatrix}T_1&T_2&\cdots&T_{20696}&Q\end{bmatrix}^{\mathsf T}
 $\delta T\simeq s_Q\delta Q+\eta_T$ （ $\eta_T$ はセルごとの独立誤差）と仮定すると、
 \[
 \begin{aligned}
-\operatorname{Cov}(T_i,T_j)
+\mathrm{Cov}(T_i,T_j)
   &=s_Q(x_i)s_Q(x_j)\sigma_Q^2+\delta_{ij}\sigma_T^2,\\
-\operatorname{Cov}(T_i,Q)&=s_Q(x_i)\sigma_Q^2,\\
-\operatorname{Var}(Q)&=\sigma_Q^2.
+\mathrm{Cov}(T_i,Q)&=s_Q(x_i)\sigma_Q^2,\\
+\mathrm{Var}(Q)&=\sigma_Q^2.
 \end{aligned}
 \]
 例えば $i=j$ なら $T_i$ の分散は
@@ -408,7 +408,7 @@ EnKFは各サイクルのメンバー（104の実ソルバ版は5、106のROM版
 
 温度場の背景誤差を $\delta T_i$ 、セル中心を $x_i$ とすると、代表的な仮定は
 
-$$B_{ij}=\operatorname{Cov}(\delta T_i,\delta T_j)
+$$B_{ij}=\mathrm{Cov}(\delta T_i,\delta T_j)
 =\sigma_T^2\exp\!\left[-\frac{\lVert x_i-x_j\rVert^2}{2L^2}\right].$$
 
 従って $B_{ii}=\sigma_T^2$ が1セルの誤差分散、距離 $L$ の2点では相関係数が
@@ -646,7 +646,7 @@ W=K_s^{-1}H_T
 
 **決め打ちパラメータ $\sigma_Q$ とは**：OIの背景共分散 $B$ で使う「**発熱量 $Q$ の背景（事前）標準偏差 [W]**」。
 数式では「同化前の推定 $Q_b$ が真値からどれだけばらつくか」の標準偏差:
-$$\sigma_Q=\sqrt{\operatorname{Var}(Q_b-Q_\text{true})}\quad[\mathrm W].$$
+$$\sigma_Q=\sqrt{\mathrm{Var}(Q_b-Q_\text{true})}\quad[\mathrm W].$$
 
 **「約4割の不確かさ」とは相対不確かさ（変動係数）** $\;\sigma_Q/Q_\text{true}=6/15=0.40=40\%$ のこと。
 背景誤差をガウス分布 $Q_b\sim\mathcal N(\mu,\sigma_Q^2)$ と仮定すると
@@ -699,7 +699,7 @@ $$\hat Q_a=\hat Q_b+C_{Q,y_f}(C_{y_fy_f}+R)^{-1}(y-\bar y_f).$$
 `BHt_q = SIGB_Q**2 * g`に相当する行を作り、
 
 $$K_Q=\sigma_Q^2g^\top S^{-1},\quad S=\widetilde{HBH^\top}+R,\quad
-Q_a=\operatorname{clip}\{Q_b+K_Q(y-y_b),0,60\}.$$
+Q_a=\mathrm{clip}\{Q_b+K_Q(y-y_b),0,60\}.$$
 
 ```python
 S = HBHt + R

@@ -297,7 +297,7 @@ $v_j$ は、そのセルが各モードにどのように反応するかを表�
 残った成分が最大のセルを選ぶ。既選択ベクトルの張る空間の正規直交基底を $B_{k-1}$ とすれば、
 
 $$r_j^{(k)}=(I-B_{k-1}B_{k-1}^\top)v_j,\qquad
-p_k=\operatorname*{arg\,max}_{j\notin\{p_1,\ldots,p_{k-1}\}}
+p_k=\mathop{\mathrm{arg\,max}}_{j\notin\{p_1,\ldots,p_{k-1}\}}
 \|r_j^{(k)}\|_2.$$
 
 この直交化と選択を安定に実行するのが列枢軸QRで、
@@ -1098,7 +1098,7 @@ $$C_{zy}=\frac1{59}\sum_m(z_f^{(m)}-\bar z_f)(y_f^{(m)}-\bar y_f)^\top
 $$C_{yy}=\frac1{59}\sum_m(y_f^{(m)}-\bar y_f)(y_f^{(m)}-\bar y_f)^\top
 \quad(4\times4).$$
 
-観測誤差共分散は $R=\operatorname{diag}(0.30^2,0.30^2,0.30^2,0.30^2)$ 。
+観測誤差共分散は $R=\mathrm{diag}(0.30^2,0.30^2,0.30^2,0.30^2)$ 。
 先頭2成分の単位はK²、後ろ2成分はµm²で、同じ数値でも物理単位は異なる。
 
 **③ 予測外れをどれだけ状態へ配分するかを求める。**
@@ -1108,7 +1108,7 @@ $$C_{yy}=\frac1{59}\sum_m(y_f^{(m)}-\bar y_f)(y_f^{(m)}-\bar y_f)^\top
 
 $$P_a(G)=P_f-GC_{zy}^\top-C_{zy}G^\top+G(C_{yy}+R)G^\top.$$
 
-したがって、 $\operatorname{tr}P_a$ をGで微分して0とすると
+したがって、 $\mathrm{tr}P_a$ をGで微分して0とすると
 
 $$-2C_{zy}+2G(C_{yy}+R)=0
 \quad\Longrightarrow\quad G=C_{zy}(C_{yy}+R)^{-1}.$$
@@ -1127,8 +1127,8 @@ $$q_a^{(m)}=q_f^{(m)}+
 $$h_a^{(m)}=h_f^{(m)}+
 \underbrace{[C_{zy}]_{h,:}(C_{yy}+R)^{-1}}_{G_h:\ 1\times4}\,r^{(m)}.$$
 
-例えばhの行には、 $\operatorname{cov}(h,T_2)$ 、 $\operatorname{cov}(h,T_0)$ 、
-$\operatorname{cov}(h,u_A)$ 、 $\operatorname{cov}(h,u_O)$ が並ぶ。
+例えばhの行には、 $\mathrm{cov}(h,T_2)$ 、 $\mathrm{cov}(h,T_0)$ 、
+$\mathrm{cov}(h,u_A)$ 、 $\mathrm{cov}(h,u_O)$ が並ぶ。
 つまり**hが違うメンバー間で観測予測がどう変わるか**を使い、hの修正量を決める。
 複数成分の相関を同時に扱うため、更新の向きは個々の共分散の符号だけでは決まらない。
 実装では逆行列を作らず `np.linalg.solve(C_yy + R, C_zy.T)` で計算する。
@@ -1228,8 +1228,8 @@ h\approx\frac{C_{\mathrm{tot}}}{5(t_2-t_1)}
 各メンバーのhで温度・変位を予測し、EnKFで
 
 $$\boxed{h_a^{(m)}=h_f^{(m)}+
-\operatorname{Cov}_{\mathrm{ens}}(h,y_f)
-\{\operatorname{Cov}_{\mathrm{ens}}(y_f,y_f)+R\}^{-1}
+\mathrm{Cov}_{\mathrm{ens}}(h,y_f)
+\{\mathrm{Cov}_{\mathrm{ens}}(y_f,y_f)+R\}^{-1}
 (y+\varepsilon^{(m)}-y_f^{(m)})}$$
 
 と更新する。共分散は60メンバーから分母59で計算する。
