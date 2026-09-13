@@ -7,6 +7,22 @@
 
 ---
 
+## 前提：104 の実ソルバ・データ同化について
+
+106 のROMは、**104 の実ソルバ・データ同化を高速化するために作った**。
+「どのプログラムで・どんなアルゴリズム（確率的アンサンブルEnKF）で同化していたか」は、
+独立ドキュメント **[`00_data_assimilation_algorithm.md`](00_data_assimilation_algorithm.md)** に
+丁寧にまとめた（プログラム構成 A → 状態・観測 B → 双子実験 C → 解析の数式 D → 重さと106との関係 E）。
+
+要点だけ:
+
+- 実行入口 `run/run_openfoam_fem_enkf.py` → ドライバ `daof/of_fem_twin.py::run_fem_twin()`
+  → 解析本体 `dacore/enkf.py::enkf_update()`。
+- アルゴリズムは**確率的EnKF（摂動観測法）**。ゲイン $K=C_{zy}(C_{yy}+R)^{-1}$ で観測へ引き寄せる。
+- **106 は予報モデルだけを ROM に置き換えた同じEnKF**。以下 §0 からその ROM の作り方を追う。
+
+---
+
 ## 0. 全体の流れ
 
 ```
@@ -41,6 +57,68 @@ $$X=\big[\,u(t_1)-\bar u,\ \dots,\ u(t_m)-\bar u\,\big]\in\mathbb{R}^{N\times m}
   時間平均**を並べた縦ベクトル（＝1枚の空間分布, 長さ $N$）
 - $u(t_k)-\bar u$ … **同じセルどうしの引き算**（各セルから、そのセルの時間平均を引く）
 
+#### 行と列を展開して確認する
+
+**はい、$\bar u$は各セルごとの時間平均である。** 本節の小文字$u$は温度場を表す記号で、
+熱変形の変位ではない。$u_i(t_k)=T_i(t_k)$と読み替えてよい。
+まず平均を引く前の温度行列を$S_T$と書き、平均を引いた行列$X$と区別する：
+
+$$u(t_k)=\begin{bmatrix}u_1(t_k)\\u_2(t_k)\\\vdots\\u_N(t_k)\end{bmatrix},\qquad
+S_T=\begin{bmatrix}
+u_1(t_1)&u_1(t_2)&\cdots&u_1(t_m)\\
+u_2(t_1)&u_2(t_2)&\cdots&u_2(t_m)\\
+\vdots&\vdots&\ddots&\vdots\\
+u_N(t_1)&u_N(t_2)&\cdots&u_N(t_m)
+\end{bmatrix}\quad(N\times m).$$
+
+**1行は同じセルの温度時刻歴、1列は同じ時刻の全セル温度場。**
+今回の$N=20,696$、$m=121$で、$t_1=0$ s、$t_2=5$ s、…、$t_{121}=600$ s。
+各行を横方向に平均するので、
+
+$$\bar u=\begin{bmatrix}
+\bar u_1\\\bar u_2\\\vdots\\\bar u_N
+\end{bmatrix}
+=\begin{bmatrix}
+\{u_1(t_1)+u_1(t_2)+\cdots+u_1(t_m)\}/m\\
+\{u_2(t_1)+u_2(t_2)+\cdots+u_2(t_m)\}/m\\
+\vdots\\
+\{u_N(t_1)+u_N(t_2)+\cdots+u_N(t_m)\}/m
+\end{bmatrix}\quad(N\times1).$$
+
+セル1にはセル1の平均$\bar u_1$、セル2にはセル2の平均$\bar u_2$を使う。
+この平均ベクトルを121列分並べてから引くことに相当する：
+
+$$X=S_T-\bar u\,\mathbf1_m^\top
+=S_T-\begin{bmatrix}
+\bar u_1&\bar u_1&\cdots&\bar u_1\\
+\bar u_2&\bar u_2&\cdots&\bar u_2\\
+\vdots&\vdots&\ddots&\vdots\\
+\bar u_N&\bar u_N&\cdots&\bar u_N
+\end{bmatrix},\qquad \mathbf1_m^\top=[1,1,\ldots,1].$$
+
+従って、実際にPODへ渡す行列は
+
+$$X=\begin{bmatrix}
+u_1(t_1)-\bar u_1&u_1(t_2)-\bar u_1&\cdots&u_1(t_m)-\bar u_1\\
+u_2(t_1)-\bar u_2&u_2(t_2)-\bar u_2&\cdots&u_2(t_m)-\bar u_2\\
+\vdots&\vdots&\ddots&\vdots\\
+u_N(t_1)-\bar u_N&u_N(t_2)-\bar u_N&\cdots&u_N(t_m)-\bar u_N
+\end{bmatrix}.$$
+
+各行の平均は0になる：$\frac1m\sum_k X_{ik}=0$。各列の空間平均が0になるとは限らない。
+これは学習温度履歴の時間平均であり、EnKFのメンバー平均とは別の操作である。
+
+| 本節の記号 | 実装 `run/select_points_qdeim.py` | 配列の形 |
+|---|---|---|
+| 生の温度行列$S_T$ | `X` | `(20696, 121)` |
+| 各セルの時間平均$\bar u$ | `mean = X.mean(axis=1)` | `(20696,)` |
+| 縦ベクトルとしての$\bar u$ | `mean[:, None]` | `(20696, 1)` |
+| 平均を引いた行列$X$ | `Xc = X - mean[:, None]` | `(20696, 121)` |
+
+`axis=1`は列の方向、つまり121時刻を平均する指定。
+`mean[:, None]`は平均を縦に並べ直し、NumPyが各列に同じ平均を適用する。
+**本文の$X$とコードの`X`は意味が違い、本文の$X$はコードの`Xc`に対応する。**
+
 ### 1.1b 具体例で見る「平均場を場所ごとに引く」
 
 言葉だと分かりにくいので、**3セル(A,B,C)×4時刻**の小さな例で示す。
@@ -57,6 +135,19 @@ $$X=\big[\,u(t_1)-\bar u,\ \dots,\ u(t_m)-\bar u\,\big]\in\mathbb{R}^{N\times m}
 - $\bar u$ ＝ `[23, 21.5, 20.75]`（**場所ごとに違う**時間平均。A は自分の23、B は21.5…）
 
 **各セルから「そのセル自身の平均」を引く** → これが $X=[u(t_k)-\bar u]$:
+
+上の表を実際の行列演算として書くと（温度は℃、差はK）、
+
+$$S_T=\begin{bmatrix}20&22&24&26\\20&21&22&23\\20&20.5&21&21.5\end{bmatrix},\qquad
+\bar u=\frac14\begin{bmatrix}20+22+24+26\\20+21+22+23\\20+20.5+21+21.5\end{bmatrix}
+=\begin{bmatrix}23\\21.5\\20.75\end{bmatrix},$$
+
+$$X=\begin{bmatrix}20&22&24&26\\20&21&22&23\\20&20.5&21&21.5\end{bmatrix}
+-\begin{bmatrix}23&23&23&23\\21.5&21.5&21.5&21.5\\20.75&20.75&20.75&20.75\end{bmatrix}
+=\begin{bmatrix}-3&-1&1&3\\-1.5&-0.5&0.5&1.5\\-0.75&-0.25&0.25&0.75\end{bmatrix}.$$
+
+例えばセルB・時刻$t_3$の成分は$X_{B,3}=22-21.5=0.5$ K。
+復元するときは同じ平均を戻し、$u_B(t_3)=21.5+0.5=22$ ℃となる。
 
 | セル | $t_1$ | $t_2$ | $t_3$ | $t_4$ |
 |---|---|---|---|---|

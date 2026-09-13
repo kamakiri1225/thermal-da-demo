@@ -89,7 +89,7 @@ def main():
     pl=pv.Plotter(off_screen=True,window_size=(950,860))
     pl.add_mesh(ug,color="lightsteelblue",opacity=0.5,show_edges=False)
     for j,xyz in enumerate(coords):
-        pl.add_mesh(pv.Sphere(radius=0.005,center=xyz),color="crimson")
+        pl.add_mesh(pv.Sphere(radius=0.0020,center=xyz),color="crimson")
         p=np.round(xyz*1000,0).astype(int)
         pl.add_point_labels([xyz+np.array([0,0,0.006*(1 if j%2 else -1)*(j//2+1)])],
             [f"P{j} ({p[0]},{p[1]},{p[2]})mm"],font_size=17,text_color="crimson",

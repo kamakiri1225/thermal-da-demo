@@ -1,0 +1,9 @@
+method: OI full-solver (OpenFOAM+FrontISTR, single background, fixed B)
+n_background_per_cycle: 1
+cycles: 10
+rmse_field_initial_K: 5.0
+rmse_field_final_K: 0.11086029268771558
+Q_final_W: 8.951779902142336
+Q_true_W: 15.0
+wall_seconds: 5622.565100431442
+wall_hours: 1.5618236390087339

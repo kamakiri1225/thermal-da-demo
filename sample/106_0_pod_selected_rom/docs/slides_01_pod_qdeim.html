@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POD と Q-DEIM ― 数式とアルゴリズム</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+
+  <style>
+    :root { --r-main-font-size: 30px; }
+    .reveal h1 { font-size: 1.7em; }
+    .reveal h2 { font-size: 1.15em; color: #1a4d7a; margin-bottom: 0.4em; }
+    .reveal h3 { font-size: 0.9em; color: #2b6cb0; }
+    .reveal section { text-align: left; }
+    .reveal .center { text-align: center; }
+    .reveal table { font-size: 0.62em; margin: 0.4em auto; }
+    .reveal table th { background: #eef3f8; }
+    .reveal pre { width: 100%; box-shadow: none; font-size: 0.52em; }
+    .reveal pre code { max-height: 460px; padding: 0.7em 1em; border-radius: 6px; }
+    .reveal img.fig { max-height: 430px; display: block; margin: 0.3em auto; background: #fff;
+                      border: 1px solid #e2e8f0; border-radius: 6px; }
+    .reveal .lead { color: #4a5568; font-size: 0.82em; }
+    .reveal .small { font-size: 0.7em; color: #4a5568; }
+    .reveal .box { background:#f5f8fc; border-left:5px solid #3182ce; padding:0.5em 0.9em;
+                   border-radius:0 6px 6px 0; font-size:0.82em; }
+    .reveal .key { background:#fffbea; border-left:5px solid #d69e2e; padding:0.5em 0.9em;
+                   border-radius:0 6px 6px 0; }
+    .reveal .cols { display:flex; gap:1.2em; align-items:center; }
+    .reveal .cols > div { flex:1; }
+    .reveal .pipeline { font-size:0.72em; line-height:1.5em; }
+    .reveal .pipeline b { color:#2b6cb0; }
+    .reveal .footer { position:fixed; bottom:8px; right:16px; font-size:13px; color:#a0aec0; }
+    .reveal .tag { display:inline-block; background:#3182ce; color:#fff; font-size:0.5em;
+                   padding:2px 10px; border-radius:12px; vertical-align:middle; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- 1. Title -->
+    <section class="center">
+      <h1>POD と Q-DEIM</h1>
+      <h2 style="text-align:center;border:none;">数式展開とプログラム手続き</h2>
+      <p class="lead">「代表点を勘で置く」のをやめ、<br>
+        <b>POD でモード抽出 → Q-DEIM で代表点を選定 → ROM を組んで校正</b><br>
+        するまでを数式とコードでたどる</p>
+      <p class="small">sample/106 ・ <code>select_points_qdeim.py</code> / <code>build_calibrate_rom.py</code> / <code>rom_general.py</code> 対応</p>
+    </section>
+
+    <!-- 2. Pipeline -->
+    <section>
+      <h2>全体の流れ</h2>
+      <div class="pipeline box">
+        OpenFOAMのCHT温度場（121枚 × 20,696セル）<br>
+        &nbsp;&nbsp;│ ① 平均を引いて <b>SVD</b><br>
+        &nbsp;&nbsp;▼ &nbsp; PODモード $U$（場の「型」）と エネルギー $\sigma^2$<br>
+        &nbsp;&nbsp;│ ② <b>Q-DEIM</b>（枢軸QR）で $r$ 点を選ぶ<br>
+        &nbsp;&nbsp;▼ &nbsp; 代表5点（データから最適に選定）<br>
+        &nbsp;&nbsp;│ ③ その5点をノードに一般化 <b>ROM</b> を組み、校正<br>
+        &nbsp;&nbsp;▼ &nbsp; 軽いROM（0→600sが数秒、残差 0.014 K）<br>
+        &nbsp;&nbsp;│ ④ 拡大状態 <b>EnKF</b> でデータ同化（別資料）<br>
+        &nbsp;&nbsp;▼ &nbsp; 温度場・$Q$・$h$ を少数観測から推定
+      </div>
+    </section>
+
+    <!-- 3. Snapshot matrix -->
+    <section>
+      <h2>1. POD ― スナップショット行列 <span class="tag">§1.1</span></h2>
+      <p class="lead">各時刻の全セル温度を縦ベクトルにし、時間方向に並べる（$N$=セル数, $m$=時刻数）:</p>
+      <p class="center">
+        $$X=\big[\,u(t_1)-\bar u,\ \dots,\ u(t_m)-\bar u\,\big]\in\mathbb{R}^{N\times m},\qquad
+        \bar u=\frac1m\sum_k u(t_k)$$
+      </p>
+      <ul class="small">
+        <li>$u(t_k)$ … その時刻の温度場まるごと（1列＝全セル分, 長さ $N$）</li>
+        <li>$\bar u$ … <b>平均場</b>。全体で1つの数ではなく、<b>セルごとの時間平均</b>を並べた縦ベクトル</li>
+        <li>$u(t_k)-\bar u$ … <b>同じセルどうしの引き算</b>（各セルから、そのセルの時間平均を引く）</li>
+      </ul>
+    </section>
+
+    <!-- 4. Concrete example -->
+    <section>
+      <h2>「平均場を場所ごとに引く」を具体例で <span class="tag">§1.1b</span></h2>
+      <div class="cols">
+        <div>
+          <p class="small center">生の温度（右端＝各行の時間平均 $\bar u_i$）</p>
+          <table>
+            <tr><th>セル</th><th>$t_1$</th><th>$t_2$</th><th>$t_3$</th><th>$t_4$</th><th>$\bar u_i$</th></tr>
+            <tr><td>A(ヒータ側)</td><td>20</td><td>22</td><td>24</td><td>26</td><td><b>23</b></td></tr>
+            <tr><td>B(中間)</td><td>20</td><td>21</td><td>22</td><td>23</td><td><b>21.5</b></td></tr>
+            <tr><td>C(反対側)</td><td>20</td><td>20.5</td><td>21</td><td>21.5</td><td><b>20.75</b></td></tr>
+          </table>
+        </div>
+        <div>
+          <p class="small center">各セルから自分の平均を引く ＝ $X$</p>
+          <table>
+            <tr><th>セル</th><th>$t_1$</th><th>$t_2$</th><th>$t_3$</th><th>$t_4$</th></tr>
+            <tr><td>A(−23)</td><td>−3</td><td>−1</td><td>+1</td><td>+3</td></tr>
+            <tr><td>B(−21.5)</td><td>−1.5</td><td>−0.5</td><td>+0.5</td><td>+1.5</td></tr>
+            <tr><td>C(−20.75)</td><td>−0.75</td><td>−0.25</td><td>+0.25</td><td>+0.75</td></tr>
+          </table>
+        </div>
+      </div>
+      <p class="key box small">各列は「その時刻に各場所が<b>自分の平均からどれだけ上下したか</b>」。POD はこの変動表から
+        <b>共通の型</b>を取り出す。コードでは <code>X - mean[:,None]</code>（<code>mean=X.mean(axis=1)</code>＝行ごと＝場所ごとの時間平均）。</p>
+    </section>
+
+    <!-- 5. Variational problem -->
+    <section>
+      <h2>最適な型を求める変分問題 <span class="tag">§1.2</span></h2>
+      <p class="lead">場を1つの型 $\varphi$（$\|\varphi\|=1$）で最もよく表す＝$\varphi$ 方向成分の二乗和を最大化:</p>
+      <p class="center">
+        $$\max_{\|\varphi\|=1}\ \sum_{k=1}^{m}\big|\varphi^\top (u(t_k)-\bar u)\big|^2
+        =\max_{\|\varphi\|=1}\ \varphi^\top \big(XX^\top\big)\varphi$$
+      </p>
+      <p class="lead">ラグランジュ未定乗数で微分してゼロ → <b>固有値問題</b>になる:</p>
+      <p class="center">$$ (XX^\top)\,\varphi=\lambda\,\varphi $$</p>
+      <ul class="small">
+        <li>固有ベクトル $\varphi_k$ ＝ <b>PODモード（型）</b></li>
+        <li>固有値 $\lambda_k=\sigma_k^2$ ＝ その型の<b>エネルギー</b>（大きいほど支配的）</li>
+        <li>$C=XX^\top$ ＝ 空間相関行列（$N\times N$）</li>
+      </ul>
+    </section>
+
+    <!-- 6. SVD equivalence -->
+    <section>
+      <h2>SVD との同値（実際の計算法） <span class="tag">§1.3</span></h2>
+      <p class="lead">$X$ を特異値分解 $X=U\Sigma V^\top$ すると</p>
+      <p class="center">$$XX^\top=U\Sigma V^\top V\Sigma U^\top=U\,\Sigma^2\,U^\top$$</p>
+      <p class="key box">
+        よって <b>$U$ の各列がそのまま $C=XX^\top$ の固有ベクトル＝PODモード</b>、$\sigma_k^2$ が固有値。<br>
+        巨大な $C$（$20696^2$）を作らず、<b>SVD 一発で POD が得られる</b>。
+      </p>
+    </section>
+
+    <!-- 7. Eckart-Young + snapshot method -->
+    <section>
+      <h2>なぜ「最良」で、なぜ「速い」か <span class="tag">§1.4–1.5</span></h2>
+      <h3>Eckart–Young の定理（最良性）</h3>
+      <p class="small">上位 $r$ モード打ち切り $X_r=\sum_{k=1}^r\sigma_k u_k v_k^\top$ は、
+        <b>ランク $r$ の全行列の中でフロベニウス誤差 $\|X-X_r\|_F$ を最小</b>にする。
+        ＝「POD は最もエネルギー効率の良いモード分解」。</p>
+      <h3>スナップショット法（高速化）</h3>
+      <p class="small">空間 $N \gg$ 時間 $m$（20696 ≫ 121）なので、小さい $m\times m$ の $X^\top X$ を解けばよい:</p>
+      <p class="center">$$X^\top X\,v_k=\sigma_k^2 v_k,\qquad \varphi_k=\frac{1}{\sigma_k}X v_k$$</p>
+      <p class="small">economy SVD（<code>full_matrices=False</code>）が実質これを行う。</p>
+    </section>
+
+    <!-- 8. POD implementation -->
+    <section>
+      <h2>2. POD の実装 <span class="tag">§2</span></h2>
+      <pre><code class="language-python" data-trim data-noescape>
+# ① スナップショット行列 X (N=20696セル × m=121時刻)
+ts, C, X = load_snapshots()          # OpenFOAMの各時刻 solid/T を読む
+
+# ② 平均を引く（変動成分だけ見る）
+mean = X.mean(axis=1)
+Xc   = X - mean[:, None]
+
+# ③ SVD（＝PODモード抽出）
+U, S, Vt = np.linalg.svd(Xc, full_matrices=False)   # U:(N,m) S:(m,) Vt:(m,m)
+
+# ④ 各モードのエネルギー比と累積
+energy = S**2 / (S**2).sum()
+cum    = np.cumsum(energy)           # 何モードで何%説明できるか
+      </code></pre>
+      <p class="key box small">本ケースの結果：<b>1モードで 91.8%、2モードで 99.9%</b>（＝場は実質2〜3自由度）。</p>
+    </section>
+
+    <!-- 9. Q-DEIM aim -->
+    <section>
+      <h2>3. Q-DEIM ― 狙い <span class="tag">§3.1</span></h2>
+      <p class="lead">$r$ 個の点 $P$ の温度だけから、PODモードで全場を復元したい（gappy 再構成 / DEIM 補間）:</p>
+      <p class="center">$$\hat u=\bar u+U_r\,a,\qquad a=\big(U_r[P,:]\big)^{+}\big(u[P]-\bar u[P]\big)$$</p>
+      <p class="small">$U_r[P,:]$ ＝「モード行列の、選んだ点の行だけ」を抜いた $r\times r$ 行列。</p>
+      <p class="key box">
+        復元が安定なのは $U_r[P,:]$ が<b>良条件（可逆・条件数が小さい）</b>なとき。<br>
+        だから「$U_r[P,:]$ の条件数を小さくする点集合 $P$」を選ぶ ＝ <b>Q-DEIM</b>。
+      </p>
+    </section>
+
+    <!-- 10. Q-DEIM algorithm -->
+    <section>
+      <h2>Q-DEIM ― 列枢軸QR <span class="tag">§3.2</span></h2>
+      <p class="lead small">モード行列の転置 $U_r^\top$ に<b>列枢軸付きQR分解</b>をかけ、最初の $r$ 個の枢軸列（＝行）を補間点にする:</p>
+      <pre><code class="language-python" data-trim data-noescape>
+from scipy.linalg import qr
+# 先頭 r モード U[:, :r] の転置に列枢軸QR
+_, _, piv = qr(U[:, :r].T, pivoting=True)   # piv: 重要な行(=点)の順
+points = list(piv[:r])                       # 最初の r 個が代表点(セル番号)
+coords = C[points]                           # その点の座標
+      </code></pre>
+      <p class="key box small">枢軸QRは「互いに最も独立な（張る空間が大きい）行を順に選ぶ」ので、
+        <b>モードを最もよく分離できる点＝場を最もよく覆う点</b>が出る。
+        これが「勘」ではなく<b>データから系統的に選ぶ</b>の中身。</p>
+    </section>
+
+    <!-- 11. Five points -->
+    <section>
+      <h2>選ばれた5点 <span class="tag">§3.3</span></h2>
+      <div class="cols">
+        <div>
+          <table>
+            <tr><th>点</th><th>座標(mm)</th><th>特徴</th></tr>
+            <tr><td>P0</td><td>(21, −2, 52)</td><td>内周・ヒータ側・中央</td></tr>
+            <tr><td>P1</td><td>(−14, 33, 52)</td><td>+Y側・中央</td></tr>
+            <tr><td>P2</td><td>(37, 7, 51)</td><td>外周・ヒータ最近傍</td></tr>
+            <tr><td>P3</td><td>(35, 1, 1)</td><td>外周・ヒータ側・<b>底面</b></td></tr>
+            <tr><td>P4</td><td>(−35, 1, 1)</td><td>外周・反対側・<b>底面</b></td></tr>
+          </table>
+          <p class="small">勘の流用点（すべて中央高さ）と違い、<b>底面(P3,P4)も選んで場を広くカバー</b>。</p>
+        </div>
+        <div class="center">
+          <img class="fig" src="img/qdeim_points.png" alt="Q-DEIM選定点">
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. ROM model -->
+    <section>
+      <h2>4. ROM ― 一般化集中定数モデル <span class="tag">§4.1</span></h2>
+      <p class="lead">任意配置の $n$ 点をノードとし、全点対をコンダクタンスで結ぶ:</p>
+      <p class="center">$$C_i\frac{dT_i}{dt}=\sum_{j\ne i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\text{air})$$</p>
+      <ul class="small">
+        <li>$K_{ij}$：ノード間コンダクタンス [W/K]（対称・全点対、$n{=}5$ なら 10本）</li>
+        <li>$q_i$：ヒータ発熱（ヒータ最近傍ノード P2 に投入）</li>
+        <li>$h$：放熱係数 [W/K]</li>
+      </ul>
+      <p class="small">行列形 $\dot{\mathbf T}=M\mathbf T+\mathbf b$ になり、RK4 で一括前進積分できる。</p>
+    </section>
+
+    <!-- 13. Calibration -->
+    <section>
+      <h2>ROM ― 校正（$C,K,h$ を実データに合わせる） <span class="tag">§4.2</span></h2>
+      <pre><code class="language-python" data-trim data-noescape>
+def resid(vec):                       # vec = [C(5), K上三角(10), h(1)] = 16未知
+    C = vec[:5]; K = tri_to_matrix(vec[5:15], 5); h = vec[15]
+    Ymodel = integrate_rom(C, K, h)   # ROMを前進積分して5点温度履歴を作る
+    return (Ymodel - Yobs).ravel()    # OpenFOAMとの差
+
+sol = least_squares(resid, x0, bounds=(lb, ub))
+      </code></pre>
+      <p class="small">選んだ5点の <b>OpenFOAM温度履歴</b>を目標に、$C[5],K[10],h$ を最小二乗で同定。</p>
+    </section>
+
+    <!-- 14. Result -->
+    <section>
+      <h2>ROM ― 結果（検証） <span class="tag">§4.3</span></h2>
+      <div class="cols">
+        <div>
+          <ul class="small">
+            <li><b>当てはめ残差 RMSE = 0.014 K</b>（最大 0.051 K）<br>＝ OpenFOAM をほぼ完全に再現</li>
+            <li>全熱容量 $\sum C_i=1211$ J/K は<br>鋼2.49 kg の $\rho c_p V\approx1195$ J/K とほぼ一致</li>
+            <li>数字合わせでなく物理的にも妥当</li>
+          </ul>
+        </div>
+        <div class="center">
+          <img class="fig" src="img/rom_calib_fit.png" alt="校正結果">
+          <p class="small">実線=OpenFOAM、破線=POD選定5点ROM。ほぼ重なる。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15. Summary -->
+    <section>
+      <h2>まとめ ― このフォルダの主張 <span class="tag">§5</span></h2>
+      <ol class="lead">
+        <li><b>代表点は勘でなく POD＋Q-DEIM でデータから選ぶ</b>。<br>
+          <span class="small">Q-DEIM＝モード行列に列枢軸QRをかけ、場を最もよく覆う点を選ぶ。</span></li>
+        <li>選んだ点で一般化ROMを組み校正すると、<b>0.014 K で OpenFOAM を再現</b>。</li>
+        <li>この上で拡大状態 EnKF により温度場・$Q$・$h$ を推定する。<br>
+          <span class="small">（→ <code>02_full_story.md</code>）</span></li>
+      </ol>
+      <p class="small">再現: <code>run/select_points_qdeim.py</code> → <code>run/build_calibrate_rom.py</code></p>
+    </section>
+
+  </div>
+</div>
+<div class="footer">POD × Q-DEIM ― sample/106</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    width: 1280,
+    height: 800,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    slideNumber: 'c/t',
+    plugins: [ RevealHighlight, RevealMath.MathJax3, RevealNotes ],
+    math: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
+    }
+  });
+</script>
+</body>
+</html>

@@ -57,7 +57,7 @@ def main():
         pl.add_mesh(g,scalars="s",cmap="turbo",n_colors=12,
                     scalar_bar_args={"title":"dT/dQ [K/(発熱倍率)]","title_font_size":16,"label_font_size":13})
         for i in range(NPT):
-            pl.add_mesh(pv.Sphere(radius=0.004,center=xyz[i]),color="white")
+            pl.add_mesh(pv.Sphere(radius=0.0018,center=xyz[i]),color="white")
         pl.camera_position=cam; pl.set_background("white")
         p=os.path.join(TMP,lab[:3]+".png"); pl.screenshot(p); pl.close(); shots.append((p,lab))
     fig,axes=plt.subplots(1,2,figsize=(13,6.4))

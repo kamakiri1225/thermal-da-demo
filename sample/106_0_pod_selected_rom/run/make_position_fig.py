@@ -54,15 +54,15 @@ def main():
     for i in range(NPT):
         frac=(sens[i]-smin)/(smax-smin+1e-9)
         col=plt.cm.viridis(frac)[:3]
-        pl.add_mesh(pv.Sphere(radius=0.006,center=xyz[i]),color=col)
+        pl.add_mesh(pv.Sphere(radius=0.0022,center=xyz[i]),color=col)
         role=" <- HIGH (temp sensor)" if i==hi else (" <- LOW (avoid)" if i==lo else "")
         dz=0.010 if i%2 else -0.010
         pl.add_point_labels([xyz[i]+np.array([0,0,dz])],
             [f"P{i} dT/dQ={sens[i]:.1f}{role}"],font_size=15,text_color="black",
             shape=None,always_visible=True)
     # 変位観測点 A/O（赤・青の別マーカー、ラベルはASCII）
-    pl.add_mesh(pv.Sphere(radius=0.006,center=A_XYZ),color="red")
-    pl.add_mesh(pv.Sphere(radius=0.006,center=O_XYZ),color="blue")
+    pl.add_mesh(pv.Sphere(radius=0.0022,center=A_XYZ),color="red")
+    pl.add_mesh(pv.Sphere(radius=0.0022,center=O_XYZ),color="blue")
     pl.add_point_labels([A_XYZ+np.array([0,0,0.008])],["Disp A (+X top)"],font_size=16,text_color="red",shape=None,always_visible=True)
     pl.add_point_labels([O_XYZ+np.array([0,0,0.018])],["Disp O (-X top)"],font_size=16,text_color="blue",shape=None,always_visible=True)
     pl.camera_position=[(0.26,-0.24,0.22),(0,0,0.05),(0,0,1)]; pl.set_background("white")

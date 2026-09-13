@@ -45,8 +45,8 @@ def main():
         pl=pv.Plotter(off_screen=True,window_size=(620,660))
         pl.add_mesh(g,scalars="row",cmap="turbo",clim=[0,vmax],n_colors=10,nan_color="lightgray",
                     scalar_bar_args={"title":"W row-sens [um/K]","title_font_size":15,"label_font_size":12})
-        pl.add_mesh(pv.Sphere(radius=0.005,center=A_XYZ),color="red")
-        pl.add_mesh(pv.Sphere(radius=0.005,center=O_XYZ),color="blue")
+        pl.add_mesh(pv.Sphere(radius=0.0020,center=A_XYZ),color="red")
+        pl.add_mesh(pv.Sphere(radius=0.0020,center=O_XYZ),color="blue")
         pl.camera_position=cam; pl.set_background("white")
         p=os.path.join(TMP,lab[:3]+".png"); pl.screenshot(p); pl.close(); shots.append((p,lab))
     fig,axes=plt.subplots(1,2,figsize=(13,6.6))

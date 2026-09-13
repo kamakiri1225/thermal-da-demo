@@ -72,13 +72,35 @@ def main():
     for _,ns in mesh['elements']:conn.extend([8]+[index[n] for n in ns])
     grid=pv.UnstructuredGrid(np.array(conn),np.full(len(mesh['elements']),12,np.uint8),coords)
     clim=(float(min(ta.min(),tt.min())-273.15),float(max(ta.max(),tt.max())-273.15))
+    # 実CHT(truth)の流体流速をグリフ表示するためのOpenFOAMリーダ（解析ROMには流体が無い）
+    foam=src/'truth'/'truth.foam';foam.touch()
+    ofr=pv.POpenFOAMReader(str(foam))
+    def velocity_glyph(t):
+        """truthの流体U場を y=0 断面でグリフ化（円柱近傍のみ）。流れが無ければNone。"""
+        try:
+            ofr.set_active_time_value(float(t))
+            fl=ofr.read()['fluid']['internalMesh']
+            near_box=fl.clip_box((-0.07,0.07,-0.07,0.07,-0.005,0.16),invert=False)
+            sl=near_box.slice(normal=(0,1,0),origin=(0,0,0.05)).cell_data_to_point_data()
+            if sl.n_points==0:return None
+            sl.set_active_vectors('U')
+            if float(np.linalg.norm(sl['U'],axis=1).max())<1e-4:return None
+            g=sl.glyph(orient='U',scale='U',factor=0.18,tolerance=0.035)
+            return g if g.n_points>0 else None
+        except Exception as e:
+            print('glyph skip t=',t,repr(e),flush=True);return None
     frames=[]
     for k,t in enumerate(times):
         pl=pv.Plotter(shape=(1,2),off_screen=True,window_size=(1000,600))
         for j,temps in enumerate([ta[k],tt[k]]):
             pl.subplot(0,j);g=grid.copy();g['T']=temps-273.15
             pl.add_mesh(g,scalars='T',cmap='turbo',clim=clim,n_colors=16,scalar_bar_args={'title':'Temperature [C]'})
-            pl.add_text(('Analysis mean' if j==0 else 'Truth')+f' / t={t}s',font_size=13)
+            pl.add_text(('Analysis mean (solid)' if j==0 else 'Truth + velocity')+f' / t={t}s',font_size=12)
+            if j==1:
+                gl=velocity_glyph(t)
+                if gl is not None:pl.add_mesh(gl,color='black')
+            pl.add_text('solid temperature only (ROM has no fluid)' if j==0
+                        else 'black arrows = fluid velocity (real CHT)',position='lower_left',font_size=9,color='gray')
             pl.camera_position=[(.24,-.22,.20),(0,0,.05),(0,0,1)];pl.set_background('white')
         frames.append(Image.fromarray(pl.screenshot()));pl.close()
     frames[0].save(img/'fullsolver_temperature_comparison.gif',save_all=True,append_images=frames[1:],duration=600,loop=0)
