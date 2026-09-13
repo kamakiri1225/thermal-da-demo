@@ -9,28 +9,34 @@
   },
   {
     "run": "run2（σQ=2 W）",
-    "status": "540秒までの途中結果",
-    "latest_time_s": 540.0,
-    "Q_W": 9.45,
-    "absolute_relative_Q_error_pct": 37.0,
-    "temperature_rmse_K": 0.035
+    "status": "600秒完了",
+    "latest_time_s": 600.0,
+    "Q_W": 8.951779902142336,
+    "absolute_relative_Q_error_pct": 40.321467319051095,
+    "temperature_rmse_K": 0.11086029268771558
   },
   {
     "run": "同化なし（Q固定22 W）",
-    "status": "360秒までの途中結果",
-    "latest_time_s": 360.0,
+    "status": "600秒完了",
+    "latest_time_s": 600.0,
     "Q_W": 22.0,
     "absolute_relative_Q_error_pct": 46.66666666666666,
-    "temperature_rmse_K": 6.467
+    "temperature_rmse_K": 6.175652342068954
   },
   {
     "run": "σQ=0.5 W",
-    "status": "解析更新の記録なし",
-    "latest_time_s": null
+    "status": "600秒完了",
+    "latest_time_s": 600.0,
+    "Q_W": 8.817060996467635,
+    "absolute_relative_Q_error_pct": 41.219593356882434,
+    "temperature_rmse_K": 0.09016129359971356
   },
   {
     "run": "σQ=50 W",
-    "status": "解析更新の記録なし",
-    "latest_time_s": null
+    "status": "600秒完了",
+    "latest_time_s": 600.0,
+    "Q_W": 8.958349546214889,
+    "absolute_relative_Q_error_pct": 40.27766969190074,
+    "temperature_rmse_K": 0.11255451416221347
   }
 ]

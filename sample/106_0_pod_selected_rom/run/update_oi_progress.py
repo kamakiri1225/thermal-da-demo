@@ -42,7 +42,7 @@ def main():
         ax.axvspan(0,300,color='orange',alpha=.07);ax.set_xlabel('時刻 [s]');ax.grid(alpha=.3);ax.legend(fontsize=8)
     fig.suptitle('実ソルバOI：温度場とQの推定は別々に評価する\n'
                  'OpenFOAM＋FrontISTR／温度hot・cold＋上面2領域Uz／60秒ごと更新／hは推定対象外\n'
-                 '途中結果は記録済み時刻で止める。300秒以降の実ヒータ入力は0 W。',fontsize=11)
+                 '5構成すべて600秒完走。300秒以降の実ヒータ入力は0 W（冷却）。',fontsize=11)
     fig.tight_layout(rect=[0,0,1,.89]);fig.savefig(ROOT/'docs/img/oi_parameter_progress.png',dpi=140);plt.close(fig)
     (ROOT/'results/oi_parameter_progress.json').write_text(json.dumps(entries,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(entries,ensure_ascii=False,indent=2))
