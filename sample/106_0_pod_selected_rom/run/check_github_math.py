@@ -60,11 +60,16 @@ def lint(path: str):
     problems=[]
     text=open(path, encoding="utf-8").read()
     lines=text.split("\n")
-    in_fence=False; dollar_total=0
+    in_fence=False; in_details=False; dollar_total=0
     for i,ln in enumerate(lines,1):
         s=ln.strip()
         if s.startswith("```"): in_fence=not in_fence; continue
         if in_fence: continue
+        if "<details>" in s: in_details=True
+        if "</details>" in s: in_details=False
+        # R12: <details>内の複数行$$ブロックはGitHubで認識されない→単一行 $$…$$ にする
+        if in_details and s=="$$":
+            problems.append((i,"R12 <details>内の複数行$$（単一行$$…$$にする）",s))
         # インラインコード `...` を同じ長さの空白でマスク（コード内の $ は数式ではない）
         ln=re.sub(r'`[^`\n]*`', lambda m: ' '*len(m.group()), ln)
         dollar_total+=len(re.findall(r'(?<!\\)\$', ln))

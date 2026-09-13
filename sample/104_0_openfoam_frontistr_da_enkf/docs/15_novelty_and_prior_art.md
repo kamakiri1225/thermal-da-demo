@@ -178,49 +178,25 @@ $W$ の行（＝温度場→変位のヤコビアン）を用いて逆熱同化�
 
 本調査では、提案法を次の構成要素に分解して「単独既出」と「組合せ既出」を区別しました。
 
-$$
-\underbrace{
-(T_k,Q_k,h_k)\xrightarrow{\mathrm{CHT/CFD}}
-T_{k+1}
-}_{\text{thermal-fluid model}}
-\xrightarrow{\text{thermal FEM / mapping}}
-\underbrace{
-u_{k+1}
-}_{\text{thermal disp}}
-$$
+$$\underbrace{ (T_k,Q_k,h_k)\xrightarrow{\mathrm{CHT/CFD}} T_{k+1} }_{\text{thermal-fluid model}} \xrightarrow{\text{thermal FEM / mapping}} \underbrace{ u_{k+1} }_{\text{thermal disp}}$$
 
 に対して、
 
-$$
-z_k=
-\begin{bmatrix}
-T_{\mathrm{sensor}}\\
-u_{\mathrm{sensor}}
-\end{bmatrix}
-+\varepsilon_k
-$$
+$$z_k= \begin{bmatrix} T_{\mathrm{sensor}}\\ u_{\mathrm{sensor}} \end{bmatrix} +\varepsilon_k$$
 
 を EnKF で同化し、
 
-$$
-x_k=
-[T_k,\;Q_k,\;h_k]^\mathsf T
-$$
+$$x_k= [T_k,\;Q_k,\;h_k]^\mathsf T$$
 
 の joint state–parameter estimation を行う、というものです。
 
 ここで一点、論文上の表現を修正した方が安全です。線形小変形熱弾性を仮定する通常の構造FEMなら、
 
-$$
-K u = H\,\Delta T,\qquad
-u=K^{-1}H\,\Delta T=W\,\Delta T
-$$
+$$K u = H\,\Delta T,\qquad u=K^{-1}H\,\Delta T=W\,\Delta T$$
 
 なので、**温度場 $T\rightarrow u$ の構造FEM部分そのものは線形観測演算子**です。実際、[Lang et al. 2026](https://doi.org/10.1007/978-3-032-01194-7_25) も
 
-$$
-y=C_{\rm mech}K^{-1}K_{\rm th}x
-$$
+$$y=C_{\rm mech}K^{-1}K_{\rm th}x$$
 
 と書いています。非線形性があるのは主として $h,Q$ を含む CHT の前進写像、あるいは温度依存物性・接触・幾何学的非線形性を導入した場合です。したがって投稿論文では「FEMを非線形観測演算子として組み込む」よりも、**“the composite CHT–thermoelastic observation map is nonlinear with respect to the augmented thermal parameters”** と書く方が正確です。
 
@@ -266,25 +242,17 @@ $$
 
 [Ansari et al. 2025](https://doi.org/10.1016/j.cma.2025.117818) は、提案法に対して最も正面から比較すべき論文です。同論文は有限要素モデル上で、計算変位／ひずみと計測値との差を目的関数とし、随伴方程式で温度場に対する勾配を計算して温度分布を復元します。Barzilai–Borwein 型の最急降下更新や正則化的なフィルタリングも使われています。すなわち、
 
-$$
-u_{\rm meas}\rightarrow T(x)
-$$
+$$u_{\rm meas}\rightarrow T(x)$$
 
 は明確に既出です。
 
 提案法との差は、
 
-$$
-\text{Ansari:}\quad
-\min_T J(u(T),u_{\rm obs})
-$$
+$$\text{Ansari:}\quad \min_T J(u(T),u_{\rm obs})$$
 
 という**決定論的・variational/adjoint inverse problem**であるのに対し、
 
-$$
-\text{proposal:}\quad
-p(T,Q,h\mid T_{\rm obs},u_{\rm obs})
-$$
+$$\text{proposal:}\quad p(T,Q,h\mid T_{\rm obs},u_{\rm obs})$$
 
 を逐次近似する**確率的・ensemble-based joint state–parameter estimation**であることです。
 
@@ -300,25 +268,19 @@ $$
 
 第一に、2026年法は通常の stochastic EnKF ではなく、
 
-$$
-\mathrm{KF}_1,\mathrm{KF}_2,\ldots,\mathrm{KF}_{500}
-$$
+$$\mathrm{KF}_1,\mathrm{KF}_2,\ldots,\mathrm{KF}_{500}$$
 
 という multiple-model KF ensemble です。各ROMは線形状態空間式を持ち、各KFが個別に温度状態を更新し、最後にモデル確率で出力を合成します。
 
 第二に、同化観測は選択された温度センサです。論文には5本の変位センサも存在しますが、熱状態の Kalman update に使われる観測式は
 
-$$
-z_{\rm obs}=C_{\rm obs}x+w
-$$
+$$z_{\rm obs}=C_{\rm obs}x+w$$
 
 という温度観測であり、熱変位は更新後の熱状態から mechanical coupling を通じて計算・評価されています。したがって、**変位を innovation に入れて thermal state / parameter を戻す閉ループ**ではありません。
 
 第三に、 $h$ の不確かさは500個の事前生成モデル間の離散的な model uncertainty として扱われ、 $h_k$ 自体を augmented continuous state として
 
-$$
-h_k^a=h_k^f+K_h(y-Hx)
-$$
+$$h_k^a=h_k^f+K_h(y-Hx)$$
 
 のように逐次修正する構造ではありません。熱入力も既知の heating-pad input を与え、未知分は process noise で吸収する考え方が記述されています。
 
@@ -381,9 +343,7 @@ Mayr et al. の
 
 さらに [Lang et al. 2026](https://doi.org/10.1007/978-3-032-01194-7_25) の式
 
-$$
-y=C_{\rm mech}K^{-1}K_{\rm th}x
-$$
+$$y=C_{\rm mech}K^{-1}K_{\rm th}x$$
 
 も実質的には同じ熱弾性伝達演算子です。
 
@@ -397,24 +357,15 @@ $$W_{ij}=\frac{\partial u_i}{\partial T_j}$$
 
 ただし、単に
 
-$$
-i^*=\arg\max_i \|W_{i,:}\|_2
-$$
+$$i^*=\arg\max_i \|W_{i,:}\|_2$$
 
 とするだけでは、査読者から「単に変位振幅が大きい場所を選んでいるだけ」と批判される可能性があります。より強い論文にするなら、ノイズ共分散 $R_u$ と augmented parameters を考慮して、
 
-$$
-J_p=
-\frac{\partial u}{\partial p},
-\qquad
-p=[Q,h,\ldots]
-$$
+$$J_p= \frac{\partial u}{\partial p}, \qquad p=[Q,h,\ldots]$$
 
 を構成し、
 
-$$
-F=J_p^\mathsf{T}R_u^{-1}J_p
-$$
+$$F=J_p^\mathsf{T}R_u^{-1}J_p$$
 
 の Fisher information、D-optimality $\log\det F$ 、A-optimality $\mathrm{tr}(F^{-1})$ 、あるいは posterior covariance reduction を選点基準にした方が、「推定したいのは温度ではなく $Q,h$ も含む」という提案法との整合性が高くなります。一般構造デジタルツインでは2026年に Fisher-information-based sensor placement がすでに報告されているため、この方向へ拡張する場合も「FIMそのもの」は新規とはせず、**thermoelastic augmented-state inverse problem への適用**を差分とするべきです。
 
@@ -569,39 +520,21 @@ $$
 
 したがって、少なくとも
 
-$$
-J=
-\frac{\partial
-[T_{\rm obs},u_{\rm obs}]
-}{
-\partial[Q,h]
-}
-$$
+$$J= \frac{\partial [T_{\rm obs},u_{\rm obs}] }{ \partial[Q,h] }$$
 
 の特異値、condition number、posterior correlation
 
-$$
-\rho_{Qh}
-=
-\frac{P_{Qh}}
-{\sqrt{P_{QQ}P_{hh}}}
-$$
+$$\rho_{Qh} = \frac{P_{Qh}} {\sqrt{P_{QQ}P_{hh}}}$$
 
 を示すべきです。回転数ステップ、冷却流量変更、加熱・冷却過程など異なる励起を与えて初めて $Q$ と $h$ を分離できる可能性があります。この identifiability analysis がないと、「二つのパラメータを都合よく process noise で調整しているだけ」と評価される危険があります。
 
 次に、**変位計測が本当に新しい情報を足すのか**を定量化する必要があります。最低でも、
 
-$$
-\text{temperature only}
-$$
+$$\text{temperature only}$$
 
-$$
-\text{displacement only}
-$$
+$$\text{displacement only}$$
 
-$$
-\text{temperature + displacement}
-$$
+$$\text{temperature + displacement}$$
 
 の三条件で、未観測温度場、 $Q$ 、 $h$ 、未観測変位のRMSEと posterior uncertainty を比較する必要があります。Ansari et al. が変位／ひずみから温度を復元できることを既に示している以上、本論文では「できる」ではなく、**温度計測に変位計測を追加した場合にどの不可観測モードが改善されるか**を示す方がはるかに強い寄与になります。
 
@@ -611,15 +544,11 @@ $$
 
 この点はむしろ、
 
-$$
-\text{high-fidelity CHT EnKF}
-$$
+$$\text{high-fidelity CHT EnKF}$$
 
 を offline/reference estimator と位置づけ、将来
 
-$$
-\text{ROM / POD / operator surrogate / multifidelity EnKF}
-$$
+$$\text{ROM / POD / operator surrogate / multifidelity EnKF}$$
 
 へ移行する構成なら問題になりにくくなります。最初の論文で「リアルタイム」を過度に主張しない方が安全です。
 
@@ -629,11 +558,7 @@ $$
 
 理想的には、
 
-$$
-\text{truth/experiment}
-\neq
-\text{assimilation model}
-$$
+$$\text{truth/experiment} \neq \text{assimilation model}$$
 
 とし、少なくとも熱源分布、接触熱抵抗、局所 $h$ 、材料物性の一部に model discrepancy を入れるべきです。
 
@@ -643,21 +568,13 @@ $$
 
 そのため最終モデルは、少なくとも
 
-$$
-x=[T,Q,h,\alpha,\text{selected structural parameters}]
-$$
+$$x=[T,Q,h,\alpha,\text{selected structural parameters}]$$
 
 まで拡張する必要があるか、逆に $E,\alpha,K$ の uncertainty が $Q,h$ 推定に与える bias を sensitivity test で示すべきです。
 
 そして最後に、比較法が重要です。最低でも
 
-$$
-\text{temperature-only KF/EnKF},
-\quad
-\text{adjoint/LM inverse},
-\quad
-\text{mixed-observation EnKF}
-$$
+$$\text{temperature-only KF/EnKF}, \quad \text{adjoint/LM inverse}, \quad \text{mixed-observation EnKF}$$
 
 を比較すると、提案法の位置づけが非常に明確になります。Ansari型の決定論的随伴法は大規模状態に対して計算効率が高く、EnKFには posterior uncertainty、オンライン逐次更新、微分不要という利点がある一方、ensemble cost と sampling error があります。Dileep/Tan型の deterministic inverse methods と、Zhang/Bakhshaei型の ensemble thermal estimators のちょうど中間に本研究を置くのが、文献上最も自然な位置づけです。
 
