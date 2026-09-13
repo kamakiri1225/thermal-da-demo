@@ -13,12 +13,12 @@ OpenFOAM(chtMultiRegionFoam)は、固体内の温度 $T(\mathbf{x},t)$ につい
 
 $$\rho c_p \frac{\partial T}{\partial t} = \nabla\!\cdot\!\left(k\,\nabla T\right) + \dot{q}$$
 
-- $\rho$: 密度 [kg/m³]、$c_p$: 比熱 [J/(kg·K)]、$k$: 熱伝導率 [W/(m·K)]
+- $\rho$: 密度 [kg/m³]、 $c_p$: 比熱 [J/(kg·K)]、 $k$: 熱伝導率 [W/(m·K)]
 - $\dot q$: 単位体積あたり発熱 [W/m³]
 
-境界条件は、ヒータ面で熱流束 $q_\mathrm{heater}$、その他の面で周囲空気への放熱
+境界条件は、ヒータ面で熱流束 $q_\mathrm{heater}$ 、その他の面で周囲空気への放熱
 
-$$-k\,\nabla T\cdot \mathbf{n} = h_s\left(T - T_\mathrm{air}\right) \quad(\text{放熱面})$$
+$$-k\,\nabla T\cdot \mathbf{n} = h_s\left(T - T_\mathrm{air}\right) \quad(\text{heat-loss face})$$
 
 これを約2万個の有限体積セルで離散化するので、**2万本の連立ODE**になる。正確だが重い。
 
@@ -30,20 +30,20 @@ $$-k\,\nabla T\cdot \mathbf{n} = h_s\left(T - T_\mathrm{air}\right) \quad(\text{
 
 $$\int_{V_i} \rho c_p \frac{\partial T}{\partial t}\,dV
 = \int_{V_i} \nabla\!\cdot\!(k\nabla T)\,dV + \int_{V_i}\dot q\,dV
-= \underbrace{\sum_{f\in\partial V_i}\!\! \big(k\nabla T\cdot\mathbf{n}\big)_f A_f}_{\text{面を通る熱流}} + \dot Q_i$$
+= \underbrace{\sum_{f\in\partial V_i}\!\! \big(k\nabla T\cdot\mathbf{n}\big)_f A_f}_{\text{flux through faces}} + \dot Q_i$$
 
-セル平均温度 $T_i \equiv \frac{1}{V_i}\int_{V_i}T\,dV$ を使うと、左辺は $\rho c_p V_i \dfrac{dT_i}{dt}$。
+セル平均温度 $T_i \equiv \frac{1}{V_i}\int_{V_i}T\,dV$ を使うと、左辺は $\rho c_p V_i \dfrac{dT_i}{dt}$ 。
 隣接セル間の熱流を**温度差に比例**すると近似(これが離散化の本質):
 
 $$\big(k\nabla T\cdot \mathbf n\big)_f A_f \;\approx\; \frac{k A_f}{d_{ij}}\,(T_j - T_i) \;\equiv\; K_{ij}\,(T_j - T_i)$$
 
 ここで $K_{ij} = \dfrac{k A_f}{d_{ij}}$ は面 $f$ の**熱コンダクタンス** [W/K]
-($A_f$: 面積、$d_{ij}$: セル中心間距離)。まとめると、**任意の粒度**で同じ形の式が立つ:
+($A_f$: 面積、 $d_{ij}$: セル中心間距離)。まとめると、**任意の粒度**で同じ形の式が立つ:
 
 $$\boxed{\,C_i \frac{dT_i}{dt} = \sum_{j} K_{ij}\,(T_j - T_i) - h_i\,(T_i - T_\mathrm{air}) + \dot Q_i\,}\tag{★}$$
 
 - $C_i = \rho c_p V_i$: ノード $i$ の**熱容量** [J/K]
-- $K_{ij}$: ノード間コンダクタンス [W/K]、$h_i$: 放熱コンダクタンス [W/K]
+- $K_{ij}$: ノード間コンダクタンス [W/K]、 $h_i$: 放熱コンダクタンス [W/K]
 - $\dot Q_i$: ノードへの発熱 [W]
 
 **縮約モデル(ROM)とは、この式(★)をセル2万個ではなく、代表5ノードで書いたもの**。
@@ -88,7 +88,7 @@ A_{ii} = -\frac{1}{C_i}\Big(\sum_{j} K_{ij} + h\Big)$$
 
 定数項は放熱とヒータ:
 
-$$\mathbf b(t) = \underbrace{\frac{h\,T_\mathrm{air}}{C_i}}_{\text{放熱}} + \underbrace{\frac{\dot Q_i(t)}{C_i}}_{\text{ヒータは hot ノードのみ}}$$
+$$\mathbf b(t) = \underbrace{\frac{h\,T_\mathrm{air}}{C_i}}_{\text{heat loss}} + \underbrace{\frac{\dot Q_i(t)}{C_i}}_{\text{heater at hot node}}$$
 
 $A$ は(対角優位で固有値が負の)安定な行列。ヒータ一定区間では $\mathbf b$ が定数なので
 厳密解は
@@ -96,7 +96,7 @@ $A$ は(対角優位で固有値が負の)安定な行列。ヒータ一定区�
 $$\mathbf T(t) = e^{A(t-t_0)}\mathbf T(t_0) + A^{-1}\!\left(e^{A(t-t_0)}-I\right)\mathbf b$$
 
 実装では一般性のため RK4 で数値積分する(`integrate_single` / `integrate_ensemble`)。
-コード対応: `system_matrix()` が $A,\ \mathbf b_\mathrm{air}$、`heater_input()` が $\dot Q_i/C_i$。
+コード対応: `system_matrix()` が $A,\ \mathbf b_\mathrm{air}$ 、`heater_input()` が $\dot Q_i/C_i$ 。
 
 ---
 
@@ -109,7 +109,7 @@ $$\hat{\boldsymbol\theta}
 = \arg\min_{\boldsymbol\theta}\ \sum_{n=1}^{N_t}\ \sum_{p\in\{\mathrm{hot,mid,cold,top}\}}
 \Big( T_p^\mathrm{ROM}(t_n;\boldsymbol\theta) - T_p^\mathrm{OF}(t_n) \Big)^2$$
 
-- $T_p^\mathrm{OF}(t_n)$: OpenFOAM の観測4点の温度(`temperature_history.csv`、$N_t=121$ 時刻)
+- $T_p^\mathrm{OF}(t_n)$: OpenFOAM の観測4点の温度(`temperature_history.csv`、 $N_t=121$ 時刻)
 - $T_p^\mathrm{ROM}(t_n;\boldsymbol\theta)$: 式(★)を真のヒータ($q\!=\!1$)で積分した予測
 - core は測っていない潜在変数なので目的関数に入れない(残り4点で拘束)
 
@@ -127,8 +127,8 @@ $$h = 0.0236\ \mathrm{W/K}$$
 
 $$\mathrm{RMSE} = \sqrt{\frac{1}{484}\sum_{n,p}\big(T^\mathrm{ROM}-T^\mathrm{OF}\big)^2} = 0.0119\ \mathrm{K}$$
 
-**物理的な妥当性チェック**: 全熱容量 $\sum_i C_i \approx 1191\ \mathrm{J/K}$。
-試験体は鋼 2.49 kg、$c_p\approx480\ \mathrm{J/(kg\,K)}$ なので
+**物理的な妥当性チェック**: 全熱容量 $\sum_i C_i \approx 1191\ \mathrm{J/K}$ 。
+試験体は鋼 2.49 kg、 $c_p\approx480\ \mathrm{J/(kg\,K)}$ なので
 $\rho c_p V \approx 2.49\times480 \approx 1195\ \mathrm{J/K}$ ― ほぼ一致する。
 つまり校正は数字合わせでなく、**物理的に正しい熱容量**を復元している。
 また $h$ が非常に小さい($0.024\ \mathrm{W/K}$)ことは、600秒では放熱が遅く、
@@ -154,7 +154,7 @@ $$T(\mathbf x,t) = T_\infty(\mathbf x) + \sum_{m=1}^{\infty} a_m\,\phi_m(\mathbf
 ## 7. データ同化での使われ方
 
 校正で $\{C, K, h\}$ は既知として固定し、**データ同化で推定するのは
-状態 $\mathbf T$ と、未知パラメータ $q$(ヒータ倍率)・$h$(放熱)** だけにする
+状態 $\mathbf T$ と、未知パラメータ $q$(ヒータ倍率)・ $h$(放熱)** だけにする
 (拡大状態、`02_beginner_guide.md` §8)。ROM は式(★)を数千ステップ積分しても
 一瞬なので、アンサンブル60本×30サイクルでも数秒で終わる。
 

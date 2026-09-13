@@ -65,6 +65,8 @@ def lint(path: str):
         s=ln.strip()
         if s.startswith("```"): in_fence=not in_fence; continue
         if in_fence: continue
+        # インラインコード `...` を同じ長さの空白でマスク（コード内の $ は数式ではない）
+        ln=re.sub(r'`[^`\n]*`', lambda m: ' '*len(m.group()), ln)
         dollar_total+=len(re.findall(r'(?<!\\)\$', ln))
         if s.startswith(">") and "$$" in ln:
             problems.append((i,"R2 引用ブロック内の$$表示数式",s[:50]))

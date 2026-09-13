@@ -1,4 +1,100 @@
-# EnKF–CHT–FEM統合による熱変形逆解析の新規性・先行研究位置づけ
+# 熱変形データ同化研究の貢献・先行研究・次の検証
+
+## 再評価：新規性がないと結論した調査ではない
+
+**オープンCAE学会で発表する価値のある研究である、というのが現時点の評価である。**
+既知のEnKF、POD、熱弾性式を使うことと、研究として新しい知見・実装上の貢献がないことは同義ではない。
+今回の強みは、OpenFOAM–FrontISTRの実ソルバ同化からROM化、温度・変位観測の比較まで、
+実行可能な計算手順と数値結果でつないだ点にある。「新しいのは組み合わせ方だけ」という旧記述は撤回する。
+一方、文献との同条件比較は行っていないので、既存法より精度・速度が優れるとまでは結論しない。
+
+### 全論文を読んだのか：調査の到達範囲
+
+**全掲載論文を全文精読したとは言えない。** 旧版自身に「要旨・書誌情報に基づく」と記載されており、
+検索式、検索件数、全文取得状況、除外理由、本文の根拠ページを揃えた網羅調査の記録もない。
+旧版の「deep research」という表題だけで全文精読・網羅性を保証することはできない。
+このため「世界初」「既に全部行われている」「今回には新規性がない」のいずれも、この調査からは断定しない。
+
+今回の再確認は、次の一次情報の範囲で行った。本文を確認した文献と、要旨のみの文献を区別する。
+
+| 資料 | 今回確認した範囲 | 確認できた重なり／差分 |
+|---|---|---|
+| [Ansari et al., 2025](https://doi.org/10.1016/j.cma.2025.117818) | 出版社の要旨。全文精読ではない | 変位・ひずみから温度場を随伴最適化で復元する研究が存在する。したがって「変位から温度」は単独の初出主張にしない。今回の逐次EnKFとは推定手順が異なる。 |
+| [Lang et al., 2024](https://www.research-collection.ethz.ch/handle/20.500.11850/700740) | ETH機関リポジトリの要旨・書誌。全文精読ではない | 縮約FEMとKFで温度状態を推定し、その後に機械モデルで熱変位を求める構成がある。ROM＋KF＋熱変位予測の組合せ自体は既存。 |
+| [Lang et al., 2026](https://doi.org/10.1007/978-3-032-01194-7_25) | 公開本文の§3.4、§4.1〜4.3、式(6)〜(11)と要旨を確認。全文の全式を検証したわけではない | 温度センサ選定、複数ROMそれぞれのKF、尤度によるモデル重み付けを扱う。式(9)の観測は温度。今回の変位残差を状態更新へ戻す実装との差分を具体的に説明できる。 |
+| 旧版に列挙したその他の文献 | 今回は全件再確認していない | 関連文献候補。個別の「扱っていない」という否定的断定を、そのまま引用しない。 |
+
+追加検索は「Kalman filter-driven state observer」「Adjoint-based recovery of thermal fields」、
+上記2026年章の題名、オープンCAE学会公式サイトを対象とした限定的な確認である。
+Scopus／Web of Scienceを含む網羅検索や全引用先の追跡を完了した調査ではない。
+
+### 今回、実際に計算した研究内容
+
+| 計算 | 実施内容 | 主張できることと範囲 |
+|---|---|---|
+| 104：実ソルバEnKF | OpenFOAMの固体温度20,696セル＋Q、5メンバー。温度2点＋上面変位2領域を同化 | 双子実験で温度場RMSE約7.61→0.011 K、Q約14.93 W（真値15 W）。hは推定していない。 |
+| 104：計算費用 | 600秒の現象、60秒ごと10更新。推定側だけで50予報区間 | 約13時間は作業記録の概算。平均計算だけの時間ではなく実ソルバ反復を含む。ROM導入の動機を具体化できる。 |
+| 106：ROM＋EnKF | POD＋Q-DEIMの代表温度5点、60メンバー。温度・発熱倍率・集中放熱係数hを推定 | 代表点と実際の観測点を区別し、観測構成を繰り返し比較した。hの単位はW/Kで、CHTの壁面熱伝達率と異なる。 |
+| 106：温度と変位の評価 | 温度観測のみ／変位追加を比較し、個別変位と2点間変位差を評価 | 温度の改善だけでは変位差の精度は保証されない、という観測設計上の知見を示す。 |
+
+結果・条件・生成プログラムは [106の全ストーリー](../../106_0_pod_selected_rom/docs/02_full_story.md) を参照。
+104でhまで同時同定したという旧版の記述は誤りである。
+また、104の観測位置が105のW解析で最適化されたという履歴は、固定座標の設定だけでは証明できない。
+106の高W／低W比較を、104実ソルバで行った比較として紹介しない。
+
+## 発表で前面に出す強み
+
+1. **温度と変位を同化へ戻す一連の実装**。変位を単に可視化するだけでなく、温度から計算した予報変位と観測の差を使って温度・パラメータを補正する。随伴コードを新たに構築せず、既存ソルバを観測演算子として使える実装上の利点がある。
+2. **実ソルバで確認した計算費用からROM導入へつなぐ構成**。重い計算を省略して始めたのではなく、全場同化の成立と費用を確認し、低次元化で観測設計を試せるようにした過程を共有できる。速度倍率は同一計測条件を揃えて評価する。
+3. **温度、個別変位、変位差、Q/hを別々に評価したこと**。温度場が合えばすべて解決する、とは限らない。温度だけを補正すると共通誤差の相殺が変わり、変位差が悪化するケースも、設計者に有用な結果である。
+4. **他者が追試できる計算資産**。コード、境界条件、観測位置、共分散、再構成式を示せることはオープンCAEとして重要な貢献になる。公開済みかどうか、ライセンス、第三者環境での再現成功は別途確認し、「誰でも再現済み」とは書かない。
+
+これらは現在の研究の貢献・実用上の強みであり、各項目の世界初を意味しない。
+特に「どの温度モードの誤差が変位差を左右するか」を可視化できれば、単なるソフトウェア接続例を超える説明になる。
+
+## 次に優位性を強くする提案（実施優先順）
+
+| 優先 | 追加検証 | 比較と評価 | 強くなる主張 |
+|---|---|---|---|
+| 1 | 学習に使わないOpenFOAM条件を観測の真値にする | 加熱波形・Q・周囲条件を変更。ROMの温度のみ／温度＋変位で、未観測温度と未観測変位差のRMSEを比較 | 同じROMを真値にした双子実験を超え、モデル誤差があっても変位観測が役立つかを示す |
+| 2 | 観測に使わない変位差を評価対象として確保 | 同一温度センサ・同数変位センサで、高W、低W、任意配置、非冗長配置を複数seedで比較 | 観測点自身へ近づくだけでなく、知りたい未観測量が改善することを示す |
+| 3 | 変位に重要なPODモードを同定 | 温度エネルギー寄与率と、各モードの変位差への寄与を比較。モード数・選点を変えて精度／費用を測る | 温度の寄与率だけでは不十分な場合に、熱変位を目的にした縮約・観測設計の根拠になる |
+| 4 | Q/hの識別とEnKF/OIの差を切り分ける | 初期条件・観測・Rを揃え、OIの感度近似と固定化を別々に検証。加熱波形変更・長い冷却も比較 | 「OIはQを同定できない」という一般化を避け、今回の実装で何が効いたかを説明できる |
+| 5 | 実測と再現性の検証 | 温度＋変位計測、観測を止めた先行予測、実行環境固定、第三者の再実行。費用は事前学習と1更新を別計測 | 実用上の精度、リアルタイム性、公開実装としての価値を裏付ける |
+
+優先3の具体式：温度誤差を $e_T=\Phi\delta a$ 、評価変位差を $d=c^\mathsf{T}u$ とすると、
+
+$$e_d=c^\mathsf{T}WJ\Phi\delta a=\sum_r b_r\delta a_r,
+\qquad b_r=c^\mathsf{T}WJ\phi_r.$$
+
+$J$ はOpenFOAMセル温度からFEM節点温度への写像、 $c$ は対象2点の差を取るベクトル。
+PODの特異値が小さいモードでも $b_r\delta a_r$ が大きければ、変位差には重要である。
+係数誤差の共分散を $P_a$ とすれば $\mathrm{Var}(e_d)=bP_ab^\mathsf{T}$ で、
+温度RMSEと変位差誤差を結ぶ検証を設計できる。この式自体を新発明とは主張せず、今回の系で何が見えたかを成果にする。
+
+## オープンCAE学会への発表としての位置づけ
+
+**発表に向けて進めることを推奨する。** 上位専門誌への投稿要件を先に全て満たさなければ発表できない、という意味ではない。
+オープンソース連成の実装、計算費用、温度と変位の観測効果、再現可能な手順を共有する発表として構成できる。
+これは研究内容に基づく評価であり、学会の採否保証ではない。
+[公式シンポジウム案内](https://www.opencae.or.jp/activity/symposium/opencae_symposium2026/) を確認したが、
+今回確認したページから新規性についての具体的な採否基準を確定したわけではない。
+
+発表題目案：**「OpenFOAM–FrontISTR連成とPOD-ROMを用いた温度・変位観測による熱状態推定」**。
+
+発表の主張案：
+「オープンCAEによる熱流体–構造連成をEnKFに組み込み、温度・変位観測を用いた熱状態推定を双子実験で検証した。
+実ソルバ反復の計算費用を踏まえてPOD-ROMへ展開し、観測構成によって温度と変位差の推定精度が異なること、
+状態推定が改善しても未知パラメータの同定誤差が残り得ることを示す。」
+
+## 旧レポートの扱い
+
+以下は追跡用に残した旧版であり、現在の結論ではない。
+CHTでのh同定、104のW選点、全文精読の範囲、既存法に対する優劣については、上の再評価を優先する。
+旧版の個別文献の詳細は本文確認前の候補として扱う。
+
+<details>
+<summary>旧レポートを表示（未検証の断定と実装との不一致を含む）</summary>
 
 > 本ドキュメントは deep research による先行研究調査レポート（2026-09-12）。
 > 数式は GitHub 表示用に `$…$` / `$$…$$` へ変換済み、引用の特殊トークンは除去済み。
@@ -54,13 +150,13 @@
 
 2020年から2026年9月12日までの文献を、熱弾性逆問題、工作機械の熱誤差・デジタルツイン、ROM／センサ配置、EnKF–CFD連成、逆熱伝達の joint state–parameter estimation の各系列に分けて照合した結果、**提案手法を構成する個々の要素はほぼすべて既出**です。しかし、下記の「統合の仕方」は、今回確認できた文献には見当たりませんでした。
 
-> **高忠実な流体–固体共役熱伝達 CHT を EnKF の前進モデルとして回し、熱状態 $T$ と発熱量 $Q$、対流熱伝達係数 $h$ を augmented state（拡大状態） として同時推定し、さらに熱場を構造FEMへ渡して得る熱変位を温度と並ぶ同化観測量として利用する、という一体型の逐次確率推定系。**
+> **高忠実な流体–固体共役熱伝達 CHT を EnKF の前進モデルとして回し、熱状態 $T$ と発熱量 $Q$ 、対流熱伝達係数 $h$ を augmented state（拡大状態） として同時推定し、さらに熱場を構造FEMへ渡して得る熱変位を温度と並ぶ同化観測量として利用する、という一体型の逐次確率推定系。**
 
-> **【著者スタンス】$W=K^{-1}H$ に新規性は主張しない。**
+> **【著者スタンス】 $W=K^{-1}H$ に新規性は主張しない。**
 > 本研究では $W=K^{-1}H$ を「新しい感度式」としては**一切主張しない**。
 > $W$ は [Mayr et al. 2015](https://doi.org/10.1016/j.cirp.2015.04.001) 等で既知の熱弾性写像であり、本研究での役割は
 > **データ同化に効く"正しい温度センサ位置・変位観測位置"を決めるための道具**である。
-> すなわち「どこを測れば温度場・$Q$・$h$ をよく推定できるか」を $W$ の行／列感度で
+> すなわち「どこを測れば温度場・ $Q$ ・ $h$ をよく推定できるか」を $W$ の行／列感度で
 > 物理的に根拠づける——という**位置づけ・使い方**として提示する。
 > （論文では $W$ を貢献点に数えず、"観測設計の手段"として記述するのが正確で安全。）
 
@@ -86,11 +182,11 @@ $$
 \underbrace{
 (T_k,Q_k,h_k)\xrightarrow{\mathrm{CHT/CFD}}
 T_{k+1}
-}_{\text{熱・流体前進モデル}}
+}_{\text{thermal-fluid model}}
 \xrightarrow{\text{thermal FEM / mapping}}
 \underbrace{
 u_{k+1}
-}_{\text{熱変位}}
+}_{\text{thermal disp}}
 $$
 
 に対して、
@@ -149,19 +245,19 @@ $$
 | | **Dileep, Hasanov & Kumarasamy (2024)** | “Simultaneous identification of spatial load and external heat source in thermoelastic plate from final time measured displacement,” *Inverse Problems and Imaging*, 18(4), 751–775. DOI [10.3934/ipi.2023053](https://doi.org/10.3934/ipi.2023053).  | 最終時刻の**変位**から機械的荷重 $F(x,t)$ と熱源 $G(x,t)$ を同時同定。Tikhonov正則化＋**随伴問題**で勾配を求める。したがって「変位から熱源」という新しさは主張できない（先行研究が既にある）。 |
 | | **Tan et al. (2025)** | C.-H. Tan, W.-W. Jiang, Y.-T. Zhou, S.-Q. Zhang, K. Yang, X.-W. Gao, “A new method for simultaneous identification of thermal-mechanical loading and thermophysical properties in dynamic coupled thermoelasticity problems based on Levenberg-Marquardt method,” *International Communications in Heat and Mass Transfer*, 169, 109869. DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | 動的連成熱弾性問題で熱流束・機械荷重・物性を**Levenberg–Marquardt＋感度行列**で同定。確率的EnKFではないが、「熱機械応答を利用した複数未知量同時同定」を先に行っている（新しさの主張を弱める）。 |
 | | **Ansari et al. (2026, preprint)** | T. S. A. Ansari et al., “One-Way Thermo-Mechanical Coupled System Identification Using Displacement and Temperature Measurements,” arXiv:2603.09526. 査読誌DOIは今回確認できず。 | 変位＋温度の複合観測を使う optimization-driven thermo-mechanical system identification。温度分布と Young率を同定するため、**「温度＋変位を融合して場＋パラメータを同定」そのものも広くは既出**。ただし $Q,h$ ではなく、EnKFでもCHTでもない。 |
-| **工作機械 KF/ROM/DT** | **Lang et al. (2024)** | S. Lang, S. Talleri, J. Mayr, K. Wegener, M. Bambach, “Kalman filter-driven state observer for thermal error compensation in machine tool digital twins,” *Manufacturing Letters*, 41, 208–218. DOI [10.1016/j.mfglet.2024.09.025](https://doi.org/10.1016/j.mfglet.2024.09.025).  | reduced FE state-space model＋**通常のKalman filter**で工作機械全体の温度状態を少数温度センサから再構成し、熱機械モデルで熱変位を予測。提案との差は、変位を同化しないこと、$Q,h$ の augmented EnKF 推定をしないこと、高忠実CHTをfilter loopに置かないこと。 |
-| | **Lang, Schneider, Rhiner & Bambach (2026)** | “Overcoming Uncertainty With an Ensemble of Physical Models and Real-Time Measurements: Thermal Error Compensation Using Kalman Filters In a Digital Twin,” *Lecture Notes in Production Engineering / ICTIMT2025 Proceedings*, pp.385–412. DOI [10.1007/978-3-032-01194-7_25](https://doi.org/10.1007/978-3-032-01194-7_25).  | 500個の境界条件違いROMに**個別KF**を走らせ尤度で重み付け。10温度センサから熱状態を推定し、FEMで変位を算出。非常に近い先行研究だが、canonical EnKFではなく、変位計測は同化更新に用いず、$h$ は連続的なaugmented-stateとして更新せずモデルアンサンブルで表現。 |
+| **工作機械 KF/ROM/DT** | **Lang et al. (2024)** | S. Lang, S. Talleri, J. Mayr, K. Wegener, M. Bambach, “Kalman filter-driven state observer for thermal error compensation in machine tool digital twins,” *Manufacturing Letters*, 41, 208–218. DOI [10.1016/j.mfglet.2024.09.025](https://doi.org/10.1016/j.mfglet.2024.09.025).  | reduced FE state-space model＋**通常のKalman filter**で工作機械全体の温度状態を少数温度センサから再構成し、熱機械モデルで熱変位を予測。提案との差は、変位を同化しないこと、 $Q,h$ の augmented EnKF 推定をしないこと、高忠実CHTをfilter loopに置かないこと。 |
+| | **Lang, Schneider, Rhiner & Bambach (2026)** | “Overcoming Uncertainty With an Ensemble of Physical Models and Real-Time Measurements: Thermal Error Compensation Using Kalman Filters In a Digital Twin,” *Lecture Notes in Production Engineering / ICTIMT2025 Proceedings*, pp.385–412. DOI [10.1007/978-3-032-01194-7_25](https://doi.org/10.1007/978-3-032-01194-7_25).  | 500個の境界条件違いROMに**個別KF**を走らせ尤度で重み付け。10温度センサから熱状態を推定し、FEMで変位を算出。非常に近い先行研究だが、canonical EnKFではなく、変位計測は同化更新に用いず、 $h$ は連続的なaugmented-stateとして更新せずモデルアンサンブルで表現。 |
 | | **Hernández-Becerro, Spescha & Wegener (2020)** | “Model order reduction of thermo-mechanical models with parametric convective boundary conditions: focus on machine tools,” *Computational Mechanics*, 67, 167–184. DOI [10.1007/s00466-020-01926-x](https://doi.org/10.1007/s00466-020-01926-x).  | 対流境界条件をパラメトリックに含む熱–機械FEMのROM。工作機械で $h$ を含むモデル低次元化の先行例だが、データ同化・逆推定ではない。 |
 | **センサ配置・感度** | **Teshima et al. (2024)** | Y. Teshima, S. Tanaka, T. Kizaki, N. Sugita, “Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools,” *CIRP Journal of Manufacturing Science and Technology*, 55, 403–410. DOI [10.1016/j.cirpj.2024.10.015](https://doi.org/10.1016/j.cirpj.2024.10.015).  | ROMを利用して、熱誤差推定に有効な**温度センサ位置**を選ぶ。提案法の「変位観測点」を選ぶ問題とは観測チャネルが逆。 |
-| | **Ando et al., ICTIMT2025 proceedings** | S. Ando, S. Tanaka, Y. Teshima, J. Morishita, T. Kizaki, “Strategy for Sensor Placement to Estimate Thermal Errors Using Temperature-Sensitivity Distribution Based on a Reduced-Order Model of Machine Tools.” Springer LNPE. DOI [10.1007/978-3-032-01194-7_31](https://doi.org/10.1007/978-3-032-01194-7_31).  | 温度感度分布＋ROMから**温度計測点**を配置。会議名はICTIMT2025だが、対応するSpringer proceedings は2026年公開系列。$W$ を使った変位センサ位置設計ではない。 |
+| | **Ando et al., ICTIMT2025 proceedings** | S. Ando, S. Tanaka, Y. Teshima, J. Morishita, T. Kizaki, “Strategy for Sensor Placement to Estimate Thermal Errors Using Temperature-Sensitivity Distribution Based on a Reduced-Order Model of Machine Tools.” Springer LNPE. DOI [10.1007/978-3-032-01194-7_31](https://doi.org/10.1007/978-3-032-01194-7_31).  | 温度感度分布＋ROMから**温度計測点**を配置。会議名はICTIMT2025だが、対応するSpringer proceedings は2026年公開系列。 $W$ を使った変位センサ位置設計ではない。 |
 | | **Lang et al. (2025)** | S. Lang, M. Zorzini, S. Scholze, J. Mayr, M. Bambach, “Sensor placement utilizing a digital twin for thermal error compensation of machine tools,” *Journal of Manufacturing Systems*, 80, 243–257. DOI [10.1016/j.jmsy.2025.03.003](https://doi.org/10.1016/j.jmsy.2025.03.003).  | デジタルツイン＋SVD/Group-LASSOで温度センサを22点から7点へ削減し、熱誤差補正を維持。やはり最適化対象は**temperature sensors**。 |
 | | **Lang et al. (2026)** | 上記 ICTIMT 論文、DOI [10.1007/978-3-032-01194-7_25](https://doi.org/10.1007/978-3-032-01194-7_25).  | 複数ROMの observability Gramian の最小固有値を目的関数に、GA等で10個の**温度センサ**を選択。変位5点は評価用で、熱状態観測点最適化の対象ではない。 |
 | **EnKF–CFD/OpenFOAM** | **Villanueva et al. (2024)** | L. Villanueva, M. Martínez Valero, A. Šarkić Glumac, M. Meldi, “Augmented state estimation of urban settings using on-the-fly sequential Data Assimilation,” *Computers & Fluids*, 269, 106118. DOI [10.1016/j.compfluid.2023.106118](https://doi.org/10.1016/j.compfluid.2023.106118).  | **CONES＋OpenFOAM＋online EnKF**で流れ場と乱流モデルパラメータを augmented state として同時推定。したがって「EnKF内でOpenFOAMを直接回して場＋パラメータ推定」は既出。熱弾性構造FEMはない。 |
 | | **Wu et al. (2021)** | Wu, Cai, Yuan, Zhang & Reniers, “CFD and EnKF coupling estimation of LNG leakage and dispersion,” *Safety Science*, 139, 105263. DOI [10.1016/j.ssci.2021.105263](https://doi.org/10.1016/j.ssci.2021.105263).  | 3D OpenFOAM CFD＋EnKFにより、濃度場を同化しながら**漏洩源強度**を推定。提案の $Q$ 同定とアルゴリズム構造が非常に近いが、熱・構造問題ではない。 |
 | | **Villanueva, Truffin & Meldi (2024)** | “Synchronization and optimization of Large Eddy Simulation using an online Ensemble Kalman Filter,” *International Journal of Heat and Fluid Flow*, 110, 109597. DOI [10.1016/j.ijheatfluidflow.2024.109597](https://doi.org/10.1016/j.ijheatfluidflow.2024.109597).  | 高忠実LESを online EnKF と結合。高価なCFDを同化ループ内に置くという意味で近いが、固体熱伝導・熱膨張は扱わない。 |
-| | **Bakhshaei et al. (2026)** | K. Bakhshaei, U. E. Morelli, G. Stabile, G. Rozza, “Optimized Bayesian framework for inverse heat transfer problems using reduced order methods,” *Computational Science and Engineering*, DOI [10.1007/s44207-026-00009-8](https://doi.org/10.1007/s44207-026-00009-8).  | OpenFOAMベースの熱モデルと **Ensemble-based Simultaneous Input and State Filtering** を使い、温度場と未知過渡熱流束を同時推定。RBF/ROMで計算量を低減。提案の $T+Q$ 推定にかなり近いが、温度観測のみで構造変位・$h$ joint estimation はない。 |
-| **$Q,h$ joint estimation** | **Oka & Ohno (2020)** | Y. Oka, M. Ohno, “Parameter estimation for heat transfer analysis during casting processes based on ensemble Kalman filter,” *International Journal of Heat and Mass Transfer*, 149, 119232. DOI [10.1016/j.ijheatmasstransfer.2019.119232](https://doi.org/10.1016/j.ijheatmasstransfer.2019.119232).  | EnKFによって熱伝導率と時間依存**界面熱伝達係数 $h$** を温度履歴から同時推定。$h$ のEnKF推定自体は明確に既出。変位・$Q$ はない。 |
-| | **Zhang et al. (2026)** | Y. Zhang, H. Long, Y. Xia, C. Huang, W. Wang, Y. Liu, “Reduced-order driven improved EnKF method for online estimation of time-varying convective heat transfer coefficient and temperature field in lithography masks,” *Applied Thermal Engineering*, 300, 131272. DOI [10.1016/j.applthermaleng.2026.131272](https://doi.org/10.1016/j.applthermaleng.2026.131272).  | ROM＋改良EnKFで**温度場 $T$ と時間変動 $h$** を逐次同時推定。提案の $T+h$ 部分をほぼ直接先取りするが、$Q$、変位、CHT-FEM連成はない。 |
+| | **Bakhshaei et al. (2026)** | K. Bakhshaei, U. E. Morelli, G. Stabile, G. Rozza, “Optimized Bayesian framework for inverse heat transfer problems using reduced order methods,” *Computational Science and Engineering*, DOI [10.1007/s44207-026-00009-8](https://doi.org/10.1007/s44207-026-00009-8).  | OpenFOAMベースの熱モデルと **Ensemble-based Simultaneous Input and State Filtering** を使い、温度場と未知過渡熱流束を同時推定。RBF/ROMで計算量を低減。提案の $T+Q$ 推定にかなり近いが、温度観測のみで構造変位・ $h$ joint estimation はない。 |
+| **$Q,h$ joint estimation** | **Oka & Ohno (2020)** | Y. Oka, M. Ohno, “Parameter estimation for heat transfer analysis during casting processes based on ensemble Kalman filter,” *International Journal of Heat and Mass Transfer*, 149, 119232. DOI [10.1016/j.ijheatmasstransfer.2019.119232](https://doi.org/10.1016/j.ijheatmasstransfer.2019.119232).  | EnKFによって熱伝導率と時間依存**界面熱伝達係数 $h$** を温度履歴から同時推定。 $h$ のEnKF推定自体は明確に既出。変位・ $Q$ はない。 |
+| | **Zhang et al. (2026)** | Y. Zhang, H. Long, Y. Xia, C. Huang, W. Wang, Y. Liu, “Reduced-order driven improved EnKF method for online estimation of time-varying convective heat transfer coefficient and temperature field in lithography masks,” *Applied Thermal Engineering*, 300, 131272. DOI [10.1016/j.applthermaleng.2026.131272](https://doi.org/10.1016/j.applthermaleng.2026.131272).  | ROM＋改良EnKFで**温度場 $T$ と時間変動 $h$** を逐次同時推定。提案の $T+h$ 部分をほぼ直接先取りするが、 $Q$ 、変位、CHT-FEM連成はない。 |
 | | **Bakhshaei et al. (2026)** | 上記、DOI [10.1007/s44207-026-00009-8](https://doi.org/10.1007/s44207-026-00009-8).  | ensemble filterで**温度場＋未知熱流束**を同時推定。すなわち $T+Q$ 側は既出。ただし $h$ は同じaugmented stateで同時推定していない。 |
 | | **Kim, Bucci & Cetiner (2025)** | H. Kim, M. Bucci, S. Cetiner, “Ensemble Kalman Smoothing for a transient one-dimensional inverse heat conduction problem with gap thermal resistance,” *Applied Thermal Engineering*, 281, 128682. DOI [10.1016/j.applthermaleng.2025.128682](https://doi.org/10.1016/j.applthermaleng.2025.128682).  | augmented-state EnKSで未知過渡熱源を温度／熱流束観測から同定し、非線形な gap thermal resistance の不確かさも扱う。変位観測および $Q+h$ の双方を未知量とした同時推定ではない。 |
 | | **Tan et al. (2025)** | *Int. Commun. Heat Mass Transfer*, DOI [10.1016/j.icheatmasstransfer.2025.109869](https://doi.org/10.1016/j.icheatmasstransfer.2025.109869).  | coupled thermoelasticity で熱流束と物性・機械荷重を同時同定するため、「複数熱・構造パラメータ同定」を先取りしている。ただし LM 型決定論的逆解析であり $Q+h$ のEnKF joint posterior ではない。 |
@@ -186,7 +282,7 @@ $$
 という**決定論的・variational/adjoint inverse problem**であるのに対し、
 
 $$
-\text{提案:}\quad
+\text{proposal:}\quad
 p(T,Q,h\mid T_{\rm obs},u_{\rm obs})
 $$
 
@@ -218,7 +314,7 @@ $$
 
 という温度観測であり、熱変位は更新後の熱状態から mechanical coupling を通じて計算・評価されています。したがって、**変位を innovation に入れて thermal state / parameter を戻す閉ループ**ではありません。
 
-第三に、$h$ の不確かさは500個の事前生成モデル間の離散的な model uncertainty として扱われ、$h_k$ 自体を augmented continuous state として
+第三に、 $h$ の不確かさは500個の事前生成モデル間の離散的な model uncertainty として扱われ、 $h_k$ 自体を augmented continuous state として
 
 $$
 h_k^a=h_k^f+K_h(y-Hx)
@@ -246,9 +342,9 @@ $$
 | FEMで熱状態から変位を計算し、DTの出力とする | **既出** | Lang et al. [2024](https://doi.org/10.1016/j.mfglet.2024.09.025)/[2026](https://doi.org/10.1007/978-3-032-01194-7_25)。2026年論文は $C_{\rm mech}K^{-1}K_{\rm th}x$ を明示。 |
 | **FEM熱変位をEnKFの観測 innovation とし、熱状態へフィードバック** | **今回の検索では未確認** | 近い工作機械研究では変位は予測／検証出力。Ansari系列は変位を使うがEnKFでない。 |
 | **CHT→固体温度→構造FEM→変位という複合forward/observation operatorをEnKF内部で反復** | **今回の検索では未確認** | EnKF–OpenFOAM と thermoelastic inverse はそれぞれ存在するが、この直列統合は確認できず。 |
-| **$T,Q,h$ を同一augmented stateで、温度＋変位から逐次同時推定** | **今回の検索では未確認** | $T+h$、$T+Q$、変位→熱源はそれぞれ既出だが三者＋mixed observations の組合せは確認できず。 |
+| **$T,Q,h$ を同一augmented stateで、温度＋変位から逐次同時推定** | **今回の検索では未確認** | $T+h$ 、 $T+Q$ 、変位→熱源はそれぞれ既出だが三者＋mixed observations の組合せは確認できず。 |
 | **$W=K^{-1}H$ を用いた「変位」観測点の最適配置を熱逆同化に使う** | **今回の検索では未確認。ただし主張は狭くすべき** | $W$ 自体は2015年既出。2024–26の工作機械配置論文は主として温度センサ配置。一般構造分野にはFisher-information型センサ配置もある。 |
-| **上記すべてを中空円筒／工作機械主軸で一体化** | **今回の検索では未確認** | 各部分技術は別々の文献系列に分散している。特に変位同化＋$Q,h$ joint estimation が欠落。 |
+| **上記すべてを中空円筒／工作機械主軸で一体化** | **今回の検索では未確認** | 各部分技術は別々の文献系列に分散している。特に変位同化＋ $Q,h$ joint estimation が欠落。 |
 
 ここから分かる重要な点は、「新規要素」が存在するというより、
 **既存の4つの研究の流れを初めて1つに組み合わせるところ**に論文価値があることです。
@@ -263,19 +359,19 @@ $$
 **それらを1本の同化系にまとめる**ことにある。
 
 具体的には、**温度観測 $T_{\rm obs}$ と 変位観測 $u_{\rm obs}$ を1つの観測ベクトルにまとめ、
-温度場・発熱量 $Q$・放熱係数 $h$ の相関（cross-covariance）を EnKF で使って一括更新する**——
+温度場・発熱量 $Q$ ・放熱係数 $h$ の相関（cross-covariance）を EnKF で使って一括更新する**——
 この部分が、Ansari型の随伴逆解析にも、Lang型の工作機械KFにも、Zhang型の $T+h$ EnKFにも
 無い差分です（＝まだ誰もやっていない組み合わせ）。
 
 ### $W=K^{-1}H$ の新規性について
 
-> **本研究の立場（明記）**：$W=K^{-1}H$ に新規性は求めない。
+> **本研究の立場（明記）**： $W=K^{-1}H$ に新規性は求めない。
 > 既知の熱弾性写像として受け入れ、**データ同化で「どの温度センサ位置・どの変位観測位置」を
-> 選べば温度場・$Q$・$h$ をよく推定できるか**を根拠づける道具として使う。
+> 選べば温度場・ $Q$ ・ $h$ をよく推定できるか**を根拠づける道具として使う。
 > したがって以下は「$W$ が新規かどうか」の議論ではなく、「$W$ を観測設計に使う際の
 > 正しい書き方・強い基準の選び方」の助言として読めばよい。
 
-ここは（もし$W$自体を新規と書いてしまうと）過大主張になるため、特に注意が必要です。
+ここは（もし $W$ 自体を新規と書いてしまうと）過大主張になるため、特に注意が必要です。
 
 Mayr et al. の
 
@@ -295,11 +391,7 @@ $$
 
 したがって、
 
-$$
-W_{ij}
-=
-\frac{\partial u_i}{\partial T_j}
-$$
+$$W_{ij}=\frac{\partial u_i}{\partial T_j}$$
 
 の**行 $i$**、つまり「候補変位位置 $i$ が温度自由度全体に対してどれだけ情報を持つか」を評価して displacement measurement locations を選ぶことには、まだ狭い新規性が残ります。
 
@@ -324,7 +416,7 @@ $$
 F=J_p^\mathsf{T}R_u^{-1}J_p
 $$
 
-の Fisher information、D-optimality $\log\det F$、A-optimality $\operatorname{tr}(F^{-1})$、あるいは posterior covariance reduction を選点基準にした方が、「推定したいのは温度ではなく $Q,h$ も含む」という提案法との整合性が高くなります。一般構造デジタルツインでは2026年に Fisher-information-based sensor placement がすでに報告されているため、この方向へ拡張する場合も「FIMそのもの」は新規とはせず、**thermoelastic augmented-state inverse problem への適用**を差分とするべきです。
+の Fisher information、D-optimality $\log\det F$ 、A-optimality $\mathrm{tr}(F^{-1})$ 、あるいは posterior covariance reduction を選点基準にした方が、「推定したいのは温度ではなく $Q,h$ も含む」という提案法との整合性が高くなります。一般構造デジタルツインでは2026年に Fisher-information-based sensor placement がすでに報告されているため、この方向へ拡張する場合も「FIMそのもの」は新規とはせず、**thermoelastic augmented-state inverse problem への適用**を差分とするべきです。
 
 ## 無理なく主張できる新規性と、その反例になりうる文献
 
@@ -338,11 +430,11 @@ $$
 
 > **A further contribution is the explicit use of the thermoelastic temperature-to-displacement sensitivity map $W=K^{-1}H$ to design displacement-observation locations for the inverse thermal assimilation problem; $W$ itself and temperature-sensor placement are established prior art.**
 
-とするのがよいです。$W$ の式自体を新規としないことが重要です。
+とするのがよいです。 $W$ の式自体を新規としないことが重要です。
 
 日本語なら、
 
-> **新規性は EnKF、CFD、FEM、変位からの温度逆推定の各要素そのものではなく、CHT–熱弾性FEMを介して温度・変位の異種観測を同一の augmented-state EnKF に取り込み、温度場・発熱量 $Q$・熱伝達係数 $h$ を逐次同時推定する統合構成にある。さらに $W=K^{-1}H$ 自体は既知であるものの、これを熱逆同化のための変位観測位置設計に明示的に用いる点は、今回確認した工作機械文献には見られない。**
+> **新規性は EnKF、CFD、FEM、変位からの温度逆推定の各要素そのものではなく、CHT–熱弾性FEMを介して温度・変位の異種観測を同一の augmented-state EnKF に取り込み、温度場・発熱量 $Q$ ・熱伝達係数 $h$ を逐次同時推定する統合構成にある。さらに $W=K^{-1}H$ 自体は既知であるものの、これを熱逆同化のための変位観測位置設計に明示的に用いる点は、今回確認した工作機械文献には見られない。**
 
 が妥当です。
 
@@ -376,7 +468,7 @@ $$
 
 **[Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272)** は ROM＋EnKF＋ $T,h$ joint estimation をすでに実現しているため、EnKF thermal parameter estimation 側の最重要競合です。
 
-**[Bakhshaei et al. 2026](https://doi.org/10.1007/s44207-026-00009-8)** は ensemble-based simultaneous input/state filtering＋OpenFOAM＋ $T,$ heat-flux estimation を実現しているので、$T,Q$ 側の最重要競合です。
+**[Bakhshaei et al. 2026](https://doi.org/10.1007/s44207-026-00009-8)** は ensemble-based simultaneous input/state filtering＋OpenFOAM＋ $T,$ heat-flux estimation を実現しているので、 $T,Q$ 側の最重要競合です。
 
 この6系列を引用した上でなお残る「まだ誰もやっていない組み合わせ」が、本研究で新しさを主張できる範囲です。
 
@@ -402,9 +494,9 @@ $$
 - この問題の事後分布は、拡散的な熱伝導＋ほぼ線形の熱弾性なので**概ねガウス**。
   PFが輝く「強い非ガウス・多峰性」がないため、置き換えても優位性は出にくい。
 - **例外的にPFが有効な場面**：推定対象を**少数パラメータ（$Q,h$ だけ）に絞り**、かつ
-  $Q$↑と$h$↓の取り違えのような**多峰・強相関の事後**を厳密に扱いたい場合。ROM上の低次元
+  $Q$↑と $h$↓の取り違えのような**多峰・強相関の事後**を厳密に扱いたい場合。ROM上の低次元
   パラメータ空間なら粒子数が現実的になり、EnKFのガウス近似が潰す多峰性をPFが拾える可能性がある。
-  → 「全場はEnKF、$Q,h$の識別可能性検討だけPF」というハイブリッドは研究として面白い。
+  → 「全場はEnKF、 $Q,h$ の識別可能性検討だけPF」というハイブリッドは研究として面白い。
 
 ### 変分法(4D-Var/随伴)について
 
@@ -447,7 +539,7 @@ $$
      （識別可能性の実証。これが無いと「都合よくnoiseで調整」と突かれる）。
 
 > **結論（戦略）**：POD・実機適用は"単独では新規性が弱い"。
-> しかし **「多熱源で $Q$ をベクトル推定＋変位を熱状態更新に同化＋$Q,h$識別可能性を実機で実証」**
+> しかし **「多熱源で $Q$ をベクトル推定＋変位を熱状態更新に同化＋ $Q,h$ 識別可能性を実機で実証」**
 > まで踏み込めば、近接文献（Ansari 2025／Lang 2026／Zhang 2026）のいずれにも無い組み合わせになり、
 > 無理なく主張できる新規性になる。POD は「必要自由度と観測設計を数値で根拠づける裏方」として
 > その物語を支える位置づけが最も効く。
@@ -463,7 +555,7 @@ $$
 | **CIRP Journal of Manufacturing Science and Technology** | ROM・センサ配置・熱誤差推定との直接的な文脈が強い | [Teshima et al. 2024](https://doi.org/10.1016/j.cirpj.2024.10.015) の直接的な先行研究が掲載されており、「温度センサ配置から変位観測設計へ」というストーリーが作りやすい。 |
 | **Journal of Manufacturing Systems** | digital twin / sensor fusion を強調する場合に適合 | [Lang et al. 2025](https://doi.org/10.1016/j.jmsy.2025.03.003) の digital-twin sensor placement が直接先行研究。リアルタイム性、状態推定、DT architecture を前面に出す場合に自然。 |
 | **International Journal of Heat and Mass Transfer** | $Q,h$ 同定とCHTが中心なら有力 | Oka & Ohno のEnKF parameter estimation 系列が存在するため、単なるEnKF適用以上に、identifiability、CHT物理、mixed displacement observations の情報価値を示す必要。 |
-| **Applied Thermal Engineering** | 工学的逆熱伝達＋オンライン推定に相性が良い | [Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) のROM-EnKF $T+h$、[Kim et al. 2025](https://doi.org/10.1016/j.applthermaleng.2025.128682) のEnKS熱源推定が直接競合。CHTと熱機械観測による性能改善を明確化する必要。 |
+| **Applied Thermal Engineering** | 工学的逆熱伝達＋オンライン推定に相性が良い | [Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) のROM-EnKF $T+h$ 、[Kim et al. 2025](https://doi.org/10.1016/j.applthermaleng.2025.128682) のEnKS熱源推定が直接競合。CHTと熱機械観測による性能改善を明確化する必要。 |
 | **Computer Methods in Applied Mechanics and Engineering** | 方法論として十分強ければ最も直接的な逆問題系候補 | [Ansari et al. 2025](https://doi.org/10.1016/j.cma.2025.117818) が掲載されているため比較が明快。ただし「標準EnKFを既存ソルバに付けた」だけでは不足し、observability、uncertainty、multi-physics coupling、アルゴリズム解析まで必要。 |
 | **Computers & Fluids / Journal of Computational Physics 系** | EnKF–high-fidelity CFD couplingを主題にする場合 | CONES等が基準になる。並列 ensemble CFD、localization、計算スケーリング、非線形DAの技術的新規性が必要。 |
 
@@ -473,7 +565,7 @@ $$
 
 ## 査読で最も突かれる弱点と事前に必要な検証
 
-最大の問題は**$Q$ と $h$ の識別可能性**です。発熱増加と放熱低下はどちらも温度上昇・熱膨張増加を生むため、限られた温度・変位計測では非常に強く相関する可能性があります。既存研究が $T+h$、$T+Q$、$k+h$ のように比較的限定した unknown set を扱っているのに対し、提案法は $T,Q,h$ を同時に未知とするため、単に EnKF が数値上収束しただけでは不十分です。
+最大の問題は**$Q$ と $h$ の識別可能性**です。発熱増加と放熱低下はどちらも温度上昇・熱膨張増加を生むため、限られた温度・変位計測では非常に強く相関する可能性があります。既存研究が $T+h$ 、 $T+Q$ 、 $k+h$ のように比較的限定した unknown set を扱っているのに対し、提案法は $T,Q,h$ を同時に未知とするため、単に EnKF が数値上収束しただけでは不十分です。
 
 したがって、少なくとも
 
@@ -511,9 +603,9 @@ $$
 \text{temperature + displacement}
 $$
 
-の三条件で、未観測温度場、$Q$、$h$、未観測変位のRMSEと posterior uncertainty を比較する必要があります。Ansari et al. が変位／ひずみから温度を復元できることを既に示している以上、本論文では「できる」ではなく、**温度計測に変位計測を追加した場合にどの不可観測モードが改善されるか**を示す方がはるかに強い寄与になります。
+の三条件で、未観測温度場、 $Q$ 、 $h$ 、未観測変位のRMSEと posterior uncertainty を比較する必要があります。Ansari et al. が変位／ひずみから温度を復元できることを既に示している以上、本論文では「できる」ではなく、**温度計測に変位計測を追加した場合にどの不可観測モードが改善されるか**を示す方がはるかに強い寄与になります。
 
-第三に、**$W$ 最大値だけによる変位点選択は弱い**可能性があります。熱膨張感度の大きい2点がほとんど同じ情報を持つ場合、$\|W_i\|$ の大きい順に選ぶと冗長になります。2025–26年の工作機械センサ配置はSVD、Group-LASSO、observability Gramian といった redundancy を考慮する方向へ進んでいます。したがって $W$ は候補生成または物理解釈に使い、最終的には Gramian/Fisher information/posterior covariance criterion にする方が現在の文献水準に合います。
+第三に、**$W$ 最大値だけによる変位点選択は弱い**可能性があります。熱膨張感度の大きい2点がほとんど同じ情報を持つ場合、 $\lVert W_i\rVert$ の大きい順に選ぶと冗長になります。2025–26年の工作機械センサ配置はSVD、Group-LASSO、observability Gramian といった redundancy を考慮する方向へ進んでいます。したがって $W$ は候補生成または物理解釈に使い、最終的には Gramian/Fisher information/posterior covariance criterion にする方が現在の文献水準に合います。
 
 第四に、**full-order CHTをEnKF ensembleの各memberで毎時刻解く計算費用**が問題になります。OpenFOAM＋EnKF自体は既出ですが、工作機械DTでは近年むしろROM化によって実時間化する方向です。[Lang et al. 2026](https://doi.org/10.1007/978-3-032-01194-7_25) は reduced thermo-mechanical models によって実時間より45倍以上高速と報告し、[Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) もROMによって EnKF の大幅高速化を狙っています。Bakhshaei et al. もRBFによって未知入力次元と ensemble computation を低減しています。したがって「デジタルツイン」「online」と主張するなら、full CHT ensemble の wall-clock time を示さないと厳しく突かれます。
 
@@ -531,7 +623,7 @@ $$
 
 へ移行する構成なら問題になりにくくなります。最初の論文で「リアルタイム」を過度に主張しない方が安全です。
 
-第五に、**ensemble size に対して状態次元が巨大**になります。CFD/FEM節点温度をそのまま state にすると、例えば $10^5$–$10^7$ 自由度に対し ensemble size が数十～数百であり、sample covariance は極端に低ランクです。OpenFOAM–EnKF系が成立していること自体は既出ですが、提案問題では温度場に加えて $Q,h$ と変位観測までcross-covarianceで結ぶため、spurious correlation、ensemble collapse、filter divergence の評価が必要です。CONES系のような高忠実 ensemble DA が存在する以上、「計算できた」だけでなく ensemble convergence、inflation、必要なら localization の設計を示すことが望まれます。
+第五に、**ensemble size に対して状態次元が巨大**になります。CFD/FEM節点温度をそのまま state にすると、例えば $10^5$– $10^7$ 自由度に対し ensemble size が数十～数百であり、sample covariance は極端に低ランクです。OpenFOAM–EnKF系が成立していること自体は既出ですが、提案問題では温度場に加えて $Q,h$ と変位観測までcross-covarianceで結ぶため、spurious correlation、ensemble collapse、filter divergence の評価が必要です。CONES系のような高忠実 ensemble DA が存在する以上、「計算できた」だけでなく ensemble convergence、inflation、必要なら localization の設計を示すことが望まれます。
 
 第六に、**inverse crime** を避ける必要があります。同一メッシュ・同一CHTモデル・同一FEMで synthetic observations を生成し、その同じモデルでEnKF推定をすると、非常に良い結果が出ても証拠として弱いです。Lang et al. の工作機械研究は実験温度・変位計測による検証まで行っているため、現在の比較対象としては実験検証の要求水準が高くなっています。
 
@@ -543,9 +635,9 @@ $$
 \text{assimilation model}
 $$
 
-とし、少なくとも熱源分布、接触熱抵抗、局所 $h$、材料物性の一部に model discrepancy を入れるべきです。
+とし、少なくとも熱源分布、接触熱抵抗、局所 $h$ 、材料物性の一部に model discrepancy を入れるべきです。
 
-第七に、**$Q$ と $h$ のパラメータ化の次元**を明確にする必要があります。「発熱量 $Q$」が主軸全体の1個のscalarなのか、前後軸受ごとの $Q_1,Q_2$ なのか、分布熱源 $Q(x,t)$ なのかで新規性と難易度は全く異なります。同様に $h$ も global scalar、複数表面ごとのpiecewise constant、空間場 $h(x)$、時間変動 $h(t)$ のどれかを明記すべきです。[Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) は time-varying $h$ まで扱っているため、単一scalar $h$ の推定だけを大きな新規性として扱うのは難しいです。
+第七に、**$Q$ と $h$ のパラメータ化の次元**を明確にする必要があります。「発熱量 $Q$ 」が主軸全体の1個のscalarなのか、前後軸受ごとの $Q_1,Q_2$ なのか、分布熱源 $Q(x,t)$ なのかで新規性と難易度は全く異なります。同様に $h$ も global scalar、複数表面ごとのpiecewise constant、空間場 $h(x)$ 、時間変動 $h(t)$ のどれかを明記すべきです。[Zhang et al. 2026](https://doi.org/10.1016/j.applthermaleng.2026.131272) は time-varying $h$ まで扱っているため、単一scalar $h$ の推定だけを大きな新規性として扱うのは難しいです。
 
 第八に、**構造モデル誤差が熱パラメータへ吸収される危険**があります。実際の主軸では、軸受拘束、接触剛性、予圧、熱膨張係数、回転体とハウジングの相対変位、機械荷重が変位計測に影響します。Ansari et al. の2026年研究が温度と Young率を同時にsystem identificationしようとしていることは、変位を熱観測として用いる場合に機械パラメータ不確かさが無視できないことを示す近接例です。
 
@@ -570,3 +662,5 @@ $$
 を比較すると、提案法の位置づけが非常に明確になります。Ansari型の決定論的随伴法は大規模状態に対して計算効率が高く、EnKFには posterior uncertainty、オンライン逐次更新、微分不要という利点がある一方、ensemble cost と sampling error があります。Dileep/Tan型の deterministic inverse methods と、Zhang/Bakhshaei型の ensemble thermal estimators のちょうど中間に本研究を置くのが、文献上最も自然な位置づけです。
 
 総合すると、**「EnKFを使ったこと」ではなく、「変位をthermal-state updateへ戻すこと」「$Q$ と $h$ を同じ augmented state で推定すること」「CHT–FEMを一つの同化forward chainにすること」の三点を同時に成立させる**のが、本研究の最も強い差分です。その上で $W=K^{-1}H$ は新規な感度式としてではなく、**変位観測の情報設計を物理的に構成する既知の写像**として利用する、と位置づけるのが過大主張を避けつつ最も説得力のある構成です。
+
+</details>

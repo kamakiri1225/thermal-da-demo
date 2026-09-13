@@ -85,10 +85,10 @@ $W$(5040行 × 5列)に1回だけ組んでおく**。各行 $W_{p,:}$ が「節�
 $$W_{p,i} = \frac{w_i}{\sum_{j} w_j},
 \qquad \sum_{i=1}^{5} W_{p,i} = 1$$
 
-すると、ある時刻の5ノード温度ベクトル $\mathbf{T}_\mathrm{node}\in\mathbb{R}^5$ から
-全節点温度 $\mathbf{T}_\mathrm{mesh}\in\mathbb{R}^{5040}$ は**行列積1発**で得られる:
+すると、ある時刻の5ノード温度ベクトル $\mathbf T_\mathrm{node}\in\mathbb{R}^5$ から
+全節点温度 $\mathbf T_\mathrm{mesh}\in\mathbb{R}^{5040}$ は**行列積1発**で得られる:
 
-$$\boxed{\ \mathbf{T}_\mathrm{mesh} = W\, \mathbf{T}_\mathrm{node}\ }$$
+$$\boxed{\ \mathbf T_\mathrm{mesh} = W\, \mathbf T_\mathrm{node}\ }$$
 
 ```python
 # 重み行列 W (5040 x 5) を最初に1回だけ作る
@@ -118,7 +118,7 @@ T_mesh = W @ T_node          # (5040,) = (5040,5) @ (5,)
 
 | | 温度の持ち方 | ParaView 分布の作り方 |
 |---|---|---|
-| **ROM 版** | 5点 | 5点を IDW で全メッシュに補間($\mathbf{T}_\mathrm{mesh}=W\mathbf{T}_\mathrm{node}$) |
+| **ROM 版** | 5点 | 5点を IDW で全メッシュに補間($\mathbf T_\mathrm{mesh}=W\mathbf T_\mathrm{node}$) |
 | **OpenFOAM 版** | 20696セル | 実メッシュのセルにそのまま貼る |
 
 ROM は「0→600s の時刻歴アニメが数秒で作れる」、OpenFOAM は「分布が正確」という住み分け。

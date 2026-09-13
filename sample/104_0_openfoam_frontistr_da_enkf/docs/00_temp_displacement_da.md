@@ -17,7 +17,7 @@ $$y = [\, T_\mathrm{hot},\ T_\mathrm{cold},\ u_z^\mathrm{heater},\ u_z^\mathrm{o
 
 温度観測は状態(温度場)の抜き出しなので線形だが、変位は
 
-$$u = g(T) \quad \text{(温度場 → IDW補間 → FrontISTR線形静解析 → 上面 } U_z)$$
+$$u = g(T) \quad \text{(temp field to top } U_z)$$
 
 という**物理チェーンを通した非線形写像**。EnKF ではヤコビアンを作る必要はなく、
 各メンバー $i$ について実際にチェーンを評価した予報観測
@@ -50,7 +50,7 @@ $$x_a^{(i)} = x_f^{(i)} + C_{zy}\left(C_{yy}+R\right)^{-1}\left(y+\varepsilon^{(
 
 ## 4. 観測誤差 R の単位混在
 
-$y$ は K と mm が混在するが、$R$ を対角に
+$y$ は K と mm が混在するが、 $R$ を対角に
 
 $$R = \mathrm{diag}\!\left(\sigma_T^2,\ \sigma_T^2,\ \sigma_u^2,\ \sigma_u^2\right), \quad \sigma_T = 0.3\ \mathrm{K},\ \sigma_u = 10^{-4}\ \mathrm{mm}$$
 
@@ -63,4 +63,4 @@ FrontISTR は1評価あたり十数秒で、OpenFOAM(1ウィンドウ数分)に�
 
 コスト内訳(1サイクル):
 
-$$\underbrace{N \times \text{chtMultiRegionFoam}}_{\text{数分} \times 5} + \underbrace{(N+1) \times \text{FrontISTR}}_{\text{約16秒} \times 6}$$
+$$\underbrace{N \times \text{chtMultiRegionFoam}}_{\text{few min} \times 5} + \underbrace{(N+1) \times \text{FrontISTR}}_{\sim 16\,\text{s} \times 6}$$

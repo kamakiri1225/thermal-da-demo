@@ -18,7 +18,7 @@
 
 温度場（全セル）と Q を1本のベクトルにまとめる（拡大状態）:
 
-$$z=\begin{bmatrix}T_1\\ \vdots\\ T_{N_c}\\ Q\end{bmatrix}\quad(\text{長さ } N_c+1,\ N_c=20696)$$
+$$z=\begin{bmatrix}T_1\\ \vdots\\ T_{N_c}\\ Q\end{bmatrix}\quad(\text{length } N_c+1,\ N_c=20696)$$
 
 Q を状態に入れるのがポイント。こうすると温度と同じ手続きで Q も更新できる。
 
@@ -32,7 +32,7 @@ $$y=\begin{bmatrix}T_{\text{hot}}\\ T_{\text{cold}}\\ u_z^{\text{heater}}\\ u_z^
 
 **観測演算子 H** は「状態 z から、観測に相当する量を取り出す関数」:
 
-$$H(z)=\begin{bmatrix}T\text{ のうち hot セル}\\ T\text{ のうち cold セル}\\ \text{温度場}\to\text{FrontISTR}\to u_z^{\text{heater}}\\ \text{温度場}\to\text{FrontISTR}\to u_z^{\text{opp}}\end{bmatrix}$$
+$$H(z)=\begin{bmatrix}T\text{ hot cell}\\ T\text{ cold cell}\\ \text{temp}\to\text{FrontISTR}\to u_z^{\text{heater}}\\ \text{temp}\to\text{FrontISTR}\to u_z^{\text{opp}}\end{bmatrix}$$
 
 - 温度2点は「そのセルの値を抜き出すだけ」＝**線形**（行列で書ける。該当セルが1、他が0の行）。
 - 変位2点は「温度場を FrontISTR に通す」＝**非線形**。行列では書けないので、
@@ -50,9 +50,9 @@ $$H(z)=\begin{bmatrix}T\text{ のうち hot セル}\\ T\text{ のうち cold セ
 各分身をモデルで前進（chtMultiRegionFoam）させた後、観測演算子を通した値を
 **予報観測** と呼ぶ:
 
-$$y_f^{(i)} = H\!\left(z_f^{(i)}\right)\quad(\text{分身 } i \text{ の「もし観測したら」の予測値})$$
+$$y_f^{(i)} = H\!\left(z_f^{(i)}\right)\quad(\text{member } i \text{ predicted obs})$$
 
-Q が大きい分身は温度が高く出る → その分身の $y_f^{(i)}$（温度成分）も大きい。
+Q が大きい分身は温度が高く出る → その分身の $y_f^{(i)}$ （温度成分）も大きい。
 これが「**Q と観測温度の相関**」の源になる。
 
 ---
@@ -73,9 +73,9 @@ $$\delta z^{(i)}=z_f^{(i)}-\bar z,\qquad \delta y^{(i)}=y_f^{(i)}-\bar y$$
 
 状態と観測の**共分散**（一緒に大きくなる／小さくなる度合い）:
 
-$$C_{zy}=\frac{1}{N-1}\sum_i \delta z^{(i)}\,\bigl(\delta y^{(i)}\bigr)^{T}\quad(\text{サイズ } (N_c{+}1)\times 4)$$
+$$C_{zy}=\frac{1}{N-1}\sum_i \delta z^{(i)}\,\bigl(\delta y^{(i)}\bigr)^{T}\quad(\text{size } (N_c{+}1)\times 4)$$
 
-$$C_{yy}=\frac{1}{N-1}\sum_i \delta y^{(i)}\,\bigl(\delta y^{(i)}\bigr)^{T}\quad(\text{サイズ } 4\times 4)$$
+$$C_{yy}=\frac{1}{N-1}\sum_i \delta y^{(i)}\,\bigl(\delta y^{(i)}\bigr)^{T}\quad(\text{size } 4\times 4)$$
 
 $C_{zy}$ の**一番下の行**が、まさに「Q と 各観測の共分散」:
 
@@ -99,10 +99,10 @@ R が大きい観測ほど「信用しない」＝補正を弱める。
 
 観測1単位のズレを、状態のどこにどれだけ反映するかを決める行列:
 
-$$\boxed{\,K=C_{zy}\,\bigl(C_{yy}+R\bigr)^{-1}\,}\qquad(\text{サイズ } (N_c{+}1)\times 4)$$
+$$\boxed{\,K=C_{zy}\,\bigl(C_{yy}+R\bigr)^{-1}\,}\qquad(\text{size } (N_c{+}1)\times 4)$$
 
-- 分子 $C_{zy}$：状態と観測の相関が強いほど大きく動かす。
-- 分母 $C_{yy}+R$：観測の（アンサンブル＋測定）不確かさが大きいほど動かさない。
+- 分子 $C_{zy}$ ：状態と観測の相関が強いほど大きく動かす。
+- 分母 $C_{yy}+R$ ：観測の（アンサンブル＋測定）不確かさが大きいほど動かさない。
 - 逆行列は 4×4 だけ（観測が4成分なので）。実装は `np.linalg.solve` で解く。
 
 ---
@@ -110,7 +110,7 @@ $$\boxed{\,K=C_{zy}\,\bigl(C_{yy}+R\bigr)^{-1}\,}\qquad(\text{サイズ } (N_c{+
 ## 8. 更新式 ― ようやく z_a（と Q）が出る
 
 各分身を、観測とのズレ（イノベーション）に K を掛けて補正する
-（摂動観測：各分身に独立ノイズ $\varepsilon^{(i)}\sim N(0,R)$）:
+（摂動観測：各分身に独立ノイズ $\varepsilon^{(i)}\sim N(0,R)$ ）:
 
 $$\boxed{\,z_a^{(i)}=z_f^{(i)}+K\,\bigl(y+\varepsilon^{(i)}-H(z_f^{(i)})\bigr)\,}$$
 
@@ -118,15 +118,15 @@ $$\boxed{\,z_a^{(i)}=z_f^{(i)}+K\,\bigl(y+\varepsilon^{(i)}-H(z_f^{(i)})\bigr)\,
 
 ### Q だけ取り出すと
 
-K の**一番下の行**を $K_Q$（長さ4）と書くと、状態ベクトルの Q 成分の更新は:
+K の**一番下の行**を $K_Q$ （長さ4）と書くと、状態ベクトルの Q 成分の更新は:
 
 $$Q_a^{(i)}=Q_f^{(i)}+K_Q\,\bigl(y+\varepsilon^{(i)}-H(z_f^{(i)})\bigr)$$
 
-$K_Q$ は §7 より $K_Q=[C_{zy}]_{Q,:}\,(C_{yy}+R)^{-1}$、つまり **§5 の cov(Q, 観測) が効く**。
+$K_Q$ は §7 より $K_Q=C_{zy}[Q,:]\,(C_{yy}+R)^{-1}$ 、つまり **§5 の cov(Q, 観測) が効く**。
 だから：
 
-- 予測温度が観測より**高すぎ**（$y-H z_f<0$）→ $\mathrm{cov}(Q,T)>0$ なので **Q を下げる**
-- 予測温度が観測より**低すぎ**（$y-H z_f>0$）→ **Q を上げる**
+- 予測温度が観測より**高すぎ**（$y-H z_f<0$ ）→ $\mathrm{cov}(Q,T)>0$ なので **Q を下げる**
+- 予測温度が観測より**低すぎ**（$y-H z_f>0$ ）→ **Q を上げる**
 
 「Q を直接測っていないのに、Q が温度に与える影響（相関）を通じて逆算」できる正体がこれ。
 
@@ -134,15 +134,15 @@ $K_Q$ は §7 より $K_Q=[C_{zy}]_{Q,:}\,(C_{yy}+R)^{-1}$、つまり **§5 の
 
 ## 8.5 放熱係数 h も「まったく同じ式」で推定される
 
-ROM版では状態に Q だけでなく**放熱 h も入れる**（拡大状態 $z=[T_1..T_5,\;Q,\;h]$、7次元）。
+ROM版では状態に Q だけでなく**放熱 h も入れる**（拡大状態 $z=[T_1..T_5,\;Q,\;h]$ 、7次元）。
 h の推定は Q と**同じ手続き**——状態のもう1行が増えるだけ:
 
 1. 各分身は違う h を持つ（初期は乱数、`param_jitter_h` でばらつかせる）
 2. 予報観測 $y_f^{(i)}=H(z_f^{(i)})$ に、その分身の h の効きが乗る
    （h が大きい分身は冷えやすく、温度が低めに出る）
 3. 標本共分散 $C_{zy}$ の **h の行** が「h と各観測の相関」になる:
-   $$[C_{zy}]_{h,:}=\bigl(\mathrm{cov}(h,T_1),\ \dots,\ \mathrm{cov}(h,u_z^{\text{opp}})\bigr)$$
-4. ゲインの h の行 $K_h=[C_{zy}]_{h,:}(C_{yy}+R)^{-1}$ で、Q と同じ更新式:
+   $$C_{zy}[h,:]=\bigl(\mathrm{cov}(h,T_1),\ \dots,\ \mathrm{cov}(h,u_z^{\text{opp}})\bigr)$$
+4. ゲインの h の行 $K_h=C_{zy}[h,:](C_{yy}+R)^{-1}$ で、Q と同じ更新式:
    $$h_a^{(i)}=h_f^{(i)}+K_h\,\bigl(y+\varepsilon^{(i)}-H(z_f^{(i)})\bigr)$$
 
 **要は「状態ベクトルに入れた量は、すべて同じ1本の式 $z_a=z_f+K(y+\varepsilon-H z_f)$ で

@@ -36,9 +36,9 @@ EnKF が複数時刻・複数メンバーの情報を統計的に平均し、**�
 - `model_dt_s: 1.0` … メンバーを1秒刻みで前へ進める(ただの積分)
 - `obs_interval_s: 20.0` … 20秒ごとに観測が来たときに**だけ**平均・分散を計算して更新
 
-$$\underbrace{1\text{s}\to 2\text{s}\to\dots\to 20\text{s}}_{\text{60メンバーをただ前進(分散計算なし)}}
-\;\xrightarrow{\ 20\text{s: 観測}\ }\;
-\underbrace{\text{平均・分散を計算して補正}}_{\text{1回}}\;\to\;\cdots$$
+$$\underbrace{1\text{s}\to 2\text{s}\to\dots\to 20\text{s}}_{\text{60 members forward, no cov}}
+\;\xrightarrow{\ 20\text{s: obs}\ }\;
+\underbrace{\text{compute mean/cov, correct}}_{\text{once}}\;\to\;\cdots$$
 
 分散・共分散を計算するのは「観測とどう混ぜるか(カルマンゲイン)」を決める瞬間だけ。
 予報の間は各メンバーを独立に走らせるだけでよい。
@@ -50,13 +50,13 @@ $$\underbrace{1\text{s}\to 2\text{s}\to\dots\to 20\text{s}}_{\text{60メンバ�
 **サイクル = データ同化を1回まわすこと**(時間の単位ではなく回数)。
 1サイクル = 「予報 → 観測 → 補正」の1セット。
 
-$$\underbrace{60\text{メンバーを20秒ぶん前進}}_{\text{予報}}\;\to\;
-\underbrace{20秒時点の観測}_{\text{観測}}\;\to\;
-\underbrace{平均・分散で補正}_{\text{解析}}$$
+$$\underbrace{60\text{ members, 20s forward}}_{\text{forecast}}\;\to\;
+\underbrace{\text{obs at 20s}}_{\text{obs}}\;\to\;
+\underbrace{\text{correct by mean/cov}}_{\text{analysis}}$$
 
 今回は観測が20秒ごとなので、**1サイクル = 20秒ぶんの処理**。
 
-$$600\ \text{s} \div 20\ \text{s} = 30\ \text{回} \;\Rightarrow\; \textbf{30サイクル}$$
+$$600\ \text{s} \div 20\ \text{s} = 30\ \text{times} \;\Rightarrow\; \textbf{30 cycles}$$
 
 ```
 t= 20s → 1サイクル目(1回目の補正)
