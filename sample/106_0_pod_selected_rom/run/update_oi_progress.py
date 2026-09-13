@@ -34,16 +34,18 @@ def main():
         state='600秒完了' if complete else f'{t[-1]:g}秒までの途中結果'
         entries.append(dict(run=label,status=state,latest_time_s=float(t[-1]),Q_W=float(q[-1]),
                             absolute_relative_Q_error_pct=float(abs(q[-1]/15-1)*100),temperature_rmse_K=float(err[-1])))
-        axes[0].plot(t,q,'o--',color=color,ms=4,label=f'{label}／{state}')
+        axes[0].plot(t,q,'o--',color=color,ms=4,label=label)
         axes[1].semilogy(t,err,'o--',color=color,ms=4,label=label)
-    axes[0].axhline(15,color='black',lw=2,label='真値Q=15 W')
+    axes[0].axhline(15,color='black',lw=2,label='真値 Q=15 W')
     axes[0].set_ylabel('発熱量パラメータ Q [W]');axes[1].set_ylabel('全20,696セルの温度RMSE [K]')
     for ax in axes:
-        ax.axvspan(0,300,color='orange',alpha=.07);ax.set_xlabel('時刻 [s]');ax.grid(alpha=.3);ax.legend(fontsize=8)
+        ax.axvspan(0,300,color='orange',alpha=.07);ax.set_xlabel('時刻 [s]');ax.grid(alpha=.3)
+    h,l=axes[0].get_legend_handles_labels()
+    fig.legend(h,l,loc='lower center',ncol=3,fontsize=9,frameon=True)
     fig.suptitle('実ソルバOI：温度場とQの推定は別々に評価する\n'
                  'OpenFOAM＋FrontISTR／温度hot・cold＋上面2領域Uz／60秒ごと更新／hは推定対象外\n'
                  '5構成すべて600秒完走。300秒以降の実ヒータ入力は0 W（冷却）。',fontsize=11)
-    fig.tight_layout(rect=[0,0,1,.89]);fig.savefig(ROOT/'docs/img/oi_parameter_progress.png',dpi=140);plt.close(fig)
+    fig.tight_layout(rect=[0,0.10,1,.89]);fig.savefig(ROOT/'docs/img/oi_parameter_progress.png',dpi=140);plt.close(fig)
     (ROOT/'results/oi_parameter_progress.json').write_text(json.dumps(entries,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(entries,ensure_ascii=False,indent=2))
 
