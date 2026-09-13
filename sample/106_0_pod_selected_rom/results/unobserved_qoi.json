@@ -1,0 +1,15 @@
+{
+  "unobserved_pair_z_mm": 75.0,
+  "temp_obs_nodes": [
+    2,
+    0
+  ],
+  "unobs_QoI_heat_MAE_um": {
+    "no_DA": 0.20011810758292495,
+    "DA": 0.06640238314739574
+  },
+  "obs_QoI_heat_MAE_um": {
+    "no_DA": 0.24364623293915577,
+    "DA": 0.07632448749221887
+  }
+}
