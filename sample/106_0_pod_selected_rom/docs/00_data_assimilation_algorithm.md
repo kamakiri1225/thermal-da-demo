@@ -97,14 +97,12 @@ W_{\rm FEM}=K_s^{-1}H_T,\qquad
 一方、下図の入力はROMの5点温度 $T_5$ で、全温度場の復元を挟む。
 $\Phi$ をPODモード、Pを代表点の抽出演算子、Jを全セルからFEM節点への温度写像とすると、
 
-$$a=(P\Phi)^+(T_5-P\bar T),\qquad
-T_{\rm FEM}=J(\bar T+\Phi a),\qquad u=W_{\rm FEM}(T_{\rm FEM}-T_{\rm ref}).$$
+$$a=(P\Phi)^+(T_5-P\bar T),\qquad T_{\rm FEM}=J(\bar T+\Phi a),\qquad u=W_{\rm FEM}(T_{\rm FEM}-T_{\rm ref}).$$
 
 A/Oの変位を抜き出す演算子をEと書けば、FrontISTRで事前計算したモード応答は
 $D_{\rm mode}=EW_{\rm FEM}J\Phi$ 。図の感度は連鎖則で
 
-$$\boxed{w=\frac{\partial(u_A-u_O)}{\partial T_5}
-=[1,-1]D_{\rm mode}(P\Phi)^+}\quad(1\times5).$$
+$$\boxed{w=\frac{\partial(u_A-u_O)}{\partial T_5} =[1,-1]D_{\rm mode}(P\Phi)^+}\quad(1\times5).$$
 
 **ROM点1つを＋1 Kすると復元温度場の多数のセルが変わる。その変化全体に対する変位差の応答**を描いている。
 棒の値を「その場所のFEM節点だけを＋1 Kした感度」と読んではいけない。
@@ -165,44 +163,56 @@ $$\boxed{w=\frac{\partial(u_A-u_O)}{\partial T_5}
 #### 104で実際に行ったEnKFの計算手順
 
 104の状態は、20696セルの固体温度と発熱量を連結した
-\[
+
+$$
 z^{(m)}=\begin{bmatrix}T^{(m)}_1,\ldots,T^{(m)}_{20696},Q^{(m)}\end{bmatrix}^{\mathsf T}
 \in\mathbb{R}^{20697},\qquad m=1,\ldots,5
-\]
+$$
+
 である。各60秒窓で、まず5メンバーそれぞれをOpenFOAMで前進し、
 その固体温度をFrontISTRへ渡して上面2点の鉛直変位を計算する。これにより、
 温度・発熱量の予報行列 $Z_f$ （ $5\times20697$ ）と変位を含む予報観測行列
 $Y_f$ （ $5\times4$ ）を得る。
 
 次に、メンバー方向の平均と偏差を計算する。
-\[
+
+$$
 \bar z=\frac{1}{5}\sum_{m=1}^{5}z_f^{(m)},\quad
 \bar y=\frac{1}{5}\sum_{m=1}^{5}y_f^{(m)},\quad
 dZ_m=z_f^{(m)}-\bar z,\quad dY_m=y_f^{(m)}-\bar y.
-\]
+$$
+
 偏差行列を $dZ\in\mathbb{R}^{5\times20697}$ 、 $dY\in\mathbb{R}^{5\times4}$ とすると、
 標本共分散は
-\[
+
+$$
 C_{zy}=\frac{dZ^{\mathsf T}dY}{5-1}\;(20697\times4),\qquad
 C_{yy}=\frac{dY^{\mathsf T}dY}{5-1}\;(4\times4).
-\]
+$$
+
 前者は温度各セル・ $Q$ と4観測成分の共分散、後者は観測成分同士の共分散である。
 カルマンゲインは
-\[
+
+$$
 K=C_{zy}(C_{yy}+R)^{-1}
-\]
+$$
+
 で求める。実装では逆行列を作らず、4×4の連立方程式を `np.linalg.solve` で解く。
 観測摂動 $\epsilon^{(m)}\sim\mathcal N(0,R)$ を各メンバーに加え、
-\[
+
+$$
 z_a^{(m)}=z_f^{(m)}+K\left[y+\epsilon^{(m)}-y_f^{(m)}\right]
-\]
+$$
+
 として5メンバーを更新する。更新した温度場と $Q$ を各OpenFOAMケースへ書き戻し、
 次の60秒窓の初期状態にする。この予報→平均・偏差→共分散→ゲイン→更新を10回繰り返した。
 
 **変位観測を使ったかどうか**：104の実ソルバEnKFでは使っている。観測ベクトルは
-\[
+
+$$
 y=\begin{bmatrix}T_{hot}&T_{cold}&u_{z,A}&u_{z,O}\end{bmatrix}^{\mathsf T}
-\]
+$$
+
 の4成分である。各メンバーの固体温度をFrontISTRへ渡して得た
 $u_{z,A},u_{z,O}$ を $Y_f$ の2列として共分散とカルマンゲインに含めたため、
 変位の観測残差も温度場と $Q$ の更新に使われる。
@@ -213,11 +223,13 @@ A/O変位差は同化後温度から計算して比較しただけである。�
 
 平均・偏差や共分散の行列積そのものは、5メンバー分をまとめて計算するため数秒程度であり、
 13時間の主因ではない。重いのは、各サイクルで5メンバーについて
-\[
+
+$$
 5\ \text{ OpenFOAM(CHT) forecasts}
 \;+
 5\ \text{ FrontISTR analyses}
-\]
+$$
+
 を実行したことである。さらに、観測を作る真値ランも別に必要である。
 10サイクルでは、少なくともメンバー予報50窓（OpenFOAM）とFrontISTRの多数回の
 変位評価を行うため、物理時間600秒に対して実時間約13時間（約78倍）となった。
@@ -233,7 +245,9 @@ EnKF が重いのは「アンサンブル $N$ 本を毎サイクル走らせて�
 そこで **OI（最適内挿）** が候補になる。OIは**背景誤差共分散 $B$ を事前に決め打ちで固定**し、
 毎サイクルはアンサンブルでなく **背景トラジェクトリ1本**だけを実ソルバ（OpenFOAM＋FrontISTR）で回す:
 
-$$z_a=z_b+K\,(y-h(z_b)),\qquad K=B H^\top (H B H^\top+R)^{-1}\quad (B,K\ \text{fixed}).$$
+$$
+z_a=z_b+K\,(y-h(z_b)),\qquad K=B H^\top (H B H^\top+R)^{-1}\quad (B,K\ \text{fixed}).
+$$
 
 **要点：OIはアンサンブルで何ケースも回さなくてよい**。予報は背景1本なので、実ソルバの実行本数は
 EnKFの $1/N$ 。104（5メンバー・約13時間）に対し、**OIなら概ね $13\text{h}/5\approx2.6$ 時間**の見込み
@@ -260,8 +274,10 @@ OpenFOAMで固体と周囲流体を連成して解き、界面の温度と熱流
 したがって、壁面からの放熱は予報計算の中で求まる。必要なら計算後に、外向き熱流束を $q_{\rm out}^{\prime\prime}$ 、
 壁面温度を $T_w$ 、選んだ参照温度を $T_{\rm ref}$ として、
 
-$$h_{\rm eff}(\boldsymbol{x},t)=\frac{q^{\prime\prime}_{\rm out}(\boldsymbol{x},t)}{T_w(\boldsymbol{x},t)-T_{\rm ref}}
-\quad [\mathrm{W/(m^2 K)}]$$
+$$
+h_{\rm eff}(\boldsymbol{x},t)=\frac{q^{\prime\prime}_{\rm out}(\boldsymbol{x},t)}{T_w(\boldsymbol{x},t)-T_{\rm ref}}
+\quad [\mathrm{W/(m^2 K)}]
+$$
 
 という**結果から評価する熱伝達率**を定義できる（温度差がゼロ付近では評価が不安定）。
 これはOIで同定したパラメータではなく、参照温度の選び方にも依存する後処理量である。
@@ -272,15 +288,37 @@ ROMの放熱係数 $h$ [W/K] とも単位・定義が異なり、そのまま数
 
 計算の役割分担は次の一方向連成である。
 
-$$
-\text{OpenFOAM (CHT)}
-\;\xrightarrow[\text{solid cell temp }T_s(\boldsymbol{x},t)]{}
-\text{temperature mapping}
-\;\xrightarrow{}
-\text{FrontISTR (thermoelastic)}
-\;\xrightarrow{}
-\boldsymbol{u}(\boldsymbol{x},t).
-$$
+```mermaid
+flowchart LR
+    A["① OpenFOAM<br/>空気と金属の熱移動を計算"]
+    B["② 金属の温度分布<br/>各セルの温度を得る"]
+    C["③ 温度を受け渡す<br/>セルから節点へ補間"]
+    D["④ FrontISTR<br/>熱膨張と拘束による変形を計算"]
+    E["⑤ 各節点の変位<br/>どの方向に何 µm 動いたか"]
+    F["⑥ 評価点の変位<br/>A−O・C−Dの差も評価"]
+    A --> B --> C --> D --> E --> F
+```
+
+**「セル」はOpenFOAMが温度を計算する小さな領域、「節点」はFrontISTRが変位を計算するメッシュの点。**
+両者の位置は一致しないため、③で周囲のセル温度から節点温度を求める。
+実ソルバの受け渡しでは、座標を対応させたうえで近傍8セルから補間する。
+プログラムは `102_1_frontistr_hollow_cylinder_thermal_expansion/python/run_thermal_expansion.py` の
+`interpolate_to_nodes(..., k=8)` と `fistr_case.run_fistr(...)`。
+
+**OIを行う場合は、②の温度分布を観測で補正する。**
+
+```mermaid
+flowchart LR
+    P["OpenFOAMで予報温度を計算"] --> Y["予報温度<br/>FrontISTRで求めた予報変位"]
+    O["観測<br/>hot・cold温度、A・O変位"] --> U["OI：観測との差から補正<br/>温度分布と発熱量Qを更新"]
+    Y --> U
+    U --> T["OpenFOAMへ保存<br/>次の計算の初期値"]
+    U --> D["補正後の温度を<br/>FrontISTRへ渡し直す"]
+    D --> V["同化後の変位を評価<br/>A・Oと未観測C・D"]
+```
+
+変位を独立した状態として保存・更新するのではなく、温度を補正した後に変位を計算し直す。
+
 
 OpenFOAMは流体の対流、固体内の熱伝導、固体‐流体界面の熱流束を解くため、
 計算の結果として局所的な熱伝達の強さが決まる。FrontISTRはその結果得られた固体温度を
@@ -312,8 +350,13 @@ EnKFは $B$ を**アンサンブルの標本共分散**として毎サイクル�
 
 1. **物理・モデル感度から作る（今回のOI）**：未知の発熱量 $Q$ の不確かさを、
    $\delta T\approx s_Q\delta Q$ （ $s_Q$ は $\partial T/\partial Q$ の近似、単位 K/W）で温度場へ伝播する:
-   $$B_{TT}=\sigma_Q^2 s_Q s_Q^\top+\sigma_T^2 I,\quad
-   B_{TQ}=\sigma_Q^2 s_Q,\quad B_{QQ}=\sigma_Q^2.$$
+   
+
+$$
+B_{TT}=\sigma_Q^2 s_Q s_Q^\top+\sigma_T^2 I,\quad
+   B_{TQ}=\sigma_Q^2 s_Q,\quad B_{QQ}=\sigma_Q^2.
+$$
+
    $\sigma_Q,\sigma_T$ は事前に設定する**標準偏差**で、その二乗が分散。
    $B_{TQ}$ により温度・変位の観測から $Q$ を更新する。今回のOIには $h$ の状態・共分散・更新式はない。
 
@@ -321,10 +364,12 @@ EnKFは $B$ を**アンサンブルの標本共分散**として毎サイクル�
 20696×20696行列である。ただしプログラムはこの大行列を作らず、必要な積
 $HBH^\mathsf{T}$ と $BH^\mathsf{T}$ を次の成分式で直接計算する（`run/run_openfoam_fem_oi.py` の94〜118行）。
 温度観測セル $i,j$ については
-\[
- (HBH^\mathsf{T})_{ij}=\sigma_T^2\,\delta_{ij}
+
+$$
+(HBH^\mathsf{T})_{ij}=\sigma_T^2\,\delta_{ij}
        +\sigma_Q^2s_Q(x_i)s_Q(x_j),
-\]
+$$
+
 であり、温度と変位の共分散も同じ $\sigma_Q^2$ のランク1項から作る。
 したがって、温度セル間の非対角共分散を距離 $L$ で広げる設定ではなく、
 $Q$ の影響分布 $s_Q$ に沿った相関だけを持つ近似である。
@@ -334,33 +379,41 @@ OIの更新では $S=HBH^\mathsf{T}+R$ を作り、固定ゲイン $K=BH^\mathsf
 #### 行列の意味を成分で書く
 
 状態ベクトルは
-\[
+
+$$
 x=\begin{bmatrix}T_1&T_2&\cdots&T_{20696}&Q\end{bmatrix}^{\mathsf T}
-\]
+$$
+
 である。 $T_i$ はOpenFOAM固体セル $i$ の温度、 $Q$ は発熱量 [W] である。
 背景誤差を $\delta x=[\delta T;\delta Q]$ とし、
 $\delta T\simeq s_Q\delta Q+\eta_T$ （ $\eta_T$ はセルごとの独立誤差）と仮定すると、
-\[
+
+$$
 \begin{aligned}
 \mathrm{Cov}(T_i,T_j)
   &=s_Q(x_i)s_Q(x_j)\sigma_Q^2+\delta_{ij}\sigma_T^2,\\
 \mathrm{Cov}(T_i,Q)&=s_Q(x_i)\sigma_Q^2,\\
 \mathrm{Var}(Q)&=\sigma_Q^2.
 \end{aligned}
-\]
+$$
+
 例えば $i=j$ なら $T_i$ の分散は
 $s_Q(x_i)^2\sigma_Q^2+\sigma_T^2$ 、 $i\ne j$ なら同じ発熱量誤差を共有する分だけ
 $s_Q(x_i)s_Q(x_j)\sigma_Q^2$ の共分散を持つ。
 
 この $B$ と観測演算子 $H$ から、観測空間の予測誤差共分散
-\[
+
+$$
 S=HBH^{\mathsf T}+R
-\]
+$$
+
 を作る。 $R$ は観測ノイズの共分散であり、温度センサの分散と変位センサの分散を対角に置く。
 そして観測残差 $d=y-h(x_b)$ に対して
-\[
+
+$$
 x_a=x_b+BH^{\mathsf T}S^{-1}d
-\]
+$$
+
 で温度場と $Q$ を同時に補正する。実装は $B$ 全体を生成せず、 $BH^{\mathsf T}$ と
 $HBH^{\mathsf T}$ を成分式で計算している。
 
@@ -377,9 +430,11 @@ $\sigma_Q$ を選ぶ必要がある。
 
 主な理由は、観測残差を温度場の補正でも説明でき、 $Q$ を動かす情報が相対的に弱かったためである。
 OIの補正は
-\[
+
+$$
 \Delta T=K_Td,\qquad \Delta Q=K_Qd
-\]
+$$
+
 で決まる。今回の $B$ ではセルごとの独立温度誤差 $\sigma_T^2I$ を許しているため、
 観測と予報の差をまず温度場側で吸収できる。一方、 $Q$ へ伝わる経路は
 $B_{TQ}=\sigma_Q^2s_Q$ という1本の感度方向だけであり、観測がその方向を十分に識別できないと
@@ -408,8 +463,10 @@ EnKFは各サイクルのメンバー（104の実ソルバ版は5、106のROM版
 
 温度場の背景誤差を $\delta T_i$ 、セル中心を $x_i$ とすると、代表的な仮定は
 
-$$B_{ij}=\mathrm{Cov}(\delta T_i,\delta T_j)
-=\sigma_T^2\exp\!\left[-\frac{\lVert x_i-x_j\rVert^2}{2L^2}\right].$$
+$$
+B_{ij}=\mathrm{Cov}(\delta T_i,\delta T_j)
+=\sigma_T^2\exp\!\left[-\frac{\lVert x_i-x_j\rVert^2}{2L^2}\right].
+$$
 
 従って $B_{ii}=\sigma_T^2$ が1セルの誤差分散、距離 $L$ の2点では相関係数が
 $\exp(-1/2)=0.607$ 、距離 $2L$ では $\exp(-2)=0.135$ になる。 $L$ は「どの距離まで
@@ -419,12 +476,16 @@ $\exp(-1/2)=0.607$ 、距離 $2L$ では $\exp(-2)=0.135$ になる。 $L$ は�
 
 $L$ を熱伝導の特徴から見積もることもできる。固体の熱伝導方程式
 
-$$\rho c_p\frac{\partial T}{\partial t}=k\nabla^2T+q$$
+$$
+\rho c_p\frac{\partial T}{\partial t}=k\nabla^2T+q
+$$
 
 で、熱拡散率を $\alpha=k/(\rho c_p)$ とおく。局所的な温度差が時間 $\tau$ の間に
 広がる距離は、熱拡散の幅から
 
-$$\ell_d(\tau)\sim\sqrt{2\alpha\tau}$$
+$$
+\ell_d(\tau)\sim\sqrt{2\alpha\tau}
+$$
 
 と見積もれる（定義によって係数は $\sqrt{\alpha\tau}$ などに変わる）。OIの相関長は、
 同化サイクルの予報時間や、誤差を生じさせた時間スケールを使い、まず
@@ -435,29 +496,39 @@ $L_0\approx\ell_d(\tau)$ を候補にする。これは「熱が届く距離」�
 
 熱源を止めた一様な無限固体で、温度差を $\theta=T-T_{\mathrm{air}}$ と置くと、
 
-$$\frac{\partial\theta}{\partial t}=\alpha\nabla^2\theta,
-\qquad \alpha=\frac{k}{\rho c_p}.$$
+$$
+\frac{\partial\theta}{\partial t}=\alpha\nabla^2\theta,
+\qquad \alpha=\frac{k}{\rho c_p}.
+$$
 
 時刻0に局所的な温度差を与えたときの基本解は、距離
 $r=\lVert x\rVert$ に対して
 
-$$\theta(r,t)=\frac{\Theta_0}{(4\pi\alpha t)^{3/2}}
-\exp\!\left(-\frac{r^2}{4\alpha t}\right).$$
+$$
+\theta(r,t)=\frac{\Theta_0}{(4\pi\alpha t)^{3/2}}
+\exp\!\left(-\frac{r^2}{4\alpha t}\right).
+$$
 
 指数の中身が1になる距離を影響範囲と定義すれば、
 
-$$\frac{r^2}{4\alpha t}=1
-\quad\Longrightarrow\quad r=\sqrt{4\alpha t}=2\sqrt{\alpha t}.$$
+$$
+\frac{r^2}{4\alpha t}=1
+\quad\Longrightarrow\quad r=\sqrt{4\alpha t}=2\sqrt{\alpha t}.
+$$
 
 また、このガウス分布の1方向の分散は $2\alpha t$ なので、標準偏差は
 
-$$\sigma_x=\sqrt{2\alpha t}.$$
+$$
+\sigma_x=\sqrt{2\alpha t}.
+$$
 
 本文の $\ell_d=\sqrt{2\alpha\tau}$ は、この**1方向のRMS幅（標準偏差）**を採用した定義である。
 指数1の幅 $2\sqrt{\alpha\tau}$ などと係数が異なるのは、「影響範囲」の定義が異なるためで、
 熱伝導方程式から得られる比例関係
 
-$$\ell_d\propto\sqrt{\alpha\tau}$$
+$$
+\ell_d\propto\sqrt{\alpha\tau}
+$$
 
 は共通である。実際の有限円筒・流体連成系ではこの基本解を厳密には使えないため、
 この距離を $L$ の初期候補にし、予報誤差の経験相関と未観測セルのRMSEで調整する。
@@ -465,7 +536,9 @@ $$\ell_d\propto\sqrt{\alpha\tau}$$
 今回の固体物性（OpenFOAMの `constant/solid/thermophysicalProperties`）は
 $k=50$ W/(m K)、 $\rho=7850$ kg/m³ 、 $c_p=480$ J/(kg K)なので、
 
-$$\alpha=\frac{50}{7850\times480}=1.33\times10^{-5}\ \mathrm{m^2/s}.$$
+$$
+\alpha=\frac{50}{7850\times480}=1.33\times10^{-5}\ \mathrm{m^2/s}.
+$$
 
 この値から得られる距離の目安は次の通りである。
 
@@ -485,7 +558,12 @@ $$\alpha=\frac{50}{7850\times480}=1.33\times10^{-5}\ \mathrm{m^2/s}.$$
 
 1. **$\sigma_T$**：同じ初期条件・同じ入力で作った複数のOpenFOAM温度場、または
    検証データに対する予報誤差 $e_i=T_i^{\rm forecast}-T_i^{\rm truth}$ を集め、
-   $$\sigma_T^2\approx\frac{1}{NM-1}\sum_{n=1}^{N}\sum_{i=1}^{M}(e_i-\bar e)^2$$
+   
+
+$$
+\sigma_T^2\approx\frac{1}{NM-1}\sum_{n=1}^{N}\sum_{i=1}^{M}(e_i-\bar e)^2
+$$
+
    とする。単一時刻しかなければ、観測誤差0.30 Kをそのまま背景分散に置かず、
    初期温度範囲・ROM残差・過去の予報誤差を根拠にする。
 2. **$L$ （相関長）** ― 誤差が「距離とともにどれだけ一緒に動くか」を測って決める。次の手順:
@@ -517,7 +595,10 @@ $$\alpha=\frac{50}{7850\times480}=1.33\times10^{-5}\ \mathrm{m^2/s}.$$
    これらの不確かさが実効誤差に乗る。**しばしばこちらが支配的で、決めにくい**。
 
 したがって
-$$\sigma_u=\sqrt{\sigma_\text{sensor}^2+\sigma_\text{model}^2}.$$
+
+$$
+\sigma_u=\sqrt{\sigma_\text{sensor}^2+\sigma_\text{model}^2}.
+$$
 
 一方、**背景側**は変位が状態変数でなく温度の従属量なので独立には決めず、温度背景 $\sigma_{T,b}$ から
 $\sigma_{u,b}\approx \lVert W\rVert\,\sigma_{T,b}$ と伝播する。
@@ -599,15 +680,159 @@ OIを回した。でたらめな初期から、温度・変位の観測で補正
 - 呼び出し箇所：OpenFOAM は `run_openfoam_fem_oi.py` の `of_case.run_window(...)`（内部で `chtMultiRegionFoam`）、
   FrontISTR は `displacement_obs(...)`（`fem/fem_obs.py`、内部で `fistr1`）。
 
-4つの決め打ち $\sigma_Q$ （0.5、2、6、50 W）を同じ初期条件・観測で比較した結果を下に示す。
-左から、hot温度、ヒータ側上面Aの変位、発熱量Qの推定履歴である。いずれも実ソルバを
-各60秒窓で計算した結果で、最終値はそれぞれ $\sigma_Q=0.5$ W: $Q=8.82$ W、
-$\sigma_Q=2$ W: $8.95$ W、 $\sigma_Q=6$ W: $8.96$ W、 $\sigma_Q=50$ W: $8.96$ Wとなった。
-温度場RMSEの最終値は順に0.090、0.111、0.112、0.113 Kである。
+#### 今回のOI：共分散の各要素を、どこでどう決めたか
 
-![実ソルバOI：σ_Q条件4ケース比較](img/oi_fullsolver_compare.png)
+**温度場の背景共分散は定義している。ただしアンサンブルから推定せず、標準偏差を人が指定し、最初の予報温度場の形でセル間の相関を与えた近似である。**
+対象コードは[104のrun_openfoam_fem_oi.py](../../104_0_openfoam_frontistr_da_enkf/run/run_openfoam_fem_oi.py)。
+冒頭の `SIGB_T` / `SIGB_Q` と、`if (not FREE) and gain is None:` 内で決める。
 
-**観測点の位置**（温度2点・変位2点。すべて熱感度Wで選定）:
+| 決める量 | 今回の値・計算方法 | 決めている箇所 |
+|---|---|---|
+| 温度の独立誤差の標準偏差 $\sigma_T$ | 既定値1.5 K。経験的に指定した設定値で、実測誤差や熱伝導式から算定した値ではない | `SIGB_T=float(os.environ.get("OI_SIGB_T","1.5"))` |
+| 発熱量の背景標準偏差 $\sigma_Q$ | 既定値6 W。比較では0.5 / 2 / 6 / 50 Wを指定 | `SIGB_Q=float(os.environ.get("OI_SIGB_Q","6.0"))` |
+| 各セルのQ感度の近似 $s_i$ | 最初の60秒予報の温度上昇を背景Qで割る | `sQ=(Tb-T_air)/max(Qb,1e-6)` |
+| 変位のQ感度の近似 $g_A,g_O$ | 温度上昇を1.1倍した場をFrontISTRへ渡し、変位差を0.1Qで割る | `hot=...`、`u_hot=displacement_obs(...)`、`duz_dQ=...` |
+| 観測誤差共分散R | 観測ノイズ標準偏差の二乗を対角に置く。背景共分散Bとは別 | `R=np.diag(...)`。値は `openfoam/da_openfoam_config.yaml` |
+
+**この実ソルバOIでは距離相関 $\exp(-r/L)$ や熱拡散長Lは使っていない。**
+別方式の一般論と、この計算の実装を区別する。1.5 Kや6 Wを熱伝導方程式から導出したわけではない。
+
+状態を $x=[T_1,\ldots,T_n,Q]^\mathsf T$ （n=20,696）とする。
+誤差を、各セル独立の温度誤差 $\eta_i$ と、共通の発熱誤差 $\delta Q$ の和で仮定する：
+
+$$
+\delta T_i=\eta_i+s_i\delta Q,\qquad
+\mathrm{Cov}(\eta_i,\eta_j)=\sigma_T^2\delta_{ij},\qquad
+\mathrm{Cov}(\eta_i,\delta Q)=0,\qquad
+\mathrm{Var}(\delta Q)=\sigma_Q^2.
+$$
+
+したがって各要素は、積を展開して期待値を取ると
+
+$$
+B_{T_iT_j}=E[(\eta_i+s_i\delta Q)(\eta_j+s_j\delta Q)]
+=\sigma_T^2\delta_{ij}+\sigma_Q^2s_is_j,
+$$
+
+$$
+B_{T_iQ}=B_{QT_i}=\sigma_Q^2s_i,\qquad B_{QQ}=\sigma_Q^2.
+$$
+
+行列全体では
+
+$$
+B=\begin{bmatrix}
+\sigma_T^2I_n+\sigma_Q^2ss^{\mathsf T}&\sigma_Q^2s\\
+\sigma_Q^2s^{\mathsf T}&\sigma_Q^2
+\end{bmatrix}.
+$$
+
+つまり温度の**対角要素は $2.25+\sigma_Q^2s_i^2$ K²**、
+**非対角要素は $\sigma_Q^2s_is_j$ K²**。1.5 Kは温度誤差全体の標準偏差ではなく、独立誤差部分の標準偏差である。
+離れたセル同士にも、共通Q誤差への応答を通じて共分散が入る。
+
+**数値例（式の説明用。実際のセル値ではない）**：2セルの感度を $s_1=0.2,s_2=0.1$ K/W、 $\sigma_Q=6$ Wとすると、
+
+$$
+B_{[T_1,T_2,Q]}=
+\begin{bmatrix}
+2.25+36(0.2)^2&36(0.2)(0.1)&36(0.2)\\
+36(0.1)(0.2)&2.25+36(0.1)^2&36(0.1)\\
+36(0.2)&36(0.1)&36
+\end{bmatrix}
+=\begin{bmatrix}3.69&0.72&7.2\\0.72&2.61&3.6\\7.2&3.6&36\end{bmatrix}.
+$$
+
+左上2×2はK²、Qとの交差要素はK·W、右下はW²。異なる単位の要素を含む拡大状態の共分散である。
+$\sigma_Q=2$ Wなら、この式の36を4に変える。全要素を単純に1/9にするのではなく、独立温度誤差の2.25は変えない。
+
+**感度も近似である**。最初の予報では背景Q=22 Wなので、 $s_i=(T^b_i(60)-T_{air})/22$ 。
+これはQを増減してOpenFOAMを再計算した有限差分 $\partial T_i/\partial Q$ ではなく、
+初期温度誤差＋5 Kの影響も含む温度上昇の比例近似である。
+変位感度も $T_{air}+1.1(T^b-T_{air})$ をFrontISTRに入れた温度スケール摂動である。
+
+**巨大なBそのものは配列化しない**。コードでは更新に必要な `BHt_f`（n×4）、`BHt_q`（4）、`HBHt`（4×4）を直接作る。
+観測を[hot温度,cold温度,A変位,O変位]、対応する感度を $g=[s_{hot},s_{cold},g_A,g_O]^\mathsf T$ とすると、実装は
+
+$$
+\widetilde{HBH^{\mathsf T}}=\sigma_Q^2gg^{\mathsf T}
++\mathrm{diag}(\sigma_T^2,\sigma_T^2,0,0)
+$$
+
+である。例えばhotとAの共分散は $\sigma_Q^2s_{hot}g_A$ 、AとOは $\sigma_Q^2g_Ag_O$ 。
+温度観測列の `BHt_f` は $\sigma_Q^2s_i s_{obs}+\sigma_T^2\delta_{i,obs}$ 、
+変位観測列は $\sigma_Q^2s_i g_{A/O}$ 、Q行は $\sigma_Q^2g^{\mathsf T}$ である。
+
+**注意：上記Bを実際の温度→変位演算子で厳密に投影した値とは異なる。**
+独立温度誤差 $\sigma_T^2I$ が変位に伝わる共分散寄与は、現実装の変位関連ブロックでは省略している。
+そのためチルダ付きで表記した。感度とゲインは最初の60秒で1回作り、その後10サイクルを通して固定する。
+EnKFのように各時刻のアンサンブルから共分散を更新する処理はない。
+
+σT=1.5 Kの根拠と、熱伝導による誤差伝播・5条件の実ソルバ検証は[18_oi_sigma_t_validation.md](18_oi_sigma_t_validation.md)に記載する。結果を先取りして妥当・不当と判断しない。
+
+#### σTを調整すれば解決するか：3ケースの結果
+
+σQ=6 W固定でσT=0.3 / 0.75 / 1.5 Kを比較した。計算済みの加熱区間60〜300秒では、
+全場温度の平均RMSEは0.4787 / 0.4811 / 0.4818 K、未観測C−D変位差RMSEは1.1877 / 1.1910 / 1.1919 µm。
+Qは300秒で9.52 / 9.49 / 9.49 W（真値15 W）で、ずれが残る。
+**現行OIでは、この範囲のσT調整だけで全場・変位差・Qの誤差を解消できなかった。OI一般の限界を証明したものではない。**
+
+![σTの3ケース：600秒までの温度・変位・変位差](img/oi_sigma_t_full_3cases.png)
+
+条件・評価式・観測温度とのトレードオフ・結論は[σT検証の結果](18_oi_sigma_t_validation.md)を参照。
+図は60〜600秒の同化後を表示する。300秒の縦線で加熱・冷却を区切る。上の加熱期指標は60〜300秒、下の冷却期指標は360〜600秒を集計した。
+
+#### σTの3ケース：600秒までの温度・変位と結論
+
+0.3 / 0.75 / 1.5 Kは600秒まで完了。冷却期360〜600秒の未観測C−D変位差RMSEは0.1136 / 0.1130 / 0.1128 µm。
+最終Qは9.006 / 8.968 / 8.958 W（真値15 W）で、約40%の過小推定が残る。
+**σT調整だけでは、今回のOIの加熱期変位差・Qの誤差を解消できなかった。冷却後の一致だけで推定成功とはいえない。**
+
+熱伝導の条件付き試算では、初期モード振幅標準偏差5 K・長さ75〜100.5 mmを例にすると60秒後は約1.24〜2.30 K。
+ただしこれは空間モードの振幅であり、セル独立誤差σTの最適値を与えるものではない。
+[熱伝導試算と実計算の対比・全区間の数値・結論](18_oi_sigma_t_validation.md)に詳細を記載した。
+
+#### σQの4条件：温度・変位を同じ図で比較
+
+| 条件 | 共通設定 |
+|---|---|
+| 予報モデル | OpenFOAM(CHT)＋FrontISTR、背景1本 |
+| 観測 | hot/cold温度＋上面A/Oの平均Uz。Wで最適選定したことは、このドライバから確認できない |
+| 初期背景 | 温度＋5 K、Q=22 W（加熱時の真値パラメータ15 W） |
+| サイクル | 60秒ごと10回、300秒でヒータOFF |
+| 比較する背景標準偏差 | σQ=0.5 / 2 / 6 / 50 W。σT=1.5 Kは共通 |
+| 同化なし | 同じ初期背景から600秒まで、観測補正なし |
+
+![実ソルバOI：温度・変位・変位差をσQの4条件で統合比較](img/oi_fullsolver_compare.png)
+
+温度4点（観測hot/cold、未観測の上部ヒータ側・底部反対側）、上面A/Oの個別変位、A−O変位差、未観測の中高さC/Dの個別変位とC−D、Q、全場温度RMSEをまとめた。
+未観測C/Dは目標座標(±28,0,75) mmに最も近いFEM節点で、上面の観測節点群とは重ならない。実際の節点IDと座標は `104/results/oi_sigma_unified_validation.npz` に保存する。
+全パネルで黒=真値、橙=同化なし、紫=0.5 W、緑=2 W、青=6 W、茶=50 W。
+温度は同化後。変位も**保存された同化後温度からFrontISTRで各ケース・各時刻を再計算**し、評価時点を揃えた。
+変位の時刻0は古い履歴が便宜的に0を保存していたため表示せず、60〜600秒を比較する。
+上面のA/Oはそれぞれ節点群の平均であり、単点の変位ではない。
+
+Q最終値はσQ=0.5 / 2 / 6 / 50 Wの順に8.82 / 8.95 / 8.96 / 8.96 W、
+全場温度RMSEは0.090 / 0.111 / 0.112 / 0.113 K。
+加熱期60・120・180・240・300秒の5時刻で求めた同化後変位差RMSEは、
+観測側A−Oで約1.41〜1.45 µm、未観測C−Dで約1.15〜1.19 µmが残った。
+この値は $\sqrt{\frac15\sum_{k=1}^5(\hat d(60k)-d_{true}(60k))^2}$ で、時刻平均絶対誤差ではない。
+未観測C/Dの実節点IDは3603/3723、実座標は(±28.750,0,75.375) mm。
+したがって、従来の「温度・変位とも真値へ収束」という説明は、特に加熱期の変位差には当てはまらない。
+**今回の範囲ではσQを大きく変えてもQ推定のずれは解消していない。**
+σQの調整だけが原因だと断定せず、上記の感度近似や固定共分散などの影響を別途検証する必要がある。
+Qパネルは加熱パラメータの推定値で、300秒以降に実際に入力する熱量は0 Wである。
+
+再生成：[104のmake_oi_compare_fig.py](../../104_0_openfoam_frontistr_da_enkf/run/make_oi_compare_fig.py)。
+変位の再評価結果は元の履歴を上書きせず、`104/results/oi_sigma_unified_uz_*.npz` に保存する。
+
+**統合図の評価位置**：温度hot/coldはT1/T2、上部ヒータ側・底部反対側はT3/T4。
+A/Oは上面の対向する節点群の平均Uz、C/Dは中高さz=75.375 mmの対向する単点Uz。
+A/Oだけを観測に使い、C/Dは検証専用。座標表は[評価位置の説明](18_oi_sigma_t_validation.md)に記載した。
+
+![温度と変位の評価位置](img/oi_evaluation_locations.png)
+
+**観測点の位置**（温度2点・上面変位2成分。Wで最適選定したという根拠は未確認）:
 
 ![OIの観測点](img/oi_obs_points.png)
 
@@ -616,44 +841,33 @@ $\sigma_Q=2$ W: $8.95$ W、 $\sigma_Q=6$ W: $8.96$ W、 $\sigma_Q=50$ W: $8.96$ 
 - **変位センサ**：**上面(z=100.5 mm) の ヒータ側(+X)＝A側 と 反対側(−X)＝O側** の鉛直変位 $U_z$ 。
   これは **106 の変位点 A(+X上面)/O(−X上面) と同じ位置**（106の QoI $=U_z(\mathrm A)-U_z(\mathrm O)$ に対応）。
   ただし 106 の A/O は単点、104のOIは**各側上面ノード列の平均**、という定義の違いはある（位置は対応）。
-  変位ノイズ 0.1 µm（レーザ変位計クラス）。底面固定・上面自由なので上面が最も動く（＝W行感度が高い）。
+  変位ノイズ 0.1 µm（レーザ変位計クラス）。境界条件は使用するFrontISTRメッシュの拘束定義に従う。上面の変位が大きいことだけで、全ての温度誤差に対する感度が最大とはいえない。
 
-#### 観測点は適当に置いたのか：104と106の選定基準
+#### 観測点の選定根拠：確認できた実装に限定する
 
-104の実ソルバEnKFで使ったhot/cold温度点と上面A/O変位点は、適当に置いた点ではない。
-105でFrontISTRの熱変位感度
-\[
-W=K_s^{-1}H_T
-\]
-を計算し、(i) 温度を変えたときに知りたい変位差 $u_{z,A}-u_{z,O}$ が大きく変わる温度領域、
-(ii) 底面固定に対して変位が大きく現れる上面領域、を調べて配置した。hot/coldはヒータ側と
-反ヒータ側の温度差を同時に見るための対向2点、A/Oは上面の高感度な対向2点である。
-したがって、104の選定根拠は**FrontISTRの熱感度 $W$**であり、PODの代表点選定ではない。
+104のhot/coldは設定ファイルに座標を指定した対向2点、A/OはFrontISTRメッシュ上の対向する上面節点群の平均変位である。
+**104の配置を105のW感度解析で最適選定したという処理・記録は、確認したドライバにはない。**
+以前の「104はWで選定」という断定を訂正する。上面がよく動くという物理的説明と、感度に基づく選定を実施した証拠は区別する。
 
-106 ROMでは手順が異なる。PODモードの空間形状を最も少ない温度点から復元するため、
-モード行列にQ-DEIM（列ピボット付きQR）を適用してP0〜P4を選んだ。つまり、
-104のhot/cold/A/OはW感度、106のP0〜P4はPOD・Q-DEIMという、目的の異なる2種類の選定である。
-
-#### 高感度点と低感度点の比較は試したか
-
-105の感度マップから高W領域を選ぶ考え方は、変位観測を温度場同化へ効かせるための設計である。
-低Wの変位点を置けば、温度誤差が変位観測へ現れにくく、カルマンゲインの温度・変位成分が小さくなるため、
-変位観測を追加しても温度場の補正はほとんど強まらない。この比較は106 ROMで実施しており、
-温度P2（1点）に対して、Wの高感度変位2点と低感度変位2点を追加した。
-加熱期の5点温度RMSEは、温度P2のみ **0.617 K**、高W変位2点追加 **0.160 K**、
-低W変位2点追加 **0.199 K**であった（同じROM・同じ真値・5 seed平均）。
-したがって低Wでも多少の改善はあるが、高Wの方が改善量が大きい。
-
-なお、104のOpenFOAM＋FrontISTRについては、実ソルバを低W配置でもう一度10サイクル回す比較は行っていない。
-104で採用した配置は105のW解析に基づく高感度配置であり、低Wの数値比較は計算時間の短い106 ROMで検証した。
+106のP0〜P4はPOD・Q-DEIMによる代表温度点。そのうちどの点を実際の観測に使うかは、各実験で異なる。
+106の `run_disp_selection.py` は温度P2の1点を固定し、105の高W/低W変位点を追加する比較である。
+標準A/Oを使う温度2点＋変位2点の比較とは別条件で、別図のMAEとRMSEを混ぜて数値比較しない。
+104実ソルバの低W配置による比較は、このσ比較には含めていない。
 
 **決め打ちパラメータ $\sigma_Q$ とは**：OIの背景共分散 $B$ で使う「**発熱量 $Q$ の背景（事前）標準偏差 [W]**」。
 数式では「同化前の推定 $Q_b$ が真値からどれだけばらつくか」の標準偏差:
-$$\sigma_Q=\sqrt{\mathrm{Var}(Q_b-Q_\text{true})}\quad[\mathrm W].$$
+
+$$
+\sigma_Q=\sqrt{\mathrm{Var}(Q_b-Q_\text{true})}\quad[\mathrm W].
+$$
 
 **「約4割の不確かさ」とは相対不確かさ（変動係数）** $\;\sigma_Q/Q_\text{true}=6/15=0.40=40\%$ のこと。
 背景誤差をガウス分布 $Q_b\sim\mathcal N(\mu,\sigma_Q^2)$ と仮定すると
-$$P(|Q-\mu|\le\sigma_Q)\approx68\%,\qquad P(|Q-\mu|\le 2\sigma_Q)\approx95\%$$
+
+$$
+P(|Q-\mu|\le\sigma_Q)\approx68\%,\qquad P(|Q-\mu|\le 2\sigma_Q)\approx95\%
+$$
+
 なので、 $\sigma_Q$=6 W は「 $Q$ はだいたい $\mu\pm6$ W（68%）、広く見て $\mu\pm12$ W（95%）の範囲だろう」と
 見積もっていることを意味する。大きいほど観測で $Q$ を強く補正（過補正しやすい）、
 小さいほど控えめになる傾向があるが、更新量は観測との共分散全体にも依存する。
@@ -662,14 +876,18 @@ $$P(|Q-\mu|\le\sigma_Q)\approx68\%,\qquad P(|Q-\mu|\le 2\sigma_Q)\approx95\%$$
 
 比較に用いた基準の発熱量が15 Wなので、相対的な標準偏差は
 
-$$\frac{\sigma_Q}{Q_{\mathrm{ref}}}=\frac{6\ \mathrm W}{15\ \mathrm W}=0.40=40\%.$$
+$$
+\frac{\sigma_Q}{Q_{\mathrm{ref}}}=\frac{6\ \mathrm W}{15\ \mathrm W}=0.40=40\%.
+$$
 
 **6 Wは標準偏差、分散は $B_{QQ}=\sigma_Q^2=36\ \mathrm{W^2}$**である。
 「実際の推定誤差が40%」「真値が必ず±40%の範囲」という意味ではない。
 正規分布を仮定して解釈するなら、背景値 $Q_b$ を中心に
 
-$$Q\sim\mathcal N(Q_b,6^2),\qquad
-p(Q)=\frac{1}{6\sqrt{2\pi}}\exp\!\left[-\frac{(Q-Q_b)^2}{2\times6^2}\right]$$
+$$
+Q\sim\mathcal N(Q_b,6^2),\qquad
+p(Q)=\frac{1}{6\sqrt{2\pi}}\exp\!\left[-\frac{(Q-Q_b)^2}{2\times6^2}\right]
+$$
 
 という不確かさの幅に対応する（QをW単位で表記）。初期背景値は実際には22 Wなので、
 初期の±1標準偏差の範囲は $22\pm6=[16,28]$ Wで、正規分布なら確率約68%の範囲。
@@ -685,13 +903,17 @@ OIはこの分布から多数のQをサンプリングせず、共分散の数�
 
 確率論では、観測履歴 $y_{1:k}$ を得た後の全状態の分布から温度を積分して、
 
-$$p(Q\mid y_{1:k})=\int p(T,Q\mid y_{1:k})\,dT$$
+$$
+p(Q\mid y_{1:k})=\int p(T,Q\mid y_{1:k})\,dT
+$$
 
 を得る操作を周辺化という。hはこの状態に存在しないので、積分にも登場しない。
 しかし**今回のコードはこの多次元積分を数値積分していない**。
 線形ガウス条件では周辺分布が解析的に求まり、平均の更新は共分散による次の式になる：
 
-$$\hat Q_a=\hat Q_b+C_{Q,y_f}(C_{y_fy_f}+R)^{-1}(y-\bar y_f).$$
+$$
+\hat Q_a=\hat Q_b+C_{Q,y_f}(C_{y_fy_f}+R)^{-1}(y-\bar y_f).
+$$
 
 観測予測 $y_f$ と観測ノイズを区別し、分母には $R$ を足す。
 共分散のQ行を取り出すことが、全状態の更新からQの平均を取り出すことに対応する。
@@ -701,8 +923,10 @@ $$\hat Q_a=\hat Q_b+C_{Q,y_f}(C_{y_fy_f}+R)^{-1}(y-\bar y_f).$$
 観測予測のQ感度を $g=[s_Q(x_{hot}),s_Q(x_{cold}),\partial u_A/\partial Q,\partial u_O/\partial Q]^\top$ とすると、
 `BHt_q = SIGB_Q**2 * g`に相当する行を作り、
 
-$$K_Q=\sigma_Q^2g^\top S^{-1},\quad S=\widetilde{HBH^\top}+R,\quad
-Q_a=\mathrm{clip}\{Q_b+K_Q(y-y_b),0,60\}.$$
+$$
+K_Q=\sigma_Q^2g^\top S^{-1},\quad S=\widetilde{HBH^\top}+R,\quad
+Q_a=\mathrm{clip}\{Q_b+K_Q(y-y_b),0,60\}.
+$$
 
 ```python
 S = HBHt + R
@@ -720,41 +944,10 @@ Qa = float(np.clip(Qb + Kq @ innov, *cfg["filter"]["Q_bounds_W"]))
 別計算である106のROM EnKFのQ・h同時推定は、
 [02_full_story.md](02_full_story.md)の「Q・hはどの式で推定したか」に記載する。
 
-**run1 / run2 の条件**（違いは $\sigma_Q$ だけ。他は完全に同一で、 $\sigma_Q$ の効果だけを見る）:
+**結果の参照先を統合した**：従来ここに掲載していたrun1/run2の時刻歴は、上の「σQの4条件：温度・変位を同じ図で比較」に集約した。
+旧 `oi_fullsolver_temp.png` はこの節では重ねて掲載しない。観測点・未観測点の温度、個別変位と変位差を、4条件＋同化なしで同時に確認できる。
 
-| 条件 | 値 | run1 | run2 |
-|---|---|---|---|
-| 予報モデル | OpenFOAM(CHT)＋FrontISTR、背景1本 | 同じ | 同じ |
-| 観測 | 温度 hot/cold ＋ 上面変位2点（Wで選定） | 同じ | 同じ |
-| でたらめ初期 | 初期温度＋5 K・発熱 $Q_0$=22 W（真値15W） | 同じ | 同じ |
-| サイクル | 60秒ごと10回（300sでヒータOFF）、真値 $Q$=15 W | 同じ | 同じ |
-| **決め打ち $\sigma_Q$** | 発熱の背景標準偏差 [W] | **6 W** | **2 W** |
-
-以下は **run1（ $\sigma_Q$=6 W）** の結果（温度・変位とも真値へ収束）:
-
-![実ソルバOIの温度・変位時刻歴](img/oi_fullsolver_temp.png)
-
-*観測点ごとに分けた時刻歴（**太い実線＝真値、温度の破線＋○＝OI同化後、橙点線＝同化なし**）。上段に温度 hot/cold（観測）と
-未観測点（上部ヒータ側）、下段に未観測点（底部反対側）と 変位 A/O（観測）。
-**観測していない点(灰字)でも、OI同化後が真値へ寄る**——場空間の同化が観測点以外も補正することを示す。
-同化なしは保存済みの360秒まで。下段の変位の青線は補正前の予報変位であり、温度の青線とは評価タイミングが異なる。*
-
-- **温度場はよく復元**：場RMSE **5.0 K →（同化後）0.11 K**。温度・変位の時刻歴とも真値に追従。
-- **計算はEnKFより桁違いに軽い**：**背景1本で 1.17 時間**（EnKF 5メンバーの約13時間に対し、
-  予報本数が $1/N$ ＝ここでは 1/5。実測でも大幅に短い）。**アンサンブルで何ケースも回さなくてよい**、が効いている。
-- **ただしパラメータ $Q$ は当てにくい**： $Q$ は 22 →**8.96 W で頭打ち（真値15Wに届かない）**。
-  固定Bの決め打ち $\sigma_Q$ が適切でないと $Q$ が過補正・過小になる——**OIは軽いが、
-  $B$ （特に $\sigma_Q$ ）の調整が必要で難しい**という「厳しくなるとき」の実例。
-  この $\sigma_Q$ 依存性は別の $\sigma_Q$ で回した run と並べて別途示す。
-
-> **出典・計算場所**：ドライバ `104…/run/run_openfoam_fem_oi.py`、計算ケース `104…/openfoam/run_fem_oi/`、
-> 結果 `104…/results/oi_fullsolver_summary.yaml`（場RMSE・Q・計算時間）。真値は104の既存 truth を再利用（読み取り専用）。
-> 予報本数が $1/N$ になるだけで、同化アルゴリズム（上の更新式）と観測点（Wで選定）は本編と同じ。
-> 「同化なし」は同じ初期温度25℃・Q=22 Wから観測補正を一度も行わず進めた計算。
-> 現在保存済みの0〜360秒を温度4点（観測2点＋未観測2点）の橙点線として追加した。
-> 420〜600秒は未計算のため欠測として扱い、外挿しない。
-> 注意：既存OIドライバでは温度場の書き戻しより前に`u_analysis`を評価しているため、
-> 図の変位の青線は実際には補正前の予報変位。凡例を修正した。温度の青線は同化後である。
+σQ=6 Wの元計算時間は約1.17時間（今回の変位後処理は含まない）。EnKF約13時間との比較は条件・実装の違いも含む実測値であり、予報本数の比だけで所要時間が決まるとはいえない。
 
 ---
 
@@ -835,13 +1028,17 @@ for 各サイクル [t0, t1]:
 
 予報アンサンブル $Z_f$ とその予報観測 $Y_f$ から、**標本共分散**を作る:
 
-$$C_{zy}=\frac{1}{N-1}\sum_i (z_f^{(i)}-\bar z_f)(y_f^{(i)}-\bar y_f)^\top,\qquad
-C_{yy}=\frac{1}{N-1}\sum_i (y_f^{(i)}-\bar y_f)(y_f^{(i)}-\bar y_f)^\top.$$
+$$
+C_{zy}=\frac{1}{N-1}\sum_i (z_f^{(i)}-\bar z_f)(y_f^{(i)}-\bar y_f)^\top,\qquad
+C_{yy}=\frac{1}{N-1}\sum_i (y_f^{(i)}-\bar y_f)(y_f^{(i)}-\bar y_f)^\top.
+$$
 
 **カルマンゲイン**と**摂動観測による更新**:
 
-$$K=C_{zy}\,(C_{yy}+R)^{-1},\qquad
-z_a^{(i)}=z_f^{(i)}+K\big(y+\varepsilon^{(i)}-y_f^{(i)}\big),\quad \varepsilon^{(i)}\sim N(0,R).$$
+$$
+K=C_{zy}\,(C_{yy}+R)^{-1},\qquad
+z_a^{(i)}=z_f^{(i)}+K\big(y+\varepsilon^{(i)}-y_f^{(i)}\big),\quad \varepsilon^{(i)}\sim N(0,R).
+$$
 
 - $C_{zy}$ が「温度場・ $Q$ と観測の相関」を運ぶので、**温度・変位を観測すると、
   直接測っていない全温度場や $Q$ まで動く**（相関を通じた更新）。
@@ -873,8 +1070,10 @@ Za = Zf + innov @ gain_T                            # 解析アンサンブル
 104の実ソルバEnKFは $z=[T_{\text{all}},Q]$ を5メンバーで更新する。
 OIのQ更新との違いは、固定した共分散ではなく、その時刻の標本共分散を使う点である。
 
-$$Q_a^{(i)}=Q_f^{(i)}+[C_{zy}]_{Q,:}(C_{yy}+R)^{-1}
-(y+\varepsilon^{(i)}-y_f^{(i)}).$$
+$$
+Q_a^{(i)}=Q_f^{(i)}+[C_{zy}]_{Q,:}(C_{yy}+R)^{-1}
+(y+\varepsilon^{(i)}-y_f^{(i)}).
+$$
 
 104の`dacore/enkf.py`が全状態を一括更新し、`daof/of_fem_twin.py`が最後のQ成分を取り出す。
 hの更新はこの計算にはない。周辺化の意味はOI節で説明した通りで、数値的な多次元積分は行わない。
@@ -902,3 +1101,23 @@ hの更新はこの計算にはない。周辺化の意味はOI節で説明し�
 
 次に読むもの：POD で型を出し（`01` §1）、Q-DEIM で代表点を選び（`01` §3）、
 ROM を組んで校正する（`01` §4）手続きは `01_pod_qdeim_algorithm.md` へ。
+
+
+## 計算フォルダと熱伝導試算ケース
+
+パスの基準は `sample/104_0_openfoam_frontistr_da_enkf/`。
+
+| σT [K] | 計算フォルダ | 結果履歴 | 状況 |
+|---:|---|---|---|
+| 0.3 | `results/oi_sigma_t_study/openfoam/st0p3/` | `results/oi_sigma_t_study/oi_fullsolver_st0p3_history.npz` | 600秒まで完了 |
+| 0.75 | `results/oi_sigma_t_study/openfoam/st0p75/` | `results/oi_sigma_t_study/oi_fullsolver_st0p75_history.npz` | 600秒まで完了 |
+| 1.5（既存） | `openfoam/run_fem_oi/` | `results/oi_fullsolver_history.npz` | 600秒まで完了。変位は `openfoam/oi_sigma_unified_fem/6/` で再評価 |
+| 1.237（熱伝導試算） | `results/oi_sigma_t_study/openfoam/st1p237/` | `results/oi_sigma_t_study/oi_fullsolver_st1p237_history.npz`（完了後に生成） | 追加実行。既存1.5 Kの結果とは区別 |
+
+1.237 Kは、長さL=75 mmの単一モード、初期振幅標準偏差5 K、経過60秒という仮定から計算した1.236724 Kを丸めた値。
+このケースの仮定・物性・試算式の入力値は `results/oi_sigma_t_study/physics_st1p237_conditions.json`。
+同じσQ=6 W・観測・初期条件で実ソルバOIを追加実行する。未完了の結果を既存3ケースの表には混ぜない。
+ログは `results/oi_sigma_t_study/st1p237.log`。
+
+各計算フォルダの `60/solid/T`、`120/solid/T` などが保存温度場、`fem_a60/`、`fem_a120/` などが同化後のFrontISTR計算。
+既存1.5 Kは履歴の変位評価順序が異なるため、上表の別フォルダで再評価した変位を使う。
