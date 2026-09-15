@@ -63,11 +63,12 @@ def main():
         tv=ts[fi]; fld=field[fi]-K      # ℃
         g=ug.copy(); g.point_data["T"]=fld[near]
         pl=pv.Plotter(off_screen=True,window_size=(720,760))
-        pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=16,
+        # 5点が透けて見えるよう温度コンタは半透明に
+        pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=16,opacity=0.55,
                     scalar_bar_args={"title":"T [degC]","fmt":"%.1f"})
-        # 復元に使った5点を白球で重ねる
+        # 復元に使った5点（マゼンタ球＝turboに無い色で目立たせる、少し大きめ）
         for s in sensors:
-            pl.add_mesh(pv.Sphere(radius=0.0028,center=s),color="white")
+            pl.add_mesh(pv.Sphere(radius=0.0038,center=s),color="magenta")
         phase="heating (heater ON)" if tv<=300 else "cooling (heater OFF)"
         pl.add_text(f"t = {tv:4.0f} s   ({phase})\n5 sensors -> full field (POD)",
                     position="upper_left",font_size=11,color="black")
