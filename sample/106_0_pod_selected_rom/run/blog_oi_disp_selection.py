@@ -100,7 +100,7 @@ def main():
     print("[oi-disp] 加熱期平均RMSE[K]:", {k:round(v,3) for k,v in e.items()})
 
     fig,(ax0,ax1)=plt.subplots(1,2,figsize=(14.5,5.6))
-    sty={"none":(":","tab:gray","変位なし","o"),"lo":("--","tab:orange","低W変位2点","s"),"hi":("--","tab:blue","高W変位2点","o")}
+    sty={"none":(":","tab:gray","温度のみ（変位追加なし）","o"),"lo":("--","tab:orange","低W変位2点","s"),"hi":("--","tab:blue","高W変位2点","o")}
     # 左：温度（全5点RMSE）
     ax0.axvspan(0,300,color="orange",alpha=.06)
     for m,(ls,c,lab,mk) in sty.items():
@@ -115,7 +115,7 @@ def main():
     ax1.set_xlabel("time [s]"); ax1.set_ylabel("変位差 Uz(A)−Uz(O) [µm]"); ax1.grid(alpha=.3); ax1.legend()
     ax1.set_title("変位：同化後の温度から復元したA/O変位差",fontsize=12)
     fig.suptitle("OI（固定B・ROM）：高W／低W変位観測点で温度・変位の推定がどう変わるか（5seed平均）\n"
-                 "温度P2に変位2点を追加。高W（青）は温度も変位も真値へ速く追従、低W（橙）は変位なし（灰）とほぼ同じ",
+                 "3構成とも温度P2で同化（＝データ同化あり）。そこへ変位2点を足すと、高W（青）は温度も変位も真値へ速く追従、低W（橙）は温度のみ（灰）とほぼ同じ",
                  fontsize=12.5,weight="bold")
     fig.tight_layout(rect=[0,0,1,0.93]); out=os.path.join(IMG,"blog_oi_disp_selection.png"); fig.savefig(out,dpi=140); plt.close(fig)
     print("[oi-disp] wrote",out)
