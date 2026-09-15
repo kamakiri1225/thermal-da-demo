@@ -70,7 +70,8 @@ def main():
         Z[:,IQ]=rng.uniform(0.3,1.8,N_B); Z[:,IH]=np.clip(rng.normal(0.02,0.01,N_B),1e-3,0.1)
         dz=Z-Z.mean(0); return dz.T@dz/(N_B-1)
 
-    def run(mode, seed):
+    def run(mode, seed, da=True):
+        """da=False なら観測補正を一切せず自由予測（＝データ同化なし）。"""
         H,uz0=obsop(mode); nobs=H.shape[0]
         R=np.diag([SIG_T**2]+([SIG_U**2]*2 if mode in ("hi","lo") else []))
         B=fixedB(seed)
@@ -81,26 +82,29 @@ def main():
         rmse=[np.sqrt(((z[:NPT]-Ttr[0])**2).mean())]; recT=[z[:NPT].copy()]; tp=0.0
         for ci,tb in enumerate(cyc,1):
             _,tr=rg.integrate_single(z[:NPT],C,Kmat,z[IH],z[IQ],heat,tp,tb,DT); z=z.copy(); z[:NPT]=tr[-1]; tp=tb
-            yv=y_of(Ttr[ci],mode,H,uz0)+rng_o.normal(0,np.sqrt(np.diag(R)))
-            ypred=y_of(z[:NPT],mode,H,uz0)
-            z=z+K@(yv-ypred)
-            z[IQ]=np.clip(z[IQ],0,3); z[IH]=np.clip(z[IH],1e-4,0.2)
+            if da:
+                yv=y_of(Ttr[ci],mode,H,uz0)+rng_o.normal(0,np.sqrt(np.diag(R)))
+                ypred=y_of(z[:NPT],mode,H,uz0)
+                z=z+K@(yv-ypred)
+                z[IQ]=np.clip(z[IQ],0,3); z[IH]=np.clip(z[IH],1e-4,0.2)
             rmse.append(np.sqrt(((z[:NPT]-Ttr[ci])**2).mean())); recT.append(z[:NPT].copy())
         return np.array(rmse), np.array(recT)
 
     out_rmse={}; out_recT={}
-    for m in ["none","lo","hi"]:
-        rs=[run(m,s) for s in SEEDS]
+    # free=データ同化なし（自由予測）, none=温度のみ, lo/hi=温度+変位
+    for m in ["free","none","lo","hi"]:
+        obs_mode="none" if m=="free" else m
+        rs=[run(obs_mode,s,da=(m!="free")) for s in SEEDS]
         out_rmse[m]=np.mean([r[0] for r in rs],axis=0)
         out_recT[m]=np.mean([r[1] for r in rs],axis=0)     # 5seed平均の解析温度
     ht=(tg>0)&(tg<=300)
     e={m:out_rmse[m][ht].mean() for m in out_rmse}
-    # 変位QoI（真値・3構成）
+    # 変位QoI（真値・各構成）
     qoi_true=qoiAO(Ttr); qoi={m:qoiAO(out_recT[m]) for m in out_recT}
     print("[oi-disp] 加熱期平均RMSE[K]:", {k:round(v,3) for k,v in e.items()})
 
     fig,(ax0,ax1)=plt.subplots(1,2,figsize=(14.5,5.6))
-    sty={"none":(":","tab:gray","温度のみ（変位追加なし）","o"),"lo":("--","tab:orange","低W変位2点","s"),"hi":("--","tab:blue","高W変位2点","o")}
+    sty={"free":("-","tab:red","データ同化なし（自由予測）","x"),"none":(":","tab:gray","温度のみ（変位追加なし）","o"),"lo":("--","tab:orange","低W変位2点","s"),"hi":("--","tab:blue","高W変位2点","o")}
     # 左：温度（全5点RMSE）
     ax0.axvspan(0,300,color="orange",alpha=.06)
     for m,(ls,c,lab,mk) in sty.items():
@@ -114,8 +118,8 @@ def main():
         ax1.plot(tg,qoi[m],ls,color=c,lw=2.3,marker=mk,ms=4,label=lab)
     ax1.set_xlabel("time [s]"); ax1.set_ylabel("変位差 Uz(A)−Uz(O) [µm]"); ax1.grid(alpha=.3); ax1.legend()
     ax1.set_title("変位：同化後の温度から復元したA/O変位差",fontsize=12)
-    fig.suptitle("OI（固定B・ROM）：高W／低W変位観測点で温度・変位の推定がどう変わるか（5seed平均）\n"
-                 "3構成とも温度P2で同化（＝データ同化あり）。そこへ変位2点を足すと、高W（青）は温度も変位も真値へ速く追従、低W（橙）は温度のみ（灰）とほぼ同じ",
+    fig.suptitle("OI（固定B・ROM）：観測構成で温度・変位の推定がどう変わるか（5seed平均）\n"
+                 "赤＝データ同化なし（補正しないので真値から外れたまま）。温度P2で同化すると灰へ改善、さらに高W変位2点を足すと青が真値へ最速で追従",
                  fontsize=12.5,weight="bold")
     fig.tight_layout(rect=[0,0,1,0.93]); out=os.path.join(IMG,"blog_oi_disp_selection.png"); fig.savefig(out,dpi=140); plt.close(fig)
     print("[oi-disp] wrote",out)
