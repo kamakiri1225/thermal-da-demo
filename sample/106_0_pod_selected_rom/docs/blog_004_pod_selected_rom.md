@@ -427,6 +427,15 @@ C, K, h = sol.x[:5], tri_to_matrix(sol.x[5:15], 5), sol.x[15]
 やっていることは「 $\theta$ を少しずつ変えて `forward` の出力を OpenFOAM に近づける」だけ。
 `least_squares` が残差の二乗和を最小にする $\theta$ を自動で探します（**16個の未知を一括同定**）。
 
+> **`Yobs` の正体＝OpenFOAM の結果**です。実際には
+> ```python
+> ts, C_all, X = load_snapshots()   # OpenFOAMの各時刻 solid/T を読む (20696×121)
+> Yobs = X[cells, :].T              # そのうちQ-DEIM選定5点の温度履歴だけ抜き出す
+> ```
+> のように、**`load_snapshots()` がCHT結果を読み込み**、5点ぶんを取り出したものが校正の目標。
+> OpenFOAMの結果は **①POD＋Q-DEIM（点選び）** と **②この校正** の両方の材料になっています
+> ―― これが「オフラインでCFDが必須」（§1-1）の正体です。
+
 ![POD選定5点ROMの校正結果](img/rom_calib_fit.png)
 
 *太い半透明線＝OpenFOAM、破線＝POD選定5点ROM。ほぼ完全に重なる（残差 RMSE 0.014 K）。*
