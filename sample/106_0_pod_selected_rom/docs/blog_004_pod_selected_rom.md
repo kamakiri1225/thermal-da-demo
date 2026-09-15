@@ -376,6 +376,40 @@ ROMを $\theta$ で前進積分して5点温度 $T_p^{\mathrm{ROM}}(t;\theta)$ �
 
 $$\hat\theta=\arg\min_{\theta}\ \sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.$$
 
+**実際のコードはこれだけ**です（`run/build_calibrate_rom.py` の要点）:
+
+```python
+from scipy.optimize import least_squares
+import numpy as np
+
+# Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標
+# ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)
+
+def forward(theta):
+    """θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。"""
+    C = theta[:5]
+    K = tri_to_matrix(theta[5:15], 5)      # 10個 → 対称5x5コンダクタンス行列
+    h = theta[15]
+    T = np.full(5, T_air); Y = [T.copy()]
+    for a, b in zip(ts[:-1], ts[1:]):      # 各区間を RK4 で前進
+        T = integrate_rom(T, C, K, h, q=1.0, heat_node=heat_node, t0=a, t1=b, dt=DT)
+        Y.append(T.copy())
+    return np.array(Y)                      # (nt,5)
+
+def resid(theta):
+    return (forward(theta) - Yobs).ravel()  # OpenFOAMとの差（残差ベクトル）
+
+x0 = np.r_[np.full(5, 120.0), np.full(10, 1.5),  0.3 ]   # 初期推定 [C,K,h]
+lb = np.r_[np.full(5,   1.0), np.full(10, 1e-4), 1e-4]   # 下限（すべて≥0）
+ub = np.r_[np.full(5,5000.0), np.full(10, 200.0), 50.0]  # 上限
+
+sol = least_squares(resid, x0, bounds=(lb, ub))          # ← 16個をまとめて同定
+C, K, h = sol.x[:5], tri_to_matrix(sol.x[5:15], 5), sol.x[15]
+```
+
+やっていることは「 $\theta$ を少しずつ変えて `forward` の出力を OpenFOAM に近づける」だけ。
+`least_squares` が残差の二乗和を最小にする $\theta$ を自動で探します（**16個の未知を一括同定**）。
+
 ![POD選定5点ROMの校正結果](img/rom_calib_fit.png)
 
 *太い半透明線＝OpenFOAM、破線＝POD選定5点ROM。ほぼ完全に重なる（残差 RMSE 0.014 K）。*
