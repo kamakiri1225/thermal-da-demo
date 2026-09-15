@@ -1,0 +1,391 @@
+<!-- wp:shortcode -->
+[mathjax]
+<!-- /wp:shortcode -->
+
+<!-- wp:paragraph -->
+<p>第3回は <strong>アンサンブルカルマンフィルタ（EnKF）</strong> です。前回（blog_002）の OI は 背景共分散 $B$ を <strong>決め打ちで固定</strong>しました。EnKF はここを変えて、</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote>
+<p><strong>たくさんの”分身（アンサンブル）“を走らせ、その散らばりから共分散を毎回作り直す</strong></p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:paragraph -->
+<p>のが特徴です。これで <strong>発熱量 $Q$ のような未知パラメータまで当てられる</strong>ようになります。 今回も <strong>節点を減らした具体例</strong>で、行列を手で追いながら理解します。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote>
+<p>OIとの一言の違い：<strong>OI は $B$ を人間が置く／EnKF は $B$ を分身の散らばりが教えてくれる</strong>。</p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">1. アンサンブル（分身）とは</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>「予報がどれくらい外れるか（共分散 $B$ ）」を人間が決めるのは難しい。 そこで EnKF は、<strong>少しずつ違う初期値・パラメータを持った $N$ 個の分身</strong>を用意して、 全部シミュレーションで前進させます。その <strong>バラけ方（散らばり）そのものが共分散</strong>になります。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:code -->
+<pre class="wp-block-code"><code>分身1 ─┐
+分身2 ─┼─ みんな少しずつ違う → シミュレーションで前進
+ ⋮    │        → 散らばり方から共分散 C を作る
+分身N ─┘</code></pre>
+<!-- /wp:code -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>分身が <strong>揃って動く2つの量</strong>は「相関が高い」→ 共分散の非対角が大きい。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>分身が <strong>バラバラな量</strong>は不確かさが大きい→ 分散が大きい。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p><strong>この共分散は状況に応じて毎サイクル作り直される</strong>（＝流れ依存）。ここが固定 $B$ の OI との決定的な差です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">2. EnKF の手順（1サイクル）</h2>
+<!-- /wp:heading -->
+
+<ol type="1">
+<li><strong>予報（forecast）</strong>：全分身をシミュレーションで次の観測時刻まで前進。</li>
+<li><strong>標本共分散</strong>：分身たちの平均とズレから共分散 $C$ を作る。</li>
+<li><strong>カルマンゲイン</strong>： $K=C_{zy}(C_{yy}+R)^{-1}$ （ $C_{zy}$ =状態と観測の共分散、 $C_{yy}$ =観測どうし）。</li>
+<li><strong>更新（analysis）</strong>：各分身を観測へ寄せる（観測には分身ごとに少しノイズを足す＝摂動観測法）。</li>
+</ol>
+<!-- wp:paragraph -->
+<p>$$x_a<sup>{(m)}=x_f</sup>{(m)}+K(y+<sup>{(m)}-Hx_f</sup>{(m)})(m=1,,N)$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>更新後の分身の <strong>平均</strong>が推定値、<strong>散らばり</strong>が不確かさです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">3. 手計算で EnKF をやってみる（2点・分身4つ・観測1点）</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-1. 分身の予報</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>状態を2点の温度 $x=(T_1,T_2)$ とし、分身を <strong>4つ</strong>用意して前進させたら、次の予報になったとします。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>分身</th>
+<th>$T_1$</th>
+<th>$T_2$</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>m1</td>
+<td>26</td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>m2</td>
+<td>30</td>
+<td>27</td>
+</tr>
+<tr class="odd">
+<td>m3</td>
+<td>28</td>
+<td>25</td>
+</tr>
+<tr class="even">
+<td>m4</td>
+<td>32</td>
+<td>28</td>
+</tr>
+<tr class="odd">
+<td><strong>平均</strong></td>
+<td><strong>29</strong></td>
+<td><strong>26</strong></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-2. 散らばりから標本共分散を作る</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>平均からのズレ（deviation）:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>分身</th>
+<th>$T_1$</th>
+<th>$T_2$</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>m1</td>
+<td>−3</td>
+<td>−2</td>
+</tr>
+<tr class="even">
+<td>m2</td>
+<td>+1</td>
+<td>+1</td>
+</tr>
+<tr class="odd">
+<td>m3</td>
+<td>−1</td>
+<td>−1</td>
+</tr>
+<tr class="even">
+<td>m4</td>
+<td>+3</td>
+<td>+2</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>標本共分散は $C=_m x<sup>{(m)},x</sup>{(m)T}$ （ $N=4$ なので $1/3$ ）:</p>
+<!-- /wp:paragraph -->
+
+$$C=
+=
+=
+<!-- wp:paragraph -->
+<p>$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>読み方</strong>： $C_{12}=4.67&gt;0$ 、つまり <strong>「 $T_1$ が高い分身は $T_2$ も高い」</strong>と分身たちが教えている。 この相関は人間が置いたのではなく、<strong>シミュレーションの結果から自動で出てきた</strong>ものです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-3. カルマンゲイン</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>点1を観測（ $H=(1, 0)$ ）、観測ノイズ $R=0.3^2=0.09$ 。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>状態×観測の共分散 $C_{zy}=C H^{T}$ ＝「 $C$ の1列目」 $=</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>観測×観測 $C_{yy}=C_{11}=6.67$</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+$$K=
+=
+=
+<!-- wp:paragraph -->
+<p>$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-4. 更新（平均で見る）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>観測 $y=30$ （真値 $T_1=30$ 付近）。予報平均のハズレは $30-29=1$ 。平均の更新は</p>
+<!-- /wp:paragraph -->
+
+$$x_a=x_f+K =
++
+=
+<!-- wp:paragraph -->
+<p>$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>点</th>
+<th>予報平均</th>
+<th><strong>同化後平均</strong></th>
+<th>真値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>点1（観測）</td>
+<td>29</td>
+<td><strong>29.99</strong></td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td>点2（未観測）</td>
+<td>26</td>
+<td><strong>26.69</strong></td>
+<td>27</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>観測した点1はほぼ真値へ、<strong>未観測の点2も標本共分散の相関を通じて真値へ寄りました</strong>。 やっていることは OI と同じ更新式ですが、<strong>共分散 $C$ を分身から作った</strong>のが違いです。 さらに更新後は <strong>分身の散らばりが縮む</strong>（不確かさが減った、を表す）。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">4. EnKF が OI より強いところ ― 発熱量 $Q$ の同定</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>OI（blog_002）では、固定 $B$ のもとで <strong>発熱量 $Q$ が真値に届きにくい</strong>という弱点がありました （ $_Q$ を100倍振っても $Q$ は約9 Wで頭打ち）。EnKF はここで差が出ます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>EnKF では状態に $Q$ も入れて <strong>拡大状態</strong> $z=(T_1,,Q, h)$ にします。分身ごとに $Q$ を少し変えて前進させると、</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>「 $Q$ が大きい分身は温度も高い」という <strong>$Q$ と観測の相関</strong> が、標本共分散に自動で現れる。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>しかもその相関は <strong>加熱中・冷却中で変わる</strong>（流れ依存）。EnKF は毎サイクルこれを作り直す。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>だから観測の予測外れを <strong>$Q$ にも正しく配分</strong>でき、 $Q$ が真値へ寄ります。 本研究の実ソルバEnKFでは、でたらめ初期から</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>全セル温度RMSE <strong>7.61 K → 0.011 K</strong></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>発熱量 <strong>$Q$ W</strong>（真値15 W、誤差約0.5%）</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>まで当てられました（OIの約9 Wと対照的）。下の図は ROM 版 EnKF での $Q,h$ 推定の収束です。</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/da_qh.png" alt="EnKFによるQ・hの推定" />
+<figcaption aria-hidden="true">EnKFによるQ・hの推定</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>発熱量 $Q$ が真値へ収束していく様子（ $h$ は主に冷却期に効くため収束はゆるやか）。</em></p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/da_rmse.png" alt="温度RMSEの収束" />
+<figcaption aria-hidden="true">温度RMSEの収束</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>同化を重ねるごとに全点温度RMSEが下がる。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">5. その代わりのコスト</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>EnKF の弱点は <strong>重さ</strong>です。共分散を作るために <strong>分身を $N$ 個、毎サイクル全部前進</strong>させます。 実ソルバ（OpenFOAM＋FrontISTR）でこれをやると、</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>OI（背景1本）：約 1.2〜1.6 時間</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>EnKF（5メンバー）：<strong>約13時間</strong>（予報が $N$ 倍）</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>となります。<strong>「軽いが $B$ が硬い OI」対「重いが $Q$ まで当たる EnKF」</strong>というトレードオフです。 この重さを避けるために <strong>予報モデルを ROM に置き換える</strong>のが、106 の POD+Q-DEIM の役割でした （0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">6. 3回のまとめ</h2>
+<!-- /wp:heading -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>回</th>
+<th>テーマ</th>
+<th>キモ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>blog_001</td>
+<td>CHT→熱膨張＋熱伝達率</td>
+<td>固体＋空気を一体で解き、温度→変形、面ごとの $h$ を診断</td>
+</tr>
+<tr class="even">
+<td>blog_002</td>
+<td>OI データ同化</td>
+<td>感度で観測点を選ぶ／固定 $B$ で軽く更新／ $Q$ は弱可同定</td>
+</tr>
+<tr class="odd">
+<td><strong>blog_003</strong></td>
+<td><strong>EnKF</strong></td>
+<td><strong>分身の散らばりから共分散を作り、 $Q$ まで同定／ただし重い</strong></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>3つを貫くメッセージは、<strong>「少数の観測から全体（温度・変形・熱源）を推定する」</strong> こと。 そのために <strong>どこを測るか（感度）</strong>・<strong>どう共分散を作るか（固定 $B$ か分身か）</strong>・<strong>どう軽くするか（ROM）</strong> を 使い分ける、というのが本研究の骨格です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">参考（元になった実装・詳細）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>OI/EnKF のアルゴリズムと数式：<code>00_data_assimilation_algorithm.md</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>EnKF がなぜ重いか・ROM化の動機：<code>00_data_assimilation_algorithm.md</code> の E 節</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>全ストーリー：<code>02_full_story.md</code></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->

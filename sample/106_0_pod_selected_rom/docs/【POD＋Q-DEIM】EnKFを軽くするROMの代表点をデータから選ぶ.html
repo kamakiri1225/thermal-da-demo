@@ -1,0 +1,462 @@
+<!-- wp:shortcode -->
+[mathjax]
+<!-- /wp:shortcode -->
+
+<!-- wp:paragraph -->
+<p>前回までの OI（blog_002）と EnKF（blog_003）は、<strong>予報モデルを毎サイクル回す</strong>のが前提でした。 ところが本物の予報モデルは <strong>OpenFOAM CHT ＋ FrontISTR</strong> の連成解析。1サイクル回すだけで分オーダーかかり、 EnKF のように <strong>何十もの分身 × 何サイクル</strong> も回すと、現実的な時間で終わりません。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>そこでこの回は、<strong>予報モデルだけを軽い ROM（縮約モデル）に置き換える</strong>話です。ポイントは1つ:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote>
+<p><strong>ROM のノード（代表点）を「勘」で置かず、POD でデータから系統的に選ぶ。</strong></p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:paragraph -->
+<p>「PODでモードを出す → Q-DEIMで代表点を選ぶ → その点でROMを組んで校正 → EnKF/OIの予報を高速化」 という流れを、<strong>数式 → 小さな行列の手計算 → 実データの図</strong>の順で追います。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:image {"sizeSlug":"large"} -->
+<figure class="wp-block-image size-large"><img src="img/blog_flow_pod.png" alt="POD→Q-DEIM→ROM→データ同化 の流れ"/></figure>
+<!-- /wp:image -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">1. なぜ ROM が要るか ― EnKF は実ソルバだと重すぎる</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>EnKF（blog_003）は、<strong>分身（アンサンブル）1つ1つについて予報モデルを前進</strong>させます。ざっくり <strong>計算量 ≒（分身の数）×（サイクル数）×（予報モデル1回のコスト）</strong> です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>実ソルバ（CHT＋FrontISTR）は <strong>1サイクル（60秒ぶん）でも分オーダー</strong>。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>これを <strong>分身50〜200個 × 10サイクル</strong>回すと、EnKF 1回で数時間〜数日。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>一方、この記事で作る <strong>POD選定5点ROM</strong> は、<strong>0→600秒の前進積分が約31ミリ秒</strong>（実測）。 分身200個 × 10サイクルでも数十秒で終わります。<strong>予報モデルをROMに差し替えるだけ</strong>で、 同じ EnKF/OI が桁違いに軽くなる、というのが狙いです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">2. POD の数式 ― なぜ SVD で場の「型」が出るのか</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-1. スナップショット行列</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>各時刻の全セル温度を縦ベクトルにして横に並べます（ $N$ =セル数, $m$ =時刻数）:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$X=^{Nm}, u=1m_{k=1}^m u(t_k).$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>$u(t_k)$ … その時刻の温度場まるごと（長さ $N$ の縦ベクトル）</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$u$ … <strong>セルごとの時間平均</strong>（1枚の空間分布）。各セルから自分の平均を引く。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$X$ の各列は「その時刻に各場所が平均からどれだけ上下したか（変動）」。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-2. 「最良の型」を求める変分問題 → 固有値問題</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>場を1つの単位ベクトル $$ （ $$ ）で最もよく表す、とは <strong>各スナップショットの $$ 方向成分の二乗和を最大化</strong>すること:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$<em>{} </em>{k=1}<sup>{m}|</sup>{T}(u(t_k)-u)|^2 =_{} <sup>{T}(XX</sup>{T}).$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>ラグランジュ乗数 $$ で微分してゼロと置くと、<strong>固有値問題</strong>になります:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>固有ベクトル $_k$ ＝ <strong>PODモード（場の型）</strong></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>固有値 $_k=_k^2$ ＝ その型の <strong>エネルギー</strong>（大きいほど支配的）</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-3. SVD との同値（実際の計算法）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>$X$ を特異値分解 $X=UV^{T}$ すると</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$XX<sup>{T}=UV</sup>{T}VU<sup>{T}=U,</sup>2,U^{T}.$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>つまり <strong>$U$ の各列がそのまま $XX^{T}$ の固有ベクトル＝PODモード</strong>、 $_k^2$ が固有値。 巨大な $XX^{T}$ （ $NN$ ）を作らず、<strong>SVD一発でPODが得られます</strong>。 しかも上位 $r$ モードで打ち切った近似は、<strong>ランク $r$ の全行列の中でフロベニウス誤差を最小</strong>にする （Eckart–Young の定理）＝「PODは最もエネルギー効率のよいモード分解」です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">3. 小さな行列で POD を手計算する（3セル × 4時刻）</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>言葉だけでは腑に落ちないので、<strong>3セル(A,B,C) × 4時刻</strong>の最小例で最後まで計算します。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>生の温度</strong>（行＝場所、列＝時刻。右端が各行の時間平均 $u_i$ ）:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>セル</th>
+<th>$t_1$</th>
+<th>$t_2$</th>
+<th>$t_3$</th>
+<th>$t_4$</th>
+<th>時間平均 $u_i$</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A（ヒータ側）</td>
+<td>20</td>
+<td>22</td>
+<td>24</td>
+<td>26</td>
+<td><strong>23</strong></td>
+</tr>
+<tr class="even">
+<td>B（中間）</td>
+<td>20</td>
+<td>21</td>
+<td>22</td>
+<td>23</td>
+<td><strong>21.5</strong></td>
+</tr>
+<tr class="odd">
+<td>C（反対側）</td>
+<td>20</td>
+<td>20.5</td>
+<td>21</td>
+<td>21.5</td>
+<td><strong>20.75</strong></td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>各セルから自分の平均を引くと、PODに渡す変動行列 $X$ は</p>
+<!-- /wp:paragraph -->
+
+$$X=
+<!-- wp:paragraph -->
+<p>.$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-1. 相関行列 $XX^{T}$ を作る</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>$XX^{T}$ は「行（場所）どうしの内積」です。1行目どうし $=(-3)<sup>2+(-1)</sup>2+1<sup>2+3</sup>2=20$ 、 2行目は1行目のちょうど半分、3行目は1/4なので、</p>
+<!-- /wp:paragraph -->
+
+$$XX^{T}=
+=20
+<!-- wp:paragraph -->
+<p>.$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>右辺が <strong>1つの縦ベクトルの外積</strong>になっている＝この行列は <strong>ランク1</strong>。 つまり「場の変動は、たった1つの型で完全に説明できる」ことが、もう見えています。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-2. 固有値と PODモード（文字式）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>ランク1行列 $XX^{T}=_1,_1_1^{T}$ の非ゼロ固有値と固有ベクトルは、 外積の中のベクトル $a=(1, 0.5, 0.25)^{T}$ を正規化して得られます:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$_1=, a===1.1456,$$</p>
+<!-- /wp:paragraph -->
+
+$$_1=
+<!-- wp:paragraph -->
+<p>, _1=_1<sup>2=20a</sup>2=20=26.25.$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>エネルギー比は $_1 / (XX^{T})=26.25/(20+5+1.25)=26.25/26.25=1$ 、 <strong>モード1だけで100％</strong>。読み方は「<strong>A が強く・B が中・C が弱く、時間とともに一様に増える</strong>」という 1つの型。これが「平均場＝下地、モード＝そこからの変動の型」という役割分担です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>（本物の場はランク1ではありませんが、後で見るように <strong>モード1で91.8％</strong>まで説明でき、構図は同じです。）</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">4. Q-DEIM ― どの点を測れば場を復元できるか</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">4-1. 少数点から場を復元する（gappy 再構成）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>$r$ 点 $P$ の温度だけから、PODモードで全場を復元したい:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$u=u+U_r,a,a=(U_{r,P})^{+}(u_P-u_P).$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>ここで $U_{r,P}$ は「モード行列の、選んだ点の行だけ」を抜いた $rr$ 行列、 $u_P$ は選んだ点の測定値です。この復元が安定なのは $U_{r,P}$ が <strong>良条件（可逆で条件数が小さい）</strong> なとき。 だから「 $U_{r,P}$ の条件数を小さくする点集合 $P$ 」を選ぶ ―― これが <strong>Q-DEIM</strong>。 アルゴリズムは「モード行列の転置に <strong>列枢軸付きQR分解</strong> をかけ、最初の $r$ 個の枢軸列（＝行＝点）を選ぶ」だけです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">4-2. 手計算：1点で場が復元できることを確かめる</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>上の3セル例（モード1本）で $r=1$ 。 $U_1=_1=(0.873, 0.436, 0.218)^{T}$ 。 枢軸QRは <strong>絶対値が最大の成分</strong>を最初の点に選ぶので、選ばれるのは <strong>セルA</strong>（0.873が最大）。 「一番よく振れる点を測れ」という直感どおりです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>では本当に <strong>A の1点だけ</strong>で場が戻るか。時刻 $t_3$ の真値 $u=(24, 22, 21)$ に対し、平均は $u=(23, 21.5, 20.75)$ 。 <strong>A だけ測る</strong>と $u_A-u_A=24-23=1$ 。係数は</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$a=(U_{1,A})^{+}(u_A-u_A)==1.145,$$</p>
+<!-- /wp:paragraph -->
+
+$$u=u+_1,a =
++
+=
+<!-- wp:paragraph -->
+<p>.$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p><strong>測っていない B・C まで、真値 22・21 にピタリ</strong>。ランク1だから1点で完全復元、というのが数字で確認できました。 本物は2〜3モードなので、同じ理屈で <strong>数点</strong>あれば場が復元できます。これが「少数の代表点でROMを組める」根拠です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">4-3. 実際に選ばれた5点</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>本ケース（20,696セル）に Q-DEIM をかけて選ばれた5点:</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/qdeim_points.png" alt="POD＋Q-DEIMで選んだROM代表点（3D）" />
+<figcaption aria-hidden="true">POD＋Q-DEIMで選んだROM代表点（3D）</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>勘の流用点（すべて中央高さ）と違い、<strong>底面(P3,P4)も選んで場を広くカバー</strong>している。 「勘」ではなく「データから系統的に」選んだ点であることがポイント。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">5. 実データの POD 結果（図で確認）</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">5-1. モード＝場の「型」</h3>
+<!-- /wp:heading -->
+
+<figure>
+<img src="img/pod_modes.png" alt="PODで出た温度場のモード" />
+<figcaption aria-hidden="true">PODで出た温度場のモード</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>平均場＋モード1（91.8％）＋モード2（8.1％）で場の99.9％を説明。 モード1は「全体が同じだけ昇温」する一様な型（＝支配的）、モード2が「ヒータ側↔︎反対側」の偏り。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>エネルギー比（実データ）:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>モード</th>
+<th>エネルギー比</th>
+<th>累積</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>モード1</td>
+<td>91.81％</td>
+<td>91.81％</td>
+</tr>
+<tr class="even">
+<td>モード2</td>
+<td>8.08％</td>
+<td><strong>99.89％</strong></td>
+</tr>
+<tr class="odd">
+<td>モード3</td>
+<td>0.11％</td>
+<td>99.996％</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p><strong>2モードで99.9％</strong> ＝ 温度場は実質2自由度。だから少数点のROMで十分表せます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">5-2. モードを足すほど真値に近づく</h3>
+<!-- /wp:heading -->
+
+<figure>
+<img src="img/pod_reconstruction.png" alt="モードを足すと真値に近づく" />
+<figcaption aria-hidden="true">モードを足すと真値に近づく</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>平均場のみ（誤差1.175K）→ ＋モード1（0.583K）→ ＋モード1,2（0.055K）→ ＋モード1,2,3（0.005K）。 モードを1つ足すごとに桁で誤差が縮む＝PODが効率よく場を捉えている証拠。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">6. 選んだ5点で ROM を組み、校正する</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">6-1. 一般化した集中定数モデル</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>選んだ任意配置の $n$ 点をノードとし、全点対をコンダクタンスで結びます:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$C_i=<em>{ji}K</em>{ij}(T_j-T_i)+q_i(t)-h,(T_i-T_).$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>$C_i$ … ノードの熱容量 [J/K]</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$K_{ij}$ … ノード間コンダクタンス [W/K]（対称・全点対、5点なら10本）</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$q_i$ … ヒータ発熱（ヒータ最近傍ノードに投入）</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>$h$ … 放熱係数 [W/K]</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>行列形にすると線形システムになり、RK4 で一括前進積分できます（これが約31msの正体）。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">6-2. 校正して OpenFOAM に合わせる</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>選んだ5点の <strong>OpenFOAM温度履歴</strong>を目標に、未知パラメータ $C[5], K[10], h$ を最小二乗で同定します:</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/rom_calib_fit.png" alt="POD選定5点ROMの校正結果" />
+<figcaption aria-hidden="true">POD選定5点ROMの校正結果</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>太い半透明線＝OpenFOAM、破線＝POD選定5点ROM。ほぼ完全に重なる。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>当てはめ残差 RMSE ＝ 0.014 K</strong>（OpenFOAMをほぼ完全に再現）</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>全熱容量 $C_i=1211$ J/K は、鋼2.49 kg の $c_p V$ J/K とほぼ一致 （数字合わせでなく <strong>物理的にも妥当</strong>）</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">7. まとめ ― この記事でやったこと</h2>
+<!-- /wp:heading -->
+
+<ol type="1">
+<li><strong>EnKFは実ソルバだと重い</strong> → 予報モデルを軽い ROM に置き換える（0-600sが約31ms）。</li>
+<li><strong>代表点は勘でなく POD＋Q-DEIM でデータから選ぶ</strong>。
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>POD：スナップショット行列を SVD して場の「型」とエネルギーを抽出（ $XX^{T}=$ ）。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>Q-DEIM：モード行列に列枢軸QRをかけ、場を最もよく復元できる点を選定。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li></ul></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>小さな行列の手計算</strong>で、ランク1なら1点測るだけで場が完全復元できることを確認した（ $u=u+U_r a$ ）。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>実データでは <strong>2モードで99.9％</strong>、選んだ5点ROMは <strong>残差0.014K</strong> で OpenFOAM を再現。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><p>この軽い ROM の上で、<strong>OI（blog_002）と EnKF（blog_003）</strong> を回すと、温度場・発熱量 $Q$ ・放熱係数 $h$ を 少数観測から高速に推定できます。<strong>「軽い予報モデル」と「賢い観測点」</strong>の2本柱がそろいました。</p></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><hr /></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><h3>参考（元になった実装・詳細）</h3></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>POD／Q-DEIM の数式と手続き：<code>01_pod_qdeim_algorithm.md</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>代表点選定：<code>run/select_points_qdeim.py</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>ROM構築・校正：<code>run/build_calibrate_rom.py</code>, <code>dacore/rom_general.py</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>この上でのデータ同化：<code>blog_002_oi_data_assimilation.md</code>, <code>blog_003_ensemble_kalman_filter.md</code></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->

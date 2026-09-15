@@ -1,0 +1,464 @@
+<!-- wp:shortcode -->
+[mathjax]
+<!-- /wp:shortcode -->
+
+<!-- wp:paragraph -->
+<p>このブログシリーズは、106 でやった一連の研究（熱流体固体連成・データ同化・ROM）を、 <strong>手を動かしながら少しずつ理解していく</strong>ためのものです。第1回は土台となる</p>
+<!-- /wp:paragraph -->
+
+<ol type="1">
+<li><strong>OpenFOAM で熱流体固体連成（CHT）を解いて温度場を出す</strong></li>
+<li><strong>その温度場を FrontISTR に渡して熱膨張（変位）を出す</strong></li>
+<li><strong>CHT の結果から熱伝達率 $h$ の分布・各面の値を算出する</strong></li>
+</ol>
+<!-- wp:paragraph -->
+<p>の3本立てです。数式は最小限にして、まず「何をしているか」の絵をつかむことを優先します。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote>
+<p><strong>この記事の範囲</strong>：本記事は <strong>OpenFOAM（CHT）と FrontISTR の”計算そのもの”</strong> の話です。 データ同化（OI・EnKF）の中身は扱いません（それぞれ blog_002・blog_003 で別途）。</p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">0. 題材：片側だけ温められる中空円筒</h2>
+<!-- /wp:heading -->
+
+<!-- 図があれば: docs/img に円筒＋ヒータの図 -->
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>形</strong>：中空の円筒（パイプ）。内径 20 mm、外径 37.5 mm、高さ 100.5 mm。材料は一般構造用鋼材相当。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>温め方</strong>：円筒の側面の <strong>片側（+X 側）だけ</strong> をヒータで温める（発熱 15 W）。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>時間</strong>：0〜300 秒は加熱、300〜600 秒はヒータを切って冷却。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>狙い</strong>：片側だけ温めると円筒は <strong>バナナのように反る</strong>。この「熱変形」を計算で出したい。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>材料定数（鋼材）:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<thead>
+<tr class="header">
+<th>物性</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ヤング率 $E$</td>
+<td>205 GPa（ $2.05^{11}$ Pa）</td>
+</tr>
+<tr class="even">
+<td>ポアソン比 $$</td>
+<td>0.3</td>
+</tr>
+<tr class="odd">
+<td>密度 $$</td>
+<td>7850 kg/m³</td>
+</tr>
+<tr class="even">
+<td>線膨張係数 $$</td>
+<td>$1.2^{-5}$ /K</td>
+</tr>
+<tr class="odd">
+<td>基準温度 $T_$</td>
+<td>293.15 K（20 ℃、ここで熱ひずみゼロ）</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">1. STEP 1：OpenFOAM で熱流体固体連成（CHT）</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">1-1. 「共役熱伝達（CHT）」ってなに？</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>熱の伝わり方は3つ（伝導・対流・輻射）ありますが、ここで効くのは <strong>固体の中の伝導</strong> と <strong>固体まわりの空気の対流</strong> です。ふつうの伝熱解析は「固体の表面に熱伝達率 $h$ を与えて」空気を省略します。 でも $h$ は本当は場所ごとに違い、事前には分かりません。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>そこで <strong>共役熱伝達（Conjugate Heat Transfer, CHT）</strong> では</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:quote -->
+<blockquote>
+<p><strong>固体と流体（空気）を”一体で”解く</strong></p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:paragraph -->
+<p>ことをします。固体の中は熱伝導、空気の中は流れ＋伝導を解き、<strong>境界（固体表面）で温度と熱流束を連続</strong>に つなぐ。こうすると $h$ を仮定しなくても、空気の対流が自動的に固体を冷やしてくれます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>OpenFOAM でこれを解くソルバが <strong><code>chtMultiRegionFoam</code></strong> です（multi-region＝複数領域を同時に解く）。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">1-2. 2つの領域（region）を用意する</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>CHT では計算領域を2つに分けます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:code -->
+<pre class="wp-block-code"><code>constant/
+  ├─ solid/   ← 円筒（鋼材）。熱伝導だけ
+  └─ fluid/   ← まわりの空気。流れ＋熱</code></pre>
+<!-- /wp:code -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>solid（円筒）</strong>：物性は鋼材。片側側面にヒータ（発熱）を与える。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>fluid（空気）</strong>：円筒を包む空気。外側は 20 ℃ の壁（周囲温度）。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>境界条件のキモは、<strong>固体と空気が接する面</strong>です。ここに <code>compressible::turbulentTemperatureCoupledBaffleMixed</code> のような <strong>“連成境界条件”</strong> を置くと、両側の温度・熱流束を自動でつないでくれます。 （＝ここで $h$ を人間が与えない、というのがCHTの利点）</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">1-3. 回すと何が出るか</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><code>chtMultiRegionFoam</code> を回すと、各時刻ディレクトリ（<code>60/</code>, <code>120/</code>, …）に</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><code>solid/T</code>：<strong>円筒の温度場</strong>（全セルの温度）</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><code>fluid/T</code>, <code>fluid/U</code>：空気の温度・流れ</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>が出ます。<strong>この <code>solid/T</code>（固体の温度場）が次の STEP で主役</strong>になります。 片側加熱なので、ヒータ側（+X）が熱く、反対側（−X）がぬるい、という左右非対称の温度分布になります。</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/fullsolver_temperature_history.png" alt="CHTで計算した各点の温度の時刻歴" />
+<figcaption aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>実ソルバ（<code>chtMultiRegionFoam</code>）で計算した温度の時間変化。0〜300秒の加熱でヒータ側（hot）がぐんぐん上がり、 反対側（cold）はゆるやかに上がる。300秒でヒータOFFにすると冷却へ。左右で温度が違うのがポイント。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">2. STEP 2：温度場を FrontISTR へ渡して熱膨張を出す</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-1. なぜソルバを2つ使うのか</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>OpenFOAM は流体・伝熱は得意ですが、<strong>構造（変形・応力）は解きません</strong>。 一方 <strong>FrontISTR</strong> はオープンソースの有限要素法（FEM）構造解析ソルバで、熱膨張が得意です。 そこで <strong>「温度は OpenFOAM、変形は FrontISTR」</strong> と役割分担します（弱連成＝一方向に温度を渡すだけ）。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:code -->
+<pre class="wp-block-code"><code>OpenFOAM(CHT) ──温度場 T(x)──▶ FrontISTR(熱弾性) ──▶ 変位 u(x)</code></pre>
+<!-- /wp:code -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-2. 熱膨張のしくみ（小学校の理科＋α）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>金属は温めると伸びます。伸び具合は <strong>線膨張係数 $$</strong> で決まり、温度が基準から $T = T - T_$ だけ上がると、各方向に</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$_=,T$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>だけ伸びようとします（ $$ はひずみ＝伸び率）。片側だけ熱いと、熱い側だけ伸びるので 円筒が反ります。FrontISTR は各要素のこの「伸びたい量」を集め、<strong>要素どうしがつながっている拘束</strong>の もとで、全体のつり合う変形（変位 $u$ ）を線形弾性で解きます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-3. FrontISTR に渡すもの・返るもの</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>渡す</strong>：FEM 節点ごとの温度（OpenFOAM の <code>solid/T</code> を最寄り節点へ内挿）＋材料定数（ $E,,$ ）＋基準温度 $T_$ ＋境界拘束（底面固定）。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>返る</strong>：各節点の変位 $u=(u_x,u_y,u_z)$ 。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>底面を固定し上面を自由にしているので、<strong>上面がいちばん動きます</strong>。ヒータ側の上面（A）と 反対側の上面（O）で上向き変位 $U_z$ を比べると、片側加熱の「反り」が数値で見えます。 この 2 点の差 $U_z(A)-U_z(O)$ が、後のブログで「注目量（QoI）」として何度も出てきます。</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/fullsolver_displacement_difference.png" alt="熱膨張による変位（ヒータ側と反対側の差）" />
+<figcaption aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>FrontISTR で計算した熱変形。片側だけ熱いと上面がヒータ側へ「反り」、ヒータ側A と反対側O の 上向き変位 $U_z$ に差が出る。温度が上がるほど反りが大きくなり、冷却で戻る。（変形は見やすさのため誇張表示）</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">2-4. ここまでの一連の流れ</h3>
+<!-- /wp:heading -->
+
+<!-- wp:code -->
+<pre class="wp-block-code"><code>[各時刻]  OpenFOAM: solid/T を計算
+   │
+   ├─ FEM節点温度へ内挿
+   ▼
+ FrontISTR: 熱ひずみ ε=αΔT → つり合い → 変位 u
+   ▼
+ 上面A/Oの Uz、2点差 = 反りの大きさ</code></pre>
+<!-- /wp:code -->
+
+<!-- wp:paragraph -->
+<p>これで <strong>「温度→変形」の物理</strong>が一通りつながりました。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">3. STEP 3：熱伝達率 $h$ の分布と各面の値を算出する</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>CHT の利点は「 $h$ を仮定しない」ことでしたが、<strong>逆に結果から $h$ を”逆算”して分布を見る</strong>ことができます。 「どの面がどれだけ冷えているか」を1つの数字（ $h$ ）で見える化するわけです。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-1. 熱伝達率の定義</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>ある壁面から空気へ逃げる熱流束（単位面積あたりの熱の流れ） $q^{}$ [W/m²] は、 壁の温度 $T_w$ と周囲（基準）温度 $T_$ の差に比例するとみなせて、その比例係数が熱伝達率 $h$ です。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$q^{}=h,(T_w-T_)h=  [].$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>$q^{}$ が大きい（よく熱が逃げる）ほど $h$ は大きい。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>温度差 $T_w-T_$ が小さいのに熱が逃げていれば $h$ は大きい。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-2. OpenFOAM から各面の $q^{}$ と $T_w$ を取り出す</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>CHT を解いた後、<code>chtMultiRegionFoam</code> の結果に対して</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>壁面熱流束</strong> $q^{}$ ：<code>wallHeatFlux</code> 関数（functionObject）または後処理ユーティリティで、 固体表面の各面（face）ごとに出せる。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>壁面温度</strong> $T_w$ ：<code>solid/T</code> の表面パッチ値（各面の温度）。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>基準温度</strong> $T_$ ：ここでは周囲空気の 20 ℃（293.15 K）。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:paragraph -->
+<p>これらは全部 <strong>面（face）ごとに配列で得られる</strong>ので、面ごとに割り算すれば</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$h_i=(i=)$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>で <strong>「 $h$ の面分布」</strong> が作れます。ParaView で $h$ をコンター表示すれば、 ヒータ側・反対側・上面・底面でどう $h$ が違うかが色で見えます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-3. 「各面の代表 $h$ 」を出す（面積平均）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>「側面ヒータ側」「側面反対側」「上面」「底面」のように <strong>面をグループ</strong>に分けて、 各グループの $h$ を <strong>面積で重みづけ平均</strong>すると、面ごとの代表値が出ます。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$h_= =$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>（ $A_i$ は面 $i$ の面積）。右側の形は「そのグループから逃げる総熱量 ÷ 温度差の重みつき面積」で、 <strong>“面ごとの実効熱伝達率”</strong> になります。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">3-4. 実際に OpenFOAM で計算した各面の熱伝達率（ $t=300$ 秒）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p>方法だけでなく、本当に計算してみます。加熱終了の $t=300$ 秒で、<code>chtMultiRegionFoam</code> の結果に</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:code -->
+<pre class="wp-block-code"><code>postProcess -region solid -func wallHeatFlux -time 300</code></pre>
+<!-- /wp:code -->
+
+<!-- wp:paragraph -->
+<p>をかけ、<strong>界面（<code>solid_to_fluid</code> パッチ、8558 面）の各面で $q^{}$ と $T_w$ を取り出し</strong>、 $T_=20$ ℃ として面グループごとに実効熱伝達率</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>$$h=$$</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
+<p>を集計しました（結果を図と表に）。</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/blog_htc_per_face.png" alt="OpenFOAMから算出した各面の熱伝達率" />
+<figcaption aria-hidden="true">OpenFOAMから算出した各面の熱伝達率</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><strong>どの面がどこか</strong>を3Dでも見てみます（界面を $h$ で色分け）。ヒータ側(+X)と反対側(−X)から見た2枚です。</p>
+<!-- /wp:paragraph -->
+
+<figure>
+<img src="img/blog_htc_paraview.png" alt="熱伝達率を色分けした3D図（どの面がどのh か）" />
+<figcaption aria-hidden="true">熱伝達率を色分けした3D図（どの面がどのh か）</figcaption>
+</figure>
+<!-- wp:paragraph -->
+<p><em>界面（<code>solid_to_fluid</code> パッチ）を熱伝達率で色分け。左＝ヒータ側(+X)から、右＝反対側(−X)から。 <strong>ヒータ側の外壁（黄, 15.8）＞ 反対側（濃紺, 10.5）</strong>、<strong>底面の縁（赤, 19.5）がいちばん高い</strong>、 上面（水色, 11.9）、空洞の内壁（青, 10.8）。「どの面がどれだけ冷えているか」が形と一緒に見えます。</em></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:table -->
+<figure class="wp-block-table">
+<table style="width: 100%;">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>面グループ</th>
+<th>平均壁温 $T_w$</th>
+<th>実効 $h$ [W/(m²·K)]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>外壁・ヒータ側(+X)</td>
+<td>23.5 ℃</td>
+<td><strong>15.8</strong></td>
+</tr>
+<tr class="even">
+<td>外壁・反対側(−X)</td>
+<td>22.5 ℃</td>
+<td>10.5</td>
+</tr>
+<tr class="odd">
+<td>内壁（空洞）</td>
+<td>23.1 ℃</td>
+<td>10.8</td>
+</tr>
+<tr class="even">
+<td>上面</td>
+<td>23.1 ℃</td>
+<td>11.9</td>
+</tr>
+<tr class="odd">
+<td><strong>底面</strong></td>
+<td>22.7 ℃</td>
+<td><strong>19.5</strong></td>
+</tr>
+<tr class="even">
+<td>全界面</td>
+<td>—</td>
+<td><strong>13.4</strong>（OpenFOAM内蔵の <code>heatTransferCoeff(T)</code> 場とも整合）</td>
+</tr>
+</tbody>
+</table>
+</figure>
+<!-- /wp:table -->
+
+<!-- wp:paragraph -->
+<p>読み取れること:</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li><strong>ヒータ側(+X)の外壁が高い</strong>（15.8）：温まって周囲空気との差が大きく、対流がよく効く。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>反対側(−X)は低い</strong>（10.5）：ぬるいぶん熱の逃げも穏やか。→ <strong>同じ「側面」でも左右で $h$ が約1.5倍違う</strong>。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li><strong>底面がいちばん高い</strong>（19.5）：底の縁は空気がまわり込みやすく、局所的に強く冷える。</li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>全部の面を <strong>一律の $h$ で近似する簡易解析がいかに雑か</strong>が数字で分かる（場所で10〜20と2倍ばらつく）。</li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
+
+<!-- wp:quote -->
+<blockquote>
+<p>ポイント：CHT は $h$ を <strong>入力しない</strong>代わりに、結果から $h$ を <strong>面ごとに診断</strong>できる。 「どの面がどれだけ冷えているか」を1枚の図＋表で定量化できるのが強みです。 （値は界面全体の面積重みつき実効値。局所には温度差ゼロ付近で $h$ が跳ねる面もあるため、 グループごとの実効値で見るのが安全です。）</p>
+</blockquote>
+<!-- /wp:quote -->
+
+<!-- wp:heading {"className":"wp-block-heading"} -->
+<h2 class="wp-block-heading">4. まとめ ― 第1回で押さえたこと</h2>
+<!-- /wp:heading -->
+
+<ol type="1">
+<li><strong>CHT（<code>chtMultiRegionFoam</code>）</strong> は固体＋空気を一体で解き、 $h$ を仮定せず温度場を出す。</li>
+<li>その <strong>温度場を FrontISTR に渡す</strong>と、熱ひずみ $T$ から熱膨張（変位）が出る。片側加熱で円筒は反る。</li>
+<li>CHT の結果から <strong>各面の $q^{}$ と $T_w$</strong> を取り出し、 $h=q^{}/(T_w-T_)$ で <strong>熱伝達率の分布・面代表値</strong>を診断できる。</li>
+</ol>
+<!-- wp:paragraph -->
+<p>次回（blog_002）は、この「温度→変形」を土台に、<strong>少ないセンサから全体を推定するデータ同化（OI）</strong>へ進みます。 まず <strong>熱感度解析で”どこを測ると効くか”</strong>を見抜き、感度の高い点で OI を回します。行列の計算は <strong>節点数をうんと減らした具体例</strong>で、手で追えるようにやります。</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"level":3,"className":"wp-block-heading"} -->
+<h3 class="wp-block-heading">参考（このブログの元になった実装・詳細）</h3>
+<!-- /wp:heading -->
+
+<!-- wp:list {"className":"wp-block-list"} -->
+<ul class="wp-block-list"><!-- wp:list-item -->
+<li>連成の実装と手順：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/docs/00_openfoam_frontistr_coupling_workflow.md</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>実ソルバ・データ同化の全体：<code>00_data_assimilation_algorithm.md</code></li>
+<!-- /wp:list-item -->
+<!-- wp:list-item -->
+<li>材料定数：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml</code></li>
+<!-- /wp:list-item --></ul>
+<!-- /wp:list -->
