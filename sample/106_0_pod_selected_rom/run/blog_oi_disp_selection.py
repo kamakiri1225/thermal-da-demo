@@ -124,5 +124,28 @@ def main():
     fig.tight_layout(rect=[0,0,1,0.93]); out=os.path.join(IMG,"blog_oi_disp_selection.png"); fig.savefig(out,dpi=140); plt.close(fig)
     print("[oi-disp] wrote",out)
 
+    # ---- 実値の時系列（RMSEでなく温度そのもの＋変位そのもの）----
+    # 温度は「観測しない点」で追従を見せると同化の効果が分かりやすい。P2以外で真値振幅が最大の点を選ぶ。
+    amp=Ttr.max(0)-Ttr.min(0); amp[tP]=-1; jp=int(np.argmax(amp))
+    fig2,(bx0,bx1)=plt.subplots(1,2,figsize=(14.5,5.6))
+    for ax in (bx0,bx1): ax.axvspan(0,300,color="orange",alpha=.06)
+    # 左：温度そのもの（未観測点 P{jp+1}）
+    bx0.plot(tg,Ttr[:,jp]-273.15,"-",color="k",lw=3.6,alpha=.45,label="真値")
+    for m,(ls,c,lab,mk) in sty.items():
+        bx0.plot(tg,out_recT[m][:,jp]-273.15,ls,color=c,lw=2.3,marker=mk,ms=4,label=lab)
+    bx0.set_xlabel("time [s]"); bx0.set_ylabel(f"未観測点 P{jp+1} の温度 [°C]"); bx0.grid(alpha=.3); bx0.legend()
+    bx0.set_title(f"温度の時系列：観測に使わない点 P{jp+1} が真値に追従するか",fontsize=12)
+    # 右：変位そのもの（A/O差）
+    bx1.plot(tg,qoi_true,"-",color="k",lw=3.6,alpha=.45,label="真値")
+    for m,(ls,c,lab,mk) in sty.items():
+        bx1.plot(tg,qoi[m],ls,color=c,lw=2.3,marker=mk,ms=4,label=lab)
+    bx1.set_xlabel("time [s]"); bx1.set_ylabel("変位差 Uz(A)−Uz(O) [µm]"); bx1.grid(alpha=.3); bx1.legend()
+    bx1.set_title("変位の時系列：同化後の温度から復元したA/O変位差",fontsize=12)
+    fig2.suptitle("OI（固定B・ROM）：温度と変位の時系列（実値・5seed平均）\n"
+                  "赤＝データ同化なしは真値から外れたまま。温度P2で同化（灰）→高W変位2点を足す（青）ほど真値へ追従",
+                  fontsize=12.5,weight="bold")
+    fig2.tight_layout(rect=[0,0,1,0.93]); out2=os.path.join(IMG,"blog_oi_timeseries.png"); fig2.savefig(out2,dpi=140); plt.close(fig2)
+    print("[oi-disp] wrote",out2)
+
 
 if __name__=="__main__": main()
