@@ -34,6 +34,9 @@ def main():
     def dispH(D):  return D@UPp                       # (2,5)  u ≈ uz0 + Hd@(T5-mean_p)
     Hd_hi=dispH(hi["D"]); Hd_lo=dispH(lo["D"])
     tP=2                                              # 温度観測点 P2
+    # 変位QoI（上面A/O差 Uz(A)-Uz(O)）を recT から出すための演算子
+    do=np.load(os.path.join(RES,"disp_operator.npz")); uzAO=do["uz_mean"]; Dao=do["Dmode"]
+    def qoiAO(T5):  a=(T5-mean[pod])@UPp.T; u=uzAO+a@Dao.T; return (u[...,0]-u[...,1])  # µm(Dmodeは既にµm)
 
     # 真値トラジェクトリ
     cyc=np.arange(OBS_DT,T_END+1e-9,OBS_DT); tg=np.r_[0,cyc]
@@ -75,29 +78,46 @@ def main():
         rng=np.random.default_rng(seed+1); rng_o=np.random.default_rng(seed+7)
         z=np.zeros(NAUG); z[:NPT]=rng.uniform(rg.T_AIR_K-3,rg.T_AIR_K+12,NPT)
         z[IQ]=rng.uniform(0.3,1.8); z[IH]=np.clip(rng.normal(0.02,0.01),1e-3,0.1)
-        rmse=[np.sqrt(((z[:NPT]-Ttr[0])**2).mean())]; tp=0.0
+        rmse=[np.sqrt(((z[:NPT]-Ttr[0])**2).mean())]; recT=[z[:NPT].copy()]; tp=0.0
         for ci,tb in enumerate(cyc,1):
             _,tr=rg.integrate_single(z[:NPT],C,Kmat,z[IH],z[IQ],heat,tp,tb,DT); z=z.copy(); z[:NPT]=tr[-1]; tp=tb
             yv=y_of(Ttr[ci],mode,H,uz0)+rng_o.normal(0,np.sqrt(np.diag(R)))
             ypred=y_of(z[:NPT],mode,H,uz0)
             z=z+K@(yv-ypred)
             z[IQ]=np.clip(z[IQ],0,3); z[IH]=np.clip(z[IH],1e-4,0.2)
-            rmse.append(np.sqrt(((z[:NPT]-Ttr[ci])**2).mean()))
-        return np.array(rmse)
+            rmse.append(np.sqrt(((z[:NPT]-Ttr[ci])**2).mean())); recT.append(z[:NPT].copy())
+        return np.array(rmse), np.array(recT)
 
-    res={m:np.mean([run(m,s) for s in SEEDS],axis=0) for m in ["none","lo","hi"]}
+    out_rmse={}; out_recT={}
+    for m in ["none","lo","hi"]:
+        rs=[run(m,s) for s in SEEDS]
+        out_rmse[m]=np.mean([r[0] for r in rs],axis=0)
+        out_recT[m]=np.mean([r[1] for r in rs],axis=0)     # 5seed平均の解析温度
     ht=(tg>0)&(tg<=300)
-    e={m:res[m][ht].mean() for m in res}
+    e={m:out_rmse[m][ht].mean() for m in out_rmse}
+    # 変位QoI（真値・3構成）
+    qoi_true=qoiAO(Ttr); qoi={m:qoiAO(out_recT[m]) for m in out_recT}
     print("[oi-disp] 加熱期平均RMSE[K]:", {k:round(v,3) for k,v in e.items()})
-    fig,ax=plt.subplots(figsize=(9,5.4)); ax.axvspan(0,300,color="orange",alpha=.06)
-    ax.plot(tg,res["none"],":",color="tab:gray",lw=2.4,label=f"温度1点のみ（変位なし）  誤差{e['none']:.2f}K")
-    ax.plot(tg,res["lo"],"--",color="tab:orange",lw=2.2,marker="s",ms=4,label=f"＋低W変位2点  誤差{e['lo']:.2f}K")
-    ax.plot(tg,res["hi"],"--",color="tab:blue",lw=2.2,marker="o",ms=4,label=f"＋高W変位2点  誤差{e['hi']:.2f}K")
-    ax.set_xlabel("time [s]"); ax.set_ylabel("全5点温度RMSE [K]")
-    ax.set_title("OI（固定B）：高W／低Wの変位観測点で温度推定がどう変わるか\n"
-                 "温度P2に変位2点を追加。高Wは速く下がり、低Wは変位なしとほぼ同じ（5seed平均）",fontsize=12)
-    ax.grid(alpha=.3); ax.legend()
-    fig.tight_layout(); out=os.path.join(IMG,"blog_oi_disp_selection.png"); fig.savefig(out,dpi=140); plt.close(fig)
+
+    fig,(ax0,ax1)=plt.subplots(1,2,figsize=(14.5,5.6))
+    sty={"none":(":","tab:gray","変位なし","o"),"lo":("--","tab:orange","低W変位2点","s"),"hi":("--","tab:blue","高W変位2点","o")}
+    # 左：温度（全5点RMSE）
+    ax0.axvspan(0,300,color="orange",alpha=.06)
+    for m,(ls,c,lab,mk) in sty.items():
+        ax0.plot(tg,out_rmse[m],ls,color=c,lw=2.3,marker=mk,ms=4,label=f"{lab}  誤差{e[m]:.2f}K")
+    ax0.set_xlabel("time [s]"); ax0.set_ylabel("全5点温度RMSE [K]"); ax0.grid(alpha=.3); ax0.legend()
+    ax0.set_title("温度：推定の誤差（真値からのズレ）",fontsize=12)
+    # 右：変位QoI Uz(A)-Uz(O)
+    ax1.axvspan(0,300,color="orange",alpha=.06)
+    ax1.plot(tg,qoi_true,"-",color="k",lw=3.6,alpha=.4,label="真値")
+    for m,(ls,c,lab,mk) in sty.items():
+        ax1.plot(tg,qoi[m],ls,color=c,lw=2.3,marker=mk,ms=4,label=lab)
+    ax1.set_xlabel("time [s]"); ax1.set_ylabel("変位差 Uz(A)−Uz(O) [µm]"); ax1.grid(alpha=.3); ax1.legend()
+    ax1.set_title("変位：同化後の温度から復元したA/O変位差",fontsize=12)
+    fig.suptitle("OI（固定B・ROM）：高W／低W変位観測点で温度・変位の推定がどう変わるか（5seed平均）\n"
+                 "温度P2に変位2点を追加。高W（青）は温度も変位も真値へ速く追従、低W（橙）は変位なし（灰）とほぼ同じ",
+                 fontsize=12.5,weight="bold")
+    fig.tight_layout(rect=[0,0,1,0.93]); out=os.path.join(IMG,"blog_oi_disp_selection.png"); fig.savefig(out,dpi=140); plt.close(fig)
     print("[oi-disp] wrote",out)
 
 
