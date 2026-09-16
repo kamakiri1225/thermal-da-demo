@@ -102,16 +102,21 @@ thermal-da-demo/
 - 002-1 の詳細: [sample/002-1_laplacian_da_round_bar/README.md](sample/002-1_laplacian_da_round_bar/README.md)
 - 先行研究メモ: [docs/](docs/)
 
-## ブログ解説記事（106：POD選定ROM＋データ同化）
+## 📚 ブログ解説記事（データ同化＋縮約モデル ROM）
 
 中空円筒の熱流体固体連成（OpenFOAM＋FrontISTR）を題材に、データ同化と縮約モデル（ROM）を
-**図・数式・実データ**で丁寧に解説しています。ブランチを切り替えず、ここから直接読めます。
+**図・数式・実データ**で丁寧に解説しています。各記事はここから直接読めます（ブランチ切替不要）。
 
-- 🌐 **まとめて読む（GitHub Pages）**: https://kamakiri1225.github.io/thermal-da-demo/
-- blog_001 CHT熱膨張＋熱伝達率 … [.ioで読む](https://kamakiri1225.github.io/thermal-da-demo/blog001.html) ／ [ソース(.md)](sample/106_0_pod_selected_rom/docs/blog_001_cht_thermal_expansion_and_htc.md)
-- blog_002 OIデータ同化 … [.ioで読む](https://kamakiri1225.github.io/thermal-da-demo/blog002.html) ／ [ソース(.md)](sample/106_0_pod_selected_rom/docs/blog_002_oi_data_assimilation.md)
-- blog_003 アンサンブルカルマンフィルタ … [.ioで読む](https://kamakiri1225.github.io/thermal-da-demo/blog003.html) ／ [ソース(.md)](sample/106_0_pod_selected_rom/docs/blog_003_ensemble_kalman_filter.md)
-- blog_004 POD選定ROM（5点→全温度場の復元アニメ付き） … [.ioで読む](https://kamakiri1225.github.io/thermal-da-demo/blog004.html) ／ [ソース(.md)](sample/106_0_pod_selected_rom/docs/blog_004_pod_selected_rom.md)
+1. [**blog_001：CHT熱膨張＋熱伝達率**](sample/106_0_pod_selected_rom/docs/blog_001_cht_thermal_expansion_and_htc.md)
+   … OpenFOAM×FrontISTRで温度→熱膨張、面ごとの熱伝達率まで実際に計算
+2. [**blog_002：OIデータ同化**](sample/106_0_pod_selected_rom/docs/blog_002_oi_data_assimilation.md)
+   … 最適内挿(OI)を数式と小さな行列の手計算で。温度・変位・発熱量Qの入り方まで
+3. [**blog_003：アンサンブルカルマンフィルタ**](sample/106_0_pod_selected_rom/docs/blog_003_ensemble_kalman_filter.md)
+   … 4個の分身で共分散を作り、EnKFを手計算で理解する
+4. [**blog_004：POD選定ROM**](sample/106_0_pod_selected_rom/docs/blog_004_pod_selected_rom.md)
+   … PODで場の型を出しQ-DEIMで代表点を選ぶ。5点→全温度場の復元アニメ付き
+
+> 📄 まとめて読めるWebページ版（GitHub Pages）もあります → [thermal-da-demo (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/)
 
 ## ライセンス
 
