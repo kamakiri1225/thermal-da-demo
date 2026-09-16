@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_003：アンサンブルカルマンフィルタ</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_003：アンサンブルカルマンフィルタ</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_003アンサンブルカルマンフィルタenkf-分身の散らばりから共分散を作る"
+id="toc-blog_003アンサンブルカルマンフィルタenkf-分身の散らばりから共分散を作る">blog_003：アンサンブルカルマンフィルタ（EnKF）―
+「分身の散らばり」から共分散を作る</a>
+<ul>
+<li><a href="#アンサンブル分身とは" id="toc-アンサンブル分身とは">1.
+アンサンブル（分身）とは</a></li>
+<li><a href="#enkf-の手順1サイクル" id="toc-enkf-の手順1サイクル">2.
+EnKF の手順（1サイクル）</a></li>
+<li><a href="#手計算で-enkf-をやってみる2点分身4つ観測1点"
+id="toc-手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
+をやってみる（2点・分身4つ・観測1点）</a>
+<ul>
+<li><a href="#分身の予報" id="toc-分身の予報">3-1. 分身の予報</a></li>
+<li><a href="#散らばりから標本共分散を作る"
+id="toc-散らばりから標本共分散を作る">3-2.
+散らばりから標本共分散を作る</a></li>
+<li><a href="#カルマンゲイン" id="toc-カルマンゲイン">3-3.
+カルマンゲイン</a></li>
+<li><a href="#更新平均で見る" id="toc-更新平均で見る">3-4.
+更新（平均で見る）</a></li>
+</ul></li>
+<li><a href="#enkf-が-oi-より強いところ-発熱量-q-の同定"
+id="toc-enkf-が-oi-より強いところ-発熱量-q-の同定">4. EnKF が OI
+より強いところ ― 発熱量 <span class="math inline">\(Q\)</span>
+の同定</a></li>
+<li><a href="#その代わりのコスト" id="toc-その代わりのコスト">5.
+その代わりのコスト</a></li>
+<li><a href="#回のまとめ" id="toc-回のまとめ">6. 3回のまとめ</a>
+<ul>
+<li><a href="#参考元になった実装詳細"
+id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_003アンサンブルカルマンフィルタenkf-分身の散らばりから共分散を作る">blog_003：アンサンブルカルマンフィルタ（EnKF）―
+「分身の散らばり」から共分散を作る</h1>
+<p>第3回は <strong>アンサンブルカルマンフィルタ（EnKF）</strong>
+です。前回（blog_002）の OI は 背景共分散 <span
+class="math inline">\(B\)</span> を
+<strong>決め打ちで固定</strong>しました。EnKF はここを変えて、</p>
+<blockquote>
+<p><strong>たくさんの”分身（アンサンブル）“を走らせ、その散らばりから共分散を毎回作り直す</strong></p>
+</blockquote>
+<p>のが特徴です。これで <strong>発熱量 <span
+class="math inline">\(Q\)</span>
+のような未知パラメータまで当てられる</strong>ようになります。 今回も
+<strong>節点を減らした具体例</strong>で、行列を手で追いながら理解します。</p>
+<blockquote>
+<p>OIとの一言の違い：<strong>OI は <span
+class="math inline">\(B\)</span> を人間が置く／EnKF は <span
+class="math inline">\(B\)</span>
+を分身の散らばりが教えてくれる</strong>。</p>
+</blockquote>
+<hr />
+<h2 id="アンサンブル分身とは">1. アンサンブル（分身）とは</h2>
+<p>「予報がどれくらい外れるか（共分散 <span
+class="math inline">\(B\)</span> ）」を人間が決めるのは難しい。 そこで
+EnKF は、<strong>少しずつ違う初期値・パラメータを持った <span
+class="math inline">\(N\)</span> 個の分身</strong>を用意して、
+全部シミュレーションで前進させます。その
+<strong>バラけ方（散らばり）そのものが共分散</strong>になります。</p>
+<pre><code>分身1 ─┐
+分身2 ─┼─ みんな少しずつ違う → シミュレーションで前進
+ ⋮    │        → 散らばり方から共分散 C を作る
+分身N ─┘</code></pre>
+<ul>
+<li>分身が <strong>揃って動く2つの量</strong>は「相関が高い」→
+共分散の非対角が大きい。</li>
+<li>分身が <strong>バラバラな量</strong>は不確かさが大きい→
+分散が大きい。</li>
+</ul>
+<p><strong>この共分散は状況に応じて毎サイクル作り直される</strong>（＝流れ依存）。ここが固定
+<span class="math inline">\(B\)</span> の OI との決定的な差です。</p>
+<hr />
+<h2 id="enkf-の手順1サイクル">2. EnKF の手順（1サイクル）</h2>
+<ol type="1">
+<li><strong>予報（forecast）</strong>：全分身をシミュレーションで次の観測時刻まで前進。</li>
+<li><strong>標本共分散</strong>：分身たちの平均とズレから共分散 <span
+class="math inline">\(C\)</span> を作る。</li>
+<li><strong>カルマンゲイン</strong>： <span
+class="math inline">\(K=C_{zy}(C_{yy}+R)^{-1}\)</span> （ <span
+class="math inline">\(C_{zy}\)</span> =状態と観測の共分散、 <span
+class="math inline">\(C_{yy}\)</span> =観測どうし）。</li>
+<li><strong>更新（analysis）</strong>：各分身を観測へ寄せる（観測には分身ごとに少しノイズを足す＝摂動観測法）。</li>
+</ol>
+<p><span
+class="math display">\[x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bigr)\qquad(m=1,\ldots,N)\]</span></p>
+<p>更新後の分身の
+<strong>平均</strong>が推定値、<strong>散らばり</strong>が不確かさです。</p>
+<hr />
+<h2 id="手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
+をやってみる（2点・分身4つ・観測1点）</h2>
+<h3 id="分身の予報">3-1. 分身の予報</h3>
+<p>状態を2点の温度 <span class="math inline">\(x=(T_1,T_2)\)</span>
+とし、分身を
+<strong>4つ</strong>用意して前進させたら、次の予報になったとします。</p>
+<table>
+<thead>
+<tr class="header">
+<th>分身</th>
+<th><span class="math inline">\(T_1\)</span></th>
+<th><span class="math inline">\(T_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>m1</td>
+<td>26</td>
+<td>24</td>
+</tr>
+<tr class="even">
+<td>m2</td>
+<td>30</td>
+<td>27</td>
+</tr>
+<tr class="odd">
+<td>m3</td>
+<td>28</td>
+<td>25</td>
+</tr>
+<tr class="even">
+<td>m4</td>
+<td>32</td>
+<td>28</td>
+</tr>
+<tr class="odd">
+<td><strong>平均</strong></td>
+<td><strong>29</strong></td>
+<td><strong>26</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="散らばりから標本共分散を作る">3-2.
+散らばりから標本共分散を作る</h3>
+<p>平均からのズレ（deviation）:</p>
+<table>
+<thead>
+<tr class="header">
+<th>分身</th>
+<th><span class="math inline">\(\delta T_1\)</span></th>
+<th><span class="math inline">\(\delta T_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>m1</td>
+<td>−3</td>
+<td>−2</td>
+</tr>
+<tr class="even">
+<td>m2</td>
+<td>+1</td>
+<td>+1</td>
+</tr>
+<tr class="odd">
+<td>m3</td>
+<td>−1</td>
+<td>−1</td>
+</tr>
+<tr class="even">
+<td>m4</td>
+<td>+3</td>
+<td>+2</td>
+</tr>
+</tbody>
+</table>
+<p>標本共分散は <span class="math inline">\(C=\dfrac{1}{N-1}\sum_m
+\delta x^{(m)}\,\delta x^{(m)\mathsf T}\)</span> （ <span
+class="math inline">\(N=4\)</span> なので <span
+class="math inline">\(1/3\)</span> ）:</p>
+<p><span
+class="math display">\[C=\frac{1}{3}\begin{pmatrix}(-3)^2+1^2+(-1)^2+3^2
+&amp; (-3)(-2)+\cdots+3\cdot2\\ 14 &amp;
+(-2)^2+1^2+(-1)^2+2^2\end{pmatrix}
+=\frac{1}{3}\begin{pmatrix}20 &amp; 14\\ 14 &amp; 10\end{pmatrix}
+=\begin{pmatrix}6.67 &amp; 4.67\\ 4.67 &amp;
+3.33\end{pmatrix}\]</span></p>
+<p><strong>読み方</strong>： <span
+class="math inline">\(C_{12}=4.67&gt;0\)</span> 、つまり <strong>「
+<span class="math inline">\(T_1\)</span> が高い分身は <span
+class="math inline">\(T_2\)</span>
+も高い」</strong>と分身たちが教えている。
+この相関は人間が置いたのではなく、<strong>シミュレーションの結果から自動で出てきた</strong>ものです。</p>
+<h3 id="カルマンゲイン">3-3. カルマンゲイン</h3>
+<p>点1を観測（ <span class="math inline">\(H=(1,\ 0)\)</span>
+）、観測ノイズ <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
+<ul>
+<li>状態×観測の共分散 <span class="math inline">\(C_{zy}=C H^{\mathsf
+T}\)</span> ＝「 <span class="math inline">\(C\)</span> の1列目」 <span
+class="math inline">\(=\begin{pmatrix}6.67\\
+4.67\end{pmatrix}\)</span></li>
+<li>観測×観測 <span
+class="math inline">\(C_{yy}=C_{11}=6.67\)</span></li>
+</ul>
+<p><span
+class="math display">\[K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\
+4.67\end{pmatrix}
+=\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
+=\begin{pmatrix}0.987\\ 0.691\end{pmatrix}\]</span></p>
+<h3 id="更新平均で見る">3-4. 更新（平均で見る）</h3>
+<p>観測 <span class="math inline">\(y=30\)</span> （真値 <span
+class="math inline">\(T_1=30\)</span> 付近）。予報平均のハズレは <span
+class="math inline">\(30-29=1\)</span> 。平均の更新は</p>
+<p><span class="math display">\[\bar x_a=\bar x_f+K\times1
+=\begin{pmatrix}29\\ 26\end{pmatrix}+\begin{pmatrix}0.987\\
+0.691\end{pmatrix}
+=\begin{pmatrix}29.99\\ 26.69\end{pmatrix}\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>点</th>
+<th>予報平均</th>
+<th><strong>同化後平均</strong></th>
+<th>真値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>点1（観測）</td>
+<td>29</td>
+<td><strong>29.99</strong></td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td>点2（未観測）</td>
+<td>26</td>
+<td><strong>26.69</strong></td>
+<td>27</td>
+</tr>
+</tbody>
+</table>
+<p>観測した点1はほぼ真値へ、<strong>未観測の点2も標本共分散の相関を通じて真値へ寄りました</strong>。
+やっていることは OI と同じ更新式ですが、<strong>共分散 <span
+class="math inline">\(C\)</span> を分身から作った</strong>のが違いです。
+さらに更新後は
+<strong>分身の散らばりが縮む</strong>（不確かさが減った、を表す）。</p>
+<hr />
+<h2 id="enkf-が-oi-より強いところ-発熱量-q-の同定">4. EnKF が OI
+より強いところ ― 発熱量 <span class="math inline">\(Q\)</span>
+の同定</h2>
+<p>OI（blog_002）では、固定 <span class="math inline">\(B\)</span>
+のもとで <strong>発熱量 <span class="math inline">\(Q\)</span>
+が真値に届きにくい</strong>という弱点がありました （ <span
+class="math inline">\(\sigma_Q\)</span> を100倍振っても <span
+class="math inline">\(Q\)</span> は約9 Wで頭打ち）。EnKF
+はここで差が出ます。</p>
+<p>EnKF では状態に <span class="math inline">\(Q\)</span> も入れて
+<strong>拡大状態</strong> <span class="math inline">\(z=(T_1,\ldots,Q,\
+h)\)</span> にします。分身ごとに <span class="math inline">\(Q\)</span>
+を少し変えて前進させると、</p>
+<ul>
+<li>「 <span class="math inline">\(Q\)</span>
+が大きい分身は温度も高い」という <strong><span
+class="math inline">\(Q\)</span> と観測の相関</strong>
+が、標本共分散に自動で現れる。</li>
+<li>しかもその相関は
+<strong>加熱中・冷却中で変わる</strong>（流れ依存）。EnKF
+は毎サイクルこれを作り直す。</li>
+</ul>
+<p>だから観測の予測外れを <strong><span class="math inline">\(Q\)</span>
+にも正しく配分</strong>でき、 <span class="math inline">\(Q\)</span>
+が真値へ寄ります。 本研究の実ソルバEnKFでは、でたらめ初期から</p>
+<ul>
+<li>全セル温度RMSE <strong>7.61 K → 0.011 K</strong></li>
+<li>発熱量 <strong><span class="math inline">\(Q\to14.93\)</span>
+W</strong>（真値15 W、誤差約0.5%）</li>
+</ul>
+<p>まで当てられました（OIの約9 Wと対照的）。下の図は ROM 版 EnKF での
+<span class="math inline">\(Q,h\)</span> 推定の収束です。</p>
+<figure>
+<img src="img/da_qh.png" alt="EnKFによるQ・hの推定" />
+<figcaption aria-hidden="true">EnKFによるQ・hの推定</figcaption>
+</figure>
+<p><em>発熱量 <span class="math inline">\(Q\)</span>
+が真値へ収束していく様子（ <span class="math inline">\(h\)</span>
+は主に冷却期に効くため収束はゆるやか）。</em></p>
+<figure>
+<img src="img/da_rmse.png" alt="温度RMSEの収束" />
+<figcaption aria-hidden="true">温度RMSEの収束</figcaption>
+</figure>
+<p><em>同化を重ねるごとに全点温度RMSEが下がる。</em></p>
+<hr />
+<h2 id="その代わりのコスト">5. その代わりのコスト</h2>
+<p>EnKF の弱点は <strong>重さ</strong>です。共分散を作るために
+<strong>分身を <span class="math inline">\(N\)</span>
+個、毎サイクル全部前進</strong>させます。
+実ソルバ（OpenFOAM＋FrontISTR）でこれをやると、</p>
+<ul>
+<li>OI（背景1本）：約 1.2〜1.6 時間</li>
+<li>EnKF（5メンバー）：<strong>約13時間</strong>（予報が <span
+class="math inline">\(N\)</span> 倍）</li>
+</ul>
+<p>となります。<strong>「軽いが <span class="math inline">\(B\)</span>
+が硬い OI」対「重いが <span class="math inline">\(Q\)</span> まで当たる
+EnKF」</strong>というトレードオフです。 この重さを避けるために
+<strong>予報モデルを ROM に置き換える</strong>のが、106 の POD+Q-DEIM
+の役割でした （0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
+<hr />
+<h2 id="回のまとめ">6. 3回のまとめ</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>回</th>
+<th>テーマ</th>
+<th>キモ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>blog_001</td>
+<td>CHT→熱膨張＋熱伝達率</td>
+<td>固体＋空気を一体で解き、温度→変形、面ごとの <span
+class="math inline">\(h\)</span> を診断</td>
+</tr>
+<tr class="even">
+<td>blog_002</td>
+<td>OI データ同化</td>
+<td>感度で観測点を選ぶ／固定 <span class="math inline">\(B\)</span>
+で軽く更新／ <span class="math inline">\(Q\)</span> は弱可同定</td>
+</tr>
+<tr class="odd">
+<td><strong>blog_003</strong></td>
+<td><strong>EnKF</strong></td>
+<td><strong>分身の散らばりから共分散を作り、 <span
+class="math inline">\(Q\)</span> まで同定／ただし重い</strong></td>
+</tr>
+</tbody>
+</table>
+<p>3つを貫くメッセージは、<strong>「少数の観測から全体（温度・変形・熱源）を推定する」</strong>
+こと。 そのために
+<strong>どこを測るか（感度）</strong>・<strong>どう共分散を作るか（固定
+<span class="math inline">\(B\)</span>
+か分身か）</strong>・<strong>どう軽くするか（ROM）</strong> を
+使い分ける、というのが本研究の骨格です。</p>
+<hr />
+<h3 id="参考元になった実装詳細">参考（元になった実装・詳細）</h3>
+<ul>
+<li>OI/EnKF
+のアルゴリズムと数式：<code>00_data_assimilation_algorithm.md</code></li>
+<li>EnKF
+がなぜ重いか・ROM化の動機：<code>00_data_assimilation_algorithm.md</code>
+の E 節</li>
+<li>全ストーリー：<code>02_full_story.md</code></li>
+</ul>
+</body>
+</html>

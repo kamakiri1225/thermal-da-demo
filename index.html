@@ -1,0 +1,22 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱データ同化ブログ ― CHT／OI／EnKF／POD-ROM</title>
+<style>
+ body{font-family:-apple-system,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+   max-width:820px;margin:0 auto;padding:2rem 1.2rem;line-height:1.8;color:#1b2733;background:#fafbfc}
+ h1{font-size:1.6rem;border-bottom:3px solid #33475b;padding-bottom:.4rem}
+ .card{display:block;border:1px solid #d8dee6;border-radius:12px;padding:1rem 1.2rem;margin:1rem 0;
+   text-decoration:none;color:inherit;background:#fff;transition:.15s}
+ .card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);border-color:#33475b}
+ .card b{font-size:1.15rem;color:#12407a}
+ .card p{margin:.3rem 0 0;color:#54616e;font-size:.95rem}
+ .note{color:#6b7684;font-size:.88rem;margin-top:2rem}
+</style></head><body>
+<h1>熱データ同化 ― CAE解説ブログ</h1>
+<p>中空円筒の熱流体固体連成（OpenFOAM＋FrontISTR）を題材に、データ同化と縮約モデルを図・数式・実データで解説します。</p>
+<a class="card" href="blog001.html"><b>blog_001：CHT熱膨張＋熱伝達率</b><p>OpenFOAM×FrontISTRで温度→熱膨張、面ごとの熱伝達率まで実際に計算。</p></a>
+<a class="card" href="blog002.html"><b>blog_002：OIデータ同化</b><p>最適内挿(OI)を数式と小さな行列の手計算で。温度・変位・発熱量Qの入り方まで。</p></a>
+<a class="card" href="blog003.html"><b>blog_003：アンサンブルカルマンフィルタ</b><p>4個の分身で共分散を作り、EnKFを手計算で理解する。</p></a>
+<a class="card" href="blog004.html"><b>blog_004：POD選定ROM</b><p>PODで場の型を出し、Q-DEIMで代表点を選び、軽いROMを校正。5点→全温度場の復元アニメ付き。</p></a>
+<p class="note">数式はMathJax、図・アニメGIFは埋め込み表示。ソース：github.com/kamakiri1225/thermal-da-demo</p>
+</body></html>
