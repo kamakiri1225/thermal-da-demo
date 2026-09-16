@@ -270,6 +270,9 @@ id="toc-最良の型を求める変分問題-固有値問題">2-2.
 <li><a href="#svd-との同値実際の計算法"
 id="toc-svd-との同値実際の計算法">2-3. SVD
 との同値（実際の計算法）</a></li>
+<li><a href="#用語の整理-podsvd特異値分解の違い"
+id="toc-用語の整理-podsvd特異値分解の違い">2-4. 用語の整理 ―
+POD・SVD・特異値分解の違い</a></li>
 </ul></li>
 <li><a href="#小さな行列で-pod-を手計算する3セル-4時刻文字式"
 id="toc-小さな行列で-pod-を手計算する3セル-4時刻文字式">3. 小さな行列で
@@ -534,6 +537,70 @@ class="math inline">\(r\)</span>
 class="math inline">\(r\)</span>
 の全行列の中でフロベニウス誤差を最小</strong>にする （Eckart–Young
 の定理）＝「PODは最もエネルギー効率のよいモード分解」です。</p>
+<h3 id="用語の整理-podsvd特異値分解の違い">2-4. 用語の整理 ―
+POD・SVD・特異値分解の違い</h3>
+<p>ここで混乱しやすい3語を整理します。まず大前提:</p>
+<blockquote>
+<p><strong>SVD ＝ 特異値分解</strong>（Singular Value Decomposition）は
+<strong>同じもの</strong>。
+英語の略称か日本語かの違いだけで、中身は1つ。だから区別すべきは実質
+<strong>「SVD（＝特異値分解）」と「POD」の2つ</strong>です。</p>
+</blockquote>
+<ul>
+<li><strong>SVD（＝特異値分解）</strong> …
+<strong>どんな行列にも使える線形代数の”道具”</strong>。行列を <span
+class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span>
+の3つに分解する操作、それ以上でも以下でもありません。物理も温度も知りません。</li>
+<li><strong>POD（固有直交分解）</strong> …
+<strong>データから”エネルギー最大の型”を取り出す”目的・考え方”</strong>。その計算に
+SVD を使います。「PODをする」＝実際には「平均を引いた <span
+class="math inline">\(X\)</span> を SVD し、 <span
+class="math inline">\(U\)</span> の列を”モード”、 <span
+class="math inline">\(\sigma_k^2\)</span>
+を”エネルギー”と読む」こと。</li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>用語</th>
+<th>正体</th>
+<th>立場</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>特異値分解</strong></td>
+<td>SVD の日本語名（＝SVDそのもの）</td>
+<td>―</td>
+</tr>
+<tr class="even">
+<td><strong>SVD</strong></td>
+<td><span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span>
+の行列分解</td>
+<td>汎用の <strong>計算道具</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>POD</strong></td>
+<td>場のエネルギー最大の直交モードを取る</td>
+<td><strong>目的・解釈</strong>（平均除去・重み・エネルギー意味づけを追加）</td>
+</tr>
+</tbody>
+</table>
+<p>つまり <strong>「POD は SVD と別物」ではなく、SVD は POD
+を計算する道具</strong>。POD側には「①平均を引く
+②（体積などで重みを付けた）エネルギーで最良性を測る
+③上位数モードで場を代表させる」という”味付け”が加わります。 統計の
+<strong>PCA（主成分分析）</strong> や確率過程の <strong>Karhunen–Loève
+展開</strong> も、呼び名が違うだけで本質は同じ仲間です。</p>
+<p>（別解：SVDを使わず <span class="math inline">\(XX^{\mathsf
+T}\)</span> の固有値分解や、時間側の小さい <span
+class="math inline">\(X^{\mathsf T}X\)</span>
+を解く”スナップショット法”でも、同じPODモードが得られます。SVDはその中で最も安定・簡単な計算法という位置づけ。）</p>
 <hr />
 <h2 id="小さな行列で-pod-を手計算する3セル-4時刻文字式">3. 小さな行列で
 POD を手計算する（3セル × 4時刻・文字式）</h2>
