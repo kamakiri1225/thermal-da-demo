@@ -71,8 +71,8 @@ def main():
     y0,y1=max(0,ys.min()-pad),min(img.shape[0],ys.max()+pad)
     x0,x1=max(0,xs.min()-pad),min(img.shape[1],xs.max()+pad)
     img=img[y0:y1,x0:x1]; h,w=img.shape[:2]
-    fig_w=8.2; ar=min(h/w,0.72)
-    fig,ax=plt.subplots(figsize=(fig_w,fig_w*ar)); ax.imshow(img,aspect="auto"); ax.axis("off")
+    fig_w=8.6; fig_h=fig_w*(h/w)          # 真のアスペクト比（つぶれ防止：aspect autoを使わない）
+    fig,ax=plt.subplots(figsize=(fig_w,fig_h)); ax.imshow(img); ax.axis("off")
     ax.set_title("ROMのノード＝POD＋Q-DEIM選定5点。各ノードで集中定数の式を解く\n"
                  "辺の太さ＝コンダクタンス K_ij（P0-P2が最強）。オレンジ＝ヒータ発熱ノードP2にqを投入",
                  fontsize=12.5)
