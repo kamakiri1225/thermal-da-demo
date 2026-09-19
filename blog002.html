@@ -549,6 +549,102 @@ class="math inline">\(\sigma_Q^2\,(s\cdot w)\)</span> ＝「感度 <span
 class="math inline">\(s\)</span> と <span
 class="math inline">\(w\)</span>
 の内積」で決まる、というのが文字式で読み取れる要点です。</p>
+<h4
+id="なぜ変位を測ると温度まで良くなるのか-分散で丁寧に導く">なぜ「変位を測ると温度まで良くなる」のか
+― 分散で丁寧に導く</h4>
+<p>「変位計は温度を測っていないのに、なぜ温度が良くなるのか」を、共分散の式で最後まで追います。</p>
+<p><strong>① 変位のズレ＝温度誤差の射影</strong>。温度の予報誤差を <span
+class="math inline">\(\delta T=T-T^b\)</span> （共分散 <span
+class="math inline">\(B\)</span> ）とすると、
+変位は温度の線形写像なので</p>
+<p><span class="math display">\[u-u^b=w^{\mathsf T}\delta T=w_1\,\delta
+T_1+w_2\,\delta T_2+\cdots\]</span></p>
+<p>変位計は「温度誤差の <span class="math inline">\(w\)</span>
+方向成分」を1つの数として読む器械です。</p>
+<p><strong>② 温度が動く理由＝共分散 <span
+class="math inline">\(Bw\)</span></strong> 。 <span
+class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
+<p><span class="math display">\[K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
+w^{\mathsf T}Bw=\mathrm{Var}(u).\]</span></p>
+<p>温度 <span class="math inline">\(T_i\)</span> が更新されるのは <span
+class="math inline">\(\mathrm{Cov}(T_i,\ u)\neq0\)</span> （＝ベクトル
+<span class="math inline">\(Bw\)</span> の第 <span
+class="math inline">\(i\)</span> 成分がゼロでない）、 つまり「 <span
+class="math inline">\(T_i\)</span>
+の誤差と変位の誤差が<strong>連動</strong>している」から。変位のハズレが、連動の強さに比例して各温度へ配られます。</p>
+<p><strong>③ どれだけ良くなるか（事後分散）</strong>：</p>
+<p><span class="math display">\[B^a=B-\frac{(Bw)(Bw)^{\mathsf
+T}}{w^{\mathsf T}Bw+r},\qquad
+\Delta=\mathrm{tr}\,B-\mathrm{tr}\,B^a=\frac{\lVert
+Bw\rVert^2}{w^{\mathsf T}Bw+r}.\]</span></p>
+<p>＝「変位から見える温度パターン <span
+class="math inline">\(Bw\)</span> の方向」の分散が丸ごと消えます。</p>
+<p><strong>④
+核心：温度誤差が「共通の型」なら変位1本で全温度が直る</strong>。
+本研究の温度誤差の主因は発熱量 <span class="math inline">\(Q\)</span>
+の間違いで、その誤差は1つの空間パターン <span
+class="math inline">\(\varphi\)</span>
+（≒PODモード1「全体が昇温する型」）で起きます： <span
+class="math inline">\(\delta T\approx a\,\varphi\)</span> （ <span
+class="math inline">\(a\)</span> はスカラー係数、 <span
+class="math inline">\(\mathrm{Var}(a)=\sigma_a^2\)</span>
+）。このとき</p>
+<p><span class="math display">\[u-u^b=g\,a,\qquad g\equiv w^{\mathsf
+T}\varphi\]</span></p>
+<p>つまり<strong>変位計は「型の係数 <span
+class="math inline">\(a\)</span> をゲイン <span
+class="math inline">\(g\)</span> で測る器械」</strong>。 <span
+class="math inline">\(a\)</span> が決まれば <span
+class="math inline">\(T^a=T^b+\varphi\,\hat a\)</span>
+で<strong>全点の温度が一斉に</strong>直ります（未観測点まで直る理由もこれ）。係数の事後分散は</p>
+<p><span class="math display">\[\mathrm{Var}(a\mid
+u)=\frac{\sigma_a^2\,r}{g^2\sigma_a^2+r}.\]</span></p>
+<p>ここに高W/低Wの答えが全部入っています：</p>
+<ul>
+<li><strong>高W点</strong>（ <span class="math inline">\(\lVert
+w\rVert\)</span> が大きく <span class="math inline">\(\varphi\)</span>
+と同じ向き）→ <span class="math inline">\(g\)</span> 大 → <span
+class="math inline">\(\mathrm{Var}\approx r/g^2\to0\)</span>
+＝ほぼ確定</li>
+<li><strong>低W点</strong> → <span class="math inline">\(g\to0\)</span>
+→ <span class="math inline">\(\mathrm{Var}\to\sigma_a^2\)</span>
+＝<strong>何も学べない</strong>（信号 <span
+class="math inline">\(g\,a\)</span> がノイズ <span
+class="math inline">\(\sqrt r\)</span> に埋もれる）</li>
+</ul>
+<p>§5の実験値（温度のみ3.52K／低W変位2.43K／高W変位0.86K）は、この <span
+class="math inline">\(g\)</span> の大小の直接の現れです。</p>
+<p><strong>⑤ 数値で確認</strong>（2点、 <span
+class="math inline">\(\sigma=1,\ \rho=0.9,\ w=(0.5,\ 0.2),\
+r=0.01\)</span> ）：</p>
+<p><span class="math display">\[w^{\mathsf
+T}Bw=0.25+0.04+2(0.9)(0.1)=0.47,\qquad Bw=\begin{pmatrix}0.68\\
+0.65\end{pmatrix},\qquad
+K=\frac{1}{0.48}\begin{pmatrix}0.68\\
+0.65\end{pmatrix}=\begin{pmatrix}1.42\\ 1.35\end{pmatrix}.\]</span></p>
+<p>分散減少 <span class="math inline">\(\Delta=0.885/0.48=1.84\)</span>
+→ 温度の総分散 <span class="math inline">\(2\to0.16\)</span>
+（<strong>92%減</strong>）。 注目は <span
+class="math inline">\(w_2=0.2\)</span> と小さい <span
+class="math inline">\(T_2\)</span> までゲイン1.35で直る点——<strong>相関
+<span class="math inline">\(\rho\)</span>
+が補正を運ぶ</strong>からです。 比較：温度計1本（点1、 <span
+class="math inline">\(r_T=0.09\)</span> ）だと <span
+class="math inline">\(\Delta=1.81/1.09=1.66\)</span> →事後0.34。
+この条件では<strong>変位1本の方が温度計1本より温度を良くします</strong>（変位は複数点の誤差をまとめて見るため）。</p>
+<p><strong>⑥ EnKFでは</strong>この <span
+class="math inline">\(Bw=\mathrm{Cov}(T,u)\)</span>
+を分身たちが自動で作ります （ <span class="math inline">\(T\)</span>
+が高い分身は <span class="math inline">\(u\)</span>
+も大きい→標本共分散に現れる）。</p>
+<blockquote>
+<p><strong>まとめ：変位観測が温度を直す3条件</strong> ① <span
+class="math inline">\(w\)</span> が大きく、誤差の型 <span
+class="math inline">\(\varphi\)</span> と揃う点で測る（＝高W点） ②
+温度誤差が空間相関を持つ（低次元の「型」で起きる＝PODが2モードで99.9%はまさにこれ）
+③ 観測ノイズが信号より小さい（ <span class="math inline">\(r\lt
+g^2\sigma_a^2\)</span> ）</p>
+</blockquote>
 <h3 id="q-が同定できる周辺化積分の正体">3-8. 「 <span
 class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</h3>
