@@ -94,7 +94,7 @@ def disp_da_timeseries_points():
     names=[rename.get(n,n) for n in names]
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
     ht=(t>0)&(t<=300)
-    fig,axes=plt.subplots(1,3,figsize=(16.5,5.6))
+    fig,axes=plt.subplots(1,3,figsize=(16.5,6.4))
     panels=[("Uz(A) ヒータ側・上面",0),("Uz(O) 反対側・上面",1),("差 Uz(A)−Uz(O)",None)]
     for ax,(ti,k) in zip(axes,panels):
         ax.axvspan(0,300,color="orange",alpha=.07)
@@ -108,11 +108,11 @@ def disp_da_timeseries_points():
             ax.plot(t,mu,lw=1.8,color=c,label=f"{names[i]}  RMSE {rm:.2f}µm")
         ax.set_title(ti,fontsize=12.5,weight="bold"); ax.grid(alpha=.3)
         ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位 [µm]")
-        ax.legend(fontsize=7.2,loc="lower center")
+        ax.legend(fontsize=8,loc="upper center",bbox_to_anchor=(0.5,-0.30),frameon=False)
     fig.suptitle("個別の変位で見ると構成差は大きい：差(A−O)だけでは相殺で見えにくい\n"
                  "温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。変位2点(赤)は両点とも合う",
                  fontsize=12.5,weight="bold")
-    fig.tight_layout(rect=[0,0,1,0.88])
+    fig.subplots_adjust(left=0.05,right=0.99,top=0.80,bottom=0.34,wspace=0.24)
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da_points.png")
     fig.savefig(out,dpi=150,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
