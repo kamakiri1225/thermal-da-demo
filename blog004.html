@@ -999,6 +999,90 @@ class="math inline">\(\lVert a\rVert\)</span>
 <p>5点を個別に読み取れるよう、温度感度（ <span
 class="math inline">\(\partial T/\partial Q\)</span>
 ）と実際の変位観測点を 同じ座標系に重ねた図も示します。</p>
+<h4
+id="高感度低感度はどういうロジックで決めているか">「高感度／低感度」はどういうロジックで決めているか</h4>
+<p>本研究では
+<strong>温度センサと変位センサで、感度の定義と決め方が違います</strong>。混同しやすいので、レシピ形式でまとめます。</p>
+<p><strong>① 温度センサの高/低感度 ＝ 発熱への温度感度 <span
+class="math inline">\(\partial T/\partial Q\)</span></strong></p>
+<blockquote>
+<p>「ヒータの発熱が変わったとき、<strong>温度がよく反応する場所</strong>はどこか」</p>
+</blockquote>
+<ol type="1">
+<li>発熱を10%増やして（ <span
+class="math inline">\(q_\mathrm{scale}\)</span> :
+1.0→1.1）ROMをもう一度回す</li>
+<li>加熱ピーク（ <span class="math inline">\(t=300\)</span>
+s）で、各点の温度上昇の差をとる： <span
+class="math inline">\(s_i=\dfrac{T_i(1.1Q)-T_i(Q)}{0.1Q}\)</span></li>
+<li>大きい順に並べる →
+<strong>最大＝高感度（P2＝ヒータ最近傍、5.7）</strong>、<strong>最小＝低感度（P4＝反対側の底面、2.6）</strong></li>
+</ol>
+<p>物理的な理屈：<strong>熱源に近いほど発熱変化が薄まらずに届く</strong>ので反応が大きい。遠い点は拡散でならされ、反応が鈍い。</p>
+<p><strong>② 変位センサの高/低感度（高W/低W）＝ 温度への変位感度 <span
+class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
+<blockquote>
+<p>「温度が変わったとき、<strong>変位がよく動く場所</strong>はどこか」</p>
+</blockquote>
+<ol type="1">
+<li>FrontISTRの熱弾性（ <span class="math inline">\(K_s u=H_T T\)</span>
+）を1度解いて、温度→変位の行列 <span class="math inline">\(W\)</span>
+を作る</li>
+<li>候補点ごとに <strong><span class="math inline">\(W\)</span>
+の行ノルム</strong>（＝その点の変位が温度場にどれだけ反応するか）を計算</li>
+<li>大きい順に並べる →
+<strong>高W＝上端の点</strong>、<strong>低W＝底面の点</strong></li>
+</ol>
+<p>物理的な理屈：<strong>底面は固定</strong>なので、そこから遠い上端ほど各層の伸びが<strong>累積</strong>して現れる（てこの先端ほど動く）。
+底面近くは拘束されていてほとんど動けない＝測っても情報が少ない。</p>
+<p><strong>まとめ表</strong>：</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>温度センサ</th>
+<th>変位センサ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>感度の定義</td>
+<td><span class="math inline">\(\partial T/\partial Q\)</span>
+（発熱→温度）</td>
+<td><span class="math inline">\(W=K_s^{-1}H_T\)</span>
+の行ノルム（温度→変位）</td>
+</tr>
+<tr class="even">
+<td>決め方</td>
+<td><span class="math inline">\(Q\)</span> を10%振って温度差を見る</td>
+<td>FrontISTRを1回解いて <span class="math inline">\(W\)</span>
+の行を比べる</td>
+</tr>
+<tr class="odd">
+<td>高感度の場所</td>
+<td><strong>ヒータ最近傍</strong>（P2）</td>
+<td><strong>上端</strong>（固定面から最遠）</td>
+</tr>
+<tr class="even">
+<td>低感度の場所</td>
+<td>反対側の底面（P4）</td>
+<td>底面（固定で動けない）</td>
+</tr>
+<tr class="odd">
+<td>どちらも意味は</td>
+<td>「測る量が、知りたい変化に<strong>よく反応する</strong>場所」を選ぶ、という同じ発想</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>（詳しい導出は blog_002 §4 と
+<code>105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.md</code>
+にあります。）</p>
 <p><img src="img/sensor_positions.png" alt="5温度点と変位観測点A/Oの位置" width="520"></p>
 <table>
 <colgroup>
