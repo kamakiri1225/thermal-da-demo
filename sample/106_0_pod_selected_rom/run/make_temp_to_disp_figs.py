@@ -46,15 +46,15 @@ def disp_da_timeseries():
     est=d["estimate_u_um"]
     names=[str(x) for x in d["names"]]
     # 凡例をわかりやすく（どの点か・何の感度かを明記）
-    rename={"同化なし(free run)":"同化なし（自由予測）",
-            "温度1点(低感度)":"温度1点：P4底面（dT/dQ小＝低感度）",
-            "温度1点(高感度)":"温度1点：P2ヒータ側（dT/dQ大＝高感度）",
-            "温度2点(高感度)":"温度2点：P2＋P0",
-            "温度2点+変位2点":"温度2点＋変位2点（高W・上端）"}
+    rename={"同化なし(free run)":"同化なし",
+            "温度1点(低感度)":"温度1点:P4底(dT/dQ小)",
+            "温度1点(高感度)":"温度1点:P2ヒータ側(dT/dQ大)",
+            "温度2点(高感度)":"温度2点:P2+P0",
+            "温度2点+変位2点":"温度2点+変位2点(高W上端)"}
     names=[rename.get(n,n) for n in names]
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
-    fig,ax=plt.subplots(figsize=(11.2,7.6))
+    fig,ax=plt.subplots(figsize=(11.6,6.0))
     ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
     ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
     ax.annotate("真値（黒太線）",xy=(370,float(np.interp(370,t,truth))),xytext=(430,1.7),
@@ -74,8 +74,8 @@ def disp_da_timeseries():
                  "→ 変位2点を足すと0.17µm（約6倍改善）",
                  fontsize=12.5,weight="bold",y=0.99)
     hd,lb=ax.get_legend_handles_labels()
-    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.895),ncol=2,fontsize=10,frameon=False)
-    fig.tight_layout(rect=[0,0,1,0.76])
+    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=9,frameon=False)
+    fig.tight_layout(rect=[0,0,1,0.865])
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
