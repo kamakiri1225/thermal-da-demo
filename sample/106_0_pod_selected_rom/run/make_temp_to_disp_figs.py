@@ -39,6 +39,35 @@ def disp_timeseries():
     fig.savefig(out,dpi=140); plt.close(fig); print("wrote",out)
 
 
+def disp_da_timeseries():
+    """EnKF/OI比較用：FrontISTR真値を太線で重ねた変位差の時系列。"""
+    d=np.load(os.path.join(RES,"da_compare_displacement.npz"), allow_pickle=True)
+    t=d["time"]; truth=d["truth_u_um"][:,0]-d["truth_u_um"][:,1]
+    est=d["estimate_u_um"]
+    names=[str(x) for x in d["names"]]
+    # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
+    colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
+    fig,ax=plt.subplots(figsize=(10.8,5.8))
+    ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
+    ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
+    ax.annotate("真値（黒太線）",xy=(150,float(np.interp(150,t,truth))),xytext=(60,3.05),
+                fontsize=12,weight="bold",
+                arrowprops=dict(arrowstyle="-|>",color="black",lw=1.6))
+    for i,(name,c) in enumerate(zip(names,colors)):
+        y=est[:,i,:,:]  # (seed,time,2)
+        diff=y[:,:,0]-y[:,:,1]
+        mu=diff.mean(axis=0); sd=diff.std(axis=0)
+        ax.plot(t,mu,lw=1.8,color=c,label=name)
+        ax.fill_between(t,mu-sd,mu+sd,color=c,alpha=.06,linewidth=0)
+    ax.axhline(0,color="k",lw=.8)
+    ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位差 Uz(A)−Uz(O) [µm]")
+    ax.set_title("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=14,weight="bold",pad=34)
+    ax.grid(alpha=.3); ax.legend(loc="upper center",bbox_to_anchor=(.5,1.14),ncol=3,fontsize=9,frameon=False)
+    fig.tight_layout(rect=[0,0,1,.84])
+    out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
+    fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
+
+
 def deform_anim():
     import pyvista as pv
     pv.OFF_SCREEN=True
@@ -79,6 +108,7 @@ def deform_anim():
 
 def main():
     disp_timeseries()
+    disp_da_timeseries()
     deform_anim()
 
 
