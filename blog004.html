@@ -665,6 +665,64 @@ class="math inline">\(\mathrm{span}(b,\ Ab,\ A^2b,\dots)\)</span></td>
 </tr>
 </tbody>
 </table>
+<h4
+id="そもそもクリロフ部分空間とは何か-3ノードの手計算で">そもそも「クリロフ部分空間」とは何か
+― 3ノードの手計算で</h4>
+<p>名前は難しいですが、定義は1行です。行列 <span
+class="math inline">\(A\)</span> と入力ベクトル <span
+class="math inline">\(b\)</span> から作る</p>
+<p><span class="math display">\[\mathcal K_r(A,b)=\mathrm{span}\{\,b,\
+Ab,\ A^2b,\ \dots,\ A^{r-1}b\,\}\]</span></p>
+<p>＝「 <span class="math inline">\(b\)</span> に <span
+class="math inline">\(A\)</span>
+を繰り返し掛けてできる方向を集めた空間」。これだけです。
+<strong>物理的な意味は「入力の影響が系の中を伝わっていく順番」</strong>。3ノードの熱伝導（ヒータは端の節点1）で確かめます:</p>
+<p><span class="math display">\[A=\begin{pmatrix}-1&amp;1&amp;0\\
+1&amp;-2&amp;1\\ 0&amp;1&amp;-1\end{pmatrix},\qquad
+b=\begin{pmatrix}1\\ 0\\ 0\end{pmatrix}\quad(\text{node 1
+heated}).\]</span></p>
+<p><span class="math inline">\(A\)</span> を順に掛けると:</p>
+<p><span class="math display">\[b=\begin{pmatrix}1\\ 0\\
+0\end{pmatrix},\qquad
+Ab=\begin{pmatrix}-1\\ 1\\ 0\end{pmatrix},\qquad
+A^2b=\begin{pmatrix}2\\ -3\\ 1\end{pmatrix}.\]</span></p>
+<ul>
+<li><span class="math inline">\(b\)</span> ：熱はまだ
+<strong>節点1だけ</strong></li>
+<li><span class="math inline">\(Ab\)</span>
+：<strong>節点2に届いた</strong>（成分が非ゼロに）</li>
+<li><span class="math inline">\(A^2b\)</span>
+：<strong>節点3まで届いた</strong></li>
+</ul>
+<p>つまり <strong><span class="math inline">\(A\)</span>
+を1回掛ける＝熱が隣へ1ステップ伝わる</strong>。クリロフ基底は「ヒータの影響が届く順」に空間を張っていきます。
+これが解と直結する理由は、熱方程式 <span class="math inline">\(\dot
+T=AT+bQ\)</span> の解に出てくる行列指数関数のテイラー級数</p>
+<p><span
+class="math display">\[e^{At}b=b+tAb+\frac{t^2}{2}A^2b+\cdots\]</span></p>
+<p>が <strong>まさにクリロフ方向の和</strong>
+だから。早い項ほど支配的なので、<strong>最初の <span
+class="math inline">\(r\)</span>
+方向だけ残して打ち切っても良い近似</strong>になる
+＝これがクリロフ縮約の原理です。実際の手順は:</p>
+<ol type="1">
+<li><span class="math inline">\(b, Ab, A^2b,\dots\)</span> を
+<strong>Arnoldi法</strong>（グラム・シュミット直交化と同じ発想）で直交基底
+<span class="math inline">\(V_r\)</span> にする （生の <span
+class="math inline">\(A^kb\)</span>
+はすぐ同じ向きに揃ってしまい数値的に危ないため）。</li>
+<li>大きい系を <span class="math inline">\(T\approx V_r\,a\)</span>
+と置いて射影： <span class="math inline">\(\dot a=(V_r^{\mathsf
+T}AV_r)\,a+V_r^{\mathsf T}b\,Q\)</span> 。 これで <span
+class="math inline">\(N\)</span> 次元の方程式が <strong><span
+class="math inline">\(r\times r\)</span>
+の小さい方程式</strong>になります。</li>
+</ol>
+<p>PODとの対比で言うと：<strong>PODは「シミュレーション結果（データ）」から支配方向を後付けで学ぶ</strong>のに対し、
+<strong>クリロフは「方程式（ <span class="math inline">\(A,b\)</span>
+）」から支配方向を計算前に組み立てる</strong>。だからクリロフはスナップショット不要ですが、
+行列 <span class="math inline">\(A,b\)</span>
+に触れる必要がある（侵入的）、という表の違いにつながります。</p>
 <p><strong>本研究がPODを選んだ理由は2つ</strong>:</p>
 <ol type="1">
 <li><strong>非侵入的（non-intrusive）だから</strong>。クリロフ法や平衡打切りは
