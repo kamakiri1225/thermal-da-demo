@@ -561,11 +561,50 @@ class="math inline">\(B\)</span> ）とすると、
 T_1+w_2\,\delta T_2+\cdots\]</span></p>
 <p>変位計は「温度誤差の <span class="math inline">\(w\)</span>
 方向成分」を1つの数として読む器械です。</p>
+<figure>
+<img src="img/disp_to_temp_mechanism.png"
+alt="変位観測が温度を直す仕組みの図解" />
+<figcaption
+aria-hidden="true">変位観測が温度を直す仕組みの図解</figcaption>
+</figure>
+<p><em>左：実線＝温度誤差が重み <span class="math inline">\(w\)</span>
+で変位計へ<strong>射影</strong>される。破線＝変位のハズレが <span
+class="math inline">\(\mathrm{Cov}(T_i,\ u)\)</span>
+に比例して各温度へ<strong>逆流</strong>する。 右：高W/低Wの差＝信号
+<span class="math inline">\(g\,\sigma_a\)</span> がノイズ <span
+class="math inline">\(\sqrt r\)</span> を超えるかどうか。</em></p>
 <p><strong>② 温度が動く理由＝共分散 <span
 class="math inline">\(Bw\)</span></strong> 。 <span
 class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
 <p><span class="math display">\[K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
 w^{\mathsf T}Bw=\mathrm{Var}(u).\]</span></p>
+<p><strong>行列を成分まで書き下す</strong>と（2点、 <span
+class="math inline">\(B\)</span> の成分を <span
+class="math inline">\(\sigma_{ij}\)</span> とする）:</p>
+<p><span
+class="math display">\[B=\begin{pmatrix}\sigma_{11}&amp;\sigma_{12}\\
+\sigma_{12}&amp;\sigma_{22}\end{pmatrix},\quad
+w=\begin{pmatrix}w_1\\ w_2\end{pmatrix}
+\ \Rightarrow\
+Bw=\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
+\sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\quad
+w^{\mathsf
+T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,\]</span></p>
+<p><span
+class="math display">\[K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
+\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
+\sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\qquad
+\begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix}
+=\begin{pmatrix}T_1^b\\ T_2^b\end{pmatrix}+K\,d,\quad
+d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).\]</span></p>
+<p><strong>読み方</strong>： <span class="math inline">\(K_1\)</span>
+の分子は <span
+class="math inline">\(\sigma_{11}w_1+\sigma_{12}w_2\)</span>
+＝「自分の重み <span class="math inline">\(w_1\)</span> 経由」＋「相関
+<span class="math inline">\(\sigma_{12}\)</span> 経由」の2経路。 だから
+<strong><span class="math inline">\(w_2\)</span> が小さい点でも、相関
+<span class="math inline">\(\sigma_{12}\)</span>
+が補正を運んでくる</strong>――これが成分で見た「温度まで直る」仕組みです。</p>
 <p>温度 <span class="math inline">\(T_i\)</span> が更新されるのは <span
 class="math inline">\(\mathrm{Cov}(T_i,\ u)\neq0\)</span> （＝ベクトル
 <span class="math inline">\(Bw\)</span> の第 <span
@@ -591,6 +630,20 @@ class="math inline">\(\mathrm{Var}(a)=\sigma_a^2\)</span>
 ）。このとき</p>
 <p><span class="math display">\[u-u^b=g\,a,\qquad g\equiv w^{\mathsf
 T}\varphi\]</span></p>
+<p>型 <span class="math inline">\(\varphi=(\varphi_1,\
+\varphi_2)^{\mathsf T}\)</span> のとき <span
+class="math inline">\(B=\sigma_a^2\,\varphi\varphi^{\mathsf T}\)</span>
+。これを行列で書き下すと</p>
+<p><span
+class="math display">\[B=\sigma_a^2\begin{pmatrix}\varphi_1^2&amp;\varphi_1\varphi_2\\
+\varphi_1\varphi_2&amp;\varphi_2^2\end{pmatrix},\qquad
+Bw=\sigma_a^2\,g\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix},\qquad
+K=\frac{\sigma_a^2\,g}{g^2\sigma_a^2+r}\begin{pmatrix}\varphi_1\\
+\varphi_2\end{pmatrix}.\]</span></p>
+<p><strong>ゲイン <span class="math inline">\(K\)</span> が型 <span
+class="math inline">\(\varphi\)</span>
+に比例</strong>しています。つまり補正は「型の形のまま」全点へ一斉に入る――
+行列で見ると「変位1本で全温度が直る」の正体はこれです。</p>
 <p>つまり<strong>変位計は「型の係数 <span
 class="math inline">\(a\)</span> をゲイン <span
 class="math inline">\(g\)</span> で測る器械」</strong>。 <span
