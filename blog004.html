@@ -273,6 +273,9 @@ id="toc-svd-との同値実際の計算法">2-3. SVD
 <li><a href="#用語の整理-podsvd特異値分解の違い"
 id="toc-用語の整理-podsvd特異値分解の違い">2-4. 用語の整理 ―
 POD・SVD・特異値分解の違い</a></li>
+<li><a href="#コラムpod以外のモデル縮約-クリロフ部分空間法との違い"
+id="toc-コラムpod以外のモデル縮約-クリロフ部分空間法との違い">2-5.
+コラム：POD以外のモデル縮約 ― クリロフ部分空間法との違い</a></li>
 </ul></li>
 <li><a href="#小さな行列で-pod-を手計算する3セル-4時刻文字式"
 id="toc-小さな行列で-pod-を手計算する3セル-4時刻文字式">3. 小さな行列で
@@ -604,6 +607,84 @@ class="math inline">\(\sigma_k^2\)</span>
 T}\)</span> の固有値分解や、時間側の小さい <span
 class="math inline">\(X^{\mathsf T}X\)</span>
 を解く”スナップショット法”でも、同じPODモードが得られます。SVDはその中で最も安定・簡単な計算法という位置づけ。）</p>
+<h3 id="コラムpod以外のモデル縮約-クリロフ部分空間法との違い">2-5.
+コラム：POD以外のモデル縮約 ― クリロフ部分空間法との違い</h3>
+<p>モデル縮約（MOR: Model Order
+Reduction）にはPOD以外の流派もあります。代表は
+<strong>クリロフ部分空間法</strong>（モーメントマッチング、Arnoldi法など）と
+<strong>平衡打切り</strong>（balanced truncation）。
+どれも「大きい系を小さい部分空間へ射影する」仲間で、違いは
+<strong>部分空間の作り方</strong> です:</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>POD</strong></th>
+<th><strong>クリロフ部分空間法</strong></th>
+<th><strong>平衡打切り</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>部分空間の材料</td>
+<td><strong>データ</strong>（スナップショットのSVD）</td>
+<td><strong>方程式の行列</strong>： <span
+class="math inline">\(\mathrm{span}(b,\ Ab,\ A^2b,\dots)\)</span></td>
+<td>可制御性・可観測性グラミアン</td>
+</tr>
+<tr class="even">
+<td>事前に必要なもの</td>
+<td>シミュレーション結果だけ</td>
+<td>システム行列 <span class="math inline">\(A,\ b\)</span> （FEMの
+<span class="math inline">\(C,K\)</span> ）</td>
+<td>システム行列＋リアプノフ方程式求解</td>
+</tr>
+<tr class="odd">
+<td>何に忠実か</td>
+<td>訓練データのエネルギー</td>
+<td>伝達関数のモーメント（周波数応答）</td>
+<td>入出力の重要度（誤差上界つき）</td>
+</tr>
+<tr class="even">
+<td>非線形への拡張</td>
+<td>DEIM等で可能</td>
+<td>基本は線形（LTI）系向け</td>
+<td>基本は線形系向け</td>
+</tr>
+<tr class="odd">
+<td>弱点</td>
+<td><strong>訓練条件に依存</strong>（外挿に弱い）</td>
+<td><strong>侵入的</strong>＝行列へのアクセスが必要</td>
+<td>大規模系では計算が重い</td>
+</tr>
+</tbody>
+</table>
+<p><strong>本研究がPODを選んだ理由は2つ</strong>:</p>
+<ol type="1">
+<li><strong>非侵入的（non-intrusive）だから</strong>。クリロフ法や平衡打切りは
+<span class="math inline">\(A, b\)</span>
+という<strong>行列そのもの</strong>が必要ですが、
+OpenFOAMのCHTソルバから系行列を取り出すのは大変です。PODは
+<strong>温度スナップショット（solid/Tのファイル）さえあればいい</strong>。</li>
+<li><strong>「代表点」が欲しかったから</strong>。POD→Q-DEIMは
+<strong>物理的な点（セル）</strong> を選んでくれるので、
+センサ議論・集中定数ROM・観測設計に直結します。クリロフ法の縮約座標は抽象的な部分空間で、
+「どの場所」という解釈がつきません。</li>
+</ol>
+<p>なお熱伝導は線形なので、行列が手に入る場合（FrontISTR側など）は
+<strong>クリロフ法も有力な代替</strong>です
+（工作機械の熱モデル縮約で実績があります）。また本記事のROMは厳密には「PODのGalerkin射影ROM」ではなく、
+<strong>Q-DEIM点上の集中定数モデルを校正</strong>したもの（PODは点選びと場の復元に使用）。
+<span class="math inline">\(C_i, K_{ij}, h\)</span>
+という<strong>物理的に読める係数</strong>にしたことで、EnKFの拡大状態（
+<span class="math inline">\(Q,h\)</span>
+推定）へ自然につながります。</p>
 <hr />
 <h2 id="小さな行列で-pod-を手計算する3セル-4時刻文字式">3. 小さな行列で
 POD を手計算する（3セル × 4時刻・文字式）</h2>
