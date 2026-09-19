@@ -1654,6 +1654,20 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 （P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。<strong>変位2点（赤）だけが両点とも0.16µm</strong>で合う。
 →
 教訓：<strong>変位を合わせたい場所には変位観測を置く。そして評価は差だけでなく個別の変位でも行う</strong>。</em></p>
+<p><strong>仕上げに、まったく別の未観測点でも確認</strong>します。観測点（赤/橙）から離れた
+<strong>未観測の温度3点（緑）と変位3点（紫）</strong>の位置はこちら:</p>
+<p><img src="img/unobs_points_locations.png" alt="観測点と未観測評価点の位置" width="440"></p>
+<p>この6か所すべてで、真値と各構成を時系列比較すると:</p>
+<figure>
+<img src="img/unobs_multi_timeseries.png"
+alt="未観測の温度3点・変位3点の時系列" />
+<figcaption
+aria-hidden="true">未観測の温度3点・変位3点の時系列</figcaption>
+</figure>
+<p><em>同化なし（灰）は6点すべてで大外れ。同化した構成は<strong>観測していない場所でも</strong>真値に沿い、
+温度＋変位（赤）が最も近い（特に底面側の温度と z=75mm
+反対側の変位の立ち上がり）。
+<strong>少数の観測が、観測していない場所まで直す</strong>――これがデータ同化＋POD復元の価値です。</em></p>
 <blockquote>
 <p><strong>凡例の「高感度／低感度」の意味</strong>：ここでの感度は
 <strong>発熱量への温度感度 <span class="math inline">\(\partial
