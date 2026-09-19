@@ -45,12 +45,19 @@ def disp_da_timeseries():
     t=d["time"]; truth=d["truth_u_um"][:,0]-d["truth_u_um"][:,1]
     est=d["estimate_u_um"]
     names=[str(x) for x in d["names"]]
+    # 凡例をわかりやすく（どの点か・何の感度かを明記）
+    rename={"同化なし(free run)":"同化なし（自由予測）",
+            "温度1点(低感度)":"温度1点：P4底面（dT/dQ小＝低感度）",
+            "温度1点(高感度)":"温度1点：P2ヒータ側（dT/dQ大＝高感度）",
+            "温度2点(高感度)":"温度2点：P2＋P0",
+            "温度2点+変位2点":"温度2点＋変位2点（高W・上端）"}
+    names=[rename.get(n,n) for n in names]
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
-    fig,ax=plt.subplots(figsize=(10.8,5.8))
+    fig,ax=plt.subplots(figsize=(11.2,7.6))
     ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
     ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
-    ax.annotate("真値（黒太線）",xy=(150,float(np.interp(150,t,truth))),xytext=(60,3.05),
+    ax.annotate("真値（黒太線）",xy=(370,float(np.interp(370,t,truth))),xytext=(430,1.7),
                 fontsize=12,weight="bold",
                 arrowprops=dict(arrowstyle="-|>",color="black",lw=1.6))
     for i,(name,c) in enumerate(zip(names,colors)):
@@ -61,9 +68,14 @@ def disp_da_timeseries():
         ax.fill_between(t,mu-sd,mu+sd,color=c,alpha=.06,linewidth=0)
     ax.axhline(0,color="k",lw=.8)
     ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位差 Uz(A)−Uz(O) [µm]")
-    ax.set_title("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=14,weight="bold",pad=34)
-    ax.grid(alpha=.3); ax.legend(loc="upper center",bbox_to_anchor=(.5,1.14),ncol=3,fontsize=9,frameon=False)
-    fig.tight_layout(rect=[0,0,1,.84])
+    ax.grid(alpha=.3)
+    fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）\n"
+                 "変位差RMSE: 温度1点 低感度1.19／高感度0.99µm（温度センサの場所差はほぼ出ない）"
+                 "→ 変位2点を足すと0.17µm（約6倍改善）",
+                 fontsize=12.5,weight="bold",y=0.99)
+    hd,lb=ax.get_legend_handles_labels()
+    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.895),ncol=2,fontsize=10,frameon=False)
+    fig.tight_layout(rect=[0,0,1,0.76])
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
