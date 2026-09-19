@@ -61,7 +61,7 @@ def disp_da_timeseries():
                 fontsize=12,weight="bold",
                 arrowprops=dict(arrowstyle="-|>",color="black",lw=1.6))
     for i,(name,c) in enumerate(zip(names,colors)):
-        y=est[:,i,:,:]  # (seed,time,2)
+        y=est[i]  # (seed,time,2)  ※軸は(config,seed,time,2)
         diff=y[:,:,0]-y[:,:,1]
         mu=diff.mean(axis=0); sd=diff.std(axis=0)
         ax.plot(t,mu,lw=1.8,color=c,label=name)
@@ -78,6 +78,43 @@ def disp_da_timeseries():
     fig.tight_layout(rect=[0,0,1,0.865])
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
+
+
+def disp_da_timeseries_points():
+    """個別の Uz(A)・Uz(O) も並べる版（差だけだと誤差の相殺で構成差が見えないため）。"""
+    d=np.load(os.path.join(RES,"da_compare_displacement.npz"), allow_pickle=True)
+    t=d["time"]; tru=d["truth_u_um"]              # (time,2)
+    est=d["estimate_u_um"]                         # (seed,cfg,time,2)
+    names=[str(x) for x in d["names"]]
+    rename={"同化なし(free run)":"同化なし",
+            "温度1点(低感度)":"温度1点:P4底(dT/dQ小)",
+            "温度1点(高感度)":"温度1点:P2ヒータ側(dT/dQ大)",
+            "温度2点(高感度)":"温度2点:P2+P0",
+            "温度2点+変位2点":"温度2点+変位2点(高W上端)"}
+    names=[rename.get(n,n) for n in names]
+    colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
+    ht=(t>0)&(t<=300)
+    fig,axes=plt.subplots(1,3,figsize=(16.5,5.6))
+    panels=[("Uz(A) ヒータ側・上面",0),("Uz(O) 反対側・上面",1),("差 Uz(A)−Uz(O)",None)]
+    for ax,(ti,k) in zip(axes,panels):
+        ax.axvspan(0,300,color="orange",alpha=.07)
+        trv=tru[:,0]-tru[:,1] if k is None else tru[:,k]
+        ax.plot(t,trv,color="black",lw=4.0,zorder=10)
+        for i,c in enumerate(colors):
+            y=est[i]
+            v=(y[:,:,0]-y[:,:,1]) if k is None else y[:,:,k]
+            mu=v.mean(axis=0)
+            rm=np.sqrt(((v-trv[None,:])**2)[:,ht].mean())
+            ax.plot(t,mu,lw=1.8,color=c,label=f"{names[i]}  RMSE {rm:.2f}µm")
+        ax.set_title(ti,fontsize=12.5,weight="bold"); ax.grid(alpha=.3)
+        ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位 [µm]")
+        ax.legend(fontsize=7.2,loc="lower center")
+    fig.suptitle("個別の変位で見ると構成差は大きい：差(A−O)だけでは相殺で見えにくい\n"
+                 "温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。変位2点(赤)は両点とも合う",
+                 fontsize=12.5,weight="bold")
+    fig.tight_layout(rect=[0,0,1,0.88])
+    out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da_points.png")
+    fig.savefig(out,dpi=150,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
 
 def deform_anim():
@@ -121,6 +158,7 @@ def deform_anim():
 def main():
     disp_timeseries()
     disp_da_timeseries()
+    disp_da_timeseries_points()
     deform_anim()
 
 
