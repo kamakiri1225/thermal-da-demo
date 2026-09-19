@@ -56,9 +56,9 @@ def main():
     x0,x1=max(0,xs.min()-pad),min(img.shape[1],xs.max()+pad)
     img=img[y0:y1,x0:x1]
     h,w=img.shape[:2]
-    # figを小さめ＆横長基準に（縦は最大でも横の0.8倍に抑える）
-    fig_w=7.6; ar=min(h/w,0.8)
-    fig,ax=plt.subplots(figsize=(fig_w,fig_w*ar)); ax.imshow(img,aspect="auto"); ax.axis("off")
+    # 真のアスペクト比で描画（aspect autoやキャップは歪みの原因なので使わない）
+    fig_w=7.6
+    fig,ax=plt.subplots(figsize=(fig_w,fig_w*h/w)); ax.imshow(img); ax.axis("off")
     ax.set_title("POD＋Q-DEIM で選んだROM代表点（勘でなくデータから選定）\n"
                  f"温度場は2モードで{cum[1]*100:.0f}%説明→少数点で表せる",fontsize=12)
     fig.savefig(os.path.join(IMG,"qdeim_points.png"),dpi=130,bbox_inches="tight",pad_inches=0.04)
