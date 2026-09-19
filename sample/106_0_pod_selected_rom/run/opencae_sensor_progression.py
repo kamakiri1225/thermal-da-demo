@@ -100,5 +100,26 @@ def main():
     out=os.path.join(IMG,"opencae_sensor_progression.png"); fig.savefig(out,dpi=140); plt.close(fig)
     print("[prog] wrote",out)
 
+    # --- 第2図: 時系列（同化に使った点 / 未観測点 / 未観測の変位差）---
+    KC=273.15; unobs=0                       # P0=未観測（観測はP2,P4）
+    fig,axes=plt.subplots(1,3,figsize=(16,5.2))
+    panels=[("温度 P2（同化に使用）", lambda r: r[:,T1]-KC, Ttr[:,T1]-KC, "温度 [degC]"),
+            ("温度 P0（未観測）",     lambda r: r[:,unobs]-KC, Ttr[:,unobs]-KC, "温度 [degC]"),
+            ("変位差 Uz(A)−Uz(O)（未観測）", lambda r: qoiAO(r), qoi_true, "変位差 [µm]")]
+    for ax,(ti,fn,tru,yl) in zip(axes,panels):
+        ax.axvspan(0,300,color="orange",alpha=.07)
+        ax.plot(tg,tru,"-",color="k",lw=4.2,alpha=.35,label="真値")
+        for name,ts_,dk,col in cfgs:
+            ax.plot(tg,fn(res[name]["recT"]),"--",lw=2.0,color=col,label=name)
+        ax.set_title(ti,fontsize=12.5,weight="bold"); ax.grid(alpha=.3)
+        ax.set_xlabel("time [s]"); ax.set_ylabel(yl)
+    axes[0].legend(fontsize=8.5)
+    fig.suptitle("時系列で見る段階比較（5seed平均）：同化に使ったP2はどの構成でも合うが、"
+                 "未観測のP0温度と変位差は観測を増やすほど真値へ寄る",
+                 fontsize=12.5,weight="bold")
+    fig.tight_layout(rect=[0,0,1,0.9])
+    out2=os.path.join(IMG,"opencae_progression_timeseries.png"); fig.savefig(out2,dpi=140); plt.close(fig)
+    print("[prog] wrote",out2)
+
 
 if __name__=="__main__": main()
