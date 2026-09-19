@@ -55,7 +55,7 @@ def disp_da_timeseries():
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
     fig=plt.figure(figsize=(11.6,6.0))
-    ax=fig.add_axes([0.075,0.11,0.905,0.655])   # 余白を固定座標で管理（tight_layoutの隙間対策）
+    ax=fig.add_axes([0.075,0.155,0.905,0.70])   # 余白を固定座標で管理（tight_layoutの隙間対策）
     ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
     ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
     ax.annotate("真値（黒太線）",xy=(370,float(np.interp(370,t,truth))),xytext=(430,1.7),
@@ -70,12 +70,11 @@ def disp_da_timeseries():
     ax.axhline(0,color="k",lw=.8)
     ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位差 Uz(A)−Uz(O) [µm]")
     ax.grid(alpha=.3)
-    fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）\n"
-                 "変位差RMSE: 温度1点 低感度1.19／高感度0.99µm（温度センサの場所差はほぼ出ない）"
-                 "→ 変位2点を足すと0.17µm（約6倍改善）",
-                 fontsize=12.5,weight="bold",y=0.995)
+    fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=13.5,weight="bold",y=0.985)
     hd,lb=ax.get_legend_handles_labels()
-    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.885),ncol=4,fontsize=9,frameon=False)
+    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=11,frameon=False)
+    fig.text(0.5,0.022,"変位差RMSE: 温度1点 低感度1.19／高感度0.99µm（温度センサの場所差はほぼ出ない）"
+             "→ 変位2点を足すと0.17µm（約6倍改善）",ha="center",fontsize=11,color="#333")
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
@@ -93,8 +92,8 @@ def disp_da_timeseries_points():
             "温度2点+変位2点":"温度2点+変位2点(高W上端)"}
     names=[rename.get(n,n) for n in names]
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
-    ht=(t>0)&(t<=300)
-    fig,axes=plt.subplots(1,3,figsize=(16.5,6.4))
+    ht=(t>0)&(t<=300); rms={}
+    fig,axes=plt.subplots(1,3,figsize=(16.5,6.2))
     panels=[("Uz(A) ヒータ側・上面",0),("Uz(O) 反対側・上面",1),("差 Uz(A)−Uz(O)",None)]
     for ax,(ti,k) in zip(axes,panels):
         ax.axvspan(0,300,color="orange",alpha=.07)
@@ -105,14 +104,23 @@ def disp_da_timeseries_points():
             v=(y[:,:,0]-y[:,:,1]) if k is None else y[:,:,k]
             mu=v.mean(axis=0)
             rm=np.sqrt(((v-trv[None,:])**2)[:,ht].mean())
-            ax.plot(t,mu,lw=1.8,color=c,label=f"{names[i]}  RMSE {rm:.2f}µm")
+            ax.plot(t,mu,lw=1.8,color=c,label=names[i])
+            rms.setdefault(ti,[]).append(rm)
         ax.set_title(ti,fontsize=12.5,weight="bold"); ax.grid(alpha=.3)
         ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位 [µm]")
-        ax.legend(fontsize=8,loc="upper center",bbox_to_anchor=(0.5,-0.30),frameon=False)
-    fig.suptitle("個別の変位で見ると構成差は大きい：差(A−O)だけでは相殺で見えにくい\n"
-                 "温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。変位2点(赤)は両点とも合う",
-                 fontsize=12.5,weight="bold")
-    fig.subplots_adjust(left=0.05,right=0.99,top=0.80,bottom=0.34,wspace=0.24)
+    fig.suptitle("個別の変位で見ると構成差は大きい：差(A−O)だけでは相殺で見えにくい",fontsize=13.5,weight="bold",y=0.985)
+    hd,lb=axes[0].get_legend_handles_labels()
+    import matplotlib.lines as mlines
+    hd=[mlines.Line2D([],[],color="black",lw=4)]+hd
+    lb=["FrontISTR真値"]+lb
+    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=6,fontsize=11.5,frameon=False)
+    key=list(rms.keys())
+    r=lambda k:"/".join(f"{v:.2f}" for v in rms[k])
+    fig.text(0.5,0.035,"温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。変位2点(赤)は両点とも合う",
+             ha="center",fontsize=11.5,weight="bold",color="#222")
+    fig.text(0.5,0.006,f"加熱期RMSE[µm]（同化なし/P4底/P2/2点/2点+変位）  Uz(A): {r(key[0])} ｜ Uz(O): {r(key[1])} ｜ 差: {r(key[2])}",
+             ha="center",fontsize=9.5,color="#444")
+    fig.subplots_adjust(left=0.05,right=0.99,top=0.80,bottom=0.185,wspace=0.24)
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da_points.png")
     fig.savefig(out,dpi=150,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
