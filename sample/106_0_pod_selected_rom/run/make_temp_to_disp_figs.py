@@ -54,7 +54,8 @@ def disp_da_timeseries():
     names=[rename.get(n,n) for n in names]
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
-    fig,ax=plt.subplots(figsize=(11.6,6.0))
+    fig=plt.figure(figsize=(11.6,6.0))
+    ax=fig.add_axes([0.075,0.11,0.905,0.655])   # 余白を固定座標で管理（tight_layoutの隙間対策）
     ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
     ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
     ax.annotate("真値（黒太線）",xy=(370,float(np.interp(370,t,truth))),xytext=(430,1.7),
@@ -72,10 +73,9 @@ def disp_da_timeseries():
     fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）\n"
                  "変位差RMSE: 温度1点 低感度1.19／高感度0.99µm（温度センサの場所差はほぼ出ない）"
                  "→ 変位2点を足すと0.17µm（約6倍改善）",
-                 fontsize=12.5,weight="bold",y=0.99)
+                 fontsize=12.5,weight="bold",y=0.995)
     hd,lb=ax.get_legend_handles_labels()
-    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=9,frameon=False)
-    fig.tight_layout(rect=[0,0,1,0.865])
+    fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.885),ncol=4,fontsize=9,frameon=False)
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
