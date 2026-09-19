@@ -516,6 +516,16 @@ alt="観測構成の段階比較" />
 そして同じ変位2点でも、<strong>熱感度 <span
 class="math inline">\(W\)</span>
 の高い点に置いた方が効く</strong>（低Wだと効きが半減）。</em></p>
+<p>時系列でも見てみます（<strong>同化に使った点と未観測点を分けて</strong>）:</p>
+<figure>
+<img src="img/opencae_progression_timeseries.png"
+alt="段階比較の時系列" />
+<figcaption aria-hidden="true">段階比較の時系列</figcaption>
+</figure>
+<p><em>左＝同化に使った P2：どの構成でも真値に合う。中＝<strong>未観測の
+P0</strong>：温度1点（灰）は加熱期にずれる。
+右＝<strong>未観測の変位差</strong>
+Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ。同化に使った点が合うのは当然で、<strong>未観測の量で比べるのが公平</strong>です。</em></p>
 <table>
 <thead>
 <tr class="header">
