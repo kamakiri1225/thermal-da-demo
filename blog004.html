@@ -1640,6 +1640,20 @@ vs 高感度0.99 µm）や数（2点で0.93
 <strong>温度センサは場所より数、変位を合わせたいなら変位センサ</strong>（それも高Wの場所へ）、が結論です。
 （なお温度そのもののRMSEでは高感度0.62 vs 低感度1.04
 Kと約1.7倍の差があり、場所の効きは評価量に依存します。）</p>
+<p><strong>さらに大事な注意
+―「差」だけで評価してはいけない</strong>。個別の <span
+class="math inline">\(U_z(A)\)</span> ・ <span
+class="math inline">\(U_z(O)\)</span> も見ると:</p>
+<figure>
+<img src="img/blog_disp_timeseries_truth_vs_da_points.png"
+alt="個別のUz(A)/Uz(O)と差の比較" />
+<figcaption aria-hidden="true">個別のUz(A)/Uz(O)と差の比較</figcaption>
+</figure>
+<p><em>「差」には罠があります。<strong>同化なし（灰）は個別には10µm級で大外れなのに、差のRMSEは0.30µmと最小級</strong>
+（A・Oが同じ方向に外れて相殺されるため）。個別で見ると、<strong>温度1点は「センサに近い側」しか合いません</strong>
+（P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。<strong>変位2点（赤）だけが両点とも0.16µm</strong>で合う。
+→
+教訓：<strong>変位を合わせたい場所には変位観測を置く。そして評価は差だけでなく個別の変位でも行う</strong>。</em></p>
 <blockquote>
 <p><strong>凡例の「高感度／低感度」の意味</strong>：ここでの感度は
 <strong>発熱量への温度感度 <span class="math inline">\(\partial
