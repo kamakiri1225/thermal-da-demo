@@ -189,10 +189,33 @@ $$u-u^b=w^{\mathsf T}\delta T=w_1\,\delta T_1+w_2\,\delta T_2+\cdots$$
 
 変位計は「温度誤差の $w$ 方向成分」を1つの数として読む器械です。
 
+![変位観測が温度を直す仕組みの図解](img/disp_to_temp_mechanism.png)
+
+*左：実線＝温度誤差が重み $w$ で変位計へ**射影**される。破線＝変位のハズレが
+$\mathrm{Cov}(T_i,\ u)$ に比例して各温度へ**逆流**する。
+右：高W/低Wの差＝信号 $g\,\sigma_a$ がノイズ $\sqrt r$ を超えるかどうか。*
+
 **② 温度が動く理由＝共分散 $Bw$** 。 $H=w^{\mathsf T}$ をゲインに入れると
 
 $$K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
 w^{\mathsf T}Bw=\mathrm{Var}(u).$$
+
+**行列を成分まで書き下す**と（2点、 $B$ の成分を $\sigma_{ij}$ とする）:
+
+$$B=\begin{pmatrix}\sigma_{11}&\sigma_{12}\\ \sigma_{12}&\sigma_{22}\end{pmatrix},\quad
+w=\begin{pmatrix}w_1\\ w_2\end{pmatrix}
+\ \Rightarrow\
+Bw=\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\ \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\quad
+w^{\mathsf T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,$$
+
+$$K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
+\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\ \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\qquad
+\begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix}
+=\begin{pmatrix}T_1^b\\ T_2^b\end{pmatrix}+K\,d,\quad
+d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).$$
+
+**読み方**： $K_1$ の分子は $\sigma_{11}w_1+\sigma_{12}w_2$ ＝「自分の重み $w_1$ 経由」＋「相関 $\sigma_{12}$ 経由」の2経路。
+だから **$w_2$ が小さい点でも、相関 $\sigma_{12}$ が補正を運んでくる**――これが成分で見た「温度まで直る」仕組みです。
 
 温度 $T_i$ が更新されるのは $\mathrm{Cov}(T_i,\ u)\neq0$ （＝ベクトル $Bw$ の第 $i$ 成分がゼロでない）、
 つまり「 $T_i$ の誤差と変位の誤差が**連動**している」から。変位のハズレが、連動の強さに比例して各温度へ配られます。
@@ -210,6 +233,15 @@ $$B^a=B-\frac{(Bw)(Bw)^{\mathsf T}}{w^{\mathsf T}Bw+r},\qquad
 （ $a$ はスカラー係数、 $\mathrm{Var}(a)=\sigma_a^2$ ）。このとき
 
 $$u-u^b=g\,a,\qquad g\equiv w^{\mathsf T}\varphi$$
+
+型 $\varphi=(\varphi_1,\ \varphi_2)^{\mathsf T}$ のとき $B=\sigma_a^2\,\varphi\varphi^{\mathsf T}$ 。これを行列で書き下すと
+
+$$B=\sigma_a^2\begin{pmatrix}\varphi_1^2&\varphi_1\varphi_2\\ \varphi_1\varphi_2&\varphi_2^2\end{pmatrix},\qquad
+Bw=\sigma_a^2\,g\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix},\qquad
+K=\frac{\sigma_a^2\,g}{g^2\sigma_a^2+r}\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix}.$$
+
+**ゲイン $K$ が型 $\varphi$ に比例**しています。つまり補正は「型の形のまま」全点へ一斉に入る――
+行列で見ると「変位1本で全温度が直る」の正体はこれです。
 
 つまり**変位計は「型の係数 $a$ をゲイン $g$ で測る器械」**。 $a$ が決まれば
 $T^a=T^b+\varphi\,\hat a$ で**全点の温度が一斉に**直ります（未観測点まで直る理由もこれ）。係数の事後分散は
