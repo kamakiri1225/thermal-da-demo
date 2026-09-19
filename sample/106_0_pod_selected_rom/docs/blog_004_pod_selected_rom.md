@@ -534,7 +534,7 @@ $$C_i\frac{dT_i}{dt}=\sum_{j\ne i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\mathrm{air})
 
 「どのノードの式か」を3Dで示すと（ParaView風）:
 
-<img src="img/rom_network.png" alt="ROMの5ノードと結合ネットワーク" width="560">
+<img src="img/rom_network.png" alt="ROMの5ノードと結合ネットワーク" width="440">
 
 *ノード＝POD＋Q-DEIM選定5点。各辺の太さが校正で決まったコンダクタンス $K_{ij}$ で、
 **P0–P2 が最強（ $K=17.5$ ）**＝ヒータ側どうしが強く熱をやり取りする。
