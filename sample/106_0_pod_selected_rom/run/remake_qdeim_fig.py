@@ -35,8 +35,8 @@ def main():
     for _e,conn in mesh["elements"]: cells.append(8); cells.extend(idr[n] for n in conn)
     ug=pv.UnstructuredGrid(np.array(cells),
         np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),mco)
-    # 横長の描画ウィンドウ＋俯瞰気味カメラで、縦に間延びしないようにする
-    pl=pv.Plotter(off_screen=True,window_size=(1180,740))
+    # 円柱の縦横比が自然に見える低めのカメラ（俯瞰しすぎると寸詰まりに見える）
+    pl=pv.Plotter(off_screen=True,window_size=(880,940))
     pl.add_mesh(ug,color="lightsteelblue",opacity=0.5,show_edges=False)
     for j,xyz in enumerate(coords):
         pl.add_mesh(pv.Sphere(radius=0.0022,center=xyz),color="crimson")
@@ -44,9 +44,9 @@ def main():
         pl.add_point_labels([xyz+np.array([0.004,0,0.004*(1 if j%2 else -1)])],
             [f"P{j} ({p[0]},{p[1]},{p[2]})mm"],font_size=15,text_color="crimson",
             shape=None,always_visible=True)
-    # 上方からより俯瞰（z成分を上げる）＋横に離す → 外接矩形が横長になる
-    pl.camera_position=[(0.30,-0.26,0.30),(0,0,0.05),(0,0,1)]
-    pl.set_background("white"); pl.camera.zoom(1.35)
+    # 低めのカメラで円柱の高さ/直径比が自然に見えるように
+    pl.camera_position=[(0.26,-0.24,0.20),(0,0,0.05),(0,0,1)]
+    pl.set_background("white"); pl.camera.zoom(1.2)
     p4=os.path.join(IMG,"_tmp_qdeim.png"); pl.screenshot(p4); pl.close()
 
     img=plt.imread(p4)

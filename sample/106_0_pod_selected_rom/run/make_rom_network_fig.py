@@ -39,7 +39,7 @@ def main():
     ug=pv.UnstructuredGrid(np.array(cells),
         np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),mco)
 
-    pl=pv.Plotter(off_screen=True,window_size=(1180,760))
+    pl=pv.Plotter(off_screen=True,window_size=(880,940))
     pl.add_mesh(ug,color="lightsteelblue",opacity=0.35,show_edges=False)
 
     # 辺：コンダクタンス K_ij を太さで表現（非ゼロのみ）
@@ -61,8 +61,8 @@ def main():
         pl.add_point_labels([p+np.array([0.005,0,0.006*(1 if j%2 else -1)])],
             [tag],font_size=17,text_color=col,shape=None,always_visible=True)
 
-    pl.camera_position=[(0.30,-0.26,0.30),(0,0,0.05),(0,0,1)]
-    pl.set_background("white"); pl.camera.zoom(1.3)
+    pl.camera_position=[(0.26,-0.24,0.20),(0,0,0.05),(0,0,1)]
+    pl.set_background("white"); pl.camera.zoom(1.2)
     p4=os.path.join(IMG,"_tmp_net.png"); pl.screenshot(p4); pl.close()
 
     img=plt.imread(p4)

@@ -355,7 +355,7 @@ $$\boxed{\ \hat u=\bar u+a\,g_k=u(t_k)\ }$$
 5点を個別に読み取れるよう、温度感度（ $\partial T/\partial Q$ ）と実際の変位観測点を
 同じ座標系に重ねた図も示します。
 
-<img src="img/sensor_positions.png" alt="5温度点と変位観測点A/Oの位置" width="900">
+<img src="img/sensor_positions.png" alt="5温度点と変位観測点A/Oの位置" width="520">
 
 | 点 | 座標 $(x,y,z)$ [m] | 役割 |
 |---|---|---|

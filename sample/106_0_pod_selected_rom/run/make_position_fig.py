@@ -47,7 +47,8 @@ def main():
     cells=[]
     for _e,conn in mesh["elements"]: cells.append(8); cells.extend(idr[n] for n in conn)
     ug=pv.UnstructuredGrid(np.array(cells),np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
-    pl=pv.Plotter(off_screen=True,window_size=(1000,880))
+    # ブログ用は縦長の余白を避け、本文に置きやすい横長で出力する。
+    pl=pv.Plotter(off_screen=True,window_size=(1200,680))
     pl.add_mesh(ug,color="lightsteelblue",opacity=0.4,show_edges=False)
     # 5ノードを dT/dQ で色付け（球＋数値ラベル）
     smin,smax=sens.min(),sens.max()
@@ -66,12 +67,20 @@ def main():
     pl.add_point_labels([A_XYZ+np.array([0,0,0.008])],["Disp A (+X top)"],font_size=16,text_color="red",shape=None,always_visible=True)
     pl.add_point_labels([O_XYZ+np.array([0,0,0.018])],["Disp O (-X top)"],font_size=16,text_color="blue",shape=None,always_visible=True)
     pl.camera_position=[(0.26,-0.24,0.22),(0,0,0.05),(0,0,1)]; pl.set_background("white")
+    pl.camera.zoom(1.25)
     p4=os.path.join(tempfile.mkdtemp(),"pos.png"); pl.screenshot(p4); pl.close()
-    fig,ax=plt.subplots(figsize=(10,9)); ax.imshow(plt.imread(p4)); ax.axis("off")
+    # 白余白を自動トリミングしてから貼る（余白が多すぎる問題の解消）
+    img=plt.imread(p4)
+    m=np.any(img[...,:3]<0.96,axis=-1); ys,xs=np.where(m); pad=12
+    img=img[max(0,ys.min()-pad):ys.max()+pad, max(0,xs.min()-pad):xs.max()+pad]
+    h,w=img.shape[:2]
+    fig_w=10.5
+    fig,ax=plt.subplots(figsize=(fig_w,fig_w*h/w)); ax.imshow(img); ax.axis("off")
     ax.set_title("観測点の位置: 温度センサ(ROM代表点をdT/dQで色付け)と変位観測点(上面A/O)\n"
                  f"温度センサは高感度ノードP{hi}(dT/dQ={sens[hi]:.1f})、避けるのは低感度P{lo}(dT/dQ={sens[lo]:.1f})",
                  fontsize=13)
-    fig.tight_layout(); fig.savefig(os.path.join(IMG,"sensor_positions.png"),dpi=130); plt.close(fig)
+    fig.tight_layout(pad=0.2); fig.savefig(os.path.join(IMG,"sensor_positions.png"),dpi=150,
+                                            bbox_inches="tight",pad_inches=0.04); plt.close(fig)
     print("[pos] wrote docs/img/sensor_positions.png")
 
 
