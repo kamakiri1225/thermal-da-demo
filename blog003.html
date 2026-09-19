@@ -209,7 +209,19 @@ id="toc-enkf-が-oi-より強いところ-発熱量-q-の同定">4. EnKF が OI
 の同定</a></li>
 <li><a href="#その代わりのコスト" id="toc-その代わりのコスト">5.
 その代わりのコスト</a></li>
-<li><a href="#回のまとめ" id="toc-回のまとめ">6. 3回のまとめ</a>
+<li><a href="#観測をどう増やすかいつ入れるか-romenkf-の実験2つ"
+id="toc-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
+観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</a>
+<ul>
+<li><a href="#観測を増やすほど精度が上がる温度1点2点変位2点"
+id="toc-観測を増やすほど精度が上がる温度1点2点変位2点">6-1.
+観測を増やすほど精度が上がる（温度1点→2点→＋変位2点）</a></li>
+<li><a href="#いつ観測するかで-q-と-h-の推定が変わる"
+id="toc-いつ観測するかで-q-と-h-の推定が変わる">6-2.
+「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
+class="math inline">\(h\)</span> の推定が変わる</a></li>
+</ul></li>
+<li><a href="#回のまとめ" id="toc-回のまとめ">7. 3回のまとめ</a>
 <ul>
 <li><a href="#参考元になった実装詳細"
 id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
@@ -482,7 +494,72 @@ EnKF」</strong>というトレードオフです。 この重さを避けるた
 <strong>予報モデルを ROM に置き換える</strong>のが、106 の POD+Q-DEIM
 の役割でした （0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
 <hr />
-<h2 id="回のまとめ">6. 3回のまとめ</h2>
+<h2 id="観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
+観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</h2>
+<p>軽いROMの上でEnKFを何度も回せるようになったので、観測設計の実験を2つ紹介します。</p>
+<h3 id="観測を増やすほど精度が上がる温度1点2点変位2点">6-1.
+観測を増やすほど精度が上がる（温度1点→2点→＋変位2点）</h3>
+<figure>
+<img src="img/opencae_sensor_progression.png"
+alt="観測構成の段階比較" />
+<figcaption aria-hidden="true">観測構成の段階比較</figcaption>
+</figure>
+<p><em>ROM＋EnKF・5seed平均。<strong>温度1点→2点で大きく改善し、変位2点を足すとさらに改善</strong>。
+そして同じ変位2点でも、<strong>熱感度 <span
+class="math inline">\(W\)</span>
+の高い点に置いた方が効く</strong>（低Wだと効きが半減）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>観測構成</th>
+<th>温度RMSE（加熱期）</th>
+<th>未観測の変位差誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度1点</td>
+<td>0.617 K</td>
+<td>0.869 µm</td>
+</tr>
+<tr class="even">
+<td>温度2点</td>
+<td>0.197 K</td>
+<td>0.151 µm</td>
+</tr>
+<tr class="odd">
+<td>温度2点＋変位2点（低W）</td>
+<td>0.188 K</td>
+<td>0.104 µm</td>
+</tr>
+<tr class="even">
+<td><strong>温度2点＋変位2点（高W）</strong></td>
+<td><strong>0.159 K</strong></td>
+<td><strong>0.077 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="いつ観測するかで-q-と-h-の推定が変わる">6-2.
+「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
+class="math inline">\(h\)</span> の推定が変わる</h3>
+<p>観測の効き目は<strong>場所だけでなく時間</strong>にもあります。同じ温度2点で、同化する時間窓だけを変えると:</p>
+<figure>
+<img src="img/qh_time_window.png" alt="同化時間窓の比較" />
+<figcaption aria-hidden="true">同化時間窓の比較</figcaption>
+</figure>
+<p><em>直接感度 <span class="math inline">\(\partial T/\partial
+Q\)</span> は加熱期に大きく、 <span class="math inline">\(\partial
+T/\partial h\)</span> は冷却期に大きい。実験でも <strong><span
+class="math inline">\(Q\)</span>
+は加熱期の観測が担い</strong>（加熱のみ0.57 W ≈ 全期間0.58
+W、冷却のみだと4.23 Wと7倍悪化）、 <strong><span
+class="math inline">\(h\)</span>
+は冷却期を足すと相対的に改善</strong>（7.6→5.3 mW/K）。ただし <span
+class="math inline">\(h\)</span>
+は温度応答がノイズ以下のため依然難しい。</em></p>
+<p>まとめると、観測設計は「<strong>どこで（空間）・何を（種類）・いつ（時間）</strong>」の3軸で考える、というのが実験から見えた形です。</p>
+<hr />
+<h2 id="回のまとめ">7. 3回のまとめ</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />

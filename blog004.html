@@ -854,6 +854,55 @@ class="math inline">\(\lVert a\rVert\)</span>
 <p>本ケース（20,696セル、モード5本）に Q-DEIM
 をかけると、上の貪欲手順で次の5点が選ばれます:</p>
 <p><img src="img/qdeim_points.png" alt="POD＋Q-DEIMで選んだROM代表点（3D）" width="460"></p>
+<p>5点を個別に読み取れるよう、温度感度（<span
+class="math inline">\(\partial T/\partial
+Q\)</span>）と実際の変位観測点を 同じ座標系に重ねた図も示します。</p>
+<p><img src="img/sensor_positions.png" alt="5温度点と変位観測点A/Oの位置" width="900"></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>点</th>
+<th>座標 <span class="math inline">\((x,y,z)\)</span> [m]</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0</td>
+<td>(0.0213, −0.0016, 0.0516)</td>
+<td>中央高さ・温度代表点</td>
+</tr>
+<tr class="even">
+<td>P1</td>
+<td>(−0.0141, 0.0331, 0.0516)</td>
+<td>中央高さ・反対側の温度代表点</td>
+</tr>
+<tr class="odd">
+<td><strong>P2</strong></td>
+<td>(0.0365, 0.0069, 0.0508)</td>
+<td><strong><span class="math inline">\(\partial T/\partial Q\)</span>
+最大の温度観測候補</strong></td>
+</tr>
+<tr class="even">
+<td>P3</td>
+<td>(0.0351, 0.0008, 0.0008)</td>
+<td>底面・ヒータ側の温度代表点</td>
+</tr>
+<tr class="odd">
+<td><strong>P4</strong></td>
+<td>(−0.0351, 0.0008, 0.0008)</td>
+<td><strong>低感度点（比較用）</strong></td>
+</tr>
+</tbody>
+</table>
+<p>赤い <code>Disp A</code> と青い <code>Disp O</code>
+は温度点ではなく、FrontISTRで取得する上面の 変位観測位置です。つまり
+<strong>P0〜P4は温度場を表す点、A/Oは変位を測る点</strong>で、役割が異なります。</p>
 <p><em>勘の流用点（すべて中央高さ）と違い、<strong>底面(P3,P4)も選んで場を広くカバー</strong>している。
 「1点目＝一番効く点 →
 以降＝それまでで分からない情報が最大の点」を繰り返した結果で、
@@ -1334,13 +1383,28 @@ class="math inline">\(\alpha\Delta T\)</span>
 <strong>反る</strong>。300秒でヒータOFF→全体が均されて反りが戻る。半透明の灰＝元形状。</em></p>
 <h3 id="変位の時系列グラフ">7-4. 変位の時系列グラフ</h3>
 <figure>
-<img src="img/blog_disp_timeseries.png" alt="変位の時系列" />
-<figcaption aria-hidden="true">変位の時系列</figcaption>
+<img src="img/blog_disp_timeseries.png"
+alt="FrontISTR真値の変位時系列" />
+<figcaption aria-hidden="true">FrontISTR真値の変位時系列</figcaption>
 </figure>
 <p><em>上面2点の上向き変位 <span class="math inline">\(U_z\)</span>
 。<strong>A（ヒータ側）が先に伸び</strong>、O（反対側）は遅れて追う。
 A−O差（緑）＝反りは加熱中に増えてピーク約2.8µm、ヒータOFF後は温度が均されて差が消える。
 <strong>底面(z=0)は固定なので変位ゼロ</strong>、動くのは上ほど大きい。</em></p>
+<p>同化の精度を確認するときは、同じ量に
+<strong>FrontISTRの真値を黒太線</strong>で重ねます。次の図は
+真値（黒）と、温度だけ／温度＋変位を観測したデータ同化後の推定値（色線）を同じ
+<span class="math inline">\(U_z(A)-U_z(O)\)</span>
+で比較したものです。薄い帯は5 seedのばらつきです。</p>
+<figure>
+<img src="img/blog_disp_timeseries_truth_vs_da.png"
+alt="FrontISTR真値とデータ同化後の変位差" />
+<figcaption
+aria-hidden="true">FrontISTR真値とデータ同化後の変位差</figcaption>
+</figure>
+<p><em>黒太線が比較基準のFrontISTR真値。赤（温度2点＋変位2点）は真値に最も近く、
+温度観測だけ（緑）は変位差に誤差が残る。これは変位を状態変数として直接積分した結果ではなく、
+同化後温度をgappy-PODで全場へ戻し、その温度をFrontISTRの熱弾性写像へ通して得た推定値です。</em></p>
 <blockquote>
 <p>実務では、この温度→変位を毎回FrontISTRで解く代わりに、<strong>線形化した感度
 <span class="math inline">\(W=K_s^{-1}H_T\)</span></strong>（blog_002

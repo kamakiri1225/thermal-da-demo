@@ -187,6 +187,8 @@ id="toc-blog_001openfoamfrontistr-で熱流体固体連成-熱膨張をやって
 で「熱流体固体連成 → 熱膨張」をやってみる ―
 さらに熱伝達率の分布まで出す</a>
 <ul>
+<li><a href="#この記事と-enkf-の関係"
+id="toc-この記事と-enkf-の関係">この記事と EnKF の関係</a></li>
 <li><a href="#題材片側だけ温められる中空円筒"
 id="toc-題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</a></li>
@@ -267,6 +269,26 @@ FrontISTR の”計算そのもの”</strong> の話です。
 データ同化（OI・EnKF）の中身は扱いません（それぞれ blog_002・blog_003
 で別途）。</p>
 </blockquote>
+<h3 id="この記事と-enkf-の関係">この記事と EnKF の関係</h3>
+<p>ここで実行しているのは <strong>EnKF
+そのものではありません</strong>。OpenFOAM の CHT と FrontISTR
+の熱弾性解析を一度きちんと計算し、温度・変位・熱伝達率の時刻歴を得ます。
+この結果を「真値」とみなして観測値を人工的に作ると、後続の双子実験で
+EnKF がどれだけ
+温度場や未知量を復元できるかを、誤差の正解が分かる状態で検証できます。</p>
+<pre class="mermaid"><code>flowchart LR
+    A[OpenFOAM CHT\n流体＋固体の温度場] --&gt; B[温度をFEM節点へ写像]
+    B --&gt; C[FrontISTR\n熱弾性・変位]
+    A --&gt; D[壁面熱流束と壁面温度\nから h を診断]
+    C --&gt; E[真値データ\n温度・変位・反り]
+    D --&gt; E
+    E --&gt; F[人工観測を作る\n双子実験]
+    F --&gt; G[次回以降：OI／EnKFで同化]</code></pre>
+<p>図の左から右が計算の順序です。<strong>このページの計算結果が、次回以降で
+EnKF を詳しく 説明するための正解値（synthetic
+truth）になります。</strong> EnKF の予報・観測摂動・共分散・
+カルマンゲイン・更新式は、blog_002（OI）および EnKF
+解説記事で独立に導出します。</p>
 <hr />
 <h2 id="題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</h2>
@@ -530,9 +552,9 @@ class="math inline">\(h\)</span>
 で色分け）。ヒータ側(+X)と反対側(−X)から見た2枚です。</p>
 <figure>
 <img src="img/blog_htc_paraview.png"
-alt="熱伝達率を色分けした3D図（どの面がどのh か）" />
-<figcaption aria-hidden="true">熱伝達率を色分けした3D図（どの面がどのh
-か）</figcaption>
+alt="熱伝達率を色分けした3D図（どの場所のhか）" />
+<figcaption
+aria-hidden="true">熱伝達率を色分けした3D図（どの場所のhか）</figcaption>
 </figure>
 <p><em>界面（<code>solid_to_fluid</code>
 パッチ）を熱伝達率で色分け。左＝ヒータ側(+X)から、右＝反対側(−X)から。
@@ -540,6 +562,16 @@ alt="熱伝達率を色分けした3D図（どの面がどのh か）" />
 10.5）</strong>、<strong>底面の縁（赤, 19.5）がいちばん高い</strong>、
 上面（水色, 11.9）、空洞の内壁（青,
 10.8）。「どの面がどれだけ冷えているか」が形と一緒に見えます。</em></p>
+<p>ParaView では <code>solid_to_fluid</code>
+パッチだけを表示し、計算した面フィールド <code>h</code> を
+<strong>面（face）単位の色</strong>として表示しています。したがって、図の色は円筒全体の平均ではなく、
+「その場所の固体表面から空気へ熱が逃げる強さ」です。左図の +X
+側外壁、右図の −X 側外壁、
+円筒の内壁、上面、底面の縁を見比べると、同じ円筒でも場所によって値が変わることが分かります。
+面名と位置の対応は、<code>solid_to_fluid</code>
+が空気に接する全界面、<code>outer/top/bottom</code> が外側の
+各面、<code>inner</code>
+が中空部の内壁、という境界パッチ定義に基づきます。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -621,6 +653,9 @@ class="math inline">\(q^{\prime\prime}\)</span> と <span
 class="math inline">\(T_w\)</span></strong> を取り出し、 <span
 class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
 で <strong>熱伝達率の分布・面代表値</strong>を診断できる。</li>
+<li>ここで得た温度・変位の時系列が、後続の <strong>OI／EnKF
+双子実験の真値</strong>になる。本記事自体は EnKF
+の同化計算ではない。</li>
 </ol>
 <p>次回（blog_002）は、この「温度→変形」を土台に、<strong>少ないセンサから全体を推定するデータ同化（OI）</strong>へ進みます。
 まず
