@@ -115,6 +115,8 @@ thermal-da-demo/
    … 4個の分身で共分散を作り、EnKFを手計算で理解する
 4. [**blog_004：POD選定ROM**](sample/106_0_pod_selected_rom/docs/blog_004_pod_selected_rom.md)
    … PODで場の型を出しQ-DEIMで代表点を選ぶ。5点→全温度場の復元アニメ付き
+5. [**blog_005：推定対象で最適センサは変わる**](sample/106_0_pod_selected_rom/docs/blog_005_optimal_sensor_placement.md)
+   … 観測の価値Δを1本の式で導き、行列手計算と実データで「対象ごとに最適観測が違う」を示す
 
 > 📄 まとめて読めるWebページ版（GitHub Pages）もあります → [thermal-da-demo (GitHub Pages)](https://kamakiri1225.github.io/thermal-da-demo/)
 
