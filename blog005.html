@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_005：推定対象で最適センサは変わる</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <style>
+    html { max-width: none; }
+    body { max-width: 1120px !important; padding: 1.2em 2.2em; line-height: 1.7; }
+    @media (max-width: 1180px){ body { max-width: 94% !important; } }
+    img { max-width: 100%; height: auto; }
+    table { display: block; overflow-x: auto; }
+    pre { overflow-x: auto; }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_005：推定対象で最適センサは変わる</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_005推定したい量で最適なセンサは変わる-観測の価値を1本の式で設計する"
+id="toc-blog_005推定したい量で最適なセンサは変わる-観測の価値を1本の式で設計する">blog_005：推定したい量で「最適なセンサ」は変わる
+― 観測の価値を1本の式で設計する</a>
+<ul>
+<li><a href="#観測の価値を測る1本の式"
+id="toc-観測の価値を測る1本の式">1. 観測の価値を測る「1本の式」</a></li>
+<li><a href="#小さな行列で手計算-が対象ごとに動く"
+id="toc-小さな行列で手計算-が対象ごとに動く">2. 小さな行列で手計算
+―「★」が対象ごとに動く</a>
+<ul>
+<li><a href="#舞台blog_002-3-5と同じ3変数"
+id="toc-舞台blog_002-3-5と同じ3変数">2-1. 舞台（blog_002
+§3-5と同じ3変数）</a></li>
+<li><a href="#部品をそろえる行列ベクトルを成分で"
+id="toc-部品をそろえる行列ベクトルを成分で">2-2.
+部品をそろえる（行列×ベクトルを成分で）</a></li>
+<li><a href="#価値-delta-を対象ごとに計算例を3つ"
+id="toc-価値-delta-を対象ごとに計算例を3つ">2-3. 価値 <span
+class="math inline">\(\Delta\)</span>
+を対象ごとに計算（例を3つ）</a></li>
+<li><a href="#全部並べるとが行ごとに動く"
+id="toc-全部並べるとが行ごとに動く">2-4.
+全部並べると「★」が行ごとに動く</a></li>
+<li><a href="#図解なぜ変位が-q-全場に強いのか"
+id="toc-図解なぜ変位が-q-全場に強いのか">2-5. 図解：なぜ変位が <span
+class="math inline">\(Q\)</span> ・全場に強いのか</a></li>
+</ul></li>
+<li><a href="#第3の軸時間-いつ観測するかも対象で変わる"
+id="toc-第3の軸時間-いつ観測するかも対象で変わる">3. 第3の軸「時間」―
+いつ観測するかも対象で変わる</a></li>
+<li><a href="#実データで検証romenkfoiすべて本リポジトリの計算"
+id="toc-実データで検証romenkfoiすべて本リポジトリの計算">4.
+実データで検証（ROM＋EnKF/OI、すべて本リポジトリの計算）</a>
+<ul>
+<li><a href="#まず観測点の位置" id="toc-まず観測点の位置">4-1.
+まず観測点の位置</a></li>
+<li><a href="#対象全温度場温度センサは散らすが最適感度最大冗長は悪化"
+id="toc-対象全温度場温度センサは散らすが最適感度最大冗長は悪化">4-2.
+対象＝全温度場：温度センサは「散らす」が最適（感度最大＝冗長は悪化）</a></li>
+<li><a href="#対象変位変位センサを高w点へ種類と場所が変わる"
+id="toc-対象変位変位センサを高w点へ種類と場所が変わる">4-3.
+対象＝変位：変位センサを「高W点」へ（種類と場所が変わる）</a></li>
+<li><a href="#観測を増やす順番も式の通り"
+id="toc-観測を増やす順番も式の通り">4-4.
+観測を増やす順番も式の通り</a></li>
+<li><a href="#仕上げ未観測の6点でも動く絵つき"
+id="toc-仕上げ未観測の6点でも動く絵つき">4-5.
+仕上げ：未観測の6点でも（動く絵つき）</a></li>
+</ul></li>
+<li><a href="#まとめ-対象別最適観測の設計表"
+id="toc-まとめ-対象別最適観測の設計表">5. まとめ ―
+対象別・最適観測の設計表</a>
+<ul>
+<li><a href="#参考元になった実装詳細"
+id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_005推定したい量で最適なセンサは変わる-観測の価値を1本の式で設計する">blog_005：推定したい量で「最適なセンサ」は変わる
+― 観測の価値を1本の式で設計する</h1>
+<p>センサ配置の素朴な疑問から始めます。</p>
+<blockquote>
+<p><strong>温度センサや変位センサは、どこに置くのが一番いいのか？</strong></p>
+</blockquote>
+<p>答えを先に言うと、<strong>「何を推定したいか」で最適な置き場所（さらに種類・時間帯）が変わります</strong>。
+温度場を知りたいときの最適配置と、発熱量 <span
+class="math inline">\(Q\)</span>
+を当てたいときの最適配置は、同じではありません。 この記事では、それを
+<strong>1本の式 → 小さな行列の手計算 → 実データ</strong>
+の順で示します。</p>
+<blockquote>
+<p><strong>この記事の流れ</strong> 1. 観測の価値を測る式 <span
+class="math inline">\(\Delta\)</span> を導く（理論） 2.
+3変数モデルの行列手計算で「対象ごとに最適観測が変わる」を見る（★が動く表）
+3. 第3の軸「時間」：いつ観測するかも対象で変わる 4.
+実データ（ROM＋EnKF/OI）で検証</p>
+<p>関連記事：OIの仕組みは <a
+href="blog_002_oi_data_assimilation.md">blog_002</a>、ROM/PODは <a
+href="blog_004_pod_selected_rom.md">blog_004</a>。</p>
+</blockquote>
+<hr />
+<h2 id="観測の価値を測る1本の式">1. 観測の価値を測る「1本の式」</h2>
+<p>データ同化の更新式（blog_002）から出発します。観測 <span
+class="math inline">\(y\)</span> を1つ入れると、状態の共分散は</p>
+<p><span class="math display">\[B^a=B-\frac{(Bh)(Bh)^{\mathsf
+T}}{h^{\mathsf T}Bh+r}\]</span></p>
+<p>と縮みます（ <span class="math inline">\(h\)</span>
+＝観測演算子の行、 <span class="math inline">\(r\)</span>
+＝観測ノイズ分散）。いま知りたい量（推定対象）を <span
+class="math inline">\(X=c^{\mathsf T}x\)</span> と書くと（ <span
+class="math inline">\(c\)</span>
+は対象を取り出すベクトル）、<strong><span
+class="math inline">\(X\)</span> の分散がどれだけ減るか</strong>は</p>
+<p><span class="math display">\[\boxed{\ \Delta(X,\
+y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
+=\frac{\bigl(c^{\mathsf T}Bh\bigr)^2}{h^{\mathsf T}Bh+r}\ }\]</span></p>
+<p>これが<strong>観測の価値</strong>です。読み方は簡単で、</p>
+<ul>
+<li>分子 <span class="math inline">\(\mathrm{Cov}(X,y)^2\)</span>
+：<strong>その観測が、知りたい量とどれだけ連動しているか</strong></li>
+<li>分母 <span class="math inline">\(\mathrm{Var}(y)+r\)</span>
+：その観測自身のばらつき＋ノイズ</li>
+</ul>
+<p>つまり「<strong>知りたい量とよく連動し、ノイズの小さい観測ほど価値が高い</strong>」。
+ここで大事なのは、分子に <strong>対象 <span
+class="math inline">\(c\)</span> と観測 <span
+class="math inline">\(h\)</span> の両方</strong>が入っていること。
+<strong>観測の価値は対象に依存する</strong>＝「万能の最適センサ位置」は存在しない、が式の形から既に見えています。</p>
+<hr />
+<h2 id="小さな行列で手計算-が対象ごとに動く">2. 小さな行列で手計算
+―「★」が対象ごとに動く</h2>
+<h3 id="舞台blog_002-3-5と同じ3変数">2-1. 舞台（blog_002
+§3-5と同じ3変数）</h3>
+<p>状態 <span class="math inline">\(x=(T_1,\ T_2,\ Q)\)</span> 。温度は
+<span class="math inline">\(Q\)</span> で決まり（感度 <span
+class="math inline">\(s=(0.3,\ 0.1)\)</span> ）、変位は温度で決まる
+（感度 <span class="math inline">\(w=(0.5,\ 0.2)\)</span>
+）。背景共分散は <span class="math inline">\(\sigma_T=1,\
+\sigma_Q=2\)</span> として</p>
+<p><span class="math display">\[B=\begin{pmatrix}
+1.36 &amp; 0.12 &amp; 1.2\\
+0.12 &amp; 1.04 &amp; 0.4\\
+1.2 &amp; 0.4 &amp; 4
+\end{pmatrix},\qquad
+B=\mathrm{diag}(\sigma_T^2,\ \sigma_T^2,\ 0)+\sigma_Q^2\,a\,a^{\mathsf
+T},\quad a=(s_1,\ s_2,\ 1)^{\mathsf T}.\]</span></p>
+<p>（成分の出どころ：対角 <span
+class="math inline">\(\sigma_T^2+\sigma_Q^2 s_i^2\)</span> 、温度と
+<span class="math inline">\(Q\)</span> の相関 <span
+class="math inline">\(\sigma_Q^2 s_i\)</span> 。導出は blog_002
+§3-5）</p>
+<p><strong>観測の候補は3つ</strong>（それぞれ <span
+class="math inline">\(h\)</span> と <span
+class="math inline">\(r\)</span> ）:</p>
+<table>
+<thead>
+<tr class="header">
+<th>候補</th>
+<th><span class="math inline">\(h\)</span></th>
+<th>ノイズ <span class="math inline">\(r\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度点1</td>
+<td><span class="math inline">\((1,\ 0,\ 0)\)</span></td>
+<td><span class="math inline">\(0.3^2=0.09\)</span></td>
+</tr>
+<tr class="even">
+<td>温度点2</td>
+<td><span class="math inline">\((0,\ 1,\ 0)\)</span></td>
+<td><span class="math inline">\(0.09\)</span></td>
+</tr>
+<tr class="odd">
+<td>変位 <span class="math inline">\(u\)</span></td>
+<td><span class="math inline">\((w_1,\ w_2,\ 0)=(0.5,\ 0.2,\
+0)\)</span></td>
+<td><span class="math inline">\(0.1^2=0.01\)</span></td>
+</tr>
+</tbody>
+</table>
+<h3 id="部品をそろえる行列ベクトルを成分で">2-2.
+部品をそろえる（行列×ベクトルを成分で）</h3>
+<p>まず各候補の <span class="math inline">\(Bh\)</span>
+（＝「その観測と各変数の共分散」の列）と <span
+class="math inline">\(\mathrm{Var}(y)+r\)</span> :</p>
+<p><span
+class="math display">\[B\begin{pmatrix}1\\0\\0\end{pmatrix}=\begin{pmatrix}1.36\\
+0.12\\ 1.2\end{pmatrix},\qquad
+B\begin{pmatrix}0\\1\\0\end{pmatrix}=\begin{pmatrix}0.12\\ 1.04\\
+0.4\end{pmatrix},\qquad
+B\begin{pmatrix}0.5\\0.2\\0\end{pmatrix}
+=\begin{pmatrix}0.5\cdot1.36+0.2\cdot0.12\\ 0.5\cdot0.12+0.2\cdot1.04\\
+0.5\cdot1.2+0.2\cdot0.4\end{pmatrix}
+=\begin{pmatrix}0.704\\ 0.268\\ 0.68\end{pmatrix}\]</span></p>
+<p><span
+class="math display">\[\mathrm{Var}(y_1)+r=1.36+0.09=1.45,\qquad
+\mathrm{Var}(y_2)+r=1.04+0.09=1.13,\]</span></p>
+<p><span class="math display">\[\mathrm{Var}(u)+r=w^{\mathsf
+T}Bw+r=0.5\cdot0.704+0.2\cdot0.268+0.01=0.4156.\]</span></p>
+<h3 id="価値-delta-を対象ごとに計算例を3つ">2-3. 価値 <span
+class="math inline">\(\Delta\)</span> を対象ごとに計算（例を3つ）</h3>
+<p><strong>例1：対象＝発熱量 <span class="math inline">\(Q\)</span> （
+<span class="math inline">\(c=(0,0,1)\)</span>
+）を温度点1で測る</strong></p>
+<p><span class="math display">\[\Delta(Q,\ y_1)=\frac{\bigl(c^{\mathsf
+T}Bh\bigr)^2}{1.45}=\frac{1.2^2}{1.45}=0.993\]</span></p>
+<p><strong>例2：対象＝ <span class="math inline">\(Q\)</span> を変位
+<span class="math inline">\(u\)</span> で測る</strong>（分子は <span
+class="math inline">\(Bw\)</span> の第3成分）</p>
+<p><span class="math display">\[\Delta(Q,\
+u)=\frac{0.68^2}{0.4156}=1.113\ \gt\ 0.993\]</span></p>
+<p>→ <strong><span class="math inline">\(Q\)</span>
+には温度点1より変位の方が価値が高い</strong>。</p>
+<p><strong>例3：対象＝ <span class="math inline">\(T_2\)</span> を変位
+<span class="math inline">\(u\)</span> で測る</strong>（分子は <span
+class="math inline">\(Bw\)</span> の第2成分）</p>
+<p><span class="math display">\[\Delta(T_2,\
+u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\
+y_2)=\frac{1.04^2}{1.13}=0.957\]</span></p>
+<p>→ <strong><span class="math inline">\(T_2\)</span>
+には温度点2が最適</strong>（変位は <span
+class="math inline">\(w_2=0.2\)</span> としか連動しない）。</p>
+<h3 id="全部並べるとが行ごとに動く">2-4.
+全部並べると「★」が行ごとに動く</h3>
+<p>同じ計算を4対象×3候補で並べたのが下の表です（<strong>すべて上の <span
+class="math inline">\(B\)</span> から電卓で出せます</strong>）:</p>
+<figure>
+<img src="img/blog005_delta_table.png"
+alt="観測の価値Δの表（対象×候補）" />
+<figcaption aria-hidden="true">観測の価値Δの表（対象×候補）</figcaption>
+</figure>
+<table>
+<thead>
+<tr class="header">
+<th>推定対象＼観測候補</th>
+<th>温度点1</th>
+<th>温度点2</th>
+<th>変位 <span class="math inline">\(u\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_1\)</span></td>
+<td><strong>1.276 ★</strong></td>
+<td>0.013</td>
+<td>1.193</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_2\)</span></td>
+<td>0.010</td>
+<td><strong>0.957 ★</strong></td>
+<td>0.173</td>
+</tr>
+<tr class="odd">
+<td>発熱量 <span class="math inline">\(Q\)</span></td>
+<td>0.993</td>
+<td>0.142</td>
+<td><strong>1.113 ★</strong></td>
+</tr>
+<tr class="even">
+<td>全温度場（ <span class="math inline">\(T_1\)</span> + <span
+class="math inline">\(T_2\)</span> ）</td>
+<td>1.286</td>
+<td>0.970</td>
+<td><strong>1.365 ★</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>★（最適な観測）が行ごとに違います。</strong>
+これがこの記事の主張の核心で、しかも理由は明快：</p>
+<ul>
+<li><span class="math inline">\(T_1\)</span> を知りたい → <span
+class="math inline">\(T_1\)</span> 自身との連動が最大の「温度点1」</li>
+<li><span class="math inline">\(T_2\)</span> を知りたい →
+「温度点2」（変位は <span class="math inline">\(w_2=0.2\)</span>
+としか連動しない）</li>
+<li><span class="math inline">\(Q\)</span> を知りたい →
+<strong>変位</strong>（複数温度の和として <span
+class="math inline">\(Q\)</span>
+の効果をまとめて拾い、ノイズも小さい）</li>
+<li>全温度場 → <strong>変位</strong>（ <span
+class="math inline">\(T_1\)</span> とも <span
+class="math inline">\(T_2\)</span> とも連動するので合計で勝つ）</li>
+</ul>
+<blockquote>
+<p><strong>一言でいうと</strong>：観測の価値は「対象との共分散」で決まり、共分散は対象ごとに違う。
+だから<strong>最適センサは推定対象の数だけある</strong>。</p>
+</blockquote>
+<h3 id="図解なぜ変位が-q-全場に強いのか">2-5. 図解：なぜ変位が <span
+class="math inline">\(Q\)</span> ・全場に強いのか</h3>
+<figure>
+<img src="img/disp_to_temp_mechanism.png"
+alt="変位観測が温度を直す仕組み" />
+<figcaption aria-hidden="true">変位観測が温度を直す仕組み</figcaption>
+</figure>
+<p><em>変位は複数点の温度誤差の<strong>射影</strong>（左・実線）を1つの数で読み、ハズレが共分散に比例して
+<strong>逆流</strong>する（左・破線）。誤差が「共通の型」で起きるとき、型と重み
+<span class="math inline">\(w\)</span> が揃う高W点は
+信号がノイズを超える（右）。詳しい導出は blog_002 §3-7。</em></p>
+<hr />
+<h2 id="第3の軸時間-いつ観測するかも対象で変わる">3. 第3の軸「時間」―
+いつ観測するかも対象で変わる</h2>
+<p><span class="math inline">\(\Delta\)</span> の分子 <span
+class="math inline">\(\mathrm{Cov}(X,y)\)</span>
+は<strong>時刻の関数</strong>でもあります。直接感度（熱方程式を <span
+class="math inline">\(Q,h\)</span> で微分したもの）を計算すると:</p>
+<figure>
+<img src="img/sensitivity_qh_timeseries.png"
+alt="∂T/∂Qと∂T/∂hの時刻歴" />
+<figcaption aria-hidden="true">∂T/∂Qと∂T/∂hの時刻歴</figcaption>
+</figure>
+<ul>
+<li><span class="math inline">\(\partial T/\partial Q\)</span>
+は<strong>加熱期に大きく</strong>、冷却で減衰 → <span
+class="math inline">\(Q\)</span>
+と温度観測の連動は<strong>加熱期</strong>にある</li>
+<li><span class="math inline">\(\partial T/\partial h\)</span>
+は温度が上がった<strong>冷却期に最大</strong> → <span
+class="math inline">\(h\)</span>
+の情報は<strong>後半</strong>にある</li>
+</ul>
+<p>実験でも、同じ温度2点で<strong>同化する時間窓だけ</strong>変えると:</p>
+<figure>
+<img src="img/qh_time_window.png" alt="同化時間窓を変えたQ/h推定" />
+<figcaption aria-hidden="true">同化時間窓を変えたQ/h推定</figcaption>
+</figure>
+<p><em><span class="math inline">\(Q\)</span> ：加熱期のみ0.57 W ≈
+全期間0.58 W、<strong>冷却期のみだと4.23 W（7倍悪化）</strong>＝ <span
+class="math inline">\(Q\)</span> は加熱期の観測が担う。 <span
+class="math inline">\(h\)</span> ：冷却期を足すと7.6→5.3
+mW/Kと相対改善（ただし温度応答＜ノイズで依然難）。</em></p>
+<p>つまり最適観測は <strong>どこで（空間）× 何を（種類）×
+いつ（時間）</strong> の3軸で、どれも対象依存です。</p>
+<hr />
+<h2 id="実データで検証romenkfoiすべて本リポジトリの計算">4.
+実データで検証（ROM＋EnKF/OI、すべて本リポジトリの計算）</h2>
+<h3 id="まず観測点の位置">4-1. まず観測点の位置</h3>
+<figure>
+<img src="img/obs_points_progression.png" alt="観測点の位置" />
+<figcaption aria-hidden="true">観測点の位置</figcaption>
+</figure>
+<h3 id="対象全温度場温度センサは散らすが最適感度最大冗長は悪化">4-2.
+対象＝全温度場：温度センサは「散らす」が最適（感度最大＝冗長は悪化）</h3>
+<figure>
+<img src="img/optimal_placement_table.png"
+alt="配置方法×推定対象の誤差表" />
+<figcaption aria-hidden="true">配置方法×推定対象の誤差表</figcaption>
+</figure>
+<p><em>温度2点のEnKF比較。<strong>感度最大＝近接2点は0.91
+Kと2.6倍悪化</strong>、散らす配置は0.35 K。
+「場をよく張る点を選ぶ」＝Q-DEIMの原理（blog_004
+§4）が温度場推定でも正しい。</em></p>
+<h3 id="対象変位変位センサを高w点へ種類と場所が変わる">4-3.
+対象＝変位：変位センサを「高W点」へ（種類と場所が変わる）</h3>
+<figure>
+<img src="img/blog_oi_disp_selection.png"
+alt="高W/低W変位点の比較（OI）" />
+<figcaption aria-hidden="true">高W/低W変位点の比較（OI）</figcaption>
+</figure>
+<p><em>同じ変位2点でも<strong>低感度W点はほぼ効かず（2.43
+K）、高W点は0.86 K</strong>。 §2の言葉では「対象＝変位・温度場」に対し
+<span class="math inline">\(g=w^{\mathsf T}\varphi\)</span>
+が大きい観測を選んだ、ということ。</em></p>
+<p>さらに個別の変位で見ると、<strong>温度センサだけでは「センサに近い側」しか合いません</strong>:</p>
+<figure>
+<img src="img/blog_disp_timeseries_truth_vs_da_points.png"
+alt="個別のUz(A)/Uz(O)と差" />
+<figcaption aria-hidden="true">個別のUz(A)/Uz(O)と差</figcaption>
+</figure>
+<h3 id="観測を増やす順番も式の通り">4-4. 観測を増やす順番も式の通り</h3>
+<figure>
+<img src="img/opencae_sensor_progression.png"
+alt="温度1点→2点→＋変位の段階比較" />
+<figcaption aria-hidden="true">温度1点→2点→＋変位の段階比較</figcaption>
+</figure>
+<p><em>温度RMSE 0.617→0.197→0.159 K、未観測変位差
+0.869→0.151→<strong>0.077 µm</strong>。
+「まず独立な温度2点で場を張り、変位で <span
+class="math inline">\(Q\)</span> ・変位系の対象を締める」＝ <span
+class="math inline">\(\Delta\)</span> 表の順序そのもの。</em></p>
+<h3 id="仕上げ未観測の6点でも動く絵つき">4-5.
+仕上げ：未観測の6点でも（動く絵つき）</h3>
+<figure>
+<img src="img/unobs_multi_timeseries.png"
+alt="未観測の温度3点・変位3点" />
+<figcaption aria-hidden="true">未観測の温度3点・変位3点</figcaption>
+</figure>
+<p>同化が全場を直せる理由（少数点→PODで全場復元）はアニメで一目です:</p>
+<figure>
+<img src="img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元" />
+<figcaption aria-hidden="true">5点から全温度場を復元</figcaption>
+</figure>
+<hr />
+<h2 id="まとめ-対象別最適観測の設計表">5. まとめ ―
+対象別・最適観測の設計表</h2>
+<figure>
+<img src="img/placement_summary_table.png"
+alt="推定対象×最適なセンサ種類・領域のまとめ" />
+<figcaption
+aria-hidden="true">推定対象×最適なセンサ種類・領域のまとめ</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>推定対象</th>
+<th>最適な観測（実データの結論）</th>
+<th>理屈（ <span class="math inline">\(\Delta\)</span> の言葉）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全温度場</td>
+<td>温度を<strong>空間に散らす</strong></td>
+<td>独立な方向を張ると合計の <span
+class="math inline">\(\mathrm{Cov}\)</span> が最大</td>
+</tr>
+<tr class="even">
+<td>変位（未観測含む）</td>
+<td><strong>変位を高W点</strong>へ</td>
+<td><span class="math inline">\(g=w^{\mathsf T}\varphi\)</span>
+が大きい観測</td>
+</tr>
+<tr class="odd">
+<td>発熱量 <span class="math inline">\(Q\)</span></td>
+<td>温度で可・場所はほぼ不問、<strong>時間＝加熱期</strong></td>
+<td><span class="math inline">\(\mathrm{Cov}(Q,y(t))\)</span>
+が加熱期に集中</td>
+</tr>
+<tr class="even">
+<td>放熱 <span class="math inline">\(h\)</span></td>
+<td><strong>冷却期</strong>の観測で相対改善（依然難）</td>
+<td><span class="math inline">\(\partial T/\partial h\)</span>
+が冷却期に最大だが信号＜ノイズ</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li><strong>観測の価値は1本の式</strong> <span
+class="math inline">\(\Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r)\)</span>
+で測れる。</li>
+<li>分子に<strong>対象</strong>が入るので、<strong>最適センサは対象の数だけある</strong>（3変数の手計算で★が行ごとに動いた）。</li>
+<li>軸は<strong>場所だけでなく種類と時間</strong>。実データ（ROM＋EnKF/OI）でも表の通りになった。</li>
+</ol>
+<blockquote>
+<p>学会発表との対応：この論理は <a
+href="https://kamakiri1225.github.io/thermal-da-demo/posters.html">発表ポスター</a>
+の
+<strong>計算工学講演会（直接感度と観測設計）</strong>・<strong>計算力学講演会（推定対象依存の観測配置）</strong>の骨格です。</p>
+</blockquote>
+<hr />
+<h3 id="参考元になった実装詳細">参考（元になった実装・詳細）</h3>
+<ul>
+<li><span class="math inline">\(\Delta\)</span>
+の元になる更新式・変位→温度の導出：<code>blog_002_oi_data_assimilation.md</code>
+§2, §3-7</li>
+<li>直接感度の実装と検証：<code>run/sensitivity_analysis.py</code>（有限差分と一致）</li>
+<li>時間窓実験：<code>run/time_window_qh.py</code> ／
+空間配置比較：<code>run/optimal_placement_table.py</code></li>
+<li>段階比較・未観測評価：<code>run/opencae_sensor_progression.py</code>,
+<code>run/make_unobs_multi_fig.py</code></li>
+</ul>
+</body>
+</html>
