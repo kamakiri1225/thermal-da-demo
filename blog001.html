@@ -189,6 +189,8 @@ id="toc-blog_001openfoamfrontistr-で熱流体固体連成-熱膨張をやって
 <ul>
 <li><a href="#この記事と-enkf-の関係"
 id="toc-この記事と-enkf-の関係">この記事と EnKF の関係</a></li>
+<li><a href="#手書きで追うための記号と単位"
+id="toc-手書きで追うための記号と単位">手書きで追うための記号と単位</a></li>
 <li><a href="#題材片側だけ温められる中空円筒"
 id="toc-題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</a></li>
@@ -229,9 +231,9 @@ id="toc-step-3熱伝達率-h-の分布と各面の値を算出する">3. STEP 3�
 id="toc-openfoam-から各面の-qprimeprime-と-t_w-を取り出す">3-2. OpenFOAM
 から各面の <span class="math inline">\(q^{\prime\prime}\)</span> と
 <span class="math inline">\(T_w\)</span> を取り出す</a></li>
-<li><a href="#各面の代表-h-を出す面積平均"
-id="toc-各面の代表-h-を出す面積平均">3-3. 「各面の代表 <span
-class="math inline">\(h\)</span> 」を出す（面積平均）</a></li>
+<li><a href="#面積平均と実効熱伝達率は別の量"
+id="toc-面積平均と実効熱伝達率は別の量">3-3.
+面積平均と実効熱伝達率は別の量</a></li>
 <li><a href="#実際に-openfoam-で計算した各面の熱伝達率-t300-秒"
 id="toc-実際に-openfoam-で計算した各面の熱伝達率-t300-秒">3-4. 実際に
 OpenFOAM で計算した各面の熱伝達率（ <span
@@ -290,9 +292,76 @@ truth）になります。</strong> EnKF の予報・観測摂動・共分散・
 カルマンゲイン・更新式は、blog_002（OI）および EnKF
 解説記事で独立に導出します。</p>
 <hr />
+<h2 id="手書きで追うための記号と単位">手書きで追うための記号と単位</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+<th>単位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T(\boldsymbol x,t)\)</span></td>
+<td>位置 <span class="math inline">\(\boldsymbol x\)</span> 、時刻 <span
+class="math inline">\(t\)</span> の温度</td>
+<td>K（表示は℃）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_w,T_\infty\)</span></td>
+<td>壁面温度、熱伝達率を定義する周囲基準温度</td>
+<td>K</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T_{\rm ref}\)</span></td>
+<td>熱ひずみゼロの基準温度</td>
+<td>K</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(Q,q^{\prime\prime},A_i\)</span></td>
+<td>発熱量、面の熱流束、面 <span class="math inline">\(i\)</span>
+の面積</td>
+<td>W、W/m²、m²</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(h\)</span></td>
+<td>この回では表面熱伝達率</td>
+<td>W/(m² K)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\boldsymbol
+u,\varepsilon,\alpha\)</span></td>
+<td>変位、ひずみ、線膨張係数</td>
+<td>m、無次元、1/K</td>
+</tr>
+</tbody>
+</table>
+<p>本ケースでは周囲温度と熱ひずみ基準温度はともに293.15
+Kですが、<strong>役割は別</strong>です。以下の熱伝達率の式の <span
+class="math inline">\(T_{\rm ref}\)</span> は周囲基準温度 <span
+class="math inline">\(T_\infty\)</span> を指します。温度差は1 K＝1
+℃であり、絶対温度は <span class="math inline">\(T[\mathrm
+K]=T[{}^\circ\mathrm C]+273.15\)</span> で換算します。</p>
+<p>手順は <strong>熱の流れを解く → 温度差から熱ひずみを作る →
+拘束下の変位を解く → 壁面熱流束からhを診断する</strong>
+です。最後のhの診断は、温度を計算した後の後処理です。</p>
 <h2 id="題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</h2>
-<!-- 図があれば: docs/img に円筒＋ヒータの図 -->
+<figure>
+<img src="img/blog001_setup.png"
+alt="解析対象：片側ヒータ付き中空円筒" />
+<figcaption
+aria-hidden="true">解析対象：片側ヒータ付き中空円筒</figcaption>
+</figure>
+<p><em>解析対象の全体像。左＝3D（赤い帯がヒータ：外周+X側、z=24.75〜75.75
+mm）。 中＝断面と寸法。右＝材料と加熱プロファイル（0〜300 sだけ15
+W）。</em></p>
 <ul>
 <li><strong>形</strong>：中空の円筒（パイプ）。内径 20 mm、外径 37.5
 mm、高さ 100.5 mm。材料は一般構造用鋼材相当。</li>
@@ -393,6 +462,11 @@ aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
 </figure>
 <p><em>実ソルバ（<code>chtMultiRegionFoam</code>）で計算した温度の時間変化。0〜300秒の加熱でヒータ側（hot）がぐんぐん上がり、
 反対側（cold）はゆるやかに上がる。300秒でヒータOFFにすると冷却へ。左右で温度が違うのがポイント。</em></p>
+<p>温度「場」としても見ておきます（どこが熱いかが一目で分かります）:</p>
+<figure>
+<img src="img/blog001_temp_field300.png" alt="t=300sの温度場" />
+<figcaption aria-hidden="true">t=300sの温度場</figcaption>
+</figure>
 <hr />
 <h2 id="step-2温度場を-frontistr-へ渡して熱膨張を出す">2. STEP
 2：温度場を FrontISTR へ渡して熱膨張を出す</h2>
@@ -510,21 +584,34 @@ face})\]</span></p>
 class="math inline">\(h\)</span> をコンター表示すれば、
 ヒータ側・反対側・上面・底面でどう <span
 class="math inline">\(h\)</span> が違うかが色で見えます。</p>
-<h3 id="各面の代表-h-を出す面積平均">3-3. 「各面の代表 <span
-class="math inline">\(h\)</span> 」を出す（面積平均）</h3>
-<p>「側面ヒータ側」「側面反対側」「上面」「底面」のように
-<strong>面をグループ</strong>に分けて、 各グループの <span
-class="math inline">\(h\)</span> を
-<strong>面積で重みづけ平均</strong>すると、面ごとの代表値が出ます。</p>
-<p><span class="math display">\[\bar h_\mathrm{group}=\frac{\sum_{i\in
-\mathrm{group}} h_i\,A_i}{\sum_{i\in \mathrm{group}} A_i}
-=\frac{\sum_i q^{\prime\prime}_i A_i}{\sum_i
-(T_{w,i}-T_\mathrm{ref})\,A_i}\]</span></p>
-<p>（ <span class="math inline">\(A_i\)</span> は面 <span
-class="math inline">\(i\)</span>
-の面積）。右側の形は「そのグループから逃げる総熱量 ÷
-温度差の重みつき面積」で、 <strong>“面ごとの実効熱伝達率”</strong>
-になります。</p>
+<h3 id="面積平均と実効熱伝達率は別の量">3-3.
+面積平均と実効熱伝達率は別の量</h3>
+<p>面集合を <span class="math inline">\(\mathcal G\)</span> とし、 <span
+class="math inline">\(\Delta T_i=T_{w,i}-T_\infty\)</span>
+と置きます。面積平均は</p>
+<p><span class="math display">\[
+\bar h_A=\frac{\sum_{i\in\mathcal G}h_iA_i}{\sum_{i\in\mathcal G}A_i}.
+\]</span></p>
+<p>一方、「総放熱量を同じにする1個のh」を求めるなら、まず面ごとの熱流束を足します。</p>
+<p><span class="math display">\[
+\dot Q_{\mathcal G}=\sum_{i\in\mathcal G}q_i^{\prime\prime}A_i
+=\sum_{i\in\mathcal G}h_i\Delta T_i A_i
+=h_{\rm eff}\sum_{i\in\mathcal G}\Delta T_i A_i.
+\]</span></p>
+<p>右端を <span class="math inline">\(h_{\rm eff}\)</span>
+について解くと、</p>
+<p><span class="math display">\[
+h_{\rm eff}=\frac{\sum_iq_i^{\prime\prime}A_i}{\sum_i\Delta T_i A_i}
+=\frac{\sum_i h_i\Delta T_i A_i}{\sum_i\Delta T_i A_i}.
+\]</span></p>
+<p>したがって
+<strong>面積平均と実効値は一般には等しくありません</strong>。例えば同面積2面で
+<span class="math inline">\(h=(10,20)\)</span> 、 <span
+class="math inline">\(\Delta T=(1,3)\)</span>
+なら、面積平均15に対し実効値は <span
+class="math inline">\((10+60)/(1+3)=17.5\)</span> W/(m²
+K)です。次節は後者を集計します。</p>
+<p>熱流束の符号は「固体から空気へ」を正として揃えます。次節の絶対値による集計は熱流束の大きさを扱う方法で、入熱と放熱が混在する場合の正味熱量とは異なります。温度差がほぼ0の面では局所hの割り算は不安定になります。</p>
 <h3 id="実際に-openfoam-で計算した各面の熱伝達率-t300-秒">3-4. 実際に
 OpenFOAM で計算した各面の熱伝達率（ <span
 class="math inline">\(t=300\)</span> 秒）</h3>
