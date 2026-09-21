@@ -1,0 +1,47 @@
+[
+  {
+    "source": "blog_001_cht_thermal_expansion_and_htc.md",
+    "sha256": "ef3b025649d156c2253f979094c0e348313c252792a723045fc7398162cd0400",
+    "math": 85,
+    "images": 6,
+    "flows": 1,
+    "gif": 0,
+    "tables": 3
+  },
+  {
+    "source": "blog_002_oi_data_assimilation.md",
+    "sha256": "a2c6b94d6759c93e939f346f8645571e6bf719528163358a7e0dce24223d722a",
+    "math": 301,
+    "images": 8,
+    "flows": 2,
+    "gif": 0,
+    "tables": 6
+  },
+  {
+    "source": "blog_003_ensemble_kalman_filter.md",
+    "sha256": "235a00e90f0ad57039ad580ea1523a2a003714379ffeb5f6f16e68d9f7f80663",
+    "math": 85,
+    "images": 6,
+    "flows": 1,
+    "gif": 0,
+    "tables": 6
+  },
+  {
+    "source": "blog_004_pod_selected_rom.md",
+    "sha256": "d8f9711b3747c197c6b23f8fbb7629d9c54169f423ed76ce9f3a30b18477d58b",
+    "math": 344,
+    "images": 15,
+    "flows": 1,
+    "gif": 2,
+    "tables": 10
+  },
+  {
+    "source": "blog_005_optimal_sensor_placement.md",
+    "sha256": "737f435a5158f7c333e193a7e3a0727087446ff18aaf438ebd04b2c180d5b3b6",
+    "math": 204,
+    "images": 12,
+    "flows": 2,
+    "gif": 1,
+    "tables": 7
+  }
+]

@@ -1,0 +1,16 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="OpenFOAM CHT\n流体＋固体の温度場"];
+B [label="温度をFEM節点へ写像"];
+C [label="FrontISTR\n熱弾性・変位"];
+D [label="壁面熱流束と壁面温度\nから h を診断"];
+E [label="真値データ\n温度・変位・反り"];
+F [label="人工観測を作る\n双子実験"];
+G [label="次回以降：OI／EnKFで同化"];
+A -> B;
+B -> C;
+A -> D;
+C -> E;
+D -> E;
+E -> F;
+F -> G;
+}

@@ -1,0 +1,12 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="OpenFOAM CHT\n固体20,696セルの温度"];
+B [label="セル温度をFEM節点へ補間"];
+C [label="FrontISTR熱弾性解析\n温度上昇 → 熱変位"];
+D [label="A/O変位・A−O差\n未観測C/D・C−D差"];
+E [label="OIで温度とQを補正\n次の60秒計算へ"];
+A -> B;
+B -> C;
+C -> D;
+D -> E;
+E -> A;
+}

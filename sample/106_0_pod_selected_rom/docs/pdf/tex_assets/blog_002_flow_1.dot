@@ -1,0 +1,10 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="物理モデルで予報"];
+B [label="予報温度から観測温度・変位を計算"];
+C [label="観測との差を固定した共分散で配分"];
+D [label="温度・パラメータを更新"];
+A -> B;
+B -> C;
+C -> D;
+D -> A;
+}

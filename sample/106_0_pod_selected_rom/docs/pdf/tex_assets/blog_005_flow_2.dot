@@ -1,0 +1,9 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="5点の感度 S：5×1"];
+B [label="係数感度：(PΦ)⁺S：5×1"];
+C [label="全場感度：Φ(PΦ)⁺S：20,696×1"];
+D [label="セル座標と対応づけて分布を表示"];
+A -> B;
+B -> C;
+C -> D;
+}

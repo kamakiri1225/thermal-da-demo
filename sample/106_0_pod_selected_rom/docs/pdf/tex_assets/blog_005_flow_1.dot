@@ -1,0 +1,13 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="熱方程式をQ・hで微分"];
+B [label="5点温度と感度を同時積分"];
+C [label="PODで全セルの感度へ復元"];
+D [label="FrontISTR応答で変位感度へ"];
+E [label="ノイズで規格化して観測点を比較"];
+F [label="選んだ配置をEnKFで検証"];
+A -> B;
+B -> C;
+C -> D;
+D -> E;
+E -> F;
+}

@@ -1,0 +1,12 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="異なる温度・Qのメンバー"];
+B [label="全員を次の観測時刻へ予報"];
+C [label="各員の温度から変位も予測"];
+D [label="メンバー方向の平均・共分散"];
+E [label="観測との差で各員を更新"];
+A -> B;
+B -> C;
+C -> D;
+D -> E;
+E -> A;
+}

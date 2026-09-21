@@ -1,0 +1,11 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="OpenFOAM CHT\n固体20,696セルの温度履歴"];
+B [label="① POD(SVD)\n場の型(モード)を抽出"];
+C [label="② Q-DEIM\n代表5点を選定"];
+D [label="③ 5点でROMを組み校正\n残差0.014K"];
+E [label="④ 軽いROMでEnKF/OI\n単一ROMの前進積分が約31ms"];
+A -> B;
+B -> C;
+C -> D;
+D -> E;
+}
