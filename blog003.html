@@ -161,6 +161,70 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <style>
     html { max-width: none; }
@@ -186,10 +250,20 @@ href="#blog_003アンサンブルカルマンフィルタenkf-分身の散らば
 id="toc-blog_003アンサンブルカルマンフィルタenkf-分身の散らばりから共分散を作る">blog_003：アンサンブルカルマンフィルタ（EnKF）―
 「分身の散らばり」から共分散を作る</a>
 <ul>
+<li><a href="#読む前にoiから何を変えるのか"
+id="toc-読む前にoiから何を変えるのか">読む前に：OIから何を変えるのか</a></li>
 <li><a href="#アンサンブル分身とは" id="toc-アンサンブル分身とは">1.
 アンサンブル（分身）とは</a></li>
 <li><a href="#enkf-の手順1サイクル" id="toc-enkf-の手順1サイクル">2.
-EnKF の手順（1サイクル）</a></li>
+EnKF の手順（1サイクル）</a>
+<ul>
+<li><a href="#平均共分散コードを同じ向きで書く"
+id="toc-平均共分散コードを同じ向きで書く">2-1.
+平均・共分散・コードを同じ向きで書く</a></li>
+<li><a href="#平均を更新と全メンバーを更新の違い"
+id="toc-平均を更新と全メンバーを更新の違い">2-2.
+「平均を更新」と「全メンバーを更新」の違い</a></li>
+</ul></li>
 <li><a href="#手計算で-enkf-をやってみる2点分身4つ観測1点"
 id="toc-手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
 をやってみる（2点・分身4つ・観測1点）</a>
@@ -203,19 +277,18 @@ id="toc-散らばりから標本共分散を作る">3-2.
 <li><a href="#更新平均で見る" id="toc-更新平均で見る">3-4.
 更新（平均で見る）</a></li>
 </ul></li>
-<li><a href="#enkf-が-oi-より強いところ-発熱量-q-の同定"
-id="toc-enkf-が-oi-より強いところ-発熱量-q-の同定">4. EnKF が OI
-より強いところ ― 発熱量 <span class="math inline">\(Q\)</span>
-の同定</a></li>
+<li><a href="#発熱量qへ情報が伝わる仕組みと実計算の結果"
+id="toc-発熱量qへ情報が伝わる仕組みと実計算の結果">4.
+発熱量Qへ情報が伝わる仕組みと、実計算の結果</a></li>
 <li><a href="#その代わりのコスト" id="toc-その代わりのコスト">5.
 その代わりのコスト</a></li>
 <li><a href="#観測をどう増やすかいつ入れるか-romenkf-の実験2つ"
 id="toc-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
 観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</a>
 <ul>
-<li><a href="#観測を増やすほど精度が上がる温度1点2点変位2点"
-id="toc-観測を増やすほど精度が上がる温度1点2点変位2点">6-1.
-観測を増やすほど精度が上がる（温度1点→2点→＋変位2点）</a></li>
+<li><a href="#今回の条件では観測の追加で改善した温度1点2点変位2点"
+id="toc-今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
+今回の条件では観測の追加で改善した（温度1点→2点→＋変位2点）</a></li>
 <li><a href="#いつ観測するかで-q-と-h-の推定が変わる"
 id="toc-いつ観測するかで-q-と-h-の推定が変わる">6-2.
 「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
@@ -232,6 +305,56 @@ id="toc-参考元になった実装詳細">参考（元になった実装・詳�
 <h1
 id="blog_003アンサンブルカルマンフィルタenkf-分身の散らばりから共分散を作る">blog_003：アンサンブルカルマンフィルタ（EnKF）―
 「分身の散らばり」から共分散を作る</h1>
+<h2
+id="読む前にoiから何を変えるのか">読む前に：OIから何を変えるのか</h2>
+<p><strong>第2回の更新式を使いながら、共分散を毎回の予報メンバーから求める</strong>のがこの記事の主題です。
+OIでもQは更新できます。EnKFは、温度とQの関係が時間とともに変わることを標本共分散に反映しますが、正しい同定を保証するわけではありません。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>読む順番</th>
+<th>内容</th>
+<th>実験の区別</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>§1〜3</td>
+<td>4メンバー・温度2点の手計算</td>
+<td>説明用の数値例</td>
+</tr>
+<tr class="even">
+<td>§4〜5</td>
+<td>Qの更新と計算コスト</td>
+<td>104：実ソルバ5メンバー。106：ROM60メンバーを分けて読む</td>
+</tr>
+<tr class="odd">
+<td>§6</td>
+<td>観測の種類・位置・時間の比較</td>
+<td>106のROM実験。独立した実測での検証ではない</td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid"><code>flowchart LR
+ A[&quot;異なる温度・Qのメンバー&quot;] --&gt; B[&quot;全員を次の観測時刻へ予報&quot;]
+ B --&gt; C[&quot;各員の温度から変位も予測&quot;]
+ C --&gt; D[&quot;メンバー方向の平均・共分散&quot;]
+ D --&gt; E[&quot;観測との差で各員を更新&quot;]
+ E --&gt; A</code></pre>
+<p>更新する温度と、観測として使う変位を区別してください。106では状態は
+<span
+class="math inline">\(z=[T_0,\ldots,T_4,q_{\mathrm{scale}},h]^{\mathsf
+T}\)</span> 、 <span
+class="math inline">\(Q=15q_{\mathrm{scale}}\)</span> Wです。
+変位は温度から計算する観測予報であり、独立した状態として時間積分しません。
+ROMの <span class="math inline">\(h\)</span> は放熱コンダクタンス [W/K]
+です。ROMの構築と全場復元は<a
+href="blog_004_pod_selected_rom.md">第4回</a>へ進みます。</p>
 <p>第3回は <strong>アンサンブルカルマンフィルタ（EnKF）</strong>
 です。前回（blog_002）の OI は 背景共分散 <span
 class="math inline">\(B\)</span> を
@@ -239,9 +362,10 @@ class="math inline">\(B\)</span> を
 <blockquote>
 <p><strong>たくさんの”分身（アンサンブル）“を走らせ、その散らばりから共分散を毎回作り直す</strong></p>
 </blockquote>
-<p>のが特徴です。これで <strong>発熱量 <span
+<p>のが特徴です。これにより <strong>発熱量 <span
 class="math inline">\(Q\)</span>
-のような未知パラメータまで当てられる</strong>ようになります。 今回も
+と観測の共分散を予報から推定</strong>できます。推定精度は観測情報・モデル・初期分布・メンバー数に依存します。
+今回も
 <strong>節点を減らした具体例</strong>で、行列を手で追いながら理解します。</p>
 <blockquote>
 <p>OIとの一言の違い：<strong>OI は <span
@@ -286,6 +410,71 @@ class="math display">\[x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bi
 <p>更新後の分身の
 <strong>平均</strong>が推定値、<strong>散らばり</strong>が不確かさです。</p>
 <hr />
+<h3 id="平均共分散コードを同じ向きで書く">2-1.
+平均・共分散・コードを同じ向きで書く</h3>
+<p><span class="math inline">\(N\)</span> はメンバー数、 <span
+class="math inline">\(n\)</span> は状態数、 <span
+class="math inline">\(p\)</span> は観測数です。 <span
+class="math inline">\(m\)</span> はメンバー番号、 <span
+class="math inline">\(f\)</span> は予報、 <span
+class="math inline">\(a\)</span> は同化後を表します。観測摂動は <span
+class="math inline">\(\epsilon^{(m)}\sim\mathcal N(0,R)\)</span>
+、すなわち平均0・共分散Rの正規乱数です。</p>
+<p>プログラムでは<strong>行にメンバー、列に状態</strong>を並べます。</p>
+<p><span class="math display">\[
+Z_f=\begin{bmatrix}(z_f^{(1)})^{\mathsf T}\\\vdots\\(z_f^{(N)})^{\mathsf
+T}\end{bmatrix}\in\mathbb R^{N\times n},
+\quad Y_f\in\mathbb R^{N\times p}.
+\]</span></p>
+<p><span class="math inline">\(Y_f\)</span>
+の第m行は、そのメンバーの状態から計算した温度・変位の観測予報です。</p>
+<p><span class="math display">\[
+\bar z_f=\frac1N\sum_m z_f^{(m)},\quad
+\bar y_f=\frac1N\sum_m y_f^{(m)},\quad
+(dZ)_{m,:}=(z_f^{(m)}-\bar z_f)^{\mathsf T}.
+\]</span></p>
+<p><span class="math inline">\(dY\)</span>
+も同様に観測予報の平均を引きます。</p>
+<p><span class="math display">\[
+C_{zy}=\frac{dZ^{\mathsf T}dY}{N-1}\in\mathbb R^{n\times p},\qquad
+C_{yy}=\frac{dY^{\mathsf T}dY}{N-1}\in\mathbb R^{p\times p}.
+\]</span></p>
+<p>例えば成分ごとに書くと</p>
+<p><span
+class="math display">\[[C_{zy}]_{ij}=\sum_m\bigl(z_{f,i}^{(m)}-\bar
+z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).\]</span>
+平均を同じ標本から推定するので標本共分散はN−1で割ります。時間方向やセル方向の分散ではありません。
+106の温度2点＋変位2点なら <span
+class="math inline">\(Z_f:60\times7\)</span> 、 <span
+class="math inline">\(Y_f:60\times4\)</span> 、 <span
+class="math inline">\(C_{zy}:7\times4\)</span> 、 <span
+class="math inline">\(C_{yy}:4\times4\)</span> です。</p>
+<p><code>dacore/enkf.py</code>の主要計算は次のとおりです（ここでは偏差を拡大するインフレーションを省略）。</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>zbar <span class="op">=</span> Zf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ybar <span class="op">=</span> Yf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dZ <span class="op">=</span> Zf <span class="op">-</span> zbar</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>dY <span class="op">=</span> Yf <span class="op">-</span> ybar</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>C_zy <span class="op">=</span> dZ.T <span class="op">@</span> dY <span class="op">/</span> (<span class="bu">len</span>(Zf) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>C_yy <span class="op">=</span> dY.T <span class="op">@</span> dY <span class="op">/</span> (<span class="bu">len</span>(Zf) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> C_yy <span class="op">+</span> R</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Sは対称なので、S @ K.T = C_zy.T を解く。</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>gain_T <span class="op">=</span> np.linalg.solve(S, C_zy.T)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span><span class="bu">len</span>(Zf))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps <span class="op">-</span> Yf) <span class="op">@</span> gain_T</span></code></pre></div>
+<p>逆行列の記号は理論式に使いますが、コードは連立方程式を解きます。変位に基準値の切片がある場合も、<code>Yf</code>に基準値込みの観測予報を渡せば同じ式で更新できます。</p>
+<h3 id="平均を更新と全メンバーを更新の違い">2-2.
+「平均を更新」と「全メンバーを更新」の違い</h3>
+<p>更新式をN人分足してNで割ると、</p>
+<p><span class="math display">\[
+\bar z_a=\bar z_f+K(y-\bar y_f+\bar\epsilon),\qquad
+\bar\epsilon=\frac1N\sum_m\epsilon^{(m)}.
+\]</span></p>
+<p>各乱数の期待値は0でも有限Nの標本平均 <span
+class="math inline">\(\bar\epsilon\)</span>
+は一般に0ではありません。次の手計算は <span
+class="math inline">\(\bar\epsilon=0\)</span>
+の平均更新を説明します。実装では各員に異なる摂動を与え、更新後の散らばりも残します。その散らばりはモデルと有限標本に依存する推定であり、真の誤差そのものではありません。</p>
 <h2 id="手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
 をやってみる（2点・分身4つ・観測1点）</h2>
 <h3 id="分身の予報">3-1. 分身の予報</h3>
@@ -362,6 +551,10 @@ class="math display">\[x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bi
 </tr>
 </tbody>
 </table>
+<p>この手計算のCは温度2点の共分散（熱容量のCとは別）です。偏差行列は</p>
+<p><span
+class="math display">\[dZ=\begin{pmatrix}-3&amp;-2\\1&amp;1\\-1&amp;-1\\3&amp;2\end{pmatrix},\qquad
+C=\frac{dZ^{\mathsf T}dZ}{3}.\]</span></p>
 <p>標本共分散は <span class="math inline">\(C=\dfrac{1}{N-1}\sum_m
 \delta x^{(m)}\,\delta x^{(m)\mathsf T}\)</span> （ <span
 class="math inline">\(N=4\)</span> なので <span
@@ -396,6 +589,8 @@ class="math display">\[K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\
 =\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
 =\begin{pmatrix}0.987\\ 0.691\end{pmatrix}\]</span></p>
 <h3 id="更新平均で見る">3-4. 更新（平均で見る）</h3>
+<p>以下は観測摂動の平均を0とした計算です。有限メンバーの摂動観測法では、実際の平均には
+<span class="math inline">\(K\bar\epsilon\)</span> が加わります。</p>
 <p>観測 <span class="math inline">\(y=30\)</span> （真値 <span
 class="math inline">\(T_1=30\)</span> 付近）。予報平均のハズレは <span
 class="math inline">\(30-29=1\)</span> 。平均の更新は</p>
@@ -433,9 +628,8 @@ class="math inline">\(C\)</span> を分身から作った</strong>のが違い�
 さらに更新後は
 <strong>分身の散らばりが縮む</strong>（不確かさが減った、を表す）。</p>
 <hr />
-<h2 id="enkf-が-oi-より強いところ-発熱量-q-の同定">4. EnKF が OI
-より強いところ ― 発熱量 <span class="math inline">\(Q\)</span>
-の同定</h2>
+<h2 id="発熱量qへ情報が伝わる仕組みと実計算の結果">4.
+発熱量Qへ情報が伝わる仕組みと、実計算の結果</h2>
 <p>OI（blog_002）では、固定 <span class="math inline">\(B\)</span>
 のもとで <strong>発熱量 <span class="math inline">\(Q\)</span>
 が真値に届きにくい</strong>という弱点がありました （ <span
@@ -455,23 +649,25 @@ class="math inline">\(Q\)</span> と観測の相関</strong>
 <strong>加熱中・冷却中で変わる</strong>（流れ依存）。EnKF
 は毎サイクルこれを作り直す。</li>
 </ul>
-<p>だから観測の予測外れを <strong><span class="math inline">\(Q\)</span>
-にも正しく配分</strong>でき、 <span class="math inline">\(Q\)</span>
-が真値へ寄ります。 本研究の実ソルバEnKFでは、でたらめ初期から</p>
+<p>この相関を通じて観測との差を
+<strong>Qにも配分</strong>できます。以下は今回得られた結果であり、常に真値へ収束するという保証ではありません。
+本研究の実ソルバEnKFでは、でたらめ初期から</p>
 <ul>
 <li>全セル温度RMSE <strong>7.61 K → 0.011 K</strong></li>
 <li>発熱量 <strong><span class="math inline">\(Q\to14.93\)</span>
 W</strong>（真値15 W、誤差約0.5%）</li>
 </ul>
-<p>まで当てられました（OIの約9 Wと対照的）。下の図は ROM 版 EnKF での
-<span class="math inline">\(Q,h\)</span> 推定の収束です。</p>
+<p>という結果でした。これは<strong>104の実ソルバ・5メンバー・60秒ごと10更新</strong>の実験です。OIとの差には設定の違いも含まれ、手法一般の優劣を証明する比較ではありません。</p>
+<p><strong>ここから下の2図は別の実験です。</strong>
+106のROM・60メンバー・温度P2のみの同化で、変位観測は使いません。真値も同じROM、seed=20260913、30秒ごと20更新。
+<code>results/da_summary.yaml</code>では最終Q=17.08 W（真値15
+W）、h=0.02511 W/K（真値0.01535 W/K）です。104の14.93
+Wを示した図ではありません。</p>
 <figure>
 <img src="img/da_qh.png" alt="EnKFによるQ・hの推定" />
 <figcaption aria-hidden="true">EnKFによるQ・hの推定</figcaption>
 </figure>
-<p><em>発熱量 <span class="math inline">\(Q\)</span>
-が真値へ収束していく様子（ <span class="math inline">\(h\)</span>
-は主に冷却期に効くため収束はゆるやか）。</em></p>
+<p><em>温度P2のみを同化したROMのQ/h履歴。Qにもhにも誤差が残っている。hは壁面熱伝達率ではなくROMの放熱コンダクタンス。</em></p>
 <figure>
 <img src="img/da_rmse.png" alt="温度RMSEの収束" />
 <figcaption aria-hidden="true">温度RMSEの収束</figcaption>
@@ -488,17 +684,16 @@ W</strong>（真値15 W、誤差約0.5%）</li>
 <li>EnKF（5メンバー）：<strong>約13時間</strong>（予報が <span
 class="math inline">\(N\)</span> 倍）</li>
 </ul>
-<p>となります。<strong>「軽いが <span class="math inline">\(B\)</span>
-が硬い OI」対「重いが <span class="math inline">\(Q\)</span> まで当たる
-EnKF」</strong>というトレードオフです。 この重さを避けるために
-<strong>予報モデルを ROM に置き換える</strong>のが、106 の POD+Q-DEIM
-の役割でした （0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
+<p>となります。実ソルバを複数回進める計算負担と、共分散を予報に応じて更新できる利点の比較です。これらは既存実行例の全体時間で、同一条件の速度ベンチマークではありません。
+この重さを避けるために <strong>予報モデルを ROM
+に置き換える</strong>のが、106 の POD+Q-DEIM の役割でした
+（0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
 <hr />
 <h2 id="観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
 観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</h2>
 <p>軽いROMの上でEnKFを何度も回せるようになったので、観測設計の実験を2つ紹介します。</p>
-<h3 id="観測を増やすほど精度が上がる温度1点2点変位2点">6-1.
-観測を増やすほど精度が上がる（温度1点→2点→＋変位2点）</h3>
+<h3 id="今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
+今回の条件では観測の追加で改善した（温度1点→2点→＋変位2点）</h3>
 <p>まず
 <strong>どこで観測しているか</strong>（この種の図はDA結果とセットで必ず示します）:</p>
 <figure>
@@ -525,7 +720,7 @@ alt="段階比較の時系列" />
 <p><em>左＝同化に使った P2：どの構成でも真値に合う。中＝<strong>未観測の
 P0</strong>：温度1点（灰）は加熱期にずれる。
 右＝<strong>未観測の変位差</strong>
-Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ。同化に使った点が合うのは当然で、<strong>未観測の量で比べるのが公平</strong>です。</em></p>
+Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ。同化に使った点だけの評価では不十分で、<strong>未観測の量で比べるのが公平</strong>です。</em></p>
 <table>
 <thead>
 <tr class="header">
@@ -607,8 +802,7 @@ class="math inline">\(h\)</span> を診断</td>
 <tr class="odd">
 <td><strong>blog_003</strong></td>
 <td><strong>EnKF</strong></td>
-<td><strong>分身の散らばりから共分散を作り、 <span
-class="math inline">\(Q\)</span> まで同定／ただし重い</strong></td>
+<td><strong>予報から共分散を更新／Qの同定精度は条件に依存／実ソルバでは重い</strong></td>
 </tr>
 </tbody>
 </table>

@@ -249,6 +249,8 @@
 id="toc-blog_004enkfを軽くするrom-pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</a>
 <ul>
+<li><a href="#読む前に入力から最終結果まで"
+id="toc-読む前に入力から最終結果まで">読む前に：入力から最終結果まで</a></li>
 <li><a href="#なぜ-rom-が要るか-enkf-は実ソルバだと重すぎる"
 id="toc-なぜ-rom-が要るか-enkf-は実ソルバだと重すぎる">1. なぜ ROM
 が要るか ― EnKF は実ソルバだと重すぎる</a>
@@ -257,6 +259,8 @@ id="toc-なぜ-rom-が要るか-enkf-は実ソルバだと重すぎる">1. な�
 id="toc-大事な注意-romはcfdを本番ループでだけ置き換える">1-1. 大事な注意
 ― ROMはCFDを「本番ループ」でだけ置き換える</a></li>
 </ul></li>
+<li><a href="#記号の読み替えと行列サイズ"
+id="toc-記号の読み替えと行列サイズ">記号の読み替えと行列サイズ</a></li>
 <li><a href="#pod-の数式-なぜ-svd-で場の型が出るのか"
 id="toc-pod-の数式-なぜ-svd-で場の型が出るのか">2. POD の数式 ― なぜ SVD
 で場の「型」が出るのか</a>
@@ -366,6 +370,62 @@ id="toc-参考元になった実装詳細">参考（元になった実装・詳�
 <h1
 id="blog_004enkfを軽くするrom-pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</h1>
+<h2
+id="読む前に入力から最終結果まで">読む前に：入力から最終結果まで</h2>
+<p><strong>目的は、第3回のEnKFで毎回必要になる予報を軽くし、少数の温度状態から全温度場・変位まで復元することです。</strong>
+この記事では、既存のOpenFOAM温度履歴を入力にして、次の順にモデルを作ります。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>手順</th>
+<th>入力 → 出力</th>
+<th>担当する実装</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POD</td>
+<td>各セルの温度履歴 → 各セルの平均場・空間モード</td>
+<td><code>run/select_points_qdeim.py</code></td>
+</tr>
+<tr class="even">
+<td>Q-DEIM</td>
+<td>空間モード → 5代表セル</td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td>熱ROMの校正</td>
+<td>5セルの時刻歴 → 熱容量・結合・放熱係数</td>
+<td><code>run/build_calibrate_rom.py</code></td>
+</tr>
+<tr class="even">
+<td>予報・同化</td>
+<td>各員の5温度・発熱倍率・放熱係数 → 更新状態</td>
+<td><code>dacore/rom_general.py</code>、<code>dacore/enkf.py</code></td>
+</tr>
+<tr class="odd">
+<td>全場復元</td>
+<td>更新後5温度 → モード係数 → 全セル温度</td>
+<td>gappy-POD（§5）</td>
+</tr>
+<tr class="even">
+<td>変位復元</td>
+<td>モード係数 → 変位</td>
+<td>事前計算したFrontISTRモード応答（§7）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>5代表点は実際のセンサ5個を意味しません。</strong>
+代表点はROMの状態、観測点はその状態を補正するための測定位置です。
+同化する観測の数と位置は別に選びます。また、このROMはPODで熱方程式を直接射影したものではなく、POD/Q-DEIMで選んだ点に<strong>集中定数モデルを校正</strong>したものです。</p>
+<p>理論を追う順は <strong>§2のPOD → §3の手計算 → §4の点選択 →
+§5の全場復元 → §6の時間発展 → §7の変位</strong>。
+§2-5のクリロフ法は補足です。主筋を先に読む場合は§3へ進み、後から戻れます。式展開は省略せず残しています。</p>
 <p>前回までの OI（blog_002）と
 EnKF（blog_003）は、<strong>予報モデルを毎サイクル回す</strong>のが前提でした。
 ところが本物の予報モデルは <strong>OpenFOAM CHT ＋ FrontISTR</strong>
@@ -385,7 +445,7 @@ ROM（縮約モデル）に置き換える</strong>話です。ポイントは1�
     A[&quot;OpenFOAM CHT&lt;br/&gt;固体20,696セルの温度履歴&quot;] --&gt; B[&quot;① POD(SVD)&lt;br/&gt;場の型(モード)を抽出&quot;]
     B --&gt; C[&quot;② Q-DEIM&lt;br/&gt;代表5点を選定&quot;]
     C --&gt; D[&quot;③ 5点でROMを組み校正&lt;br/&gt;残差0.014K&quot;]
-    D --&gt; E[&quot;④ 軽いROMでEnKF/OI&lt;br/&gt;0-600sが約31ms&quot;]</code></pre>
+    D --&gt; E[&quot;④ 軽いROMでEnKF/OI&lt;br/&gt;単一ROMの前進積分が約31ms&quot;]</code></pre>
 <hr />
 <h2 id="なぜ-rom-が要るか-enkf-は実ソルバだと重すぎる">1. なぜ ROM
 が要るか ― EnKF は実ソルバだと重すぎる</h2>
@@ -400,8 +460,8 @@ ROM（縮約モデル）に置き換える</strong>話です。ポイントは1�
 1回で数時間〜数日。</li>
 </ul>
 <p>一方、この記事で作る <strong>POD選定5点ROM</strong>
-は、<strong>0→600秒の前進積分が約31ミリ秒</strong>（実測）。 分身200個 ×
-10サイクルでも数十秒で終わります。<strong>予報モデルをROMに差し替えるだけ</strong>で、
+は、<strong>0→600秒の前進積分が約31ミリ秒</strong>（実測）。
+この単一ROMの計測値は、全場復元・変位評価・図生成を含むEnKF一式の計算時間ではありません。<strong>予報モデルをROMに差し替えるだけ</strong>で、
 同じ EnKF/OI が桁違いに軽くなる、というのが狙いです。</p>
 <h3 id="大事な注意-romはcfdを本番ループでだけ置き換える">1-1. 大事な注意
 ― ROMはCFDを「本番ループ」でだけ置き換える</h3>
@@ -454,6 +514,73 @@ OpenFOAMのメリットが消えたのではなく、ROMという形に
 <strong>形状・境界条件・加熱シナリオが大きく変わると無効</strong>になり、CFDを回して作り直し／再校正が要ります。</li>
 </ul>
 <hr />
+<h2 id="記号の読み替えと行列サイズ">記号の読み替えと行列サイズ</h2>
+<p><strong>§2〜5の <span class="math inline">\(u\)</span>
+は温度場です。§7の <span class="math inline">\(\boldsymbol u\)</span>
+は変位です。</strong> 既存の式を追う際は、温度の <span
+class="math inline">\(u\)</span> をノートでは <span
+class="math inline">\(T\)</span>
+と書き換えて構いません。温度と変位を同じ物理量として扱わないでください。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>大きさ・単位</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(N,m,r\)</span></td>
+<td>20,696、121、5</td>
+<td>セル数、保存時刻数、採用モード数</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(S,X\)</span></td>
+<td><span class="math inline">\(N\times m\)</span> 、K</td>
+<td>温度履歴、各セルの時間平均を引いた履歴</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\bar u\)</span></td>
+<td><span class="math inline">\(N\times1\)</span> 、K</td>
+<td>各セル固有の時間平均温度</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U,\Sigma,V^{\mathsf T}\)</span></td>
+<td>薄いSVDで <span class="math inline">\(N\times m,m\times m,m\times
+m\)</span></td>
+<td>左特異ベクトル、特異値、右特異ベクトルの転置</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Phi=U_r\)</span></td>
+<td><span class="math inline">\(N\times r\)</span> 、無次元</td>
+<td>上位r本の空間モード</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(a(t)\)</span></td>
+<td><span class="math inline">\(r\times1\)</span> 、K</td>
+<td>時刻tで全セルが共有するモード係数</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P\)</span></td>
+<td><span class="math inline">\(5\times N\)</span> 、無次元</td>
+<td>選んだセルの行を取り出す選択行列</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(\mathsf T\)</span> は転置、 <span
+class="math inline">\(^+\)</span> はMoore–Penrose疑似逆行列、 <span
+class="math inline">\(\sigma_k\)</span> は特異値、 <span
+class="math inline">\(\lambda_k\)</span> は固有値です。
+本文の「r点P」は選んだ点集合を指します。行列として書くと <span
+class="math inline">\(U_{r,P}=P\Phi\)</span> です。
+PODの「エネルギー」は温度変動の二乗和であり、熱量[J]ではありません。この実装はセル体積の重みを付けないSVDです。</p>
+<p>平均場と基底は0〜600秒の121枚から作って固定します。300秒でヒータを切っても平均場だけを切り替えません。</p>
 <h2 id="pod-の数式-なぜ-svd-で場の型が出るのか">2. POD の数式 ― なぜ SVD
 で場の「型」が出るのか</h2>
 <h3 id="スナップショット行列-温度場の写真を横に並べる">2-1.
@@ -516,8 +643,21 @@ class="math inline">\(\varphi\)</span>
 \sum_{k=1}^{m}\bigl|\varphi^{\mathsf T}(u(t_k)-\bar u)\bigr|^2
 =\max_{\lVert\varphi\rVert=1}\ \varphi^{\mathsf T}\bigl(XX^{\mathsf
 T}\bigr)\varphi.\]</span></p>
-<p>ラグランジュ乗数 <span class="math inline">\(\lambda\)</span>
-で微分してゼロと置くと、<strong>固有値問題</strong>になります:</p>
+<p>制約 <span class="math inline">\(\varphi^{\mathsf
+T}\varphi=1\)</span> をラグランジュ乗数 <span
+class="math inline">\(\lambda\)</span> で組み込みます。</p>
+<p><span class="math display">\[
+\mathcal L=\varphi^{\mathsf T}XX^{\mathsf
+T}\varphi-\lambda(\varphi^{\mathsf T}\varphi-1).
+\]</span></p>
+<p>対称行列Aに対して <span
+class="math inline">\(\partial(\varphi^{\mathsf
+T}A\varphi)/\partial\varphi=2A\varphi\)</span> なので、</p>
+<p><span class="math display">\[
+\frac{\partial\mathcal L}{\partial\varphi}=2XX^{\mathsf
+T}\varphi-2\lambda\varphi=0.
+\]</span></p>
+<p>両辺を2で割って移項すると、次の固有値問題になります:</p>
 <p><span class="math display">\[\boxed{\ (XX^{\mathsf
 T})\,\varphi=\lambda\,\varphi\ }\]</span></p>
 <ul>
@@ -900,8 +1040,9 @@ u+U_r\,a.\]</span></p>
 class="math inline">\(a=(a_1,\dots,a_r)\)</span></strong> の <span
 class="math inline">\(r\)</span> 個だけ。 <span
 class="math inline">\(r\)</span> 個の未知を決めるには <strong><span
-class="math inline">\(r\)</span> 個の測定</strong>があればいい ――
-これが「少数点でROMを組める」理由です。 <span
+class="math inline">\(r\)</span>
+個の独立な測定</strong>があり、選点行列がフルランクなら係数を決められる
+―― これが「少数点でROMを組める」理由です。 <span
 class="math inline">\(r\)</span> 点 <span
 class="math inline">\(P\)</span>
 で測ると、その点でのモードの値だけを並べた <span
@@ -1261,11 +1402,28 @@ T_i=\bar u_i+\sum_k a_k\,\varphi_{k,i}\)</span> （各セルは
 <strong>自分のモード値</strong> <span
 class="math inline">\(\varphi_{k,i}\)</span> を使う）</li>
 </ol>
+<h4
+id="選択行列から復元式まで省略せずに書く">選択行列から復元式まで省略せずに書く</h4>
+<p><span class="math inline">\(T_r\)</span>
+は同化後の5代表点温度（全5点の直接測定値ではありません）。全場を <span
+class="math inline">\(T_{\rm full}\approx\bar u+\Phi a\)</span>
+と表すと、</p>
+<p><span class="math display">\[
+T_r=P T_{\rm full}\approx P\bar u+P\Phi a.
+\]</span></p>
+<p>平均を引いて <span class="math inline">\((P\Phi)a=T_r-P\bar
+u\)</span> を解き、全場の式へ戻すと、</p>
+<p><span class="math display">\[
+a=(P\Phi)^+(T_r-P\bar u),\qquad
+\widehat T_{\rm full}=\bar u+\Phi(P\Phi)^+(T_r-P\bar u).
+\]</span></p>
+<p><span class="math inline">\(P\Phi\)</span>
+は5×5。フルランクなら逆行列と疑似逆行列は一致します。一般には、選んだ点での残差二乗和を最小にする係数を疑似逆行列で求めます。観測点数不足やモード外の温度変化があれば、全場を一意・正確に復元できるとは限りません。</p>
+<p>「gappy」は全場の一部にしか値がない状態を指します。この処理は距離補間ではなく、学習した空間モードによる復元です。</p>
 <h4 id="この式の読み方-モードの割合で各点の温度が決まる">この式の読み方
 ―「モードの割合」で各点の温度が決まる</h4>
-<p>ご名答で、<strong>「その時刻のモードの割合 <span
-class="math inline">\(a_k\)</span>
-」で各点の温度が決まります</strong>。式の2つの部品は役割がはっきり違います:</p>
+<p><strong>各時刻のモード係数 <span class="math inline">\(a_k\)</span>
+が、固定したモードをどれだけ足すかを決めます</strong>。係数は負にもなり、合計1の割合ではありません。式の2つの部品は役割がはっきり違います:</p>
 <ul>
 <li><span class="math inline">\(a_k(t)\)</span> …
 <strong>モードの割合（混ぜ具合）</strong>。時刻ごとに1組の数（ <span
@@ -1378,7 +1536,7 @@ class="math inline">\(q_i=0\)</span> ）</li>
 <p><em>ノード＝POD＋Q-DEIM選定5点。各辺の太さが校正で決まったコンダクタンス
 <span class="math inline">\(K_{ij}\)</span> で、 <strong>P0–P2 が最強（
 <span class="math inline">\(K=17.5\)</span>
-）</strong>＝ヒータ側どうしが強く熱をやり取りする。
+W/K）</strong>＝ヒータ側どうしが強く熱をやり取りする。
 <strong>オレンジのP2がヒータ発熱ノード</strong>（ <span
 class="math inline">\(q\)</span> を投入）、そこから
 P0→P3→…と全ノードへ熱が伝わる。 底面 P3・P4
@@ -1533,6 +1691,8 @@ FrontISTR
 ですが、ここでは「<strong>温度をどう実形状へ渡すか</strong>」を数式で押さえます。</p>
 <h3 id="温度を実形状femメッシュへマッピング-逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</h3>
+<p><strong>ここからは空間の移し替えです。</strong>
+5点→全セルの復元は§5のgappy-PODで済んでいます。その後、CFDセルとFEM節点の位置の違いを補間します。以下はIDWの説明で、すべての図が同じ補間実装という意味ではありません。例えば未観測C/Dの検証スクリプトは最近傍セルを使います。各図の再現スクリプトで確認してください。</p>
 <p>CFD（またはPOD復元）の温度は <strong>セル中心 <span
 class="math inline">\(x_c\)</span></strong> の値。いっぽう FrontISTR
 が要るのは <strong>節点 <span
@@ -1568,6 +1728,20 @@ T_3}{w_1+w_2+w_3}
 class="math inline">\(d\to0\)</span>
 ）その重みが無限大になり、<strong>そのセル値がそのまま採用</strong>されます
 （＝最近傍フォールバック）。</p>
+<h4 id="次のfem式に出てくる記号">次のFEM式に出てくる記号</h4>
+<p><span class="math inline">\(\varepsilon_{\rm th}\)</span>
+は熱ひずみ、 <span class="math inline">\(\mathbf I\)</span>
+は3×3単位テンソル、 <span class="math inline">\(\Omega_e\)</span>
+は要素eの領域、 <span class="math inline">\(dV\)</span>
+は体積積分の微小体積です。 <span class="math inline">\(B\)</span>
+は節点変位からひずみを作る行列、 <span class="math inline">\(D\)</span>
+はひずみから応力を作る弾性行列、 <span class="math inline">\(f_{\rm
+th}\)</span> は等価熱荷重[N]、 <span class="math inline">\(K_s\)</span>
+は構造剛性[N/m]です。
+<strong>このBはOIの誤差共分散ではなく、このDはPODモード変位応答でもありません。</strong>
+テンソルの熱ひずみを実装のVoigt表記に直すと、 <span
+class="math inline">\(\alpha\Delta T(1,1,1,0,0,0)^{\mathsf T}\)</span>
+です。後半3成分はせん断ひずみです。</p>
 <h3 id="熱ひずみ-節点荷重-つり合い熱弾性fem">7-2. 熱ひずみ → 節点荷重 →
 つり合い（熱弾性FEM）</h3>
 <blockquote>
@@ -1599,6 +1773,7 @@ class="math inline">\(\alpha\Delta T\)</span>
 を集めて、つながりと拘束の中でつり合わせると変位が出る</strong>」。
 片側だけ熱いと伸びに差が出て、円筒が反ります。</p>
 <h3 id="変形アニメーション">7-3. 変形アニメーション</h3>
+<p><strong>表示の条件</strong>：<code>run/make_temp_to_disp_figs.py</code>は、保存した1つのFrontISTR変位形状をA−O時系列の振幅で拡大縮小して動画にしています。色も元の変位場を使用します。各フレームでFrontISTRを解き直した変形時刻歴ではなく、反りの変化を説明する模式アニメーションです。定量的な時刻歴は次節のグラフで確認します。</p>
 <figure>
 <img src="img/blog_deform_anim.gif" alt="熱変形のアニメーション" />
 <figcaption aria-hidden="true">熱変形のアニメーション</figcaption>
@@ -1618,17 +1793,18 @@ alt="FrontISTR真値の変位時系列" />
 A−O差（緑）＝反りは加熱中に増えてピーク約2.8µm、ヒータOFF後は温度が均されて差が消える。
 <strong>底面(z=0)は固定なので変位ゼロ</strong>、動くのは上ほど大きい。</em></p>
 <p>同化の精度を確認するときは、同じ量に
-<strong>FrontISTRの真値を黒太線</strong>で重ねます。次の図は
+<strong>ROM真値温度をFrontISTRの変位写像へ通した参照値を黒太線</strong>で重ねます。次の図は
 真値（黒）と、温度だけ／温度＋変位を観測したデータ同化後の推定値（色線）を同じ
 <span class="math inline">\(U_z(A)-U_z(O)\)</span>
-で比較したものです。薄い帯は5 seedのばらつきです。</p>
+で比較したものです。薄い帯は5
+seedのばらつきです。図内に「FrontISTR真値」とある場合も、この比較の真値はROM温度からFrontISTRのモード応答を用いて計算したものを指します。</p>
 <figure>
 <img src="img/blog_disp_timeseries_truth_vs_da.png"
-alt="FrontISTR真値とデータ同化後の変位差" />
+alt="ROM真値とデータ同化後温度から求めた変位差" />
 <figcaption
-aria-hidden="true">FrontISTR真値とデータ同化後の変位差</figcaption>
+aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差</figcaption>
 </figure>
-<p><em>黒太線が比較基準のFrontISTR真値。赤（温度2点＋変位2点）は真値に最も近く、
+<p><em>黒太線はROM真値から同じ変位写像で計算した参照値。独立したOpenFOAM温度履歴を毎時刻FrontISTRで解析した真値ではありません。赤（温度2点＋変位2点）は真値に最も近く、
 温度観測だけ（緑）は変位差に誤差が残る。これは変位を状態変数として直接積分した結果ではなく、
 同化後温度をgappy-PODで全場へ戻し、その温度をFrontISTRの熱弾性写像へ通して得た推定値です。</em></p>
 <p><strong>この図の正直な読み</strong>：変位差RMSEで比べると、温度センサの<strong>場所（低感度1.19
@@ -1636,8 +1812,7 @@ vs 高感度0.99 µm）や数（2点で0.93
 µm）の差はわずか</strong>です。桁で効くのは<strong>変位観測の追加</strong>（0.17
 µm＝約6倍改善）。
 これは「Q/hへの温度感度が空間的にほぼ一様」という直接感度の結果とも整合します。
-つまり
-<strong>温度センサは場所より数、変位を合わせたいなら変位センサ</strong>（それも高Wの場所へ）、が結論です。
+これは今回の配置・ノイズ・モデルでの結果です。<strong>一般に温度センサの場所より数が重要だと結論することはできません。</strong>
 （なお温度そのもののRMSEでは高感度0.62 vs 低感度1.04
 Kと約1.7倍の差があり、場所の効きは評価量に依存します。）</p>
 <p><strong>さらに大事な注意
@@ -1688,9 +1863,8 @@ class="math inline">\(\partial T/\partial Q\)</span> 、変位センサは
 <p>実務では、この温度→変位を毎回FrontISTRで解く代わりに、<strong>線形化した感度
 <span class="math inline">\(W=K_s^{-1}H_T\)</span></strong>（blog_002
 §4）で 温度から直接変位を出せます。 <span
-class="math inline">\(W\)</span> はこの <span class="math inline">\(K_s
-u=f_\mathrm{th}\)</span>
-を1度だけ解いて作った「温度→変位の地図」です。</p>
+class="math inline">\(W\)</span>
+は多数の温度入力に対する線形応答です。剛性行列の分解を再利用できますが、単一の熱荷重を1回解くだけで全Wが得られるわけではありません。POD版では必要なモード応答だけを事前に計算します。</p>
 </blockquote>
 <hr />
 <h2 id="まだ分かっていないこと-代表点選択の未解決問題">8.
@@ -1730,7 +1904,7 @@ Q-DEIMは行列式最大化の<strong>貪欲近似</strong>で、大域最適の
 この記事でやったこと</h2>
 <ol type="1">
 <li><strong>EnKFは実ソルバだと重い</strong> → 予報モデルを軽い ROM
-に置き換える（0-600sが約31ms）。</li>
+に置き換える（単一ROMの前進積分が約31ms）。</li>
 <li><strong>代表点は勘でなく POD＋Q-DEIM でデータから選ぶ</strong>。
 <ul>
 <li>POD：スナップショット行列を SVD して場の「型」とエネルギーを抽出（
