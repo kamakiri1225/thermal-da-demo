@@ -227,12 +227,10 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <style>
-    html { max-width: none; }
-    body { max-width: 1120px !important; padding: 1.2em 2.2em; line-height: 1.7; }
-    @media (max-width: 1180px){ body { max-width: 94% !important; } }
+    html body { max-width: 1120px !important; }
+    body { padding: 0 24px; }
     img { max-width: 100%; height: auto; }
-    table { display: block; overflow-x: auto; }
-    pre { overflow-x: auto; }
+    table { font-size: 0.95em; }
   </style>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
@@ -683,6 +681,206 @@ class="math inline">\(r\)</span>
 class="math inline">\(r\)</span>
 の全行列の中でフロベニウス誤差を最小</strong>にする （Eckart–Young
 の定理）＝「PODは最もエネルギー効率のよいモード分解」です。</p>
+<h4
+id="実際のコードは3行-np.linalg.svd-の中で何が起きているか">実際のコードは3行
+― <code>np.linalg.svd</code> の中で何が起きているか</h4>
+<p>ここまでが理屈ですが、<strong>実装は拍子抜けするほど短い</strong>です。本研究のモード分解は
+<code>run/select_points_qdeim.py</code>
+の次の3行がすべてです（専用ライブラリは使っていません）。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)                                <span class="co"># セルごとの時間平均</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]                             <span class="co"># 平均を引いて「変動だけ」にする</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)    <span class="co"># ← これがモード分解</span></span></code></pre></div>
+<p>出てくる3つの箱の意味は次のとおりです（本ケースの実サイズつき）。</p>
+<table>
+<thead>
+<tr class="header">
+<th>変数</th>
+<th>数学記号</th>
+<th>中身</th>
+<th>サイズ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Xc</code></td>
+<td><span class="math inline">\(X\)</span></td>
+<td>平均を引いた温度場（1列＝1時刻）</td>
+<td>20,696 × 121</td>
+</tr>
+<tr class="even">
+<td><code>U</code></td>
+<td><span class="math inline">\(U\)</span></td>
+<td><strong>PODモード＝空間の型</strong>（1列＝1モード）</td>
+<td>20,696 × 121</td>
+</tr>
+<tr class="odd">
+<td><code>S</code></td>
+<td><span class="math inline">\(\sigma_k\)</span></td>
+<td>各モードの<strong>大きさ</strong>（特異値）</td>
+<td>121</td>
+</tr>
+<tr class="even">
+<td><code>Vt</code></td>
+<td><span class="math inline">\(V^{\mathsf T}\)</span></td>
+<td>各モードの<strong>時間の動き方</strong></td>
+<td>121 × 121</td>
+</tr>
+</tbody>
+</table>
+<p><code>full_matrices=False</code> は「20,696 × 20,696 の巨大な <span
+class="math inline">\(U\)</span>
+を作らず、意味のある121列だけ計算する」という指定です。</p>
+<p><strong>中でやっていること</strong>を一言でいうと、行列を次のように<strong>足し算へ分解</strong>しています:</p>
+<p><span class="math display">\[X=\sigma_1\,u_1v_1^{\mathsf
+T}+\sigma_2\,u_2v_2^{\mathsf T}+\cdots+\sigma_r\,u_rv_r^{\mathsf
+T}\]</span></p>
+<p>各項が「<strong>空間の型 <span
+class="math inline">\(u_k\)</span></strong> × <strong>時間の動き <span
+class="math inline">\(v_k\)</span></strong> × <strong>大きさ <span
+class="math inline">\(\sigma_k\)</span></strong>」の1セット。 しかも
+<span class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
+と<strong>大きい順に並ぶ</strong>ので、頭からいくつか取れば良い近似になります。
+（アルゴリズムとしてはLAPACKの <code>gesdd</code>
+が呼ばれ、二重対角化してから反復で特異値を求めます。
+ただし<strong>使う側が知っておくべきは上の分解の意味だけ</strong>です。）</p>
+<p><strong>本当にそうなっているか、実データで確かめます。</strong>
+検証スクリプトを同梱しました:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python3</span> run/svd_explained.py</span></code></pre></div>
+<p>実行結果（20,696セル × 121時刻、0〜600秒）:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>確かめたこと</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① <span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span>
+に分解できているか</td>
+<td>相対誤差 <span class="math inline">\(1.2\times10^{-15}\)</span>
+＝<strong>厳密に分解</strong>（近似ではない）</td>
+</tr>
+<tr class="even">
+<td>② <span class="math inline">\(U\)</span> の列は <span
+class="math inline">\(XX^{\mathsf T}\)</span> の固有ベクトルか</td>
+<td><span class="math inline">\(XX^{\mathsf T}u_1\)</span> と <span
+class="math inline">\(\sigma_1^2u_1\)</span> の差 <span
+class="math inline">\(4.3\times10^{-16}\)</span>
+＝<strong>一致</strong></td>
+</tr>
+<tr class="odd">
+<td>③ 時間側の小行列（121×121）でも同じか</td>
+<td>特異値 1822.0, 540.7, 61.7, 12.0
+が<strong>完全一致</strong>（スナップショット法）</td>
+</tr>
+<tr class="even">
+<td>④ モードは正規直交か</td>
+<td><span class="math inline">\(U^{\mathsf T}U=I\)</span>
+（単位行列）</td>
+</tr>
+</tbody>
+</table>
+<p>②は §2-2 の固有値問題と、③は「巨大な <span
+class="math inline">\(XX^{\mathsf T}\)</span>
+を作らなくてよい」という主張の実証です。</p>
+<p><strong>何モードで足りるか</strong>（④ Eckart–Young の実測）:</p>
+<table>
+<thead>
+<tr class="header">
+<th>モード数</th>
+<th>場の相対誤差</th>
+<th>温度のRMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>28.62 %</td>
+<td>0.344 K</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td><strong>3.31 %</strong></td>
+<td><strong>0.040 K</strong></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>0.64 %</td>
+<td>0.008 K</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.03 %</td>
+<td>0.0004 K</td>
+</tr>
+</tbody>
+</table>
+<p>ここで<strong>注意が1つ</strong>あります。「2モードでエネルギー99.89
+%」と「相対誤差3.31 %」は矛盾しません。
+エネルギーは<strong>2乗の量</strong>なので、誤差は <span
+class="math inline">\(\sqrt{1-0.9989}=0.033\)</span> ＝ 3.3 %
+になります。
+<strong>エネルギー比は実際の誤差よりも良く見える</strong>ので、モード数を決めるときは
+温度のRMSE（ここでは0.04
+K）のような<strong>物理量での誤差も併せて見る</strong>のが安全です。</p>
+<p>最後に <code>Vt</code>（時間の動き）の中身も見ておきます。 <span
+class="math inline">\(\sigma_k v_k\)</span> が「モード <span
+class="math inline">\(k\)</span>
+が各時刻にどれだけ効いているか」です:</p>
+<table>
+<thead>
+<tr class="header">
+<th>時刻 [s]</th>
+<th style="text-align: right;">0</th>
+<th style="text-align: right;">50</th>
+<th style="text-align: right;">150</th>
+<th style="text-align: right;">300</th>
+<th style="text-align: right;">450</th>
+<th style="text-align: right;">600</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>モード1の係数</td>
+<td style="text-align: right;">401.9</td>
+<td style="text-align: right;">301.0</td>
+<td style="text-align: right;">117.1</td>
+<td style="text-align: right;">−146.7</td>
+<td style="text-align: right;">−120.3</td>
+<td style="text-align: right;">−110.0</td>
+</tr>
+<tr class="even">
+<td>モード2の係数</td>
+<td style="text-align: right;">114.3</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">−44.3</td>
+<td style="text-align: right;">−83.6</td>
+<td style="text-align: right;">42.8</td>
+<td style="text-align: right;">51.6</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>モード1</strong>は加熱の進行とともに単調に変化
+＝「<strong>全体の温度レベル</strong>」を担当</li>
+<li><strong>モード2</strong>は300秒（ヒータOFF）の前後で<strong>符号が反転</strong>
+＝「<strong>左右の偏りの向き</strong>」を担当
+（加熱中はヒータ側が熱い状態、冷却後はその偏りが解消・逆転していく様子）</li>
+</ul>
+<p>つまり <code>np.linalg.svd</code>
+は、<strong>121枚の温度場から「全体の昇温」と「左右の偏り」という2つの型を自動で見つけ出し、
+それぞれの時間変化まで分離してくれた</strong>わけです。物理の知識を一切与えずに、です。</p>
+<p>（符号には任意性があります。 <span class="math inline">\(u_k\)</span>
+と <span class="math inline">\(v_k\)</span> の両方を同時に反転しても同じ
+<span class="math inline">\(X\)</span> になるため、
+モードの色の向きが逆に出ることがあります。物理的な意味は変わりません。）</p>
 <h3 id="用語の整理-podsvd特異値分解の違い">2-4. 用語の整理 ―
 POD・SVD・特異値分解の違い</h3>
 <p>ここで混乱しやすい3語を整理します。まず大前提:</p>
@@ -1581,33 +1779,33 @@ class="math inline">\(T_p^{\mathrm{OF}}(t)\)</span> との差を最小化しま�
 \sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.\]</span></p>
 <p><strong>実際のコードはこれだけ</strong>です（<code>run/build_calibrate_rom.py</code>
 の要点）:</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。&quot;&quot;&quot;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        Y.append(T.copy())</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。&quot;&quot;&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        Y.append(T.copy())</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
 <p>やっていることは「 <span class="math inline">\(\theta\)</span>
 を少しずつ変えて <code>forward</code> の出力を OpenFOAM
 に近づける」だけ。 <code>least_squares</code> が残差の二乗和を最小にする
@@ -1616,9 +1814,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a hr
 <blockquote>
 <p><strong><code>Yobs</code> の正体＝OpenFOAM
 の結果</strong>です。実際には</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
 <p>のように、<strong><code>load_snapshots()</code>
 がCHT結果を読み込み</strong>、5点ぶんを取り出したものが校正の目標。
 OpenFOAMの結果は <strong>①POD＋Q-DEIM（点選び）</strong> と
