@@ -1,11 +1,11 @@
 [
   {
     "source": "blog_004_pod_selected_rom.md",
-    "sha256": "d517f0b866797ce90097422a1bccc01022d13fc826a1ddaa5a25d510ed0292ee",
-    "math": 369,
+    "sha256": "45a7d3536dfdc38116fd16158731383549891c858f68ff8b4db6e5c344998d78",
+    "math": 400,
     "images": 15,
     "flows": 1,
     "gif": 2,
-    "tables": 14
+    "tables": 17
   }
 ]
