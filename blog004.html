@@ -1008,6 +1008,152 @@ class="math inline">\(k\)</span>
 と <span class="math inline">\(v_k\)</span> の両方を同時に反転しても同じ
 <span class="math inline">\(X\)</span> になるため、
 モードの色の向きが逆に出ることがあります。物理的な意味は変わりません。）</p>
+<h4
+id="自分のケースで試す-cfd結果からpodまでの手順8ステップ">自分のケースで試す
+― CFD結果からPODまでの手順（8ステップ）</h4>
+<p>「行列を入れれば出る」とはいえ、<strong>CFDの結果をその行列にするまで</strong>が実務では一番手間です。
+本研究で実際に踏んだ手順を、そのまま再現できる形で書きます。</p>
+<p><strong>STEP 1.
+CFDを回し、スナップショットを等間隔で残す</strong></p>
+<p><code>system/controlDict</code>
+で出力を設定します（本研究の実際の値）:</p>
+<pre><code>application     chtMultiRegionFoam;
+endTime         600;
+writeControl    adjustableRunTime;
+writeInterval   5;        // 5秒ごとに出力
+writeFormat     ascii;    // 後で読むのでasciiが楽</code></pre>
+<p>→
+0〜600秒で<strong>121枚</strong>のスナップショットができます。ここでの注意は3つ:</p>
+<ul>
+<li><strong>等間隔で出す</strong>：PODは各スナップショットを<strong>等しい重み</strong>で扱うため、間隔が不揃いだと
+細かく出した時間帯が実質的に重くなります</li>
+<li><strong>ascii形式</strong>：binaryでも読めますがパーサが面倒になります（容量と引き換え）</li>
+<li><strong>並列計算なら <code>reconstructPar</code></strong>
+で1つに戻してから読む</li>
+</ul>
+<p><strong>STEP 2. セル中心座標（と体積）を書き出す</strong></p>
+<p>温度の値だけでは「どのセルがどこにあるか」が分かりません。後で図示・選点に使うので出しておきます:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellCentres <span class="at">-time</span> 5</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellVolumes <span class="at">-time</span> 5   <span class="co"># 体積重みを使う場合</span></span></code></pre></div>
+<p>→
+<code>5/solid/C</code>（セル中心座標）、<code>5/solid/V</code>（セル体積）が生成されます。</p>
+<p><strong>STEP 3. 温度場ファイルを読んで行列に積む</strong></p>
+<p>OpenFOAMのフィールドファイルは
+<code>internalField nonuniform List&lt;scalar&gt; 20696 ( ... )</code>
+という形式です。 正規表現で中身を取り出します（本研究の
+<code>read_foam_field()</code> の要点）:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> read_foam_field(path, ncell<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    txt <span class="op">=</span> <span class="bu">open</span>(path).read()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    seg <span class="op">=</span> txt[txt.find(<span class="st">&quot;internalField&quot;</span>):]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">&quot;uniform&quot;</span> <span class="kw">in</span> seg[:<span class="dv">40</span>] <span class="kw">and</span> <span class="st">&quot;nonuniform&quot;</span> <span class="kw">not</span> <span class="kw">in</span> seg[:<span class="dv">40</span>]:   <span class="co"># 均一場（初期条件など）</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> <span class="bu">float</span>(re.findall(<span class="vs">r&quot;uniform\s+([-\d.eE ]+);&quot;</span>, seg)[<span class="dv">0</span>])</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.full(ncell, v)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">int</span>(re.search(<span class="vs">r&quot;List&lt;\w+&gt;\s*\n?\s*(\d+)&quot;</span>, seg).group(<span class="dv">1</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    body <span class="op">=</span> seg[seg.find(<span class="st">&quot;(&quot;</span>)<span class="op">+</span><span class="dv">1</span>:]</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([<span class="bu">float</span>(x) <span class="cf">for</span> x <span class="kw">in</span> re.findall(<span class="vs">r&quot;[-+]?\d[\d.eE+-]*&quot;</span>, body)[:n]])</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">int</span>(d) <span class="cf">for</span> d <span class="kw">in</span> os.listdir(case) <span class="cf">if</span> d.isdigit())</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([read_foam_field(<span class="ss">f&quot;</span><span class="sc">{</span>case<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">/solid/T&quot;</span>, ncell) <span class="cf">for</span> t <span class="kw">in</span> times])</span></code></pre></div>
+<p><strong>ここが一番の落とし穴</strong>です:</p>
+<ul>
+<li><strong>初期時刻は <code>uniform</code>
+で書かれることがある</strong>（全セル同じ値なので行数がない）→
+上のように分岐が要る</li>
+<li><strong>全時刻でセルの並び順が同じ</strong>である必要がある（同じメッシュなら自動的に満たされる。
+ただし<strong>動的メッシュやリメッシュを使うと崩れる</strong>のでPOD不可）</li>
+<li><code>0.orig</code>
+のような<strong>数字でないディレクトリを除外</strong>する</li>
+</ul>
+<p><strong>STEP 4. 平均を引く</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)      <span class="co"># セルごとの時間平均</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]</span></code></pre></div>
+<p>引かないとモード1が「平均場そのもの」になり、変動の型が2番目以降にずれます。</p>
+<p><strong>STEP 5. SVDをかける</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)</span></code></pre></div>
+<p><code>full_matrices=False</code>
+を<strong>必ず付けます</strong>。付けないと <span
+class="math inline">\(N\times N\)</span>
+（20,696角）の行列を作ろうとして メモリが破綻します。</p>
+<p><strong>STEP 6. エネルギーを見てモード数を決める</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.cumsum(energy)[:<span class="dv">5</span>])      <span class="co"># → 0.918, 0.999, ...</span></span></code></pre></div>
+<p>ここで <strong>§2-3
+で述べた「エネルギーは2乗の量」の注意</strong>が効きます。 99.9
+%でも誤差は3.3
+%なので、<strong>物理量（温度RMSE）でも確認</strong>してから打ち切ります:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>]:</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    Xr <span class="op">=</span> (U[:, :r] <span class="op">*</span> S[:r]) <span class="op">@</span> Vt[:r]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(r, np.sqrt(((Xc <span class="op">-</span> Xr)<span class="op">**</span><span class="dv">2</span>).mean()), <span class="st">&quot;K&quot;</span>)</span></code></pre></div>
+<p><strong>STEP 7. モードを可視化して物理的に意味を確認する</strong></p>
+<p>数値だけで進めず、<strong>必ず絵にして確認</strong>します。 <span
+class="math inline">\(U\)</span> の各列は「全セル分の値」なので、
+そのままCFDのスカラー場として書き出せばParaViewで見られます。
+モード1が「全体の昇温」、モード2が「左右の偏り」のように<strong>物理的に読めるか</strong>をチェックします。
+読めない場合は、データの取り方（時間窓・出力間隔）を疑います。</p>
+<p><strong>STEP 8. 代表点を選ぶ（Q-DEIM）</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.linalg <span class="im">import</span> qr</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :r].T, pivoting<span class="op">=</span><span class="va">True</span>)   <span class="co"># 枢軸QR</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> piv[:r]                             <span class="co"># 先頭r個が代表点</span></span></code></pre></div>
+<p>詳細は §4 で説明します。</p>
+<p><strong>まとめ（つまずきやすい点）</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ステップ</th>
+<th>よくある失敗</th>
+<th>対策</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>出力間隔が不揃い</td>
+<td><code>adjustableRunTime</code> で等間隔に</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>並列計算のまま読む</td>
+<td><code>reconstructPar</code> してから</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>初期時刻が <code>uniform</code> で落ちる</td>
+<td>分岐して全セル同値で埋める</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>動的メッシュでセル順が変わる</td>
+<td>PODには使えない（固定メッシュ前提）</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>メモリ不足</td>
+<td><code>full_matrices=False</code></td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>エネルギーだけで打ち切る</td>
+<td>物理量の誤差でも確認</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>絵にせず数値だけで進む</td>
+<td>ParaViewでモードを必ず目視</td>
+</tr>
+</tbody>
+</table>
 <h4 id="この方法の限界-発表や査読で必ず聞かれる2点">この方法の限界 ―
 発表や査読で必ず聞かれる2点</h4>
 <p>ここまで「行列を入れればモードが出る」と書きましたが、<strong>手軽さの裏返しの限界</strong>が2つあります。
@@ -2017,33 +2163,33 @@ class="math inline">\(T_p^{\mathrm{OF}}(t)\)</span> との差を最小化しま�
 \sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.\]</span></p>
 <p><strong>実際のコードはこれだけ</strong>です（<code>run/build_calibrate_rom.py</code>
 の要点）:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。&quot;&quot;&quot;</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        Y.append(T.copy())</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。&quot;&quot;&quot;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        Y.append(T.copy())</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
 <p>やっていることは「 <span class="math inline">\(\theta\)</span>
 を少しずつ変えて <code>forward</code> の出力を OpenFOAM
 に近づける」だけ。 <code>least_squares</code> が残差の二乗和を最小にする
@@ -2052,9 +2198,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 <blockquote>
 <p><strong><code>Yobs</code> の正体＝OpenFOAM
 の結果</strong>です。実際には</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
 <p>のように、<strong><code>load_snapshots()</code>
 がCHT結果を読み込み</strong>、5点ぶんを取り出したものが校正の目標。
 OpenFOAMの結果は <strong>①POD＋Q-DEIM（点選び）</strong> と
