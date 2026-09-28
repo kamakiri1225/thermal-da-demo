@@ -227,12 +227,10 @@
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   <style>
-    html { max-width: none; }
-    body { max-width: 1120px !important; padding: 1.2em 2.2em; line-height: 1.7; }
-    @media (max-width: 1180px){ body { max-width: 94% !important; } }
+    html body { max-width: 1120px !important; }
+    body { padding: 0 24px; }
     img { max-width: 100%; height: auto; }
-    table { display: block; overflow-x: auto; }
-    pre { overflow-x: auto; }
+    table { font-size: 0.95em; }
   </style>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
@@ -1120,6 +1118,67 @@ alt="配置方法×推定対象の誤差表" />
 <p><em>温度2点のEnKF比較。<strong>感度最大＝近接2点は0.91
 Kと2.6倍悪化</strong>、散らす配置は0.35 K。
 今回の比較は観測の非冗長性の重要さを示唆しますが、Q-DEIMが全候補中で最適であることを証明するものではありません。</em></p>
+<p><strong>なぜ「感度が高い点を並べる」と負けるのか</strong>を、情報の重なりで測ってみます
+（<code>run/redundancy_check.py</code>）。場への効き（モード1の振幅）が大きい順に2点取る場合と、
+1点目から30 mm以上離して2点目を取る場合の比較です:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>感度最大の上位2点</th>
+<th>散らした2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>選ばれたセル</td>
+<td>13885, 13906</td>
+<td>13885, 4617</td>
+</tr>
+<tr class="even">
+<td>2点間の距離</td>
+<td><strong>1.6 mm</strong></td>
+<td>30.1 mm</td>
+</tr>
+<tr class="odd">
+<td>2点の温度変動の相関</td>
+<td><strong>+1.00000</strong></td>
+<td>+0.99740</td>
+</tr>
+<tr class="even">
+<td>観測行列の <span
+class="math inline">\(\lvert\det\rvert\)</span></td>
+<td><span class="math inline">\(5.9\times10^{-11}\)</span></td>
+<td><span class="math inline">\(1.5\times10^{-5}\)</span></td>
+</tr>
+<tr class="odd">
+<td>条件数</td>
+<td><strong>4,763,514</strong></td>
+<td><strong>16.2</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>感度順に素直に2点取ると、1.6
+mmしか離れていない隣どうしが選ばれます</strong>。
+温度変動の相関は1.00000
+――<strong>まったく同じことしか言わない2点</strong>です。
+その結果、観測行列の条件数が<strong>30万倍</strong>悪化し、2つの未知数を分離できなくなります。</p>
+<p>ここで面白いのは、<strong>散らした2点でも相関は0.997とかなり高い</strong>ことです。
+本ケースは「全体が一緒に昇温する」モード1が91.8
+%を占めるため、どの2点を取っても
+温度履歴は似た形になります。それでも<strong>条件数は16.2まで改善</strong>する
+―― つまり大事なのは「相関が低いこと」そのものではなく、
+<strong>わずかに違う成分（モード2以降）をきちんと拾えること</strong>だと分かります。</p>
+<p>これは §2 の <span class="math inline">\(\Delta\)</span>
+の言葉でも説明できます。2点目の価値は
+「1点目では説明できない残り」に比例するので、<strong>1点目とほぼ同じ点の価値はほぼゼロ</strong>。
+Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004
+§4-2）のは、まさにこの冗長性を避けるためです。</p>
 <h3 id="対象変位変位センサを高w点へ種類と場所が変わる">4-3.
 対象＝変位：変位センサを「高W点」へ（種類と場所が変わる）</h3>
 <figure>
