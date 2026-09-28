@@ -310,6 +310,131 @@ OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/svd_explained.py
 （符号には任意性があります。 $u_k$ と $v_k$ の両方を同時に反転しても同じ $X$ になるため、
 モードの色の向きが逆に出ることがあります。物理的な意味は変わりません。）
 
+#### 自分のケースで試す ― CFD結果からPODまでの手順（8ステップ）
+
+「行列を入れれば出る」とはいえ、**CFDの結果をその行列にするまで**が実務では一番手間です。
+本研究で実際に踏んだ手順を、そのまま再現できる形で書きます。
+
+**STEP 1. CFDを回し、スナップショットを等間隔で残す**
+
+`system/controlDict` で出力を設定します（本研究の実際の値）:
+
+```
+application     chtMultiRegionFoam;
+endTime         600;
+writeControl    adjustableRunTime;
+writeInterval   5;        // 5秒ごとに出力
+writeFormat     ascii;    // 後で読むのでasciiが楽
+```
+
+→ 0〜600秒で**121枚**のスナップショットができます。ここでの注意は3つ:
+
+- **等間隔で出す**：PODは各スナップショットを**等しい重み**で扱うため、間隔が不揃いだと
+  細かく出した時間帯が実質的に重くなります
+- **ascii形式**：binaryでも読めますがパーサが面倒になります（容量と引き換え）
+- **並列計算なら `reconstructPar`** で1つに戻してから読む
+
+**STEP 2. セル中心座標（と体積）を書き出す**
+
+温度の値だけでは「どのセルがどこにあるか」が分かりません。後で図示・選点に使うので出しておきます:
+
+```bash
+postProcess -region solid -func writeCellCentres -time 5
+postProcess -region solid -func writeCellVolumes -time 5   # 体積重みを使う場合
+```
+
+→ `5/solid/C`（セル中心座標）、`5/solid/V`（セル体積）が生成されます。
+
+**STEP 3. 温度場ファイルを読んで行列に積む**
+
+OpenFOAMのフィールドファイルは `internalField nonuniform List<scalar> 20696 ( ... )` という形式です。
+正規表現で中身を取り出します（本研究の `read_foam_field()` の要点）:
+
+```python
+def read_foam_field(path, ncell=None):
+    txt = open(path).read()
+    seg = txt[txt.find("internalField"):]
+    if "uniform" in seg[:40] and "nonuniform" not in seg[:40]:   # 均一場（初期条件など）
+        v = float(re.findall(r"uniform\s+([-\d.eE ]+);", seg)[0])
+        return np.full(ncell, v)
+    n = int(re.search(r"List<\w+>\s*\n?\s*(\d+)", seg).group(1))
+    body = seg[seg.find("(")+1:]
+    return np.array([float(x) for x in re.findall(r"[-+]?\d[\d.eE+-]*", body)[:n]])
+
+times = sorted(int(d) for d in os.listdir(case) if d.isdigit())
+X = np.column_stack([read_foam_field(f"{case}/{t}/solid/T", ncell) for t in times])
+```
+
+**ここが一番の落とし穴**です:
+
+- **初期時刻は `uniform` で書かれることがある**（全セル同じ値なので行数がない）→ 上のように分岐が要る
+- **全時刻でセルの並び順が同じ**である必要がある（同じメッシュなら自動的に満たされる。
+  ただし**動的メッシュやリメッシュを使うと崩れる**のでPOD不可）
+- `0.orig` のような**数字でないディレクトリを除外**する
+
+**STEP 4. 平均を引く**
+
+```python
+mean = X.mean(axis=1)      # セルごとの時間平均
+Xc   = X - mean[:, None]
+```
+
+引かないとモード1が「平均場そのもの」になり、変動の型が2番目以降にずれます。
+
+**STEP 5. SVDをかける**
+
+```python
+U, S, Vt = np.linalg.svd(Xc, full_matrices=False)
+```
+
+`full_matrices=False` を**必ず付けます**。付けないと $N\times N$ （20,696角）の行列を作ろうとして
+メモリが破綻します。
+
+**STEP 6. エネルギーを見てモード数を決める**
+
+```python
+energy = S**2 / (S**2).sum()
+print(np.cumsum(energy)[:5])      # → 0.918, 0.999, ...
+```
+
+ここで **§2-3 で述べた「エネルギーは2乗の量」の注意**が効きます。
+99.9 %でも誤差は3.3 %なので、**物理量（温度RMSE）でも確認**してから打ち切ります:
+
+```python
+for r in [1, 2, 3, 5]:
+    Xr = (U[:, :r] * S[:r]) @ Vt[:r]
+    print(r, np.sqrt(((Xc - Xr)**2).mean()), "K")
+```
+
+**STEP 7. モードを可視化して物理的に意味を確認する**
+
+数値だけで進めず、**必ず絵にして確認**します。 $U$ の各列は「全セル分の値」なので、
+そのままCFDのスカラー場として書き出せばParaViewで見られます。
+モード1が「全体の昇温」、モード2が「左右の偏り」のように**物理的に読めるか**をチェックします。
+読めない場合は、データの取り方（時間窓・出力間隔）を疑います。
+
+**STEP 8. 代表点を選ぶ（Q-DEIM）**
+
+```python
+from scipy.linalg import qr
+_, _, piv = qr(U[:, :r].T, pivoting=True)   # 枢軸QR
+points = piv[:r]                             # 先頭r個が代表点
+```
+
+詳細は §4 で説明します。
+
+**まとめ（つまずきやすい点）**
+
+| ステップ | よくある失敗 | 対策 |
+|---|---|---|
+| 1 | 出力間隔が不揃い | `adjustableRunTime` で等間隔に |
+| 1 | 並列計算のまま読む | `reconstructPar` してから |
+| 3 | 初期時刻が `uniform` で落ちる | 分岐して全セル同値で埋める |
+| 3 | 動的メッシュでセル順が変わる | PODには使えない（固定メッシュ前提） |
+| 5 | メモリ不足 | `full_matrices=False` |
+| 6 | エネルギーだけで打ち切る | 物理量の誤差でも確認 |
+| 7 | 絵にせず数値だけで進む | ParaViewでモードを必ず目視 |
+
 #### この方法の限界 ― 発表や査読で必ず聞かれる2点
 
 ここまで「行列を入れればモードが出る」と書きましたが、**手軽さの裏返しの限界**が2つあります。
