@@ -175,12 +175,21 @@
 <!-- 7 -->
 <section>
 <h2>課題① OIでは発熱量が当たらない</h2>
-<p style="flex:0 0 auto">実ソルバ（20,696セル）の双子実験で、共分散 \(B\) を固定した<strong>OI</strong>を実行した。</p>
+<p style="flex:0 0 auto">状態を<strong>拡大</strong>して \( x=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \) とし、共分散 \(B\) を固定したOIを実ソルバ（20,696セル）で実行した。</p>
+<div class="math" style="margin-bottom:4px">
+<div><b>\(B\) の中身</b>　\(B\) は<strong>状態ベクトルの誤差共分散</strong>。対角＝各量の不確かさ、非対角＝連動。
+温度は \(Q\) で決まる（ \(T_i=T_\mathrm{air}+s_iQ\) 、\(s_i=\partial T_i/\partial Q\) ）ので、
+\( B=\mathrm{diag}(\sigma_T^2,\dots,0)+\sigma_Q^2\,aa^{\mathsf T} \)、\( a=(s_1,\dots,s_5,1)^{\mathsf T} \)
+ <span class="arrow">→</span> <strong>温度と \(Q\) の相関 \( B_{TQ}=\sigma_Q^2 s \) </strong>が生まれる</div>
+<div><b>\(Q\) の逆推定</b>　温度しか測らなくても（ \(H\) の \(Q\) 成分は0）、ゲインの \(Q\) 行は非ゼロ：
+\( K_Q=\dfrac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}\;(\neq 0) \)
+　したがって \( Q^a=Q^b+K_Q\,(y-Hx^b) \) で \(Q\) が動く</div>
+</div>
 <div class="fig"><img src="../docs/img/oi_fullsolver_compare.png" alt="実ソルバOIの結果">
 <p class="cap">温度は真値に追従する（最終RMSE 0.090〜0.113 K）が、<strong>発熱量 \(Q\) は 8.8〜9.0 W</strong>（真値15 W）で頭打ち。
-観測ノイズ \(\sigma_T\) を振っても加熱期RMSEは0.479〜0.482 Kで<strong>ほぼ不変</strong></p></div>
-<div class="key" style="flex:0 0 auto">温度は合うのに \(Q\) が当たらない ＝ <strong>パラメータ調整では解決しない</strong><br>
-<span style="font-weight:400;font-size:.88em">原因：温度と \(Q\) を独立に見積もった固定 \(B\) には \( \mathrm{Cov}(T,Q)=0 \) が入っている。ゼロに何を掛けてもゼロ</span></div>
+\(\sigma_Q\) を4条件振っても改善しない</p></div>
+<div class="key" style="margin-top:0">\(B_{TQ}=\sigma_Q^2 s\) を<strong>決め打ちしている</strong>のが限界の正体<br>
+<span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を大きくしても\(Q\)は9 W付近で頭打ち</span></div>
 </section>
 
 <!-- 8 -->
