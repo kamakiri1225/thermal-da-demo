@@ -10,13 +10,15 @@
 再現: OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/make_timeseries_verification_fig.py
 """
 from __future__ import annotations
-import os, sys, json, importlib.util
+import os, sys, json, tempfile, importlib.util
 import numpy as np
 from scipy.linalg import qr
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 from dacore import plots as _p
 import matplotlib.pyplot as plt
+SAMPLE=os.path.dirname(ROOT)
+sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
 spec=importlib.util.spec_from_file_location('q', os.path.join(HERE,'select_points_qdeim.py'))
 q=importlib.util.module_from_spec(spec); spec.loader.exec_module(q)
 RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
@@ -55,7 +57,42 @@ def main():
         band=np.array([c for c in band if c not in pod])
         picks.append(int(band[np.argmax(dmin[band])]))
 
-    fig,axes=plt.subplots(1,4,figsize=(19.2,5.4))
+    # ── どこを測り、どこで検証したかの3D図（ParaView風）──
+    import pyvista as pv, vtk, cylinder_mesh
+    pv.OFF_SCREEN=True
+    try: pv.start_xvfb()
+    except Exception: pass
+    mesh=cylinder_mesh.build_cylinder_mesh(4,48,20,0.020,0.0375,0.1005)
+    coords=np.array([pt for _n,pt in mesh["nodes"]])
+    idr={nid:i for i,(nid,_x) in enumerate(mesh["nodes"])}
+    conn=[]
+    for _e,cc in mesh["elements"]: conn.append(8); conn.extend(idr[n] for n in cc)
+    ug=pv.UnstructuredGrid(np.array(conn),
+        np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
+    TMP=tempfile.mkdtemp()
+    pl=pv.Plotter(off_screen=True,window_size=(660,780))
+    pl.add_mesh(ug,color="#b9c6d6",opacity=0.22,show_edges=False)
+    for i,c in enumerate(pod):
+        pl.add_mesh(pv.Sphere(radius=0.0034,center=Cc[c]),color="#1F4E9C")
+        pl.add_point_labels([Cc[c]],[f"P{i}"],font_size=34,text_color="#1F4E9C",
+                            shape=None,always_visible=True,bold=True)
+    for k,c in enumerate(picks):
+        pl.add_mesh(pv.Sphere(radius=0.0034,center=Cc[c]),color="#C0392B")
+        pl.add_point_labels([Cc[c]],[f"V{k+1}"],font_size=34,text_color="#C0392B",
+                            shape=None,always_visible=True,bold=True)
+    pl.camera_position=[(0.26,-0.24,0.17),(0,0,0.05),(0,0,1)]
+    pl.set_background("white"); pl.camera.zoom(1.55)
+    img3d=pl.screenshot(return_img=True); pl.close()
+    msk=np.any(img3d[:,:,:3]<246,axis=-1)          # 白余白をトリムして大きく見せる
+    ys,xs=np.where(msk); pad=6
+    img3d=img3d[max(0,ys.min()-pad):ys.max()+pad, max(0,xs.min()-pad):xs.max()+pad]
+
+    fig=plt.figure(figsize=(21.0,6.1))
+    gs=fig.add_gridspec(1,5,width_ratios=[0.70,1,1,1,1],wspace=.30)
+    ax3=fig.add_subplot(gs[0]); ax3.imshow(img3d); ax3.axis("off")
+    ax3.set_title("青 P0〜P4＝測定する5点\n赤 V1〜V3＝検証点（測っていない）",
+                  fontsize=12.5, weight="bold")
+    axes=[fig.add_subplot(gs[j]) for j in range(1,5)]
     for ax,c in zip(axes[:3], picks):
         ax.axvspan(0,300,color="orange",alpha=.07)
         ax.plot(ts, X[c]-KC, color="black", lw=5.4, alpha=.38, label="OpenFOAM（真値）")
@@ -63,7 +100,8 @@ def main():
                 label="Q-DEIM 5点から復元")
         ax.plot(ts, worst[2][c]-KC, ":", color="#7a8899", lw=2.4,
                 label="ランダム5点（最悪）から復元")
-        ax.set_title(f"検証点 ({Cc[c][0]*1000:.0f}, {Cc[c][1]*1000:.0f}, {Cc[c][2]*1000:.0f}) mm\n"
+        ax.set_title(f"V{picks.index(c)+1}  ({Cc[c][0]*1000:.0f}, {Cc[c][1]*1000:.0f}, "
+                     f"{Cc[c][2]*1000:.0f}) mm\n"
                      f"5点から {dmin[c]*1000:.0f} mm　Q-DEIM誤差 "
                      f"{np.sqrt(((Xq[c]-X[c])**2).mean())*1000:.1f} mK",
                      fontsize=12.5, weight="bold")
@@ -88,8 +126,8 @@ def main():
     ax.tick_params(labelsize=10.5)
 
     fig.suptitle("5点だけで全温度場が本当に合うのか ― 上部・中央・下部の検証点を時刻歴で確認する",
-                 fontsize=15, weight="bold")
-    fig.tight_layout(rect=[0,0,1,0.90])
+                 fontsize=15.5, weight="bold", y=0.985)
+    fig.tight_layout(rect=[0,0,1,0.875])
     out=os.path.join(IMG,"timeseries_verification.png")
     fig.savefig(out, dpi=135); plt.close(fig)
     with open(os.path.join(RES,"timeseries_verification.json"),"w") as f:
