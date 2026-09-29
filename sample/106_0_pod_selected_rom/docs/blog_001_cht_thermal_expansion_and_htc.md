@@ -36,6 +36,141 @@ flowchart LR
 
 ---
 
+## 0. 背景 ― なぜ熱変形を推定したいのか
+
+技術の話に入る前に、**この研究が何の役に立つのか**を文献で押さえておきます。
+主張には**無料で読める出典**を付けます（有料しか根拠が無いものは、そう明記します）。
+
+### 0-1. 熱変位は加工誤差の最大の原因
+
+**Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G. (2024)**
+"Machine Tool Thermal Error Measurement and Prediction via Wireless Microscope",
+*Manufacturing Letters* **41**, 1440–1451（オープンアクセス）
+📄 全文無料: <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076>
+
+> "Thermal errors can contribute **up to 75 percent** of the overall machining errors of a machined part."
+
+同じ数字は **Bünger, A. et al. (2023)** arXiv:2306.12736（📄 <https://arxiv.org/abs/2306.12736>）でも
+「Mayr et al., 2012 によれば熱誤差は最終製品の製造誤差の **75 %** を占める」と引用されています。
+
+### 0-2. 対策は「回避」と「補償」の2つ
+
+同じく Li et al. (2024) より:
+
+> "In general, there are two methods for thermal error reduction:
+> **thermal error avoidance** and **thermal error compensation**."
+
+> "**Thermal error avoidance is typically a more costly solution than thermal error compensation**
+> and is more sensitive to modeling errors and unknown disturbances."
+
+**回避**＝低膨張材料・潤滑や冷却の最適化で、機械を温度変化に鈍感にする。
+**補償**＝温度から変形を予測し、その分だけ指令位置をずらす。
+**コスト面から補償が実務の主役**、というのが文献の立場です。
+
+補償が何をしているかも、同論文が明快に書いています:
+
+> "thermal error compensation is normally based on a **predictive model established by the thermal
+> error measurement** of a machine tool."
+
+> "employ a **predictive error model, which are inverted to determine compensation amounts**.
+> Common thermal error models include **least-square regression, finite element, neural network,
+> gray system**, etc."
+
+つまり「**多点の温度と刃先変位を実測 → 関係をモデル化 → モデルを逆に使って補正量を出す**」。
+
+### 0-3. メーカー各社の実装
+
+> ⚠️ 各社の**公開情報（製品ページ）**に基づく。数値は各社の公称値。
+
+| | **オークマ** | **ヤマザキマザック** | **DMG MORI** | **牧野フライス** |
+|---|---|---|---|---|
+| 技術名 | サーモフレンドリーコンセプト<br>TAS-C / TAS-S | AI Thermal Shield | Spindle Growth Sensor | （個別技術の集合） |
+| **一言でいうと** | **変形を予測しやすい形に設計してから推定** | **学習で補正を育てる** | **変位を直接測って直す** | **そもそも熱を入れない** |
+| 特徴的な入力 | **送り軸の位置情報** | **クーラントON/OFF**・機械位置 | **主軸伸びの実測** | **熱伝導の時間遅れ** |
+| ハード側 | 熱変形の単純化構造 | 全軸ボールねじ軸冷却 | 冷却リニアガイド | 軸芯＋ジャケット冷却、断熱カバー |
+| 公称性能 | 127機種中83機種・5万台超 | 室温8 ℃変化で**6 µm**維持 | 長期安定精度 | ミクロンオーダーの金型加工 |
+
+🔗 [オークマ](https://www.okuma.co.jp/onlyone/thermo/)／[マザック](https://www.mazak.com/jp-ja/technology/accuracy/)／[DMG MORI](https://en.dmgmori.com/products/machines/milling/vertical-milling/nvx/nvx-5100)／[牧野](https://www.makino.co.jp/ja-jp/)
+
+**TAS** ＝ Thermo Active Stabilizer（読み：ティー・エー・エス）。
+**-C** は Construction（環境熱変位制御）、**-S** は Spindle（主軸熱変位制御）。
+
+**オークマが他社と違う点**は、熱を抑えるのではなく
+**「熱変形の単純化構造」で変形そのものを予測しやすい形に設計している**こと。
+機械とCNC（OSP）を両方自社で作っているため、構造設計と補正を一体で最適化できます。
+本研究の言葉でいえば、**場の低次元性を設計変数にしている**ことになります。
+
+**補正のタイミング**：事前に予測モデルを作り、**運転中はCNCが温度を常時読んでオフセットを
+更新し続ける**（加工の合間に測るのではない）。FANUCも2022年に「AI熱変位補正」を発表し、
+多点温度入力用のI/Oユニットを提供しています。
+
+### 0-4. しかし「温度が合っても変形が合う」とは限らない
+
+ここが本研究の動機です。**Bünger et al. (2023)**（📄 無料 <https://arxiv.org/abs/2306.12736>）:
+
+> "the accuracy of the **TCP prediction depends highly on the accuracy of the model parameters,
+> such as heat exchange parameters, and the initial temperature**"
+
+理由は3つあります。
+
+1. **効くのは温度そのものではなく勾配**。柱の上下にわずかな温度差があるだけで曲げが生じ、
+   主軸先端では**てこで拡大**される。「平均温度が合っている」ことは何の保証にもならない。
+2. **熱伝達率を直接測る計測器が存在しない**。
+   - 📄 <https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/>（2025、無料）
+     … CHTCを直接測る専用計測器が無く、熱流束センサや赤外サーモグラフィでも測れない
+   - 📄 <https://www.mdpi.com/2075-1702/9/9/184>（*Machines* 2021、オープンアクセス）
+     … FEMの精度は熱源・熱伝達係数・境界条件の定義に依存するが、汎用的な定義は困難
+3. **標準試験は実運転を模擬していない**。**ISO 230-3:2020**（📄 無料プレビューに Scope 全文:
+   <https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf>）
+   が規定するのは ETVE（環境温度変動）・主軸回転・直線軸・回転軸の4試験ですが、規格自身が:
+
+   > "**The test conditions described in this document are not intended to simulate the normal
+   > operating conditions**... For example, **use of coolants can significantly affect the actual
+   > thermal behaviour**... these tests are considered only as the **preliminary tests**"
+
+> **ゆえに：限られた実測から境界条件ごと補正し、熱変形そのものを推定する枠組みが要る。**
+> それが本シリーズで作るものです。
+
+### 0-5. 計測の方法（間接法と直接法）
+
+| | **間接法** | **直接法** |
+|---|---|---|
+| 測るもの | **温度** | **刃先とワークの相対変位** |
+| 道具 | 熱電対、測温抵抗体、**サーマルカメラ** | レーザ干渉計、静電容量センサ、**タッチプローブ** |
+| 変位の求め方 | 温度→変形モデルで予測 | そのまま実測 |
+| 短所 | **モデルの精度に依存** | **多点測定に時間がかかる**（加工を止める） |
+
+**タッチプローブ**とは、主軸に装着する接触式の測定器です。先端の球が対象に**触れた瞬間に
+信号を出す**ので、そのときの機械座標から位置が分かります。熱変位の測定では
+**基準球を定盤に固定**しておき、一定時間ごとに測って**見かけの位置の移動量**を読みます。
+機械に元から付いていることが多く追加投資が小さい一方、**測るたびに加工を止める**必要があります。
+
+**カメラでも測れます**。Li et al. (2024)（上記、無料）は**主軸にワイヤレス顕微鏡**を付け、
+テーブルに貼った**基準マーク**（フェムト秒レーザ加工、楕円格子350 µm間隔、
+行・列の番号付き）を撮影して画像解析で3方向の変位を出しました。
+精度は「**機械の位置決め分解能の4倍以内**、多くは2倍以内」と報告されています。
+
+### 0-6. この分野の最新研究（2023〜2025）
+
+| 論文 | 内容 | 無料 |
+|---|---|---|
+| Teshima et al. (2024) *CIRP JMST* **55**, 403–410<br>🔗 <https://doi.org/10.1016/j.cirpj.2024.10.015> | 温度→TCP変位の**ROM**を作り、回帰係数＝温度感度として**センサ配置の指針**を示す。「最適な点数と配置を決める方法が無かった」と問題提起 | ❌ |
+| Ando et al. (ICTIMT2025)<br>🔗 <https://doi.org/10.1007/978-3-032-01194-7_31> | 上の続報。**伝達関数行列**と**温度感度分布**で配置を決める | ❌ |
+| Bünger et al. (2023) arXiv:2306.12736<br>📄 <https://arxiv.org/abs/2306.12736> | **初期温度場**をベイズ逆問題で推定し、**事後分散**を低ランク／テンソルトレイン近似で高速評価。「配置の評価は最適配置の前提」 | ✅ |
+| Li et al. (2024) *Manufacturing Letters* **41**<br>📄 <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076> | **ワイヤレス顕微鏡**で熱変位を直接測る新手法 | ✅ |
+| Coelho et al. (2025) arXiv:2510.03261<br>📄 <https://arxiv.org/abs/2510.03261> | 誤差ではなく**温度・熱流束の場そのもの**をNNで予測。6アーキテクチャをベンチマーク | ✅ |
+| Peet (2019) *Proc. SPIE* **11158**<br>🔗 <https://doi.org/10.1117/12.2532755> | **赤外線シグネチャ**監視のため、気象データのみを入力にFEM熱収支＋**カルマンフィルタ**で表面温度分布を実時間推定 | ❌ |
+
+**読み取れる流れ**：①誤差の直接予測から**場の予測**へ、②**センサ配置**が独立したテーマに、
+③**測れない境界条件を推定する**方向（CHTCのソフトセンサ等）、④**測定の低コスト化**。
+Peet (2019) が示すように、**熱の問題にデータ同化を持ち込む発想は分野の外では既に実用検討**されています。
+
+**本シリーズの位置づけ**：この3つの潮流（場の推定・配置設計・境界条件の推定）の交点にあり、
+さらに**OSSだけで一気通貫に実装して公開**している点が特徴です。
+先行研究との具体的な差分は blog_005 で扱います。
+
+---
+
 ## 手書きで追うための記号と単位
 
 | 記号 | 意味 | 単位 |
