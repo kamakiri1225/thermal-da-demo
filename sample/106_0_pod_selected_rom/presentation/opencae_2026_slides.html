@@ -101,42 +101,51 @@
 <!-- 4 -->
 <section>
 <h2>データ同化とは</h2>
-<div class="key">シミュレーションと実測を、それぞれの「確からしさ」で重み付けして融合し、<br>
-<strong>測っていない量まで推定する</strong>枠組み</div>
-<ul>
-<li>シミュレーションは<em>全点の値が出る</em>が、境界条件が不確かで<strong>真値からずれる</strong></li>
-<li>実測は<em>正しい</em>が、<strong>数点しか測れない</strong></li>
-<li>両者を誤差の大きさで重み付けして合成 <span class="arrow">→</span> 未観測の温度・変形、測れない発熱量・熱伝達率まで推定できる</li>
-</ul>
-<p style="font-size:.7em;text-align:center;margin-top:18px">
-更新式はたった1本： <span style="font-size:1.25em">\( x^a = x^b + K\,(y - Hx^b) \)</span></p>
-<table style="width:82%;margin:6px auto 0">
-<tr><th>記号</th><th>意味</th></tr>
-<tr><td>\(x^b\) / \(x^a\)</td><td>同化前（予報）／同化後の状態</td></tr>
-<tr><td>\(y - Hx^b\)</td><td>予報のハズレ（測ったら予報と何度違ったか）</td></tr>
-<tr class="hi"><td>\(K\)</td><td><strong>カルマンゲイン</strong>＝ハズレを各点にどう配分するかの重み</td></tr>
+<div class="two">
+<div style="flex:1.42">
+<img src="../docs/img/da_cycle.png" alt="データ同化のサイクル" style="max-height:340px">
+<p class="cap">実際のEnKF計算。予報（青破線）は時間とともに真値から離れ分散も広がるが、<br>観測が来るたびに解析（赤）が引き戻し、分散が縮む</p>
+</div>
+<div>
+<div class="key" style="font-size:.66em">シミュレーションと実測を<br>それぞれの<strong>確からしさ</strong>で<br>重み付けして融合し、<br><strong>測っていない量まで推定</strong>する</div>
+<table style="font-size:.52em">
+<tr><th>段階</th><th>すること</th></tr>
+<tr><td><em>予報</em></td><td>モデルで時間を進める<br>→ <strong>分散が増える</strong></td></tr>
+<tr><td><em>解析</em></td><td>観測で引き戻す<br>→ <strong>分散が減る</strong></td></tr>
 </table>
-<p style="font-size:.6em;text-align:center;color:#556;margin-top:8px">
-\(K\) は<em>背景誤差共分散 \(B\)</em> から決まる。\(B\) が「点どうしの連動」を持つので、<strong>測っていない点にも補正が届く</strong></p>
+<p style="font-size:.55em;color:#556;margin-top:6px">シミュレーションは<em>全点</em>出るがずれる。実測は<em>正しい</em>が数点しかない。</p>
+</div></div>
+<p style="text-align:center;font-size:.72em;margin-top:6px">
+根拠は<strong>ベイズの定理</strong>： \( \underbrace{p(x\mid y)}_{\text{解析}} \propto \underbrace{p(y\mid x)}_{\text{観測の尤度}}\;\underbrace{p(x)}_{\text{予報}} \)</p>
+<p style="text-align:center;font-size:.66em;color:#1F4E9C">ガウス分布なら、この最大化は1本の更新式になる：
+<span style="font-size:1.15em">\( x^a = x^b + K\,(y - Hx^b), \quad K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1} \)</span></p>
+<div class="foot">\(B\)＝背景誤差共分散（点どうしの連動）／\(R\)＝観測誤差。\(B\) があるから<strong>測っていない点にも補正が届く</strong></div>
 </section>
 
 <!-- 5 -->
 <section>
-<h2>どの手法を使うか</h2>
-<div class="fig tall"><img src="../docs/img/da_methods_map.png" alt="手法マップとEnKF vs PF"></div>
-<div class="two" style="margin-top:6px">
-<div>
-<table>
-<tr><th>手法</th><th>本研究では</th></tr>
-<tr class="hi"><td><strong>OI（最適内挿）</strong></td><td>使う（仕組みの理解・実ソルバ検証）</td></tr>
-<tr class="hi"><td><strong>EnKF</strong></td><td>使う（本番・パラメータ同時推定）</td></tr>
-<tr><td>粒子フィルタ</td><td>試したが不採用</td></tr>
-<tr><td>変分法（4D-Var）</td><td>随伴が必要。対象外</td></tr>
-</table></div>
-<div><div class="key" style="font-size:.66em">粒子フィルタは400粒子でも<br>
-<strong>有効粒子数が1.02個</strong>まで縮退<br>
-＝約2万次元では次元の呪い<br>
-<span style="color:#1b2430;font-weight:400">熱伝導は線形・誤差はガウス <span class="arrow">→</span> カルマン系で十分</span></div></div>
+<h2>データ同化の種類と、今回の選択</h2>
+<table style="font-size:.53em">
+<tr><th style="width:11%">分類</th><th style="width:15%">手法</th><th>考え方</th><th style="width:23%">特徴</th></tr>
+<tr><td rowspan="4"><strong>逐次<br>データ同化</strong><br><span style="font-size:.85em;color:#556">観測が来るたびに<br>その場で更新</span></td>
+    <td class="hi" style="background:#fff3f0"><strong>OI</strong><br>（最適内挿）</td>
+    <td>共分散 \(B\) を<em>固定</em>して更新式を1回解く</td>
+    <td>最も軽い・仕組みが明快<br><strong>パラメータ推定は苦手</strong></td></tr>
+<tr><td>カルマンフィルタ</td><td>\(B\) を線形モデルで時間発展させる</td><td>線形・ガウスなら最適<br>高次元では共分散が巨大</td></tr>
+<tr><td class="hi" style="background:#fff3f0"><strong>EnKF</strong><br>（アンサンブル）</td>
+    <td>多数の<em>分身</em>の散らばりから \(B\) を作る</td>
+    <td>高次元の場に強い<br><strong>パラメータも同時推定できる</strong></td></tr>
+<tr><td>粒子フィルタ</td><td>重み付き粒子で分布そのものを表す</td><td>非ガウス・多峰でもOK<br><strong>高次元で粒子が縮退</strong></td></tr>
+<tr><td rowspan="2"><strong>変分法</strong><br><span style="font-size:.85em;color:#556">時間窓全体を<br>まとめて最適化</span></td>
+    <td>3D-Var</td><td>ある時刻の評価関数 \(J(x)\) を最小化</td><td>共分散を陽に持たなくてよい</td></tr>
+<tr><td>4D-Var</td><td>時間窓全体で \(J\) を最小化</td><td>精度が高い<br><strong>随伴コードの実装が必要</strong></td></tr>
+</table>
+<div class="two" style="margin-top:8px">
+<div><div class="key" style="font-size:.64em">本研究では <strong>OI</strong> と <strong>EnKF</strong> を<br>
+OpenFOAM ＋ FrontISTR に適用した<br>
+<span style="color:#1b2430;font-weight:400">熱伝導は線形・誤差はガウス <span class="arrow">→</span> 変分法の随伴は不要、粒子フィルタの利点も活きない</span></div></div>
+<div><img src="../docs/img/da_methods_map.png" alt="EnKF vs PF" style="max-height:170px">
+<p class="cap">粒子フィルタは400粒子でも<strong>有効粒子数1.02個</strong>まで縮退（約2万次元）</p></div>
 </div>
 </section>
 
