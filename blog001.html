@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_001：CHT熱膨張＋熱伝達率</title>
+  <title>blog_001：OpenFOAM＋FrontISTR で熱流体固体連成→熱膨張</title>
   <style>
     html {
       color: #1a1a1a;
@@ -226,11 +226,12 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  
   <style>
-    html body { max-width: 1120px !important; }
-    body { padding: 0 24px; }
-    img { max-width: 100%; height: auto; }
-    table { font-size: 0.95em; }
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
   </style>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
@@ -239,7 +240,8 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">blog_001：CHT熱膨張＋熱伝達率</h1>
+<h1 class="title">blog_001：OpenFOAM＋FrontISTR
+で熱流体固体連成→熱膨張</h1>
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
@@ -251,6 +253,27 @@ id="toc-blog_001openfoamfrontistr-で熱流体固体連成-熱膨張をやって
 <ul>
 <li><a href="#この記事と-enkf-の関係"
 id="toc-この記事と-enkf-の関係">この記事と EnKF の関係</a></li>
+<li><a href="#背景-なぜ熱変形を推定したいのか"
+id="toc-背景-なぜ熱変形を推定したいのか">0. 背景 ―
+なぜ熱変形を推定したいのか</a>
+<ul>
+<li><a href="#熱変位は加工誤差の最大の原因"
+id="toc-熱変位は加工誤差の最大の原因">0-1.
+熱変位は加工誤差の最大の原因</a></li>
+<li><a href="#対策は回避と補償の2つ" id="toc-対策は回避と補償の2つ">0-2.
+対策は「回避」と「補償」の2つ</a></li>
+<li><a href="#メーカー各社の実装" id="toc-メーカー各社の実装">0-3.
+メーカー各社の実装</a></li>
+<li><a href="#しかし温度が合っても変形が合うとは限らない"
+id="toc-しかし温度が合っても変形が合うとは限らない">0-4.
+しかし「温度が合っても変形が合う」とは限らない</a></li>
+<li><a href="#計測の方法間接法と直接法"
+id="toc-計測の方法間接法と直接法">0-5.
+計測の方法（間接法と直接法）</a></li>
+<li><a href="#この分野の最新研究20232025"
+id="toc-この分野の最新研究20232025">0-6.
+この分野の最新研究（2023〜2025）</a></li>
+</ul></li>
 <li><a href="#手書きで追うための記号と単位"
 id="toc-手書きで追うための記号と単位">手書きで追うための記号と単位</a></li>
 <li><a href="#題材片側だけ温められる中空円筒"
@@ -353,6 +376,289 @@ EnKF を詳しく 説明するための正解値（synthetic
 truth）になります。</strong> EnKF の予報・観測摂動・共分散・
 カルマンゲイン・更新式は、blog_002（OI）および EnKF
 解説記事で独立に導出します。</p>
+<hr />
+<h2 id="背景-なぜ熱変形を推定したいのか">0. 背景 ―
+なぜ熱変形を推定したいのか</h2>
+<p>技術の話に入る前に、<strong>この研究が何の役に立つのか</strong>を文献で押さえておきます。
+主張には<strong>無料で読める出典</strong>を付けます（有料しか根拠が無いものは、そう明記します）。</p>
+<h3 id="熱変位は加工誤差の最大の原因">0-1.
+熱変位は加工誤差の最大の原因</h3>
+<p><strong>Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G.
+(2024)</strong> “Machine Tool Thermal Error Measurement and Prediction
+via Wireless Microscope”, <em>Manufacturing Letters</em>
+<strong>41</strong>, 1440–1451（オープンアクセス） 📄 全文無料: <a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076"
+class="uri">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></p>
+<blockquote>
+<p>“Thermal errors can contribute <strong>up to 75 percent</strong> of
+the overall machining errors of a machined part.”</p>
+</blockquote>
+<p>同じ数字は <strong>Bünger, A. et al. (2023)</strong>
+arXiv:2306.12736（📄 <a href="https://arxiv.org/abs/2306.12736"
+class="uri">https://arxiv.org/abs/2306.12736</a>）でも 「Mayr et al.,
+2012 によれば熱誤差は最終製品の製造誤差の <strong>75 %</strong>
+を占める」と引用されています。</p>
+<h3 id="対策は回避と補償の2つ">0-2. 対策は「回避」と「補償」の2つ</h3>
+<p>同じく Li et al. (2024) より:</p>
+<blockquote>
+<p>“In general, there are two methods for thermal error reduction:
+<strong>thermal error avoidance</strong> and <strong>thermal error
+compensation</strong>.”</p>
+</blockquote>
+<blockquote>
+<p>“<strong>Thermal error avoidance is typically a more costly solution
+than thermal error compensation</strong> and is more sensitive to
+modeling errors and unknown disturbances.”</p>
+</blockquote>
+<p><strong>回避</strong>＝低膨張材料・潤滑や冷却の最適化で、機械を温度変化に鈍感にする。
+<strong>補償</strong>＝温度から変形を予測し、その分だけ指令位置をずらす。
+<strong>コスト面から補償が実務の主役</strong>、というのが文献の立場です。</p>
+<p>補償が何をしているかも、同論文が明快に書いています:</p>
+<blockquote>
+<p>“thermal error compensation is normally based on a <strong>predictive
+model established by the thermal error measurement</strong> of a machine
+tool.”</p>
+</blockquote>
+<blockquote>
+<p>“employ a <strong>predictive error model, which are inverted to
+determine compensation amounts</strong>. Common thermal error models
+include <strong>least-square regression, finite element, neural network,
+gray system</strong>, etc.”</p>
+</blockquote>
+<p>つまり「<strong>多点の温度と刃先変位を実測 → 関係をモデル化 →
+モデルを逆に使って補正量を出す</strong>」。</p>
+<h3 id="メーカー各社の実装">0-3. メーカー各社の実装</h3>
+<blockquote>
+<p>⚠️
+各社の<strong>公開情報（製品ページ）</strong>に基づく。数値は各社の公称値。</p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>オークマ</strong></th>
+<th><strong>ヤマザキマザック</strong></th>
+<th><strong>DMG MORI</strong></th>
+<th><strong>牧野フライス</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>技術名</td>
+<td>サーモフレンドリーコンセプト<br>TAS-C / TAS-S</td>
+<td>AI Thermal Shield</td>
+<td>Spindle Growth Sensor</td>
+<td>（個別技術の集合）</td>
+</tr>
+<tr class="even">
+<td><strong>一言でいうと</strong></td>
+<td><strong>変形を予測しやすい形に設計してから推定</strong></td>
+<td><strong>学習で補正を育てる</strong></td>
+<td><strong>変位を直接測って直す</strong></td>
+<td><strong>そもそも熱を入れない</strong></td>
+</tr>
+<tr class="odd">
+<td>特徴的な入力</td>
+<td><strong>送り軸の位置情報</strong></td>
+<td><strong>クーラントON/OFF</strong>・機械位置</td>
+<td><strong>主軸伸びの実測</strong></td>
+<td><strong>熱伝導の時間遅れ</strong></td>
+</tr>
+<tr class="even">
+<td>ハード側</td>
+<td>熱変形の単純化構造</td>
+<td>全軸ボールねじ軸冷却</td>
+<td>冷却リニアガイド</td>
+<td>軸芯＋ジャケット冷却、断熱カバー</td>
+</tr>
+<tr class="odd">
+<td>公称性能</td>
+<td>127機種中83機種・5万台超</td>
+<td>室温8 ℃変化で<strong>6 µm</strong>維持</td>
+<td>長期安定精度</td>
+<td>ミクロンオーダーの金型加工</td>
+</tr>
+</tbody>
+</table>
+<p>🔗 <a href="https://www.okuma.co.jp/onlyone/thermo/">オークマ</a>／<a
+href="https://www.mazak.com/jp-ja/technology/accuracy/">マザック</a>／<a
+href="https://en.dmgmori.com/products/machines/milling/vertical-milling/nvx/nvx-5100">DMG
+MORI</a>／<a href="https://www.makino.co.jp/ja-jp/">牧野</a></p>
+<p><strong>TAS</strong> ＝ Thermo Active
+Stabilizer（読み：ティー・エー・エス）。 <strong>-C</strong> は
+Construction（環境熱変位制御）、<strong>-S</strong> は
+Spindle（主軸熱変位制御）。</p>
+<p><strong>オークマが他社と違う点</strong>は、熱を抑えるのではなく
+<strong>「熱変形の単純化構造」で変形そのものを予測しやすい形に設計している</strong>こと。
+機械とCNC（OSP）を両方自社で作っているため、構造設計と補正を一体で最適化できます。
+本研究の言葉でいえば、<strong>場の低次元性を設計変数にしている</strong>ことになります。</p>
+<p><strong>補正のタイミング</strong>：事前に予測モデルを作り、<strong>運転中はCNCが温度を常時読んでオフセットを
+更新し続ける</strong>（加工の合間に測るのではない）。FANUCも2022年に「AI熱変位補正」を発表し、
+多点温度入力用のI/Oユニットを提供しています。</p>
+<h3 id="しかし温度が合っても変形が合うとは限らない">0-4.
+しかし「温度が合っても変形が合う」とは限らない</h3>
+<p>ここが本研究の動機です。<strong>Bünger et al. (2023)</strong>（📄
+無料 <a href="https://arxiv.org/abs/2306.12736"
+class="uri">https://arxiv.org/abs/2306.12736</a>）:</p>
+<blockquote>
+<p>“the accuracy of the <strong>TCP prediction depends highly on the
+accuracy of the model parameters, such as heat exchange parameters, and
+the initial temperature</strong>”</p>
+</blockquote>
+<p>理由は3つあります。</p>
+<ol type="1">
+<li><p><strong>効くのは温度そのものではなく勾配</strong>。柱の上下にわずかな温度差があるだけで曲げが生じ、
+主軸先端では<strong>てこで拡大</strong>される。「平均温度が合っている」ことは何の保証にもならない。</p></li>
+<li><p><strong>熱伝達率を直接測る計測器が存在しない</strong>。</p>
+<ul>
+<li>📄 <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/"
+class="uri">https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/</a>（2025、無料）
+…
+CHTCを直接測る専用計測器が無く、熱流束センサや赤外サーモグラフィでも測れない</li>
+<li>📄 <a href="https://www.mdpi.com/2075-1702/9/9/184"
+class="uri">https://www.mdpi.com/2075-1702/9/9/184</a>（<em>Machines</em>
+2021、オープンアクセス） …
+FEMの精度は熱源・熱伝達係数・境界条件の定義に依存するが、汎用的な定義は困難</li>
+</ul></li>
+<li><p><strong>標準試験は実運転を模擬していない</strong>。<strong>ISO
+230-3:2020</strong>（📄 無料プレビューに Scope 全文: <a
+href="https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf"
+class="uri">https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf</a>）
+が規定するのは
+ETVE（環境温度変動）・主軸回転・直線軸・回転軸の4試験ですが、規格自身が:</p>
+<blockquote>
+<p>“<strong>The test conditions described in this document are not
+intended to simulate the normal operating conditions</strong>… For
+example, <strong>use of coolants can significantly affect the actual
+thermal behaviour</strong>… these tests are considered only as the
+<strong>preliminary tests</strong>”</p>
+</blockquote></li>
+</ol>
+<blockquote>
+<p><strong>ゆえに：限られた実測から境界条件ごと補正し、熱変形そのものを推定する枠組みが要る。</strong>
+それが本シリーズで作るものです。</p>
+</blockquote>
+<h3 id="計測の方法間接法と直接法">0-5. 計測の方法（間接法と直接法）</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>間接法</strong></th>
+<th><strong>直接法</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>測るもの</td>
+<td><strong>温度</strong></td>
+<td><strong>刃先とワークの相対変位</strong></td>
+</tr>
+<tr class="even">
+<td>道具</td>
+<td>熱電対、測温抵抗体、<strong>サーマルカメラ</strong></td>
+<td>レーザ干渉計、静電容量センサ、<strong>タッチプローブ</strong></td>
+</tr>
+<tr class="odd">
+<td>変位の求め方</td>
+<td>温度→変形モデルで予測</td>
+<td>そのまま実測</td>
+</tr>
+<tr class="even">
+<td>短所</td>
+<td><strong>モデルの精度に依存</strong></td>
+<td><strong>多点測定に時間がかかる</strong>（加工を止める）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>タッチプローブ</strong>とは、主軸に装着する接触式の測定器です。先端の球が対象に<strong>触れた瞬間に
+信号を出す</strong>ので、そのときの機械座標から位置が分かります。熱変位の測定では
+<strong>基準球を定盤に固定</strong>しておき、一定時間ごとに測って<strong>見かけの位置の移動量</strong>を読みます。
+機械に元から付いていることが多く追加投資が小さい一方、<strong>測るたびに加工を止める</strong>必要があります。</p>
+<p><strong>カメラでも測れます</strong>。Li et
+al. (2024)（上記、無料）は<strong>主軸にワイヤレス顕微鏡</strong>を付け、
+テーブルに貼った<strong>基準マーク</strong>（フェムト秒レーザ加工、楕円格子350
+µm間隔、 行・列の番号付き）を撮影して画像解析で3方向の変位を出しました。
+精度は「<strong>機械の位置決め分解能の4倍以内</strong>、多くは2倍以内」と報告されています。</p>
+<h3 id="この分野の最新研究20232025">0-6.
+この分野の最新研究（2023〜2025）</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>論文</th>
+<th>内容</th>
+<th>無料</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Teshima et al. (2024) <em>CIRP JMST</em> <strong>55</strong>,
+403–410<br>🔗 <a href="https://doi.org/10.1016/j.cirpj.2024.10.015"
+class="uri">https://doi.org/10.1016/j.cirpj.2024.10.015</a></td>
+<td>温度→TCP変位の<strong>ROM</strong>を作り、回帰係数＝温度感度として<strong>センサ配置の指針</strong>を示す。「最適な点数と配置を決める方法が無かった」と問題提起</td>
+<td>❌</td>
+</tr>
+<tr class="even">
+<td>Ando et al. (ICTIMT2025)<br>🔗 <a
+href="https://doi.org/10.1007/978-3-032-01194-7_31"
+class="uri">https://doi.org/10.1007/978-3-032-01194-7_31</a></td>
+<td>上の続報。<strong>伝達関数行列</strong>と<strong>温度感度分布</strong>で配置を決める</td>
+<td>❌</td>
+</tr>
+<tr class="odd">
+<td>Bünger et al. (2023) arXiv:2306.12736<br>📄 <a
+href="https://arxiv.org/abs/2306.12736"
+class="uri">https://arxiv.org/abs/2306.12736</a></td>
+<td><strong>初期温度場</strong>をベイズ逆問題で推定し、<strong>事後分散</strong>を低ランク／テンソルトレイン近似で高速評価。「配置の評価は最適配置の前提」</td>
+<td>✅</td>
+</tr>
+<tr class="even">
+<td>Li et al. (2024) <em>Manufacturing Letters</em>
+<strong>41</strong><br>📄 <a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076"
+class="uri">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></td>
+<td><strong>ワイヤレス顕微鏡</strong>で熱変位を直接測る新手法</td>
+<td>✅</td>
+</tr>
+<tr class="odd">
+<td>Coelho et al. (2025) arXiv:2510.03261<br>📄 <a
+href="https://arxiv.org/abs/2510.03261"
+class="uri">https://arxiv.org/abs/2510.03261</a></td>
+<td>誤差ではなく<strong>温度・熱流束の場そのもの</strong>をNNで予測。6アーキテクチャをベンチマーク</td>
+<td>✅</td>
+</tr>
+<tr class="even">
+<td>Peet (2019) <em>Proc. SPIE</em> <strong>11158</strong><br>🔗 <a
+href="https://doi.org/10.1117/12.2532755"
+class="uri">https://doi.org/10.1117/12.2532755</a></td>
+<td><strong>赤外線シグネチャ</strong>監視のため、気象データのみを入力にFEM熱収支＋<strong>カルマンフィルタ</strong>で表面温度分布を実時間推定</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<p><strong>読み取れる流れ</strong>：①誤差の直接予測から<strong>場の予測</strong>へ、②<strong>センサ配置</strong>が独立したテーマに、
+③<strong>測れない境界条件を推定する</strong>方向（CHTCのソフトセンサ等）、④<strong>測定の低コスト化</strong>。
+Peet (2019)
+が示すように、<strong>熱の問題にデータ同化を持ち込む発想は分野の外では既に実用検討</strong>されています。</p>
+<p><strong>本シリーズの位置づけ</strong>：この3つの潮流（場の推定・配置設計・境界条件の推定）の交点にあり、
+さらに<strong>OSSだけで一気通貫に実装して公開</strong>している点が特徴です。
+先行研究との具体的な差分は blog_005 で扱います。</p>
 <hr />
 <h2 id="手書きで追うための記号と単位">手書きで追うための記号と単位</h2>
 <table>

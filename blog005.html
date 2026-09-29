@@ -226,11 +226,12 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  
   <style>
-    html body { max-width: 1120px !important; }
-    body { padding: 0 24px; }
-    img { max-width: 100%; height: auto; }
-    table { font-size: 0.95em; }
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
   </style>
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script
@@ -249,7 +250,12 @@ id="toc-blog_005推定したい量で最適なセンサは変わる-観測の価
 ― 観測の価値を1本の式で設計する</a>
 <ul>
 <li><a href="#観測の価値を測る1本の式"
-id="toc-観測の価値を測る1本の式">1. 観測の価値を測る「1本の式」</a></li>
+id="toc-観測の価値を測る1本の式">1. 観測の価値を測る「1本の式」</a>
+<ul>
+<li><a href="#補足この構造はベイジアンネットワークそのもの"
+id="toc-補足この構造はベイジアンネットワークそのもの">1-1.
+補足：この構造はベイジアンネットワークそのもの</a></li>
+</ul></li>
 <li><a href="#小さな行列で手計算-が対象ごとに動く"
 id="toc-小さな行列で手計算-が対象ごとに動く">2. 小さな行列で手計算
 ―「★」が対象ごとに動く</a>
@@ -316,6 +322,12 @@ id="toc-実データで検証romenkfoiすべて本リポジトリの計算">4.
 <li><a href="#対象全温度場今回の候補比較では散らす配置が改善"
 id="toc-対象全温度場今回の候補比較では散らす配置が改善">4-2.
 対象＝全温度場：今回の候補比較では「散らす」配置が改善</a></li>
+<li><a href="#b.-熱感度とは何か-2つの感度は別物"
+id="toc-b.-熱感度とは何か-2つの感度は別物">4-2b. 「熱感度」とは何か ―
+2つの感度は別物</a></li>
+<li><a href="#c.-どちらの基準で選ぶべきか-実験で確かめる"
+id="toc-c.-どちらの基準で選ぶべきか-実験で確かめる">4-2c.
+どちらの基準で選ぶべきか ― 実験で確かめる</a></li>
 <li><a href="#対象変位変位センサを高w点へ種類と場所が変わる"
 id="toc-対象変位変位センサを高w点へ種類と場所が変わる">4-3.
 対象＝変位：変位センサを「高W点」へ（種類と場所が変わる）</a></li>
@@ -398,6 +410,102 @@ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
 class="math inline">\(c\)</span> と観測 <span
 class="math inline">\(v\)</span> の両方</strong>が入っていること。
 <strong>観測の価値は対象に依存する</strong>＝全対象に共通する最適センサ位置は一般には保証されない、が式の形から既に見えています。</p>
+<h3 id="補足この構造はベイジアンネットワークそのもの">1-1.
+補足：この構造はベイジアンネットワークそのもの</h3>
+<p>ここまでの話は、確率変数の依存関係を矢印で描く
+<strong>ベイジアンネットワーク（有向グラフ）</strong>
+として整理できます。実際、本研究の物理はきれいな因果の連鎖になっています:</p>
+<figure>
+<img src="img/bayes_network.png"
+alt="本研究のベイジアンネットワーク表現と相互情報量" />
+<figcaption
+aria-hidden="true">本研究のベイジアンネットワーク表現と相互情報量</figcaption>
+</figure>
+<p><em>左：発熱量 <span class="math inline">\(Q\)</span> ・放熱 <span
+class="math inline">\(h\)</span> が温度場 <span
+class="math inline">\(T\)</span> を決め、 <span
+class="math inline">\(T\)</span> が変位 <span
+class="math inline">\(u\)</span> を決める。観測 <span
+class="math inline">\(y\)</span> はそこにノイズが乗ったもの。
+データ同化は<strong>この矢印を逆にたどって未知数を絞り込む</strong>操作にあたる。
+右：各観測がもたらす相互情報量。 <span
+class="math inline">\(\Delta\)</span> の順位と完全に一致する。</em></p>
+<p><strong>なぜ一致するのか</strong>。すべてがガウス分布なら、観測 <span
+class="math inline">\(y\)</span> を得たときの対象 <span
+class="math inline">\(X\)</span> の
+情報利得（相互情報量）は分散の比で書けます:</p>
+<p><span
+class="math display">\[I(X;y)=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid
+y)}
+=-\frac{1}{2}\ln\Bigl(1-\frac{\Delta(X,y)}{\mathrm{Var}(X)}\Bigr)\]</span></p>
+<p><span class="math inline">\(\Delta\)</span> が大きいほど <span
+class="math inline">\(I\)</span> も大きい
+<strong>単調な関係</strong>なので、<strong>どちらで測っても観測の順位は変わりません</strong>。
+実際に計算すると:</p>
+<table>
+<thead>
+<tr class="header">
+<th>推定対象</th>
+<th style="text-align: right;">温度点1</th>
+<th style="text-align: right;">温度点2</th>
+<th style="text-align: right;">変位 <span
+class="math inline">\(u\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_1\)</span></td>
+<td style="text-align: right;"><strong>2.00 bit</strong></td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">1.51</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_2\)</span></td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;"><strong>1.83 bit</strong></td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(Q\)</span></td>
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;"><strong>0.24 bit</strong></td>
+</tr>
+<tr class="even">
+<td>全温度場</td>
+<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;"><strong>0.61 bit</strong></td>
+</tr>
+</tbody>
+</table>
+<p>★の位置は §2 の <span class="math inline">\(\Delta\)</span>
+の表とぴったり同じです。
+つまり本記事の「観測の価値」は、<strong>ベイジアンネットワークにおける情報利得の言い換え</strong>でした。</p>
+<p><strong>ベイジアンネットワークとして見ると何が嬉しいか</strong></p>
+<ul>
+<li><strong>条件付き独立が図で読める</strong>。たとえば <span
+class="math inline">\(u\)</span> は <span
+class="math inline">\(T\)</span> を通してしか <span
+class="math inline">\(Q\)</span> に依存しません （ <span
+class="math inline">\(Q \perp u \mid T\)</span> ）。だから「変位を測ると
+<span class="math inline">\(Q\)</span> が分かる」のは <span
+class="math inline">\(T\)</span>
+を経由した間接的な情報伝達だ、と図から即座に言えます。</li>
+<li><strong>設計の言葉が使える</strong>。センサ配置は「相互情報量を最大にする観測集合の選択」という
+ベイズ実験計画（Bayesian experimental design）の標準問題になります。
+Q-DEIMの貪欲選択（blog_004
+§4-2）も、<strong>貪欲な相互情報量最大化</strong>として読み直せます。</li>
+<li><strong>非ガウス・非線形へ広げられる</strong>。本研究は線形・ガウスなので
+<span class="math inline">\(\Delta\)</span> で十分ですが、
+相変化や接触のような非線形が入ると <span
+class="math inline">\(\Delta\)</span> の式は崩れます。その場合も
+相互情報量なら定義は生き残ります（計算は重くなります）。</li>
+</ul>
+<p><strong>逆に、今のままで足りている点</strong>：本ケースは熱伝導が線形で、誤差もガウスと置けるため、
+<strong>わざわざ一般のベイジアンネットワーク推論（信念伝播など）を持ち出す必要はありません</strong>。
+EnKFはこのネットワーク上のベイズ更新を、<strong>共分散をアンサンブルで近似して解いている</strong>ものと
+みなせます（blog_003）。</p>
 <hr />
 <h2 id="小さな行列で手計算-が対象ごとに動く">2. 小さな行列で手計算
 ―「★」が対象ごとに動く</h2>
@@ -1179,6 +1287,179 @@ mmしか離れていない隣どうしが選ばれます</strong>。
 「1点目では説明できない残り」に比例するので、<strong>1点目とほぼ同じ点の価値はほぼゼロ</strong>。
 Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004
 §4-2）のは、まさにこの冗長性を避けるためです。</p>
+<h3 id="b.-熱感度とは何か-2つの感度は別物">4-2b. 「熱感度」とは何か ―
+2つの感度は別物</h3>
+<p>ここで用語を整理します。本研究には<strong>まったく別の2つの「感度」</strong>が出てきます。
+混同すると結論を誤るので、はっきり分けます。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>発熱感度</strong>（基準A）</th>
+<th><strong>熱感度 (W)</strong>（基準B）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>定義</td>
+<td>( T_i/Q )</td>
+<td>( W=K_s^{-1}H_T ) から導く ( u/T_i )</td>
+</tr>
+<tr class="even">
+<td>何を表すか</td>
+<td>発熱が変わると<strong>その点の温度</strong>がどれだけ動くか</td>
+<td>その点の温度が変わると<strong>変形</strong>がどれだけ動くか</td>
+</tr>
+<tr class="odd">
+<td>出どころ</td>
+<td>ROM（または CHT）を (Q) で微分</td>
+<td><strong>FrontISTR</strong> の熱弾性を1度解く</td>
+</tr>
+<tr class="even">
+<td>単位</td>
+<td>K/W</td>
+<td>µm/K</td>
+</tr>
+<tr class="odd">
+<td>向いている用途</td>
+<td>発熱量 (Q) の推定</td>
+<td><strong>熱変形の推定</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>本研究の注目量は熱変形</strong>（上面2点の変位差
+(U_z(A)-U_z(O)) ）なので、 <strong>基準Bの熱感度 (W)
+が本来の指標</strong>です。</p>
+<p>実際に5つの代表点で両方を計算すると、<strong>順位がまったく違います</strong>:</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 36%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>点</th>
+<th style="text-align: right;">熱感度 ( (U_z(A)-U_z(O))/T_i) [µm/K]</th>
+<th style="text-align: right;">発熱感度 ( T_i/Q ) [K/W]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0</td>
+<td style="text-align: right;">0.470</td>
+<td style="text-align: right;">5.24</td>
+</tr>
+<tr class="even">
+<td><strong>P1</strong></td>
+<td style="text-align: right;"><strong>0.654（最大）</strong></td>
+<td style="text-align: right;">3.31</td>
+</tr>
+<tr class="odd">
+<td>P2</td>
+<td style="text-align: right;">0.604</td>
+<td style="text-align: right;"><strong>5.74（最大）</strong></td>
+</tr>
+<tr class="even">
+<td><strong>P3</strong></td>
+<td style="text-align: right;"><strong>0.038（最小）</strong></td>
+<td style="text-align: right;">4.22</td>
+</tr>
+<tr class="odd">
+<td>P4</td>
+<td style="text-align: right;">0.458</td>
+<td style="text-align: right;"><strong>2.65（最小）</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>熱感度 (W) が最大なのは <strong>P1</strong>、最小は
+<strong>P3</strong></li>
+<li>発熱感度が最大なのは <strong>P2</strong>、最小は
+<strong>P4</strong></li>
+<li>2つの感度の相関は <strong>+0.045</strong>（ほぼ無関係）</li>
+</ul>
+<p><strong>高感度点も低感度点も、基準によって別の点になります。</strong>
+なお熱感度には<strong>符号</strong>があり、P1は −0.654、P2は +0.604
+と<strong>逆向き</strong>です
+（A側とO側で反対に効く点がある）。発熱感度では絶対に見えない情報です。</p>
+<h3 id="c.-どちらの基準で選ぶべきか-実験で確かめる">4-2c.
+どちらの基準で選ぶべきか ― 実験で確かめる</h3>
+<p>「熱変形を推定したいのだから熱感度 (W)
+の高い点を選べばよい」と考えたくなります。
+本当にそうか、<strong>4つの選び方で温度センサ1点だけを同化</strong>して比べました
+（<code>run/sensitivity_criterion_compare.py</code>、EnKF・5
+seed平均）:</p>
+<figure>
+<img src="img/sensitivity_criterion.png" alt="選択基準の比較" />
+<figcaption aria-hidden="true">選択基準の比較</figcaption>
+</figure>
+<table>
+<thead>
+<tr class="header">
+<th>選択基準</th>
+<th>選ばれた点</th>
+<th style="text-align: right;">温度RMSE [K]</th>
+<th style="text-align: right;"><strong>変位差の誤差 [µm]</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>基準A：発熱感度 最大</td>
+<td>P2</td>
+<td style="text-align: right;"><strong>0.623</strong></td>
+<td style="text-align: right;">0.869</td>
+</tr>
+<tr class="even">
+<td>基準A：発熱感度 最小</td>
+<td>P4</td>
+<td style="text-align: right;">1.138</td>
+<td style="text-align: right;">0.902</td>
+</tr>
+<tr class="odd">
+<td>基準B：熱感度W 最大</td>
+<td>P1</td>
+<td style="text-align: right;">0.955</td>
+<td style="text-align: right;">0.795</td>
+</tr>
+<tr class="even">
+<td><strong>基準B：熱感度W 最小</strong></td>
+<td><strong>P3</strong></td>
+<td style="text-align: right;">0.539</td>
+<td style="text-align: right;"><strong>0.562（最良）</strong></td>
+</tr>
+</tbody>
+</table>
+<p>結果は<strong>直感に反します</strong>:</p>
+<ul>
+<li><strong>温度を当てたいなら</strong>、発熱感度の基準は機能する（最大P2
+0.623 K ＜ 最小P4 1.138 K）</li>
+<li><strong>変形を当てたいのに</strong>、熱感度 (W)
+が<strong>最小</strong>のP3が<strong>いちばん良い</strong>（0.562 µm）。
+(W) が最大のP1（0.795 µm）より良い</li>
+</ul>
+<p><strong>なぜか</strong>。§1で見たとおり、観測の価値は感度そのものではなく</p>
+<p><span
+class="math display">\[\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}\]</span></p>
+<p>で決まるからです。 (u/T_i) が大きいことは 「(T_i) が (u)
+を強く動かす」を意味しますが、<strong>推定に効くかは 「(T_i) を測ると
+(u) の不確かさがどれだけ減るか」</strong>であって、同じではありません。
+実際、(T_i) 自身のばらつき ((y)) が大きければ分母で損をします。</p>
+<blockquote>
+<p><strong>結論</strong>：センサ選びは「<strong>感度が高い点を選ぶ</strong>」では決まりません。
+感度は () を作る材料の一つにすぎず、 <strong>観測の価値 ()
+で測る必要があります</strong>。 これは §2
+で示した「推定対象が変われば最適な観測も変わる」と同じ話です。</p>
+</blockquote>
+<p><strong>ただし注意</strong>：ここで比べたのは<strong>温度センサ1点</strong>の場合です。
+次項で見るように、<strong>変位センサ</strong>については熱感度 (W)
+の高い点が明確に有利で、 基準Bがそのまま機能します（変位計は (W)
+方向を直接測るため）。</p>
 <h3 id="対象変位変位センサを高w点へ種類と場所が変わる">4-3.
 対象＝変位：変位センサを「高W点」へ（種類と場所が変わる）</h3>
 <figure>

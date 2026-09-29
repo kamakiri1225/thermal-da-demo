@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POD選定ROM × データ同化 ― 全ストーリー</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+
+  <style>
+    :root { --r-main-font-size: 28px; }
+    .reveal h1 { font-size: 1.55em; }
+    .reveal h2 { font-size: 1.05em; color: #1a4d7a; margin-bottom: 0.35em; }
+    .reveal h3 { font-size: 0.82em; color: #2b6cb0; }
+    .reveal section { text-align: left; }
+    .reveal .center { text-align: center; }
+    .reveal table { font-size: 0.58em; margin: 0.35em auto; border-collapse: collapse; }
+    .reveal table th { background: #eef3f8; } .reveal table td, .reveal table th { padding: 0.15em 0.5em; }
+    .reveal pre { width: 100%; box-shadow: none; font-size: 0.48em; }
+    .reveal pre code { max-height: 440px; padding: 0.7em 1em; border-radius: 6px; }
+    .reveal img.fig { max-height: 400px; display: block; margin: 0.2em auto; background:#fff;
+                      border: 1px solid #e2e8f0; border-radius: 6px; }
+    .reveal img.figw { max-height: 330px; }
+    .reveal .lead { color: #4a5568; font-size: 0.82em; }
+    .reveal .small { font-size: 0.68em; color: #4a5568; }
+    .reveal .box { background:#f5f8fc; border-left:5px solid #3182ce; padding:0.45em 0.85em; border-radius:0 6px 6px 0; font-size:0.8em; }
+    .reveal .key { background:#fffbea; border-left:5px solid #d69e2e; }
+    .reveal .warn { background:#fff5f5; border-left:5px solid #e53e3e; }
+    .reveal .cols { display:flex; gap:1.1em; align-items:center; }
+    .reveal .cols > div { flex:1; }
+    .reveal .footer { position:fixed; bottom:8px; right:16px; font-size:13px; color:#a0aec0; }
+    .reveal .tag { display:inline-block; background:#3182ce; color:#fff; font-size:0.48em; padding:2px 9px; border-radius:12px; vertical-align:middle; }
+    .reveal .tag.sup { background:#805ad5; }
+    .reveal .hint { color:#805ad5; font-size:0.62em; margin-top:0.3em; }
+    .reveal .big { font-size:1.25em; color:#c53030; font-weight:bold; }
+  </style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+  <!-- ============ TITLE ============ -->
+  <section class="center">
+    <h1>POD選定ROM × データ同化</h1>
+    <h2 style="text-align:center;border:none;">少数観測から温度分布と変位を推定する ― 全ストーリー</h2>
+    <p class="lead">目的：少数の<b>温度・変位</b>観測で、<b>温度分布と変位時刻歴</b>の推定誤差を減らせるか</p>
+    <p class="small">手法：<b>ROM</b>で高速化 ／ <b>POD＋Q-DEIM</b>でROM代表点を選定 ／ <b>熱感度 W=K⁻¹H</b>で変位観測点を選定</p>
+    <p class="hint">▼ 下キー：各ステップで <b>01の数式補足</b> が開きます</p>
+  </section>
+
+  <!-- ============ MOTIVATION ============ -->
+  <section>
+    <h2>研究の出発点：実ソルバで同化できたが「重い」</h2>
+    <div class="cols">
+      <div>
+        <ul class="small">
+          <li>104：OpenFOAM(CHT)＋FrontISTR で実ソルバ同化に成功</li>
+          <li>だが <b>10分間の現象に約13時間</b>（対象時間の約78倍）</li>
+          <li>観測配置・メンバー数・乱数を何通りも試す研究には重すぎる</li>
+        </ul>
+        <div class="box key small">そこで <b>ROM</b> を導入 → 0→600s が数秒。<br>観測配置と精度・$Q/h$ の識別性を<b>繰り返し比較</b>できるようにする。</div>
+      </div>
+      <div class="center">
+        <img class="fig figw" src="img/fullsolver_temperature_comparison.gif" alt="実ソルバ同化と流速">
+        <p class="small">左=同化後(固体温度)／右=真値＋流速(実CHT)</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHAT WE VERIFY ============ -->
+  <section>
+    <h2>何を検証する研究か</h2>
+    <table>
+      <tr><th>段階</th><th>何を計算するか</th><th>注意</th></tr>
+      <tr><td>学習・校正</td><td>OpenFOAM温度場からPOD→5点でROM校正</td><td>校正残差は学習適合度</td></tr>
+      <tr><td>基本同化</td><td>温度P2だけ観測→5点温度・$Q$・$h$を推定</td><td>ROM双子実験</td></tr>
+      <tr><td>観測配置比較</td><td>温度配置／変位配置を変える</td><td>$\partial T/\partial Q$ と $W=K^{-1}H$ を区別</td></tr>
+      <tr><td>全場・変位評価</td><td>同化後5点→gappy-POD→全場→変位</td><td>ROM復元の一致</td></tr>
+    </table>
+    <div class="box small"><b>役割分担</b>：ROM＝高速化 ／ POD＋Q-DEIM＝<b>ROM代表点の選定</b> ／
+      $W=K^{-1}H$＝<b>変位観測点の選定</b>（高感度ほど同化が効く）。$\partial T/\partial Q$ は温度センサ選定の補足。</div>
+  </section>
+
+  <!-- ============ STEP1 POD (+ math vertical) ============ -->
+  <section>
+    <section>
+      <h2>STEP 1. POD で「温度場の型」を取り出す <span class="tag">§1</span></h2>
+      <div class="cols">
+        <div class="center"><img class="fig" src="img/pod_modes.png" alt="PODモード"></div>
+        <div>
+          <ul class="small">
+            <li>平均場＋<b>モード1(91.8%)</b>＋モード2(8.1%)</li>
+            <li><b>2モードで場の 99.9%</b> を説明</li>
+            <li>＝温度場は実質 2〜3 自由度 → 少数点で表せる</li>
+          </ul>
+          <div class="box small">SVD で「固定した型（モード）× 時間変化する強さ」に分解。<br>このモードが Q-DEIM・gappy-POD の土台になる。</div>
+        </div>
+      </div>
+      <p class="hint">▼ 数式補足：スナップショット行列 → 固有値問題 → SVD</p>
+    </section>
+    <section>
+      <h2>数式補足：POD はなぜ SVD か <span class="tag sup">01 §1</span></h2>
+      <p class="small">スナップショット行列（各セルから<b>自分の時間平均</b>を引く）:</p>
+      <p class="center">$$X=[\,u(t_1)-\bar u,\dots,u(t_m)-\bar u\,]\in\mathbb R^{N\times m}$$</p>
+      <p class="small">「1つの型 $\varphi$ で最もよく表す」＝二乗和最大化 → ラグランジュ微分で<b>固有値問題</b>:</p>
+      <p class="center">$$\max_{\|\varphi\|=1}\varphi^\top(XX^\top)\varphi\;\Rightarrow\;(XX^\top)\varphi=\lambda\varphi$$</p>
+      <p class="small">$X=U\Sigma V^\top$ なら $XX^\top=U\Sigma^2U^\top$ → <b>$U$の列＝PODモード</b>、$\sigma_k^2$＝エネルギー。巨大な $C$ を作らず SVD 一発。</p>
+    </section>
+  </section>
+
+  <!-- ============ STEP1b reconstruction ============ -->
+  <section>
+    <h2>モードを足すと真値に近づく <span class="tag">§1</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/pod_reconstruction.png" alt="段階再構成"></div>
+      <div>
+        <table>
+          <tr><th>使うもの</th><th>再構成誤差</th></tr>
+          <tr><td>平均場のみ</td><td>1.175 K</td></tr>
+          <tr><td>＋モード1</td><td>0.583 K</td></tr>
+          <tr><td><b>＋モード1,2</b></td><td><b>0.055 K</b></td></tr>
+          <tr><td>＋モード1,2,3</td><td>0.005 K</td></tr>
+        </table>
+        <p class="small">左端＝真値（基準）。<b>平均場＋2モードで真値と見分けがつかない</b>。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP2 Q-DEIM (+ math) ============ -->
+  <section>
+    <section>
+      <h2>STEP 2. Q-DEIM で代表点を「データから」選ぶ <span class="tag">§2</span></h2>
+      <div class="cols">
+        <div class="center"><img class="fig figw" src="img/qdeim_points.png" alt="Q-DEIM選定点"></div>
+        <div>
+          <ul class="small">
+            <li>モード行列に<b>列枢軸QR</b>をかけ、場を最もよく覆う点を選ぶ</li>
+            <li>勘の点（すべて中央高さ）と違い <b>底面(P3,P4)も選定</b></li>
+            <li>「離れているから」でなく「<b>残るモード情報が大きいから</b>」選ぶ</li>
+          </ul>
+          <div class="box small">選んだ5点で全場を復元する行列 $U_r[P,:]$ の<br>2ノルム条件数 ≈ <b>3.15</b>（式が重複せず安定）。</div>
+        </div>
+      </div>
+      <p class="hint">▼ 数式補足：gappy 復元 と 枢軸QR の選び方</p>
+    </section>
+    <section>
+      <h2>数式補足：Q-DEIM の選定基準 <span class="tag sup">01 §3</span></h2>
+      <p class="small">$r$点の温度から全場を復元（gappy / DEIM 補間）:</p>
+      <p class="center">$$\hat u=\bar u+U_r a,\qquad a=(U_r[P,:])^{+}(u[P]-\bar u[P])$$</p>
+      <p class="small">復元が安定なのは $U_r[P,:]$ が良条件のとき → その点集合を選ぶ。<br>
+        セル $j$ の反応ベクトル $v_j=[\phi_1(j),\dots,\phi_r(j)]$ について、<b>既選択で説明できない残差が最大</b>の点を順に選ぶ:</p>
+      <p class="center">$$p_k=\arg\max_j\|(I-B_{k-1}B_{k-1}^\top)v_j\|_2$$</p>
+      <p class="small">これを安定に実行するのが <code>qr(U[:, :r].T, pivoting=True)</code> の先頭 $r$ 枢軸。</p>
+    </section>
+  </section>
+
+  <!-- ============ STEP3 ROM (+ math) ============ -->
+  <section>
+    <section>
+      <h2>STEP 3. 選んだ点で ROM を組み、校正する <span class="tag">§3</span></h2>
+      <p class="center">$$C_i\frac{dT_i}{dt}=\sum_{j\ne i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\text{air})$$</p>
+      <div class="cols">
+        <div class="center"><img class="fig figw" src="img/rom_calib_fit.png" alt="ROM校正"></div>
+        <div>
+          <ul class="small">
+            <li>全点対をコンダクタンスで結ぶ一般化集中定数モデル</li>
+            <li>$C[5],K[10],h$ を最小二乗で校正</li>
+            <li><b>当てはめ残差 RMSE 0.014 K</b>（ほぼ完全に再現）</li>
+            <li>$\sum C_i=1211$ J/K ≈ 鋼2.49kg（物理的に妥当）</li>
+            <li>0→600s が<b>数秒</b> → 何度も同化を試せる</li>
+          </ul>
+        </div>
+      </div>
+      <p class="hint">▼ 数式補足：校正の最小二乗</p>
+    </section>
+    <section>
+      <h2>数式補足：ROM の校正 <span class="tag sup">01 §4</span></h2>
+      <pre><code class="language-python" data-trim data-noescape>
+def resid(vec):                       # vec=[C(5),K上三角(10),h(1)]=16未知
+    C=vec[:5]; K=tri_to_matrix(vec[5:15],5); h=vec[15]
+    Ymodel=integrate_rom(C,K,h)       # ROMを前進積分→5点温度履歴
+    return (Ymodel-Yobs).ravel()      # OpenFOAMとの差
+sol=least_squares(resid, x0, bounds=(lb,ub))
+      </code></pre>
+      <p class="small">行列形 $\dot{\mathbf T}=M\mathbf T+\mathbf b$ を RK4 で一括積分。目標は選定5点の OpenFOAM 温度履歴。</p>
+    </section>
+  </section>
+
+  <!-- ============ STEP4 EnKF (+ math) ============ -->
+  <section>
+    <section>
+      <h2>STEP 4. データ同化で 温度・$Q$・$h$ を推定 <span class="tag">§4</span></h2>
+      <p class="small">拡大状態 $z=[T_0..T_4,Q,h]$（7次元）を $N=60$ メンバーEnKFで更新。温度数点でも標本共分散で $Q,h$ を逆算:</p>
+      <p class="center">$$K=C_{zy}(C_{yy}+R)^{-1},\quad z_a^{(i)}=z_f^{(i)}+K\big(y+\varepsilon^{(i)}-H(z_f^{(i)})\big)$$</p>
+      <div class="box small">この後：<b>4-1</b> 基本設定で推定できるか → <b>4-3</b> 観測点を $W$ で選ぶ（主軸）→ <b>4-4</b> 温度センサは $\partial T/\partial Q$（補足）。</div>
+      <p class="hint">▼ 数式補足：なぜ温度だけで $Q,h$ が決まるのか（周辺化）</p>
+    </section>
+    <section>
+      <h2>数式補足：EnKF＝ベイズ更新 <span class="tag sup">02 §4-2</span></h2>
+      <p class="small">事後 $\propto$ 尤度 × 事前。ガウス同士なら事後もガウス（カルマン更新）。<br>
+        $Q$ は直接測らないが、温度と<b>共分散で結ばれる</b>ので周辺分布で決まる:</p>
+      <p class="center">$$p(Q\mid y)=\int p(Q,T\mid y)\,dT,\quad
+        \mathbb E[Q\mid y]=\mathbb E[Q]+\mathrm{Cov}(Q,y)\,\mathrm{Cov}(y,y)^{-1}(y-\bar y)$$</p>
+      <p class="small">「観測の予測外れを共分散比だけ $Q$ に配分」する線形回帰。真の共分散は<b>60メンバーの標本共分散</b> $C_{zy}=\frac1{N-1}\sum(z-\bar z)(y-\bar y)^\top$ で近似。</p>
+    </section>
+  </section>
+
+  <!-- ============ 4-1 basic result ============ -->
+  <section>
+    <h2>4-1. 基本設定：温度1点で本当に推定できるか <span class="tag">§4-1</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/da_track.png" alt="温度追従"></div>
+      <div>
+        <ul class="small">
+          <li>観測は<b>温度P2の1点だけ</b>（$\partial T/\partial Q$最大）</li>
+          <li><b>わざと外した初期</b>（t=0で数K）が観測で真値へ収束</li>
+          <li>最終温度RMSE <b>0.131 K</b>（初期4.5K→）</li>
+        </ul>
+        <div class="box small">見どころは「t=0の大きなズレ→加熱期の終わりでほぼ0」（右下=残差パネル）。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4-1 Q/h identifiability ============ -->
+  <section>
+    <h2>4-1. ただし $Q,h$ は完全一致しない（可同定性） <span class="tag">§4-1</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig figw" src="img/da_qh.png" alt="Q・h推定"></div>
+      <div>
+        <ul class="small">
+          <li>$Q$=17.08 W（真値15）、$h$=0.0251（真値0.0154）</li>
+          <li>温度1点1サイクルでは $Q,h$ は<b>組合せでしか拘束されない</b></li>
+          <li>推定と真の $(Q,h)$ でも温度差は<b>0.42 K</b>（見分け不能）</li>
+        </ul>
+        <div class="box warn small"><b>温度・変位の推定なら実質OK</b>。だが真の $Q,h$ 同定や別条件の外挿は不可（外挿で誤差0.71K）。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4-3 what is W ============ -->
+  <section>
+    <h2>4-3.（主軸）熱感度 $W=K^{-1}H$ とは <span class="tag">§4-3</span></h2>
+    <div class="cols">
+      <div>
+        <p class="center small">熱弾性 $Ku=H\Delta T$ より</p>
+        <p class="center">$$u=K^{-1}H\,\Delta T=W\,\Delta T$$</p>
+        <ul class="small">
+          <li>$W$ の<b>行ノルム</b>＝その点で変位を測ると温度情報をどれだけ拾えるか</li>
+          <li><b>上端(自由端)ほど高感度</b>（底面固定で最も動く）</li>
+          <li>FrontISTR(DUMPW)で計算、随伴法と一致検証済み</li>
+        </ul>
+      </div>
+      <div class="center"><img class="fig" src="img/frontistr_sensitivity.png" alt="W分布"></div>
+    </div>
+  </section>
+
+  <!-- ============ 4-3 proof ============ -->
+  <section>
+    <h2>4-3.【本命の証明】高W変位点で同化精度が上がる <span class="tag">§4-3</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/disp_sel_pernode.png" alt="変位点選定"></div>
+      <div>
+        <table>
+          <tr><th>観測構成</th><th>加熱期RMSE</th></tr>
+          <tr><td>温度1点のみ</td><td>0.617 K</td></tr>
+          <tr><td>＋変位2点(低W)</td><td>0.535 K</td></tr>
+          <tr><td><b>＋変位2点(高W)</b></td><td><b>0.146 K</b></td></tr>
+        </table>
+        <div class="box key small"><b>高W の変位点を観測に足すと 4倍改善</b>。低Wはほとんど効かない。<br>→ $W$ は「変位観測点の選定」に使うべき指標。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4-3 temp not enough ============ -->
+  <section>
+    <h2>4-3. 温度が合っても変位は合わない <span class="tag">§4-3</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/disp_sel_temp_vs_disp.png" alt="温度vs変位"></div>
+      <div>
+        <table>
+          <tr><th></th><th>温度だけ</th><th>温度+変位</th><th>比</th></tr>
+          <tr><td>温度誤差</td><td>0.45 K</td><td>0.20 K</td><td>2.2×</td></tr>
+          <tr><td>変位 uz 誤差</td><td>0.98 µm</td><td>0.10 µm</td><td><b>9.5×</b></td></tr>
+        </table>
+        <div class="box small"><b>変位は温度のわずかな誤差を $W$ で増幅</b>して映す。温度が0.数K合っても変位はµmずれる → <b>変位を当てたいなら変位を観測</b>。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4-4 dT/dQ ============ -->
+  <section>
+    <h2>4-4.（補足①）温度センサは $\partial T/\partial Q$ で選ぶ <span class="tag">§4-4</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/da_sensor_select.png" alt="dT/dQ"></div>
+      <div>
+        <ul class="small">
+          <li>$\partial T/\partial Q$（発熱への温度の反応）は $W$ とは<b>別の感度</b></li>
+          <li>低感度の点(P4)は<b>明確に最悪</b>＝避けるべき（相関 r≈−0.83）</li>
+          <li>高感度側は感度だけで決まらず「<b>場の代表性</b>」も効く</li>
+        </ul>
+        <div class="box small"><b>センサの価値＝感度 × 場の代表性</b>。$W$（変位観測点）と $\partial T/\partial Q$（温度センサ）は役割が別。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STEP5 gappy (+math) ============ -->
+  <section>
+    <section>
+      <h2>STEP 5. 全温度場を gappy-POD で復元 <span class="tag">§5</span></h2>
+      <div class="cols">
+        <div class="center"><img class="fig figw" src="img/da_field.png" alt="全場復元"></div>
+        <div>
+          <ul class="small">
+            <li>推定5点温度から <b>全20,696セル</b>を復元</li>
+            <li>モードの混ぜ方(5個の数)を5点から逆算 → 全セルへ展開</li>
+            <li>物理的な型に限定するので少数点でも高精度</li>
+          </ul>
+        </div>
+      </div>
+      <p class="hint">▼ 数式補足：gappy-POD の式とコード</p>
+    </section>
+    <section>
+      <h2>数式補足：gappy-POD <span class="tag sup">01 §3 / 02</span></h2>
+      <p class="center">$$\hat u=\bar u+U_r a,\qquad a=(U_r[P,:])^{+}(u[P]-\bar u[P])$$</p>
+      <pre><code class="language-python" data-trim data-noescape>
+def gappy(T5):                          # 5点温度→全場
+    a,_,_,_ = np.linalg.lstsq(U[pod_cells,:],   # 5×5の正方連立を解く
+                              T5 - mean[pod_cells], rcond=None)
+    return mean + U @ a                 # 全20,696セルへ展開
+      </code></pre>
+      <p class="small">5点(=モード数)なので $5\times5$ の正方問題。Q-DEIM が良条件に選ぶので解が安定。</p>
+    </section>
+  </section>
+
+  <!-- ============ STEP6 usefulness ============ -->
+  <section>
+    <h2>STEP 6.【有用性】観測構成を変えて比較 <span class="tag">§6</span></h2>
+    <div class="cols">
+      <div class="center"><img class="fig" src="img/da_compare_rmse.png" alt="有用性比較"></div>
+      <div>
+        <table>
+          <tr><th>観測構成</th><th>加熱期RMSE</th></tr>
+          <tr><td>同化なし</td><td>4.585 K</td></tr>
+          <tr><td>温度1点(低感度)</td><td>1.036 K</td></tr>
+          <tr><td>温度1点(高感度)</td><td>0.617 K</td></tr>
+          <tr><td>温度2点</td><td>0.503 K</td></tr>
+          <tr><td><b>温度2点＋変位2点</b></td><td><b>0.160 K</b></td></tr>
+        </table>
+        <p class="small">同化なし4.6K → 最良0.16K（<b>約29倍</b>）。変位を足すと決定的。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONCLUSION ============ -->
+  <section class="center">
+    <h2 style="text-align:center;">結論</h2>
+    <ol class="lead" style="display:inline-block;text-align:left;">
+      <li><b>データ同化が必須</b>：同化なし4.6K → 最良0.16K（約29倍）</li>
+      <li><b>代表点は勘でなく POD＋Q-DEIM</b>：0.014Kでre現</li>
+      <li><b>観測点の選定が効く</b>：温度は $\partial T/\partial Q$、<b>変位は $W=K^{-1}H$ の高い上端</b></li>
+      <li><b>変位観測が決定的</b>：温度2点＋変位2点で温度だけの3倍精度</li>
+      <li>ただし $Q,h$ の同定・外挿には限界（可同定性）</li>
+    </ol>
+    <p class="small">数式の詳細は <code>01_pod_qdeim_algorithm.md</code> ／ 本編は <code>02_full_story.md</code></p>
+  </section>
+
+</div></div>
+<div class="footer">POD選定ROM × データ同化 ― sample/106</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true, width: 1280, height: 800, margin: 0.04, minScale: 0.2, maxScale: 2.0,
+    slideNumber: 'c/t', navigationMode: 'grid',
+    plugins: [ RevealHighlight, RevealMath.MathJax3, RevealNotes ],
+    math: {
+      mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+      tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    }
+  });
+</script>
+</body>
+</html>
