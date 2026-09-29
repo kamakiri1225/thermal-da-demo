@@ -419,11 +419,12 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 </div>
 </div>
 <div style="flex:1.08"><img src="img/blog_oi_disp_selection.png" alt="高W低Wの比較">
-<p class="cap">同じ「変位2点」でも置く場所で効果が変わる。
-同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>
+<p class="cap"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2の1点に固定</strong>し、
+<strong>変えたのは変位2点の置き場所だけ</strong>。同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>
 </div>
-<div class="key" style="flex:0 0 auto">変位センサは<strong>熱感度 \(W\) の高い点</strong>（固定面から遠い上端）に置くと効く<br>
-<span style="font-weight:400;font-size:.88em">底面は拘束されて動けないため、測っても情報が少ない</span></div>
+<div class="key" style="flex:0 0 auto">変位センサは<strong>熱感度 \(W\) の高い点</strong>（固定面から遠い上端）に置くと効く。底面は拘束されて動けず、測っても情報が少ない<br>
+<span style="font-weight:400;font-size:.86em">右図で青（高W）がまだ真値からずれるのは、この比較が<strong>①OI＝\(B\) 固定（課題①）②温度1点だけ ③注目量 \(U_z(A)-U_z(O)\) そのものは測っていない</strong>という条件だから。
+EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように一致する</strong>（0.16 µm）。この図の目的は絶対精度ではなく<strong>置き場所の効きの比較</strong></span></div>
 </section>
 
 <!-- 20 -->
