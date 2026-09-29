@@ -159,6 +159,71 @@ $$\varepsilon_\mathrm{thermal}=\alpha\,\Delta T$$
 - **渡す**：FEM 節点ごとの温度（OpenFOAM の `solid/T` を最寄り節点へ内挿）＋材料定数（ $E,\nu,\alpha$ ）＋基準温度 $T_\mathrm{ref}$ ＋境界拘束（底面固定）。
 - **返る**：各節点の変位 $u=(u_x,u_y,u_z)$ 。
 
+#### なぜ「内挿」が要るのか ― 2つのソルバは同じ点を見ていない
+
+さらっと「内挿」と書きましたが、ここは**連成で最初につまずく所**なので図解します。
+
+問題はこうです。OpenFOAMが温度を持っているのは**セルの中心**（有限体積法だから）。
+いっぽうFrontISTRが温度を必要とするのは**節点**（有限要素法だから）。
+**同じ形状を解いていても、値が乗っている場所が違います**。
+しかもメッシュも別物で、本ケースでは **CFDセル20,696個 に対して FEM節点5,040個**です。
+
+![OpenFOAMからFrontISTRへの温度マッピング](img/blog001_mapping.png)
+
+*z=50 mm断面で見た様子（t=300 s）。**A**：色付きの点がCFDセル中心、黒丸がFEM節点。
+重ねると**互いにずれている**のが分かる。**B**：1つの節点について、近い8個のセルを距離の近い順に並べ、
+重み $w=1/d$ で加重平均する様子。**C**：こうして全節点に温度が乗った状態。これをFrontISTRへ渡す。*
+
+**Bの中身を数字で**：この節点の近くには2.32〜4.19 mmの距離に8個のセルがあり、
+温度は24.16〜24.63 ℃とばらついています。距離の逆数で重みを付けると
+1番近いセルが0.186、8番目が0.102の重みになり、加重平均は **24.413 ℃**。
+これがこの節点の温度になります。式で書くと:
+
+$$T_p=\frac{\sum_{c\in\mathcal N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{pc}},
+\qquad w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}$$
+
+**実装はここにあります**：
+[`102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py`](../../102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py)
+
+| 関数 | 役割 |
+|---|---|
+| `load_solid_cell_temperatures()` | OpenFOAMの `<時刻>/solid/C`（セル中心）と `<時刻>/solid/T`（温度）を読む |
+| `align_cell_centers_to_node_mesh()` | 2つの点群のバウンディングボックス中心を合わせて平行移動（回転・拡大はしない） |
+| `interpolate_to_nodes()` | **各節点について最近傍 $k=8$ 個から逆距離加重**（上の式） |
+
+核心部分は10行ほどです:
+
+```python
+for idx in range(n_nodes):
+    d = np.linalg.norm(cell_centers - node_coords[idx], axis=1)  # 全セルまでの距離
+    nearest = np.argsort(d)[:k]                                   # 近い順にk個
+    dn = d[nearest]
+    if dn[0] < 1e-9:                    # 節点がセル中心と一致したら
+        result[idx] = cell_temperatures[nearest[0]]               # その値をそのまま
+        continue
+    w = 1.0 / dn                                                  # 重み＝距離の逆数
+    result[idx] = np.sum(w * cell_temperatures[nearest]) / np.sum(w)
+```
+
+**事前に必要な操作**：セル中心の座標ファイル `C` はOpenFOAMが自動では書かないので、
+先に出しておきます。
+
+```bash
+postProcess -func writeCellCentres -region solid -time 300
+```
+
+**注意点**
+
+- **セル順序が命**：`C` と `T` は同じセル順で書かれるので素直にzipできますが、
+  **並列計算のままだと順序が分割ごとになる**ため `reconstructPar` が必要です。
+- **外挿はしていない**：IDWは近傍の平均なので、**元の温度範囲を超えません**。
+  実際、節点温度は22.64〜25.77 ℃で、CFDセルの22.64〜25.78 ℃にきれいに収まっています。
+- **境界面がやや鈍る**：セル中心は表面上に無いため、表面節点は内側のセルから内挿されます。
+  精度を上げるなら境界パッチ値も候補に含める方法がありますが、本研究では
+  温度差が0.5 ℃程度の緩やかな場なので影響は小さいと判断しています。
+
+（POD復元した温度を同じ手順でFEMへ渡す話は [blog_004 §7-1](blog_004_pod_selected_rom.md) にあります。）
+
 底面を固定し上面を自由にしているので、**上面がいちばん動きます**。ヒータ側の上面（A）と
 反対側の上面（O）で上向き変位 $U_z$ を比べると、片側加熱の「反り」が数値で見えます。
 この 2 点の差 $U_z(\mathrm A)-U_z(\mathrm O)$ が、後のブログで「注目量（QoI）」として何度も出てきます。
