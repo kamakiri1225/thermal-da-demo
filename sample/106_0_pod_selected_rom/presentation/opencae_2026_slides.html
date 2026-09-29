@@ -119,16 +119,20 @@
 <!-- 5 -->
 <section>
 <h2>データ同化の種類と、今回の選択</h2>
-<table style="font-size:.56em;flex:1 1 0;min-height:0">
+<table style="font-size:.5em;flex:1 1 0;min-height:0">
 <tr><th style="width:11%">分類</th><th style="width:15%">手法</th><th>考え方</th><th style="width:25%">特徴</th></tr>
 <tr><td rowspan="4"><strong>逐次<br>データ同化</strong><br><span style="font-size:.85em;color:#556">観測が来るたび<br>その場で更新</span></td>
     <td style="background:#fff3f0"><strong>OI</strong>（最適内挿）</td>
-    <td>共分散 \(B\) を<em>固定</em>して更新式を1回解く</td>
+    <td>共分散 \(B\) を<strong>固定したまま</strong>使う（時間発展させない）</td>
     <td>最も軽い・仕組みが明快<br><strong>パラメータ推定は苦手</strong></td></tr>
-<tr><td>カルマンフィルタ</td><td>\(B\) を線形モデルで時間発展させる</td><td>線形・ガウスなら最適<br>高次元では共分散が巨大</td></tr>
+<tr><td>カルマンフィルタ</td>
+    <td><strong>物理モデルで共分散そのものを逐次計算する</strong><br>
+        \( P^f_k = M\,P^a_{k-1}M^{\mathsf T}+Q \)　（\(M\)＝モデルの線形化）</td>
+    <td>線形・ガウスなら最適<br>高次元では \(P\) が巨大で扱えない</td></tr>
 <tr><td style="background:#fff3f0"><strong>EnKF</strong>（アンサンブル）</td>
-    <td>多数の<em>分身</em>の散らばりから \(B\) を作る</td>
-    <td>高次元の場に強い<br><strong>パラメータも同時推定できる</strong></td></tr>
+    <td>上の \(P\) を直接持たず、<strong>各メンバーを前進させ、アンサンブル平均からの偏差で標本共分散として計算する</strong><br>
+        \( P^f\simeq\dfrac{1}{N-1}\,dZ\,dZ^{\mathsf T},\quad dZ^{(m)}=z^{(m)}-\bar z \)</td>
+    <td>高次元でも少数メンバーで済む<br><strong>パラメータも同時推定できる</strong></td></tr>
 <tr><td>粒子フィルタ</td><td>重み付き粒子で分布そのものを表す</td><td>非ガウス・多峰でもOK<br><strong>高次元で粒子が縮退</strong></td></tr>
 <tr><td rowspan="2"><strong>変分法</strong><br><span style="font-size:.85em;color:#556">時間窓全体を<br>まとめて最適化</span></td>
     <td>3D-Var</td><td>ある時刻の評価関数 \(J(x)\) を最小化</td><td>共分散を陽に持たなくてよい</td></tr>
