@@ -8,7 +8,7 @@
 
 ### 課題（箇条書き3行）
 
-- 工作機械の加工誤差のうち、**熱変位が占める割合は40〜70 %** であり、最大の誤差要因である。
+- 工作機械の加工誤差のうち、**熱変位が占める割合は最大75 %** であり、最大の誤差要因である。
 - 対策は「**熱的に素性の良い設計**」「**温度制御**」「**モデルによる補償**」の3系統だが、
   実用の主役は補償であり、その前提は**熱変形を正しく予測できること**である。
 - しかし予測が難しい。**TCP変位は温度の絶対値ではなく温度勾配で決まる**ため、
@@ -23,17 +23,23 @@
 
 ## 各行の根拠（引用元）
 
-### 1行目：40〜70 %
+### 1行目：最大75 %（2026-09-29 訂正）
 
-- **Bryan, J. B. (1990)** "International Status of Thermal Error Research (1990)",
-  *CIRP Annals* 39(2), 645–656.
-  → 熱誤差が全誤差の **40〜70 %** を占めるという、この分野で最も広く引用される数字。
-- **Teshima, Y., Tanaka, S., Kizaki, T., Sugita, N. (2024)**
-  *CIRP Journal of Manufacturing Science and Technology* 55, 403–410.
-  → 冒頭で「thermal errors in machine tools account for **up to 70 %** of machining errors」と記述。
-  2024年の論文でも同じ数字が使われており、**現在も有効な数字**として引ける。
+**訂正**：当初「40〜70 %［Bryan 1990］」としましたが、Bryan (1990) は有料で**原典を確認できません**でした。
+代わりに**全文無料で確認できた「最大75 %」**に差し替えます。
 
-**スライドでの書き方の例**：「熱変位は加工誤差の40〜70 %を占める［Bryan 1990］」
+- **Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G. (2024)**
+  "Machine Tool Thermal Error Measurement and Prediction via Wireless Microscope",
+  *Manufacturing Letters* 41, 1440–1451（オープンアクセス）
+  📄 <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076>
+  > "Thermal errors can contribute **up to 75 percent** of the overall machining errors of a machined part."
+- **Bünger, A. et al. (2023)** arXiv:2306.12736（全文無料）
+  📄 <https://arxiv.org/abs/2306.12736>
+  > "According to **Mayr et al., 2012, the thermal error accounts for 75 %** of the total manufacturing error."
+
+→ どちらも **Mayr et al. (2012)** を典拠としており、**孫引きの連鎖が確認できる**。
+
+**スライドでの書き方の例**：「熱変位は加工誤差の**最大75 %**を占める［Mayr et al. 2012］」
 
 ### 2行目：対策の3系統
 
@@ -109,6 +115,11 @@
   3行目の横に「温度は合っているのに変位がずれている」グラフがあると理想。
   → 本研究の `oi_fullsolver_compare.png`（温度RMSEは0.09 Kまで下がるのに $Q$ は8.9 W止まり）は
   **まさにこの構図**なので、導入の伏線として使える。
+
+## 詳しい実務調査
+
+熱変位補正が実際に何をしているか、メーカー各社（オークマ・マザック・DMG MORI・FANUC）が
+どう実装しているかは、**`thermal_compensation_survey.md`** に無料リンク付きでまとめています。
 
 ## 確認しておくとよい点
 
