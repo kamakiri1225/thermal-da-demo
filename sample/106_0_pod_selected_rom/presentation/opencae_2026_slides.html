@@ -146,14 +146,29 @@
 <section>
 <h2>OpenFOAM から FrontISTR へ ― 節点補間と双子実験</h2>
 <p style="flex:0 0 auto">CFDは<em>セル中心</em>、FEMは<em>節点</em>に値を持つ。<strong>逆距離加重（IDW）</strong>で温度を節点へ写像した。</p>
-<div class="fig"><img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
+<div class="two">
+<div style="flex:1.25"><img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
 <p class="cap">①有限体積法はセル中心、有限要素法は節点に値を置くので<strong>位置がずれる</strong>。
-②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する（近いほど重い）</p></div>
-<div class="math">
-<div><b>実際の値</b> 本ケースは \(k=8\)。ある節点の近傍8セルは距離 2.32〜4.19 mm、温度 24.16〜24.63 ℃
-　<span class="arrow">→</span> 加重平均 <strong>24.413 ℃</strong>（CFD 20,696セル → FEM 5,040節点）</div>
-</div>
-<div class="key" style="margin-top:0">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、<br>
+②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する</p></div>
+<div class="txt">
+<h3>これを使うと何ができるか</h3>
+<ul style="font-size:.9em">
+<li>OpenFOAMの<strong>熱流体固体連成（CHT）</strong>で求めた温度をFrontISTRへ引き継ぎ、
+<strong>熱膨張（熱変位）まで一気通貫</strong>で計算できる</li>
+<li>CHTは<em>流体そのものを解く</em>ので、<strong>熱伝達率を仮定せずに済む</strong>
+（対流が自然に決まる。輻射も同じ枠組みで扱える ― 本ケースはOFF）</li>
+<li>逆に、計算後に壁面熱流束と壁面温度から<strong>熱伝達率を診断</strong>することもできる</li>
+</ul>
+<table style="font-size:.52em;margin-top:6px">
+<tr><th>項目</th><th>本ケースの値</th></tr>
+<tr><td>補間に使う近傍数</td><td>\(k=8\)</td></tr>
+<tr><td>近傍セルまでの距離</td><td>2.32 〜 4.19 mm</td></tr>
+<tr><td>近傍セルの温度</td><td>24.16 〜 24.63 ℃</td></tr>
+<tr class="hi"><td><strong>加重平均の結果</strong></td><td><strong>24.413 ℃</strong></td></tr>
+<tr><td>規模</td><td>CFD 20,696セル → FEM 5,040節点</td></tr>
+</table>
+</div></div>
+<div class="key">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、<br>
 人工的にノイズを載せた観測を作って<strong>双子実験（正解が分かる検証）</strong>とした</div>
 </section>
 
