@@ -2,9 +2,9 @@
 
 比較する構成:
   (0) 同化なし（free run: でたらめ初期のまま前進、補正しない）
-  (1) 温度1点（低感度 dT/dQ 最小ノード）
-  (2) 温度1点（高感度 dT/dQ 最大ノード）
-  (3) 温度2点（高感度上位2ノード）
+  (1) 温度1点（熱感度 W=|d(Uz(A)-Uz(O))/dT_i| が最小のノード）
+  (2) 温度1点（熱感度 W が最大のノード）
+  (3) 温度2点（熱感度 W 上位2ノード）
   (4) 温度2点 + 変位2点（上面Uz、FrontISTRのPODモード応答で観測化）
 
 指標: 全5点温度の推定RMSEの時刻歴と最終値、発熱量Qの誤差。
@@ -260,7 +260,7 @@ def main():
 
     yaml.safe_dump({n:{"final_rmse_K":float(results[n][0][-1]),
         "final_Q_W":float(results[n][1][-1]*15)} for n in names}|
-        {"dTdQ":[float(x) for x in sens],"hi_node":hi,"lo_node":lo},
+        {"W_dAO_dT_um_per_K":[float(x) for x in sens],"hi_node":hi,"lo_node":lo},
         open(os.path.join(RES,"da_compare.yaml"),"w"),allow_unicode=True)
     print("[cmp] wrote da_compare_rmse.png, da_compare_traj.png, da_compare.yaml")
 

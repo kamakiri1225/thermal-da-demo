@@ -37,6 +37,14 @@
           justify-items:center;align-items:center;overflow:hidden}
  .two>div.txt{display:flex;flex-direction:column;justify-content:center;align-items:stretch}
  .two img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ /* 図をスライド幅いっぱいに出し、はみ出す分は枠内スクロールで見る */
+ .scrollfig{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;
+            margin-left:var(--pad);margin-right:var(--pad);
+            border:1px solid #d7dfe9;border-radius:6px;background:#fff}
+ .scrollfig img{width:100%;max-width:100%;max-height:none;height:auto;display:block}
+ .scrollfig::-webkit-scrollbar{width:11px}
+ .scrollfig::-webkit-scrollbar-thumb{background:#9fb3c8;border-radius:6px}
+ .scrollhint{font-size:.42em;color:#7a8a9a;text-align:right;margin:2px var(--pad) 0;flex:0 0 auto}
  .cap{font-size:.45em;color:#556;text-align:center;margin:4px 0 0;line-height:1.42;flex:0 0 auto}
  .reveal table{font-size:.55em;border-collapse:collapse;width:100%;margin:.2em 0}
  .reveal table th{background:#eef2f8;color:var(--blue);padding:6px 9px;border:1px solid #b9c6d6}
@@ -159,26 +167,12 @@
 <div style="flex:1.25"><img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
 <p class="cap">①有限体積法はセル中心、有限要素法は節点に値を置くので<strong>位置がずれる</strong>。
 ②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する</p></div>
-<div class="txt">
-<h3>これを使うと何ができるか</h3>
-<ul style="font-size:.9em">
-<li>OpenFOAMの<strong>熱流体固体連成（CHT）</strong>で求めた温度をFrontISTRへ引き継ぎ、
-<strong>熱膨張（熱変位）まで一気通貫</strong>で計算できる</li>
-<li>CHTは<em>流体そのものを解く</em>ので、<strong>熱伝達率を仮定せずに済む</strong>
-（対流が自然に決まる。輻射も同じ枠組みで扱える ― 本ケースはOFF）</li>
-<li>逆に、計算後に壁面熱流束と壁面温度から<strong>熱伝達率を診断</strong>することもできる</li>
-</ul>
-<table style="font-size:.52em;margin-top:6px">
-<tr><th>項目</th><th>本ケースの値</th></tr>
-<tr><td>補間に使う近傍数</td><td>\(k=8\)</td></tr>
-<tr><td>近傍セルまでの距離</td><td>2.32 〜 4.19 mm</td></tr>
-<tr><td>近傍セルの温度</td><td>24.16 〜 24.63 ℃</td></tr>
-<tr class="hi"><td><strong>加重平均の結果</strong></td><td><strong>24.413 ℃</strong></td></tr>
-<tr><td>規模</td><td>CFD 20,696セル → FEM 5,040節点</td></tr>
-</table>
-</div></div>
-<div class="key">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、<br>
-人工的にノイズを載せた観測を作って<strong>双子実験（正解が分かる検証）</strong>とした</div>
+<div style="flex:1.35"><img src="../docs/img/cht_to_fem_anim.gif" alt="OpenFOAMからFrontISTRへの一気通貫">
+<p class="cap">左＝OpenFOAM（CHT）で解いた温度、右＝その温度をFrontISTRに渡した熱変形（×6000誇張）。
+<strong>温度を引き継いで熱変位まで一気通貫</strong>で出せる。CFD 20,696セル → FEM 5,040節点、\(k=8\)</p></div>
+</div>
+<div class="key">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、ノイズを載せた観測を作って<strong>双子実験</strong>とした<br>
+<span style="font-weight:400;font-size:.88em">CHTは流体を解くので<strong>熱伝達率を仮定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。逆に計算後の壁面熱流束から熱伝達率を診断もできる</span></div>
 </section>
 
 <!-- 7 -->
@@ -194,9 +188,10 @@
 \( K_Q=\dfrac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}\;(\neq 0) \)
 　したがって \( Q^a=Q^b+K_Q\,(y-Hx^b) \) で \(Q\) が動く</div>
 </div>
-<div class="fig"><img src="../docs/img/oi_fullsolver_compare.png" alt="実ソルバOIの結果">
-<p class="cap">温度は真値に追従する（最終RMSE 0.090〜0.113 K）が、<strong>発熱量 \(Q\) は 8.8〜9.0 W</strong>（真値15 W）で頭打ち。
-\(\sigma_Q\) を4条件振っても改善しない</p></div>
+<div class="scrollfig"><img src="../docs/img/oi_fullsolver_compare.png" alt="実ソルバOIの結果"></div>
+<p class="scrollhint">▲ 図は枠内をスクロールすると全体が見えます（12枚：温度4点・変位4点・\(Q\)・RMSE）</p>
+<p class="cap" style="margin:0 var(--pad)">温度は真値に追従する（最終RMSE 0.090〜0.113 K）が、<strong>発熱量 \(Q\) は 8.8〜9.0 W</strong>（真値15 W）で頭打ち。
+\(\sigma_Q\) を4条件振っても改善しない</p>
 <div class="key" style="margin-top:0">\(B_{TQ}=\sigma_Q^2 s\) を<strong>決め打ちしている</strong>のが限界の正体<br>
 <span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を大きくしても\(Q\)は9 W付近で頭打ち</span></div>
 </section>
@@ -244,8 +239,8 @@ PODで温度場を<strong>2モード（99.9 %）</strong>に圧縮し、
 5点の集中定数ROMを校正（残差0.0142 K）
 <br><span class="arrow">→ 0→600 s が 31 ms</span>（分オーダー → ミリ秒）</div>
 <div class="fbox f-ok"><b>(2)への対策：感度による観測点の設計</b>
-FrontISTRの<strong>熱感度 \(W=K_s^{-1}H_T\)</strong> から、
-温度が変位にどう効くかを分析。
+FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何µm動くかの表）を1度だけ作り、
+<strong>よく動く点＝測る価値のある点</strong>として観測位置を決める。
 <strong>最適なセンサ位置が存在する</strong>ことを示す
 <br><span class="arrow">→ 同じ変位2点でも 2.43 K と 0.86 K</span></div>
 <div class="fbox f-ok"><b>さらに：観測の価値を一般化</b>
@@ -337,8 +332,8 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <div><img src="../docs/img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元">
 <p class="cap">マゼンタの5点だけを測り、<br>そこから全場を復元したアニメーション</p></div>
 </div>
-<div class="key" style="flex:0 0 auto">解く行列は<strong>たった5×5</strong>。逆行列1回と行列ベクトル積1回で全場が出る<br>
-<span style="font-weight:400;font-size:.88em">Q-DEIMが「連立が解ける5点」を選んでいるから、\(U_{r,P}\) が特異にならない</span></div>
+<div class="key" style="flex:0 0 auto">解く行列は<strong>たった5×5</strong>。測っていない<strong>20,691セル</strong>でもRMSE <strong>0.00081 K</strong>（最大0.017 K＝変動幅5.78 Kの0.29 %）<br>
+<span style="font-weight:400;font-size:.88em">前半60枚でPODと5点を作り<strong>後半61枚で検証しても0.0023 K</strong>。観測ノイズ0.3 Kより2桁小さい／Q-DEIMが「連立が解ける5点」を選ぶので \(U_{r,P}\) が特異にならない</span></div>
 </section>
 
 <!-- 15 -->
@@ -346,16 +341,21 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <h2>結果③ 温度から熱変形へ</h2>
 <p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
 <div class="fig"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
-<p class="cap">黒太線＝FrontISTR真値。同化なし4.585 K／温度1点（低感度）1.036 K／温度2点 0.503 K／
-<strong>温度2点＋変位2点 0.160 K</strong>（変位差誤差も 0.165 µm）</p></div>
-<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.16 K（約29倍の改善）</strong><br>
-<span style="font-weight:400;font-size:.88em">実務では温度→変位を毎回FEMで解かず、線形化した感度 \(W=K_s^{-1}H_T\) で直接変位を出せる</span></div>
+<p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 0.841・0.534 K／温度2点 0.272 K／
+<strong>温度2点＋変位2点 0.147 K</strong>（変位差の誤差 0.162 µm）。凡例の高低は<strong>熱感度 \(W\)</strong>（温度1 Kあたり変位が何µm動くか）の大小</p></div>
+<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.15 K（約31倍の改善）</strong><br>
+<span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
 </section>
 
 <!-- 16 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
-<p style="flex:0 0 auto">FrontISTRで熱感度 \(W=K_s^{-1}H_T\) を1度だけ求め、その<strong>行ノルムが大きい点</strong>に変位センサを置いた。</p>
+<p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
+<div class="steps" style="margin-bottom:6px">
+<div><b>① FEMを毎回解かなくてよい</b>温度場 \(T\) から変位が \(u=W\,\delta T\) の<strong>行列1回の掛け算</strong>で出る（分オーダー → ミリ秒）</div>
+<div><b>② 変位センサの置き場所が決まる</b>\(W\) の<strong>行ノルムが大きい点</strong>＝よく動く点。測れば情報が多い（固定面から遠い上端）</div>
+<div><b>③ 効く温度が分かる</b>\(W\) の<strong>列</strong>を見れば、どの場所の温度が変形を支配しているかが分かる＝温度センサの設計根拠</div>
+</div>
 <div class="fig"><img src="../docs/img/blog_oi_disp_selection.png" alt="高W低Wの比較">
 <p class="cap">同じ「変位2点」でも置く場所で効果が変わる。
 同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>

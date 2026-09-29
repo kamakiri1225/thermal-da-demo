@@ -39,6 +39,14 @@ def disp_timeseries():
     fig.savefig(out,dpi=140); plt.close(fig); print("wrote",out)
 
 
+# 凡例表記は「熱感度 W = |d(Uz(A)-Uz(O))/dT_i|」で統一する。
+# （発熱への温度感度 dT/dQ とは別物なので、混同を避けて図には出さない）
+RENAME={"同化なし(free run)":"同化なし",
+        "温度1点(熱感度 低)":"温度1点:P3 底面(熱感度W 低 0.04 µm/K)",
+        "温度1点(熱感度 高)":"温度1点:P1 中央高さ(熱感度W 高 0.65 µm/K)",
+        "温度2点(熱感度 上位2)":"温度2点:P1+P2(熱感度W 上位2)",
+        "温度2点+変位2点":"温度2点+変位2点(上面A/O)"}
+
 def disp_da_timeseries():
     """EnKF/OI比較用：FrontISTR真値を太線で重ねた変位差の時系列。"""
     d=np.load(os.path.join(RES,"da_compare_displacement.npz"), allow_pickle=True)
@@ -46,11 +54,7 @@ def disp_da_timeseries():
     est=d["estimate_u_um"]
     names=[str(x) for x in d["names"]]
     # 凡例をわかりやすく（どの点か・何の感度かを明記）
-    rename={"同化なし(free run)":"同化なし",
-            "温度1点(低感度)":"温度1点:P4底(dT/dQ小)",
-            "温度1点(高感度)":"温度1点:P2ヒータ側(dT/dQ大)",
-            "温度2点(高感度)":"温度2点:P2+P0",
-            "温度2点+変位2点":"温度2点+変位2点(高W上端)"}
+    rename=RENAME
     names=[rename.get(n,n) for n in names]
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
@@ -73,8 +77,8 @@ def disp_da_timeseries():
     fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=13.5,weight="bold",y=0.985)
     hd,lb=ax.get_legend_handles_labels()
     fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=11,frameon=False)
-    fig.text(0.5,0.022,"変位差RMSE: 温度1点 低感度1.19／高感度0.99µm（温度センサの場所差はほぼ出ない）"
-             "→ 変位2点を足すと0.17µm（約6倍改善）",ha="center",fontsize=11,color="#333")
+    fig.text(0.5,0.022,"変位差RMSE: 温度1点 0.79／1.13 µm（温度センサ1点では熱感度Wの高低で逆転もする）"
+             "→ 温度2点で0.34µm、変位2点を足すと0.16µm（約5倍改善）",ha="center",fontsize=11,color="#333")
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
@@ -85,11 +89,7 @@ def disp_da_timeseries_points():
     t=d["time"]; tru=d["truth_u_um"]              # (time,2)
     est=d["estimate_u_um"]                         # (seed,cfg,time,2)
     names=[str(x) for x in d["names"]]
-    rename={"同化なし(free run)":"同化なし",
-            "温度1点(低感度)":"温度1点:P4底(dT/dQ小)",
-            "温度1点(高感度)":"温度1点:P2ヒータ側(dT/dQ大)",
-            "温度2点(高感度)":"温度2点:P2+P0",
-            "温度2点+変位2点":"温度2点+変位2点(高W上端)"}
+    rename=RENAME
     names=[rename.get(n,n) for n in names]
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
     ht=(t>0)&(t<=300); rms={}

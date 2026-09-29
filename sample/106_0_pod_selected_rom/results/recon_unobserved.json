@@ -1,0 +1,9 @@
+{
+  "n_obs": 5,
+  "n_unobs": 20691,
+  "rmse_obs": 0.0,
+  "rmse_unobs": 0.0008099971849691848,
+  "rmse_unobs_max": 0.01680243914353241,
+  "rmse_unobs_holdout": 0.002344087867404609,
+  "worst_cell_rmse": 0.002211719217816297
+}
