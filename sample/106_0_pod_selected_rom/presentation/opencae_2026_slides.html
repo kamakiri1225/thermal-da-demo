@@ -378,9 +378,14 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <section>
 <h2>結果③ 温度から熱変形へ</h2>
 <p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
-<div class="fig"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
+<div class="two" style="gap:18px">
+<div style="flex:.80"><img src="../docs/img/disp_obs_points.png" alt="A・Oの位置">
+<p class="cap"><strong>A＝上面のヒータ側(+X)</strong>、<strong>O＝上面の反対側(−X)</strong>（ともに z=100.5 mm）。
+青 P0〜P4＝温度の代表点。A側が持ち上がりO側が下がるので、差 \(U_z(A)-U_z(O)\) が<strong>上面の反り</strong>になる</p></div>
+<div style="flex:1.34"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
 <p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 0.841・0.534 K／温度2点 0.272 K／
-<strong>温度2点＋変位2点 0.147 K</strong>（変位差の誤差 0.162 µm）。凡例の高低は<strong>熱感度 \(W\)</strong>（温度1 Kあたり変位が何µm動くか）の大小</p></div>
+<strong>温度2点＋変位2点 0.147 K</strong>（変位差の誤差 0.162 µm）。凡例の高低は<strong>熱感度 \(W\)</strong>の大小</p></div>
+</div>
 <div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.15 K（約31倍の改善）</strong><br>
 <span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
 </section>
