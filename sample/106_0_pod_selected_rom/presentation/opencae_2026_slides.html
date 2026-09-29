@@ -270,14 +270,24 @@ FrontISTRの<strong>熱感度 \(W=K_s^{-1}H_T\)</strong> から、
 <!-- 11 -->
 <section>
 <h2>代表点の選択 ― Q-DEIM</h2>
-<p style="flex:0 0 auto">ROMのノードを<strong>勘で置くのをやめ</strong>、PODモードから<em>貪欲法</em>で5点を自動選定した。
-①一番強い点を選ぶ → ②その方向を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返し）</p>
-<div class="fig"><img src="../docs/img/qdeim_order.png" alt="Q-DEIMの選択順序">
-<p class="cap">赤＝新しく追加された点、灰色＝すでに選んだ点。残差 0.0369→0.0266→0.0192→0.0173→0.0142→<strong>0</strong>。
-<strong>1点目はヒータ最近傍ではなく中央高さ</strong>（21,−2,52 mm）。2点目は反対側（−14,33,52）、3点目でヒータ側（37,7,51）、
-4・5点目で底面の両側（±35,1,1）へ ― <strong>場を広く覆うように広がる</strong></p></div>
-<div class="key">この手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
-<span style="font-weight:400;font-size:.9em">ランダム5点と比べると Q-DEIM 0.00081 K／中央値 0.00220 K／<strong>最悪 1.396 K（約1700倍）</strong>
+<div class="math" style="margin-bottom:5px">
+<div><b>なぜ自動で選ぶのか</b>　20,696セルから5点を選ぶ組み合わせは \( \binom{20696}{5}\approx3.2\times10^{19} \) 通り。
+1組1マイクロ秒で試しても<strong>約100万年</strong>かかり、全探索は不可能</div>
+<div><b>貪欲法（greedy）で1点ずつ足す</b>　①PODモードの値がいちばん大きい点を選ぶ →
+②その点で説明できる分を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返す）。
+判断の材料は<strong>PODモード行列</strong>（各セルが持つモードの値）</div>
+</div>
+<div class="two">
+<div><img src="../docs/img/qdeim_order.png" alt="選択の順序">
+<p class="cap">赤＝新しく追加、灰＝すでに選んだ点。<strong>1点目はヒータ最近傍ではなく中央高さ</strong>、
+2点目は反対側、4・5点目で底面へ ― 場を広く覆うように広がる</p></div>
+<div><img src="../docs/img/qdeim_value.png" alt="残差の減衰とランダムとの比較">
+<p class="cap">左：1点足すごとに<strong>まだ説明できていない情報</strong>が減り、5点でゼロ。
+右：<strong>5点だけ測って全20,696セルの温度場を復元したときの誤差</strong>の分布（ランダム200通り）</p></div>
+</div>
+<div class="key">手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
+<span style="font-weight:400;font-size:.9em">全20,696セルの<strong>復元温度RMSE</strong>で比較すると
+Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 1.396 K（約1700倍）</strong>
 ― 価値は「大外れを確実に避ける」こと</span></div>
 </section>
 
