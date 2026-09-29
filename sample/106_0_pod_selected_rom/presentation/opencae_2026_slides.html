@@ -351,14 +351,22 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
-<div class="steps" style="margin-bottom:6px">
-<div><b>① FEMを毎回解かなくてよい</b>温度場 \(T\) から変位が \(u=W\,\delta T\) の<strong>行列1回の掛け算</strong>で出る（分オーダー → ミリ秒）</div>
-<div><b>② 変位センサの置き場所が決まる</b>\(W\) の<strong>行ノルムが大きい点</strong>＝よく動く点。測れば情報が多い（固定面から遠い上端）</div>
-<div><b>③ 効く温度が分かる</b>\(W\) の<strong>列</strong>を見れば、どの場所の温度が変形を支配しているかが分かる＝温度センサの設計根拠</div>
+<div class="two" style="gap:24px">
+<div class="txt" style="flex:.92">
+<h3>熱感度 \(W\) で何ができるか</h3>
+<div class="flow" style="margin:0;gap:8px;flex:0 0 auto">
+<div class="fbox f-ok"><b>① FEMを毎回解かなくてよい</b>
+温度場から変位が \( u=W\,\delta T \) の<strong>行列1回の掛け算</strong>で出る（分オーダー <span class="arrow">→</span> ミリ秒）</div>
+<div class="fbox f-ok"><b>② 変位センサの置き場所が決まる</b>
+\(W\) の<strong>行ノルムが大きい点</strong>＝よく動く点。測れば情報が多い（固定面から遠い上端）</div>
+<div class="fbox f-ok"><b>③ 効く温度が分かる</b>
+\(W\) の<strong>列</strong>を見れば、どの場所の温度が変形を支配しているかが分かる＝<strong>温度センサの設計根拠</strong></div>
 </div>
-<div class="fig"><img src="../docs/img/blog_oi_disp_selection.png" alt="高W低Wの比較">
+</div>
+<div style="flex:1.08"><img src="../docs/img/blog_oi_disp_selection.png" alt="高W低Wの比較">
 <p class="cap">同じ「変位2点」でも置く場所で効果が変わる。
 同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>
+</div>
 <div class="key" style="flex:0 0 auto">変位センサは<strong>熱感度 \(W\) の高い点</strong>（固定面から遠い上端）に置くと効く<br>
 <span style="font-weight:400;font-size:.88em">底面は拘束されて動けないため、測っても情報が少ない</span></div>
 </section>
