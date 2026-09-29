@@ -399,10 +399,12 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 ④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ） ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
 <div class="scrollfig">
 <img src="../docs/img/sensitivity_derivation.png" alt="熱感度Wの導出">
+<img src="../docs/img/sensitivity_reference.png" alt="熱感度の基準">
 <img src="../docs/img/frontistr_sensitivity.png" alt="熱感度Wの空間分布">
 </div>
 <p class="scrollhint">▲ 枠内をスクロールすると④⑤（$W$の読み方・実データ・実装）と、
-<strong>熱感度 \(W\) の空間分布</strong>（赤＝よく動く上端／青＝動けない底面。灰色＝固定部近傍の除外域）が見えます</p>
+<strong>熱感度 \(W\) の空間分布</strong>が見えます。分布は<strong>固定した底面（\(U_z=0\)）を基準にした絶対変位</strong>で、
+上へ行くほど膨張が積み上がって大きく動く。実際に測る \(U_z(A)-U_z(O)\) は<strong>2点の相対変位</strong>で、一様な伸びが引き算で消えて「反り」だけが残る</p>
 <div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表<br>
 <span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
 </section>
