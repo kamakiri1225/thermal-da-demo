@@ -397,8 +397,12 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
 ①\(K_su=f_\mathrm{th}\) ②\(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\) ③\(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)
 ④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ） ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
-<div class="scrollfig"><img src="../docs/img/sensitivity_derivation.png" alt="熱感度Wの導出"></div>
-<p class="scrollhint">▲ 枠内をスクロールすると④⑤（$W$の読み方・実データ・実装）が見えます</p>
+<div class="scrollfig">
+<img src="../docs/img/sensitivity_derivation.png" alt="熱感度Wの導出">
+<img src="../docs/img/frontistr_sensitivity.png" alt="熱感度Wの空間分布">
+</div>
+<p class="scrollhint">▲ 枠内をスクロールすると④⑤（$W$の読み方・実データ・実装）と、
+<strong>熱感度 \(W\) の空間分布</strong>（赤＝よく動く上端／青＝動けない底面。灰色＝固定部近傍の除外域）が見えます</p>
 <div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表<br>
 <span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
 </section>
@@ -406,25 +410,15 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <!-- 19 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
-<p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
-<div class="two" style="gap:24px">
-<div class="txt" style="flex:.92">
-<h3>熱感度 \(W\) で何ができるか</h3>
-<div class="flow" style="margin:0;gap:8px;flex:0 0 auto">
-<div class="fbox f-ok"><b>① FEMを毎回解かなくてよい</b>
-温度場から変位が \( u=W\,\delta T \) の<strong>行列1回の掛け算</strong>で出る（分オーダー <span class="arrow">→</span> ミリ秒）</div>
-<div class="fbox f-ok"><b>② 変位センサの置き場所が決まる</b>
-\(W\) の<strong>行ノルムが大きい点</strong>＝よく動く点。測れば情報が多い（固定面から遠い上端）</div>
-<div class="fbox f-ok"><b>③ 効く温度が分かる</b>
-\(W\) の<strong>列</strong>を見れば、どの場所の温度が変形を支配しているかが分かる＝<strong>温度センサの設計根拠</strong></div>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2（36.5, 6.9, 50.8）mm の1点に固定</strong>し、
+<strong>変えたのは変位2点の置き場所だけ</strong>。高W＝上面 z=100.5 mm（6.33 / 4.45 µm/K）、低W＝底面近く z=5 mm（0.12 / 0.13 µm/K）。</p>
+<div class="scrollfig">
+<img src="../docs/img/wsel_obs_points.png" alt="P2と高W低W変位点の位置">
+<img src="../docs/img/blog_oi_disp_selection.png" alt="高W低Wの比較">
 </div>
-</div>
-<div style="flex:1.08"><img src="../docs/img/blog_oi_disp_selection.png" alt="高W低Wの比較">
-<p class="cap"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2の1点に固定</strong>し、
-<strong>変えたのは変位2点の置き場所だけ</strong>。同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>
-</div>
-<div class="key" style="flex:0 0 auto">変位センサは<strong>熱感度 \(W\) の高い点</strong>（固定面から遠い上端）に置くと効く。底面は拘束されて動けず、測っても情報が少ない<br>
-<span style="font-weight:400;font-size:.86em">右図で青（高W）がまだ真値からずれるのは、この比較が<strong>①OI＝\(B\) 固定（課題①）②温度1点だけ ③注目量 \(U_z(A)-U_z(O)\) そのものは測っていない</strong>という条件だから。
+<p class="scrollhint">▲ 上＝どこを測っているか（青 P2＝温度、赤＝高W変位2点、橙＝低W変位2点）／下＝結果。枠内スクロールで両方見えます</p>
+<div class="key" style="flex:0 0 auto">同じ「変位2点」でも置き場所で <strong>2.43 K → 0.86 K</strong>（同化なし 5.27 K／温度のみ 3.52 K）。底面は拘束されて動けず、測っても情報が少ない<br>
+<span style="font-weight:400;font-size:.86em">青（高W）がまだ真値からずれるのは<strong>①OI＝\(B\) 固定（課題①）②温度1点だけ ③注目量 \(U_z(A)-U_z(O)\) そのものは測っていない</strong>から。
 EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように一致する</strong>（0.16 µm）。この図の目的は絶対精度ではなく<strong>置き場所の効きの比較</strong></span></div>
 </section>
 
@@ -445,13 +439,13 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <!-- 21 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
-<p style="flex:0 0 auto">「どこに置くか」は、観測がもたらす<strong>分散の減少量</strong>で定量化できる。
-\( \Delta(X,y)=\dfrac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r} \)</p>
-<div class="fig"><img src="../docs/img/blog005_delta_table.png" alt="対象×観測の価値表">
-<p class="cap">行＝推定したい量、列＝観測の候補。<strong>★の列が行ごとに違う</strong>
-（\(T_1\)→温度点1、\(T_2\)→温度点2、<strong>\(Q\)と全温度場→変位</strong>）</p></div>
-<div class="key" style="flex:0 0 auto">分子に<strong>推定対象</strong>が入る ＝ <strong>対象が変われば最適な観測も変わる</strong><br>
-<span style="font-weight:400;font-size:.88em">感度が高い点を並べるのは逆効果。近接2点は相関1.00000で条件数が30万倍悪化する</span></div>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">「どこに何を置くか」は、その観測で<strong>知りたい量の不確かさが何%消えるか</strong>で測れる。
+\( \Delta(X,y)=\dfrac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r} \)　＝ カルマンフィルタで分散が減る量そのもの（\(X\)＝推定したい量、\(y\)＝観測、\(r\)＝センサのノイズ分散）。</p>
+<div class="scrollfig"><img src="../docs/img/delta_explained.png" alt="観測の価値Δの説明"></div>
+<p class="scrollhint">▲ ①分散が減る絵 ②式の出どころ ③分子・分母の意味 ④対象×観測の表。枠内スクロールで④まで見えます</p>
+<div class="key" style="flex:0 0 auto"><strong>分子に「推定したい量」が入る ＝ 対象が変われば最適な観測も変わる</strong><br>
+<span style="font-weight:400;font-size:.86em">\(T_1\)を知りたいなら温度点1（94%減）、\(T_2\)なら温度点2（92%減）、<strong>発熱量\(Q\)と全温度場なら変位</strong>（28%／57%減）。
+生の \(\Delta\) は対象の分散と同じ単位なので<strong>行の中でだけ比べる</strong>／感度が高い点を並べるのは逆効果（近接2点は相関1.00000で条件数が30万倍悪化）</span></div>
 </section>
 
 <!-- 22 -->
