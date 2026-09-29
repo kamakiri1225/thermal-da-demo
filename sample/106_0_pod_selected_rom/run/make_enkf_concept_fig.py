@@ -71,8 +71,10 @@ def main():
                  "（初期温度・発熱量・放熱をばらつかせる）", fontsize=12.5, weight="bold")
     a0.legend(fontsize=9.5, loc="lower right"); a0.grid(alpha=.3)
 
-    for ax, (Tv, Qv), ttl in [(a1, snap0, "B：サイクル0（前進前）"),
-                              (a2, snapN, f"C：サイクル{len(cyc)}（前進後）")]:
+    # サイクル番号だけだと何秒か分からないので、実時刻を併記する（観測間隔 OBS_DT=30 s）
+    for ax, (Tv, Qv), ttl in [(a1, snap0, "B：サイクル0  t = 0 s（前進前）"),
+                              (a2, snapN,
+                               f"C：サイクル{len(cyc)}  t = {cyc[-1]:.0f} s（{len(cyc)}回前進後）")]:
         ax.scatter(Tv, Qv, s=34, color="#3b74b8", alpha=.72, edgecolors="w", lw=.5)
         r = np.corrcoef(Tv, Qv)[0, 1]
         if abs(r) > 0.25:
