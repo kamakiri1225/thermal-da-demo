@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>少数観測から熱変形を推定する ― OpenFOAM＋FrontISTR＋データ同化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+ :root{--blue:#1F4E9C;--blue2:#2E75D4;--red:#C0392B;--ink:#1b2430;--pad:38px;}
+ .reveal{font-family:"Noto Sans JP",sans-serif;color:var(--ink);font-size:28px}
+ /* スライドは1280x720の箱。上にフルブリードの見出し、下に本文 */
+ .reveal .slides>section{display:flex!important;flex-direction:column;
+   width:1280px;height:720px;padding:0!important;box-sizing:border-box;
+   overflow:hidden;text-align:left;top:0!important}
+ .reveal .slides>section>*{margin-left:var(--pad);margin-right:var(--pad)}
+ .reveal h2{flex:0 0 auto;margin:0 0 16px!important;padding:15px var(--pad);
+   font-size:1.08em;color:#fff;background:var(--blue);font-weight:700;
+   border-bottom:5px solid var(--blue2);text-align:left}
+ .reveal h1{font-size:1.5em;color:var(--blue);font-weight:700}
+ .reveal h3{font-size:.8em;color:var(--blue);margin:.2em 0 .18em;flex:0 0 auto}
+ .reveal p,.reveal li{font-size:.69em;line-height:1.5}
+ .reveal ul{margin-left:1.2em;flex:0 0 auto}
+ .reveal li{margin-bottom:.22em}
+ .reveal strong{color:var(--red)}
+ .reveal em{color:var(--blue);font-style:normal;font-weight:700}
+ .reveal img{border:none;box-shadow:none;background:none;max-width:100%}
+ /* 図の領域：gridの 1fr で高さを確定させ、画像を必ずその中に収める */
+ .fig{flex:1 1 0;min-height:0;display:grid;grid-template-rows:1fr auto;
+      justify-items:center;align-items:center;overflow:hidden;
+      margin-left:var(--pad);margin-right:var(--pad)}
+ .fig img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ .two{display:flex;gap:22px;flex:1 1 0;min-height:0;overflow:hidden;
+      margin-left:var(--pad);margin-right:var(--pad)}
+ .two>div{flex:1;min-width:0;display:grid;grid-template-rows:1fr auto;
+          justify-items:center;align-items:center;overflow:hidden}
+ .two>div.txt{display:flex;flex-direction:column;justify-content:center;align-items:stretch}
+ .two img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ /* 図をスライド幅いっぱいに出し、はみ出す分は枠内スクロールで見る */
+ .scrollfig{flex:1 1 0;min-height:0;overflow-y:auto;overflow-x:hidden;
+            margin-left:var(--pad);margin-right:var(--pad);
+            border:1px solid #d7dfe9;border-radius:6px;background:#fff}
+ .scrollfig img{width:100%;max-width:100%;max-height:none;height:auto;display:block}
+ .scrollfig::-webkit-scrollbar{width:11px}
+ .scrollfig::-webkit-scrollbar-thumb{background:#9fb3c8;border-radius:6px}
+ .scrollhint{font-size:.42em;color:#7a8a9a;text-align:right;margin:2px var(--pad) 0;flex:0 0 auto}
+ .cap{font-size:.45em;color:#556;text-align:center;margin:4px 0 0;line-height:1.42;flex:0 0 auto}
+ .reveal table{font-size:.55em;border-collapse:collapse;width:100%;margin:.2em 0}
+ .reveal table th{background:#eef2f8;color:var(--blue);padding:6px 9px;border:1px solid #b9c6d6}
+ .reveal table td{padding:5px 9px;border:1px solid #c9d4e0}
+ .reveal table tr.hi td{background:#fff3f0}
+ .key{flex:0 0 auto;background:#fff3f0;border-left:7px solid var(--red);
+      padding:10px 16px;font-size:.66em;font-weight:700;margin:10px var(--pad) 14px;line-height:1.5}
+ .steps{display:flex;gap:14px;flex:0 0 auto;margin:0 var(--pad) 8px}
+ .steps>div{flex:1;background:#f1f5fa;border-left:5px solid var(--blue2);
+            padding:8px 12px;font-size:.55em;line-height:1.45}
+ .steps b{color:var(--blue);display:block;font-size:1.05em;margin-bottom:2px}
+ .arrow{color:var(--red);font-weight:700}
+ .flow{display:flex;flex-direction:column;gap:7px;flex:1 1 0;min-height:0;
+        justify-content:center;margin:0 var(--pad)}
+ .fbox{border-radius:6px;padding:9px 15px;font-size:.6em;line-height:1.5}
+ .fbox b{display:block;font-size:1.06em;margin-bottom:2px}
+ .f-do{background:#eef3f9;border-left:6px solid #2E75D4}
+ .f-ng{background:#fdecea;border-left:6px solid #C0392B}
+ .f-hit{background:#fff3f0;border:2px solid #C0392B;border-left:7px solid #C0392B}
+ .f-ok{background:#eaf6ee;border-left:6px solid #2e9e5b}
+ .fa{text-align:center;color:#8899aa;font-size:.5em;margin:-3px 0}
+ .math{flex:0 0 auto;margin:6px var(--pad) 12px;background:#f7f9fc;border:1px solid #ccd8e6;
+       border-radius:6px;padding:9px 16px;font-size:.6em;line-height:1.75}
+ .math b{color:var(--blue);margin-right:6px}
+ .math div{margin:2px 0}
+ .title-s{justify-content:center;align-items:center;text-align:center!important}
+ .title-s h1{font-size:1.3em;line-height:1.42;margin-bottom:.45em;text-align:center}
+ .title-s .sub{font-size:.62em;color:#456;line-height:1.9;text-align:center}
+ .reveal .slide-number{font-size:15px;background:rgba(31,78,156,.82)}
+</style>
+</head>
+<body><div class="reveal"><div class="slides">
+<!-- 1 -->
+<section class="title-s">
+<h1>少数の温度・変位観測から<br>熱変形を推定する<br><span style="font-size:.7em;color:#2E75D4">― OpenFOAM＋FrontISTR＋データ同化のオープンソース実装 ―</span></h1>
+<p class="sub">ヤマザキマザック株式会社　楠村 拓也<br>
+オープンCAE学会シンポジウム　B-16<br>2026年11月12日（木）</p>
+</section>
+
+<!-- 2 -->
+<section>
+<h2>はじめに</h2>
+<ul style="flex:0 0 auto">
+<li>工作機械の加工誤差では<strong>熱変位が約40〜70 %</strong>を占め、最大の誤差要因となる。</li>
+<li>対策には<em>熱設計・温度制御・モデル補償</em>があるが、補償には<strong>熱変形を正確に予測する</strong>必要がある。</li>
+<li>熱解析や熱流体解析を用いても、<em>温度勾配・熱伝達率・複数の時定数</em>を完全に再現することは難しく、
+<strong>温度の傾向が合ってもTCP変位が合わない</strong>場合がある。</li>
+</ul>
+<div class="two">
+<div><img src="img/intro_temp_history.png" alt="温度変化">
+<p class="cap">温度変化（熱電対による測温点の温度）</p></div>
+<div><img src="img/intro_deform_anim.gif" alt="変位の変形具合とグラフ">
+<p class="cap">変位の変形具合と変位のグラフ（誇張表示）</p></div>
+</div>
+<div class="key">そのため、<strong>観測データを用いて境界条件や熱変形を逐次補正するデータ同化</strong>が注目されている</div>
+</section>
+
+<!-- 3 -->
+<section>
+<h2>目的</h2>
+<ul style="flex:0 0 auto">
+<li>数値モデルだけでは、<strong>初期条件や境界条件の不確かさ</strong>のために現実を再現しきれない</li>
+<li>そこで<em>限られた温度・変位の観測</em>と<em>数値モデル</em>を統合する<strong>データ同化</strong>を用いる</li>
+</ul>
+<div class="fig"><img src="img/da_correction_anim.gif" alt="でたらめな状態から補正される様子">
+<p class="cap">題材：片側ヒータ付き中空円筒（鋼、固体20,696セル）。15 W を 0〜300 s 投入し冷却。
+<strong>でたらめな初期状態（誤差9.3 K）</strong>から、温度2点の観測だけで
+同化なしは12.7 Kまで悪化する一方、<strong>同化ありは0.24 Kまで補正</strong>される</p></div>
+<div class="key">少数の観測から ① 全温度場　② 熱変形　③ 発熱量　④ 境界条件（放熱）を<strong>逐次推定</strong>する枠組みを、
+<strong>オープンソースだけ</strong>（OpenFOAM v2412 ＋ FrontISTR ＋ Python）で構築する</div>
+</section>
+
+<!-- 4 -->
+<section>
+<h2>データ同化とは</h2>
+<p style="flex:0 0 auto">シミュレーションと実測を、それぞれの<em>確からしさ</em>で重み付けして融合し、<strong>測っていない量まで推定する</strong>枠組み。</p>
+<div class="fig"><img src="img/da_cycle.png" alt="データ同化のサイクル">
+<p class="cap">実際のEnKF計算。<em>予報</em>（青破線）はモデルで進むあいだ真値から離れ分散も広がるが、<em>観測</em>（緑）が来るたびに<em>解析</em>（赤）が引き戻し、分散が縮む</p></div>
+<div class="math">
+<div><b>① 材料</b> 予報 \( x^b \)（誤差共分散 \(B\)）と 観測 \( y=Hx+\varepsilon \)（誤差共分散 \(R\)）。\(H\)＝どこを測ったかを表す行列</div>
+<div><b>② ベイズの定理</b> \( \underbrace{p(x\mid y)}_{\text{解析}}\propto\underbrace{p(y\mid x)}_{\text{観測の尤度}}\underbrace{p(x)}_{\text{予報}} \)
+　ガウスなら「最も確からしい \(x\)」は \( J(x)=(x-x^b)^{\mathsf T}B^{-1}(x-x^b)+(y-Hx)^{\mathsf T}R^{-1}(y-Hx) \) の最小化</div>
+<div><b>③ 解</b> \( \;x^a=x^b+K\,(y-Hx^b),\quad K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1},\quad B^a=(I-KH)B \)</div>
+</div>
+<div class="key" style="margin-top:0">\(B\) が<strong>「点どうしの連動」</strong>を持つので、測っていない点にも補正が届く。
+\(B^a=(I-KH)B\) が<strong>「分散が縮む」</strong>の中身</div>
+</section>
+
+<!-- 5 -->
+<section>
+<h2>データ同化の種類と、今回の選択</h2>
+<table style="font-size:.5em;flex:1 1 0;min-height:0">
+<tr><th style="width:11%">分類</th><th style="width:15%">手法</th><th>考え方</th><th style="width:25%">特徴</th></tr>
+<tr><td rowspan="4"><strong>逐次<br>データ同化</strong><br><span style="font-size:.85em;color:#556">観測が来るたび<br>その場で更新</span></td>
+    <td style="background:#fff3f0"><strong>OI</strong>（最適内挿）</td>
+    <td>共分散 \(B\) を<strong>固定したまま</strong>使う（時間発展させない）</td>
+    <td>最も軽い・仕組みが明快<br><strong>パラメータ推定は苦手</strong></td></tr>
+<tr><td>カルマンフィルタ</td>
+    <td><strong>物理モデルで共分散そのものを逐次計算する</strong><br>
+        \( P^f_k = M\,P^a_{k-1}M^{\mathsf T}+Q \)　（\(M\)＝モデルの線形化）</td>
+    <td>線形・ガウスなら最適<br>高次元では \(P\) が巨大で扱えない</td></tr>
+<tr><td style="background:#fff3f0"><strong>EnKF</strong>（アンサンブル）</td>
+    <td>上の \(P\) を直接持たず、<strong>各メンバーを前進させ、アンサンブル平均からの偏差で標本共分散として計算する</strong><br>
+        \( P^f\simeq\dfrac{1}{N-1}\,dZ\,dZ^{\mathsf T},\quad dZ^{(m)}=z^{(m)}-\bar z \)</td>
+    <td>高次元でも少数メンバーで済む<br><strong>パラメータも同時推定できる</strong></td></tr>
+<tr><td>粒子フィルタ</td><td>重み付き粒子で分布そのものを表す</td><td>非ガウス・多峰でもOK<br><strong>高次元で粒子が縮退</strong></td></tr>
+<tr><td rowspan="2"><strong>変分法</strong><br><span style="font-size:.85em;color:#556">時間窓全体を<br>まとめて最適化</span></td>
+    <td>3D-Var</td><td>ある時刻の評価関数 \(J(x)\) を最小化</td><td>共分散を陽に持たなくてよい</td></tr>
+<tr><td>4D-Var</td><td>時間窓全体で \(J\) を最小化</td><td>精度が高い<br><strong>随伴コードの実装が必要</strong></td></tr>
+</table>
+<div class="key" style="flex:0 0 auto">本研究では <strong>OI</strong> と <strong>EnKF</strong> を OpenFOAM ＋ FrontISTR に適用<br>
+<span style="font-weight:400;font-size:.88em">熱伝導は線形・誤差はガウス → 変分法の随伴は不要。粒子フィルタは400粒子でも有効粒子数1.02個まで縮退</span></div>
+</section>
+
+<!-- 6 -->
+<section>
+<h2>OpenFOAM から FrontISTR へ ― 節点補間と双子実験</h2>
+<p style="flex:0 0 auto">CFDは<em>セル中心</em>、FEMは<em>節点</em>に値を持つ。<strong>逆距離加重（IDW）</strong>で温度を節点へ写像した。</p>
+<div class="two">
+<div style="flex:1.25"><img src="img/idw_concept.png" alt="IDW補間の概念">
+<p class="cap">①有限体積法はセル中心、有限要素法は節点に値を置くので<strong>位置がずれる</strong>。
+②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する</p></div>
+<div style="flex:1.35"><img src="img/cht_to_fem_anim.gif" alt="OpenFOAMからFrontISTRへの一気通貫">
+<p class="cap">左＝OpenFOAM（CHT）で解いた温度、右＝その温度をFrontISTRに渡した熱変形（×6000誇張）。
+<strong>温度を引き継いで熱変位まで一気通貫</strong>で出せる。CFD 20,696セル → FEM 5,040節点、\(k=8\)</p></div>
+</div>
+<div class="key">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、ノイズを載せた観測を作って<strong>双子実験</strong>とした<br>
+<span style="font-weight:400;font-size:.88em">CHTは流体を解くので<strong>熱伝達率を仮定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。逆に計算後の壁面熱流束から熱伝達率を診断もできる</span></div>
+</section>
+
+<!-- 7 -->
+<section>
+<h2>課題① OIでは発熱量が当たらない</h2>
+<p style="flex:0 0 auto">状態を<strong>拡大</strong>して \( x=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \) とし、共分散 \(B\) を固定したOIを実ソルバ（20,696セル）で実行した。</p>
+<div class="math" style="margin-bottom:4px">
+<div><b>\(B\) の中身</b>　\(B\) は<strong>状態ベクトルの誤差共分散</strong>。対角＝各量の不確かさ、非対角＝連動。
+温度は \(Q\) で決まる（ \(T_i=T_\mathrm{air}+s_iQ\) 、\(s_i=\partial T_i/\partial Q\) ）ので、
+\( B=\mathrm{diag}(\sigma_T^2,\dots,0)+\sigma_Q^2\,aa^{\mathsf T} \)、\( a=(s_1,\dots,s_5,1)^{\mathsf T} \)
+ <span class="arrow">→</span> <strong>温度と \(Q\) の相関 \( B_{TQ}=\sigma_Q^2 s \) </strong>が生まれる</div>
+<div><b>\(Q\) の逆推定</b>　温度しか測らなくても（ \(H\) の \(Q\) 成分は0）、ゲインの \(Q\) 行は非ゼロ：
+\( K_Q=\dfrac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}\;(\neq 0) \)
+　したがって \( Q^a=Q^b+K_Q\,(y-Hx^b) \) で \(Q\) が動く</div>
+</div>
+<div class="scrollfig"><img src="img/oi_fullsolver_compare.png" alt="実ソルバOIの結果"></div>
+<p class="scrollhint">▲ 図は枠内をスクロールすると全体が見えます（12枚：温度4点・変位4点・\(Q\)・RMSE）</p>
+<p class="cap" style="margin:0 var(--pad)">温度は真値に追従する（最終RMSE 0.090〜0.113 K）が、<strong>発熱量 \(Q\) は 8.8〜9.0 W</strong>（真値15 W）で頭打ち。
+\(\sigma_Q\) を4条件振っても改善しない</p>
+<div class="key" style="margin-top:0">\(B_{TQ}=\sigma_Q^2 s\) を<strong>決め打ちしている</strong>のが限界の正体<br>
+<span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を大きくしても\(Q\)は9 W付近で頭打ち</span></div>
+</section>
+
+<!-- 8 -->
+<section>
+<h2>課題② EnKFは当たるが計算コストが大きい</h2>
+<p style="flex:0 0 auto">EnKFは共分散を行列で持たず、<strong>少しずつ条件の違うメンバー（分身）を並行して前進させ、そのばらつきから共分散を作る</strong>。</p>
+<div class="fig"><img src="img/enkf_concept.png" alt="EnKFの図解">
+<p class="cap">A：60本のメンバーを前進させる。B：初期は温度と \(Q\) が<strong>無相関</strong>（丸い雲）。
+C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</strong>。この連動が共分散 \( P\simeq dZ\,dZ^{\mathsf T}/(N-1) \) で、
+<strong>温度しか測らなくても \(Q\) が動く</strong>（温度1点だけで \(Q=15.95\) W、真値15 W）</p></div>
+<div class="key">ただし計算量 ≒（メンバー数）×（サイクル数）×（予報1回のコスト）。
+実ソルバは<strong>1回で分オーダー</strong>なので、<strong>50〜200メンバー × 10サイクル＝数時間〜数日</strong></div>
+</section>
+
+<!-- 9 -->
+<section>
+<h2>課題の整理と、本研究での解決</h2>
+<div class="two" style="gap:26px">
+<div class="txt">
+<h3 style="color:#C0392B">ここまでで分かった課題</h3>
+<div class="flow" style="margin:0;gap:6px">
+<div class="fbox f-do"><b>① 双子実験の土台はできた</b>
+OpenFOAM（CHT）＋FrontISTR で、正解となる温度と変位を作れた</div>
+<div class="fa">▼</div>
+<div class="fbox f-ng"><b>② OIでは足りない</b>
+温度は合うが<strong>発熱量 \(Q\) が 8.9 W 止まり</strong>（真値15 W）。
+共分散 \(B\) を決め打ちしているため</div>
+<div class="fa">▼</div>
+<div class="fbox f-ng"><b>③ EnKFは当たるが重い</b>
+メンバー×サイクル×予報コスト。実ソルバでは<strong>数時間〜数日</strong></div>
+<div class="fa">▼</div>
+<div class="fbox f-hit"><b>ネックは2つ</b>
+<strong>(1) 流体解析の計算時間</strong>がボトルネック<br>
+<strong>(2) どこの温度を観測するか</strong>の基準がない</div>
+</div>
+</div>
+<div class="txt">
+<h3 style="color:#2e9e5b">本研究で行ったこと</h3>
+<div class="flow" style="margin:0;gap:9px">
+<div class="fbox f-ok"><b>(1)への対策：低次元モデル化</b>
+PODで温度場を<strong>2モード（99.9 %）</strong>に圧縮し、
+<strong>代表点の選び方</strong>（Q-DEIM）を提示。
+5点の集中定数ROMを校正（残差0.0142 K）
+<br><span class="arrow">→ 0→600 s が 31 ms</span>（分オーダー → ミリ秒）</div>
+<div class="fbox f-ok"><b>(2)への対策：感度による観測点の設計</b>
+FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何µm動くかの表）を1度だけ作り、
+<strong>よく動く点＝測る価値のある点</strong>として観測位置を決める。
+<strong>最適なセンサ位置が存在する</strong>ことを示す
+<br><span class="arrow">→ 同じ変位2点でも 2.43 K と 0.86 K</span></div>
+<div class="fbox f-ok"><b>さらに：観測の価値を一般化</b>
+\( \Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r) \) で、
+<strong>推定対象ごとに最適な観測が変わる</strong>ことを定量化</div>
+</div>
+</div></div>
+<div class="key">この2つの対策により、<strong>実用的な時間で・根拠をもって観測点を選んだ</strong>データ同化が可能になる</div>
+</section>
+
+<!-- 10 -->
+<section>
+<h2>低次元モデル化 ― POD</h2>
+<p style="flex:0 0 auto">温度場スナップショット（20,696セル × 121時刻）を<strong>特異値分解</strong>し、場の「型」を抽出した。
+\( X=\sigma_1 u_1 v_1^{\mathsf T}+\sigma_2 u_2 v_2^{\mathsf T}+\cdots \)</p>
+<div class="fig"><img src="img/pod_modes.png" alt="PODモード">
+<p class="cap">モード1（<strong>91.8 %</strong>）＝全体が一様に昇温する型／モード2（8.08 %）＝ヒータ側と反対側の温度差／モード3（0.11 %）＝ほぼ効かない</p></div>
+<div class="key" style="flex:0 0 auto"><strong>2モードで99.9 %</strong> ＝ 温度場は実質2次元しか動いていない<br>
+<span style="font-weight:400;font-size:.88em">実装は numpy で3行。物理の知識は一切与えていない</span></div>
+</section>
+
+<!-- 11 -->
+<section>
+<h2>代表点の選択 ― Q-DEIM</h2>
+<div class="math" style="margin-bottom:5px">
+<div><b>なぜ自動で選ぶのか</b>　20,696セルから5点を選ぶ組み合わせは \( \binom{20696}{5}\approx3.2\times10^{19} \) 通り。
+1組1マイクロ秒で試しても<strong>約100万年</strong>かかり、全探索は不可能</div>
+<div><b>貪欲法（greedy）で1点ずつ足す</b>　①PODモードの値がいちばん大きい点を選ぶ →
+②その点で説明できる分を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返す）。
+判断の材料は<strong>PODモード行列</strong>（各セルが持つモードの値）</div>
+</div>
+<div class="two">
+<div><img src="img/qdeim_order.png" alt="選択の順序">
+<p class="cap">赤＝新しく追加、灰＝すでに選んだ点。<strong>1点目はヒータ最近傍ではなく中央高さ</strong>、
+2点目は反対側、4・5点目で底面へ ― 場を広く覆うように広がる</p></div>
+<div><img src="img/qdeim_value.png" alt="残差の減衰とランダムとの比較">
+<p class="cap">左：1点足すごとに<strong>まだ説明できていない情報</strong>が減り、5点でゼロ。
+右：<strong>5点だけ測って全20,696セルの温度場を復元したときの誤差</strong>の分布（ランダム200通り）</p></div>
+</div>
+<div class="key">手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
+<span style="font-weight:400;font-size:.9em">全20,696セルの<strong>復元温度RMSE</strong>で比較すると
+Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 1.396 K（約1700倍）</strong>
+― 価値は「大外れを確実に避ける」こと</span></div>
+</section>
+
+<!-- 12 -->
+<section>
+<h2>ROMの構築と校正</h2>
+<p style="flex:0 0 auto">選んだ5点上で集中定数モデルを組み、係数 \(C_i, K_{ij}, h\) を<strong>OpenFOAM結果に合うよう最小二乗で校正</strong>した。
+\( C_i\dfrac{dT_i}{dt}=\sum_j K_{ij}(T_j-T_i)+q_i(t)-h(T_i-T_{\mathrm{air}}) \)</p>
+<div class="two">
+<div><img src="img/rom_network.png" alt="ROMネットワーク">
+<p class="cap">5ノードと結合コンダクタンス \(K_{ij}\)（P0-P2が最強）</p></div>
+<div><img src="img/rom_calib_fit.png" alt="校正の当てはまり">
+<p class="cap">校正したROMはCHTの温度履歴をほぼ再現</p></div>
+</div>
+<div class="key" style="flex:0 0 auto">校正残差 <strong>0.0142 K</strong>／0→600 s の前進積分が <strong>約31 ミリ秒</strong>（実ソルバは分オーダー）<br>
+<span style="font-weight:400;font-size:.88em">分身200個 × 10サイクルでも数十秒 ＝ EnKFが現実的な時間で回るようになった</span></div>
+</section>
+
+<!-- 13 -->
+<section>
+<h2>結果① 温度が精度よく再現できる</h2>
+<p style="flex:0 0 auto">でたらめな初期状態から出発し、少数の温度観測だけでROM＋EnKFを回した。</p>
+<div class="fig"><img src="img/da_rmse.png" alt="温度RMSEの収束">
+<p class="cap">同化を重ねるごとに全点温度RMSEが下がる。観測ノイズ（0.3 K）を下回る水準まで到達する</p></div>
+<div class="key" style="flex:0 0 auto">少数の温度観測だけで、<strong>観測していない点まで含めた全点の温度が真値へ収束</strong>する</div>
+</section>
+
+<!-- 14 -->
+<section>
+<h2>結果② 5点から温度分布を復元する</h2>
+<p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。手順は2ステップだけ。</p>
+<div class="two">
+<div class="txt" style="flex:1.3">
+<table style="font-size:.5em">
+<tr><th style="width:13%">手順</th><th>やること</th><th style="width:26%">行列サイズ</th></tr>
+<tr><td><strong>①</strong></td><td>5点を測り、平均を引く<br>\( T_P-\bar u_P \)</td><td>5×1</td></tr>
+<tr class="hi"><td><strong>②</strong></td><td><strong>5元連立を解いて係数を出す</strong><br>\( a=(U_{r,P})^{-1}\,(T_P-\bar u_P) \)</td><td>(5×5)⁻¹ ×(5×1)<br><strong>→ 5×1</strong></td></tr>
+<tr class="hi"><td><strong>③</strong></td><td><strong>全セルへ伸ばす</strong><br>\( \hat T=\bar u+U_r\,a \)</td><td>(20,696×5)×(5×1)<br><strong>→ 20,696×1</strong></td></tr>
+</table>
+<p style="font-size:.56em;margin-top:8px">\(U_{r,P}\)＝選んだ5点の行だけを抜いたモード行列（5×5）。
+\(U_r\)＝全セル分のモード行列（20,696×5）。</p>
+<p style="font-size:.56em">セル \(c\) 1個に着目すると
+\( \hat T_c=\bar u_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\cdots \)<br>
+＝ <strong>「そのセルのモード値」×「5点で決めた割合 \(a\)」の足し算</strong>。
+測っていないセルも、モードを通して値が決まる。</p>
+</div>
+<div><img src="img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元">
+<p class="cap">マゼンタの5点だけを測り、<br>そこから全場を復元したアニメーション</p></div>
+</div>
+<div class="key" style="flex:0 0 auto">解く行列は<strong>たった5×5</strong>。測っていない<strong>20,691セル</strong>でもRMSE <strong>0.00081 K</strong>（最大0.017 K＝変動幅5.78 Kの0.29 %）<br>
+<span style="font-weight:400;font-size:.88em">前半60枚でPODと5点を作り<strong>後半61枚で検証しても0.0023 K</strong>。観測ノイズ0.3 Kより2桁小さい／Q-DEIMが「連立が解ける5点」を選ぶので \(U_{r,P}\) が特異にならない</span></div>
+</section>
+
+<!-- 15 -->
+<section>
+<h2>結果③ 温度から熱変形へ</h2>
+<p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
+<div class="fig"><img src="img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
+<p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 0.841・0.534 K／温度2点 0.272 K／
+<strong>温度2点＋変位2点 0.147 K</strong>（変位差の誤差 0.162 µm）。凡例の高低は<strong>熱感度 \(W\)</strong>（温度1 Kあたり変位が何µm動くか）の大小</p></div>
+<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.15 K（約31倍の改善）</strong><br>
+<span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
+</section>
+
+<!-- 16 -->
+<section>
+<h2>熱感度による観測点の選択</h2>
+<p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
+<div class="steps" style="margin-bottom:6px">
+<div><b>① FEMを毎回解かなくてよい</b>温度場 \(T\) から変位が \(u=W\,\delta T\) の<strong>行列1回の掛け算</strong>で出る（分オーダー → ミリ秒）</div>
+<div><b>② 変位センサの置き場所が決まる</b>\(W\) の<strong>行ノルムが大きい点</strong>＝よく動く点。測れば情報が多い（固定面から遠い上端）</div>
+<div><b>③ 効く温度が分かる</b>\(W\) の<strong>列</strong>を見れば、どの場所の温度が変形を支配しているかが分かる＝温度センサの設計根拠</div>
+</div>
+<div class="fig"><img src="img/blog_oi_disp_selection.png" alt="高W低Wの比較">
+<p class="cap">同じ「変位2点」でも置く場所で効果が変わる。
+同化なし 5.27 K ／ 温度のみ 3.52 K ／ 低W 2.43 K ／ <strong>高W 0.86 K</strong></p></div>
+<div class="key" style="flex:0 0 auto">変位センサは<strong>熱感度 \(W\) の高い点</strong>（固定面から遠い上端）に置くと効く<br>
+<span style="font-weight:400;font-size:.88em">底面は拘束されて動けないため、測っても情報が少ない</span></div>
+</section>
+
+<!-- 17 -->
+<section>
+<h2>結果④ 観測を増やすほど精度が上がる</h2>
+<p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
+<div class="two">
+<div><img src="img/obs_points_progression.png" alt="観測点の位置">
+<p class="cap">どこで観測しているか（温度：赤・青／変位：橙・灰）</p></div>
+<div><img src="img/opencae_sensor_progression.png" alt="段階比較">
+<p class="cap">温度RMSE 0.617 → 0.197 → <strong>0.159 K</strong>／未観測の変位差誤差 0.869 → 0.151 → <strong>0.077 µm</strong></p></div>
+</div>
+<div class="key" style="flex:0 0 auto">温度1点 → 2点で<strong>3倍</strong>改善。さらに<strong>変位を足すと未観測の変形まで合う</strong><br>
+<span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
+</section>
+
+<!-- 18 -->
+<section>
+<h2>観測の価値を1本の式で測る</h2>
+<p style="flex:0 0 auto">「どこに置くか」は、観測がもたらす<strong>分散の減少量</strong>で定量化できる。
+\( \Delta(X,y)=\dfrac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r} \)</p>
+<div class="fig"><img src="img/blog005_delta_table.png" alt="対象×観測の価値表">
+<p class="cap">行＝推定したい量、列＝観測の候補。<strong>★の列が行ごとに違う</strong>
+（\(T_1\)→温度点1、\(T_2\)→温度点2、<strong>\(Q\)と全温度場→変位</strong>）</p></div>
+<div class="key" style="flex:0 0 auto">分子に<strong>推定対象</strong>が入る ＝ <strong>対象が変われば最適な観測も変わる</strong><br>
+<span style="font-weight:400;font-size:.88em">感度が高い点を並べるのは逆効果。近接2点は相関1.00000で条件数が30万倍悪化する</span></div>
+</section>
+
+<!-- 19 -->
+<section>
+<h2>まとめ</h2>
+<table style="font-size:.62em;flex:1 1 0;min-height:0">
+<tr><th style="width:13%">段階</th><th style="width:40%">やったこと</th><th>結果</th></tr>
+<tr><td><strong>連携</strong></td><td>OpenFOAM(CHT) → 節点補間 → FrontISTR(熱弾性)</td><td>温度・変形・面ごとの熱伝達率を算出し、双子実験の真値とした</td></tr>
+<tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOIは \(Q\)=8.9 W止まり <span class="arrow">→</span> EnKFで<strong>15.95 W</strong></td></tr>
+<tr class="hi"><td><strong>低次元化</strong></td><td>PODで場を2モードに圧縮（99.9 %）</td><td><strong>0→600 s が31 ms</strong>（実ソルバは分オーダー）</td></tr>
+<tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、大外れ（1.4 K）を確実に回避</td></tr>
+<tr class="hi"><td><strong>観測設計</strong></td><td>熱感度 \(W\) と観測の価値 \(\Delta\) で配置を決定</td><td><strong>同化なし 4.59 K → 0.16 K</strong>（約29倍）</td></tr>
+</table>
+<div class="key" style="flex:0 0 auto">OpenFOAM＋FrontISTR＋Python だけで <strong>CHT → 熱変形 → データ同化 → ROM</strong> を一気通貫で構築<br>
+<span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
+</section>
+
+<!-- 20 -->
+<section>
+<h2>限界と今後／公開情報</h2>
+<div class="two">
+<div class="txt">
+<h3>正直な限界</h3>
+<ul style="font-size:.86em">
+<li><strong>放熱 \(h\) は推定が難しい</strong>。温度応答（0.05 K）が観測ノイズ（0.30 K）より小さい</li>
+<li><strong>Q-DEIM点は「復元に良い点」</strong>であり、推定に最適な保証はない</li>
+<li><strong>ROMは訓練した運転条件でのみ有効</strong>。加熱位置が変われば作り直しが要る</li>
+<li>比較は<em>候補内</em>のものであり、大域最適の証明ではない</li>
+</ul>
+<h3>今後</h3>
+<ul style="font-size:.86em">
+<li>実機形状・実測データへの適用（現在は双子実験）</li>
+<li>設置制約を入れた<em>制約付き最適配置</em></li>
+<li>OpenModelica との連成（FMI/FMU）による1D-CAEとの統合</li>
+</ul>
+</div>
+<div class="txt">
+<h3>公開情報</h3>
+<div class="key" style="font-size:.66em">コード・データ・解説記事はすべて公開</div>
+<table style="font-size:.52em">
+<tr><th>内容</th><th>場所</th></tr>
+<tr><td>リポジトリ</td><td>github.com/kamakiri1225/<br>thermal-da-demo</td></tr>
+<tr><td>解説記事（全5回）</td><td>kamakiri1225.github.io/<br>thermal-da-demo/</td></tr>
+</table>
+<table style="font-size:.5em;margin-top:6px">
+<tr><td>blog_001</td><td>CHT → 熱膨張、熱伝達率の分布</td></tr>
+<tr><td>blog_002</td><td>OI ― 数式と3点モデルの手計算</td></tr>
+<tr><td>blog_003</td><td>EnKF ― 分身の散らばりで共分散を作る</td></tr>
+<tr><td>blog_004</td><td>POD で代表点をデータから選ぶ ROM</td></tr>
+<tr><td>blog_005</td><td>推定対象で最適センサは変わる</td></tr>
+</table>
+<p style="text-align:center;font-size:.72em;margin-top:14px;color:#1F4E9C;font-weight:700">ご清聴ありがとうございました</p>
+</div></div>
+</section>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  width: 1280, height: 720,
+  margin: 0,
+  minScale: 0.2, maxScale: 1.6,
+  transition: 'slide',
+  plugins: [ RevealMath.MathJax3, RevealNotes ],
+  mathjax3: {
+    tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+  }
+});
+</script>
+</body></html>
