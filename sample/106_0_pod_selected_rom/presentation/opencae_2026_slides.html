@@ -49,6 +49,15 @@
             padding:8px 12px;font-size:.55em;line-height:1.45}
  .steps b{color:var(--blue);display:block;font-size:1.05em;margin-bottom:2px}
  .arrow{color:var(--red);font-weight:700}
+ .flow{display:flex;flex-direction:column;gap:7px;flex:1 1 0;min-height:0;
+        justify-content:center;margin:0 var(--pad)}
+ .fbox{border-radius:6px;padding:9px 15px;font-size:.6em;line-height:1.5}
+ .fbox b{display:block;font-size:1.06em;margin-bottom:2px}
+ .f-do{background:#eef3f9;border-left:6px solid #2E75D4}
+ .f-ng{background:#fdecea;border-left:6px solid #C0392B}
+ .f-hit{background:#fff3f0;border:2px solid #C0392B;border-left:7px solid #C0392B}
+ .f-ok{background:#eaf6ee;border-left:6px solid #2e9e5b}
+ .fa{text-align:center;color:#8899aa;font-size:.5em;margin:-3px 0}
  .math{flex:0 0 auto;margin:6px var(--pad) 12px;background:#f7f9fc;border:1px solid #ccd8e6;
        border-radius:6px;padding:9px 16px;font-size:.6em;line-height:1.75}
  .math b{color:var(--blue);margin-right:6px}
@@ -195,41 +204,56 @@
 <!-- 8 -->
 <section>
 <h2>課題② EnKFは当たるが計算コストが大きい</h2>
-<p style="flex:0 0 auto">EnKFでは<em>分身</em>を少しずつ違う \(Q,h\) で前進させる。温度と \(Q\) を独立に初期化しても<strong>相関が自動で現れる</strong>。</p>
-<div class="two">
-<div class="txt">
-<table style="font-size:.6em">
-<tr><th>サイクル</th><th>corr(\(T_{P2}\), \(Q\))</th></tr>
-<tr><td>0（初期）</td><td>−0.08（無相関）</td></tr>
-<tr><td>2</td><td>0.54</td></tr>
-<tr><td>5</td><td>0.70</td></tr>
-<tr class="hi"><td>10</td><td><strong>0.84</strong></td></tr>
-</table>
-<p style="font-size:.62em;margin-top:8px">前進積分するだけで「\(Q\) が大きい分身は温度も高い」という関係が標本共分散に現れる<br>
-<span class="arrow">→</span> <strong>温度1点だけで \(Q=15.95\) W</strong>（真値15 W）</p>
-</div>
-<div class="txt">
-<table style="font-size:.6em">
-<tr><th>予報モデル</th><th>1回のコスト</th></tr>
-<tr class="hi"><td>実ソルバ（CHT＋FEM）</td><td><strong>分オーダー</strong></td></tr>
-</table>
-<p style="font-size:.62em;margin-top:8px">計算量 ≒（分身の数）×（サイクル数）×（予報1回のコスト）<br><br>
-分身50〜200 × 10サイクル <span class="arrow">→</span> <strong>数時間〜数日</strong></p>
-</div></div>
-<div class="key" style="flex:0 0 auto">EnKFならパラメータまで当たるが、<strong>流体解析の計算時間がボトルネック</strong><br>
-<span style="font-weight:400;font-size:.88em">→ 予報モデルだけを軽い ROM に置き換える</span></div>
+<p style="flex:0 0 auto">EnKFは共分散を行列で持たず、<strong>少しずつ条件の違うメンバー（分身）を並行して前進させ、そのばらつきから共分散を作る</strong>。</p>
+<div class="fig"><img src="../docs/img/enkf_concept.png" alt="EnKFの図解">
+<p class="cap">A：60本のメンバーを前進させる。B：初期は温度と \(Q\) が<strong>無相関</strong>（丸い雲）。
+C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</strong>。この連動が共分散 \( P\simeq dZ\,dZ^{\mathsf T}/(N-1) \) で、
+<strong>温度しか測らなくても \(Q\) が動く</strong>（温度1点だけで \(Q=15.95\) W、真値15 W）</p></div>
+<div class="key">ただし計算量 ≒（メンバー数）×（サイクル数）×（予報1回のコスト）。
+実ソルバは<strong>1回で分オーダー</strong>なので、<strong>50〜200メンバー × 10サイクル＝数時間〜数日</strong></div>
 </section>
 
 <!-- 9 -->
 <section>
-<h2>課題③ どこの温度を観測すべきか</h2>
-<p style="flex:0 0 auto">センサは<strong>数点しか置けない</strong>（内部・回転部には置けない）。勘で置くと結果が桁で変わる。</p>
-<div class="fig"><img src="../docs/img/sensor_positions.png" alt="観測点候補と感度">
-<p class="cap">候補点を発熱への温度感度 \(\partial T/\partial Q\) で色分けしたもの。
-高感度はヒータ最近傍のP2（5.7）、低感度は反対側底面のP4（2.6）</p></div>
-<div class="key" style="flex:0 0 auto">本研究の2つの問い：<br>
-① <strong>代表点</strong>をどう選ぶか（ROMを組むため）　② <strong>観測点</strong>をどう選ぶか（推定精度のため）<br>
-<span style="font-weight:400;font-size:.88em">この2つは別の問題である、ということも後で示す</span></div>
+<h2>課題の整理と、本研究での解決</h2>
+<div class="two" style="gap:26px">
+<div class="txt">
+<h3 style="color:#C0392B">ここまでで分かった課題</h3>
+<div class="flow" style="margin:0;gap:6px">
+<div class="fbox f-do"><b>① 双子実験の土台はできた</b>
+OpenFOAM（CHT）＋FrontISTR で、正解となる温度と変位を作れた</div>
+<div class="fa">▼</div>
+<div class="fbox f-ng"><b>② OIでは足りない</b>
+温度は合うが<strong>発熱量 \(Q\) が 8.9 W 止まり</strong>（真値15 W）。
+共分散 \(B\) を決め打ちしているため</div>
+<div class="fa">▼</div>
+<div class="fbox f-ng"><b>③ EnKFは当たるが重い</b>
+メンバー×サイクル×予報コスト。実ソルバでは<strong>数時間〜数日</strong></div>
+<div class="fa">▼</div>
+<div class="fbox f-hit"><b>ネックは2つ</b>
+<strong>(1) 流体解析の計算時間</strong>がボトルネック<br>
+<strong>(2) どこの温度を観測するか</strong>の基準がない</div>
+</div>
+</div>
+<div class="txt">
+<h3 style="color:#2e9e5b">本研究で行ったこと</h3>
+<div class="flow" style="margin:0;gap:9px">
+<div class="fbox f-ok"><b>(1)への対策：低次元モデル化</b>
+PODで温度場を<strong>2モード（99.9 %）</strong>に圧縮し、
+<strong>代表点の選び方</strong>（Q-DEIM）を提示。
+5点の集中定数ROMを校正（残差0.0142 K）
+<br><span class="arrow">→ 0→600 s が 31 ms</span>（分オーダー → ミリ秒）</div>
+<div class="fbox f-ok"><b>(2)への対策：感度による観測点の設計</b>
+FrontISTRの<strong>熱感度 \(W=K_s^{-1}H_T\)</strong> から、
+温度が変位にどう効くかを分析。
+<strong>最適なセンサ位置が存在する</strong>ことを示す
+<br><span class="arrow">→ 同じ変位2点でも 2.43 K と 0.86 K</span></div>
+<div class="fbox f-ok"><b>さらに：観測の価値を一般化</b>
+\( \Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r) \) で、
+<strong>推定対象ごとに最適な観測が変わる</strong>ことを定量化</div>
+</div>
+</div></div>
+<div class="key">この2つの対策により、<strong>実用的な時間で・根拠をもって観測点を選んだ</strong>データ同化が可能になる</div>
 </section>
 
 <!-- 10 -->
