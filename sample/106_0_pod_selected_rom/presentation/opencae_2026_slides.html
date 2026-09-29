@@ -288,9 +288,29 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 
 <!-- 12 -->
 <section>
+<h2>検証 ― 5点で本当に全体が合うのか（時刻歴）</h2>
+<p style="flex:0 0 auto">残差の棒グラフだけでは分からないので、<strong>選点にも校正にも使っていない検証点</strong>を上部・中央・下部から取り、温度の時刻歴で真値と重ねた。</p>
+<div class="fig"><img src="../docs/img/timeseries_verification.png" alt="検証点の時刻歴比較">
+<p class="cap">黒＝OpenFOAM真値、赤破線＝<strong>Q-DEIM 5点から復元</strong>、灰点線＝ランダム5点（200通り中の最悪）から復元。
+検証点は5点から52〜73 mm離れており、上部・中央・下部で<strong>立ち上がり方も冷え方も違う</strong>が、いずれも赤が黒に重なる。
+右端＝全20,696セルRMSEの時刻歴</p></div>
+<div class="key" style="flex:0 0 auto">測っていない点でも誤差は <strong>0.4〜0.8 mK</strong>。全セルRMSEは全時刻で<strong>観測ノイズ0.3 Kの2桁下</strong><br>
+<span style="font-weight:400;font-size:.88em">ランダム5点の最悪例は同じ枚数のモードを使っても 0.295 K まで崩れる ＝ <strong>点の選び方が効いている</strong></span></div>
+</section>
+
+<!-- 13 -->
+<section>
 <h2>ROMの構築と校正</h2>
 <p style="flex:0 0 auto">選んだ5点上で集中定数モデルを組み、係数 \(C_i, K_{ij}, h\) を<strong>OpenFOAM結果に合うよう最小二乗で校正</strong>した。
 \( C_i\dfrac{dT_i}{dt}=\sum_j K_{ij}(T_j-T_i)+q_i(t)-h(T_i-T_{\mathrm{air}}) \)</p>
+<div class="math" style="margin:2px var(--pad) 8px;font-size:.55em;line-height:1.6">
+<div><b>定数の決め方</b>　物性値から積むのではなく、<strong>CHTの答えに合うように逆算</strong>する。
+未知数は <strong>16個</strong>＝熱容量 \(C_i\)（5）＋点対コンダクタンス \(K_{ij}\)（\({}_5C_2=10\)）＋放熱 \(h\)（1）。
+これを \( \displaystyle\min_{C,K,h}\sum_{n}\sum_{i=1}^{5}\bigl(T_i^{\mathrm{ROM}}(t_n)-T_i^{\mathrm{CHT}}(t_n)\bigr)^2 \) で解く
+（<span style="font-family:monospace">scipy least_squares</span>・信頼領域法、拘束 \(C>0,\,K\ge0,\,h>0\)、目標は5点×121時刻＝<strong>605本の残差</strong>）</div>
+<div><b>物理的に妥当か</b>　校正で出た \(\sum C_i=1211\) J/K に対し、鋼の物性から計算した \(\rho V c_p=1222\) J/K
+ <span class="arrow">→</span> <strong>差 0.9 %</strong>。数合わせではなく<strong>本体の熱容量を当てている</strong></div>
+</div>
 <div class="two">
 <div><img src="../docs/img/rom_network.png" alt="ROMネットワーク">
 <p class="cap">5ノードと結合コンダクタンス \(K_{ij}\)（P0-P2が最強）</p></div>
@@ -301,7 +321,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">分身200個 × 10サイクルでも数十秒 ＝ EnKFが現実的な時間で回るようになった</span></div>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 <section>
 <h2>結果① 温度が精度よく再現できる</h2>
 <p style="flex:0 0 auto">でたらめな初期状態から出発し、少数の温度観測だけでROM＋EnKFを回した。</p>
@@ -310,7 +330,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <div class="key" style="flex:0 0 auto">少数の温度観測だけで、<strong>観測していない点まで含めた全点の温度が真値へ収束</strong>する</div>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section>
 <h2>結果② 5点から温度分布を復元する</h2>
 <p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。手順は2ステップだけ。</p>
@@ -336,7 +356,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">前半60枚でPODと5点を作り<strong>後半61枚で検証しても0.0023 K</strong>。観測ノイズ0.3 Kより2桁小さい／Q-DEIMが「連立が解ける5点」を選ぶので \(U_{r,P}\) が特異にならない</span></div>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section>
 <h2>結果③ 温度から熱変形へ</h2>
 <p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
@@ -347,7 +367,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
@@ -371,7 +391,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">底面は拘束されて動けないため、測っても情報が少ない</span></div>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
@@ -385,7 +405,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
-<!-- 18 -->
+<!-- 19 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
 <p style="flex:0 0 auto">「どこに置くか」は、観測がもたらす<strong>分散の減少量</strong>で定量化できる。
@@ -397,7 +417,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">感度が高い点を並べるのは逆効果。近接2点は相関1.00000で条件数が30万倍悪化する</span></div>
 </section>
 
-<!-- 19 -->
+<!-- 20 -->
 <section>
 <h2>まとめ</h2>
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
@@ -412,7 +432,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 <section>
 <h2>限界と今後／公開情報</h2>
 <div class="two">

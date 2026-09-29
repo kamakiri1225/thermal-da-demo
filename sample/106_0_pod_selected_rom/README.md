@@ -62,6 +62,34 @@ $\sqrt{\frac15\sum_i(\hat T_i-T_i^{true})^2}$ を過渡期(0-300s)平均した�
 
 観測ノイズ 0.3 K より2〜3桁小さい。図は `docs/img/recon_unobserved.png`。
 
+### 校正した5点ROMは、校正に使っていない点でも合うか
+
+`run/rom_unrelated_points_check.py`（同化なし。校正済みROMを0→600sそのまま前進させ、
+5点の温度を gappy-POD で全場へ復元して OpenFOAM と比較）。
+
+| 評価対象 | RMSE |
+|---|---|
+| 校正に使った5点 | 0.0142 K |
+| **それ以外の20,691セル** | **0.0130 K** |
+| 全20,696セル | 0.0130 K |
+
+**校正に使っていない点のほうがわずかに良い**（過学習していない）。
+5点から52〜73 mm離れた検証点を上部・中央・下部から取って時刻歴で重ねても、
+立ち上がり方も冷え方も違う各点で誤差 0.4〜0.8 mK に収まる
+（`run/make_timeseries_verification_fig.py` → `docs/img/timeseries_verification.png`）。
+同じ5点でもランダムに選ぶと最悪 0.295 K まで崩れるので、**点の選び方が効いている**。
+
+### ROM係数（$C_i, K_{ij}, h$）の決め方
+
+物性値から積むのではなく、**CHTの答えに合うように逆算**する（`run/build_calibrate_rom.py`）。
+未知数は16個＝熱容量 $C_i$（5）＋点対コンダクタンス $K_{ij}$（${}_5C_2=10$）＋放熱 $h$（1）。
+
+$$\min_{C,K,h}\ \sum_{n}\sum_{i=1}^{5}\bigl(T_i^{\mathrm{ROM}}(t_n)-T_i^{\mathrm{CHT}}(t_n)\bigr)^2$$
+
+`scipy.optimize.least_squares`（信頼領域反射法）で、拘束 $C>0,\ K\ge0,\ h>0$ のもと
+5点×121時刻＝**605本の残差**を一括で最小化する。結果は $\sum C_i = 1211$ J/K で、
+鋼の物性から計算した $\rho V c_p = 1222$ J/K と **0.9 % 差** ― 数合わせではなく本体の熱容量を当てている。
+
 ## 発表資料
 
 - **[オープンCAE学会シンポジウム B-16 発表スライド（20枚, reveal.js）](https://kamakiri1225.github.io/thermal-da-demo/opencae2026.html)**
