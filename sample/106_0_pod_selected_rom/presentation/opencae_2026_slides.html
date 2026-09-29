@@ -272,21 +272,29 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 ②その点で説明できる分を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返す）。
 判断の材料は<strong>PODモード行列</strong>（各セルが持つモードの値）</div>
 </div>
-<div class="two">
-<div><img src="../docs/img/qdeim_order.png" alt="選択の順序">
-<p class="cap">赤＝新しく追加、灰＝すでに選んだ点。<strong>1点目はヒータ最近傍ではなく中央高さ</strong>、
-2点目は反対側、4・5点目で底面へ ― 場を広く覆うように広がる</p></div>
-<div><img src="../docs/img/qdeim_value.png" alt="残差の減衰とランダムとの比較">
-<p class="cap">左：1点足すごとに<strong>まだ説明できていない情報</strong>が減り、5点でゼロ。
-右：<strong>5点だけ測って全20,696セルの温度場を復元したときの誤差</strong>の分布（ランダム200通り）</p></div>
-</div>
+<div class="fig"><img src="../docs/img/qdeim_order.png" alt="選択の順序">
+<p class="cap">赤＝新しく追加、灰＝すでに選んだ点。各パネルの「残差」は<strong>まだ説明できていないモード成分の大きさ</strong>（復元前の無次元量。温度[K]ではない）。
+<strong>1点目はヒータ最近傍ではなく中央高さ</strong>、2点目は反対側、4・5点目で底面へ ― 場を広く覆うように広がり、5点で残差ゼロ＝5モードを張り切る</p></div>
 <div class="key">手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
-<span style="font-weight:400;font-size:.9em">全20,696セルの<strong>復元温度RMSE</strong>で比較すると
+<span style="font-weight:400;font-size:.9em"><strong>復元してから</strong>の温度RMSE（全20,696セル）で比べると
 Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 1.396 K（約1700倍）</strong>
 ― 価値は「大外れを確実に避ける」こと</span></div>
 </section>
 
 <!-- 12 -->
+<section>
+<h2>なぜその5点なのか ― PODと測定点の関係</h2>
+<p style="flex:0 0 auto">PODが「全場は5個の数 \(a\) で決まる」と言った瞬間、<strong>測定点選びは \(5\times5\) の連立方程式を解きやすくする問題</strong>に変わる。</p>
+<div class="fig"><img src="../docs/img/pod_to_points.png" alt="PODと測定点の関係">
+<p class="cap">①全場は \(\bar T+\sum a_k\varphi_k\)。②1点測る＝\(a\) の式が1本立つ → 5点で \(U_{r,P}a=T_P-\bar T_P\)。
+③④実際の \(U_{r,P}\)：Q-DEIMは条件数3.15、ランダム最悪は上3行がそっくりで151,718。
+⑤条件数と復元誤差は<strong>対数どうしの相関 +0.917</strong>できれいに並ぶ</p></div>
+<div class="key" style="flex:0 0 auto"><strong>Q-DEIM</strong>＝この連立が解きやすくなるよう「測る5行」を選ぶ手続き（オフラインで1回。中身は枢軸付きQR分解）／
+<strong>gappy-POD</strong>＝選んだ5点から \(a\) を解いて全場へ伸ばす計算（毎時刻。gappy＝20,696セル中5セルしかない穴だらけの意味）<br>
+<span style="font-weight:400;font-size:.88em"><strong>「ランダム5点」とは</strong>：20,696セルから一様に5セルを選び直し（重複なし）、<strong>同じPODモード・同じ復元式</strong>で全場を復元する対照実験を200回。変えたのは「どの5行を抜くか」だけ</span></div>
+</section>
+
+<!-- 13 -->
 <section>
 <h2>検証 ― 5点で本当に全体が合うのか（時刻歴）</h2>
 <p style="flex:0 0 auto">残差の棒グラフだけでは分からないので、<strong>選点にも校正にも使っていない検証点</strong>を上部・中央・下部から取り、温度の時刻歴で真値と重ねた。</p>
@@ -298,7 +306,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">ランダム5点の最悪例は同じ枚数のモードを使っても 0.295 K まで崩れる ＝ <strong>点の選び方が効いている</strong></span></div>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 <section>
 <h2>ROMの構築と校正</h2>
 <p style="flex:0 0 auto">選んだ5点上で集中定数モデルを組み、係数 \(C_i, K_{ij}, h\) を<strong>OpenFOAM結果に合うよう最小二乗で校正</strong>した。
@@ -321,7 +329,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">分身200個 × 10サイクルでも数十秒 ＝ EnKFが現実的な時間で回るようになった</span></div>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section>
 <h2>結果① 温度が精度よく再現できる</h2>
 <p style="flex:0 0 auto">でたらめな初期状態から出発し、少数の温度観測だけでROM＋EnKFを回した。</p>
@@ -330,33 +338,43 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <div class="key" style="flex:0 0 auto">少数の温度観測だけで、<strong>観測していない点まで含めた全点の温度が真値へ収束</strong>する</div>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section>
 <h2>結果② 5点から温度分布を復元する</h2>
-<p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。手順は2ステップだけ。</p>
-<div class="two">
-<div class="txt" style="flex:1.3">
-<table style="font-size:.5em">
-<tr><th style="width:13%">手順</th><th>やること</th><th style="width:26%">行列サイズ</th></tr>
-<tr><td><strong>①</strong></td><td>5点を測り、平均を引く<br>\( T_P-\bar u_P \)</td><td>5×1</td></tr>
-<tr class="hi"><td><strong>②</strong></td><td><strong>5元連立を解いて係数を出す</strong><br>\( a=(U_{r,P})^{-1}\,(T_P-\bar u_P) \)</td><td>(5×5)⁻¹ ×(5×1)<br><strong>→ 5×1</strong></td></tr>
-<tr class="hi"><td><strong>③</strong></td><td><strong>全セルへ伸ばす</strong><br>\( \hat T=\bar u+U_r\,a \)</td><td>(20,696×5)×(5×1)<br><strong>→ 20,696×1</strong></td></tr>
-</table>
-<p style="font-size:.56em;margin-top:8px">\(U_{r,P}\)＝選んだ5点の行だけを抜いたモード行列（5×5）。
-\(U_r\)＝全セル分のモード行列（20,696×5）。</p>
-<p style="font-size:.56em">セル \(c\) 1個に着目すると
-\( \hat T_c=\bar u_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\cdots \)<br>
-＝ <strong>「そのセルのモード値」×「5点で決めた割合 \(a\)」の足し算</strong>。
-測っていないセルも、モードを通して値が決まる。</p>
+<p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。式の中身を順に追う。</p>
+<div class="two" style="gap:20px">
+<div class="txt" style="flex:1.62">
+<div class="math" style="margin:0 0 6px;font-size:.53em;line-height:1.7">
+<div><b>記号</b>　\(\bar u\)＝全セルの平均温度場（20,696×1、計算済み・固定）／
+\(U_r=[\varphi_1\,\varphi_2\cdots\varphi_5]\)＝モード行列（20,696×5、計算済み・固定）／
+\(a=(a_1,\dots,a_5)^{\mathsf T}\)＝<strong>毎時刻これだけが未知</strong>／
+\(P\)＝選んだ5セルの番号、\(T_P\)＝そこで測った温度（5×1）</div>
 </div>
-<div><img src="../docs/img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元">
-<p class="cap">マゼンタの5点だけを測り、<br>そこから全場を復元したアニメーション</p></div>
+<p style="font-size:.53em;margin:3px 0 1px"><strong>手順①　測って、平均からのズレにする</strong>　\( \;\delta_P = T_P-\bar u_P \)（5×1）。
+PODは「平均場からの変動」を分解したので、比べる相手も平均を引いた量にそろえる。</p>
+<p style="font-size:.53em;margin:3px 0 1px"><strong>手順②　5本の式を連立して \(a\) を出す</strong>　測った各点 \(P_i\) について、PODの定義からこう書ける：</p>
+<div class="math" style="margin:2px 0 3px;font-size:.5em;line-height:1.55">
+<div>\( \delta_{P_1}=a_1\varphi_1[P_1]+a_2\varphi_2[P_1]+\cdots+a_5\varphi_5[P_1] \)　←1点目で式1本</div>
+<div>　　　　　　　\(\vdots\)　　（5点そろうと未知5個・式5本）</div>
+<div>\( \delta_{P_5}=a_1\varphi_1[P_5]+\cdots+a_5\varphi_5[P_5] \)　
+<span class="arrow">⇒</span> 行列で \( U_{r,P}\,a=\delta_P \)　<span class="arrow">⇒</span> \( a=(U_{r,P})^{-1}\delta_P \)</div>
+</div>
+<p style="font-size:.53em;margin:1px 0 1px">\(U_{r,P}\)＝<strong>\(U_r\) から「測った5行」だけを抜いた 5×5 行列</strong>。ここだけが逆行列を取る対象で、解くのは<strong>5元連立1回</strong>。</p>
+<p style="font-size:.53em;margin:3px 0 1px"><strong>手順③　その \(a\) を全セルに使い回す</strong>　\( \hat T=\bar u+U_r\,a \)（20,696×5 と 5×1 の積）。セル \(c\) 1個で書くと</p>
+<div class="math" style="margin:2px 0 3px;font-size:.5em;line-height:1.5">
+<div>\( \hat T_c=\bar u_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\cdots+a_5\varphi_5[c] \)</div>
+<div>＝<strong>「そのセルが持つモードの値」×「5点で決めた割合 \(a\)」の足し算</strong>。
+\(\varphi_k[c]\) はセル \(c\) が測定点でなくても持っているので、<strong>測っていないセルも値が決まる</strong></div>
+</div>
+</div>
+<div style="flex:1"><img src="../docs/img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元">
+<p class="cap">ピンク色の球（5点）だけを測り、<br>そこから全場を復元したアニメーション</p></div>
 </div>
 <div class="key" style="flex:0 0 auto">解く行列は<strong>たった5×5</strong>。測っていない<strong>20,691セル</strong>でもRMSE <strong>0.00081 K</strong>（最大0.017 K＝変動幅5.78 Kの0.29 %）<br>
 <span style="font-weight:400;font-size:.88em">前半60枚でPODと5点を作り<strong>後半61枚で検証しても0.0023 K</strong>。観測ノイズ0.3 Kより2桁小さい／Q-DEIMが「連立が解ける5点」を選ぶので \(U_{r,P}\) が特異にならない</span></div>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 <section>
 <h2>結果③ 温度から熱変形へ</h2>
 <p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
@@ -367,7 +385,19 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
+<section>
+<h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
+<p style="flex:0 0 auto">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。</p>
+<div class="fig"><img src="../docs/img/sensitivity_derivation.png" alt="熱感度Wの導出">
+<p class="cap">①FEM離散化で \(K_su=f_\mathrm{th}\)。②熱ひずみ \(\alpha(T-T_\mathrm{ref})\) が温度に比例するので \(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\)。
+③よって \(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)。④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ）。
+⑤実装は全 \(W\) を作らず、PODモード方向だけFrontISTRに通す（6回）</p></div>
+<div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表<br>
+<span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
+</section>
+
+<!-- 19 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto">熱感度 \(W=K_s^{-1}H_T\) は<strong>「その点の温度が1 K上がると、どこが何µm動くか」の一覧表</strong>。FrontISTRで<em>1度だけ</em>作れば使い回せる。</p>
@@ -391,7 +421,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">底面は拘束されて動けないため、測っても情報が少ない</span></div>
 </section>
 
-<!-- 18 -->
+<!-- 20 -->
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
@@ -405,7 +435,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
-<!-- 19 -->
+<!-- 21 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
 <p style="flex:0 0 auto">「どこに置くか」は、観測がもたらす<strong>分散の減少量</strong>で定量化できる。
@@ -417,7 +447,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">感度が高い点を並べるのは逆効果。近接2点は相関1.00000で条件数が30万倍悪化する</span></div>
 </section>
 
-<!-- 20 -->
+<!-- 22 -->
 <section>
 <h2>まとめ</h2>
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
@@ -432,7 +462,7 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
 </section>
 
-<!-- 21 -->
+<!-- 23 -->
 <section>
 <h2>限界と今後／公開情報</h2>
 <div class="two">
@@ -441,7 +471,10 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <ul style="font-size:.86em">
 <li><strong>放熱 \(h\) は推定が難しい</strong>。温度応答（0.05 K）が観測ノイズ（0.30 K）より小さい</li>
 <li><strong>Q-DEIM点は「復元に良い点」</strong>であり、推定に最適な保証はない</li>
-<li><strong>ROMは訓練した運転条件でのみ有効</strong>。加熱位置が変われば作り直しが要る</li>
+<li><strong>発熱量が変わるのは平気</strong>。伝導は \(Q\) に線形で、\(Q\) はモード係数 \(a\) のスケールに吸収される
+（3〜75 Wで復元誤差 0.0004〜0.0045 K、常にノイズの2桁下）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
+<li><strong>発熱の位置・分布や形状が変わると作り直し</strong>。モードは20,696セルに紐づくベクトルなので別メッシュでは意味を持たない
+（ただし CHT→POD→Q-DEIM→ROM校正 の手順はそのまま再利用でき、自動化済み）</li>
 <li>比較は<em>候補内</em>のものであり、大域最適の証明ではない</li>
 </ul>
 <h3>今後</h3>

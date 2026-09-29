@@ -110,7 +110,7 @@ def main():
     for j,(p2,lab) in enumerate(shots):
         ax=fig.add_subplot(gs[2, j*3:j*3+3])
         ax.imshow(plt.imread(p2)); ax.axis("off")
-        ax.set_title(f"{lab}　白球＝校正に使った5点／マゼンタ＝無関係な検証点 Q1〜Q6",
+        ax.set_title(f"{lab}　白い球＝校正に使った5点／ピンク色の球＝無関係な検証点 Q1〜Q6",
                      fontsize=12.5, weight="bold")
     fig.suptitle("校正した5点ROMは、校正に使っていない点でも温度が合うか\n"
                  f"全20,696セル {rmse_all:.3f} K　｜　校正に使った5点 {rmse_5:.3f} K　｜　"
