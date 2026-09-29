@@ -33,8 +33,18 @@ def main():
     w=np.load(os.path.join(RES,"qh_time_window.npz"))
     h_true=hs["h_true_W_K"]
 
-    fig=plt.figure(figsize=(19.0,9.2))
-    gs=fig.add_gridspec(2,3,height_ratios=[.92,1.0],hspace=.40,wspace=.30)
+    # h がずれたまま長時間予測するとどうなるか（同じROMで真h/推定hを回す）
+    from dacore import rom_general as rg
+    rd=np.load(os.path.join(RES,"rom_calibrated_pod.npz"))
+    Cc=rd["C"]; Km=rg.tri_to_matrix(rd["K_upper"],5); heat=int(rd["heat_node"])
+    h_est=float(h[-1,0]); T0=np.full(5,rg.T_AIR_K)
+    horiz=[600,1800,3600,10800,18000]
+    gap=[float(np.abs(rg.integrate_single(T0,Cc,Km,h_true,1.0,heat,0,E,2.0)[1][-1]
+                     -rg.integrate_single(T0,Cc,Km,h_est,1.0,heat,0,E,2.0)[1][-1]).max())
+         for E in horiz]
+
+    fig=plt.figure(figsize=(19.0,12.4))
+    gs=fig.add_gridspec(3,3,height_ratios=[.90,.98,.80],hspace=.46,wspace=.30)
 
     # ① 手順
     ax=fig.add_subplot(gs[0,0]); ax.axis("off")
@@ -116,16 +126,62 @@ def main():
     ax.set_title(f"⑥ $h$ は決まらない：応答がノイズの 1/6\n"
                  f"推定 {h[-1,0]:.4f} vs 真値 {h_true:.4f} W/K（ばらつきも縮まない）",
                  fontsize=12.5,weight="bold")
-    ax.legend(fontsize=10.5); ax.grid(alpha=.3,axis="y",which="both")
+    ax.legend(fontsize=10,loc="upper center",bbox_to_anchor=(0.5,-0.10),ncol=2,frameon=False)
+    ax.grid(alpha=.3,axis="y",which="both")
+
+    # ⑦ 当たらないと何が困るのか
+    ax=fig.add_subplot(gs[2,0])
+    ax.plot(np.array(horiz)/60, gap, "-o", color="#1F4E9C", lw=2.6, ms=7)
+    ax.axhline(0.3, color="#2e9e5b", ls="--", lw=2.2)
+    ax.text(horiz[-1]/60, 0.33, "観測ノイズ 0.3 K", ha="right", fontsize=10.5,
+            color="#2e9e5b", weight="bold")
+    for xx,yy in zip(np.array(horiz)/60, gap):
+        ax.annotate(f"{yy:.2f} K",(xx,yy),textcoords="offset points",xytext=(0,9),
+                    ha="center",fontsize=10,weight="bold")
+    ax.set_ylim(0, max(gap)*1.30)
+    ax.set_xlabel("予測したい時間の長さ [分]", fontsize=12)
+    ax.set_ylabel("$h$ のずれが生む温度誤差 [K]", fontsize=12)
+    ax.set_title("⑦ $h$ が63%ずれたまま予測すると\n"
+                 "600 s なら 0.08 K だが、30分〜3時間では効いてくる",
+                 fontsize=12.5, weight="bold")
+    ax.grid(alpha=.3)
+
+    ax=fig.add_subplot(gs[2,1]); ax.axis("off")
+    ax.set_title("⑧ 当たらなくても、今回の目的は達成できている",
+                 fontsize=12.5, weight="bold")
+    ax.text(0.02,0.78,"$h$ が観測に現れない ＝ $h$ を間違えても\n"
+                      "600秒の温度・変形には効かない（表裏一体）。",
+            fontsize=12, transform=ax.transAxes)
+    ax.text(0.02,0.50,"実際、$h$ が63%ずれたままでも\n"
+                      "　温度RMSE 0.147 K ／ 変位差誤差 0.162 µm\n"
+                      "まで下がっている。",
+            fontsize=12, transform=ax.transAxes, color="#2e7d32", weight="bold")
+    ax.text(0.02,0.22,"困るのは「長時間・定常まで外挿したいとき」。\n"
+                      "定常温度上昇は $\\Delta T_{ss}\\propto Q/h$ なので、\n"
+                      "$h$ が63%ずれると定常温度を 39% 取り違える。",
+            fontsize=12, transform=ax.transAxes, color="#C0392B")
+
+    ax=fig.add_subplot(gs[2,2]); ax.axis("off")
+    ax.set_title("⑨ どうするか", fontsize=12.5, weight="bold")
+    opts=["観測期間を延ばす（時定数15,800 sの1/3＝約5,000 s）",
+          "温度差を大きくする（発熱を上げる／強制対流にする）",
+          "$h$ が効く量を測る（冷却期の $dT/dt$ そのもの）",
+          "CHTで求めた面ごとの熱伝達率を事前分布で与える",
+          "推定をあきらめて固定する（自由度が減り $Q$ が安定）"]
+    for i,o in enumerate(opts):
+        ax.text(0.02,0.88-i*0.165,f"・{o}",fontsize=11.5,transform=ax.transAxes)
+    ax.text(0.02,-0.10,"※ 何より、事前に感度を計算しておけば\n"
+                       "　「この構成では $h$ は同定できない」と実験前に分かる。",
+            fontsize=11, transform=ax.transAxes, color="#556")
 
     fig.suptitle("データ同化でパラメータを同定する ― 発熱量 $Q$ は当たり、放熱 $h$ は当たらない",
-                 fontsize=16,weight="bold")
-    fig.text(0.5,0.012,
+                 fontsize=17,weight="bold")
+    fig.text(0.5,0.006,
              "※ 同じ枠組みで $h$ も状態に入れているが、$h$ を40%動かしても600秒での温度差は 0.049 K しかなく、"
              "観測ノイズ 0.30 K に埋もれる。\n"
              "  「同化の設定が悪い」のではなく「この実験条件では $h$ の情報が観測に現れない」という可同定性の問題。",
              ha="center",fontsize=11.5,color="#444")
-    fig.tight_layout(rect=[0,0.030,1,0.935])
+    fig.tight_layout(rect=[0,0.022,1,0.952])
     out=os.path.join(IMG,"param_identification.png")
     fig.savefig(out,dpi=125); plt.close(fig)
     print(f"Q: {qm[-1]:.2f} W (真値15) / h: {h[-1,0]:.5f} (真値{h_true:.5f})")

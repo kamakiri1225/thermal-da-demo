@@ -178,22 +178,18 @@
 <!-- 7 -->
 <section>
 <h2>課題① OIでは発熱量が当たらない</h2>
-<p style="flex:0 0 auto">状態を<strong>拡大</strong>して \( x=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \) とし、共分散 \(B\) を固定したOIを実ソルバ（20,696セル）で実行した。</p>
-<div class="math" style="margin-bottom:4px">
-<div><b>\(B\) の中身</b>　\(B\) は<strong>状態ベクトルの誤差共分散</strong>。対角＝各量の不確かさ、非対角＝連動。
-温度は \(Q\) で決まる（ \(T_i=T_\mathrm{air}+s_iQ\) 、\(s_i=\partial T_i/\partial Q\) ）ので、
+<p style="flex:0 0 auto;font-size:.58em;margin-bottom:4px">状態を<strong>拡大</strong>して \( x=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \) とし、共分散 \(B\) を固定したOIを実ソルバ（20,696セル）で実行した。</p>
+<div class="math" style="margin:0 var(--pad) 5px;font-size:.47em;line-height:1.62">
+<div><b>\(B\) の中身</b>　状態ベクトルの誤差共分散。対角＝各量の不確かさ、非対角＝連動。温度は \(Q\) で決まる（ \(T_i=T_\mathrm{air}+s_iQ\)、\(s_i=\partial T_i/\partial Q\) ）ので
 \( B=\mathrm{diag}(\sigma_T^2,\dots,0)+\sigma_Q^2\,aa^{\mathsf T} \)、\( a=(s_1,\dots,s_5,1)^{\mathsf T} \)
- <span class="arrow">→</span> <strong>温度と \(Q\) の相関 \( B_{TQ}=\sigma_Q^2 s \) </strong>が生まれる</div>
-<div><b>\(Q\) の逆推定</b>　温度しか測らなくても（ \(H\) の \(Q\) 成分は0）、ゲインの \(Q\) 行は非ゼロ：
-\( K_Q=\dfrac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}\;(\neq 0) \)
-　したがって \( Q^a=Q^b+K_Q\,(y-Hx^b) \) で \(Q\) が動く</div>
+<span class="arrow">→</span> <strong>温度と \(Q\) の相関 \( B_{TQ}=\sigma_Q^2 s \)</strong> が生まれる</div>
+<div><b>\(Q\) の逆推定</b>　温度しか測らなくても（ \(H\) の \(Q\) 成分は0）ゲインの \(Q\) 行は非ゼロ：
+\( K_Q=\sigma_Q^2 s_1/(\sigma_T^2+\sigma_Q^2 s_1^2+r)\;(\neq 0) \)　したがって \( Q^a=Q^b+K_Q\,(y-Hx^b) \) で \(Q\) が動く</div>
 </div>
 <div class="scrollfig"><img src="../docs/img/oi_fullsolver_compare.png" alt="実ソルバOIの結果"></div>
-<p class="scrollhint">▲ 図は枠内をスクロールすると全体が見えます（12枚：温度4点・変位4点・\(Q\)・RMSE）</p>
-<p class="cap" style="margin:0 var(--pad)">温度は真値に追従する（最終RMSE 0.090〜0.113 K）が、<strong>発熱量 \(Q\) は 8.8〜9.0 W</strong>（真値15 W）で頭打ち。
-\(\sigma_Q\) を4条件振っても改善しない</p>
+<p class="scrollhint">▲ 枠内スクロールで全12枚（温度4点・変位4点・\(Q\)・RMSE）。温度は真値に追従（最終RMSE 0.090〜0.113 K）するが \(Q\) は 8.8〜9.0 W で頭打ち（真値15 W）</p>
 <div class="key" style="margin-top:0">\(B_{TQ}=\sigma_Q^2 s\) を<strong>決め打ちしている</strong>のが限界の正体<br>
-<span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を大きくしても\(Q\)は9 W付近で頭打ち</span></div>
+<span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を4条件振っても \(Q\) は9 W付近で頭打ち</span></div>
 </section>
 
 <!-- 8 -->
@@ -210,13 +206,14 @@ C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</
 
 <!-- 9 -->
 <section>
-<h2>パラメータの同定 ― \(Q\) は当たり、\(h\) は当たらない</h2>
+<h2>パラメータの同定 ― 発熱量 \(Q\) は当たり、放熱 \(h\) は当たらない</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">手順は<strong>状態拡大</strong>だけ。推定したいパラメータを状態ベクトルに入れる：\( z=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \)。
 各メンバーに違う \(Q,h\) を持たせて前進させると、温度と \(Q\) の相関が自然に育ち、<strong>温度しか測らなくてもゲインの \(Q\) 行が非ゼロ</strong>になる。</p>
 <div class="scrollfig"><img src="../docs/img/param_identification.png" alt="パラメータ同定の手順と結果"></div>
 <p class="scrollhint">▲ ①手順 ②なぜ温度だけで \(Q\) が動くのか ③\(Q\) の収束 ④\(Q\)と\(h\)の効く時間帯 ⑤いつ測るか ⑥\(h\) が決まらない理由。枠内スクロールで下段まで見えます</p>
-<div class="key" style="flex:0 0 auto">同じ枠組みで \(h\) も推定できる<strong>はず</strong>だが、\(h\) を40%変えても600秒での温度差は <strong>0.049 K</strong>。観測ノイズ0.30 Kに埋もれる<br>
-<span style="font-weight:400;font-size:.86em">これは同化の設定が悪いのではなく<strong>可同定性（identifiability）の問題</strong>。\(Q\) は<strong>加熱期</strong>に効くので、冷却期だけ観測すると誤差が 0.57 W → 4.23 W（7倍）に悪化する ＝ <strong>「いつ測るか」も設計項目</strong></span></div>
+<div class="key" style="flex:0 0 auto"><strong>\(h\) が当たらなくても、今回の目的は達成できている</strong>（温度RMSE 0.147 K／変位差誤差 0.162 µm）<br>
+<span style="font-weight:400;font-size:.85em">\(h\) が観測に現れない＝\(h\) を間違えても600秒の結果に効かない（表裏一体）。困るのは<strong>長時間の外挿</strong>：1時間で0.39 K、定常では \(\Delta T_{ss}\propto Q/h\) なので<strong>39%取り違える</strong>。
+対処は観測を延ばす／温度差を上げる／\(dT/dt\) を測る／CHTの値を事前分布にする／固定する。<strong>事前に感度を計算すれば「同定できない」と実験前に分かる</strong>のが要点。詳細は blog_003 §4-0</span></div>
 </section>
 
 <!-- 10 -->
