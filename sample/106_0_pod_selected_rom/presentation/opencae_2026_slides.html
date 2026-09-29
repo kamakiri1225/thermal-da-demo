@@ -49,6 +49,10 @@
             padding:8px 12px;font-size:.55em;line-height:1.45}
  .steps b{color:var(--blue);display:block;font-size:1.05em;margin-bottom:2px}
  .arrow{color:var(--red);font-weight:700}
+ .math{flex:0 0 auto;margin:6px var(--pad) 12px;background:#f7f9fc;border:1px solid #ccd8e6;
+       border-radius:6px;padding:9px 16px;font-size:.6em;line-height:1.75}
+ .math b{color:var(--blue);margin-right:6px}
+ .math div{margin:2px 0}
  .title-s{justify-content:center;align-items:center;text-align:center!important}
  .title-s h1{font-size:1.3em;line-height:1.42;margin-bottom:.45em;text-align:center}
  .title-s .sub{font-size:.62em;color:#456;line-height:1.9;text-align:center}
@@ -96,11 +100,15 @@ OpenFOAM v2412（CHT）＋ FrontISTR（熱弾性）＋ Python（同化・ROM）<
 <h2>データ同化とは</h2>
 <p style="flex:0 0 auto">シミュレーションと実測を、それぞれの<em>確からしさ</em>で重み付けして融合し、<strong>測っていない量まで推定する</strong>枠組み。</p>
 <div class="fig"><img src="../docs/img/da_cycle.png" alt="データ同化のサイクル">
-<p class="cap">実際のEnKF計算。<em>予報</em>（青破線）はモデルで進むあいだ真値から離れ分散も広がるが、
-<em>観測</em>（緑）が来るたびに<em>解析</em>（赤）が引き戻し、分散が縮む</p></div>
-<div class="key" style="flex:0 0 auto">根拠は<strong>ベイズの定理</strong>： \( \underbrace{p(x\mid y)}_{\text{解析}} \propto \underbrace{p(y\mid x)}_{\text{観測の尤度}}\,\underbrace{p(x)}_{\text{予報}} \)
-　<span style="font-weight:400">ガウス分布ならこの最大化は1本の式になる</span><br>
-<span style="font-size:1.05em">\( x^a = x^b + K\,(y - Hx^b),\quad K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1} \)</span></div>
+<p class="cap">実際のEnKF計算。<em>予報</em>（青破線）はモデルで進むあいだ真値から離れ分散も広がるが、<em>観測</em>（緑）が来るたびに<em>解析</em>（赤）が引き戻し、分散が縮む</p></div>
+<div class="math">
+<div><b>① 材料</b> 予報 \( x^b \)（誤差共分散 \(B\)）と 観測 \( y=Hx+\varepsilon \)（誤差共分散 \(R\)）。\(H\)＝どこを測ったかを表す行列</div>
+<div><b>② ベイズの定理</b> \( \underbrace{p(x\mid y)}_{\text{解析}}\propto\underbrace{p(y\mid x)}_{\text{観測の尤度}}\underbrace{p(x)}_{\text{予報}} \)
+　ガウスなら「最も確からしい \(x\)」は \( J(x)=(x-x^b)^{\mathsf T}B^{-1}(x-x^b)+(y-Hx)^{\mathsf T}R^{-1}(y-Hx) \) の最小化</div>
+<div><b>③ 解</b> \( \;x^a=x^b+K\,(y-Hx^b),\quad K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1},\quad B^a=(I-KH)B \)</div>
+</div>
+<div class="key" style="margin-top:0">\(B\) が<strong>「点どうしの連動」</strong>を持つので、測っていない点にも補正が届く。
+\(B^a=(I-KH)B\) が<strong>「分散が縮む」</strong>の中身</div>
 </section>
 
 <!-- 5 -->
@@ -129,11 +137,14 @@ OpenFOAM v2412（CHT）＋ FrontISTR（熱弾性）＋ Python（同化・ROM）<
 <section>
 <h2>OpenFOAM から FrontISTR へ ― 節点補間と双子実験</h2>
 <p style="flex:0 0 auto">CFDは<em>セル中心</em>、FEMは<em>節点</em>に値を持つ。<strong>逆距離加重（IDW）</strong>で温度を節点へ写像した。</p>
-<div class="fig"><img src="../docs/img/blog001_mapping.png" alt="温度マッピングの図解">
-<p class="cap">A：CFDセル中心（色）とFEM節点（黒丸）は<strong>位置が一致しない</strong>（20,696セル → 5,040節点）。
-B：1節点につき近い8セルを<em>距離の逆数</em>で加重平均（例：2.32〜4.19 mm、24.16〜24.63 ℃ → 24.413 ℃）。
-C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
-<div class="key" style="flex:0 0 auto">この CHT → 補間 → 熱弾性 の計算結果を<strong>「真値」</strong>とし、<br>
+<div class="fig"><img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
+<p class="cap">①有限体積法はセル中心、有限要素法は節点に値を置くので<strong>位置がずれる</strong>。
+②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する（近いほど重い）</p></div>
+<div class="math">
+<div><b>実際の値</b> 本ケースは \(k=8\)。ある節点の近傍8セルは距離 2.32〜4.19 mm、温度 24.16〜24.63 ℃
+　<span class="arrow">→</span> 加重平均 <strong>24.413 ℃</strong>（CFD 20,696セル → FEM 5,040節点）</div>
+</div>
+<div class="key" style="margin-top:0">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、<br>
 人工的にノイズを載せた観測を作って<strong>双子実験（正解が分かる検証）</strong>とした</div>
 </section>
 
