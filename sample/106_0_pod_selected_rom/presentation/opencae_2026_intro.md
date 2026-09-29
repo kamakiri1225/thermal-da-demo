@@ -199,6 +199,23 @@
 **注目点**：**変位を直接測る**アプローチ。本研究の「変位観測を足すと精度が上がる」
 （温度2点 0.197 K → ＋変位 0.159 K）と**同じ思想が既に商用化されている**。
 
+#### 牧野フライス製作所 ― 冷却と断熱で「熱を入れない」
+🔗 <https://www.makino.co.jp/ja-jp/>
+
+4社の中で**最も「回避（avoidance）」寄り**のアプローチ。
+
+| 要素 | 内容 |
+|---|---|
+| 主軸 | 高速主軸に**軸芯冷却＋ジャケット冷却**の両方を採用 |
+| 送り系 | **ボールねじ内部**とX軸案内面を集中冷却し、機械本体温度に同調させる |
+| 機体全体 | **断熱カバー**で温度変化速度を均一化、**機内空気の循環・攪拌** |
+| 熱源 | 温調油による冷却 |
+| 補正 | **熱伝導遅れを考慮した熱変位補正**を併用 |
+
+**注目点**：「**熱伝導遅れを考慮した**補正」＝温度が変わってから変形が現れるまでの
+**時間遅れを明示的にモデル化**している。これは本研究の集中定数ROM
+（ $C_i\,dT_i/dt=\sum_j K_{ij}(T_j-T_i)+\dots$ が時定数を持つ）と同じ発想。
+
 #### FANUC ― CNC側の機能
 🔗 <https://www.fanuc.co.jp/ja/product/cnc/index.html>
 
@@ -206,7 +223,24 @@
 - 多点の温度センサ入力に対応する小型・省配線のI/Oユニットを提供
 → **補正は最終的にCNCの中で座標オフセットとして効く**という実装の裏付け。
 
-### 3-4. 「いつ補正するのか」
+### 3-4. 4社の比較（どこに力を入れているか）
+
+| | オークマ | マザック | DMG MORI | 牧野フライス |
+|---|---|---|---|---|
+| **主戦略** | 変形を**予測可能にする設計**＋推定補正 | **学習**で補正を最適化 | **変位を直接測って**補正 | **冷却・断熱で熱を入れない** |
+| 温度センサ | 適切配置のセンサ群 | 主軸まわり＋環境 | 機械各所 | 機体各所（同調冷却用） |
+| 特徴的な入力 | **送り軸の位置情報** | **クーラントON/OFF・機械位置** | **主軸伸びの実測（SGS）** | **熱伝導遅れ** |
+| 補正モデル | 熱変位特性に基づく推定 | 加工後データの蓄積・学習 | 実測フィードバック中心 | 遅れを考慮した補正 |
+| 公称性能 | 127機種中83機種搭載・5万台超 | 室温8 ℃変化で6 µm維持 | ― | ― |
+
+**読み取れること**：
+- **「回避か補償か」は二者択一ではなく、各社とも両方やっている**。配合比が違うだけ
+- **入力に何を使うかが各社の個性**：オークマは軸位置、マザックはクーラント状態、
+  DMG MORIは変位実測、牧野は時間遅れ
+- **本研究の立ち位置**：入力を増やす方向ではなく、
+  **「その観測にどれだけ価値があるか」を定量化して設計する**という上流の話
+
+### 3-5. 「いつ補正するのか」
 
 1. **事前（オフライン）**：さまざまな温度条件で運転し、**多点温度**と**刃先変位**を
    同時計測 → 回帰などで**予測モデル**を作る
@@ -219,9 +253,184 @@
 
 ---
 
-## 4. 最も近い先行研究（質疑への備え）
+## 4. 計測の実際 ― 何を、どこで、どう測るか
 
-### 4-1. Teshima, Y., Tanaka, S., Kizaki, T., Sugita, N. (2024)
+### 4-1. 測定方法の2分類（文献の整理）
+
+**Li et al. (2024)**（全文無料 📄 <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076>）
+の Introduction が、測り方をきれいに2つに分けています（原文引用）:
+
+> "**Indirect measurement methods** estimate the thermal deformation of a machine tool based on a
+> temperature-deformation simulation model (e.g., finite element, neural network) and
+> **measure temperatures via thermocouples or thermal cameras**."
+
+> "Alternatively, **direct measurement methods** measure the changes of the tool position relative to
+> the workpiece via **displacement sensors such as laser interferometers, capacitive sensors,
+> and touch probes**."
+
+> "For direct measurements, **multi-position measurements are necessary** to determine the thermal
+> errors effects on the entire machine tool workspace, which is usually a **very time-consuming**
+> measurement process."
+
+| | 間接法（indirect） | 直接法（direct） |
+|---|---|---|
+| 測るもの | **温度** | **刃先とワークの相対変位** |
+| 道具 | 熱電対、**サーマルカメラ** | レーザ干渉計、静電容量センサ、**タッチプローブ** |
+| 変位の求め方 | 温度→変形モデル（FEM・NN）で予測 | そのまま実測 |
+| 長所 | 運転中も常時測れる、安い | モデル誤差が無い |
+| 短所 | **モデルの精度に依存**（境界条件の不確かさ） | **多点を測るので時間がかかる**、加工を止める必要 |
+
+**→ 実機の補正は「間接法（温度）」が主役。直接法は事前のモデル作成と検証に使う**、という役割分担。
+
+### 4-2. 温度はどう測るか・どこで測るか
+
+**測る道具**
+
+| 種類 | 特徴 | 用途 |
+|---|---|---|
+| **熱電対**（K型など） | 安い、応答が速い、多点化しやすい | **最も一般的**。機械各部に多数貼る |
+| 測温抵抗体（Pt100） | 精度・安定性が高い、やや高価 | 基準温度・精密測定 |
+| サーミスタ | 感度が高い、狭い範囲 | 組み込み用 |
+| **サーマルカメラ** | **非接触で面分布**が一度に取れる | 熱源の特定、モデル検証 |
+
+**どこに置くか** ― ここが本研究のテーマそのものです。各社の公開情報では:
+
+- オークマ：「**適切に配置されたセンサ**の温度情報」（配置が効くことを示唆）
+- マザック：主軸まわり＋環境温度
+- 一般には：**主軸軸受近傍、主軸モータ、ボールねじナット、案内面、コラム、ベッド、機外環境**
+
+**→ 「どこに置けば効くか」に定説が無いのが、先行研究（Teshima 2024ほか）と本研究の出発点。**
+
+### 4-3. 温度条件はどう取るか ― ISO 230-3
+
+**ISO 230-3:2020** "Test code for machine tools — Part 3: Determination of thermal effects"
+🔗 <https://www.iso.org/standard/73291.html> ※本体は有料
+📄 **無料プレビュー（Scope全文が読めます）**:
+<https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf>
+
+規定される試験は**4種類**（2020年版。2007年版は3種類）:
+
+1. **ETVE**（Environmental Temperature Variation Error）＝**環境温度変動誤差**試験
+   … 機械を動かさず、**周囲温度の変動だけ**でどれだけ動くかを測る
+2. **主軸回転**による熱変形試験（主軸を回し続けて変位を測る）
+3. **直線軸の運動**による熱変形試験
+4. **回転軸の運動**による熱変形試験（2020年版で追加）
+
+**ここが重要** ― 規格自身が次のように断っています（プレビューから原文引用）:
+
+> "It is a recognized fact that **the ultimate thermo-elastic deformation of a machine tool is
+> closely linked to the operating conditions**. **The test conditions described in this document are
+> not intended to simulate the normal operating conditions** but are to facilitate performance
+> estimation..."
+
+> "For example, **use of coolants can significantly affect the actual thermal behaviour of the
+> machine tool**. Therefore, these tests are considered only as the **preliminary tests** towards
+> the determination of actual thermo-elastic behaviour of the machine tool..."
+
+> "The tests are designed to measure the **relative displacements between the component that holds
+> the tool and the component that holds the workpiece**."
+
+**→ 発表で効く一文**：
+**「標準試験は実運転を模擬していない、と規格自身が明記している。
+とくにクーラントの影響は大きい」**
+つまり**実運転の熱挙動は、標準試験だけでは決まらない**。
+だからこそ**運転中の観測からその場で推定する**枠組みに意味がある。
+
+### 4-4. 変位はどう測るか
+
+#### タッチプローブとは
+
+**主軸に装着する接触式の測定器**です。先端の球（スタイラス）がワークや基準球に
+**触れた瞬間に信号を出す**ので、そのときの機械座標を読めば「その面・その点がどこにあるか」が分かります。
+
+- 用途：ワーク原点出し、加工後の寸法測定、そして**熱変位の測定**
+- 熱変位測定での使い方：**基準球（マスターボール）を定盤に固定**しておき、
+  一定時間ごとにプローブで測る → **球の見かけの位置が動いた量＝その間に生じた熱変位**
+- 長所：**機械に元から付いていることが多い**（追加投資が小さい）、3方向まとめて測れる
+- 短所：**接触するたびに加工を止める**必要がある、測定に時間がかかる
+
+#### そのほかの変位測定
+
+| 方法 | 原理 | 特徴 |
+|---|---|---|
+| **静電容量変位センサ** | 対象との距離で静電容量が変わる | 非接触、**nm〜サブµm分解能**。主軸の伸びを連続測定できる |
+| **渦電流センサ** | 金属中の渦電流で距離を検出 | 非接触、油・切粉に強い。実機に組み込みやすい |
+| **レーザ干渉計** | 光の干渉で長さを測る | 最高精度。**軸の位置決め誤差**の評価に使う。設置が大がかり |
+| **テストバー（マンドレル）＋変位センサ** | 主軸に基準の丸棒を付け、周囲から複数センサで測る | **ISO 230-3の主軸試験の標準構成**。軸方向の伸びと傾きを分離できる |
+| **DMG MORI の SGS** | 主軸伸びの専用センサ | 実機に**常設**して運転中ずっと測る |
+
+**補足**：ISO 230-3では、角度偏差も評価する場合、
+「**変位センサの間隔**は十分な測定範囲・分解能・不確かさが得られるように選ぶ」とされ、
+また「**軸方向センサは主軸端面に直接当てて**、テストバー自身の熱膨張の影響を除いてもよい」
+とされています（プレビュー記載の趣旨）。
+
+#### カメラで測れるか ― **測れます**（2024年のオープンアクセス論文）
+
+**Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G. (2024)**
+"Machine Tool **Thermal Error Measurement and Prediction via Wireless Microscope**",
+*Manufacturing Letters* **41**, 1440–1451
+📄 **全文無料**: <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076>
+
+やっていること（原文の要約）:
+
+> "A novel method is proposed to measure the thermal errors of a three-axis machine tool by
+> **taking images of unique custom-designed fiducials attached to a worktable using a wireless
+> microscope mounted to the spindle**."
+
+- **主軸にワイヤレス顕微鏡**を装着し、**テーブルに貼った基準マーク（フィデューシャル）**を撮影
+- マークはフェムト秒レーザで**黒アルミ板に加工**（楕円の格子、間隔350 µm、加工分解能75 nm）
+- 楕円1つ1つに**行・列の番号が振ってある**ので、**格子間隔より大きくずれても追跡できる**
+- 画像解析で**3方向の変位**を算出
+
+**精度**（原文引用）:
+
+> "The results show the method can **measure thermal errors within four times the positioning
+> resolution of the machine tool**, with most of the errors being **smaller in magnitude than twice
+> the positioning resolution**."
+
+**長所**：測定が**速く・安く・実用的**（著者らの主張）。ワイヤレスなので配線不要。
+複数マークを置けば**作業空間の複数位置**を測れる。
+**短所**：加工中は測れない（主軸に顕微鏡を付ける必要がある）、視野内の平面変位が主。
+
+**→ 「カメラでも測れるか？」の答え：YES。2024年のNAMRC論文で実証済み**で、
+しかも**全文無料で読めます**。
+
+---
+
+## 5. 最新研究の動向（2023〜2025）
+
+| 論文 | 何をしているか | 無料か |
+|---|---|---|
+| **Teshima et al. (2024)** *CIRP JMST* 55, 403–410<br>🔗 <https://doi.org/10.1016/j.cirpj.2024.10.015> | 温度→TCP変位の**ROM**を作り、回帰係数＝温度感度として**センサ配置の指針**を与える | ❌ 有料 |
+| **Ando et al. (ICTIMT2025)**<br>🔗 <https://doi.org/10.1007/978-3-032-01194-7_31> | 上の続報。**伝達関数行列**と**温度感度分布**で配置を決める | ❌ 有料 |
+| **Bünger et al. (2023)** arXiv:2306.12736<br>📄 <https://arxiv.org/abs/2306.12736> | **初期条件の不確かさ伝播**を低ランク近似で高速計算し、**センサ配置の評価**に使う | ✅ 無料 |
+| **Li et al. (2024)** *Manufacturing Letters* 41<br>📄 <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076> | **ワイヤレス顕微鏡＋基準マーク**で熱変位を直接測る新手法 | ✅ 無料 |
+| **Coelho et al. (2025)** arXiv:2510.03261<br>📄 <https://arxiv.org/abs/2510.03261> | 温度・熱流束**場そのもの**をニューラルネットで予測。RNN/GRU/LSTM/Transformer等**6種をベンチマーク**。**相関ベースで測定点を選ぶ**戦略も提案 | ✅ 無料 |
+| **Intelligent Soft Sensor for CHTC** (2025)<br>📄 <https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/> | **測れないCHTCを最適化アルゴリズムで推定**する（ソフトセンサ） | ✅ 無料 |
+
+### 動向の読み取り
+
+1. **「誤差を直接予測」から「場を予測」へ**
+   Coelho et al. (2025) は、誤差を直接出すのではなく**温度場・熱流束場を予測**し、
+   下流で誤差に変換するモジュール構成を提案。**本研究の「温度場を推定してから変位へ」と同じ思想**。
+2. **センサ配置が独立した研究テーマになってきた**
+   Teshima (2024)、Ando (2025)、Bünger (2023) がいずれも配置問題を扱う。
+   **本研究もこの流れに乗っている**。
+3. **測れない境界条件を「推定する」方向**
+   CHTCソフトセンサ (2025) は、測れないCHTCを最適化で推定。
+   **本研究がEnKFで $Q,h$ を推定するのと動機が同じ**。
+4. **測定側の革新**
+   カメラ（Li 2024）のように、**安く速く測る**方法が出てきている。
+   測定が安くなれば、**データ同化に使える観測が増える**。
+
+**→ 本研究の位置づけ**：①場を推定する ②配置を設計する ③境界条件を推定する、
+という**3つの潮流の交点**にあり、さらに**OSSで全部公開**している点が独自。
+
+---
+
+## 6. 最も近い先行研究（質疑への備え）
+
+### 6-1. Teshima, Y., Tanaka, S., Kizaki, T., Sugita, N. (2024)
 
 "Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools",
 *CIRP Journal of Manufacturing Science and Technology* **55**, 403–410
@@ -232,7 +441,7 @@
 - 彼ら自身が挙げるギャップ：
   「入力点を増やせば精度は上がるが、**最適な点数と配置を決める方法がこれまで無かった**」
 
-### 4-2. Ando, S., Tanaka, S., Teshima, Y., Morishita, J., Kizaki, T.（続報）
+### 6-2. Ando, S., Tanaka, S., Teshima, Y., Morishita, J., Kizaki, T.（続報）
 
 "Strategy for Sensor Placement to Estimate Thermal Errors Using **Temperature-Sensitivity
 Distribution** Based on a Reduced-Order Model of Machine Tools"
@@ -243,7 +452,7 @@ Distribution** Based on a Reduced-Order Model of Machine Tools"
 - **伝達関数行列**を定義し、TCP-ワーク間の相対変位をセンサ位置の温度変化と結ぶ
 - ROMに基づく**センサ感度関数**を定義して配置を決める
 
-### 4-3. 本研究との違い
+### 6-3. 本研究との違い
 
 | | Teshima / Ando ら | 本研究 |
 |---|---|---|
@@ -259,7 +468,7 @@ Distribution** Based on a Reduced-Order Model of Machine Tools"
 
 ---
 
-## 5. 発表での使い方
+## 7. 発表での使い方
 
 - オープンCAEの聴衆向けなので、**1行目で数字を出して「大きい問題だ」と示し**、
   **3行目で「だからシミュレーションだけでは足りない」へ落とす**のが効く。
