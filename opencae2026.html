@@ -291,9 +291,9 @@ Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 
 <h2>検証 ― 5点で本当に全体が合うのか（時刻歴）</h2>
 <p style="flex:0 0 auto">残差の棒グラフだけでは分からないので、<strong>選点にも校正にも使っていない検証点</strong>を上部・中央・下部から取り、温度の時刻歴で真値と重ねた。</p>
 <div class="fig"><img src="img/timeseries_verification.png" alt="検証点の時刻歴比較">
-<p class="cap">黒＝OpenFOAM真値、赤破線＝<strong>Q-DEIM 5点から復元</strong>、灰点線＝ランダム5点（200通り中の最悪）から復元。
-検証点は5点から52〜73 mm離れており、上部・中央・下部で<strong>立ち上がり方も冷え方も違う</strong>が、いずれも赤が黒に重なる。
-右端＝全20,696セルRMSEの時刻歴</p></div>
+<p class="cap">左端＝<strong>測定する5点（青 P0〜P4）と検証点（赤 V1〜V3）の位置</strong>。V1＝上部・V2＝中央・V3＝下部で、いずれも5点から52〜73 mm離れている。
+中3枚は黒＝OpenFOAM真値、赤破線＝<strong>Q-DEIM 5点から復元</strong>、灰点線＝ランダム5点（200通り中の最悪）から復元。
+<strong>立ち上がり方も冷え方も違う</strong>3点で、いずれも赤が黒に重なる。右端＝全20,696セルRMSEの時刻歴</p></div>
 <div class="key" style="flex:0 0 auto">測っていない点でも誤差は <strong>0.4〜0.8 mK</strong>。全セルRMSEは全時刻で<strong>観測ノイズ0.3 Kの2桁下</strong><br>
 <span style="font-weight:400;font-size:.88em">ランダム5点の最悪例は同じ枚数のモードを使っても 0.295 K まで崩れる ＝ <strong>点の選び方が効いている</strong></span></div>
 </section>
