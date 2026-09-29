@@ -27,16 +27,16 @@
  .reveal em{color:var(--blue);font-style:normal;font-weight:700}
  .reveal img{border:none;box-shadow:none;background:none;max-width:100%}
  /* 図の領域：gridの 1fr で高さを確定させ、画像を必ずその中に収める */
- .fig{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:1fr auto;
+ .fig{flex:1 1 0;min-height:0;display:grid;grid-template-rows:1fr auto;
       justify-items:center;align-items:center;overflow:hidden;
       margin-left:var(--pad);margin-right:var(--pad)}
- .fig img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain}
- .two{display:flex;gap:22px;flex:1 1 auto;min-height:0;overflow:hidden;
+ .fig img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ .two{display:flex;gap:22px;flex:1 1 0;min-height:0;overflow:hidden;
       margin-left:var(--pad);margin-right:var(--pad)}
  .two>div{flex:1;min-width:0;display:grid;grid-template-rows:1fr auto;
           justify-items:center;align-items:center;overflow:hidden}
  .two>div.txt{display:flex;flex-direction:column;justify-content:center;align-items:stretch}
- .two img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain}
+ .two img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
  .cap{font-size:.45em;color:#556;text-align:center;margin:4px 0 0;line-height:1.42;flex:0 0 auto}
  .reveal table{font-size:.55em;border-collapse:collapse;width:100%;margin:.2em 0}
  .reveal table th{background:#eef2f8;color:var(--blue);padding:6px 9px;border:1px solid #b9c6d6}
@@ -106,7 +106,7 @@ OpenFOAM v2412（CHT）＋ FrontISTR（熱弾性）＋ Python（同化・ROM）<
 <!-- 5 -->
 <section>
 <h2>データ同化の種類と、今回の選択</h2>
-<table style="font-size:.56em;flex:1 1 auto">
+<table style="font-size:.56em;flex:1 1 0;min-height:0">
 <tr><th style="width:11%">分類</th><th style="width:15%">手法</th><th>考え方</th><th style="width:25%">特徴</th></tr>
 <tr><td rowspan="4"><strong>逐次<br>データ同化</strong><br><span style="font-size:.85em;color:#556">観測が来るたび<br>その場で更新</span></td>
     <td style="background:#fff3f0"><strong>OI</strong>（最適内挿）</td>
@@ -152,7 +152,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <section>
 <h2>課題② EnKFは当たるが計算コストが大きい</h2>
 <p style="flex:0 0 auto">EnKFでは<em>分身</em>を少しずつ違う \(Q,h\) で前進させる。温度と \(Q\) を独立に初期化しても<strong>相関が自動で現れる</strong>。</p>
-<div class="two" style="flex:1 1 auto">
+<div class="two">
 <div class="txt">
 <table style="font-size:.6em">
 <tr><th>サイクル</th><th>corr(\(T_{P2}\), \(Q\))</th></tr>
@@ -202,17 +202,15 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <!-- 11 -->
 <section>
 <h2>代表点の選択 ― Q-DEIM</h2>
-<p style="flex:0 0 auto">ROMのノードを<strong>勘で置くのをやめ</strong>、PODモードから<em>貪欲法</em>で5点を自動選定した。</p>
-<div class="steps">
-<div><b>① 一番強い点を選ぶ</b>各セルが持つ「モード指紋」の長さが最大の点＝場にいちばん効く点</div>
-<div><b>② その方向を差し引く</b>選んだ点で説明できる成分を全セルから消す（デフレーション）</div>
-<div><b>③ 残りが最大の点を選ぶ</b>①②を5点そろうまで繰り返す＝「まだ分からない情報」を最大化</div>
-</div>
-<div class="fig"><img src="../docs/img/qdeim_value.png" alt="Q-DEIMの選択過程と価値">
-<p class="cap">左：1点選ぶごとに残差が 0.0369→0.0266→0.0192→0.0173→0.0142 と減り、<strong>5点で残差ゼロ</strong>（5モードを張り切った）。
-右：ランダム5点200通りとの比較 ― Q-DEIM <strong>0.00081 K</strong>／中央値 0.00220 K／<strong>最悪 1.396 K</strong></p></div>
+<p style="flex:0 0 auto">ROMのノードを<strong>勘で置くのをやめ</strong>、PODモードから<em>貪欲法</em>で5点を自動選定した。
+①一番強い点を選ぶ → ②その方向を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返し）</p>
+<div class="fig"><img src="../docs/img/qdeim_order.png" alt="Q-DEIMの選択順序">
+<p class="cap">赤＝新しく追加された点、灰色＝すでに選んだ点。残差 0.0369→0.0266→0.0192→0.0173→0.0142→<strong>0</strong>。
+<strong>1点目はヒータ最近傍ではなく中央高さ</strong>（21,−2,52 mm）。2点目は反対側（−14,33,52）、3点目でヒータ側（37,7,51）、
+4・5点目で底面の両側（±35,1,1）へ ― <strong>場を広く覆うように広がる</strong></p></div>
 <div class="key">この手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
-<span style="font-weight:400;font-size:.9em">価値は「平均的に良い」ことではなく、<strong>大外れ（1.4 K＝1700倍）を確実に避ける</strong>こと</span></div>
+<span style="font-weight:400;font-size:.9em">ランダム5点と比べると Q-DEIM 0.00081 K／中央値 0.00220 K／<strong>最悪 1.396 K（約1700倍）</strong>
+― 価値は「大外れを確実に避ける」こと</span></div>
 </section>
 
 <!-- 12 -->
@@ -220,7 +218,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <h2>ROMの構築と校正</h2>
 <p style="flex:0 0 auto">選んだ5点上で集中定数モデルを組み、係数 \(C_i, K_{ij}, h\) を<strong>OpenFOAM結果に合うよう最小二乗で校正</strong>した。
 \( C_i\dfrac{dT_i}{dt}=\sum_j K_{ij}(T_j-T_i)+q_i(t)-h(T_i-T_{\mathrm{air}}) \)</p>
-<div class="two" style="flex:1 1 auto">
+<div class="two">
 <div><img src="../docs/img/rom_network.png" alt="ROMネットワーク">
 <p class="cap">5ノードと結合コンダクタンス \(K_{ij}\)（P0-P2が最強）</p></div>
 <div><img src="../docs/img/rom_calib_fit.png" alt="校正の当てはまり">
@@ -243,7 +241,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <section>
 <h2>結果② 5点から温度分布を復元する</h2>
 <p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。手順は2ステップだけ。</p>
-<div class="two" style="flex:1 1 auto">
+<div class="two">
 <div class="txt" style="flex:1.3">
 <table style="font-size:.5em">
 <tr><th style="width:13%">手順</th><th>やること</th><th style="width:26%">行列サイズ</th></tr>
@@ -291,7 +289,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
-<div class="two" style="flex:1 1 auto">
+<div class="two">
 <div><img src="../docs/img/obs_points_progression.png" alt="観測点の位置">
 <p class="cap">どこで観測しているか（温度：赤・青／変位：橙・灰）</p></div>
 <div><img src="../docs/img/opencae_sensor_progression.png" alt="段階比較">
@@ -316,7 +314,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <!-- 19 -->
 <section>
 <h2>まとめ</h2>
-<table style="font-size:.62em;flex:1 1 auto">
+<table style="font-size:.62em;flex:1 1 0;min-height:0">
 <tr><th style="width:13%">段階</th><th style="width:40%">やったこと</th><th>結果</th></tr>
 <tr><td><strong>連携</strong></td><td>OpenFOAM(CHT) → 節点補間 → FrontISTR(熱弾性)</td><td>温度・変形・面ごとの熱伝達率を算出し、双子実験の真値とした</td></tr>
 <tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOIは \(Q\)=8.9 W止まり <span class="arrow">→</span> EnKFで<strong>15.95 W</strong></td></tr>
@@ -331,7 +329,7 @@ C：全節点に温度が乗った状態をFrontISTRへ渡す</p></div>
 <!-- 20 -->
 <section>
 <h2>限界と今後／公開情報</h2>
-<div class="two" style="flex:1 1 auto">
+<div class="two">
 <div class="txt">
 <h3>正直な限界</h3>
 <ul style="font-size:.86em">

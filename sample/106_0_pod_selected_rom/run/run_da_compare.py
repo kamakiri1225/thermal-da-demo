@@ -80,15 +80,20 @@ def main():
     pod_cells=kv["cell_idx"]
     UP=U[pod_cells,:]; UP_pinv=np.linalg.pinv(UP)      # a = UP_pinv (T5 - mean[pod])
 
-    # dT/dQ でノード感度
-    base=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.0,heat_node,0,300,DT)[1][-1]
-    pert=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.1,heat_node,0,300,DT)[1][-1]
-    sens=(pert-base)/0.1
+    uz_mean, Dmode = build_disp_operator(U, mean, Cc)
+
+    # 熱感度 W = Ks^-1 H_T 由来のノード感度:
+    #   各代表点の温度が「注目量（A-O変位差）」にどれだけ効くか  d(Uz(A)-Uz(O))/dT_i
+    # （発熱への温度感度 dT/dQ とは別物。熱変形を推定したいので、こちらを基準にする）
+    wAO = (Dmode[0]-Dmode[1]) @ UP_pinv          # (NPT,) [µm/K]
+    sens = np.abs(wAO)
     hi=int(np.argmax(sens)); lo=int(np.argmin(sens))
     hi2=list(np.argsort(sens)[::-1][:2])
-    print(f"[cmp] dT/dQ={np.round(sens,2)}  高感度={hi} 低感度={lo} 上位2={hi2}")
-
-    uz_mean, Dmode = build_disp_operator(U, mean, Cc)
+    print(f"[cmp] 熱感度|d(A-O)/dT|={np.round(sens,3)} µm/K  高感度=P{hi} 低感度=P{lo} 上位2={hi2}")
+    # 参考: 発熱への温度感度（比較用に表示のみ）
+    b0=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.0,heat_node,0,300,DT)[1][-1]
+    b1=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.1,heat_node,0,300,DT)[1][-1]
+    print(f"[cmp] 参考 dT/dQ={np.round((b1-b0)/0.1,2)} K/W （順位が違う点に注意）")
     def disp_of_T5(T5):   # (…,5)->(…,2)
         a=(T5-mean[pod_cells])@UP_pinv.T
         return uz_mean + a@Dmode.T
@@ -135,9 +140,9 @@ def main():
 
     configs=[
         ("同化なし(free run)",   None,      False, "tab:gray"),
-        ("温度1点(低感度)",      [lo],      False, "tab:orange"),
-        ("温度1点(高感度)",      [hi],      False, "tab:blue"),
-        ("温度2点(高感度)",      hi2,       False, "tab:green"),
+        ("温度1点(熱感度 低)",   [lo],      False, "tab:orange"),
+        ("温度1点(熱感度 高)",   [hi],      False, "tab:blue"),
+        ("温度2点(熱感度 上位2)",hi2,       False, "tab:green"),
         ("温度2点+変位2点",      hi2,       True,  "tab:red"),
     ]
     results={}
