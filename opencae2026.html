@@ -272,23 +272,24 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 ②その点で説明できる分を全セルから差し引く → ③残りが最大の点を選ぶ（5点まで繰り返す）。
 判断の材料は<strong>PODモード行列</strong>（各セルが持つモードの値）</div>
 </div>
-<div class="fig"><img src="img/qdeim_order.png" alt="選択の順序">
-<p class="cap">赤＝新しく追加、灰＝すでに選んだ点。各パネルの「残差」は<strong>まだ説明できていないモード成分の大きさ</strong>（復元前の無次元量。温度[K]ではない）。
-<strong>1点目はヒータ最近傍ではなく中央高さ</strong>、2点目は反対側、4・5点目で底面へ ― 場を広く覆うように広がり、5点で残差ゼロ＝5モードを張り切る</p></div>
+<div class="scrollfig">
+<img src="img/qdeim_order.png" alt="選択の順序">
+<img src="img/qdeim_rmse_vs_npoints.png" alt="温度RMSE">
+</div>
+<p class="scrollhint">▲ 上＝選ぶ順序（各パネルの「残差」は復元前のモード空間の無次元量。温度[K]ではない）／
+下＝<strong>温度[K]のRMSE</strong>。枠内をスクロールすると両方見えます</p>
 <div class="key">手順は <code>scipy.linalg.qr(..., pivoting=True)</code> と完全に一致 ＝ <strong>枢軸付きQR分解そのもの</strong><br>
-<span style="font-weight:400;font-size:.9em"><strong>復元してから</strong>の温度RMSE（全20,696セル）で比べると
-Q-DEIM 0.00081 K／ランダム中央値 0.00220 K／<strong>ランダム最悪 1.396 K（約1700倍）</strong>
-― 価値は「大外れを確実に避ける」こと</span></div>
+<span style="font-weight:400;font-size:.88em"><strong>復元してからの温度RMSE</strong>（全20,696セル）：1点 0.527 K → 2点 0.066 K → <strong>5点 0.00081 K</strong>（650分の1）。
+同じ5点でもランダムだと中央値 0.00220 K・<strong>最悪 1.396 K（1,724倍）</strong> ― 価値は「大外れを確実に避ける」こと</span></div>
 </section>
 
 <!-- 12 -->
 <section>
 <h2>なぜその5点なのか ― PODと測定点の関係</h2>
-<p style="flex:0 0 auto">PODが「全場は5個の数 \(a\) で決まる」と言った瞬間、<strong>測定点選びは \(5\times5\) の連立方程式を解きやすくする問題</strong>に変わる。</p>
-<div class="fig"><img src="img/pod_to_points.png" alt="PODと測定点の関係">
-<p class="cap">①全場は \(\bar T+\sum a_k\varphi_k\)。②1点測る＝\(a\) の式が1本立つ → 5点で \(U_{r,P}a=T_P-\bar T_P\)。
-③④実際の \(U_{r,P}\)：Q-DEIMは条件数3.15、ランダム最悪は上3行がそっくりで151,718。
-⑤条件数と復元誤差は<strong>対数どうしの相関 +0.917</strong>できれいに並ぶ</p></div>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">PODが「全場は5個の数 \(a\) で決まる」と言った瞬間、<strong>測定点選びは \(5\times5\) の連立方程式を解きやすくする問題</strong>に変わる。
+①②＝式の流れ／③④＝実際の \(U_{r,P}\)（Q-DEIMは条件数3.15、ランダム最悪は上3行がそっくりで151,718）／⑤＝条件数と復元誤差は<strong>対数どうしの相関 +0.917</strong></p>
+<div class="scrollfig"><img src="img/pod_to_points.png" alt="PODと測定点の関係"></div>
+<p class="scrollhint">▲ 枠内をスクロールすると図の下半分（実際の行列と散布図）が見えます</p>
 <div class="key" style="flex:0 0 auto"><strong>Q-DEIM</strong>＝この連立が解きやすくなるよう「測る5行」を選ぶ手続き（オフラインで1回。中身は枢軸付きQR分解）／
 <strong>gappy-POD</strong>＝選んだ5点から \(a\) を解いて全場へ伸ばす計算（毎時刻。gappy＝20,696セル中5セルしかない穴だらけの意味）<br>
 <span style="font-weight:400;font-size:.88em"><strong>「ランダム5点」とは</strong>：20,696セルから一様に5セルを選び直し（重複なし）、<strong>同じPODモード・同じ復元式</strong>で全場を復元する対照実験を200回。変えたのは「どの5行を抜くか」だけ</span></div>
@@ -393,11 +394,11 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <!-- 18 -->
 <section>
 <h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
-<p style="flex:0 0 auto">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。</p>
-<div class="fig"><img src="img/sensitivity_derivation.png" alt="熱感度Wの導出">
-<p class="cap">①FEM離散化で \(K_su=f_\mathrm{th}\)。②熱ひずみ \(\alpha(T-T_\mathrm{ref})\) が温度に比例するので \(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\)。
-③よって \(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)。④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ）。
-⑤実装は全 \(W\) を作らず、PODモード方向だけFrontISTRに通す（6回）</p></div>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
+①\(K_su=f_\mathrm{th}\) ②\(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\) ③\(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)
+④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ） ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
+<div class="scrollfig"><img src="img/sensitivity_derivation.png" alt="熱感度Wの導出"></div>
+<p class="scrollhint">▲ 枠内をスクロールすると④⑤（$W$の読み方・実データ・実装）が見えます</p>
 <div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表<br>
 <span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
 </section>
