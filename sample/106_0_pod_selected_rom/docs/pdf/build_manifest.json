@@ -1,11 +1,11 @@
 [
   {
-    "source": "blog_001_cht_thermal_expansion_and_htc.md",
-    "sha256": "b4749456492345a78d58b041a74d7faf00168e6faa7c549888671aca53b1c2d4",
-    "math": 88,
-    "images": 7,
-    "flows": 1,
-    "gif": 0,
-    "tables": 4
+    "source": "blog_005_optimal_sensor_placement.md",
+    "sha256": "81ce2470b7ff0802ed2ec03d18abc33c72d9c0809c526a801538cda5e73d3509",
+    "math": 233,
+    "images": 13,
+    "flows": 2,
+    "gif": 1,
+    "tables": 9
   }
 ]
