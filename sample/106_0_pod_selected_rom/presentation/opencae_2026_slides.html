@@ -71,14 +71,18 @@
 <section>
 <h2>はじめに</h2>
 <ul style="flex:0 0 auto">
-<li>工作機械の加工誤差のうち、<strong>熱変位が占める割合は最大75 %</strong>［Mayr et al. 2012］</li>
-<li>対策は<em>回避</em>（熱設計・冷却）と<em>補償</em>（熱変位補正）。<strong>回避はコストが高く</strong>、実用の主役は補償</li>
-<li>補償の前提は<em>熱変形を正しく予測できること</em>。しかし熱解析で温度勾配まで完全に再現するのは難しい</li>
+<li>工作機械の加工誤差では<strong>熱変位が約40〜70 %</strong>を占め、最大の誤差要因となる。</li>
+<li>対策には<em>熱設計・温度制御・モデル補償</em>があるが、補償には<strong>熱変形を正確に予測する</strong>必要がある。</li>
+<li>熱解析や熱流体解析を用いても、<em>温度勾配・熱伝達率・複数の時定数</em>を完全に再現することは難しく、
+<strong>温度の傾向が合ってもTCP変位が合わない</strong>場合がある。</li>
 </ul>
-<div class="fig"><img src="../docs/img/intro_deform_anim.gif" alt="熱変形と変位">
-<p class="cap">片側加熱による熱変形と変位の時間変化（誇張表示）</p></div>
-<div class="key" style="flex:0 0 auto">熱伝達率を直接測る計測器は存在せず、<strong>境界条件の不確かさが予測精度を左右する</strong><br>
-<span style="font-weight:400;font-size:.88em">ISO 230-3 も「標準試験は実運転を模擬しない。とくにクーラントの影響は大きい」と明記</span></div>
+<div class="two">
+<div><img src="../docs/img/intro_temp_history.png" alt="温度変化">
+<p class="cap">温度変化（熱電対による測温点の温度）</p></div>
+<div><img src="../docs/img/intro_deform_anim.gif" alt="変位の変形具合とグラフ">
+<p class="cap">変位の変形具合と変位のグラフ（誇張表示）</p></div>
+</div>
+<div class="key">そのため、<strong>観測データを用いて境界条件や熱変形を逐次補正するデータ同化</strong>が注目されている</div>
 </section>
 
 <!-- 3 -->
@@ -88,11 +92,12 @@
 <li>数値モデルだけでは、<strong>初期条件や境界条件の不確かさ</strong>のために現実を再現しきれない</li>
 <li>そこで<em>限られた温度・変位の観測</em>と<em>数値モデル</em>を統合する<strong>データ同化</strong>を用いる</li>
 </ul>
-<div class="fig"><img src="../docs/img/blog001_setup.png" alt="解析対象">
-<p class="cap">題材：片側ヒータ付き中空円筒（鋼、固体20,696セル）。15 W を 0〜300 s 投入し冷却。<br>
-OpenFOAM v2412（CHT）＋ FrontISTR（熱弾性）＋ Python（同化・ROM）</p></div>
-<div class="key" style="flex:0 0 auto">少数の観測から ① 全温度場　② 熱変形　③ 発熱量　④ 境界条件（放熱）を<br>
-<strong>逐次推定</strong>する枠組みを、<strong>オープンソースだけ</strong>で構築する</div>
+<div class="fig"><img src="../docs/img/da_correction_anim.gif" alt="でたらめな状態から補正される様子">
+<p class="cap">題材：片側ヒータ付き中空円筒（鋼、固体20,696セル）。15 W を 0〜300 s 投入し冷却。
+<strong>でたらめな初期状態（誤差9.3 K）</strong>から、温度2点の観測だけで
+同化なしは12.7 Kまで悪化する一方、<strong>同化ありは0.24 Kまで補正</strong>される</p></div>
+<div class="key">少数の観測から ① 全温度場　② 熱変形　③ 発熱量　④ 境界条件（放熱）を<strong>逐次推定</strong>する枠組みを、
+<strong>オープンソースだけ</strong>（OpenFOAM v2412 ＋ FrontISTR ＋ Python）で構築する</div>
 </section>
 
 <!-- 4 -->
