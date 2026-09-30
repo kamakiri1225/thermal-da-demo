@@ -39,12 +39,13 @@ def disp_timeseries():
     fig.savefig(out,dpi=140); plt.close(fig); print("wrote",out)
 
 
-# 凡例表記は「熱感度 W = |d(Uz(A)-Uz(O))/dT_i|」で統一する。
-# （発熱への温度感度 dT/dQ とは別物なので、混同を避けて図には出さない）
+# 温度センサの選定基準は「発熱感度 dT/dQ」。
+# 熱感度 W（温度→変位）は変位センサの基準で、温度センサに使うと逆効果になる
+# （run/why_lowW_wins_check.py：温度RMSEとの相関 dT/dQ -0.835 vs W +0.405）
 RENAME={"同化なし(free run)":"同化なし",
-        "温度1点(熱感度 低)":"温度1点:P3 底面(熱感度W 低 0.04 µm/K)",
-        "温度1点(熱感度 高)":"温度1点:P1 中央高さ(熱感度W 高 0.65 µm/K)",
-        "温度2点(熱感度 上位2)":"温度2点:P1+P2(熱感度W 上位2)",
+        "温度1点(発熱感度 低)":"温度1点:P4 反ヒータ側底面(dT/dQ 低 2.6)",
+        "温度1点(発熱感度 高)":"温度1点:P2 ヒータ側(dT/dQ 高 5.7)",
+        "温度2点(発熱感度 上位2)":"温度2点:P2+P0(dT/dQ 上位2)",
         "温度2点+変位2点":"温度2点+変位2点(上面A/O)"}
 
 def disp_da_timeseries():
@@ -77,8 +78,8 @@ def disp_da_timeseries():
     fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=13.5,weight="bold",y=0.985)
     hd,lb=ax.get_legend_handles_labels()
     fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=11,frameon=False)
-    fig.text(0.5,0.022,"変位差RMSE: 温度1点 0.79／1.13 µm（温度センサ1点では熱感度Wの高低で逆転もする）"
-             "→ 温度2点で0.34µm、変位2点を足すと0.16µm（約5倍改善）",ha="center",fontsize=11,color="#333")
+    fig.text(0.5,0.022,"温度RMSE: 同化なし4.59K → 温度1点 低感度1.04／高感度0.62K（発熱感度が高い点のほうが1.7倍良い）"
+             "→ 温度2点0.50K、変位2点を足すと0.16K（約29倍改善）",ha="center",fontsize=11,color="#333")
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 

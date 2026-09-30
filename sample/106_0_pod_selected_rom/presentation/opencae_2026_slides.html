@@ -393,11 +393,11 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 本研究の変位はすべて<strong>\(z\) 方向（上下・軸方向）成分のみ</strong>。
 青 P0〜P4＝温度の代表点。A側が持ち上がりO側が下がるので、差 \(U_z(A)-U_z(O)\) が<strong>上面の反り</strong>になる</p></div>
 <div style="flex:1.34"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
-<p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 0.841・0.534 K／温度2点 0.272 K／
-<strong>温度2点＋変位2点 0.147 K</strong>（変位差の誤差 0.162 µm）。凡例の高低は<strong>熱感度 \(W\)</strong>の大小</p></div>
+<p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 低感度1.036・<strong>高感度0.617 K</strong>／温度2点 0.503 K／
+<strong>温度2点＋変位2点 0.160 K</strong>（変位差の誤差 0.165 µm）。凡例の高低は<strong>発熱感度 \(\partial T/\partial Q\)</strong>の大小</p></div>
 </div>
-<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.15 K（約31倍の改善）</strong><br>
-<span style="font-weight:400;font-size:.88em">温度1点だけだと \(W\) の高低で逆転もする（0.84 K と 0.53 K）＝<strong>1点では足りない</strong>。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
+<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.16 K（約29倍の改善）</strong><br>
+<span style="font-weight:400;font-size:.88em">温度1点でも<strong>発熱感度 \(\partial T/\partial Q\) の高い点に置けば1.7倍良い</strong>（1.036→0.617 K）。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
 </section>
 
 <!-- 19 -->
@@ -419,15 +419,17 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 ①\(K_su=f_\mathrm{th}\) ②\(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\) ③\(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)
 ④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ） ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
 <div class="scrollfig">
+<img src="../docs/img/two_sensitivities.png" alt="2つの感度の使い分け">
 <img src="../docs/img/sensitivity_derivation.png" alt="熱感度Wの導出">
 <img src="../docs/img/sensitivity_reference.png" alt="熱感度の基準">
 <img src="../docs/img/frontistr_sensitivity.png" alt="熱感度Wの空間分布">
 </div>
-<p class="scrollhint">▲ 枠内をスクロールすると④⑤（$W$の読み方・実データ・実装）と、
+<p class="scrollhint">▲ <strong>1枚目＝2つの感度の使い分け</strong>（温度センサは \(\partial T/\partial Q\)、変位センサは \(W\)）。続いて導出、④⑤（\(W\)の読み方・実データ・実装）、
 <strong>熱感度 \(W\) の空間分布</strong>が見えます。分布は<strong>固定した底面（\(U_z=0\)）を基準にした絶対変位</strong>で、
 上へ行くほど膨張が積み上がって大きく動く。実際に測る \(U_z(A)-U_z(O)\) は<strong>2点の相対変位</strong>で、一様な伸びが引き算で消えて「反り」だけが残る</p>
-<div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表<br>
-<span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
+<div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表。<strong>これは変位センサを置く場所の基準</strong><br>
+<span style="font-weight:400;font-size:.86em">\(K_s\) が底面固定を含むので固定面の近くは \(K_s^{-1}\) が小さい＝底面は測っても動かない（高Wと低Wで<strong>51倍</strong>の開き）。
+<strong>一方、温度センサの基準は発熱感度 \(\partial T/\partial Q\)</strong>。\(W\) を温度センサに流用すると逆効果になる（温度RMSEとの相関：\(\partial T/\partial Q\) −0.835 に対し \(W\) は +0.405）</span></div>
 </section>
 
 <!-- 21 -->

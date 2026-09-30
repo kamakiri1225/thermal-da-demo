@@ -2,9 +2,9 @@
 
 比較する構成:
   (0) 同化なし（free run: でたらめ初期のまま前進、補正しない）
-  (1) 温度1点（熱感度 W=|d(Uz(A)-Uz(O))/dT_i| が最小のノード）
-  (2) 温度1点（熱感度 W が最大のノード）
-  (3) 温度2点（熱感度 W 上位2ノード）
+  (1) 温度1点（発熱感度 dT/dQ が最小のノード）
+  (2) 温度1点（発熱感度 dT/dQ が最大のノード）
+  (3) 温度2点（発熱感度 dT/dQ 上位2ノード）
   (4) 温度2点 + 変位2点（上面Uz、FrontISTRのPODモード応答で観測化）
 
 指標: 全5点温度の推定RMSEの時刻歴と最終値、発熱量Qの誤差。
@@ -82,18 +82,21 @@ def main():
 
     uz_mean, Dmode = build_disp_operator(U, mean, Cc)
 
-    # 熱感度 W = Ks^-1 H_T 由来のノード感度:
-    #   各代表点の温度が「注目量（A-O変位差）」にどれだけ効くか  d(Uz(A)-Uz(O))/dT_i
-    # （発熱への温度感度 dT/dQ とは別物。熱変形を推定したいので、こちらを基準にする）
-    wAO = (Dmode[0]-Dmode[1]) @ UP_pinv          # (NPT,) [µm/K]
-    sens = np.abs(wAO)
-    hi=int(np.argmax(sens)); lo=int(np.argmin(sens))
-    hi2=list(np.argsort(sens)[::-1][:2])
-    print(f"[cmp] 熱感度|d(A-O)/dT|={np.round(sens,3)} µm/K  高感度=P{hi} 低感度=P{lo} 上位2={hi2}")
-    # 参考: 発熱への温度感度（比較用に表示のみ）
+    # ── 温度センサの選定基準は「発熱への温度感度 dT/dQ」──
+    # 検証（run/why_lowW_wins_check.py）で、温度RMSE との相関は
+    #   dT/dQ  -0.835（最良）／ 熱感度 W  +0.405（逆効果）
+    # となり、W は変位センサの基準であって温度センサの基準ではないと分かった。
+    # 「感度が高いところに置く」は正しく、センサの種類で感度の種類が違うだけ。
     b0=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.0,heat_node,0,300,DT)[1][-1]
     b1=rg.integrate_single(np.full(NPT,rg.T_AIR_K),C,Kmat,h_true,1.1,heat_node,0,300,DT)[1][-1]
-    print(f"[cmp] 参考 dT/dQ={np.round((b1-b0)/0.1,2)} K/W （順位が違う点に注意）")
+    sens=(b1-b0)/0.1                              # dT/dQ [K/(発熱倍率)]
+    hi=int(np.argmax(sens)); lo=int(np.argmin(sens))
+    hi2=list(np.argsort(sens)[::-1][:2])
+    print(f"[cmp] 発熱感度 dT/dQ={np.round(sens,2)}  高感度=P{hi} 低感度=P{lo} 上位2={hi2}")
+    # 参考: 熱感度 W（温度→変位）。変位センサの選定に使う基準で、順位が違う
+    uz_mean2, Dmode2 = uz_mean, Dmode
+    wAO=np.abs((Dmode2[0]-Dmode2[1]) @ UP_pinv)
+    print(f"[cmp] 参考 熱感度W={np.round(wAO,3)} µm/K （変位センサ用。温度センサには使わない）")
     def disp_of_T5(T5):   # (…,5)->(…,2)
         a=(T5-mean[pod_cells])@UP_pinv.T
         return uz_mean + a@Dmode.T
@@ -140,9 +143,9 @@ def main():
 
     configs=[
         ("同化なし(free run)",   None,      False, "tab:gray"),
-        ("温度1点(熱感度 低)",   [lo],      False, "tab:orange"),
-        ("温度1点(熱感度 高)",   [hi],      False, "tab:blue"),
-        ("温度2点(熱感度 上位2)",hi2,       False, "tab:green"),
+        ("温度1点(発熱感度 低)", [lo],      False, "tab:orange"),
+        ("温度1点(発熱感度 高)", [hi],      False, "tab:blue"),
+        ("温度2点(発熱感度 上位2)",hi2,     False, "tab:green"),
         ("温度2点+変位2点",      hi2,       True,  "tab:red"),
     ]
     results={}
@@ -260,7 +263,7 @@ def main():
 
     yaml.safe_dump({n:{"final_rmse_K":float(results[n][0][-1]),
         "final_Q_W":float(results[n][1][-1]*15)} for n in names}|
-        {"W_dAO_dT_um_per_K":[float(x) for x in sens],"hi_node":hi,"lo_node":lo},
+        {"dTdQ_K_per_qscale":[float(x) for x in sens],"W_um_per_K":[float(x) for x in wAO],"hi_node":hi,"lo_node":lo},
         open(os.path.join(RES,"da_compare.yaml"),"w"),allow_unicode=True)
     print("[cmp] wrote da_compare_rmse.png, da_compare_traj.png, da_compare.yaml")
 
