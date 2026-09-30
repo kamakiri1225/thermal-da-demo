@@ -1,11 +1,11 @@
 """x・y・z の3成分すべてで、観測点と未観測点の変位がデータ同化でどうなるかを検証する.
 
 これまでは z 成分（上下・軸方向）だけを見ていた。ここでは
-  観測点   A(+28,0,100.5) / O(-28,0,100.5) mm   ← 同化に使う（ただし Uz のみ観測）
-  未観測点 B(+28,0, 75.0) / C(-28,0, 75.0) mm   ← 同化に一切使わない
+  観測点         A(+28,0,100.5) / O(-28,0,100.5) mm ← 同化に使う（Uz のみ）
+  評価点(未観測点) B(+28,0, 75.0) / C(-28,0, 75.0) mm ← 同化に一切使わない
 の Ux, Uy, Uz を、同化なし / 同化後 で真値と比べる。
 
-狙い：「Uz しか観測していないのに、Ux・Uy も直るのか」「未観測点でも直るのか」を
+狙い：「Uz しか観測していないのに、Ux・Uy も直るのか」「評価点（未観測点）でも直るのか」を
 データで示す。温度場が正しくなれば W を通じて全成分が従うはずだが、確認していなかった。
 
 出力: docs/img/xyz_disp_da.png, results/xyz_disp_da.json
@@ -32,9 +32,9 @@ DT=2.0; OBS_DT=30.0; T_END=600.0; N_ENS=60; SIG_T=0.30; SIG_U=0.30; INFL=1.02
 SEEDS=[20260913,20260914,20260915,20260916,20260917]
 NR,NTH,NZ=4,48,20; R_IN,R_OUT,H=0.020,0.0375,0.1005
 Tref=MATERIAL["reference_temperature_K"]
-# 観測点（上面）と未観測点（中高さ z=75mm）。どちらも +X / -X の対。
+# 観測点（上面）と評価点＝未観測点（中高さ z=75mm）。どちらも +X / -X の対。
 PTS=[("A",( 0.028,0,H    ),"観測"),("O",(-0.028,0,H    ),"観測"),
-     ("B",( 0.028,0,0.075),"未観測"),("C",(-0.028,0,0.075),"未観測")]
+     ("B",( 0.028,0,0.075),"評価点"),("C",(-0.028,0,0.075),"評価点")]
 COMP=["Ux","Uy","Uz"]
 
 
@@ -163,13 +163,13 @@ def main():
             ax.set_title(f"{lab}（{role}） {COMP[c]}\n"
                          f"MAE {r['mae_noDA_um']:.3f} → {r['mae_DA_um']:.3f} µm"
                          f"（{r['improve']:.0f}倍）",fontsize=11.5,
-                         weight="bold",color=("#C0392B" if role=="未観測" else "#1F4E9C"))
+                         weight="bold",color=("#C0392B" if role=="評価点" else "#1F4E9C"))
             ax.grid(alpha=.3); ax.tick_params(labelsize=9.5)
             if c==2: ax.set_xlabel("時刻 [s]",fontsize=11)
             if p==0: ax.set_ylabel(f"{COMP[c]} [µm]",fontsize=12)
             if p==0 and c==0: ax.legend(fontsize=10,loc="upper left")
-    fig.suptitle("観測は「温度2点＋A/O の $U_z$ だけ」― それでも $U_x,U_y$ と未観測点は直るか\n"
-                 f"A/O＝上面 z=100.5 mm（観測に使用）　B/C＝中高さ z=75 mm（一切観測しない）　"
+    fig.suptitle("観測は「温度2点＋A/O の $U_z$ だけ」― それでも $U_x,U_y$ と評価点（未観測点）は直るか\n"
+                 f"A/O＝観測点（上面 z=100.5 mm）　B/C＝評価点＝未観測点（中高さ z=75 mm・同化に一切使わない）　"
                  f"5 seed平均・加熱期 0–300 s のMAE",fontsize=15,weight="bold")
     fig.tight_layout(rect=[0,0,1,0.915])
     out=os.path.join(IMG,"xyz_disp_da.png")
