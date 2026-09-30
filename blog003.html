@@ -534,6 +534,24 @@ class="math inline">\(\bar\epsilon=0\)</span>
 </table>
 <h3 id="散らばりから標本共分散を作る">3-2.
 散らばりから標本共分散を作る</h3>
+<figure>
+<img src="img/covariance_explained.png"
+alt="散布図が共分散とはどういうことか" />
+<figcaption
+aria-hidden="true">散布図が共分散とはどういうことか</figcaption>
+</figure>
+<p><em>「散布図が共分散」というのは比喩ではなく<strong>定義そのもの</strong>です。
+各メンバーについて <span class="math inline">\((T^{(m)}-\bar
+T)\times(Q^{(m)}-\bar Q)\)</span> を計算し、全部足して <span
+class="math inline">\(N-1\)</span> で割る。
+赤の象限（両方とも平均より上／両方とも下）は積が＋、青の象限（片方だけ上）は積が−。
+<strong>丸い雲なら＋と−が打ち消し合って <span
+class="math inline">\(\mathrm{Cov}\simeq0\)</span>、斜めに伸びれば片方に偏って
+<span class="math inline">\(\mathrm{Cov}\neq0\)</span></strong>。
+実データ（サイクル11・60メンバー）で手計算すると <span
+class="math inline">\(\sum=-6.326\)</span>、<span
+class="math inline">\(\mathrm{Cov}=-6.326/59=-0.1072\)</span>、相関
+<span class="math inline">\(-0.287\)</span>。</em></p>
 <p>平均からのズレ（deviation）:</p>
 <table>
 <thead>

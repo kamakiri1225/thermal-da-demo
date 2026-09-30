@@ -2692,8 +2692,26 @@ T_P\bigr)\quad(5\times1)\]</span></p>
 class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
 <p>ここで <span class="math inline">\(D\)</span> は <strong>FrontISTR
 で事前に作った定数行列</strong>です（<span
-class="math inline">\(2\times5\)</span>）。 各列 <span
-class="math inline">\(D[:,k]\)</span> が「モード <span
+class="math inline">\(2\times5\)</span>）。</p>
+<figure>
+<img src="img/D_matrix_explained.png" alt="D行列とは何か" />
+<figcaption aria-hidden="true">D行列とは何か</figcaption>
+</figure>
+<p><em>①線形性で <span class="math inline">\(u=W\bar T+\sum
+a_k(W\varphi_k)\)</span> と分けられ、<span
+class="math inline">\(W\varphi_k\)</span> は <span
+class="math inline">\(a_k\)</span> に依存しない →
+先に計算して保存できる。②FrontISTR を6回（平均場＋5モード）呼ぶだけ。
+③実際の <span class="math inline">\(D\)</span>（<span
+class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
+逆向きで反りを生む）。 ④60メンバー分の変位計算が <strong>5.2
+µs</strong>。毎サイクルFEMを呼べば数日かかる。</em></p>
+<blockquote>
+<p>⚠️ <strong>この手が使えるのは熱弾性が線形だから</strong>です。
+塑性・クリープ・接触があると <span class="math inline">\(W\)</span>
+が状態に依存するので、重ね合わせが成り立ちません。</p>
+</blockquote>
+<p>各列 <span class="math inline">\(D[:,k]\)</span> が「モード <span
 class="math inline">\(\varphi_k\)</span>
 が1単位混ざったときの上面A/Oの変位」で、 <strong>同化を始める前に
 FrontISTR を <span class="math inline">\(1+5=6\)</span>
