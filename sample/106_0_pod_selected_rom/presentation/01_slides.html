@@ -196,8 +196,12 @@
 <h2>観測データはどう作られ、どう同化に使われるのか</h2>
 <p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">双子実験なので<strong>観測も自分で作る</strong>。真値にノイズを載せて \(y\) とし、メンバーごとに同じ量を計算して \(Y_f\) とする。
 <strong>変位は状態に入れず、観測演算子の中で温度から毎回計算する</strong>のが要点。</p>
-<div class="scrollfig"><img src="../docs/img/obs_pipeline.png" alt="観測の作り方と使い方"></div>
-<p class="scrollhint">▲ ①観測データの作り方（双子実験）／②予報観測 \(Y_f\) の作り方／③EnKFの更新式。枠内スクロールで③まで見えます</p>
+<div class="scrollfig">
+<img src="../docs/img/obs_pipeline.png" alt="観測の作り方と使い方">
+<img src="../docs/img/D_matrix_explained.png" alt="D行列とは何か">
+</div>
+<p class="scrollhint">▲ 1枚目＝①観測データの作り方（双子実験）／②予報観測 \(Y_f\) の作り方／③EnKFの更新式。
+<strong>2枚目＝\(D\) 行列とは何か</strong>（なぜFEMを呼ばずに済むか・6回の作り方・実際の数値・速度）。枠内スクロールで両方見えます</p>
 <div class="key" style="flex:0 0 auto">変位を状態に入れない理由：<strong>温度が決まれば変位は一意に決まる</strong>（\(u=u_\mathrm{mean}+Da\)）ので、入れると同じ量を2つ持つことになり整合性が壊れる<br>
 <span style="font-weight:400;font-size:.86em">\(D\) は<strong>事前にFrontISTRを6回</strong>（平均場＋5モード）呼んで作った \(2\times5\) の定数行列。<strong>同化ループ中にFEMは一度も呼ばない</strong>。
 更新式は温度だけのときと同一で、\(C_{zy}\) に \(\mathrm{Cov}(T_i,u_j)\) の列が入ることだけが違う</span></div>
@@ -224,12 +228,14 @@
 <section>
 <h2>課題② EnKFは当たるが計算コストが大きい</h2>
 <p style="flex:0 0 auto">EnKFは共分散を行列で持たず、<strong>少しずつ条件の違うメンバー（分身）を並行して前進させ、そのばらつきから共分散を作る</strong>。</p>
-<div class="fig"><img src="../docs/img/enkf_concept.png" alt="EnKFの図解">
-<p class="cap">A：60本のメンバーを前進させる。B：初期は温度と \(Q\) が<strong>無相関</strong>（丸い雲）。
-C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</strong>。この連動が共分散 \( P\simeq dZ\,dZ^{\mathsf T}/(N-1) \) で、
-<strong>温度しか測らなくても \(Q\) が動く</strong>（温度1点だけで \(Q=15.95\) W、真値15 W）</p></div>
-<div class="key">ただし計算量 ≒（メンバー数）×（サイクル数）×（予報1回のコスト）。
-実ソルバは<strong>1回で分オーダー</strong>なので、<strong>50〜200メンバー × 10サイクル＝数時間〜数日</strong></div>
+<div class="scrollfig">
+<img src="../docs/img/enkf_concept.png" alt="EnKFの図解">
+<img src="../docs/img/covariance_explained.png" alt="散布図が共分散とはどういうことか">
+</div>
+<p class="scrollhint">▲ 1枚目 A：60本のメンバーを前進させる／B：初期は温度と \(Q\) が<strong>無相関</strong>（丸い雲）／C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</strong>。
+<strong>2枚目＝「散布図が共分散」とはどういうことか</strong>。4象限で積の符号を塗り分け、実際の60メンバーから手計算で \(\mathrm{Cov}=-0.107\)、相関 \(-0.287\) を出している</p>
+<div class="key">この連動が共分散 \( P\simeq dZ\,dZ^{\mathsf T}/(N-1) \)。だから<strong>温度しか測らなくても \(Q\) が動く</strong>（温度1点だけで \(Q=15.95\) W、真値15 W）<br>
+<span style="font-weight:400;font-size:.87em">ただし計算量 ≒（メンバー数）×（サイクル数）×（予報1回のコスト）。実ソルバは<strong>1回で分オーダー</strong>なので、<strong>50〜200メンバー × 10サイクル＝数時間〜数日</strong></span></div>
 </section>
 
 <!-- 10 -->
