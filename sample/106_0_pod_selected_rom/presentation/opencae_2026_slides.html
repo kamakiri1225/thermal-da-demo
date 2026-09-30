@@ -402,6 +402,18 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 
 <!-- 19 -->
 <section>
+<h2>結果③-2　観測していない方向・場所はどうなるか</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">観測するのは<strong>「温度2点 ＋ 上面A/O の \(U_z\) だけ」</strong>。\(x,y\) は一切観測せず、中高さの B・C（z=75 mm）は一度も同化に使わない。
+それでも<strong>観測していない \(U_x\) と、観測していない場所</strong>が直るかを確かめた。</p>
+<div class="scrollfig"><img src="../docs/img/xyz_disp_da.png" alt="xyz全成分の同化結果"></div>
+<p class="scrollhint">▲ 行＝成分（\(U_x,U_y,U_z\)）、列＝点（A・O＝観測／<strong>B・C＝未観測</strong>）。灰点線＝同化なし、赤破線＝同化後、太灰＝真値。枠内スクロールで3行とも見えます</p>
+<div class="key" style="flex:0 0 auto">\(U_z\) しか観測していないのに <strong>\(U_x\) も直る</strong>（O点 2.87→0.036 µm／未観測C点 2.78→0.022 µm）。<strong>未観測点も観測点と同じ率</strong>で直る（\(U_z\)：観測179倍・未観測172倍）<br>
+<span style="font-weight:400;font-size:.85em">同化が直しているのは変位ではなく<strong>温度場</strong>。\(u=W(T-T_\mathrm{ref})\) の \(W\) は3成分を含むので、温度が合えば全方向が従う。
+\(U_y\) だけ変わらない（0.023→0.027 µm）のは、4点とも \(y=0\) の対称面上で<strong>元から誤差が振幅の3%しかなく直す余地がなかった</strong>ため。5 seed平均・60〜300 sのMAE（初回サイクルのスピンアップを除く）</span></div>
+</section>
+
+<!-- 20 -->
+<section>
 <h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
 ①\(K_su=f_\mathrm{th}\) ②\(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\) ③\(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)
@@ -418,7 +430,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <span style="font-weight:400;font-size:.88em">\(K_s\) が底面固定を含むので<strong>固定面の近くは \(K_s^{-1}\) が小さい</strong>＝底面は測っても動かない。実データでも高Wと低Wで<strong>51倍</strong>の開き（6.33 vs 0.12 µm/K）</span></div>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2（36.5, 6.9, 50.8）mm の1点に固定</strong>し、
@@ -433,7 +445,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように一致する</strong>（0.16 µm）。この図の目的は絶対精度ではなく<strong>置き場所の効きの比較</strong></span></div>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
@@ -447,7 +459,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">「どこに何を置くか」は、その観測で<strong>知りたい量の不確かさが何%消えるか</strong>で測れる。
@@ -459,7 +471,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 生の \(\Delta\) は対象の分散と同じ単位なので<strong>行の中でだけ比べる</strong>／感度が高い点を並べるのは逆効果（近接2点は相関1.00000で条件数が30万倍悪化）</span></div>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 <section>
 <h2>まとめ</h2>
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
@@ -474,7 +486,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 <section>
 <h2>限界と今後／公開情報</h2>
 <div class="two">
@@ -487,7 +499,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 （3〜75 Wで復元誤差 0.0004〜0.0045 K、常にノイズの2桁下）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
 <li><strong>発熱の位置・分布や形状が変わると作り直し</strong>。モードは20,696セルに紐づくベクトルなので別メッシュでは意味を持たない
 （ただし CHT→POD→Q-DEIM→ROM校正 の手順はそのまま再利用でき、自動化済み）</li>
-<li><strong>対象量は上面の \(z\) 変位差の1自由度</strong>。実際は半径方向 \(U_x\) も同程度動く（実ソルバ場で \(|U_x|\)=1.33 µm vs \(|U_z|\)=0.96 µm）が今回は対象外</li>
+<li><strong>観測量は上面の \(z\) 変位2点のみ</strong>。半径方向 \(U_x\) も同程度動くが、\(U_x\) は観測せずとも同化で直ることを確認済み（結果③-2）。ただし \(y\neq0\) の点や \(U_y\) の可観測性は未検証</li>
 <li>比較は<em>候補内</em>のものであり、大域最適の証明ではない</li>
 </ul>
 <h3>今後</h3>
