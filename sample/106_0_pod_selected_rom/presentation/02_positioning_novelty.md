@@ -459,15 +459,49 @@ $W$ が高い点＝よく動く点＝固定端から遠い**場の端**であり
 **$W$ の正しい使い道**：**変位センサ**の選定には有効（高W 0.86 K vs 低W 2.43 K、約3倍）。
 変位計は動く点に置かないと信号が出ないので、そちらでは直感どおり。
 
-### 6-8. 未解決 ― 傾きは補正できるのか
+### 6-8. ✅ 傾きは補正できるのか ― 文献で確認した（2026-09-30）
 
 本研究の注目量 $U_z(A)-U_z(O)$ は**上面の傾き**である。
-3軸機のNC補正は軸座標のオフセットなので、**主軸の倒れ（角度誤差）は補正できない**
-という指摘がある（**未検証。文献で裏を取ること**）。
+「3軸機のNC補正は軸座標のオフセットなので、主軸の倒れは補正できないのでは」という
+疑問について文献を当たった。**半分正しく、半分違う。**
 
-もしそうなら、本研究の出力は「補正値そのもの」ではなく
-**①設計段階（回避）へのフィードバック ②補正可能な並進成分の分離 ③5軸機での姿勢補正**
-に位置づけ直す必要がある。**発表前に確認すべき最重要項目。**
+| | 判定 |
+|---|---|
+| 工具の**姿勢**（傾きそのもの）を3軸機で変える | ❌ できない |
+| 傾きが工具先端に生む**位置ずれ** $\delta\simeq\theta L$ を補正する | ✅ **できる**（並進だから） |
+
+Yang らがまさにこの点を指摘している。
+
+> "The present error compensation technology of CNC machine tools **ignores radial thermal
+> tilt angle errors of the spindle**, while the thermal-induced offset is **closely related to
+> the tilt angle and the handle length**."
+> — **Yang, J., Mei, X., Zhao, L., Ma, C., Shi, H., Feng, B. (2015)**
+> "Thermal error compensation on a computer numerical control machine tool considering
+> thermal tilt angles and cutting tool length", *Proc. IMechE Part B: J. Engineering Manufacture*
+> [doi:10.1177/0954405414556499](https://doi.org/10.1177/0954405414556499)（有料）
+
+**本ケースで換算すると**（A–O 間 57.4 mm）:
+
+$$\theta=\frac{2.735\ \mu\mathrm m}{57.4\ \mathrm{mm}}=4.77\times10^{-5}\ \mathrm{rad}=0.0027^\circ$$
+
+| 工具長 $L$ | 工具先端の位置ずれ | 本研究の推定誤差 |
+|---|---|---|
+| 100 mm | **4.77 µm** | 0.140 µm |
+| 200 mm | **9.53 µm** | 0.281 µm |
+
+> **傾き角を知らなければ、この工具長依存を計算できない。** これが反りを推定する価値。
+
+ただし機械構成によっては無視できる。旋盤を扱った
+**Zhao, Guo, Tang, Zhang, Yi (2025)** *Scientific Reports*
+[PMC12223237](https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/)（**全文無料**）は、
+最大傾き角 **0.0099°** と小さいため「主軸軸線の動きを**並進運動とみなしてよい**」と結論している。
+本ケースの 0.0027° はその 1/3.6。
+
+**発表での言い方**
+> 「本研究が推定しているのは傾きです。3軸機では工具の姿勢そのものは直せませんが、
+> **工具先端の位置ずれ $\delta=\theta L$ は並進なのでNC補正できます**。
+> ただし**工具長に比例する**ので、傾き角を知らないと補正量が決まりません。
+> ここが並進成分だけ測る方式との違いです。」
 
 ### 6-5. この4つを発表にどう入れるか
 
@@ -515,6 +549,19 @@ $W$ が高い点＝よく動く点＝固定端から遠い**場の端**であり
 4. **Coelho, et al. (2025)** arXiv:2510.03261
    📄 <https://arxiv.org/abs/2510.03261>
    → 温度・熱流束場をNNで予測、相関ベースの測定点選択
+
+5b. **Yang, J., Mei, X., Zhao, L., Ma, C., Shi, H., Feng, B. (2015)**
+   "Thermal error compensation on a computer numerical control machine tool considering
+   thermal tilt angles and cutting tool length",
+   *Proc. IMechE Part B: Journal of Engineering Manufacture*
+   🔗 <https://doi.org/10.1177/0954405414556499>（有料。アブストラクトは公開）
+   → **傾き角と工具長に基づく補正**。「現行のCNC補正は主軸の熱的傾き角を無視している」
+
+5c. **Zhao, H., Guo, J., Tang, Y., Zhang, S., Yi, X. (2025)**
+   "An analysis of compensation for radial thermal errors of a turning center with a
+   three axis feed system", *Scientific Reports*
+   📄 <https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/>
+   → 旋盤では最大傾き角 0.0099° で**並進とみなしてよい**。3軸送り系で線形成分＋角度成分を補間
 
 ### データ同化・逆問題
 
