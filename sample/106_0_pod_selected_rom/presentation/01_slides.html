@@ -402,14 +402,18 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 
 <!-- 19 -->
 <section>
-<h2>結果③-2　観測していない方向・場所はどうなるか</h2>
-<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">観測するのは<strong>「温度2点 ＋ 上面A/O の \(U_z\) だけ」</strong>。\(x,y\) は一切観測せず、中高さの B・C（z=75 mm）は一度も同化に使わない。
-それでも<strong>観測していない \(U_x\) と、観測していない場所</strong>が直るかを確かめた。</p>
-<div class="scrollfig"><img src="../docs/img/xyz_disp_da.png" alt="xyz全成分の同化結果"></div>
-<p class="scrollhint">▲ 行＝成分（\(U_x,U_y,U_z\)）、列＝点（A・O＝観測／<strong>B・C＝未観測</strong>）。灰点線＝同化なし、赤破線＝同化後、太灰＝真値。枠内スクロールで3行とも見えます</p>
-<div class="key" style="flex:0 0 auto">\(U_z\) しか観測していないのに <strong>\(U_x\) も直る</strong>（O点 2.87→0.036 µm／未観測C点 2.78→0.022 µm）。<strong>未観測点も観測点と同じ率</strong>で直る（\(U_z\)：観測179倍・未観測172倍）<br>
-<span style="font-weight:400;font-size:.85em">同化が直しているのは変位ではなく<strong>温度場</strong>。\(u=W(T-T_\mathrm{ref})\) の \(W\) は3成分を含むので、温度が合えば全方向が従う。
-\(U_y\) だけ変わらない（0.023→0.027 µm）のは、4点とも \(y=0\) の対称面上で<strong>元から誤差が振幅の3%しかなく直す余地がなかった</strong>ため。5 seed平均・60〜300 sのMAE（初回サイクルのスピンアップを除く）</span></div>
+<h2>結果③-2　測っていない場所の変形を当てる（循環のない検証）</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px"><strong>観測した点を評価しても意味がない。</strong>そこで観測点と評価点を物理的に分けた。
+観測＝温度2点＋<strong>上面A/O の \(U_z\) だけ</strong>（z=100.5 mm）。評価＝<strong>中高さ B/C</strong>（z=75.4 mm）で、<strong>同化に一切使わない</strong>。</p>
+<div class="scrollfig">
+<img src="../docs/img/obs_vs_target.png" alt="観測点と評価点を分ける">
+<img src="../docs/img/xyz_disp_da.png" alt="xyz全成分の同化結果">
+</div>
+<p class="scrollhint">▲ 1枚目＝手続きと結果。2枚目＝時刻歴（行＝成分 \(U_x,U_y,U_z\)／列＝点。A・O＝観測、<strong>B・C＝未観測</strong>）。枠内スクロールで両方見えます</p>
+<div class="key" style="flex:0 0 auto">A/O を測って、<strong>25 mm 離れた B/C が 172〜195倍</strong>正確に（\(U_z\)：4.02→0.021 µm）。
+<strong>\(U_x\) は一度も観測していない方向</strong>なのに 126倍（2.78→0.022 µm）<br>
+<span style="font-weight:400;font-size:.85em">同化が直しているのは変位ではなく<strong>温度場</strong>（4.585→0.160 K）。\(u=W(T-T_\mathrm{ref})\) の \(W\) は3成分を含むので、温度が合えば<strong>どの点のどの方向も自動的に従う</strong>。
+\(U_y\) だけ変わらないのは4点とも \(y=0\) の対称面上で元から誤差が振幅の3%しかなかったため。5 seed平均・60〜300 sのMAE</span></div>
 </section>
 
 <!-- 20 -->
