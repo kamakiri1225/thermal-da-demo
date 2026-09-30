@@ -2697,19 +2697,32 @@ class="math inline">\(2\times5\)</span>）。</p>
 <img src="img/D_matrix_explained.png" alt="D行列とは何か" />
 <figcaption aria-hidden="true">D行列とは何か</figcaption>
 </figure>
-<p><em>①線形性で <span class="math inline">\(u=W\bar T+\sum
-a_k(W\varphi_k)\)</span> と分けられ、<span
-class="math inline">\(W\varphi_k\)</span> は <span
-class="math inline">\(a_k\)</span> に依存しない →
-先に計算して保存できる。②FrontISTR を6回（平均場＋5モード）呼ぶだけ。
-③実際の <span class="math inline">\(D\)</span>（<span
-class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
-逆向きで反りを生む）。 ④60メンバー分の変位計算が <strong>5.2
-µs</strong>。毎サイクルFEMを呼べば数日かかる。</em></p>
+<p><em><span class="math inline">\(D\)</span>
+は変位を状態に含めるための補助量ではなく、温度場から変位への線形写像
+<span class="math inline">\(W=K_s^{-1}H_T\)</span> を
+POD基底へ射影した表現である。<span
+class="math inline">\(u=W(T-T_\mathrm{ref})\)</span> に <span
+class="math inline">\(T=\bar T+\sum_k a_k\varphi_k\)</span> を代入すると
+<span class="math inline">\(u=W\bar T+\sum_k a_k(W\varphi_k)\)</span>
+となり、<span class="math inline">\(W\varphi_k\)</span> は係数 <span
+class="math inline">\(a_k\)</span> に依存しない。 したがって <span
+class="math inline">\(W\varphi_k\)</span> をあらかじめ FrontISTR
+で評価して <span class="math inline">\(D\)</span>
+の各列に格納しておけば、 同化中の変位計算は <span
+class="math inline">\(Da\)</span>
+の行列積に帰着し、有限要素方程式を解き直す必要がない。 <span
+class="math inline">\(D\)</span> の作成に要する FrontISTR
+の呼び出しは、平均場1回とモード5回の計6回である。 <span
+class="math inline">\(\varphi_2\)</span> の列で A が負・O
+が正と符号が逆になっているのは、このモードがヒータ側と
+反対側を逆向きに動かす成分であり、上面の反りを生む主因であることを示す。
+60メンバー分の変位計算は実測 5.2 µs
+で、毎サイクル有限要素解析を行う構成に対して 7〜8桁の差がある。</em></p>
 <blockquote>
-<p>⚠️ <strong>この手が使えるのは熱弾性が線形だから</strong>です。
-塑性・クリープ・接触があると <span class="math inline">\(W\)</span>
-が状態に依存するので、重ね合わせが成り立ちません。</p>
+<p>この分解が成立するのは熱弾性が線形だからである。塑性・クリープ・接触が入ると
+<span class="math inline">\(W\)</span> が状態に依存するため、<span
+class="math inline">\(W\varphi_k\)</span>
+を定数として先に評価する操作は成り立たない。</p>
 </blockquote>
 <p>各列 <span class="math inline">\(D[:,k]\)</span> が「モード <span
 class="math inline">\(\varphi_k\)</span>
