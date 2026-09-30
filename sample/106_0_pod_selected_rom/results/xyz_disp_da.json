@@ -1,0 +1,188 @@
+{
+  "points": [
+    {
+      "label": "A",
+      "xyz_mm": [
+        28.0,
+        0,
+        100.5
+      ],
+      "role": "観測"
+    },
+    {
+      "label": "O",
+      "xyz_mm": [
+        -28.0,
+        0,
+        100.5
+      ],
+      "role": "観測"
+    },
+    {
+      "label": "B",
+      "xyz_mm": [
+        28.0,
+        0,
+        75.0
+      ],
+      "role": "未観測"
+    },
+    {
+      "label": "C",
+      "xyz_mm": [
+        -28.0,
+        0,
+        75.0
+      ],
+      "role": "未観測"
+    }
+  ],
+  "obs": "温度2点(熱感度W上位2) + A/O の Uz のみ",
+  "window": "加熱期 0-300 s、5 seed平均",
+  "rows": [
+    {
+      "point": "A",
+      "role": "観測",
+      "comp": "Ux",
+      "amp_um": 2.2395188060977427,
+      "mae_noDA_um": 0.2577137537776012,
+      "mae_DA_um": 0.05930081085211414,
+      "improve": 4.345872342627731,
+      "mae_noDA_after1cyc_um": 0.26615142813168746,
+      "mae_DA_after1cyc_um": 0.04632581324292927,
+      "improve_after1cyc": 5.745207898154066
+    },
+    {
+      "point": "A",
+      "role": "観測",
+      "comp": "Uy",
+      "amp_um": 0.765011278206509,
+      "mae_noDA_um": 0.028224257167347926,
+      "mae_DA_um": 0.09765510897811897,
+      "improve": 0.2890197703191543,
+      "mae_noDA_after1cyc_um": 0.023403049430310754,
+      "mae_DA_after1cyc_um": 0.026991992188505214,
+      "improve_after1cyc": 0.8670367591569309
+    },
+    {
+      "point": "A",
+      "role": "観測",
+      "comp": "Uz",
+      "amp_um": 5.778227268823788,
+      "mae_noDA_um": 5.601872665181041,
+      "mae_DA_um": 0.044710842118095416,
+      "improve": 125.29114639318873,
+      "mae_noDA_after1cyc_um": 5.614379856491831,
+      "mae_DA_after1cyc_um": 0.03135900793379203,
+      "improve_after1cyc": 179.03563366371208
+    },
+    {
+      "point": "O",
+      "role": "観測",
+      "comp": "Ux",
+      "amp_um": 4.35676785432001,
+      "mae_noDA_um": 2.8719850154698086,
+      "mae_DA_um": 0.07193992049771389,
+      "improve": 39.921993179865616,
+      "mae_noDA_after1cyc_um": 2.8729808185057064,
+      "mae_DA_after1cyc_um": 0.035762908208259336,
+      "improve_after1cyc": 80.33409368654756
+    },
+    {
+      "point": "O",
+      "role": "観測",
+      "comp": "Uy",
+      "amp_um": 0.7650104993913804,
+      "mae_noDA_um": 0.028231778564468846,
+      "mae_DA_um": 0.09771133350672317,
+      "improve": 0.2889304398094855,
+      "mae_noDA_after1cyc_um": 0.023410796944604333,
+      "mae_DA_after1cyc_um": 0.027019296646970368,
+      "improve_after1cyc": 0.8664473117300538
+    },
+    {
+      "point": "O",
+      "role": "観測",
+      "comp": "Uz",
+      "amp_um": 4.360183597661552,
+      "mae_noDA_um": 5.358226432241864,
+      "mae_DA_um": 0.0467086131797997,
+      "improve": 114.71602489279562,
+      "mae_noDA_after1cyc_um": 5.37614917445509,
+      "mae_DA_after1cyc_um": 0.03236319373988958,
+      "improve_after1cyc": 166.11924081610846
+    },
+    {
+      "point": "B",
+      "role": "未観測",
+      "comp": "Ux",
+      "amp_um": 1.0016387974679195,
+      "mae_noDA_um": 0.36924353469785587,
+      "mae_DA_um": 0.02937524443492212,
+      "improve": 12.569888074152967,
+      "mae_noDA_after1cyc_um": 0.3741285293121599,
+      "mae_DA_after1cyc_um": 0.02202956783542287,
+      "improve_after1cyc": 16.983017193400077
+    },
+    {
+      "point": "B",
+      "role": "未観測",
+      "comp": "Uy",
+      "amp_um": 0.5737608009677109,
+      "mae_noDA_um": 0.021176458846350443,
+      "mae_DA_um": 0.07324699129248756,
+      "improve": 0.28911028934675664,
+      "mae_noDA_after1cyc_um": 0.017560514733919827,
+      "mae_DA_after1cyc_um": 0.020246300803979118,
+      "improve_after1cyc": 0.8673443560844736
+    },
+    {
+      "point": "B",
+      "role": "未観測",
+      "comp": "Uz",
+      "amp_um": 4.452771688386282,
+      "mae_noDA_um": 4.20813757215946,
+      "mae_DA_um": 0.037346470413644875,
+      "improve": 112.67832075027842,
+      "mae_noDA_after1cyc_um": 4.216946767131353,
+      "mae_DA_after1cyc_um": 0.02448228435147653,
+      "improve_after1cyc": 172.24482432240964
+    },
+    {
+      "point": "C",
+      "role": "未観測",
+      "comp": "Ux",
+      "amp_um": 3.396304896965563,
+      "mae_noDA_um": 2.77867130038999,
+      "mae_DA_um": 0.04410320052615828,
+      "improve": 63.00384705055402,
+      "mae_noDA_after1cyc_um": 2.7818299127124546,
+      "mae_DA_after1cyc_um": 0.02208054389918273,
+      "improve_after1cyc": 125.98557016593323
+    },
+    {
+      "point": "C",
+      "role": "未観測",
+      "comp": "Uy",
+      "amp_um": 0.5737559594850862,
+      "mae_noDA_um": 0.021175233712768603,
+      "mae_DA_um": 0.07330158768043518,
+      "improve": 0.28887824101551424,
+      "mae_noDA_after1cyc_um": 0.01755957653852711,
+      "mae_DA_after1cyc_um": 0.02027331140575677,
+      "improve_after1cyc": 0.8661424957711115
+    },
+    {
+      "point": "C",
+      "role": "未観測",
+      "comp": "Uz",
+      "amp_um": 3.270448559477241,
+      "mae_noDA_um": 4.008019464576518,
+      "mae_DA_um": 0.021384942496883004,
+      "improve": 187.42250371543963,
+      "mae_noDA_after1cyc_um": 4.0221201807101785,
+      "mae_DA_after1cyc_um": 0.02059663759472195,
+      "improve_after1cyc": 195.28042682757493
+    }
+  ]
+}
