@@ -96,25 +96,37 @@
 
 ### 3-1. まず「既にあるもの」を認める
 
-| 要素 | 既発表か | 代表例 |
-|---|---|---|
-| ROMで工作機械の熱変位を推定 | **既発表** | Teshima et al. 2024（CIRP JMST 55, 403–410） |
-| ROMの感度分布でセンサ配置を決める | **既発表** | Ando et al. ICTIMT2025 |
-| 変位・ひずみから温度場を逆推定 | **既発表** | ScienceDirect 2025（随伴法） |
-| カルマンフィルタで熱変位補正 | **既発表** | ScienceDirect 2024（線形KF／オブザーバ） |
-| OpenFOAM×EnKF の結合 | **既発表** | CONESフレームワーク等 |
-| POD＋Q-DEIM（gappy-POD） | **既発表**（流体分野で広く使われる） | Drmač & Gugercin 2016 |
+| 要素 | 既発表か | 出典 | 無料 |
+|---|---|---|---|
+| ROMで工作機械の熱変位を推定し、センサ配置の指針にする | **既発表** | **Teshima, Y., Tanaka, S., Kizaki, T., Sugita, N. (2024)** "Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools", *CIRP J. Manuf. Sci. Technol.* **55**, 403–410. [doi:10.1016/j.cirpj.2024.10.015](https://doi.org/10.1016/j.cirpj.2024.10.015) | ❌ |
+| ROMの**温度感度分布**でセンサ配置を決める | **既発表** | **Ando, S., Tanaka, S., Teshima, Y., Morishita, J., Kizaki, T. (2025)** "Strategy for Sensor Placement to Estimate Thermal Errors Using Temperature-Sensitivity Distribution Based on a Reduced-Order Model of Machine Tools", ICTIMT2025. [doi:10.1007/978-3-032-01194-7_31](https://doi.org/10.1007/978-3-032-01194-7_31) | ❌ |
+| 熱モデル＋**ベイズ逆問題**で初期温度場を推定し、**センサ配置を評価**する | **既発表** | **Bünger, A., Herzog, R., Naumann, A., Stoll, M. (2023)** "Uncertainty Propagation of Initial Conditions in Thermal Models", arXiv:2306.12736. [arxiv.org/abs/2306.12736](https://arxiv.org/abs/2306.12736) | ✅ |
+| **FEM熱モデル＋カルマンフィルタ**で温度分布をリアルタイム推定 | **既発表**（別分野） | **Peet, B. J. A. (2019)** "Accurate estimation of temperature distributions for IR signature monitoring with a dynamic thermal model and data assimilation", *Proc. SPIE* **11158**, 111580C. [doi:10.1117/12.2532755](https://doi.org/10.1117/12.2532755) | ❌ |
+| **測れない熱伝達率を最適化で推定**（ソフトセンサ） | **既発表** | "Intelligent Soft Sensor for Spindle Convective Heat Transfer Coefficient ... Using Improved Grey Wolf Optimization Algorithm" (2025). [PMC12473924](https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/) | ✅ |
+| 温度・熱流束**場そのもの**をNNで予測し、**相関ベースで測定点を選ぶ** | **既発表** | **Coelho et al. (2025)** arXiv:2510.03261. [arxiv.org/abs/2510.03261](https://arxiv.org/abs/2510.03261) | ✅ |
+| **Q-DEIM（枢軸付きQRによる点選択）** | **既発表**（流体分野で標準） | **Drmač, Z., Gugercin, S. (2016)** "A New Selection Operator for the Discrete Empirical Interpolation Method", *SIAM J. Sci. Comput.* **38**(2), A631–A648. [arxiv.org/abs/1505.00370](https://arxiv.org/abs/1505.00370) | ✅ |
+
+**さらに、2026-09の調査で名前だけ確認したが DOI を取れていないもの**（発表前に要確認）:
+
+- 変位・ひずみ測定から**随伴法**で温度場を復元する研究（ScienceDirect 2025）
+- **線形カルマンフィルタ／状態オブザーバ**による工作機械デジタルツインの熱誤差補償（ScienceDirect 2024）
+- **CONES** ― OpenFOAM と EnKF を結合するフレームワーク
+- EnKF による鋳造の熱伝達係数推定
+
+> ⚠️ **これら4件は書誌情報が未確定です。** 発表スライドや論文に引用する前に、
+> 必ず原典を特定してください。本ファイルでは「この領域は既に混んでいる」ことの
+> 傍証としてのみ扱います。
 
 > **この領域は競争が激しく、「初めて」と言える部分はほとんどありません。**
 > 主張を盛ると質疑で崩れます。
 
 ### 3-2. それでも差分と言える3点
 
-| # | 差分 | なぜ差分か | 弱み（正直に） |
+| # | 差分 | 比較対象（先行） | 弱み（正直に） |
 |---|---|---|---|
-| **A** | **EnKF（アンサンブル）で、高忠実CHT＋FEMを非線形観測演算子としてループに入れた** | 先行は**線形KF／オブザーバ／随伴法**が主。アンサンブルなら随伴コードを書かずに済み、非線形のまま扱える | 計算コストが高い（104で13時間）。ROM化で回避したが、ROMは訓練条件依存 |
-| **B** | **発熱量 $Q$ と放熱 $h$ を温度場と同時に推定**（joint state–parameter estimation） | 先行は温度を**入力として与える**か、場の復元だけ。**境界条件そのものを観測から決める**角度は薄い | $h$ は同定できなかった（可同定性の限界を実証した、とも言える） |
-| **C** | **観測の価値 $\Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r)$ で、温度と変位を同じ尺度で比較** | 先行は温度センサ配置が主流。**変位ゲージ側の選定**と、**推定対象ごとに最適が変わる**ことの定量化 | 線形ガウス仮定。大域最適の証明ではなく候補内比較 |
+| **A** | **EnKF（アンサンブル）で、高忠実CHT＋FEMを非線形観測演算子としてループに入れた** | Bünger 2023 はベイズ逆問題＋低ランク／TT近似、Peet 2019 は線形KF＋FEM。**アンサンブルなら随伴コードを書かずに非線形のまま扱える** | 計算コストが高い（104で13時間）。ROM化で回避したが、ROMは訓練条件依存 |
+| **B** | **発熱量 $Q$ と放熱 $h$ を温度場と同時に推定**（joint state–parameter estimation） | Bünger 2023 は**初期温度場**が対象。Teshima/Ando は温度を**入力として与える**。**境界条件そのものを観測から決める**角度は薄い | $h$ は同定できなかった（可同定性の限界を実証した、とも言える） |
+| **C** | **観測の価値 $\Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r)$ で、温度と変位を同じ尺度で比較** | Teshima/Ando・Coelho はいずれも**温度センサ**の配置。**変位ゲージ側の選定**と、**推定対象ごとに最適が変わる**ことの定量化 | 線形ガウス仮定。大域最適の証明ではなく候補内比較 |
 
 ### 3-3. 最も近い先行研究との比較表
 
@@ -127,6 +139,23 @@
 | 未知パラメータ | 扱わない（温度は入力） | **$Q$・$h$ を状態に入れて同時推定** |
 | 観測の種類 | 温度センサ | **温度＋変位**を同じ枠組みで |
 | 実装 | ― | **OSSのみ**（OpenFOAM＋FrontISTR＋Python）で全公開 |
+
+### 3-3b. 手法として最も近い Bünger et al. (2023) との比較
+
+[arXiv:2306.12736](https://arxiv.org/abs/2306.12736)（**全文無料**）。
+「物理モデル＋データ同化で温度場を推定し、センサ配置を評価する」という構図が最も近い。
+
+| | Bünger et al. 2023 | **本研究** |
+|---|---|---|
+| 推定対象 | **初期温度場** | **温度場＋発熱量 $Q$＋放熱 $h$** |
+| 手法 | ベイズ逆問題＋低ランク／テンソルトレイン近似 | **EnKF**（アンサンブルで共分散を近似） |
+| 低次元化 | **事後共分散**を低ランク近似 | **POD＋Q-DEIM**で**状態自体**を5点に縮約 |
+| 配置の扱い | 「与えられた配置を**評価**する」道具 | **評価＋推定対象ごとの比較**（$\Delta$＝相互情報量） |
+| 観測の種類 | 温度のみ | **温度＋変位** |
+| 物理モデル | 熱伝導FEM | **CHT（流体を解く）＋熱弾性FEM** |
+
+→ 「配置を評価する前提を整える」のが Bünger、
+**「対象が変われば最適配置も変わる」を示すのが本研究**。相補的なので質疑で引き合いに出せます。
 
 ### 3-4. 実務・CAEコミュニティに対する優位性
 
@@ -143,7 +172,125 @@
 
 ---
 
-## 4. 発表で言ってよいこと／言ってはいけないこと
+## 4. 何を主張すれば優位性が出るか ― 主張の設計
+
+先行研究が混んでいる以上、**「何を新しいと言うか」の選び方で勝負が決まります**。
+強い順に3案。**第1案を軸に据えることを推奨します。**
+
+### 【推奨】主張① 「熱伝達率を仮定しない熱変形推定」
+
+> **先行研究はすべて熱伝達率 $h$ を「与えて」いる。本研究は流体を解いて $h$ を出し、
+> しかも $h$ が時間とともに 2.4 倍変わることを示した。固定 $h$ という前提自体が怪しい。**
+
+**なぜ効くか** ― 文献自身がこの弱点を認めているからです。
+
+| 文献 | 何と言っているか |
+|---|---|
+| Intelligent Soft Sensor (2025) | 「**CHTCを直接測定する専用計測器が存在しない**ため、主軸の熱解析は大きな困難に直面する」 |
+| *Machines* 9(9), 184 (2021) | 「熱源と境界条件は組立・加工条件に強く依存するため、**汎用的に通用する定義は難しい**」 |
+
+**本研究の根拠データ**（`results/heat_transfer_check.json`）:
+
+| 時刻 | 実効熱伝達率 |
+|---|---|
+| 300 s（加熱終了） | **8.58 W/(m²·K)** |
+| 600 s（冷却後） | **3.56 W/(m²·K)** |
+
+→ **同じ物体・同じ姿勢でも 600 秒のあいだに 2.4 倍変わります。**
+自然対流は $\Delta T$ に依存するので当然ですが、**固定 $h$ を仮定する熱伝導FEMでは表現できません**。
+
+本研究は `chtMultiRegionFoam`（流体・固体の両領域を解く共役熱伝達）を使うので、
+$h$ は**仮定するものではなく、計算結果から診断されるもの**になります。
+
+**言い方の例**
+> 「先行研究の多くは熱伝導FEMに熱伝達率を与えます。しかし熱伝達率は測れませんし、
+> 本研究の計算では 600 秒で 2.4 倍変化しました。そこで流体ごと解き、
+> 熱伝達率を仮定しない経路で熱変形まで一気通貫しました。」
+
+**受ける攻撃と返し**
+
+| 攻撃 | 返し |
+|---|---|
+| 「CHTは重すぎて実用にならない」 | そのとおりです。だから**オフラインでCHTを1回だけ回してPODモードを作り、オンラインはROM（31 ms）**にしています |
+| 「$h$ を推定できていないではないか」 | ROMの集中定数 $h$ は**同化では同定できませんでした**。ただしこれは**可同定性の問題**であることを定量的に示しました（応答0.049 K < ノイズ0.30 K）。**CHT側では $h$ を仮定していません** |
+
+---
+
+### 主張② 「推定したい量が変われば、最適なセンサも変わる」
+
+> **先行研究のセンサ配置は「温度場を再現する」ための1つの基準で決まっている。
+> 本研究は観測の価値 $\Delta=\mathrm{Cov}(X,y)^2/(\mathrm{Var}(y)+r)$ を定義し、
+> 推定対象ごとに最適な観測が入れ替わることを示した。**
+
+**本研究の根拠データ**（`results/delta_explained.json`）― 分散が何 % 消えるか:
+
+| 推定したい量 | 温度点1 | 温度点2 | 変位 $u$ |
+|---|---|---|---|
+| $T_1$ | **★94 %** | 1 % | 88 % |
+| $T_2$ | 1 % | **★92 %** | 17 % |
+| 発熱量 $Q$ | 25 % | 4 % | **★28 %** |
+| 全温度場 | 54 % | 40 % | **★57 %** |
+
+→ **★の列が行ごとに違う。** 「良いセンサ位置」は単独では決まりません。
+
+さらに強い補強材料として、**選び方を間違えたときの崩れ方**も定量化してあります。
+
+| 5点の選び方 | 全20,696セルの復元RMSE |
+|---|---|
+| Q-DEIM | 0.00081 K |
+| ランダム中央値 | 0.00220 K |
+| **ランダム最悪** | **1.396 K（1,724倍）** |
+
+条件数と復元誤差の**対数相関は +0.917**。「なんとなく散らす」では最悪ケースを踏みます。
+
+**受ける攻撃と返し**
+
+| 攻撃 | 返し |
+|---|---|
+| 「相互情報量によるセンサ配置は既知では」 | はい、理論は既知です。本研究の主張は**理論の新しさではなく、温度と変位という異種センサを同じ尺度に載せ、工作機械の熱変形問題で実際に順位が入れ替わることを示した**点です |
+| 「線形ガウス仮定が効かない場合は」 | そのとおりで、候補内比較にとどまります。大域最適の証明はしていません |
+
+---
+
+### 主張③ 「変位センサ側の配置設計」
+
+> **温度センサの配置は研究されているが、変位ゲージをどこに置くかの設計論は薄い。
+> FrontISTRの $W=K_s^{-1}H_T$ の行ノルムで決められる。**
+
+**根拠データ**: 同じ「変位2点」でも 低W 2.43 K / **高W 0.86 K**（約3倍）。
+行感度は高W 6.33 vs 低W 0.12 µm/K で**51倍**の開き。
+
+ただし**主張①②より弱い**です。「固定端から遠いほど動く」は直感的で、
+「当たり前では」と言われやすい。**①②の補強材料として使うのが安全**です。
+
+---
+
+### 主張してはいけないこと（優位性が出ない／崩れる）
+
+| ❌ 言わないほうがよい | 理由 |
+|---|---|
+| 「EnKFを熱変形に使ったのが新しい」 | Peet 2019（KF＋FEM）、2024年の線形KF例がある |
+| 「PODでROM化したのが新しい」 | Teshima/Ando が先行。流体分野では標準手法 |
+| 「Q-DEIMで代表点を選んだのが新しい」 | Drmač & Gugercin 2016 の手法をそのまま使っている |
+| 「ROMでセンサ配置を決めるのが新しい」 | **Teshima 2024・Ando 2025 が真正面から先行** |
+| 「この手法が最適」 | 候補内比較。大域最適の証明はしていない |
+| 「実機で有効」 | 双子実験。実測検証は未実施 |
+
+---
+
+### まとめ ― 一文にすると
+
+> **「熱伝達率を仮定せずに流体ごと解き、少数の温度・変位観測から
+> 発熱量と温度場を同時推定して熱変形まで出す。
+> しかも、どこを測るべきかは推定したい量によって変わることを定量的に示した。
+> 全部オープンソースで再現できる。」**
+
+この一文なら、どの部分も**本研究のデータで裏が取れます**。
+
+---
+
+## 4-b. 発表で言ってよいこと／言ってはいけないこと
+
 
 ### 言ってよい
 
@@ -170,6 +317,82 @@
 | 「商用ツールでも同じことができるのでは」 | できます。本研究の主張は手法の独自性より **OSSで再現可能な形にしたこと** です |
 | 「$h$ が当たらないのは失敗では」 | この条件では $h$ の応答（0.049 K）が観測ノイズ（0.30 K）に埋もれるためで、**フィルタの問題ではなく可同定性の問題**です。事前に感度を計算すれば実験前に分かります |
 | 「なぜ $z$ 方向だけなのか」 | 注目量を上面の反りに絞ったためです。$U_x$ も同程度動きますが、**観測しなくても同化で直る**ことは確認しました（結果③-2） |
+
+---
+
+## 6. 引用文献一覧
+
+本ファイルで引用したもの。**無料で全文が読めるもの**には 📄 を付けています。
+
+### 工作機械の熱変位・センサ配置
+
+1. **Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G. (2024)**
+   "Machine Tool Thermal Error Measurement and Prediction via Wireless Microscope",
+   *Manufacturing Letters* **41**, 1440–1451（NAMRC 52）
+   📄 <https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076>
+   → 「熱変位は加工誤差の**最大75 %**」の出典（原典は Mayr et al. 2012）
+2. **Teshima, Y., Tanaka, S., Kizaki, T., Sugita, N. (2024)**
+   "Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools",
+   *CIRP Journal of Manufacturing Science and Technology* **55**, 403–410
+   🔗 <https://doi.org/10.1016/j.cirpj.2024.10.015>（有料）
+3. **Ando, S., Tanaka, S., Teshima, Y., Morishita, J., Kizaki, T. (2025)**
+   "Strategy for Sensor Placement to Estimate Thermal Errors Using Temperature-Sensitivity
+   Distribution Based on a Reduced-Order Model of Machine Tools", ICTIMT2025
+   🔗 <https://doi.org/10.1007/978-3-032-01194-7_31>（有料）
+   研究室: 東京大学 先端加工学（木崎研）<https://mfg.t.u-tokyo.ac.jp/>
+4. **Coelho, et al. (2025)** arXiv:2510.03261
+   📄 <https://arxiv.org/abs/2510.03261>
+   → 温度・熱流束場をNNで予測、相関ベースの測定点選択
+
+### データ同化・逆問題
+
+5. **Bünger, A., Herzog, R., Naumann, A., Stoll, M. (2023)**
+   "Uncertainty Propagation of Initial Conditions in Thermal Models", arXiv:2306.12736
+   📄 <https://arxiv.org/abs/2306.12736>
+   → **本研究に手法として最も近い**（§3-3b）
+6. **Peet, B. J. A. (2019)**
+   "Accurate estimation of temperature distributions for IR signature monitoring with a dynamic
+   thermal model and data assimilation", *Proc. SPIE* **11158**, Target and Background Signatures V, 111580C
+   🔗 <https://doi.org/10.1117/12.2532755>（有料）
+   🔗 TNOリポジトリ: <https://repository.tno.nl/islandora/object/uuid:3886b677-1d88-4198-9925-39d68360fb77>
+
+### 熱伝達率・境界条件の推定
+
+7. "Intelligent Soft Sensor for Spindle Convective Heat Transfer Coefficient Under Varying
+   Operating Conditions Using Improved Grey Wolf Optimization Algorithm" (2025)
+   📄 <https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/>
+   → 「**CHTCを直接測定する専用計測器が存在しない**」
+8. "The Thermal Error Estimation of the Machine Tool Spindle Based on Machine Learning",
+   *Machines* **9**(9), 184 (2021)
+   📄 <https://www.mdpi.com/2075-1702/9/9/184>
+   → 「熱源と境界条件は組立・加工条件に強く依存し、**汎用的な定義は難しい**」
+
+### 数値手法
+
+9. **Drmač, Z., Gugercin, S. (2016)**
+   "A New Selection Operator for the Discrete Empirical Interpolation Method
+   — Improved A Priori Error Bound and Extensions",
+   *SIAM Journal on Scientific Computing* **38**(2), A631–A648
+   📄 <https://arxiv.org/abs/1505.00370>
+   → **Q-DEIM の原典**。本研究の代表点選定はこれをそのまま使っている
+
+### 規格
+
+10. **ISO 230-3:2020** "Test code for machine tools — Part 3: Determination of thermal effects"
+    🔗 <https://www.iso.org/standard/73291.html>（有料）
+    📄 プレビュー: <https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf>
+
+### メーカー公開情報
+
+11. オークマ「サーモフレンドリーコンセプト」<https://www.okuma.co.jp/onlyone/thermo/>
+12. ヤマザキマザック「高精度化技術」<https://www.mazak.com/jp-ja/technology/accuracy/>
+13. DMG MORI NVX 5100 <https://en.dmgmori.com/products/machines/milling/vertical-milling/nvx/nvx-5100>
+14. 牧野フライス製作所 <https://www.makino.co.jp/ja-jp/>
+
+> **注意**：2・3・6・10 は有料です。発表資料に引用する際は、
+> 少なくとも**アブストラクトの記述までで留める**か、原典を入手してください。
+> また §3-1 末尾に挙げた4件（随伴法／線形KF／CONES／鋳造EnKF）は
+> **書誌が未確定**なので、このまま引用しないでください。
 
 ---
 
