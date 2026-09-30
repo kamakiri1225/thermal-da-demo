@@ -1,0 +1,16 @@
+digraph G {rankdir=LR; graph [bgcolor="white",pad="0.15",nodesep="0.3",ranksep="0.3"]; node [shape=box,style="rounded",fontname="IPAexMincho",fontsize=15,margin="0.15,0.12",color="#354858"]; edge [color="#354858"];
+A [label="CHT解析\n温度場121枚"];
+B [label="POD（SVD）\nモード φ1..φ5 を得る"];
+C [label="Q-DEIM\n測る5点 P を選ぶ"];
+D [label="【ここまでオフライン・1回だけ】"];
+E [label="5点を測る\nT_P（5個の数）"];
+F [label="gappy-POD\na を解いて全場へ"];
+G [label="全20,696セルの温度"];
+A -> B;
+B -> C;
+C -> D;
+D -> E;
+E -> F;
+F -> G;
+G -> E;
+}

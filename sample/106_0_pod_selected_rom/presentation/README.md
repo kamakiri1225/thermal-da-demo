@@ -4,7 +4,7 @@
 
 | # | ファイル | 内容 | いつ使うか |
 |---|---|---|---|
-| **01** | [`01_slides.html`](01_slides.html) | **発表スライド25枚**（reveal.js。→キーで進む） | **本番** |
+| **01** | [`01_slides.html`](01_slides.html) | **発表スライド（優位性と検証計画を追記）**（reveal.js。→キーで進む） | **本番** |
 | **02** | [`02_positioning_novelty.md`](02_positioning_novelty.md) | **研究の位置づけ・先行研究との差分・何を主張すれば優位性が出るか・追加検証の結果** | 発表前の準備／質疑 |
 | **03** | [`03_expected_questions.md`](03_expected_questions.md) | **想定質問 Q1〜Q22**（LETKF、ベイズ最適化、メーカー比較など） | 質疑 |
 | **04** | [`04_intro_literature.md`](04_intro_literature.md) | 導入の文献調査（75%の出典）・メーカー4社比較・ISO 230-3・測定方法 | スライド2の根拠 |
@@ -30,3 +30,15 @@
 | `conference_posters.*` | `06_conference_posters.*` |
 
 `git mv` なので履歴は `git log --follow <新ファイル名>` で追えます。
+
+## 今回の研究レビュー（2026-10-01）
+
+優位性・調査範囲・訂正点・追加試験は [研究レビュー](../docs/19_research_advantage_and_validation.md)。ブログ005と本番スライドにも要点を反映しました。学会別ポスターPDFは4枚のA2横向きです。
+
+ポスターPDFはJavaScriptを使わず、TeXをMathJaxのSVGへ変換して組版できます。
+
+```bash
+python3 ../run/render_conference_posters_pdf.py --mathjax-root /path/to/node_modules/mathjax-full
+```
+
+Node.js、mathjax-full、beautifulsoup4、WeasyPrint、PyMuPDFが必要です。PDFではGIFは静止表示、HTMLでは動画として表示します。

@@ -226,7 +226,7 @@ Peet (2019) が示すように、**熱の問題にデータ同化を持ち込む
 > **固体と流体（空気）を"一体で"解く**
 
 ことをします。固体の中は熱伝導、空気の中は流れ＋伝導を解き、**境界（固体表面）で温度と熱流束を連続**に
-つなぐ。こうすると $h$ を仮定しなくても、空気の対流が自動的に固体を冷やしてくれます。
+つなぐ。こうすると固体壁に一定の表面熱伝達率 $h$ を直接与えず、流体側の熱輸送を計算できます。ただし外部流体境界・物性・対流モデル・メッシュの仮定は残り、計算結果が実測の真値になるわけではありません。
 
 OpenFOAM でこれを解くソルバが **`chtMultiRegionFoam`** です（multi-region＝複数領域を同時に解く）。
 
@@ -389,7 +389,7 @@ postProcess -func writeCellCentres -region solid -time 300
 
 ## 3. STEP 3：熱伝達率 $h$ の分布と各面の値を算出する
 
-CHT の利点は「 $h$ を仮定しない」ことでしたが、**逆に結果から $h$ を"逆算"して分布を見る**ことができます。
+CHTでは一定の壁面 $h$ を直接指定しないため、**逆に結果から $h$ を"逆算"して分布を見る**ことができます。
 「どの面がどれだけ冷えているか」を1つの数字（ $h$ ）で見える化するわけです。
 
 ### 3-1. 熱伝達率の定義
@@ -502,7 +502,7 @@ ParaView では `solid_to_fluid` パッチだけを表示し、計算した面�
 
 ## 4. まとめ ― 第1回で押さえたこと
 
-1. **CHT（`chtMultiRegionFoam`）** は固体＋空気を一体で解き、 $h$ を仮定せず温度場を出す。
+1. **CHT（`chtMultiRegionFoam`）** は固体＋空気を一体で解き、 一定の壁面 $h$ を直接指定せず温度場を出す（流体条件等の仮定は残る）。
 2. その **温度場を FrontISTR に渡す**と、熱ひずみ $\alpha\Delta T$ から熱膨張（変位）が出る。片側加熱で円筒は反る。
 3. CHT の結果から **各面の $q^{\prime\prime}$ と $T_w$** を取り出し、 $h=q^{\prime\prime}/(T_w-T_\mathrm{ref})$ で **熱伝達率の分布・面代表値**を診断できる。
 4. ここで得た温度・変位の時系列が、後続の **OI／EnKF 双子実験の真値**になる。本記事自体は EnKF の同化計算ではない。
@@ -518,3 +518,6 @@ ParaView では `solid_to_fluid` パッチだけを表示し、計算した面�
 - 連成の実装と手順：`../../102_1_frontistr_hollow_cylinder_thermal_expansion/docs/00_openfoam_frontistr_coupling_workflow.md`
 - 実ソルバ・データ同化の全体：`blog_002_oi_data_assimilation.md`（OI）・`blog_003_ensemble_kalman_filter.md`（EnKF）
 - 材料定数：`../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml`
+
+
+研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は [研究の優位性と検証計画](19_research_advantage_and_validation.md) を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。

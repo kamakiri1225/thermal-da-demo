@@ -143,4 +143,10 @@ if __name__=='__main__':
  for src in sorted(DOC.glob('blog_00[1-5]_*.md')):
   if selected and src.name[:8] not in selected:continue
   print('Building',src.name,flush=True);records.append(make(src));print('OK',records[-1],flush=True)
- (HERE/'build_manifest.json').write_text(json.dumps(records,ensure_ascii=False,indent=2)+'\n')
+ manifest=HERE/'build_manifest.json'
+ if selected and manifest.exists():
+  previous=json.loads(manifest.read_text())
+  updated={record['source']:record for record in previous}
+  updated.update({record['source']:record for record in records})
+  records=[updated[key] for key in sorted(updated)]
+ manifest.write_text(json.dumps(records,ensure_ascii=False,indent=2)+'\n')

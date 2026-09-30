@@ -580,3 +580,6 @@ C−D差は「同化に使っていない別の変位差」で、**同化がそ�
 - 感度による観測設計：`../../105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.md`
 - σTスタディの詳細：`18_oi_sigma_t_validation.md`
 - 全ストーリー：`blog_004_pod_selected_rom.md`
+
+
+研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は [研究の優位性と検証計画](19_research_advantage_and_validation.md) を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。

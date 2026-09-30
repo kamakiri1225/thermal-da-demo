@@ -87,14 +87,14 @@
 <section>
 <h2>はじめに</h2>
 <ul style="flex:0 0 auto">
-<li>工作機械の加工誤差では<strong>熱変位が約40〜70 %</strong>を占め、最大の誤差要因となる。</li>
+<li>工作機械では<strong>熱変位が加工精度を左右する主要因の一つ</strong>であり、工具と工作物の相対位置を予測したい。</li>
 <li>対策には<em>熱設計・温度制御・モデル補償</em>があるが、補償には<strong>熱変形を正確に予測する</strong>必要がある。</li>
 <li>熱解析や熱流体解析を用いても、<em>温度勾配・熱伝達率・複数の時定数</em>を完全に再現することは難しく、
 <strong>温度の傾向が合ってもTCP変位が合わない</strong>場合がある。</li>
 </ul>
 <div class="two">
 <div><img src="../docs/img/intro_temp_history.png" alt="温度変化">
-<p class="cap">温度変化（熱電対による測温点の温度）</p></div>
+<p class="cap">基礎モデルの測温位置における温度履歴（実機実測ではない）</p></div>
 <div><img src="../docs/img/intro_deform_anim.gif" alt="変位の変形具合とグラフ">
 <p class="cap">変位の変形具合と変位のグラフ（誇張表示）</p></div>
 </div>
@@ -140,7 +140,7 @@
 <tr><td rowspan="4"><strong>逐次<br>データ同化</strong><br><span style="font-size:.85em;color:#556">観測が来るたび<br>その場で更新</span></td>
     <td style="background:#fff3f0"><strong>OI</strong>（最適内挿）</td>
     <td>共分散 \(B\) を<strong>固定したまま</strong>使う（時間発展させない）</td>
-    <td>最も軽い・仕組みが明快<br><strong>パラメータ推定は苦手</strong></td></tr>
+    <td>最も軽い・仕組みが明快<br>固定共分散の設計に推定性能が依存</td></tr>
 <tr><td>カルマンフィルタ</td>
     <td><strong>物理モデルで共分散そのものを逐次計算する</strong><br>
         \( P^f_k = M\,P^a_{k-1}M^{\mathsf T}+Q \)　（\(M\)＝モデルの線形化）</td>
@@ -160,14 +160,14 @@
         \( J(x)=\tfrac12(x-x^b)^{\mathsf T}B^{-1}(x-x^b)+\tfrac12(y-Hx)^{\mathsf T}R^{-1}(y-Hx) \)</td>
     <td>\(P\) を陽に持たず反復で解ける<br><strong>\(B\) を固定するのでOIと同じ弱点</strong>（最小解はOIと一致）</td></tr>
 <tr><td>4D-Var</td>
-    <td><strong>時間窓全体</strong>の観測に合うよう<strong>初期値 \(x_0\) だけ</strong>を最適化。途中の時刻はモデル \(M\) が決める<br>
+    <td><strong>時間窓全体</strong>の観測に合うよう初期値 \(x_0\) 等を時間窓全体で最適化。途中の時刻はモデル \(M\) が決める<br>
         \( J(x_0)=\tfrac12(x_0-x^b)^{\mathsf T}B^{-1}(x_0-x^b)+\tfrac12\sum_k (y_k-HM_{0\to k}x_0)^{\mathsf T}R^{-1}(\cdot) \)</td>
-    <td>窓内の全観測を使うので精度が高い<br><strong>勾配に随伴モデル \(M^{\mathsf T}\) が必要</strong><br>
+    <td>窓内の全観測を使うので精度が高い<br>勾配は随伴・直接感度・自動微分等で計算<br>
         <span style="font-size:.9em">OpenFOAM/FrontISTR の随伴を書くことになる</span></td></tr>
 </table>
 <div class="key" style="flex:0 0 auto">本研究では <strong>OI</strong> と <strong>EnKF</strong> を OpenFOAM ＋ FrontISTR に適用<br>
 <span style="font-weight:400;font-size:.84em"><strong>PFを外した理由</strong>：同じ真値・同じ観測で比べると、<strong>60メンバーのEnKF 0.076 K に対し400粒子のPFは0.458 K（6倍悪い）</strong>。有効粒子数が1.02個まで落ち分布を表現できない＝<strong>次元の呪い</strong>（状態は約20,000セル）。
-<strong>変分法を外した理由</strong>：4D-Varは随伴モデル \(M^{\mathsf T}\) の実装が要る。EnKFなら<strong>随伴なしで非線形観測（FEMを通した変位）を扱える</strong></span></div>
+<strong>変分法を外した理由</strong>：大規模な4D-Varでは随伴等の勾配計算が実装負担になる。EnKFなら<strong>随伴なしで非線形観測（FEMを通した変位）を扱える</strong></span></div>
 </section>
 
 <!-- 6 -->
@@ -188,7 +188,7 @@
 </div>
 <p class="scrollhint">▲ 1枚目＝①なぜ位置がずれるか ②距離の逆数で加重平均する仕組み。2枚目＝左がOpenFOAMのCHT温度、右がFrontISTRの熱変形（×6000誇張）。枠内スクロールで両方見えます</p>
 <div class="key" style="flex:0 0 auto">この <strong>CHT → 補間 → 熱弾性</strong> の結果を「真値」とし、ノイズを載せた観測を作って<strong>双子実験</strong>とした<br>
-<span style="font-weight:400;font-size:.87em">CHTは流体を解くので<strong>熱伝達率を仮定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。逆に計算後の壁面熱流束から熱伝達率を診断もできる</span></div>
+<span style="font-weight:400;font-size:.87em">CHTは流体を解くので<strong>固体壁に一定の表面熱伝達率を直接指定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。壁面熱流束から表面熱伝達率を診断できる。ただし流体境界・物性・対流モデル等の不確かさは残る。106の同化試験は別途ROM真値を使う</span></div>
 </section>
 
 <!-- 7 -->
@@ -429,7 +429,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 </div>
 <p class="scrollhint">▲ 1枚目＝\(U_z(A)\)／\(U_z(O)\)／反りの時刻歴。<strong>赤破線＝B/Cだけ測った構成</strong>が青点線（A/Oを測った参考値）とほぼ重なる。2枚目＝観測点と評価点の位置</p>
 <div class="key" style="flex:0 0 auto">知りたい場所を測らなくても<strong>反りの誤差 0.081 µm</strong>（振幅2.735 µmの3.0%）。A/Oを直接測った場合（0.077 µm）と<strong>ほぼ同じ</strong><br>
-<span style="font-weight:400;font-size:.83em">温度2点だけだと 0.697 µm で反りは当たらない（個別の \(U_z(A)\) は0.160 µmまで合うのに）＝<strong>差を当てるには変位観測が要る</strong>。同化なしの0.238 µmは<strong>見かけ</strong>（個別には5.6 µm外れ、A・Oが同方向に外れて相殺しているだけ）<br>
+<span style="font-weight:400;font-size:.83em">温度2点だけだと 0.697 µm で反りは当たらない（個別の \(U_z(A)\) は0.160 µmまで合うのに）＝<strong>この条件では変位観測の追加が差の精度を改善した</strong>。同化なしの0.238 µmは<strong>見かけ</strong>（個別には5.6 µm外れ、A・Oが同方向に外れて相殺しているだけ）<br>
 <strong>なぜ反りが要るか</strong>：反り2.735 µm＝傾き角 \(\theta=0.0027^\circ\)。工具先端の位置ずれは \(\delta\simeq\theta L\) で<strong>工具長に比例</strong>し、100 mmで4.8 µm・200 mmで9.5 µm。
 <strong>傾き角を知らないとこの工具長依存を計算できない</strong>［Yang et al. 2015］</span></div>
 </section>
@@ -457,7 +457,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <p class="scrollhint">▲ 1枚目＝手続きと結果。2枚目＝時刻歴（行＝成分 \(U_x,U_y,U_z\)／列＝点。A・O＝<strong>観測点</strong>、<strong>B・C＝評価点（未観測点）</strong>）。枠内スクロールで両方見えます</p>
 <div class="key" style="flex:0 0 auto">A/O を測って、<strong>25 mm 離れた評価点 B/C が 172〜195倍</strong>正確に（\(U_z\)：4.02→0.021 µm）。
 <strong>\(U_x\) は一度も観測していない方向</strong>なのに 126倍（2.78→0.022 µm）<br>
-<span style="font-weight:400;font-size:.85em">同化が直しているのは変位ではなく<strong>温度場</strong>（4.585→0.160 K）。\(u=W(T-T_\mathrm{ref})\) の \(W\) は3成分を含むので、温度が合えば<strong>どの点のどの方向も自動的に従う</strong>。
+<span style="font-weight:400;font-size:.85em">同化が直しているのは変位ではなく<strong>温度場</strong>（4.585→0.160 K）。\(u=W(T-T_\mathrm{ref})\) の \(W\) は3成分を含むので、温度が合えば同じ線形写像で表現できる各方向の変位も改善し得る。温度RMSEだけで全方向の精度は保証しない。
 \(U_y\) だけ変わらないのは4点とも \(y=0\) の対称面上で元から誤差が振幅の3%しかなかったため。5 seed平均・60〜300 sのMAE</span></div>
 </section>
 
@@ -507,7 +507,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <p class="cap">温度RMSE 0.617 → 0.197 → <strong>0.159 K</strong>／未観測の変位差誤差 0.869 → 0.151 → <strong>0.077 µm</strong></p></div>
 </div>
 <div class="key" style="flex:0 0 auto">温度1点 → 2点で<strong>3倍</strong>改善。さらに<strong>変位を足すと未観測の変形まで合う</strong><br>
-<span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
+<span style="font-weight:400;font-size:.88em">今回の高W候補は低W候補より改善した（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
 <!-- 25 -->
@@ -517,9 +517,9 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 \( \Delta(X,y)=\dfrac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r} \)　＝ カルマンフィルタで分散が減る量そのもの（\(X\)＝推定したい量、\(y\)＝観測、\(r\)＝センサのノイズ分散）。</p>
 <div class="scrollfig"><img src="../docs/img/delta_explained.png" alt="観測の価値Δの説明"></div>
 <p class="scrollhint">▲ ①分散が減る絵 ②式の出どころ ③分子・分母の意味 ④対象×観測の表。枠内スクロールで④まで見えます</p>
-<div class="key" style="flex:0 0 auto"><strong>分子に「推定したい量」が入る ＝ 対象が変われば最適な観測も変わる</strong><br>
+<div class="key" style="flex:0 0 auto"><strong>対象によって単回の観測価値は変わり得る</strong><br>
 <span style="font-weight:400;font-size:.86em">\(T_1\)を知りたいなら温度点1（94%減）、\(T_2\)なら温度点2（92%減）、<strong>発熱量\(Q\)と全温度場なら変位</strong>（28%／57%減）。
-生の \(\Delta\) は対象の分散と同じ単位なので<strong>行の中でだけ比べる</strong>／感度が高い点を並べるのは逆効果（近接2点は相関1.00000で条件数が30万倍悪化）</span></div>
+ここは説明用3変数モデル。Δは単回の分散減少であり<strong>逐次同化の最終精度を保証しない</strong>（追加試験で順位不一致）。Q-DEIMとも別の基準</span></div>
 </section>
 
 <!-- 26 -->
@@ -528,15 +528,29 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
 <tr><th style="width:13%">段階</th><th style="width:40%">やったこと</th><th>結果</th></tr>
 <tr><td><strong>連携</strong></td><td>OpenFOAM(CHT) → 節点補間 → FrontISTR(熱弾性)</td><td>温度・変形・面ごとの熱伝達率を算出し、双子実験の真値とした</td></tr>
-<tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOIは \(Q\)=8.9 W止まり <span class="arrow">→</span> EnKFで<strong>15.95 W</strong></td></tr>
+<tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOI例：\(Q\)=8.9 W／104 EnKFの別設定：<strong>14.926 W</strong>（真値15 W。公平な同条件比較ではない）</td></tr>
 <tr class="hi"><td><strong>低次元化</strong></td><td>PODで場を2モードに圧縮（99.9 %）</td><td><strong>0→600 s が31 ms</strong>（実ソルバは分オーダー）</td></tr>
-<tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、大外れ（1.4 K）を確実に回避</td></tr>
+<tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、比較したランダム配置の最悪1.4 Kより良い復元（大域保証ではない）</td></tr>
 <tr class="hi"><td><strong>観測設計</strong></td><td>温度センサは発熱感度 \(\partial T/\partial Q\)、変位センサは熱感度 \(W\) で選ぶ</td><td><strong>同化なし 4.59 K → 0.16 K</strong>（約29倍）／同じ変位2点でも置き場所で 2.43→0.86 K</td></tr>
-<tr class="hi"><td><strong>循環の排除</strong></td><td><strong>知りたい場所を測らずに</strong>当てる（観測＝中高さ、評価＝上面）</td><td>反りの誤差 <strong>0.081 µm</strong>（振幅の3.0%）。直接測った場合(0.077)とほぼ同じ</td></tr>
+<tr class="hi"><td><strong>観測外評価</strong></td><td><strong>知りたい場所を測らずに</strong>当てる（観測＝中高さ、評価＝上面）</td><td>反りの誤差 <strong>0.081 µm</strong>（振幅の3.0%）。直接測った場合(0.077)とほぼ同じ</td></tr>
 <tr class="hi"><td><strong>センサ構成</strong></td><td><strong>温度センサ0本</strong>（変位計だけ）でも成立するか</td><td>温度RMSE <strong>0.207 K</strong> ― 温度2点だけ(0.453 K)の<strong>2.2倍良い</strong></td></tr>
 </table>
 <div class="key" style="flex:0 0 auto">OpenFOAM＋FrontISTR＋Python だけで <strong>CHT → 熱変形 → データ同化 → ROM</strong> を一気通貫で構築<br>
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を定量的に設計でき、<strong>測れない場所の熱変形を測れる場所から推定できる</strong>ことを示した</span></div>
+</section>
+
+<section>
+<h2>本研究の強みと、優位性を示す次の検証</h2>
+<div class="two">
+<div><img src="../docs/img/holdout_support_displacement.png" alt="観測外C/Dの変位と差の時刻歴">
+<p class="cap">106同一ROM双子実験／60メンバー／30秒更新／5seed／σT=0.30 K、σu=0.30 µm。加熱30〜300秒、C/Dは更新に使わない。</p></div>
+<div class="txt"><h3>現在の証拠</h3>
+<p>温度P2/P0のみ：未観測C−D RMSE <strong>0.792 µm</strong><br>＋高W変位S1/S2：<strong>0.158 µm（約80%低下）</strong></p>
+<p>強み：<strong>公開実装と条件を伴う、観測外の相対変位の評価</strong>。同じROM真値での追加観測効果であり、実機精度や固定予算での最適配置は未証明。</p>
+<h3>優位性を裏付ける3項目</h3>
+<p>① 未学習条件のCHT＋FrontISTRを真値にする<br>② 同じセンサ数で感度・情報・基準配置を比較<br>③ Q/hとholdout変位の誤差・ばらつきを併記</p></div></div>
+<div class="key">目的別の配置理論は既知。<strong>熱変形で何が改善し、何が改善しないかを独立条件で示す</strong>ことを次の貢献にする。</div>
+<p class="cap"><a href="../docs/19_research_advantage_and_validation.md">原典・条件・検証計画</a> ／ goal-oriented sensor placement: <a href="https://arxiv.org/abs/2507.02500">2025/2026先行研究</a></p>
 </section>
 
 <!-- 27 -->
@@ -546,9 +560,9 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <div class="txt">
 <h3>正直な限界</h3>
 <ul style="font-size:.86em">
-<li><strong>放熱 \(h\) は推定が難しい</strong>。温度応答（0.05 K）が観測ノイズ（0.30 K）より小さい</li>
+<li><strong>放熱 \(h_{\rm rom}\) [W/K]は600秒では情報が弱い</strong>。5,000秒のROM外挿試験では3seed平均誤差1.30%に改善。ただしアンサンブル幅は真値の約18%、独立CAE検証は未実施</li>
 <li><strong>Q-DEIM点は「復元に良い点」</strong>であり、推定に最適な保証はない</li>
-<li><strong>発熱量が変わるのは平気</strong>。伝導は \(Q\) に線形で、\(Q\) はモード係数 \(a\) のスケールに吸収される
+<li><strong>発熱量変更の復元試験では誤差が小さい</strong>。伝導は \(Q\) に線形で、\(Q\) はモード係数 \(a\) のスケールに吸収される
 （3〜75 Wで復元誤差 0.0004〜0.0045 K、常にノイズの2桁下）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
 <li><strong>発熱の位置・分布や形状が変わると作り直し</strong>。モードは20,696セルに紐づくベクトルなので別メッシュでは意味を持たない
 （ただし CHT→POD→Q-DEIM→ROM校正 の手順はそのまま再利用でき、自動化済み）</li>
@@ -558,9 +572,9 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 </ul>
 <h3>今後</h3>
 <ul style="font-size:.86em">
-<li>実機形状・実測データへの適用（現在は双子実験）</li>
-<li>設置制約を入れた<em>制約付き最適配置</em></li>
-<li>OpenModelica との連成（FMI/FMU）による1D-CAEとの統合</li>
+<li><strong>未学習Q・加熱履歴のOpenFOAM＋FrontISTR真値</strong>で独立検証。学習ROMと同じ真値だけで性能を結論しない</li>
+<li><strong>同じセンサ数・ノイズ・seed群</strong>で配置を比較し、温度・Q/h・未観測変位差を同時評価</li>
+<li>hの初期分布・観測時間・膨張を分離検証。前処理と同化1周期の全実行時間を計時</li>
 </ul>
 </div>
 <div class="txt">
