@@ -374,6 +374,8 @@ class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
 id="toc-観測構成を変えて比べる-本研究の有用性">7-6.
 観測構成を変えて比べる ― 本研究の有用性</a>
 <ul>
+<li><a href="#本研究で実際に行った手続きrunrun_da_compare.py"
+id="toc-本研究で実際に行った手続きrunrun_da_compare.py">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</a></li>
 <li><a href="#この表のrmseは何を計算した値か"
 id="toc-この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</a></li>
 <li><a href="#結果" id="toc-結果">結果</a></li>
@@ -3622,6 +3624,110 @@ class="math inline">\(W\)</span>
 観測構成を変えて比べる ― 本研究の有用性</h2>
 <p>ここまでの部品（POD＋Q-DEIM＋ROM＋EnKF）を組み合わせ、<strong>観測の構成だけを変えて</strong>比べます。</p>
 <h3
+id="本研究で実際に行った手続きrunrun_da_compare.py">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</h3>
+<p>ここに書くのは説明用の簡略例ではなく、表の数値を出した計算そのものの設定である。</p>
+<p><strong>真値（双子実験）</strong>　校正済みの5点ROMを、発熱量 <span
+class="math inline">\(Q=15\)</span> W（ヒータ点 P2）、放熱 <span
+class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
+冷却で時間積分したものを真値とする。</p>
+<p><strong>状態ベクトル</strong>（7次元）</p>
+<p><span class="math display">\[z=(T_1,\dots,T_5,\ q,\ h),\qquad
+Q=15\,q\ [\mathrm W]\]</span></p>
+<p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span
+class="math inline">\(q=1\)</span>）。変位は状態に入れない。</p>
+<p><strong>観測</strong>（30 s ごと、計20回）　温度2点（発熱感度 <span
+class="math inline">\(\partial T/\partial Q\)</span> の上位2点＝P2,
+P0）と、 上面 A・O の <span class="math inline">\(U_z\)</span>
+の計4個。真値にノイズを足して作る。</p>
+<p><span class="math display">\[y=\bigl(T_{P2},\ T_{P0},\ U_z(A),\
+U_z(O)\bigr)^{\mathrm{true}}+\varepsilon,\qquad
+\varepsilon\sim N(0,R),\quad
+R=\mathrm{diag}(0.3^2,0.3^2,0.3^2,0.3^2)\]</span></p>
+<p>（温度は K、変位は µm）</p>
+<p><strong>初期アンサンブル</strong>（60メンバー）　真値を知らない状態から始めるため、広くばらつかせる。</p>
+<table>
+<thead>
+<tr class="header">
+<th>成分</th>
+<th>初期分布</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_1..T_5\)</span></td>
+<td>一様分布 <span class="math inline">\([T_\mathrm{air}-3,\
+T_\mathrm{air}+12]\)</span> K</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span></td>
+<td>一様分布 <span class="math inline">\([0.3,\ 1.8]\)</span>（<span
+class="math inline">\(Q=4.5\)</span>〜<span
+class="math inline">\(27\)</span> W）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(h\)</span></td>
+<td>正規分布 <span class="math inline">\(N(0.02,\
+0.01^2)\)</span>、<span class="math inline">\([10^{-3},0.1]\)</span>
+に制限</td>
+</tr>
+</tbody>
+</table>
+<p><strong>各サイクルの手続き</strong>（<span
+class="math inline">\(t_k=30k\)</span> s、<span
+class="math inline">\(k=1,\dots,20\)</span>）</p>
+<ol type="1">
+<li><strong>予報</strong>　各メンバーを、そのメンバー自身の <span
+class="math inline">\(q,h\)</span> を使ってROMで30 s
+前進させる（RK4、刻み2 s）。 <span class="math inline">\(q,h\)</span>
+は前進中は変えない。</li>
+<li><strong>予報観測</strong> <span
+class="math inline">\(Y_f\)</span>（<span
+class="math inline">\(60\times4\)</span>）　各メンバーについて、温度2点はそのまま取り出し、
+変位2点は温度から計算する（§7-0）。 <span
+class="math display">\[u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
+T_P\bigr)\]</span></li>
+<li><strong>共分散膨張</strong>　メンバーの平均からのずれを1.02倍に広げる（標本数不足で分散が縮みすぎるのを防ぐ）。</li>
+<li><strong>ゲイン</strong>　60メンバーの偏差 <span
+class="math inline">\(dZ\)</span>（<span
+class="math inline">\(60\times7\)</span>）、<span
+class="math inline">\(dY\)</span>（<span
+class="math inline">\(60\times4\)</span>）から <span
+class="math display">\[C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\
+(7\times4),\quad
+  C_{yy}=\frac{dY^{\mathsf T}dY}{59}\ (4\times4),\quad
+  K=C_{zy}\,(C_{yy}+R)^{-1}\ (7\times4)\]</span></li>
+<li><strong>更新</strong>　メンバーごとに観測ノイズ <span
+class="math inline">\(\varepsilon^{(m)}\sim N(0,R)\)</span>
+を足して更新する（摂動観測法）。 <span
+class="math display">\[z^{(m)}\leftarrow
+z^{(m)}+K\bigl(y+\varepsilon^{(m)}-Y_f^{(m)}\bigr)\]</span></li>
+<li><strong>制約</strong>　<span
+class="math inline">\(q\in[0,3]\)</span>、<span
+class="math inline">\(h\in[10^{-4},0.2]\)</span> に収める。</li>
+</ol>
+<p>これを5つの乱数シード（20260913〜20260917）で繰り返し、平均を取る。</p>
+<p><strong>発熱量 <span class="math inline">\(Q\)</span>
+が同定される仕組み</strong>　手順5で更新されるのは <span
+class="math inline">\(z\)</span> の7成分すべてであり、 <span
+class="math inline">\(q\)</span> はその6番目の成分である。<span
+class="math inline">\(q\)</span> の更新量は <span
+class="math inline">\(K\)</span> の6行目 <span
+class="math display">\[K_{q,:}=\mathrm{Cov}(q,\
+Y_f)\,(C_{yy}+R)^{-1}\]</span> で決まる。手順1で <span
+class="math inline">\(q\)</span>
+の大きいメンバーほど温度が上がり、手順2でその温度から計算される変位も大きくなるため、
+<span class="math inline">\(\mathrm{Cov}(q,T)\)</span> と <span
+class="math inline">\(\mathrm{Cov}(q,u)\)</span>
+は0にならない。したがって <span class="math inline">\(q\)</span>
+を直接観測していなくても、 温度と変位の残差 <span
+class="math inline">\(y-Y_f\)</span> が <span
+class="math inline">\(q\)</span> を動かす。</p>
+<p><strong>結果</strong>　20回の更新後、<span
+class="math inline">\(Q=14.89\)</span> W（真値 15
+W）。加熱期の全5点温度RMSEは 0.160 K、 上面の変位差の誤差は 0.165
+µm（下の表の最終行）。
+なお真値も同じROMで作っているため、モデル誤差のない条件での結果である。</p>
+<h3
 id="この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</h3>
 <p>数字を出す前に定義をはっきりさせます。同じ観測構成で乱数条件を5回変えて計算します。
 <span class="math inline">\(s=1,\ldots,5\)</span>
@@ -3799,5 +3905,8 @@ class="math inline">\(h\)</span> を 少数観測から高速に推定でき、�
 <li>この上でのデータ同化：<code>blog_002_oi_data_assimilation.md</code>,
 <code>blog_003_ensemble_kalman_filter.md</code></li>
 </ul>
+<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
+href="19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>
