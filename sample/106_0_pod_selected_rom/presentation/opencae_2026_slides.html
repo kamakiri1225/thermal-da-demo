@@ -390,6 +390,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <div class="two" style="gap:18px">
 <div style="flex:.80"><img src="../docs/img/disp_obs_points.png" alt="A・Oの位置">
 <p class="cap"><strong>A＝上面のヒータ側(+X)</strong>、<strong>O＝上面の反対側(−X)</strong>（ともに z=100.5 mm）。
+本研究の変位はすべて<strong>\(z\) 方向（上下・軸方向）成分のみ</strong>。
 青 P0〜P4＝温度の代表点。A側が持ち上がりO側が下がるので、差 \(U_z(A)-U_z(O)\) が<strong>上面の反り</strong>になる</p></div>
 <div style="flex:1.34"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
 <p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 0.841・0.534 K／温度2点 0.272 K／
@@ -486,6 +487,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 （3〜75 Wで復元誤差 0.0004〜0.0045 K、常にノイズの2桁下）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
 <li><strong>発熱の位置・分布や形状が変わると作り直し</strong>。モードは20,696セルに紐づくベクトルなので別メッシュでは意味を持たない
 （ただし CHT→POD→Q-DEIM→ROM校正 の手順はそのまま再利用でき、自動化済み）</li>
+<li><strong>対象量は上面の \(z\) 変位差の1自由度</strong>。実際は半径方向 \(U_x\) も同程度動く（実ソルバ場で \(|U_x|\)=1.33 µm vs \(|U_z|\)=0.96 µm）が今回は対象外</li>
 <li>比較は<em>候補内</em>のものであり、大域最適の証明ではない</li>
 </ul>
 <h3>今後</h3>
