@@ -417,7 +417,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">実機では<strong>内部に熱電対を入れられない</strong>ことがある。変位計だけで足りるならセンサ構成の選択肢が広がるので確かめた。</p>
 <div class="scrollfig"><img src="img/disp_only_da.png" alt="変位だけで温度場を直せるか"></div>
 <p class="scrollhint">▲ ③④＝変位だけ（温度センサ0本）／②＝温度だけ／⑥＝両方。左＝全5点の温度RMSE、中＝発熱量 \(Q\)、右＝反りの誤差</p>
-<div class="key" style="flex:0 0 auto"><strong>変位2点だけ（温度センサ0本）で温度RMSE 0.207 K</strong> ― <strong>温度2点だけ（0.453 K）の2.2倍良い</strong><br>
+<div class="key" style="flex:0 0 auto"><strong>変位2点だけ（温度センサ0本）で温度RMSE 0.207 K</strong> ― <strong>温度2点だけ（0.453 K）の2.2倍良い</strong>（この1枚のみ<strong>60–300 s</strong>集計。他ページは0–300 s）<br>
 <span style="font-weight:400;font-size:.85em">変位計は「<strong>5点温度の重み付き和</strong>」を測っているので、<strong>1本で5点すべてに触れる</strong>（温度計は1点だけ）。未知が7個なので広く触れるほうが絞り込みが速い。
 置く場所も上面0.207 Kと中高さ0.244 Kでほぼ差がない。ただし<strong>温度2点＋変位2点の0.127 Kが最良</strong>＝局所と大域は補完関係</span></div>
 </section>
@@ -508,10 +508,12 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOIは \(Q\)=8.9 W止まり <span class="arrow">→</span> EnKFで<strong>15.95 W</strong></td></tr>
 <tr class="hi"><td><strong>低次元化</strong></td><td>PODで場を2モードに圧縮（99.9 %）</td><td><strong>0→600 s が31 ms</strong>（実ソルバは分オーダー）</td></tr>
 <tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、大外れ（1.4 K）を確実に回避</td></tr>
-<tr class="hi"><td><strong>観測設計</strong></td><td>熱感度 \(W\) と観測の価値 \(\Delta\) で配置を決定</td><td><strong>同化なし 4.59 K → 0.16 K</strong>（約29倍）</td></tr>
+<tr class="hi"><td><strong>観測設計</strong></td><td>温度センサは発熱感度 \(\partial T/\partial Q\)、変位センサは熱感度 \(W\) で選ぶ</td><td><strong>同化なし 4.59 K → 0.16 K</strong>（約29倍）／同じ変位2点でも置き場所で 2.43→0.86 K</td></tr>
+<tr class="hi"><td><strong>循環の排除</strong></td><td><strong>知りたい場所を測らずに</strong>当てる（観測＝中高さ、評価＝上面）</td><td>反りの誤差 <strong>0.081 µm</strong>（振幅の3.0%）。直接測った場合(0.077)とほぼ同じ</td></tr>
+<tr class="hi"><td><strong>センサ構成</strong></td><td><strong>温度センサ0本</strong>（変位計だけ）でも成立するか</td><td>温度RMSE <strong>0.207 K</strong> ― 温度2点だけ(0.453 K)の<strong>2.2倍良い</strong></td></tr>
 </table>
 <div class="key" style="flex:0 0 auto">OpenFOAM＋FrontISTR＋Python だけで <strong>CHT → 熱変形 → データ同化 → ROM</strong> を一気通貫で構築<br>
-<span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
+<span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を定量的に設計でき、<strong>測れない場所の熱変形を測れる場所から推定できる</strong>ことを示した</span></div>
 </section>
 
 <!-- 27 -->
