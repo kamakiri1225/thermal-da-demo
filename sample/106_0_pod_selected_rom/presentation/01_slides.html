@@ -149,29 +149,46 @@
     <td>上の \(P\) を直接持たず、<strong>各メンバーを前進させ、アンサンブル平均からの偏差で標本共分散として計算する</strong><br>
         \( P^f\simeq\dfrac{1}{N-1}\,dZ\,dZ^{\mathsf T},\quad dZ^{(m)}=z^{(m)}-\bar z \)</td>
     <td>高次元でも少数メンバーで済む<br><strong>パラメータも同時推定できる</strong></td></tr>
-<tr><td>粒子フィルタ</td><td>重み付き粒子で分布そのものを表す</td><td>非ガウス・多峰でもOK<br><strong>高次元で粒子が縮退</strong></td></tr>
+<tr><td>粒子フィルタ（PF）</td>
+    <td><strong>共分散を使わない。</strong>粒子を1つずつ前進させ、観測との合致度で<strong>重み</strong>を付ける。重みの小さい粒子を捨てて大きい粒子を複製（リサンプリング）<br>
+        \( w^{(m)}\propto p(y\,|\,z^{(m)}),\qquad p(z\,|\,y)\simeq\sum_m w^{(m)}\,\delta(z-z^{(m)}) \)</td>
+    <td>分布の形を仮定しない（非ガウス・多峰OK）<br><strong>高次元で1粒子に重みが集中し縮退</strong><br>
+        <span style="color:#C0392B">実測：400粒子でも<strong>有効粒子数 1.02個</strong></span></td></tr>
 <tr><td rowspan="2"><strong>変分法</strong><br><span style="font-size:.85em;color:#556">時間窓全体を<br>まとめて最適化</span></td>
-    <td>3D-Var</td><td>ある時刻の評価関数 \(J(x)\) を最小化</td><td>共分散を陽に持たなくてよい</td></tr>
-<tr><td>4D-Var</td><td>時間窓全体で \(J\) を最小化</td><td>精度が高い<br><strong>随伴コードの実装が必要</strong></td></tr>
+    <td>3D-Var</td>
+    <td><strong>ある1時刻</strong>で「背景からのズレ」＋「観測とのズレ」を最小にする \(x\) を探す<br>
+        \( J(x)=\tfrac12(x-x^b)^{\mathsf T}B^{-1}(x-x^b)+\tfrac12(y-Hx)^{\mathsf T}R^{-1}(y-Hx) \)</td>
+    <td>\(P\) を陽に持たず反復で解ける<br><strong>\(B\) を固定するのでOIと同じ弱点</strong>（最小解はOIと一致）</td></tr>
+<tr><td>4D-Var</td>
+    <td><strong>時間窓全体</strong>の観測に合うよう<strong>初期値 \(x_0\) だけ</strong>を最適化。途中の時刻はモデル \(M\) が決める<br>
+        \( J(x_0)=\tfrac12(x_0-x^b)^{\mathsf T}B^{-1}(x_0-x^b)+\tfrac12\sum_k (y_k-HM_{0\to k}x_0)^{\mathsf T}R^{-1}(\cdot) \)</td>
+    <td>窓内の全観測を使うので精度が高い<br><strong>勾配に随伴モデル \(M^{\mathsf T}\) が必要</strong><br>
+        <span style="font-size:.9em">OpenFOAM/FrontISTR の随伴を書くことになる</span></td></tr>
 </table>
 <div class="key" style="flex:0 0 auto">本研究では <strong>OI</strong> と <strong>EnKF</strong> を OpenFOAM ＋ FrontISTR に適用<br>
-<span style="font-weight:400;font-size:.88em">熱伝導は線形・誤差はガウス → 変分法の随伴は不要。粒子フィルタは400粒子でも有効粒子数1.02個まで縮退</span></div>
+<span style="font-weight:400;font-size:.84em"><strong>PFを外した理由</strong>：同じ真値・同じ観測で比べると、<strong>60メンバーのEnKF 0.076 K に対し400粒子のPFは0.458 K（6倍悪い）</strong>。有効粒子数が1.02個まで落ち分布を表現できない＝<strong>次元の呪い</strong>（状態は約20,000セル）。
+<strong>変分法を外した理由</strong>：4D-Varは随伴モデル \(M^{\mathsf T}\) の実装が要る。EnKFなら<strong>随伴なしで非線形観測（FEMを通した変位）を扱える</strong></span></div>
 </section>
 
 <!-- 6 -->
 <section>
 <h2>OpenFOAM から FrontISTR へ ― 節点補間と双子実験</h2>
-<p style="flex:0 0 auto">CFDは<em>セル中心</em>、FEMは<em>節点</em>に値を持つ。<strong>逆距離加重（IDW）</strong>で温度を節点へ写像した。</p>
-<div class="two">
-<div style="flex:1.25"><img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
-<p class="cap">①有限体積法はセル中心、有限要素法は節点に値を置くので<strong>位置がずれる</strong>。
-②1つの節点について近い \(k\) 個のセルを<strong>距離の逆数</strong>で加重平均する</p></div>
-<div style="flex:1.35"><img src="../docs/img/cht_to_fem_anim.gif" alt="OpenFOAMからFrontISTRへの一気通貫">
-<p class="cap">左＝OpenFOAM（CHT）で解いた温度、右＝その温度をFrontISTRに渡した熱変形（×6000誇張）。
-<strong>温度を引き継いで熱変位まで一気通貫</strong>で出せる。CFD 20,696セル → FEM 5,040節点、\(k=8\)</p></div>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:4px">CFDは<em>セル中心</em>、FEMは<em>節点</em>に値を持つので<strong>位置がずれる</strong>。
+そこで<strong>逆距離加重（IDW）</strong>で温度を節点へ写像した。</p>
+<div class="math" style="margin:0 var(--pad) 5px;font-size:.50em;line-height:1.68">
+<div><b>やっている計算</b>　1つのFEM節点 \(p\) について、<strong>近い \(k=8\) 個のCFDセルを距離の逆数で重み付けして平均</strong>する：
+\( T_p=\dfrac{\sum_c w_c T_c}{\sum_c w_c},\quad w_c=\dfrac{1}{\lVert x_p-x_c\rVert} \)
+　<span class="arrow">→</span> 近いセルほど重みが大きい（距離が半分なら重みは2倍）。節点がセル中心と一致したらその値をそのまま使う</div>
+<div><b>本ケースの実数値</b>　近傍8セルまでの距離 2.32〜4.19 mm、その温度 24.16〜24.63 ℃
+ <span class="arrow">→</span> 加重平均すると <strong>24.413 ℃</strong>。規模は <strong>CFD 20,696セル → FEM 5,040節点</strong></div>
 </div>
-<div class="key">この <strong>CHT → 補間 → 熱弾性</strong> の計算結果を「真値」とし、ノイズを載せた観測を作って<strong>双子実験</strong>とした<br>
-<span style="font-weight:400;font-size:.88em">CHTは流体を解くので<strong>熱伝達率を仮定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。逆に計算後の壁面熱流束から熱伝達率を診断もできる</span></div>
+<div class="scrollfig">
+<img src="../docs/img/idw_concept.png" alt="IDW補間の概念">
+<img src="../docs/img/cht_to_fem_anim.gif" alt="OpenFOAMからFrontISTRへの一気通貫">
+</div>
+<p class="scrollhint">▲ 1枚目＝①なぜ位置がずれるか ②距離の逆数で加重平均する仕組み。2枚目＝左がOpenFOAMのCHT温度、右がFrontISTRの熱変形（×6000誇張）。枠内スクロールで両方見えます</p>
+<div class="key" style="flex:0 0 auto">この <strong>CHT → 補間 → 熱弾性</strong> の結果を「真値」とし、ノイズを載せた観測を作って<strong>双子実験</strong>とした<br>
+<span style="font-weight:400;font-size:.87em">CHTは流体を解くので<strong>熱伝達率を仮定せずに済む</strong>（対流が自然に決まる／輻射も同じ枠組みで扱える ― 本ケースはOFF）。逆に計算後の壁面熱流束から熱伝達率を診断もできる</span></div>
 </section>
 
 <!-- 7 -->
