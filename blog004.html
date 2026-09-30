@@ -361,6 +361,9 @@ id="toc-熱ひずみ-節点荷重-つり合い熱弾性fem">7-2. 熱ひずみ �
 <li><a href="#b.-重要知りたい場所を測らずに当てる-循環を断つ"
 id="toc-b.-重要知りたい場所を測らずに当てる-循環を断つ">7-4b.
 【重要】知りたい場所を測らずに当てる ― 循環を断つ</a></li>
+<li><a href="#c.-温度センサを1本も使わず変位計だけで温度場を直せるか"
+id="toc-c.-温度センサを1本も使わず変位計だけで温度場を直せるか">7-4c.
+温度センサを1本も使わず、変位計だけで温度場を直せるか</a></li>
 <li><a href="#xyz-の全成分を見る-観測していない方向評価点はどうなるか"
 id="toc-xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
@@ -3199,6 +3202,153 @@ z=75.4 mm）</li>
 </ol>
 <p>再現:
 <code>OMP_NUM_THREADS=4 python3 run/eval_AO_from_elsewhere.py</code></p>
+<h3 id="c.-温度センサを1本も使わず変位計だけで温度場を直せるか">7-4c.
+温度センサを1本も使わず、変位計だけで温度場を直せるか</h3>
+<p>「変位を観測して、データ同化で温度を直す」― これが本研究の方式です。
+では<strong>温度センサを一切使わず、変位計だけ</strong>でも成立するのでしょうか。</p>
+<p>実機では内部に熱電対を入れられないことがあります。変位計だけで足りるなら
+センサ構成の選択肢が広がるので、確かめました。</p>
+<figure>
+<img src="img/disp_only_da.png" alt="変位だけで温度場を直せるか" />
+<figcaption aria-hidden="true">変位だけで温度場を直せるか</figcaption>
+</figure>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測構成</th>
+<th>温度センサ</th>
+<th>変位計</th>
+<th><strong>全5点の温度RMSE</strong></th>
+<th>最終 <span class="math inline">\(Q\)</span></th>
+<th>反りの誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① 同化なし</td>
+<td>0</td>
+<td>0</td>
+<td>4.596 K</td>
+<td>16.45 W</td>
+<td>0.238 µm ※</td>
+</tr>
+<tr class="even">
+<td>② 温度2点のみ</td>
+<td>2</td>
+<td>0</td>
+<td>0.453 K</td>
+<td>14.05 W</td>
+<td>0.714 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>③ 変位2点のみ（上面A/O）</strong></td>
+<td><strong>0</strong></td>
+<td>2</td>
+<td><strong>0.207 K</strong></td>
+<td>14.74 W</td>
+<td>0.192 µm</td>
+</tr>
+<tr class="even">
+<td><strong>④ 変位2点のみ（中高さB/C）</strong></td>
+<td><strong>0</strong></td>
+<td>2</td>
+<td><strong>0.244 K</strong></td>
+<td>14.59 W</td>
+<td>0.224 µm</td>
+</tr>
+<tr class="odd">
+<td>⑤ 変位4点（A/O＋B/C）</td>
+<td>0</td>
+<td>4</td>
+<td>0.194 K</td>
+<td>14.84 W</td>
+<td>0.177 µm</td>
+</tr>
+<tr class="even">
+<td><strong>⑥ 温度2点＋変位2点</strong></td>
+<td>2</td>
+<td>2</td>
+<td><strong>0.127 K</strong></td>
+<td><strong>14.89 W</strong></td>
+<td><strong>0.123 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（60メンバー・5 seed平均・加熱期 60–300 s。真値 <span
+class="math inline">\(Q=15.00\)</span> W）</p>
+<h4
+id="結論変位計だけで温度場は直せるしかも温度計だけより良い">結論：変位計だけで温度場は直せる。しかも温度計だけより良い</h4>
+<p><strong>③ 変位2点だけ（温度センサ0本）で温度RMSE 0.207 K。</strong>
+<strong>② 温度2点だけ（0.453 K）の
+2.2倍良い</strong>結果になりました。</p>
+<blockquote>
+<p><strong>温度を測らずに温度を当てている</strong>わけですが、不思議なことではありません。
+§7-0
+のとおり、変位計は「<strong>5点温度の重み付き和</strong>」を測っています。
+重みは <span class="math inline">\(D\)</span> の行そのもので、A の <span
+class="math inline">\(U_z\)</span> なら <span
+class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>。
+<strong>1本で5点すべてに触れている</strong>ので、温度計1本より情報が広いのです。</p>
+</blockquote>
+<h4 id="なぜ変位のほうが強いのか">なぜ変位のほうが強いのか</h4>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>温度計</th>
+<th><strong>変位計</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>測るもの</td>
+<td><strong>1点の温度</strong></td>
+<td><strong>全5点の重み付き和</strong></td>
+</tr>
+<tr class="even">
+<td>触れる範囲</td>
+<td>1点</td>
+<td><strong>5点すべて</strong></td>
+</tr>
+<tr class="odd">
+<td>情報の種類</td>
+<td>局所</td>
+<td>大域</td>
+</tr>
+</tbody>
+</table>
+<p>温度計2本では「P2 と P0 の値」しか分かりませんが、
+変位計2本は「<strong>5点の重み付き和が2通り</strong>」分かります。
+未知が7個（<span class="math inline">\(T_1..T_5, Q,
+h\)</span>）なので、<strong>広く触れるほうが絞り込みが速い</strong>わけです。</p>
+<h4 id="ただし組み合わせが最良">ただし組み合わせが最良</h4>
+<p><strong>⑥ 温度2点＋変位2点が 0.127 K で最良</strong>です。③の 0.207 K
+より 1.6倍良い。
+<strong>局所（温度）と大域（変位）は補完関係</strong>にあり、どちらか一方を増やすより
+組み合わせたほうが効きます。</p>
+<h4 id="実務的な読み取り">実務的な読み取り</h4>
+<ol type="1">
+<li><strong>内部に熱電対を入れられない機械でも、変位計だけで温度場を推定できる</strong></li>
+<li><strong>変位計は置ける場所でよい</strong>（③上面 0.207 K と ④中高さ
+0.244 K でほぼ差がない）</li>
+<li>ただし<strong>温度計を足せるなら足したほうがよい</strong>（0.207 →
+0.127 K）</li>
+</ol>
+<h4 id="の反りの誤差-0.238-µmに注意">※ ①の「反りの誤差 0.238
+µm」に注意</h4>
+<p>同化なしは個別には 5.6 µm も外れているのに、A と O
+が同じ方向に外れるため
+<strong>差では相殺</strong>されて小さく見えているだけです（§7-4b）。</p>
+<p>再現:
+<code>OMP_NUM_THREADS=4 python3 run/disp_only_da_check.py</code></p>
 <h3 id="xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
 class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
