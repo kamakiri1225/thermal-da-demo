@@ -3096,6 +3096,89 @@ class="math inline">\(U_z(O)\)</span>
                         A/O の反りも正しくなる</code></pre>
 <p><strong>A/O を当てているのではなく、温度場を当てた結果として A/O
 が付いてくる</strong>わけです。</p>
+<h4
+id="なぜ反りを知る必要があるのか-工具長で補正量が変わる">なぜ「反り」を知る必要があるのか
+― 工具長で補正量が変わる</h4>
+<p>「3軸機は軸をオフセットするだけなので、<strong>傾きは補正できないのでは</strong>」という疑問があります。
+文献で確かめたところ、<strong>半分正しく、半分違います</strong>。</p>
+<p><strong>正しい部分</strong>：工具の<strong>姿勢</strong>（傾きそのもの）は3軸機では変えられません。</p>
+<p><strong>違う部分</strong>：傾き角は<strong>工具先端では並進の位置ずれに化ける</strong>ので、NCオフセットで補正できます。</p>
+<p><span class="math display">\[\delta \;\simeq\; \theta \times L
+\qquad(\theta:\text{傾き角},\ L:\text{工具長})\]</span></p>
+<p>Yang らはまさにこれを指摘しています。</p>
+<blockquote>
+<p>“The present error compensation technology of computer numerical
+control machine tools <strong>ignores radial thermal tilt angle errors
+of the spindle</strong>, while the thermal-induced offset is
+<strong>closely related to the tilt angle and the handle
+length</strong>.” — Yang, Mei, Zhao, Ma, Shi, Feng (2015), <em>Proc.
+IMechE Part B</em> <a
+href="https://doi.org/10.1177/0954405414556499">doi:10.1177/0954405414556499</a></p>
+</blockquote>
+<p>彼らはヨー角・ピッチ角・伸びの3モデルを立て、<strong>傾き角と工具長に基づいて補正</strong>しています。</p>
+<h4 id="本ケースで具体的に計算すると">本ケースで具体的に計算すると</h4>
+<p>A と O は 57.4 mm 離れているので、反り 2.735 µm は傾き角に直すと</p>
+<p><span
+class="math display">\[\theta=\frac{2.735\times10^{-6}}{57.4\times10^{-3}}=4.77\times10^{-5}\
+\mathrm{rad}=0.0027^\circ\]</span></p>
+<p>これを工具長で工具先端の位置ずれに換算します。</p>
+<table>
+<thead>
+<tr class="header">
+<th>工具長 <span class="math inline">\(L\)</span></th>
+<th>工具先端の位置ずれ <span class="math inline">\(\delta=\theta
+L\)</span></th>
+<th>本研究の推定誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>50 mm</td>
+<td>2.38 µm</td>
+<td>0.070 µm</td>
+</tr>
+<tr class="even">
+<td><strong>100 mm</strong></td>
+<td><strong>4.77 µm</strong></td>
+<td><strong>0.140 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>150 mm</td>
+<td>7.15 µm</td>
+<td>0.211 µm</td>
+</tr>
+<tr class="even">
+<td><strong>200 mm</strong></td>
+<td><strong>9.53 µm</strong></td>
+<td><strong>0.281 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>300 mm</td>
+<td>14.30 µm</td>
+<td>0.421 µm</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>同じ機械・同じ温度でも、工具を長くすると位置ずれが比例して大きくなります。</strong>
+100 mm の工具で 4.8 µm、200 mm なら 9.5 µm。
+<strong>傾き角を知らなければ、この工具長依存を計算できません。</strong></p>
+</blockquote>
+<p><strong>これが「反りを推定する価値」です。</strong>
+並進成分だけ測っていては、
+工具を替えるたびに補正量が変わることに対応できません。</p>
+<h4
+id="ただし機械によっては無視できる">ただし機械によっては無視できる</h4>
+<p>旋盤（turning center）を扱った Zhao らは、最大傾き角が
+<strong>0.0099°</strong> と小さいため
+「多くの場合、主軸軸線の動きを<strong>並進運動とみなしてよい</strong>」と結論しています。</p>
+<blockquote>
+<p>— Zhao, Guo, Tang, Zhang, Yi (2025), <em>Scientific Reports</em> <a
+href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/">PMC12223237</a>（<strong>全文無料</strong>）</p>
+</blockquote>
+<p>本ケースの 0.0027° はその 1/3.6
+です。<strong>傾きが効くかどうかは、機械構成と工具長で決まります</strong>。
+本研究の値は「工具が長いほど効いてくる」領域にあります。</p>
 <h4 id="手続き再現用">手続き（再現用）</h4>
 <ol type="1">
 <li><strong>評価点</strong>を決める：A, O（上面 z=100.5 mm）―
