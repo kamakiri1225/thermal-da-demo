@@ -374,6 +374,8 @@ class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
 id="toc-観測構成を変えて比べる-本研究の有用性">7-6.
 観測構成を変えて比べる ― 本研究の有用性</a>
 <ul>
+<li><a href="#先に読む106のどの計算を説明しているか"
+id="toc-先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</a></li>
 <li><a href="#本研究で実際に行った手続きrunrun_da_compare.py"
 id="toc-本研究で実際に行った手続きrunrun_da_compare.py">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</a></li>
 <li><a href="#この表のrmseは何を計算した値か"
@@ -3593,6 +3595,51 @@ class="math inline">\(W\)</span>
 <h2 id="観測構成を変えて比べる-本研究の有用性">7-6.
 観測構成を変えて比べる ― 本研究の有用性</h2>
 <p>ここまでの部品（POD＋Q-DEIM＋ROM＋EnKF）を組み合わせ、<strong>観測の構成だけを変えて</strong>比べます。</p>
+<h3
+id="先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</h3>
+<p>106では複数の観測構成を試しています。この節の主試験は
+<strong>P2/P0＋変位A/O</strong>（<code>run/run_da_compare.py</code>）です。
+これとは別に、<strong>P2/P0＋高W変位S1/S2を観測して、観測しないC/Dを評価した試験</strong>があります。
+観測点・変位写像・ノイズの乱数系列が異なるため、Qの値や変位誤差を混ぜて読まないでください。</p>
+<p>後者の実際の手順を、<a
+href="20_actual_enkf_displacement_and_heat_identification.md">「今回行った計算を順番に追う」</a>
+にまとめました。読む順番は次のとおりです。</p>
+<ol type="1">
+<li><strong>60組の仮説を用意する。</strong>
+各組は温度P0〜P4、発熱倍率q、放熱hの7個を持つ。Qは <span
+class="math inline">\(15q\)</span> W。</li>
+<li><strong>次の30秒まで予測する。</strong>
+各組のq・hでRK4を進め、その組の予報温度を得る。</li>
+<li><strong>温度から変位を予測する。</strong>
+5点温度→POD係数→事前計算したFrontISTR応答Dの順に計算する。</li>
+<li><strong>測定値との差を作る。</strong> 予報は <span
+class="math inline">\([T_2,T_0,u_{S1},u_{S2}]\)</span>
+の4成分。C/Dは観測に入れない。</li>
+<li><strong>60組の共分散を作る。</strong>
+同じ時刻の平均と偏差から、7×4の <span
+class="math inline">\(C_{zy}\)</span> と4×4の <span
+class="math inline">\(C_{yy}\)</span> を59で割って計算する。</li>
+<li><strong>温度・q・hを補正する。</strong>
+カルマンゲインで4成分の残差を7未知数へ配り、次の予測に使う。</li>
+</ol>
+<p>例えば温度P0と発熱倍率qの補正は、コードの添字で書くと</p>
+<p><span
+class="math display">\[T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},\]</span></p>
+<p><span
+class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.\]</span></p>
+<p>ここでfは偏差膨張後の予報、aは同化後、dは「観測＋メンバー別の観測摂動−予報観測」です。
+<strong>各式の最後の2項が、変位観測から温度や発熱倍率へ入る補正</strong>です。補正したqを15倍するとQ
+[W]になります。</p>
+<p>S1/S2試験の最初の更新（seed=20260913、30秒）を実数で再計算すると、変位S1/S2の残差による平均Qへの寄与は
+<strong>+19.642 W、−15.039 W</strong>
+でした。温度からの寄与と足し合わせ、制約を適用するとQ平均は
+<strong>17.090→10.432 W</strong>
+となります。以後の更新で修正され、このseedの600秒では <strong>14.890
+W</strong> です。初回から真値に一致するわけではありません。</p>
+<p>数値の内訳、観測ノイズと観測摂動の違い、実コード、保存ファイル、5seed結果は
+<a
+href="20_actual_enkf_displacement_and_heat_identification.md">手順の詳細</a>
+に記載しています。</p>
 <h3
 id="本研究で実際に行った手続きrunrun_da_compare.py">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</h3>
 <p>ここに書くのは説明用の簡略例ではなく、表の数値を出した計算そのものの設定である。</p>

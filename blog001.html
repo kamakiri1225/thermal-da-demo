@@ -792,8 +792,9 @@ class="math inline">\(h\)</span>
 <p><strong>固体と流体（空気）を”一体で”解く</strong></p>
 </blockquote>
 <p>ことをします。固体の中は熱伝導、空気の中は流れ＋伝導を解き、<strong>境界（固体表面）で温度と熱流束を連続</strong>に
-つなぐ。こうすると <span class="math inline">\(h\)</span>
-を仮定しなくても、空気の対流が自動的に固体を冷やしてくれます。</p>
+つなぐ。こうすると固体壁に一定の表面熱伝達率 <span
+class="math inline">\(h\)</span>
+を直接与えず、流体側の熱輸送を計算できます。ただし外部流体境界・物性・対流モデル・メッシュの仮定は残り、計算結果が実測の真値になるわけではありません。</p>
 <p>OpenFOAM でこれを解くソルバが
 <strong><code>chtMultiRegionFoam</code></strong>
 です（multi-region＝複数領域を同時に解く）。</p>
@@ -994,8 +995,8 @@ aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）<
 <hr />
 <h2 id="step-3熱伝達率-h-の分布と各面の値を算出する">3. STEP 3：熱伝達率
 <span class="math inline">\(h\)</span> の分布と各面の値を算出する</h2>
-<p>CHT の利点は「 <span class="math inline">\(h\)</span>
-を仮定しない」ことでしたが、<strong>逆に結果から <span
+<p>CHTでは一定の壁面 <span class="math inline">\(h\)</span>
+を直接指定しないため、<strong>逆に結果から <span
 class="math inline">\(h\)</span>
 を”逆算”して分布を見る</strong>ことができます。
 「どの面がどれだけ冷えているか」を1つの数字（ <span
@@ -1191,8 +1192,9 @@ class="math inline">\(h\)</span> が跳ねる面もあるため、
 <h2 id="まとめ-第1回で押さえたこと">4. まとめ ― 第1回で押さえたこと</h2>
 <ol type="1">
 <li><strong>CHT（<code>chtMultiRegionFoam</code>）</strong>
-は固体＋空気を一体で解き、 <span class="math inline">\(h\)</span>
-を仮定せず温度場を出す。</li>
+は固体＋空気を一体で解き、 一定の壁面 <span
+class="math inline">\(h\)</span>
+を直接指定せず温度場を出す（流体条件等の仮定は残る）。</li>
 <li>その <strong>温度場を FrontISTR に渡す</strong>と、熱ひずみ <span
 class="math inline">\(\alpha\Delta T\)</span>
 から熱膨張（変位）が出る。片側加熱で円筒は反る。</li>
@@ -1218,5 +1220,8 @@ id="参考このブログの元になった実装詳細">参考（このブロ�
 <li>実ソルバ・データ同化の全体：<code>blog_002_oi_data_assimilation.md</code>（OI）・<code>blog_003_ensemble_kalman_filter.md</code>（EnKF）</li>
 <li>材料定数：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml</code></li>
 </ul>
+<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
+href="19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>
