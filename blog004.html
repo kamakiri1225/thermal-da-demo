@@ -358,10 +358,9 @@ id="toc-熱ひずみ-節点荷重-つり合い熱弾性fem">7-2. 熱ひずみ �
 変形アニメーション</a></li>
 <li><a href="#変位の時系列グラフ" id="toc-変位の時系列グラフ">7-4.
 変位の時系列グラフ</a></li>
-<li><a
-href="#b.-重要観測した点を評価しても意味がない-手続きで循環を断つ"
-id="toc-b.-重要観測した点を評価しても意味がない-手続きで循環を断つ">7-4b.
-【重要】観測した点を評価しても意味がない ― 手続きで循環を断つ</a></li>
+<li><a href="#b.-重要知りたい場所を測らずに当てる-循環を断つ"
+id="toc-b.-重要知りたい場所を測らずに当てる-循環を断つ">7-4b.
+【重要】知りたい場所を測らずに当てる ― 循環を断つ</a></li>
 <li><a href="#xyz-の全成分を見る-観測していない方向評価点はどうなるか"
 id="toc-xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
@@ -2926,25 +2925,23 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 （P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。<strong>変位2点（赤）だけが両点とも0.16µm</strong>で合う。
 →
 教訓：<strong>変位を合わせたい場所には変位観測を置く。そして評価は差だけでなく個別の変位でも行う</strong>。</em></p>
-<h3
-id="b.-重要観測した点を評価しても意味がない-手続きで循環を断つ">7-4b.
-【重要】観測した点を評価しても意味がない ― 手続きで循環を断つ</h3>
-<p>§7-4 のグラフは <span class="math inline">\(U_z(A)-U_z(O)\)</span>
-を評価していますが、「温度2点＋変位2点」の構成では <strong>A と O
+<h3 id="b.-重要知りたい場所を測らずに当てる-循環を断つ">7-4b.
+【重要】知りたい場所を測らずに当てる ― 循環を断つ</h3>
+<p>§7-4 のグラフは <span
+class="math inline">\(U_z(A)-U_z(O)\)</span>（上面の反り）を評価していますが、
+「温度2点＋変位2点」の構成では <strong>A と O
 をそのまま観測に使っています</strong>。</p>
 <blockquote>
-<p><strong>測った場所の値を当てて「当たりました」と言っているだけ</strong>で、これは<strong>循環</strong>です。
-主張としては弱く、そのままでは成果になりません。</p>
+<p><strong>測った場所の値を当てて「当たりました」と言っているだけ</strong>で、これは<strong>循環</strong>です。</p>
 </blockquote>
-<p>そこで、<strong>観測点と評価点（未観測点）を物理的に分けた実験</strong>を行います。</p>
-<figure>
-<img src="img/obs_vs_target.png"
-alt="観測点と評価点（未観測点）を分ける" />
-<figcaption
-aria-hidden="true">観測点と評価点（未観測点）を分ける</figcaption>
-</figure>
-<h4 id="手続き6ステップ">手続き（6ステップ）</h4>
-<p><strong>① 観測点を決める</strong></p>
+<h4 id="実務ではむしろ逆になる">実務ではむしろ逆になる</h4>
+<p>工作機械で本当に知りたいのは<strong>工具先端側の変位</strong>です。ところが</p>
+<ul>
+<li><strong>加工中の工具先端に変位計は置けません</strong></li>
+<li>置けるのは機械の外側・静止部・冷えている部分</li>
+</ul>
+<p>つまり実務は「<strong>測れる場所で測って、測れない場所を推定する</strong>」という構図です。
+そこで、この構図をそのまま実験にします。</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -2954,45 +2951,7 @@ aria-hidden="true">観測点と評価点（未観測点）を分ける</figcapti
 </colgroup>
 <thead>
 <tr class="header">
-<th>種類</th>
-<th>点</th>
-<th>座標</th>
-<th>ノイズ</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>温度</td>
-<td>P2</td>
-<td>(36.5, 6.9, 50.8) mm</td>
-<td><span class="math inline">\(\sigma_T=0.30\)</span> K</td>
-</tr>
-<tr class="even">
-<td>温度</td>
-<td>P0</td>
-<td>(21.3, −1.6, 51.6) mm</td>
-<td><span class="math inline">\(\sigma_T=0.30\)</span> K</td>
-</tr>
-<tr class="odd">
-<td>変位</td>
-<td><strong>A</strong></td>
-<td>(28.7, 0, <strong>100.5</strong>) mm の <span
-class="math inline">\(U_z\)</span></td>
-<td><span class="math inline">\(\sigma_u=0.30\)</span> µm</td>
-</tr>
-<tr class="even">
-<td>変位</td>
-<td><strong>O</strong></td>
-<td>(−28.7, 0, <strong>100.5</strong>) mm の <span
-class="math inline">\(U_z\)</span></td>
-<td><span class="math inline">\(\sigma_u=0.30\)</span> µm</td>
-</tr>
-</tbody>
-</table>
-<p><strong>② 評価点（未観測点）を決める ― ここが肝</strong></p>
-<table>
-<thead>
-<tr class="header">
+<th></th>
 <th>点</th>
 <th>座標</th>
 <th>扱い</th>
@@ -3000,95 +2959,106 @@ class="math inline">\(U_z\)</span></td>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>B</strong></td>
-<td>(28.7, 0, <strong>75.4</strong>) mm</td>
-<td><strong>同化に一切使わない。評価だけ</strong></td>
+<td><strong>評価点</strong></td>
+<td><strong>A, O</strong></td>
+<td>上面 z=<strong>100.5</strong> mm</td>
+<td><strong>本当に知りたい場所。工具先端側に相当</strong></td>
 </tr>
 <tr class="even">
-<td><strong>C</strong></td>
-<td>(−28.7, 0, <strong>75.4</strong>) mm</td>
-<td><strong>同化に一切使わない。評価だけ</strong></td>
+<td><strong>観測点</strong></td>
+<td>温度 P2, P0</td>
+<td>(36.5,6.9,50.8) / (21.3,−1.6,51.6) mm</td>
+<td>側面に貼った熱電対</td>
+</tr>
+<tr class="odd">
+<td><strong>観測点</strong></td>
+<td><strong>B, C</strong></td>
+<td>中高さ z=<strong>75.4</strong> mm</td>
+<td><strong>25 mm 下。ここなら変位計を置ける</strong></td>
 </tr>
 </tbody>
 </table>
-<p>A/O は上面（z=100.5）、B/C は<strong>中高さ（z=75.4）で25
-mm下</strong>。別の場所です。</p>
-<p><strong>③ でたらめな初期状態からアンサンブルを作る</strong></p>
-<div class="sourceCode" id="cb19"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Z[:, :<span class="dv">5</span>] <span class="op">=</span> rng.uniform(T_air<span class="op">-</span><span class="dv">3</span>, T_air<span class="op">+</span><span class="dv">12</span>, (<span class="dv">60</span>, <span class="dv">5</span>))   <span class="co"># 温度はバラバラ</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">5</span>]  <span class="op">=</span> rng.uniform(<span class="fl">0.3</span>, <span class="fl">1.8</span>, <span class="dv">60</span>)                 <span class="co"># Q も間違っている</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">6</span>]  <span class="op">=</span> np.clip(rng.normal(<span class="fl">0.02</span>, <span class="fl">0.01</span>, <span class="dv">60</span>), <span class="fl">1e-3</span>, <span class="fl">0.1</span>)  <span class="co"># h も</span></span></code></pre></div>
-<p><strong>④
-30秒ごとに前進し、①の4つだけを観測して状態を更新する（20回）</strong></p>
-<div class="sourceCode" id="cb20"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>yv <span class="op">=</span> [T(P2), T(P0), Uz(A), Uz(O)]        <span class="co"># ← B, C は入れない</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([Z[:, [<span class="dv">2</span>,<span class="dv">0</span>]], disp_of_T5(Z[:, :<span class="dv">5</span>])[:, [iAz, iOz]]])</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>Z  <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span><span class="fl">1.02</span>, Yf<span class="op">=</span>Yf)</span></code></pre></div>
-<p><strong>⑤ 同化後の温度場から、評価点 B・C
-の変位を計算する</strong></p>
-<p><span class="math display">\[a=U_{r,P}^{+}(T_5^a-\bar T_P),\qquad
-u_{B},u_{C}=u_{\mathrm{mean}}+D\,a\]</span></p>
-<p><span class="math inline">\(D\)</span> には<strong>B/C
-用の行</strong>を使います（FrontISTR で A/O
-と一緒に作っておいたもの）。</p>
-<p><strong>⑥ 評価点の真値と比べる ― これが本当の成績</strong></p>
-<h4 id="結果加熱期-60300-s-の-mae5-seed平均">結果（加熱期 60–300 s の
-MAE、5 seed平均）</h4>
+<figure>
+<img src="img/AO_from_elsewhere.png"
+alt="A/Oを測らずにA/Oの反りを当てる" />
+<figcaption
+aria-hidden="true">A/Oを測らずにA/Oの反りを当てる</figcaption>
+</figure>
+<h4
+id="結果知りたい量上面の反り真値の振幅-2.735-µm">結果（知りたい量＝上面の反り。真値の振幅
+2.735 µm）</h4>
 <table>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th>評価点の量</th>
-<th>観測点か</th>
-<th>同化なし</th>
-<th><strong>同化後</strong></th>
-<th>改善</th>
+<th>観測構成</th>
+<th><strong>反りの誤差</strong></th>
+<th><span class="math inline">\(U_z(A)\)</span> 誤差</th>
+<th><span class="math inline">\(U_z(O)\)</span> 誤差</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>B の <span class="math inline">\(U_z\)</span></strong></td>
-<td>❌ していない</td>
-<td>4.217 µm</td>
-<td><strong>0.024 µm</strong></td>
-<td><strong>172倍</strong></td>
+<td>同化なし</td>
+<td>0.238 µm ※</td>
+<td>5.614 µm</td>
+<td>5.376 µm</td>
 </tr>
 <tr class="even">
-<td><strong>C の <span class="math inline">\(U_z\)</span></strong></td>
-<td>❌ していない</td>
-<td>4.022 µm</td>
-<td><strong>0.021 µm</strong></td>
-<td><strong>195倍</strong></td>
+<td>温度2点のみ</td>
+<td>0.697 µm</td>
+<td>0.160 µm</td>
+<td>0.848 µm</td>
 </tr>
 <tr class="odd">
-<td><strong>B の <span class="math inline">\(U_x\)</span></strong></td>
-<td>❌ <span class="math inline">\(x\)</span> 方向は完全に無観測</td>
-<td>0.374 µm</td>
-<td><strong>0.022 µm</strong></td>
-<td>17倍</td>
+<td><strong>温度2点＋変位B/C（中高さ）</strong></td>
+<td><strong>0.081 µm</strong></td>
+<td><strong>0.055 µm</strong></td>
+<td><strong>0.027 µm</strong></td>
 </tr>
 <tr class="even">
-<td><strong>C の <span class="math inline">\(U_x\)</span></strong></td>
-<td>❌ <span class="math inline">\(x\)</span> 方向は完全に無観測</td>
-<td>2.782 µm</td>
-<td><strong>0.022 µm</strong></td>
-<td><strong>126倍</strong></td>
+<td>温度2点＋変位A/O（参考・循環あり）</td>
+<td>0.077 µm</td>
+<td>0.059 µm</td>
+<td>0.019 µm</td>
 </tr>
 </tbody>
 </table>
+<p>（加熱期 60–300 s の MAE、5 seed平均）</p>
+<h4 id="つの読み取り">3つの読み取り</h4>
+<p><strong>①
+知りたい場所を測らなくても、ほぼ同じ精度で当たる</strong></p>
+<p>中高さ B/C を測るだけで反りの誤差 <strong>0.081 µm</strong>（振幅の
+3.0 %）。 知りたい場所そのものを測った場合（0.077
+µm）と<strong>ほぼ同じ</strong>です。</p>
 <blockquote>
-<p><strong>A/O を測って、25 mm 離れた B/C が 172〜195倍
-正確になりました。</strong> しかも <span
-class="math inline">\(U_x\)</span>（半径方向）は<strong>そもそも一度も観測していない方向</strong>なのに直っています。</p>
+<p><strong>「工具先端に変位計を置けなくても、置ける場所に置けばよい」</strong>
+― 実務で意味があるのはこの一点です。</p>
 </blockquote>
-<h4
-id="なぜ循環していないと言えるのか">なぜ循環していないと言えるのか</h4>
+<p><strong>② 温度だけでは反りは当たらない</strong></p>
+<p>温度2点だけだと 0.697 µm（振幅の 25 %）。 個別の <span
+class="math inline">\(U_z(A)\)</span> は 0.160 µm
+まで合うのに、<strong>反りは合いません</strong>。 <span
+class="math inline">\(U_z(A)\)</span> と <span
+class="math inline">\(U_z(O)\)</span>
+の<strong>差</strong>を当てるには、変位観測が必要です。</p>
+<p><strong>③ ※ 同化なしの 0.238 µm に騙されないこと</strong></p>
+<p>同化なしは個別に <strong>5.6 µm も外れている</strong>のに、A と O
+が同じ方向に外れるため <strong>差では相殺</strong>されて小さく見えます。
+<span class="math inline">\(U_z(A)\)</span>・<span
+class="math inline">\(U_z(O)\)</span>
+の個別グラフ（図の左・中）を見れば、
+灰色の線が真値から大きく離れているのが分かります。</p>
+<blockquote>
+<p><strong>「差」だけで評価してはいけない</strong>という §7-4
+の注意が、ここでも効いています。</p>
+</blockquote>
+<h4 id="循環していないと言える根拠">循環していないと言える根拠</h4>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -3102,33 +3072,44 @@ id="なぜ循環していないと言えるのか">なぜ循環していない�
 </thead>
 <tbody>
 <tr class="odd">
-<td>評価点を観測に使ったか</td>
-<td><strong>使っていない</strong>（B/C は同化に一切入れない）</td>
+<td>評価点（A/O）を観測に使ったか</td>
+<td><strong>使っていない</strong>（観測は温度P2・P0と変位B/C）</td>
 </tr>
 <tr class="even">
-<td>評価する方向を観測したか</td>
-<td><span class="math inline">\(U_z\)</span>
-は別の点で観測／<strong><span class="math inline">\(U_x\)</span>
-は完全に無観測</strong></td>
+<td>真値を同化に渡したか</td>
+<td>渡していない（ノイズ付きの4つだけ）</td>
 </tr>
 <tr class="odd">
-<td>真値を同化に渡したか</td>
-<td>渡していない（観測はノイズ付きの4つだけ）</td>
+<td>評価点と観測点は離れているか</td>
+<td><strong>25 mm 離れている</strong>（z=100.5 と z=75.4）</td>
 </tr>
 </tbody>
 </table>
-<h4 id="何がこれを可能にしているか">何がこれを可能にしているか</h4>
-<p><strong>同化が直しているのは変位ではなく温度場</strong>だからです（§7-0）。</p>
-<pre><code>A/O の変位残差 → 共分散 Cov(T,u) → 温度5点とQを修正
+<h4 id="なぜ当たるのか">なぜ当たるのか</h4>
+<p>同化が直しているのは変位ではなく<strong>温度場</strong>だからです（§7-0）。</p>
+<pre><code>B/C の変位残差 → 共分散 Cov(T,u) → 温度5点とQを修正
                                     ↓
-                      温度場が正しくなる（RMSE 4.585 → 0.160 K）
+                      温度場が正しくなる
                                     ↓
-                  u = W(T − T_ref) で、どの点のどの方向も自動的に従う
+              u = W(T − T_ref) で、どの点のどの方向も従う
                                     ↓
-                        B/C の Uz も Ux も正しくなる</code></pre>
-<p>つまり <strong>B/C を当てているのではなく、温度場を当てた結果として
-B/C が付いてくる</strong>わけです。
-これが「少数観測から全体を知る」ということの中身です。</p>
+                        A/O の反りも正しくなる</code></pre>
+<p><strong>A/O を当てているのではなく、温度場を当てた結果として A/O
+が付いてくる</strong>わけです。</p>
+<h4 id="手続き再現用">手続き（再現用）</h4>
+<ol type="1">
+<li><strong>評価点</strong>を決める：A, O（上面 z=100.5 mm）―
+同化に一切使わない</li>
+<li><strong>観測点</strong>を決める：温度 P2・P0 ＋ 変位 B・C（中高さ
+z=75.4 mm）</li>
+<li>でたらめな初期温度・誤った <span class="math inline">\(Q,h\)</span>
+から60メンバー</li>
+<li>30秒ごとに前進 → 2. の4つだけ観測して状態を更新（20回）</li>
+<li>同化後の温度場から<strong>評価点 A/O</strong> の変位を計算</li>
+<li>A/O の真値と比べる</li>
+</ol>
+<p>再現:
+<code>OMP_NUM_THREADS=4 python3 run/eval_AO_from_elsewhere.py</code></p>
 <h3 id="xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
 class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
