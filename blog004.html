@@ -362,11 +362,11 @@ id="toc-熱ひずみ-節点荷重-つり合い熱弾性fem">7-2. 熱ひずみ �
 href="#b.-重要観測した点を評価しても意味がない-手続きで循環を断つ"
 id="toc-b.-重要観測した点を評価しても意味がない-手続きで循環を断つ">7-4b.
 【重要】観測した点を評価しても意味がない ― 手続きで循環を断つ</a></li>
-<li><a href="#xyz-の全成分を見る-観測していない方向場所はどうなるか"
-id="toc-xyz-の全成分を見る-観測していない方向場所はどうなるか">7-5.
+<li><a href="#xyz-の全成分を見る-観測していない方向評価点はどうなるか"
+id="toc-xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
 class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
-の全成分を見る ― 観測していない方向・場所はどうなるか</a></li>
+の全成分を見る ― 観測していない方向・評価点はどうなるか</a></li>
 </ul></li>
 <li><a href="#観測構成を変えて比べる-本研究の有用性"
 id="toc-観測構成を変えて比べる-本研究の有用性">7-6.
@@ -2936,13 +2936,15 @@ id="b.-重要観測した点を評価しても意味がない-手続きで循環
 <p><strong>測った場所の値を当てて「当たりました」と言っているだけ</strong>で、これは<strong>循環</strong>です。
 主張としては弱く、そのままでは成果になりません。</p>
 </blockquote>
-<p>そこで、<strong>観測に使う点と、本当に知りたい点を物理的に分けた実験</strong>を行います。</p>
+<p>そこで、<strong>観測点と評価点（未観測点）を物理的に分けた実験</strong>を行います。</p>
 <figure>
-<img src="img/obs_vs_target.png" alt="観測点と評価点を分ける" />
-<figcaption aria-hidden="true">観測点と評価点を分ける</figcaption>
+<img src="img/obs_vs_target.png"
+alt="観測点と評価点（未観測点）を分ける" />
+<figcaption
+aria-hidden="true">観測点と評価点（未観測点）を分ける</figcaption>
 </figure>
 <h4 id="手続き6ステップ">手続き（6ステップ）</h4>
-<p><strong>① 観測に使う点を決める</strong></p>
+<p><strong>① 観測点を決める</strong></p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -2987,7 +2989,7 @@ class="math inline">\(U_z\)</span></td>
 </tr>
 </tbody>
 </table>
-<p><strong>② 本当に知りたい点を決める ― ここが肝</strong></p>
+<p><strong>② 評価点（未観測点）を決める ― ここが肝</strong></p>
 <table>
 <thead>
 <tr class="header">
@@ -3022,13 +3024,14 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a h
 class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>yv <span class="op">=</span> [T(P2), T(P0), Uz(A), Uz(O)]        <span class="co"># ← B, C は入れない</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([Z[:, [<span class="dv">2</span>,<span class="dv">0</span>]], disp_of_T5(Z[:, :<span class="dv">5</span>])[:, [iAz, iOz]]])</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>Z  <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span><span class="fl">1.02</span>, Yf<span class="op">=</span>Yf)</span></code></pre></div>
-<p><strong>⑤ 同化後の温度場から、②の B・C の変位を計算する</strong></p>
+<p><strong>⑤ 同化後の温度場から、評価点 B・C
+の変位を計算する</strong></p>
 <p><span class="math display">\[a=U_{r,P}^{+}(T_5^a-\bar T_P),\qquad
 u_{B},u_{C}=u_{\mathrm{mean}}+D\,a\]</span></p>
 <p><span class="math inline">\(D\)</span> には<strong>B/C
 用の行</strong>を使います（FrontISTR で A/O
 と一緒に作っておいたもの）。</p>
-<p><strong>⑥ B・C の真値と比べる ― これが本当の成績</strong></p>
+<p><strong>⑥ 評価点の真値と比べる ― これが本当の成績</strong></p>
 <h4 id="結果加熱期-60300-s-の-mae5-seed平均">結果（加熱期 60–300 s の
 MAE、5 seed平均）</h4>
 <table>
@@ -3041,8 +3044,8 @@ MAE、5 seed平均）</h4>
 </colgroup>
 <thead>
 <tr class="header">
-<th>知りたい量</th>
-<th>観測したか</th>
+<th>評価点の量</th>
+<th>観測点か</th>
 <th>同化なし</th>
 <th><strong>同化後</strong></th>
 <th>改善</th>
@@ -3126,16 +3129,16 @@ id="なぜ循環していないと言えるのか">なぜ循環していない�
 <p>つまり <strong>B/C を当てているのではなく、温度場を当てた結果として
 B/C が付いてくる</strong>わけです。
 これが「少数観測から全体を知る」ということの中身です。</p>
-<h3 id="xyz-の全成分を見る-観測していない方向場所はどうなるか">7-5.
+<h3 id="xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
 <span class="math inline">\(x\)</span>・<span
 class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
-の全成分を見る ― 観測していない方向・場所はどうなるか</h3>
+の全成分を見る ― 観測していない方向・評価点はどうなるか</h3>
 <p>ここまでの図はすべて <strong><span class="math inline">\(z\)</span>
 成分（上下・軸方向）だけ</strong>でした。 FrontISTR は当然 <span
 class="math inline">\(U_x,U_y,U_z\)</span>
 の3成分を返しているので、<strong>観測していない <span
 class="math inline">\(x,y\)</span> 方向</strong>と
-<strong>観測していない場所</strong>がどうなるかを確かめます。</p>
+<strong>評価点（未観測点）</strong>がどうなるかを確かめます。</p>
 <p>観測に使うのは今までどおり <strong>「温度2点 ＋ 上面A/O の <span
 class="math inline">\(U_z\)</span> だけ」</strong>。 <span
 class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
@@ -3164,12 +3167,12 @@ class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
 <tr class="odd">
 <td><strong>B</strong></td>
 <td><strong>(+28.7, 0, 75.4) mm</strong></td>
-<td><strong>中高さ。一切観測しない</strong></td>
+<td><strong>評価点。同化に一切使わない</strong></td>
 </tr>
 <tr class="even">
 <td><strong>C</strong></td>
 <td><strong>(−28.7, 0, 75.4) mm</strong></td>
-<td><strong>中高さ。一切観測しない</strong></td>
+<td><strong>評価点。同化に一切使わない</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3252,7 +3255,7 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 </tr>
 <tr class="even">
 <td><strong>B</strong></td>
-<td><strong>未観測</strong></td>
+<td><strong>評価点</strong></td>
 <td><span class="math inline">\(U_x\)</span></td>
 <td>1.00</td>
 <td>0.374</td>
@@ -3261,7 +3264,7 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 </tr>
 <tr class="odd">
 <td><strong>B</strong></td>
-<td><strong>未観測</strong></td>
+<td><strong>評価点</strong></td>
 <td><span class="math inline">\(U_z\)</span></td>
 <td>4.45</td>
 <td>4.217</td>
@@ -3270,7 +3273,7 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 </tr>
 <tr class="even">
 <td><strong>C</strong></td>
-<td><strong>未観測</strong></td>
+<td><strong>評価点</strong></td>
 <td><span class="math inline">\(U_x\)</span></td>
 <td>3.40</td>
 <td>2.782</td>
@@ -3279,7 +3282,7 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 </tr>
 <tr class="odd">
 <td><strong>C</strong></td>
-<td><strong>未観測</strong></td>
+<td><strong>評価点</strong></td>
 <td><span class="math inline">\(U_z\)</span></td>
 <td>3.27</td>
 <td>4.022</td>
@@ -3304,9 +3307,9 @@ class="math inline">\(z\)</span> も自動的に従います</strong>。 「<spa
 class="math inline">\(U_z\)</span> を観測して <span
 class="math inline">\(U_x\)</span>
 が直る」のは不思議なことではなく、当然の帰結です。</p>
-<p><strong>② 未観測点は観測点と同じ率で直る。</strong> <span
-class="math inline">\(U_z\)</span> で観測点179倍・未観測点172倍、<span
-class="math inline">\(U_x\)</span> で観測点80倍・未観測点126倍。
+<p><strong>② 評価点（未観測点）は観測点と同じ率で直る。</strong> <span
+class="math inline">\(U_z\)</span> で観測点179倍・評価点172倍、<span
+class="math inline">\(U_x\)</span> で観測点80倍・評価点126倍。
 <strong>「測ったところだけ合っている」のではありません。</strong> これは
 §5-4（未観測セルの温度復元）と同じ主張を、変位の側から確かめたことになります。</p>
 <p><strong>③ <span class="math inline">\(U_y\)</span>
