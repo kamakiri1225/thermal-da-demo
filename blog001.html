@@ -360,7 +360,10 @@ FrontISTR の”計算そのもの”</strong> の話です。
 <p>ここで実行しているのは <strong>EnKF
 そのものではありません</strong>。OpenFOAM の CHT と FrontISTR
 の熱弾性解析を一度きちんと計算し、温度・変位・熱伝達率の時刻歴を得ます。
-この結果を「真値」とみなして観測値を人工的に作ると、後続の双子実験で
+この結果を「真値」とみなして観測値を人工的に作ると、後続の<strong>双子実験</strong>（英語では
+<strong>OSSE: Observing System Simulation
+Experiment</strong>＝観測システムシミュレーション実験。
+気象分野で「そのセンサ構成で本当に推定できるか」を事前に評価するために使われる手法）で
 EnKF がどれだけ
 温度場や未知量を復元できるかを、誤差の正解が分かる状態で検証できます。</p>
 <pre class="mermaid"><code>flowchart LR
@@ -1212,7 +1215,7 @@ OI を回します。行列の計算は
 id="参考このブログの元になった実装詳細">参考（このブログの元になった実装・詳細）</h3>
 <ul>
 <li>連成の実装と手順：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/docs/00_openfoam_frontistr_coupling_workflow.md</code></li>
-<li>実ソルバ・データ同化の全体：<code>00_data_assimilation_algorithm.md</code></li>
+<li>実ソルバ・データ同化の全体：<code>blog_002_oi_data_assimilation.md</code>（OI）・<code>blog_003_ensemble_kalman_filter.md</code>（EnKF）</li>
 <li>材料定数：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml</code></li>
 </ul>
 </body>

@@ -361,6 +361,14 @@ id="toc-xyz-の全成分を見る-観測していない方向場所はどうな�
 class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
 の全成分を見る ― 観測していない方向・場所はどうなるか</a></li>
 </ul></li>
+<li><a href="#観測構成を変えて比べる-本研究の有用性"
+id="toc-観測構成を変えて比べる-本研究の有用性">7-6.
+観測構成を変えて比べる ― 本研究の有用性</a>
+<ul>
+<li><a href="#この表のrmseは何を計算した値か"
+id="toc-この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</a></li>
+<li><a href="#結果" id="toc-結果">結果</a></li>
+</ul></li>
 <li><a href="#まだ分かっていないこと-代表点選択の未解決問題"
 id="toc-まだ分かっていないこと-代表点選択の未解決問題">8.
 まだ分かっていないこと ― 代表点選択の未解決問題</a></li>
@@ -3025,6 +3033,110 @@ class="math inline">\(W\)</span>
 は多数の温度入力に対する線形応答です。剛性行列の分解を再利用できますが、単一の熱荷重を1回解くだけで全Wが得られるわけではありません。POD版では必要なモード応答だけを事前に計算します。</p>
 </blockquote>
 <hr />
+<h2 id="観測構成を変えて比べる-本研究の有用性">7-6.
+観測構成を変えて比べる ― 本研究の有用性</h2>
+<p>ここまでの部品（POD＋Q-DEIM＋ROM＋EnKF）を組み合わせ、<strong>観測の構成だけを変えて</strong>比べます。</p>
+<h3
+id="この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</h3>
+<p>数字を出す前に定義をはっきりさせます。同じ観測構成で乱数条件を5回変えて計算します。
+<span class="math inline">\(s=1,\ldots,5\)</span>
+が計算番号（seed）、<span class="math inline">\(i=0,\ldots,4\)</span>
+がROMの温度点、 <span class="math inline">\(m=1,\ldots,60\)</span>
+がEnKFメンバーです。<strong>5 seed
+は再試行の数であり、60メンバーとは別物</strong>です。</p>
+<p>まず各時刻の同化後アンサンブルから、点ごとの推定温度を出します:</p>
+<p><span class="math display">\[\hat
+T_{s,i}(t_k)=\frac{1}{60}\sum_{m=1}^{60}T^a_{s,m,i}(t_k)\]</span></p>
+<p>（同化なしの場合は、同じ初期アンサンブルを更新せずに時間発展させた平均を使います）</p>
+<p>次に、観測点だけでなく<strong>全5点（未観測点を含む）</strong>で真値との差を取ります:</p>
+<p><span class="math display">\[e_{s,i,k}=\hat
+T_{s,i}(t_k)-T_i^{\mathrm{true}}(t_k),\qquad
+r_{s,k}=\sqrt{\frac{1}{5}\sum_{i=0}^{4}e_{s,i,k}^2}\]</span></p>
+<p>表の「加熱期の平均RMSE」は、この空間RMSEを<strong>時刻とseedで平均</strong>した値です:</p>
+<p><span class="math display">\[\overline{\mathrm{RMSE}}_T=
+\frac{1}{5}\sum_{s=1}^{5}\left[\frac{1}{10}\sum_{k=1}^{10}r_{s,k}\right]\
+[\mathrm K],
+\qquad t_k=30k\ \mathrm{s}\]</span></p>
+<p>集計は <strong>30, 60, …,
+300秒の10回の同化後</strong>です。0秒は初期誤差が全構成で共通なので除外しています。</p>
+<blockquote>
+<p><strong>これは何ではないか</strong>
+全20,696セルの温度RMSEでもなく、メンバーの標準偏差でもなく、最終300秒だけの誤差でもありません。
+また「全時刻・全点の二乗誤差をまとめてから平方根を取る」定義とも違います。</p>
+</blockquote>
+<p><strong>小さな数値例</strong>：ある時刻の5点の誤差が <span
+class="math inline">\([1,-2,0,2,-1]\)</span> K なら <span
+class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
+これを10時刻それぞれで計算して平均し、さらに5 seed を平均します。</p>
+<p>実装は <code>run/run_da_compare.py</code> の
+<code>run_cfg_seed()</code> 内の
+<code>np.sqrt(((Z[:,:NPT].mean(0)-Ttr[ci])**2).mean())</code>、
+時間平均は <code>heat=(tgrid&gt;0)&amp;(tgrid&lt;=300)</code> と
+<code>results[n][0][heat].mean()</code> です。
+時間とseedはどちらも算術平均なので、平均の順序は交換できます。</p>
+<h3 id="結果">結果</h3>
+<figure>
+<img src="img/da_compare_traj.png" alt="収束の比較" />
+<figcaption aria-hidden="true">収束の比較</figcaption>
+</figure>
+<p><em>ROM双子実験／60メンバー／30秒ごと20回更新（0〜600秒）／真値も同じROM／seed
+20260913〜20260917 の5回。</em></p>
+<figure>
+<img src="img/da_compare_rmse.png" alt="有用性の棒グラフ" />
+<figcaption aria-hidden="true">有用性の棒グラフ</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測構成</th>
+<th>加熱期の平均RMSE</th>
+<th>何が言えるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>同化なし（free run）</strong></td>
+<td>4.585 K</td>
+<td>でたらめのまま。<strong>データ同化なしでは推定できない</strong></td>
+</tr>
+<tr class="even">
+<td>温度1点（発熱感度 <span class="math inline">\(\partial T/\partial
+Q\)</span> 最小・P4）</td>
+<td>1.036 K</td>
+<td>同化すれば桁違いに改善。ただし感度の低い点は遅い</td>
+</tr>
+<tr class="odd">
+<td>温度1点（発熱感度 最大・P2）</td>
+<td><strong>0.617 K</strong></td>
+<td><strong>同じ1点でも感度の高い場所に置くと1.7倍良い</strong></td>
+</tr>
+<tr class="even">
+<td>温度2点（発熱感度 上位2・P2+P0）</td>
+<td>0.503 K</td>
+<td><strong>センサを足すとさらに改善</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>温度2点＋変位2点</strong></td>
+<td><strong>0.160 K</strong></td>
+<td><strong>変位を足すと決定的</strong>（温度だけの3倍良い）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>温度センサの選定基準は発熱感度 <span
+class="math inline">\(\partial T/\partial Q\)</span> です。</strong>
+熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
+は<strong>変位センサ</strong>の基準であって、温度センサに流用すると逆効果になります
+（検証：<code>run/why_lowW_wins_check.py</code>。温度RMSEとの相関は
+<span class="math inline">\(\partial T/\partial Q\)</span> −0.835 に対し
+<span class="math inline">\(W\)</span> +0.405）。 詳しくは blog_005
+§4-2b。</p>
+</blockquote>
 <h2 id="まだ分かっていないこと-代表点選択の未解決問題">8.
 まだ分かっていないこと ― 代表点選択の未解決問題</h2>
 <p>ここまで「PODでモード→Q-DEIMで代表点→ROM校正」ときれいに流れましたが、
@@ -3094,8 +3206,8 @@ class="math inline">\(h\)</span> を 少数観測から高速に推定でき、�
 <hr />
 <h3 id="参考元になった実装詳細">参考（元になった実装・詳細）</h3>
 <ul>
-<li>POD／Q-DEIM
-の数式と手続き：<code>01_pod_qdeim_algorithm.md</code></li>
+<li>POD／Q-DEIM の数式と手続き：本記事 §2〜§4（旧
+<code>01_pod_qdeim_algorithm.md</code> を統合）</li>
 <li>代表点選定：<code>run/select_points_qdeim.py</code></li>
 <li>ROM構築・校正：<code>run/build_calibrate_rom.py</code>,
 <code>dacore/rom_general.py</code></li>
