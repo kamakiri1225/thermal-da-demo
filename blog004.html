@@ -345,6 +345,9 @@ href="#温度が求まったら-実形状にマッピングして-frontistr-で�
 id="toc-温度が求まったら-実形状にマッピングして-frontistr-で変位を出す">7.
 温度が求まったら ― 実形状にマッピングして FrontISTR で変位を出す</a>
 <ul>
+<li><a href="#変位を観測として使う手続き-状態に入れずに観測演算子で作る"
+id="toc-変位を観測として使う手続き-状態に入れずに観測演算子で作る">7-0.
+変位を「観測」として使う手続き ― 状態に入れずに観測演算子で作る</a></li>
 <li><a href="#温度を実形状femメッシュへマッピング-逆距離加重"
 id="toc-温度を実形状femメッシュへマッピング-逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</a></li>
@@ -2650,6 +2653,135 @@ id="温度が求まったら-実形状にマッピングして-frontistr-で変�
 <strong>変位（熱膨張・反り）</strong> です。 温度→変位は blog_001 と同じ
 FrontISTR
 ですが、ここでは「<strong>温度をどう実形状へ渡すか</strong>」を数式で押さえます。</p>
+<h3 id="変位を観測として使う手続き-状態に入れずに観測演算子で作る">7-0.
+変位を「観測」として使う手続き ― 状態に入れずに観測演算子で作る</h3>
+<p>先に、いちばん分かりにくいところを片付けます。
+<strong>「変位計の値をデータ同化にどう入れるのか」</strong>です。</p>
+<h4 id="まず結論">まず結論</h4>
+<blockquote>
+<p><strong>変位は状態ベクトルに入れません。</strong> 状態はあくまで
+<span class="math inline">\(z=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf
+T}\)</span> の7次元のままです。
+変位は<strong>観測演算子の中で、そのつど温度から計算します</strong>。</p>
+</blockquote>
+<p>これができる理由は、<strong>温度から変位への写像が線形</strong>だからです（§7-2）。</p>
+<h4 id="手続き4ステップ">手続き（4ステップ）</h4>
+<p>EnKFの各サイクルで、<strong>60メンバーそれぞれについて</strong>次を実行します。</p>
+<p><strong>ステップ1：そのメンバーの5点温度を取り出す</strong></p>
+<p><span
+class="math display">\[T_5^{(m)}=(T_1^{(m)},\dots,T_5^{(m)})\qquad
+m=1,\dots,60\]</span></p>
+<p><strong>ステップ2：gappy-POD でモード係数にする</strong>（§4-0
+と同じ計算）</p>
+<p><span class="math display">\[a^{(m)}=U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
+T_P\bigr)\quad(5\times1)\]</span></p>
+<p><strong>ステップ3：モード係数から変位を出す</strong></p>
+<p><span
+class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
+<p>ここで <span class="math inline">\(D\)</span> は <strong>FrontISTR
+で事前に作った定数行列</strong>です（<span
+class="math inline">\(2\times5\)</span>）。 各列 <span
+class="math inline">\(D[:,k]\)</span> が「モード <span
+class="math inline">\(\varphi_k\)</span>
+が1単位混ざったときの上面A/Oの変位」で、 <strong>同化を始める前に
+FrontISTR を <span class="math inline">\(1+5=6\)</span>
+回だけ呼んで作ってあります</strong>（§7-2）。</p>
+<blockquote>
+<p><strong>重要：同化のループ中に FrontISTR
+は一度も呼びません。</strong> 呼ぶのは事前の6回だけ。あとは <span
+class="math inline">\(2\times5\)</span>
+の行列を掛けるだけなので一瞬です。</p>
+</blockquote>
+<p><strong>ステップ4：観測予報 <span class="math inline">\(Y_f\)</span>
+に並べる</strong></p>
+<p>温度2点と変位2点を観測するなら、メンバーごとに4つの値を並べます:</p>
+<p><span
+class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{\text{温度2点}},\
+\underbrace{u_1^{(m)},\,u_2^{(m)}}_{\text{変位2点}}\bigr)\]</span></p>
+<p>実装はこれだけです:</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> disp_of_T5(T5):                      <span class="co"># (…,5) -&gt; (…,2)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> (T5 <span class="op">-</span> mean[pod_cells]) <span class="op">@</span> UP_pinv.T   <span class="co"># ステップ2：gappy-POD</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> uz_mean <span class="op">+</span> a <span class="op">@</span> Dmode.T             <span class="co"># ステップ3：モード→変位</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ステップ4：温度と変位を横に並べて観測予報にする</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([Z[:, nodes],                    <span class="co"># 温度2点</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                      disp_of_T5(Z[:, :NPT])])        <span class="co"># 変位2点</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>Z  <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span></code></pre></div>
+<h4 id="なぜこれで温度が直るのか">なぜこれで温度が直るのか</h4>
+<p>EnKF
+の更新式は<strong>温度だけを観測したときとまったく同じ</strong>です:</p>
+<p><span class="math display">\[z^a=z^b+K\,(y-Y_f),\qquad
+K=C_{zy}\,(C_{yy}+R)^{-1}\]</span></p>
+<p>変わるのは <span
+class="math inline">\(C_{zy}=\mathrm{Cov}(z,Y_f)\)</span> の中身だけ。
+<span class="math inline">\(Y_f\)</span>
+に変位が入っているので、<strong>温度と変位の共分散 <span
+class="math inline">\(\mathrm{Cov}(T_i,u_j)\)</span> が
+アンサンブルから自動的に計算されます</strong>。</p>
+<p><span class="math display">\[C_{zy}=\begin{pmatrix}
+\mathrm{Cov}(T_1,T_{i_1}) &amp; \cdots &amp;
+\color{red}{\mathrm{Cov}(T_1,u_1)} &amp;
+\color{red}{\mathrm{Cov}(T_1,u_2)}\\
+\vdots &amp; &amp; \vdots &amp; \vdots\\
+\mathrm{Cov}(Q,T_{i_1}) &amp; \cdots &amp;
+\color{red}{\mathrm{Cov}(Q,u_1)} &amp; \color{red}{\mathrm{Cov}(Q,u_2)}
+\end{pmatrix}\]</span></p>
+<p><strong>赤い列があるから、変位の残差 <span
+class="math inline">\(y_u-u^b\)</span>
+が温度と発熱量を引っぱります。</strong> 仕組みは blog_003 §4-0
+の「温度しか測らなくても <span class="math inline">\(Q\)</span>
+が動く」とまったく同じで、
+<strong>測っていない量でも、測った量と相関していれば更新される</strong>という一点に尽きます。</p>
+<h4 id="つのやっていないこと">3つの「やっていないこと」</h4>
+<p>混乱しやすいので、やっていないことを明記します。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>❌ やっていない</th>
+<th>⭕ 実際にやっていること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位を状態ベクトルに入れる</td>
+<td>状態は温度5点＋<span class="math inline">\(Q\)</span>＋<span
+class="math inline">\(h\)</span> の7次元のまま</td>
+</tr>
+<tr class="even">
+<td>同化ループ中に FrontISTR を呼ぶ</td>
+<td>事前に6回呼んで <span class="math inline">\(D\)</span>（<span
+class="math inline">\(2\times5\)</span>）を作っておく</td>
+</tr>
+<tr class="odd">
+<td>変位から温度を「逆算」する</td>
+<td>変位は<strong>順方向</strong>に計算し、残差を共分散経由で温度へ配分する</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="非線形な観測でも同じ形で書ける">非線形な観測でも同じ形で書ける</h4>
+<p><code>enkf_update</code> は観測行列 <span
+class="math inline">\(H\)</span> ではなく <strong>予報観測 <span
+class="math inline">\(Y_f\)</span>
+をそのまま受け取る</strong>設計にしてあります
+（<code>dacore/enkf.py</code>）。</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> enkf_update(Zf, y, H, R, rng, inflation<span class="op">=</span><span class="fl">1.0</span>, Yf<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Yf <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> Zf <span class="op">@</span> H.T        <span class="co"># 線形観測ならここで作る</span></span></code></pre></div>
+<p>今回の変位写像はたまたま線形（<span
+class="math inline">\(u=u_{\mathrm{mean}}+D\,a\)</span>）ですが、
+<strong>メンバーごとに実ソルバを通すような非線形観測でも、<span
+class="math inline">\(Y_f\)</span> を渡せば同じ式で動きます</strong>。
+実際 104 では、各メンバーの温度場を FrontISTR に通した変位を <span
+class="math inline">\(Y_f\)</span> にしていました
+（そのぶん1サイクルが分オーダーになり、ROM化の動機になりました）。</p>
 <h3 id="温度を実形状femメッシュへマッピング-逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</h3>
 <p><strong>ここからは空間の移し替えです。</strong>
