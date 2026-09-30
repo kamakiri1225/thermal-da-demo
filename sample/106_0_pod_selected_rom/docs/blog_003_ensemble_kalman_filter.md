@@ -662,6 +662,6 @@ EnKFは共分散を毎サイクル作り直すので、**$Q$ や $h$ を状態�
 
 ### 参考（元になった実装・詳細）
 
-- OI/EnKF のアルゴリズムと数式：`00_data_assimilation_algorithm.md`
-- EnKF がなぜ重いか・ROM化の動機：`00_data_assimilation_algorithm.md` の E 節
-- 全ストーリー：`02_full_story.md`
+- OI のアルゴリズムと数式：`blog_002_oi_data_assimilation.md`
+- EnKF がなぜ重いか・ROM化の動機：`blog_004_pod_selected_rom.md` §1
+- 全ストーリー：`blog_004_pod_selected_rom.md`

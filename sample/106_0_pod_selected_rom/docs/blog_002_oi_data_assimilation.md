@@ -576,7 +576,7 @@ C−D差は「同化に使っていない別の変位差」で、**同化がそ�
 
 ### 参考（元になった実装・詳細）
 
-- OI/EnKF のアルゴリズムと数式：`00_data_assimilation_algorithm.md`
+- EnKF のアルゴリズムと数式：`blog_003_ensemble_kalman_filter.md`
 - 感度による観測設計：`../../105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.md`
 - σTスタディの詳細：`18_oi_sigma_t_validation.md`
-- 全ストーリー：`02_full_story.md`
+- 全ストーリー：`blog_004_pod_selected_rom.md`

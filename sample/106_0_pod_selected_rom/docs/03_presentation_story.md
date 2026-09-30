@@ -5,7 +5,7 @@
 全コード・全ドキュメント・全図が公開され、**誰でも再現できる**ことが最大の貢献。
 
 > この発表ストーリーは 104（実ソルバDA）・105（観測設計）・106（POD選定ROM）を横断してまとめたもの。
-> アルゴリズム詳細は本フォルダ106の `00_data_assimilation_algorithm.md`（EnKF/OI）・`01_pod_qdeim_algorithm.md`（POD/Q-DEIM）・`02_full_story.md`（絵と数式の全ストーリー）を参照。
+> アルゴリズム詳細は本フォルダ106の `blog_002_oi_data_assimilation.md`（OI）・`blog_003_ensemble_kalman_filter.md`（EnKF）・`blog_004_pod_selected_rom.md`（POD/Q-DEIM・全ストーリー）を参照。
 
 > **話の背骨（1文）**：
 > 「実ソルバ連成でデータ同化は"動く"。だが熱変位の同化には固有の難しさ（識別可能性・観測設計・計算コスト）があり、
@@ -151,8 +151,8 @@
 | 6 | OIのQ(t) / 温度・変位 / 観測点 | `106/docs/img/oi_{Q_estimate,fullsolver_temp}.png`, `oi_obs_points.png` |
 | 7 | 分布・変位の再現 | ParaView出力, `106/docs/img/oi_fullsolver_temp.png` |
 
-- 数式・アルゴリズム詳細：`00_data_assimilation_algorithm.md`（EnKF/OI）, `01_pod_qdeim_algorithm.md`（POD/Q-DEIM）
-- 全ストーリー（絵と数式）：`02_full_story.md`
+- 数式・アルゴリズム詳細：`blog_002_oi_data_assimilation.md`（OI）, `blog_003_ensemble_kalman_filter.md`（EnKF）, `blog_004_pod_selected_rom.md`（POD/Q-DEIM）
+- 全ストーリー（絵と数式）：`blog_004_pod_selected_rom.md`
 - 先行研究の位置づけ：`../../104_0_openfoam_frontistr_da_enkf/docs/15_novelty_and_prior_art.md`
 - スライド（reveal.js）：`slides_02_full_story.html`（本編）, `slides_01_pod_qdeim.html`（数式補足）
 

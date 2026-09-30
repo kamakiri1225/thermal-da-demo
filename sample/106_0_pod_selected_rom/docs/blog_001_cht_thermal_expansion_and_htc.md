@@ -16,7 +16,10 @@
 
 ここで実行しているのは **EnKF そのものではありません**。OpenFOAM の CHT と
 FrontISTR の熱弾性解析を一度きちんと計算し、温度・変位・熱伝達率の時刻歴を得ます。
-この結果を「真値」とみなして観測値を人工的に作ると、後続の双子実験で EnKF がどれだけ
+この結果を「真値」とみなして観測値を人工的に作ると、後続の**双子実験**（英語では
+**OSSE: Observing System Simulation Experiment**＝観測システムシミュレーション実験。
+気象分野で「そのセンサ構成で本当に推定できるか」を事前に評価するために使われる手法）で
+EnKF がどれだけ
 温度場や未知量を復元できるかを、誤差の正解が分かる状態で検証できます。
 
 ```mermaid
@@ -513,5 +516,5 @@ ParaView では `solid_to_fluid` パッチだけを表示し、計算した面�
 ### 参考（このブログの元になった実装・詳細）
 
 - 連成の実装と手順：`../../102_1_frontistr_hollow_cylinder_thermal_expansion/docs/00_openfoam_frontistr_coupling_workflow.md`
-- 実ソルバ・データ同化の全体：`00_data_assimilation_algorithm.md`
+- 実ソルバ・データ同化の全体：`blog_002_oi_data_assimilation.md`（OI）・`blog_003_ensemble_kalman_filter.md`（EnKF）
 - 材料定数：`../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml`

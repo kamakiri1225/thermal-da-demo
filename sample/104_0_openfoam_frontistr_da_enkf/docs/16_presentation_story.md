@@ -145,8 +145,8 @@
 | 6 | OIのQ(t) / 温度・変位 / 観測点 | `104…/docs/img/oi_{Q_estimate,fullsolver_temp}.png`, `106…/docs/img/oi_obs_points.png` |
 | 7 | 分布・変位の再現 | ParaView出力, `oi_fullsolver_temp.png` |
 
-- 数式・アルゴリズム詳細：`106…/docs/00_data_assimilation_algorithm.md`（EnKF/OI）, `01_pod_qdeim_algorithm.md`（POD/Q-DEIM）
-- 全ストーリー（絵と数式）：`106…/docs/02_full_story.md`
+- 数式・アルゴリズム詳細：`106…/docs/blog_002_oi_data_assimilation.md`（OI）, `blog_003_ensemble_kalman_filter.md`（EnKF）, `blog_004_pod_selected_rom.md`（POD/Q-DEIM）
+- 全ストーリー（絵と数式）：`106…/docs/blog_004_pod_selected_rom.md`
 - 先行研究の位置づけ：`104…/docs/15_novelty_and_prior_art.md`
 - スライド（reveal.js）：`106…/docs/slides_02_full_story.html`（本編）, `slides_01_pod_qdeim.html`（数式補足）
 

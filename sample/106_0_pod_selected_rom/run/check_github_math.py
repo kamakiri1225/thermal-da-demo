@@ -109,8 +109,7 @@ def main(argv):
         base=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         sample=os.path.dirname(base)
         files=[os.path.join(base,"docs",x) for x in
-               ("00_data_assimilation_algorithm.md","01_pod_qdeim_algorithm.md",
-                "02_full_story.md","03_presentation_story.md")]
+               ("03_presentation_story.md",)]
         files.append(os.path.join(sample,"104_0_openfoam_frontistr_da_enkf","docs","16_presentation_story.md"))
     total=0
     for f in files:
