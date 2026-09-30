@@ -86,12 +86,12 @@ def build():
 
     for pdf in sorted((DOCS / "pdf").glob("blog_00[1-5].pdf")):
         shutil.copy2(pdf, OUT / "pdf" / pdf.name)
-    poster = ROOT / "presentation" / "conference_posters.pdf"
+    poster = ROOT / "presentation" / "06_conference_posters.pdf"
     if poster.exists():
         shutil.copy2(poster, OUT / "pdf" / "posters.pdf")
 
     # ポスターHTML（画像パスを site 内へ書き換え）
-    ph = ROOT / "presentation" / "conference_posters.html"
+    ph = ROOT / "presentation" / "06_conference_posters.html"
     if ph.exists():
         t = ph.read_text(encoding="utf-8").replace('src="../docs/img/', 'src="img/')
         (OUT / "posters.html").write_text(t, encoding="utf-8")

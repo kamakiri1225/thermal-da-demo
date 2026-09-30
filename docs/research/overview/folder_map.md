@@ -45,7 +45,7 @@
 | `run/` | 428 KB | **実行スクリプト42本**。ROM構築・校正、Q-DEIM選点、感度解析、EnKF比較、各種作図 |
 | `results/` | 1.7 MB | 計算結果の `.npz`（校正済みROM、POD モード、変位オペレータ、感度）と集計表 |
 | `docs/` | 36 MB | **ブログ本文5本**（`blog_001`〜`blog_005`）、`img/`（図・アニメ）、`pdf/`（二段組TeX版PDFとビルド系） |
-| `presentation/` | 3.3 MB | 学会発表ポスター（`conference_posters.html` / `.pdf`、4学会分） |
+| `presentation/` | 3.3 MB | 学会発表ポスター（`06_conference_posters.html` / `.pdf`、4学会分） |
 | `openfoam/` | 87 MB | 実ソルバ連携用の作業ディレクトリ（大きいため非公開） |
 | `config/`, `fem/` | 28 KB | 解析条件とFEM設定 |
 

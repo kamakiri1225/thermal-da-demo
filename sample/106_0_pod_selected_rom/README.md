@@ -93,10 +93,10 @@ $$\min_{C,K,h}\ \sum_{n}\sum_{i=1}^{5}\bigl(T_i^{\mathrm{ROM}}(t_n)-T_i^{\mathrm
 ## 発表資料
 
 - **[オープンCAE学会シンポジウム B-16 発表スライド（20枚, reveal.js）](https://kamakiri1225.github.io/thermal-da-demo/opencae2026.html)**
-  … ローカルでは `presentation/opencae_2026_slides.html` を直接ブラウザで開く
-- 原稿・調査メモ: `presentation/opencae_2026_slide02_intro.md`（導入の文献調査・メーカー比較）、
-  `presentation/opencae_2026_qa.md`（想定質問Q1〜Q20）
-- 学会ポスター（4学会分）: `presentation/conference_posters.html`
+  … ローカルでは `presentation/01_slides.html` を直接ブラウザで開く
+- 原稿・調査メモ: `presentation/04_intro_literature.md`（導入の文献調査・メーカー比較）、
+  `presentation/03_expected_questions.md`（想定質問Q1〜Q20）
+- 学会ポスター（4学会分）: `presentation/06_conference_posters.html`
 
 ## 前提
 

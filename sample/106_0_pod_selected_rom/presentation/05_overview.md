@@ -277,6 +277,6 @@ OpenFOAM(CHT) → FrontISTR(熱膨張)      … 1
 - ブログ本文：`sample/106_0_pod_selected_rom/docs/blog_00{1..5}_*.md`
 - 論文形式PDF：同 `docs/pdf/blog_00{1..5}.pdf`（A4二段組）
 - 図：同 `docs/img/`
-- 既存ポスター：`presentation/conference_posters.html`（4学会分。P1がオープンCAE用）
+- 既存ポスター：`presentation/06_conference_posters.html`（4学会分。P1がオープンCAE用）
 - 公開サイト：<https://kamakiri1225.github.io/thermal-da-demo/>
 - フォルダ地図：`docs/research/overview/folder_map.md`

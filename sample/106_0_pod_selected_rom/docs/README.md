@@ -79,11 +79,11 @@ Webで読む（数式・図・GIFつき）: <https://kamakiri1225.github.io/ther
 
 | ファイル | 内容 |
 |---|---|
-| `opencae_2026_slides.html` | **発表スライド25枚**（reveal.js） |
-| `opencae_2026_positioning.md` | **研究の位置づけ・先行研究との差分・主張の設計** |
-| `opencae_2026_qa.md` | 想定質問 Q1〜Q22 |
-| `opencae_2026_slide02_intro.md` | 導入の文献調査・メーカー比較 |
-| `conference_posters.html` | 学会別ポスター（4学会分） |
+| `01_slides.html` | **発表スライド25枚**（reveal.js） |
+| `02_positioning_novelty.md` | **研究の位置づけ・先行研究との差分・主張の設計** |
+| `03_expected_questions.md` | 想定質問 Q1〜Q22 |
+| `04_intro_literature.md` | 導入の文献調査・メーカー比較 |
+| `06_conference_posters.html` | 学会別ポスター（4学会分） |
 
 ---
 

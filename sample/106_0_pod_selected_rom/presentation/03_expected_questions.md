@@ -238,7 +238,7 @@ $Q,h \rightarrow T \rightarrow u \rightarrow$ 観測、という因果のDAGで�
 モデルは**最小二乗回帰・FEM・ニューラルネット・グレーシステム**が代表例
 （ガウス過程回帰もこの系列）。補正は**運転中ずっとCNCがオフセットを更新し続ける**。
 
-📖 blog_001 §0-2 ／ スライド `opencae_2026_slide02_intro.md` §3
+📖 blog_001 §0-2 ／ スライド `04_intro_literature.md` §3
 
 ## Q19. メーカー各社（オークマ・マザック・DMG MORI・牧野）は何が違うのか
 
@@ -253,7 +253,7 @@ $Q,h \rightarrow T \rightarrow u \rightarrow$ 観測、という因果のDAGで�
 機械とCNC（OSP）が両方自社なので一体最適化できる。
 **TAS** ＝ Thermo Active Stabilizer（ティー・エー・エス）、**-C**＝Construction、**-S**＝Spindle。
 
-📖 スライド `opencae_2026_slide02_intro.md` §3-4（4つの比較表）／ blog_001 §0-3
+📖 スライド `04_intro_literature.md` §3-4（4つの比較表）／ blog_001 §0-3
 
 ## Q20. GitHubを非公開にできるか（.ioが見られなくなるなら公開でもよい）
 
