@@ -153,7 +153,7 @@ def main():
                       "600秒の温度・変形には効かない（表裏一体）。",
             fontsize=12, transform=ax.transAxes)
     ax.text(0.02,0.50,"実際、$h$ が63%ずれたままでも\n"
-                      "　温度RMSE 0.147 K ／ 変位差誤差 0.162 µm\n"
+                      "　温度RMSE 0.160 K ／ 変位差誤差 0.165 µm\n"
                       "まで下がっている。",
             fontsize=12, transform=ax.transAxes, color="#2e7d32", weight="bold")
     ax.text(0.02,0.22,"困るのは「長時間・定常まで外挿したいとき」。\n"
