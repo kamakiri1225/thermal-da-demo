@@ -211,7 +211,7 @@ C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</
 各メンバーに違う \(Q,h\) を持たせて前進させると、温度と \(Q\) の相関が自然に育ち、<strong>温度しか測らなくてもゲインの \(Q\) 行が非ゼロ</strong>になる。</p>
 <div class="scrollfig"><img src="img/param_identification.png" alt="パラメータ同定の手順と結果"></div>
 <p class="scrollhint">▲ ①手順 ②なぜ温度だけで \(Q\) が動くのか ③\(Q\) の収束 ④\(Q\)と\(h\)の効く時間帯 ⑤いつ測るか ⑥\(h\) が決まらない理由。枠内スクロールで下段まで見えます</p>
-<div class="key" style="flex:0 0 auto"><strong>\(h\) が当たらなくても、今回の目的は達成できている</strong>（温度RMSE 0.147 K／変位差誤差 0.162 µm）<br>
+<div class="key" style="flex:0 0 auto"><strong>\(h\) が当たらなくても、今回の目的は達成できている</strong>（温度RMSE 0.160 K／変位差誤差 0.165 µm）<br>
 <span style="font-weight:400;font-size:.85em">\(h\) が観測に現れない＝\(h\) を間違えても600秒の結果に効かない（表裏一体）。困るのは<strong>長時間の外挿</strong>：1時間で0.39 K、定常では \(\Delta T_{ss}\propto Q/h\) なので<strong>39%取り違える</strong>。
 対処は観測を延ばす／温度差を上げる／\(dT/dt\) を測る／CHTの値を事前分布にする／固定する。<strong>事前に感度を計算すれば「同定できない」と実験前に分かる</strong>のが要点。詳細は blog_003 §4-0</span></div>
 </section>

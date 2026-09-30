@@ -1327,14 +1327,51 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004
 </tr>
 <tr class="odd">
 <td>向いている用途</td>
-<td>発熱量 (Q) の推定</td>
-<td><strong>熱変形の推定</strong></td>
+<td><strong>温度センサを置く場所</strong></td>
+<td><strong>変位センサを置く場所</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>本研究の注目量は熱変形</strong>（上面2点の変位差
-(U_z(A)-U_z(O)) ）なので、 <strong>基準Bの熱感度 (W)
-が本来の指標</strong>です。</p>
+<blockquote>
+<p>⚠️ <strong>2026-09-30 追記・訂正。</strong> 以前この箇所には
+「本研究の注目量は熱変形なので、基準Bの熱感度 (W)
+が本来の指標です」と書いていました。 <strong>これは誤りでした。</strong>
+5点それぞれを唯一の温度センサにして同化し、 温度RMSE
+との相関を測ったところ（<code>run/why_lowW_wins_check.py</code>）、</p>
+<table>
+<thead>
+<tr class="header">
+<th>指標</th>
+<th>温度RMSE との相関</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>発熱感度 (T/Q)</strong></td>
+<td><strong>−0.835（最良）</strong></td>
+</tr>
+<tr class="even">
+<td>熱感度 (W)</td>
+<td><strong>+0.405（高いほど悪い）</strong></td>
+</tr>
+</tbody>
+</table>
+<p>となりました。<strong>(W)
+は「その点の温度を間違えると変位がどれだけずれるか」であって、
+「その点を測ると何が分かるか」ではありません。</strong> (W)
+が高い点＝よく動く点＝固定端から遠い「場の端」で、場全体を代表しないためです。</p>
+<p><strong>正しい使い分け：温度センサは発熱感度
+(T/Q)、変位センサは熱感度 (W)。</strong>
+どちらも「感度が高い点に置く」で正しく、感度の種類が違うだけです。
+（§4-2c の実験結果は当初からこの向きを示していました）</p>
+</blockquote>
+<figure>
+<img src="img/two_sensitivities.png" alt="2つの感度の使い分け" />
+<figcaption aria-hidden="true">2つの感度の使い分け</figcaption>
+</figure>
+<p><em>左：温度センサを発熱感度で選ぶと相関 −0.835＝高いほど良い。
+中：同じ温度センサを (W) で選ぶと
++0.405＝高いほど悪い。右：使い分けのまとめ。</em></p>
 <p>実際に5つの代表点で両方を計算すると、<strong>順位がまったく違います</strong>:</p>
 <table>
 <colgroup>
