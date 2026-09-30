@@ -2660,6 +2660,12 @@ FrontISTR
 変位を「観測」として使う手続き ― 状態に入れずに観測演算子で作る</h3>
 <p>先に、いちばん分かりにくいところを片付けます。
 <strong>「変位計の値をデータ同化にどう入れるのか」</strong>です。</p>
+<figure>
+<img src="img/obs_pipeline.png" alt="観測の作り方と使い方" />
+<figcaption aria-hidden="true">観測の作り方と使い方</figcaption>
+</figure>
+<p><em>①観測データの作り方（双子実験）／②予報観測 <span
+class="math inline">\(Y_f\)</span> の作り方／③EnKFの更新式。</em></p>
 <h4 id="まず結論">まず結論</h4>
 <blockquote>
 <p><strong>変位は状態ベクトルに入れません。</strong> 状態はあくまで

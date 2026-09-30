@@ -80,8 +80,7 @@
 <!-- 1 -->
 <section class="title-s">
 <h1>少数の温度・変位観測から<br>熱変形を推定する<br><span style="font-size:.7em;color:#2E75D4">― OpenFOAM＋FrontISTR＋データ同化のオープンソース実装 ―</span></h1>
-<p class="sub">ヤマザキマザック株式会社　楠村 拓也<br>
-オープンCAE学会シンポジウム　B-16<br>2026年11月12日（木）</p>
+<p class="sub">オープンCAE学会シンポジウム　B-16<br>2026年11月12日（木）</p>
 </section>
 
 <!-- 2 -->
@@ -177,6 +176,18 @@
 
 <!-- 7 -->
 <section>
+<h2>観測データはどう作られ、どう同化に使われるのか</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">双子実験なので<strong>観測も自分で作る</strong>。真値にノイズを載せて \(y\) とし、メンバーごとに同じ量を計算して \(Y_f\) とする。
+<strong>変位は状態に入れず、観測演算子の中で温度から毎回計算する</strong>のが要点。</p>
+<div class="scrollfig"><img src="img/obs_pipeline.png" alt="観測の作り方と使い方"></div>
+<p class="scrollhint">▲ ①観測データの作り方（双子実験）／②予報観測 \(Y_f\) の作り方／③EnKFの更新式。枠内スクロールで③まで見えます</p>
+<div class="key" style="flex:0 0 auto">変位を状態に入れない理由：<strong>温度が決まれば変位は一意に決まる</strong>（\(u=u_\mathrm{mean}+Da\)）ので、入れると同じ量を2つ持つことになり整合性が壊れる<br>
+<span style="font-weight:400;font-size:.86em">\(D\) は<strong>事前にFrontISTRを6回</strong>（平均場＋5モード）呼んで作った \(2\times5\) の定数行列。<strong>同化ループ中にFEMは一度も呼ばない</strong>。
+更新式は温度だけのときと同一で、\(C_{zy}\) に \(\mathrm{Cov}(T_i,u_j)\) の列が入ることだけが違う</span></div>
+</section>
+
+<!-- 8 -->
+<section>
 <h2>課題① OIでは発熱量が当たらない</h2>
 <p style="flex:0 0 auto;font-size:.58em;margin-bottom:4px">状態を<strong>拡大</strong>して \( x=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \) とし、共分散 \(B\) を固定したOIを実ソルバ（20,696セル）で実行した。</p>
 <div class="math" style="margin:0 var(--pad) 5px;font-size:.47em;line-height:1.62">
@@ -192,7 +203,7 @@
 <span style="font-weight:400;font-size:.9em">実際の \(s\) は時間とともに変わるのに固定のまま。\(\sigma_Q\) を4条件振っても \(Q\) は9 W付近で頭打ち</span></div>
 </section>
 
-<!-- 8 -->
+<!-- 9 -->
 <section>
 <h2>課題② EnKFは当たるが計算コストが大きい</h2>
 <p style="flex:0 0 auto">EnKFは共分散を行列で持たず、<strong>少しずつ条件の違うメンバー（分身）を並行して前進させ、そのばらつきから共分散を作る</strong>。</p>
@@ -204,7 +215,7 @@ C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</
 実ソルバは<strong>1回で分オーダー</strong>なので、<strong>50〜200メンバー × 10サイクル＝数時間〜数日</strong></div>
 </section>
 
-<!-- 9 -->
+<!-- 10 -->
 <section>
 <h2>パラメータの同定 ― 発熱量 \(Q\) は当たり、放熱 \(h\) は当たらない</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">手順は<strong>状態拡大</strong>だけ。推定したいパラメータを状態ベクトルに入れる：\( z=(T_1,\dots,T_5,\;Q,\;h)^{\mathsf T} \)。
@@ -216,7 +227,7 @@ C：前進させるだけで<strong>斜めに伸びる＝連動が生まれる</
 対処は観測を延ばす／温度差を上げる／\(dT/dt\) を測る／CHTの値を事前分布にする／固定する。<strong>事前に感度を計算すれば「同定できない」と実験前に分かる</strong>のが要点。詳細は blog_003 §4-0</span></div>
 </section>
 
-<!-- 10 -->
+<!-- 11 -->
 <section>
 <h2>課題の整理と、本研究での解決</h2>
 <div class="two" style="gap:26px">
@@ -259,7 +270,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <div class="key">この2つの対策により、<strong>実用的な時間で・根拠をもって観測点を選んだ</strong>データ同化が可能になる</div>
 </section>
 
-<!-- 11 -->
+<!-- 12 -->
 <section>
 <h2>低次元モデル化 ― POD</h2>
 <p style="flex:0 0 auto">温度場スナップショット（20,696セル × 121時刻）を<strong>特異値分解</strong>し、場の「型」を抽出した。
@@ -270,7 +281,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <span style="font-weight:400;font-size:.88em">実装は numpy で3行。物理の知識は一切与えていない</span></div>
 </section>
 
-<!-- 12 -->
+<!-- 13 -->
 <section>
 <h2>代表点の選択 ― Q-DEIM</h2>
 <div class="math" style="margin-bottom:5px">
@@ -291,7 +302,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 同じ5点でもランダムだと中央値 0.00220 K・<strong>最悪 1.396 K（1,724倍）</strong> ― 価値は「大外れを確実に避ける」こと</span></div>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 <section>
 <h2>なぜその5点なのか ― PODと測定点の関係</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">PODが「全場は5個の数 \(a\) で決まる」と言った瞬間、<strong>測定点選びは \(5\times5\) の連立方程式を解きやすくする問題</strong>に変わる。
@@ -303,7 +314,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <span style="font-weight:400;font-size:.88em"><strong>「ランダム5点」とは</strong>：20,696セルから一様に5セルを選び直し（重複なし）、<strong>同じPODモード・同じ復元式</strong>で全場を復元する対照実験を200回。変えたのは「どの5行を抜くか」だけ</span></div>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section>
 <h2>検証 ― 5点で本当に全体が合うのか（時刻歴）</h2>
 <p style="flex:0 0 auto">残差の棒グラフだけでは分からないので、<strong>選点にも校正にも使っていない検証点</strong>を上部・中央・下部から取り、温度の時刻歴で真値と重ねた。</p>
@@ -315,7 +326,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <span style="font-weight:400;font-size:.88em">ランダム5点の最悪例は同じ枚数のモードを使っても 0.295 K まで崩れる ＝ <strong>点の選び方が効いている</strong></span></div>
 </section>
 
-<!-- 15 -->
+<!-- 16 -->
 <section>
 <h2>ROMの構築と校正</h2>
 <p style="flex:0 0 auto">選んだ5点上で集中定数モデルを組み、係数 \(C_i, K_{ij}, h\) を<strong>OpenFOAM結果に合うよう最小二乗で校正</strong>した。
@@ -338,7 +349,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <span style="font-weight:400;font-size:.88em">分身200個 × 10サイクルでも数十秒 ＝ EnKFが現実的な時間で回るようになった</span></div>
 </section>
 
-<!-- 16 -->
+<!-- 17 -->
 <section>
 <h2>結果① 温度が精度よく再現できる</h2>
 <p style="flex:0 0 auto">でたらめな初期状態から出発し、少数の温度観測だけでROM＋EnKFを回した。</p>
@@ -347,7 +358,7 @@ FrontISTRで<strong>熱感度 \(W=K_s^{-1}H_T\)</strong>（温度1 Kあたり何
 <div class="key" style="flex:0 0 auto">少数の温度観測だけで、<strong>観測していない点まで含めた全点の温度が真値へ収束</strong>する</div>
 </section>
 
-<!-- 17 -->
+<!-- 18 -->
 <section>
 <h2>結果② 5点から温度分布を復元する</h2>
 <p style="flex:0 0 auto">gappy-POD により、代表5点の測定値から<strong>全20,696セル</strong>を再構成する。式の中身を順に追う。</p>
@@ -383,7 +394,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <span style="font-weight:400;font-size:.88em">前半60枚でPODと5点を作り<strong>後半61枚で検証しても0.0023 K</strong>。観測ノイズ0.3 Kより2桁小さい／Q-DEIMが「連立が解ける5点」を選ぶので \(U_{r,P}\) が特異にならない</span></div>
 </section>
 
-<!-- 18 -->
+<!-- 19 -->
 <section>
 <h2>結果③ 測れない場所の熱変形を、測れる場所から当てる</h2>
 <p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">実機では<strong>加工中の工具先端に変位計を置けない</strong>。そこで構図をそのまま実験にした。
@@ -400,7 +411,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <strong>傾き角を知らないとこの工具長依存を計算できない</strong>［Yang et al. 2015］</span></div>
 </section>
 
-<!-- 19 -->
+<!-- 20 -->
 <section>
 <h2>結果③-2　どの方向・どの場所でも当たるのか</h2>
 <p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">前ページは上面の反りだった。ここでは<strong>観測点と評価点を入れ替え</strong>、観測＝温度2点＋<strong>上面A/O の \(U_z\) だけ</strong>、評価点＝<strong>中高さ B/C</strong>（z=75.4 mm）として、
@@ -416,7 +427,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 \(U_y\) だけ変わらないのは4点とも \(y=0\) の対称面上で元から誤差が振幅の3%しかなかったため。5 seed平均・60〜300 sのMAE</span></div>
 </section>
 
-<!-- 20 -->
+<!-- 21 -->
 <section>
 <h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
@@ -436,7 +447,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <strong>一方、温度センサの基準は発熱感度 \(\partial T/\partial Q\)</strong>。\(W\) を温度センサに流用すると逆効果になる（温度RMSEとの相関：\(\partial T/\partial Q\) −0.835 に対し \(W\) は +0.405）</span></div>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2（36.5, 6.9, 50.8）mm の1点に固定</strong>し、
@@ -451,7 +462,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように一致する</strong>（0.16 µm）。この図の目的は絶対精度ではなく<strong>置き場所の効きの比較</strong></span></div>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
@@ -465,7 +476,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">「どこに何を置くか」は、その観測で<strong>知りたい量の不確かさが何%消えるか</strong>で測れる。
@@ -477,7 +488,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 生の \(\Delta\) は対象の分散と同じ単位なので<strong>行の中でだけ比べる</strong>／感度が高い点を並べるのは逆効果（近接2点は相関1.00000で条件数が30万倍悪化）</span></div>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 <section>
 <h2>まとめ</h2>
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
@@ -492,7 +503,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
 </section>
 
-<!-- 25 -->
+<!-- 26 -->
 <section>
 <h2>限界と今後／公開情報</h2>
 <div class="two">
