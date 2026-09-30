@@ -413,6 +413,17 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 
 <!-- 20 -->
 <section>
+<h2>温度センサを1本も使わず、変位計だけで温度場を直せるか</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">実機では<strong>内部に熱電対を入れられない</strong>ことがある。変位計だけで足りるならセンサ構成の選択肢が広がるので確かめた。</p>
+<div class="scrollfig"><img src="../docs/img/disp_only_da.png" alt="変位だけで温度場を直せるか"></div>
+<p class="scrollhint">▲ ③④＝変位だけ（温度センサ0本）／②＝温度だけ／⑥＝両方。左＝全5点の温度RMSE、中＝発熱量 \(Q\)、右＝反りの誤差</p>
+<div class="key" style="flex:0 0 auto"><strong>変位2点だけ（温度センサ0本）で温度RMSE 0.207 K</strong> ― <strong>温度2点だけ（0.453 K）の2.2倍良い</strong><br>
+<span style="font-weight:400;font-size:.85em">変位計は「<strong>5点温度の重み付き和</strong>」を測っているので、<strong>1本で5点すべてに触れる</strong>（温度計は1点だけ）。未知が7個なので広く触れるほうが絞り込みが速い。
+置く場所も上面0.207 Kと中高さ0.244 Kでほぼ差がない。ただし<strong>温度2点＋変位2点の0.127 Kが最良</strong>＝局所と大域は補完関係</span></div>
+</section>
+
+<!-- 21 -->
+<section>
 <h2>結果③-2　どの方向・どの場所でも当たるのか</h2>
 <p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">前ページは上面の反りだった。ここでは<strong>観測点と評価点を入れ替え</strong>、観測＝温度2点＋<strong>上面A/O の \(U_z\) だけ</strong>、評価点＝<strong>中高さ B/C</strong>（z=75.4 mm）として、
 <strong>観測していない \(U_x\)（半径方向）まで直るか</strong>を見る。</p>
@@ -427,7 +438,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 \(U_y\) だけ変わらないのは4点とも \(y=0\) の対称面上で元から誤差が振幅の3%しかなかったため。5 seed平均・60〜300 sのMAE</span></div>
 </section>
 
-<!-- 21 -->
+<!-- 22 -->
 <section>
 <h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
@@ -447,7 +458,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <strong>一方、温度センサの基準は発熱感度 \(\partial T/\partial Q\)</strong>。\(W\) を温度センサに流用すると逆効果になる（温度RMSEとの相関：\(\partial T/\partial Q\) −0.835 に対し \(W\) は +0.405）</span></div>
 </section>
 
-<!-- 22 -->
+<!-- 23 -->
 <section>
 <h2>熱感度による観測点の選択</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px"><strong>条件をそろえた対照実験</strong>：手法は<strong>OI（共分散 \(B\) を固定）</strong>、温度は<strong>P2（36.5, 6.9, 50.8）mm の1点に固定</strong>し、
@@ -462,7 +473,7 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように一致する</strong>（0.16 µm）。この図の目的は絶対精度ではなく<strong>置き場所の効きの比較</strong></span></div>
 </section>
 
-<!-- 23 -->
+<!-- 24 -->
 <section>
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
 <p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
@@ -476,7 +487,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">変位は高感度Wの点に置くほど効く（低W 0.104 µm → 高W 0.077 µm）</span></div>
 </section>
 
-<!-- 24 -->
+<!-- 25 -->
 <section>
 <h2>観測の価値を1本の式で測る</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:5px">「どこに何を置くか」は、その観測で<strong>知りたい量の不確かさが何%消えるか</strong>で測れる。
@@ -488,7 +499,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 生の \(\Delta\) は対象の分散と同じ単位なので<strong>行の中でだけ比べる</strong>／感度が高い点を並べるのは逆効果（近接2点は相関1.00000で条件数が30万倍悪化）</span></div>
 </section>
 
-<!-- 25 -->
+<!-- 26 -->
 <section>
 <h2>まとめ</h2>
 <table style="font-size:.62em;flex:1 1 0;min-height:0">
@@ -503,7 +514,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <span style="font-weight:400;font-size:.88em">さらに「どこを・何で・いつ測るか」を、推定対象ごとに定量的に設計できるようになった</span></div>
 </section>
 
-<!-- 26 -->
+<!-- 27 -->
 <section>
 <h2>限界と今後／公開情報</h2>
 <div class="two">
