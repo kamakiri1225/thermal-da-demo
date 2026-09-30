@@ -2765,36 +2765,6 @@ class="math inline">\(y_u-u^b\)</span>
 の「温度しか測らなくても <span class="math inline">\(Q\)</span>
 が動く」とまったく同じで、
 <strong>測っていない量でも、測った量と相関していれば更新される</strong>という一点に尽きます。</p>
-<h4 id="つのやっていないこと">3つの「やっていないこと」</h4>
-<p>混乱しやすいので、やっていないことを明記します。</p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>❌ やっていない</th>
-<th>⭕ 実際にやっていること</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>変位を状態ベクトルに入れる</td>
-<td>状態は温度5点＋<span class="math inline">\(Q\)</span>＋<span
-class="math inline">\(h\)</span> の7次元のまま</td>
-</tr>
-<tr class="even">
-<td>同化ループ中に FrontISTR を呼ぶ</td>
-<td>事前に6回呼んで <span class="math inline">\(D\)</span>（<span
-class="math inline">\(2\times5\)</span>）を作っておく</td>
-</tr>
-<tr class="odd">
-<td>変位から温度を「逆算」する</td>
-<td>変位は<strong>順方向</strong>に計算し、残差を共分散経由で温度へ配分する</td>
-</tr>
-</tbody>
-</table>
 <h4
 id="非線形な観測でも同じ形で書ける">非線形な観測でも同じ形で書ける</h4>
 <p><code>enkf_update</code> は観測行列 <span
