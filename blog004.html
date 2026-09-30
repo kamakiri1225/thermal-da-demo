@@ -355,6 +355,11 @@ id="toc-熱ひずみ-節点荷重-つり合い熱弾性fem">7-2. 熱ひずみ �
 変形アニメーション</a></li>
 <li><a href="#変位の時系列グラフ" id="toc-変位の時系列グラフ">7-4.
 変位の時系列グラフ</a></li>
+<li><a href="#xyz-の全成分を見る-観測していない方向場所はどうなるか"
+id="toc-xyz-の全成分を見る-観測していない方向場所はどうなるか">7-5.
+<span class="math inline">\(x\)</span>・<span
+class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
+の全成分を見る ― 観測していない方向・場所はどうなるか</a></li>
 </ul></li>
 <li><a href="#まだ分かっていないこと-代表点選択の未解決問題"
 id="toc-まだ分かっていないこと-代表点選択の未解決問題">8.
@@ -2777,6 +2782,211 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 （P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。<strong>変位2点（赤）だけが両点とも0.16µm</strong>で合う。
 →
 教訓：<strong>変位を合わせたい場所には変位観測を置く。そして評価は差だけでなく個別の変位でも行う</strong>。</em></p>
+<h3 id="xyz-の全成分を見る-観測していない方向場所はどうなるか">7-5.
+<span class="math inline">\(x\)</span>・<span
+class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
+の全成分を見る ― 観測していない方向・場所はどうなるか</h3>
+<p>ここまでの図はすべて <strong><span class="math inline">\(z\)</span>
+成分（上下・軸方向）だけ</strong>でした。 FrontISTR は当然 <span
+class="math inline">\(U_x,U_y,U_z\)</span>
+の3成分を返しているので、<strong>観測していない <span
+class="math inline">\(x,y\)</span> 方向</strong>と
+<strong>観測していない場所</strong>がどうなるかを確かめます。</p>
+<p>観測に使うのは今までどおり <strong>「温度2点 ＋ 上面A/O の <span
+class="math inline">\(U_z\)</span> だけ」</strong>。 <span
+class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
+点は一度も同化に使いません。</p>
+<table>
+<thead>
+<tr class="header">
+<th>点</th>
+<th>座標</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>(+28.7, 0, 100.5) mm</td>
+<td>上面ヒータ側。<strong><span class="math inline">\(U_z\)</span>
+のみ観測に使用</strong></td>
+</tr>
+<tr class="even">
+<td>O</td>
+<td>(−28.7, 0, 100.5) mm</td>
+<td>上面反対側。<strong><span class="math inline">\(U_z\)</span>
+のみ観測に使用</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>B</strong></td>
+<td><strong>(+28.7, 0, 75.4) mm</strong></td>
+<td><strong>中高さ。一切観測しない</strong></td>
+</tr>
+<tr class="even">
+<td><strong>C</strong></td>
+<td><strong>(−28.7, 0, 75.4) mm</strong></td>
+<td><strong>中高さ。一切観測しない</strong></td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="img/xyz_disp_da.png" alt="xyz全成分の同化結果" />
+<figcaption aria-hidden="true">xyz全成分の同化結果</figcaption>
+</figure>
+<p><em>行が成分（上から <span class="math inline">\(U_x,U_y,U_z\)</span>
+）、列が点（A・O＝観測、B・C＝未観測）。
+灰点線＝同化なし、赤破線＝同化後、太い灰実線＝真値。</em></p>
+<p>5 seed平均、<strong>初回サイクル（<span
+class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–300 s
+の MAE</strong>:</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>点</th>
+<th>区分</th>
+<th>成分</th>
+<th>真値振幅 [µm]</th>
+<th>同化なし [µm]</th>
+<th><strong>同化後 [µm]</strong></th>
+<th>改善</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>観測</td>
+<td><span class="math inline">\(U_x\)</span></td>
+<td>2.24</td>
+<td>0.266</td>
+<td><strong>0.046</strong></td>
+<td>5.7倍</td>
+</tr>
+<tr class="even">
+<td>A</td>
+<td>観測</td>
+<td><span class="math inline">\(U_y\)</span></td>
+<td>0.77</td>
+<td>0.023</td>
+<td>0.027</td>
+<td>ほぼ変化なし</td>
+</tr>
+<tr class="odd">
+<td>A</td>
+<td>観測</td>
+<td><span class="math inline">\(U_z\)</span></td>
+<td>5.78</td>
+<td>5.614</td>
+<td><strong>0.031</strong></td>
+<td><strong>179倍</strong></td>
+</tr>
+<tr class="even">
+<td>O</td>
+<td>観測</td>
+<td><span class="math inline">\(U_x\)</span></td>
+<td>4.36</td>
+<td>2.873</td>
+<td><strong>0.036</strong></td>
+<td><strong>80倍</strong></td>
+</tr>
+<tr class="odd">
+<td>O</td>
+<td>観測</td>
+<td><span class="math inline">\(U_z\)</span></td>
+<td>4.36</td>
+<td>5.376</td>
+<td><strong>0.032</strong></td>
+<td><strong>166倍</strong></td>
+</tr>
+<tr class="even">
+<td><strong>B</strong></td>
+<td><strong>未観測</strong></td>
+<td><span class="math inline">\(U_x\)</span></td>
+<td>1.00</td>
+<td>0.374</td>
+<td><strong>0.022</strong></td>
+<td><strong>17倍</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>B</strong></td>
+<td><strong>未観測</strong></td>
+<td><span class="math inline">\(U_z\)</span></td>
+<td>4.45</td>
+<td>4.217</td>
+<td><strong>0.024</strong></td>
+<td><strong>172倍</strong></td>
+</tr>
+<tr class="even">
+<td><strong>C</strong></td>
+<td><strong>未観測</strong></td>
+<td><span class="math inline">\(U_x\)</span></td>
+<td>3.40</td>
+<td>2.782</td>
+<td><strong>0.022</strong></td>
+<td><strong>126倍</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>C</strong></td>
+<td><strong>未観測</strong></td>
+<td><span class="math inline">\(U_z\)</span></td>
+<td>3.27</td>
+<td>4.022</td>
+<td><strong>0.021</strong></td>
+<td><strong>195倍</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="分かったこと">分かったこと</h4>
+<p><strong>① <span class="math inline">\(U_x\)</span>
+は観測していないのに直る。</strong> O点で 2.87 → 0.036
+µm（80倍）、未観測のC点でも 2.78 → 0.022 µm（126倍）。</p>
+<p>理屈は §7-2 の熱弾性から明らかです。変位は温度場から <span
+class="math inline">\(u=W(T-T_\mathrm{ref})\)</span> で決まり、 <span
+class="math inline">\(W=K_s^{-1}H_T\)</span>
+は<strong>3成分すべてを含む行列</strong>です。
+つまり<strong>同化が直しているのは変位ではなく温度場</strong>であって、
+温度場が正しくなれば <span class="math inline">\(W\)</span> を通じて
+<strong><span class="math inline">\(x\)</span> も <span
+class="math inline">\(y\)</span> も <span
+class="math inline">\(z\)</span> も自動的に従います</strong>。 「<span
+class="math inline">\(U_z\)</span> を観測して <span
+class="math inline">\(U_x\)</span>
+が直る」のは不思議なことではなく、当然の帰結です。</p>
+<p><strong>② 未観測点は観測点と同じ率で直る。</strong> <span
+class="math inline">\(U_z\)</span> で観測点179倍・未観測点172倍、<span
+class="math inline">\(U_x\)</span> で観測点80倍・未観測点126倍。
+<strong>「測ったところだけ合っている」のではありません。</strong> これは
+§5-4（未観測セルの温度復元）と同じ主張を、変位の側から確かめたことになります。</p>
+<p><strong>③ <span class="math inline">\(U_y\)</span>
+だけは変わらない（0.023 → 0.027 µm）。</strong>
+これは失敗ではなく、<strong>同化なしの時点ですでに振幅0.77
+µmに対し誤差0.023 µm（3%）</strong> で、 直す余地がなかったためです。
+A・O・B・C はすべて <span class="math inline">\(y=0\)</span>
+の<strong>対称面上</strong>にあり、非対称加熱が生む周方向変位が
+ほぼ打ち消し合うためと考えられます（<strong>この解釈は未検証です</strong>。
+<span class="math inline">\(y\neq0\)</span>
+の点で確かめる必要があります）。</p>
+<blockquote>
+<p><strong>正直な注記</strong>：<span
+class="math inline">\(t=30\)</span> s
+の初回サイクルだけを含めて平均すると、<span
+class="math inline">\(U_y\)</span> は 0.028 → 0.098 µm
+と「悪化」して見えます。これは<strong>1回目の更新での行き過ぎ</strong>が
+平均を押し上げているだけで、2サイクル目以降は真値に乗っています。
+上の表が 60–300 s なのはこのためです。</p>
+</blockquote>
+<p>再現:
+<code>OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/eval_xyz_disp_da.py</code>
+（FrontISTR を6回呼んで3成分の変位演算子を作り、結果を
+<code>results/xyz_disp_da.json</code> に保存）</p>
 <p><strong>仕上げに、まったく別の未観測点でも確認</strong>します。観測点（赤/橙）から離れた
 <strong>未観測の温度3点（緑）と変位3点（紫）</strong>の位置はこちら:</p>
 <p><img src="img/unobs_points_locations.png" alt="観測点と未観測評価点の位置" width="440"></p>
