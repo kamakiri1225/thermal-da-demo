@@ -385,26 +385,25 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 
 <!-- 18 -->
 <section>
-<h2>結果③ 温度から熱変形へ</h2>
-<p style="flex:0 0 auto">復元した温度場をFrontISTRの熱弾性へ渡し、<em>未観測の変位</em>を推定した。</p>
-<div class="two" style="gap:18px">
-<div style="flex:.80"><img src="../docs/img/disp_obs_points.png" alt="A・Oの位置">
-<p class="cap"><strong>A＝上面のヒータ側(+X)</strong>、<strong>O＝上面の反対側(−X)</strong>（ともに z=100.5 mm）。
-本研究の変位はすべて<strong>\(z\) 方向（上下・軸方向）成分のみ</strong>。
-青 P0〜P4＝温度の代表点。A側が持ち上がりO側が下がるので、差 \(U_z(A)-U_z(O)\) が<strong>上面の反り</strong>になる</p></div>
-<div style="flex:1.34"><img src="../docs/img/blog_disp_timeseries_truth_vs_da.png" alt="変位差の時系列">
-<p class="cap">黒太線＝FrontISTR真値。温度RMSE：同化なし 4.585 K／温度1点 低感度1.036・<strong>高感度0.617 K</strong>／温度2点 0.503 K／
-<strong>温度2点＋変位2点 0.160 K</strong>（変位差の誤差 0.165 µm）。凡例の高低は<strong>発熱感度 \(\partial T/\partial Q\)</strong>の大小</p></div>
+<h2>結果③ 測れない場所の熱変形を、測れる場所から当てる</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">実機では<strong>加工中の工具先端に変位計を置けない</strong>。そこで構図をそのまま実験にした。
+<strong>評価点＝上面A/Oの反り</strong>（z=100.5 mm・工具先端側に相当、<strong>同化に一切使わない</strong>）／
+<strong>観測点＝温度2点＋変位B/C</strong>（z=75.4 mm・25 mm下）。</p>
+<div class="scrollfig">
+<img src="../docs/img/AO_from_elsewhere.png" alt="A/Oを測らずにA/Oの反りを当てる">
+<img src="../docs/img/obs_vs_target.png" alt="観測点と評価点">
 </div>
-<div class="key" style="flex:0 0 auto">同化なし 4.59 K <span class="arrow">→</span> 温度2点＋変位2点で <strong>0.16 K（約29倍の改善）</strong><br>
-<span style="font-weight:400;font-size:.88em">温度1点でも<strong>発熱感度 \(\partial T/\partial Q\) の高い点に置けば1.7倍良い</strong>（1.036→0.617 K）。実務では温度→変位を毎回FEMで解かず \(W=K_s^{-1}H_T\) で直接出せる</span></div>
+<p class="scrollhint">▲ 1枚目＝\(U_z(A)\)／\(U_z(O)\)／反りの時刻歴。<strong>赤破線＝B/Cだけ測った構成</strong>が青点線（A/Oを測った参考値）とほぼ重なる。2枚目＝観測点と評価点の位置</p>
+<div class="key" style="flex:0 0 auto">知りたい場所を測らなくても<strong>反りの誤差 0.081 µm</strong>（振幅2.735 µmの3.0%）。A/Oを直接測った場合（0.077 µm）と<strong>ほぼ同じ</strong><br>
+<span style="font-weight:400;font-size:.85em">温度2点だけだと 0.697 µm で反りは当たらない（個別の \(U_z(A)\) は0.160 µmまで合うのに）＝<strong>差を当てるには変位観測が要る</strong>。
+同化なしの0.238 µmは<strong>見かけ</strong>：個別には5.6 µmも外れており、A・Oが同方向に外れて差で相殺しているだけ</span></div>
 </section>
 
 <!-- 19 -->
 <section>
-<h2>結果③-2　測っていない場所の変形を当てる（循環のない検証）</h2>
-<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px"><strong>観測点を評価しても意味がない。</strong>そこで<strong>観測点</strong>と<strong>評価点（未観測点）</strong>を物理的に分けた。
-観測＝温度2点＋<strong>上面A/O の \(U_z\) だけ</strong>（z=100.5 mm）。評価点＝<strong>中高さ B/C</strong>（z=75.4 mm）で、<strong>同化に一切使わない</strong>。</p>
+<h2>結果③-2　どの方向・どの場所でも当たるのか</h2>
+<p style="flex:0 0 auto;font-size:.60em;margin-bottom:5px">前ページは上面の反りだった。ここでは<strong>観測点と評価点を入れ替え</strong>、観測＝温度2点＋<strong>上面A/O の \(U_z\) だけ</strong>、評価点＝<strong>中高さ B/C</strong>（z=75.4 mm）として、
+<strong>観測していない \(U_x\)（半径方向）まで直るか</strong>を見る。</p>
 <div class="scrollfig">
 <img src="../docs/img/obs_vs_target.png" alt="観測点と評価点を分ける">
 <img src="../docs/img/xyz_disp_da.png" alt="xyz全成分の同化結果">
