@@ -97,7 +97,7 @@ def main():
             fontsize=15,transform=ax.transAxes,color=RED,weight="bold")
     ax.add_patch(plt.Rectangle((0.02,0.10),0.95,0.235,transform=ax.transAxes,
                  fc="#fdecea",ec=RED,lw=2.2,clip_on=False))
-    ax.text(0.06,0.275,"もし毎サイクルFrontISTRを呼んだら",fontsize=13,
+    ax.text(0.06,0.275,"もし毎サイクルFrontISTRを呼んだら（見積もり。106では実施していない）",fontsize=13,
             transform=ax.transAxes,weight="bold")
     ax.text(0.06,0.185,"1回＝分オーダー × 60メンバー × 20サイクル = 数日",
             fontsize=13.5,transform=ax.transAxes)
