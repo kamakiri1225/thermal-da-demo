@@ -24,6 +24,7 @@ TITLES = {
     "blog_003": "blog_003：アンサンブルカルマンフィルタ（EnKF）",
     "blog_004": "blog_004：POD で代表点を選ぶ ROM",
     "blog_005": "blog_005：推定対象で最適センサは変わる",
+    "blog_006": "blog_006：温度2点＋変位2点の同化を1ステップずつ追う",
 }
 LEAD = {
     "blog_001": "中空円筒のCHT解析からFrontISTRの熱膨張まで。熱伝達率の分布も出す。",
@@ -31,6 +32,7 @@ LEAD = {
     "blog_003": "分身の散らばりで共分散を作り、発熱量Qと放熱hを同時推定する。",
     "blog_004": "PODで場の型を出し、Q-DEIMで代表5点を選んで軽いROMを組む。",
     "blog_005": "観測の価値Δを1本の式で定義し、対象ごとに最適観測が変わることを示す。",
+    "blog_006": "センサの読みから、状態・予報・観測演算子・共分散・ゲイン・更新まで、本番の数値で追う。",
 }
 
 CSS = """
@@ -66,7 +68,7 @@ def build():
     hdr = OUT / "_header.html"
     hdr.write_text(CSS, encoding="utf-8")
 
-    mds = sorted(DOCS.glob("blog_00[1-5]_*.md"))
+    mds = sorted(DOCS.glob("blog_00[1-6]_*.md"))
     used_imgs: set[str] = set()
     for md in mds:
         stem = md.name[:8]
@@ -84,7 +86,7 @@ def build():
             shutil.copy2(src, OUT / rel)
     print(f"  copied {len(used_imgs)} images")
 
-    for pdf in sorted((DOCS / "pdf").glob("blog_00[1-5].pdf")):
+    for pdf in sorted((DOCS / "pdf").glob("blog_00[1-6].pdf")):
         shutil.copy2(pdf, OUT / "pdf" / pdf.name)
     poster = ROOT / "presentation" / "06_conference_posters.pdf"
     if poster.exists():
@@ -102,9 +104,10 @@ def build():
 
     cards = "".join(
         f'<a class="card" href="{s.replace("_","")}.html"><b>{TITLES[s]}</b>'
-        f'<p>{LEAD[s]}</p><p class="sub">PDF: '
-        f'<a href="pdf/{s}.pdf">{s}.pdf</a></p></a>\n'
-        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005"])
+        f'<p>{LEAD[s]}</p>'
+        + (f'<p class="sub">PDF: <a href="pdf/{s}.pdf">{s}.pdf</a></p>' if (DOCS / "pdf" / f"{s}.pdf").exists() else '')
+        + '</a>\n'
+        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005", "blog_006"])
     (OUT / "index.html").write_text(
         f'<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">'
         f'<title>熱データ同化 研究ノート（ローカル閲覧）</title>{INDEX_CSS}</head><body>'

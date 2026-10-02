@@ -17,6 +17,7 @@
 
 - 題材：片側にヒータ（15 W）が付いた中空円筒。
 - 流れ：OpenFOAM で温度を計算 → FrontISTR で熱変形を計算 → 同化で補正。
+- 同化の中身（センサの読みから数式まで）：[blog_006](../docs/blog_006_temp2_disp2_step_by_step.md)
 - 真値は計算で作った模擬データ（双子実験）。
 
 ### 3. 課題
@@ -52,6 +53,45 @@
 - 真値はすべて計算で作った模擬データ。実機でも、実ソルバ（OpenFOAM＋FrontISTR）を真値にした試験でもない。
 - 放熱係数 $h$ は、600 秒の計算では当たらない。
 - 熱源の位置が変わると、選んだ置き場所も変わる。
+
+## 発表構成（スライド35枚：表紙・目次＋7章33枚）
+
+章は → ←、章の中は ↓ ↑ で移動します。「言うこと」は各スライドで伝える1行、「詳しい説明」は質問されたときに見る資料です。
+
+| 章 | スライド | 言うこと | 詳しい説明 |
+|---|---|---|---|
+| 1. 背景と目的 | はじめに | 熱変形は加工精度を悪くする。解析だけでは合わない | [04_intro_literature](04_intro_literature.md) |
+| | 目的 | 少ない測定とモデルを同化で組み合わせ、オープンソースだけで作る | |
+| 2. データ同化の基礎と双子実験 | データ同化とは | 予測を測定値で直す | [blog_002](../docs/blog_002_oi_data_assimilation.md) |
+| | データ同化の種類と、今回の選択 | OI・EnKF・粒子フィルタ・4D-Var の中で EnKF を選んだ理由 | [blog_003 §5-2](../docs/blog_003_ensemble_kalman_filter.md) |
+| | OpenFOAM から FrontISTR へ | CHT の温度を節点補間して熱変形を計算。これを真値にする（双子実験） | [blog_001](../docs/blog_001_cht_thermal_expansion_and_htc.md) |
+| | 観測データはどう作られ、どう同化に使われるのか | 温度2点＋変位2点の読み → 予測と比べる → 温度・発熱量を直す | **[blog_006](../docs/blog_006_temp2_disp2_step_by_step.md)** |
+| 3. 課題 | 課題① OI では発熱量が当たらない | 共分散を固定すると Q が 9 W 止まり | [blog_002 §3-6](../docs/blog_002_oi_data_assimilation.md) |
+| | 課題② EnKF は当たるが計算が重い | 実ソルバで 60 メンバーは重い | [blog_003](../docs/blog_003_ensemble_kalman_filter.md) |
+| | パラメータの同定 | Q は当たる（14.9 W）、h は 600 秒では当たらない | [blog_003 §4-0・§4-0-b](../docs/blog_003_ensemble_kalman_filter.md)、[blog_006](../docs/blog_006_temp2_disp2_step_by_step.md) |
+| | 課題の整理と解決 | 計算を軽くすれば EnKF が使える | |
+| 4. 低次元化 | POD | 温度場は2モードで 99.9 % | [blog_004 §2・§3](../docs/blog_004_pod_selected_rom.md) |
+| | Q-DEIM | 代表5点を自動で選ぶ | [blog_004 §4](../docs/blog_004_pod_selected_rom.md) |
+| | なぜその5点なのか | POD と測定点の関係 | [blog_004 §4-0](../docs/blog_004_pod_selected_rom.md) |
+| | 検証（時刻歴） | 5点で全体が合う | [blog_004 §5-4](../docs/blog_004_pod_selected_rom.md) |
+| | ROM の構築と校正 | 600 秒が 31 ms、校正残差 0.014 K | [blog_004 §6](../docs/blog_004_pod_selected_rom.md) |
+| 5. 結果 | 結果① 温度 | 4.6 K → 0.16 K | [blog_004 §7-6](../docs/blog_004_pod_selected_rom.md) |
+| | 結果② 温度分布の復元 | 5点から 20,696 セルを復元 | [blog_004 §5-4](../docs/blog_004_pod_selected_rom.md) |
+| | 結果③ 測れない場所の熱変形 | 中段を測って上面の反りを 0.08 µm | [blog_004 §7-4b](../docs/blog_004_pod_selected_rom.md) |
+| | 変位計だけで | 温度センサなしで 0.21 K | [blog_004 §7-4c](../docs/blog_004_pod_selected_rom.md) |
+| | 結果③-2 どの方向でも | 測っていない横方向 Ux も 126 倍改善 | [blog_004 §7-5](../docs/blog_004_pod_selected_rom.md) |
+| 6. 観測点の設計 | 熱感度 W はどこから来るのか | W＝温度が 1 K 変わるとどこが何 µm 動くか。FrontISTR で計算 | [blog_002 §4](../docs/blog_002_oi_data_assimilation.md) |
+| | 熱感度による観測点の選択 | 変位計は W の大きい上面へ（2.43 → 0.86 K） | [blog_005 §4-3](../docs/blog_005_optimal_sensor_placement.md) |
+| | 結果④ 観測を増やすほど | 温度1点 → 2点（P2＋P4）→ ＋変位2点 | [blog_005 §4-4](../docs/blog_005_optimal_sensor_placement.md) |
+| | 温度センサは W の高い点に置けばよいか | いいえ。反りのずれ＝W×推定温度のずれ | [blog_005 §4-6](../docs/blog_005_optimal_sensor_placement.md) |
+| | W＋温度のばらつきで選ぶ | 測る前に順位を当てられる（順位相関 0.98） | [blog_005 §4-6](../docs/blog_005_optimal_sensor_placement.md) |
+| | 前提が外れても | 発熱量・放熱のずれには強い。熱源の位置は外せない | [blog_005 §4-6](../docs/blog_005_optimal_sensor_placement.md) |
+| | 観測の価値を1本の式で | Δ＝Cov²/(Var＋r)。単回の指標で、最終精度は保証しない | [blog_005 §1・§6-1](../docs/blog_005_optimal_sensor_placement.md) |
+| 7. まとめと今後 | まとめ | オープンソースだけで解析から同化まで。測れない場所の変形を推定、置き場所を計算で選べた | この資料 |
+| | 強みと次の検証 | 実ソルバ真値・未学習条件での検証が次 | [02_positioning_novelty](02_positioning_novelty.md)、[19](../docs/19_research_advantage_and_validation.md) |
+| | 限界と今後 | 模擬データ、h、熱源位置 | 下の「限界」 |
+
+想定質問への答えは [03_expected_questions](03_expected_questions.md) にあります。
 
 ## 熱感度 $W$ の使い方
 
