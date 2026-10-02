@@ -523,7 +523,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 </div>
 <p class="scrollhint">▲ 上＝同化前の予測 \(\sigma_S\) と実際の反りの誤差（EnKF・5 seed）／下＝全10通りの温度場・反りの誤差（緑＝A側とO側に1本ずつ）。枠内スクロール</p>
 <div class="key" style="flex:0 0 auto">予測の順位と同化結果の順位が一致（<strong>順位相関 0.98</strong>）。選ばれるのは<strong>P2＋P4（A側とO側に1本ずつ）</strong><br>
-<span style="font-weight:400;font-size:.86em">P2＋P0（2本ともA側）に比べ温度場の誤差 0.33→<strong>0.16 K</strong>、反り 0.53→<strong>0.24 µm</strong>（3指標とも5 seed全勝）。
+<span style="font-weight:400;font-size:.86em">P2＋P0（2本ともA側）に比べ温度場の誤差 0.33〜0.53→<strong>0.15〜0.16 K</strong>、反り 0.53〜0.76→<strong>0.24〜0.25 µm</strong>（3指標とも5 seed全勝。範囲は乱数の割り当てによる違い。P2＋P0は不安定）。
 両側に置く組み合わせ同士の差はseedのばらつき内。<strong>温度センサ1本では順位を当てられなかった</strong>（順位相関0.5）。予測値の大きさ自体は実際の誤差と一致しない</span></div>
 </section>
 <section data-chapter="観測点の設計 ― 熱感度と観測の価値">
@@ -556,7 +556,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOI例：\(Q\)=8.9 W／104 EnKFの別設定：<strong>14.926 W</strong>（真値15 W。公平な同条件比較ではない）</td></tr>
 <tr class="hi"><td><strong>低次元化</strong></td><td>PODで場を2モードに圧縮（99.9 %）</td><td><strong>0→600 s が31 ms</strong>（実ソルバは分オーダー）</td></tr>
 <tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、比較したランダム配置の最悪1.4 Kより良い復元（大域保証ではない）</td></tr>
-<tr class="hi"><td><strong>観測設計</strong></td><td>変位センサは熱感度 \(W\) の大きい点へ。温度センサは \(W\)＋温度のばらつきから、測る前に選ぶ</td><td>変位2点：置き場所で 2.43→0.86 K／温度2点：予測順位と同化結果の順位相関 0.98、A側だけの配置より温度場の誤差が約半分</td></tr>
+<tr class="hi"><td><strong>観測設計</strong></td><td>変位センサは熱感度 \(W\) の大きい点へ。温度センサは \(W\)＋温度のばらつきから、測る前に選ぶ</td><td>変位2点：置き場所で 2.43→0.86 K／温度2点：予測順位と同化結果の順位相関 0.98、A側だけの配置より温度場の誤差が小さい（0.15〜0.16 K 対 0.33〜0.53 K）</td></tr>
 <tr class="hi"><td><strong>観測外評価</strong></td><td><strong>知りたい場所を測らずに</strong>当てる（観測＝中高さ、評価＝上面）</td><td>反りの誤差 <strong>0.081 µm</strong>（振幅の3.0%）。直接測った場合(0.077)とほぼ同じ</td></tr>
 <tr class="hi"><td><strong>センサ構成</strong></td><td><strong>温度センサ0本</strong>（変位計だけ）でも成立するか</td><td>温度RMSE <strong>0.207 K</strong> ― 温度2点だけ(0.453 K)の<strong>2.2倍良い</strong></td></tr>
 </table>
