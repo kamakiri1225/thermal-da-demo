@@ -1,19 +1,29 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>熱データ同化 研究ノート（ローカル閲覧）</title>
-body{font-family:"Noto Sans CJK JP",system-ui,sans-serif;max-width:980px;margin:0 auto;
-     padding:32px 24px 64px;color:#1b2430;line-height:1.7}
-h1{font-size:30px;border-bottom:3px solid #2E75D4;padding-bottom:10px}
-.note{background:#f1f5fa;border-left:4px solid #2E75D4;padding:12px 16px;font-size:14.5px}
-.card{display:block;border:1px solid #c9d4e0;border-radius:10px;padding:16px 18px;margin:12px 0;
-      text-decoration:none;color:inherit;transition:.15s}
-.card:hover{border-color:#2E75D4;box-shadow:0 2px 10px rgba(46,117,212,.18)}
-.card b{font-size:17px;color:#14459c}
-.card p{margin:6px 0 0;font-size:14.5px;color:#445}
-.sub{font-size:13px;color:#667}
-</style>
-</head><body><h1>熱データ同化 研究ノート</h1><p class="note">このページは<b>あなたのPCの中だけ</b>で動いています（<code>/mnt/d/work/002_CAE/openfoam/20260505_datadoka/sample/106_0_pod_selected_rom/site</code>）。インターネットには公開されていません。</p><a class="card" href="blog001.html"><b>blog_001：OpenFOAM＋FrontISTR で熱流体固体連成→熱膨張</b><p>中空円筒のCHT解析からFrontISTRの熱膨張まで。熱伝達率の分布も出す。</p><p class="sub">PDF: <a href="pdf/blog_001.pdf">blog_001.pdf</a></p></a>
-<a class="card" href="blog002.html"><b>blog_002：OI（最適内挿）でデータ同化</b><p>更新式1本と3点モデルの手計算から、熱感度Wによる観測点選びまで。</p><p class="sub">PDF: <a href="pdf/blog_002.pdf">blog_002.pdf</a></p></a>
-<a class="card" href="blog003.html"><b>blog_003：アンサンブルカルマンフィルタ（EnKF）</b><p>分身の散らばりで共分散を作り、発熱量Qと放熱hを同時推定する。</p><p class="sub">PDF: <a href="pdf/blog_003.pdf">blog_003.pdf</a></p></a>
-<a class="card" href="blog004.html"><b>blog_004：POD で代表点を選ぶ ROM</b><p>PODで場の型を出し、Q-DEIMで代表5点を選んで軽いROMを組む。</p><p class="sub">PDF: <a href="pdf/blog_004.pdf">blog_004.pdf</a></p></a>
-<a class="card" href="blog005.html"><b>blog_005：推定対象で最適センサは変わる</b><p>観測の価値Δを1本の式で定義し、対象ごとに最適観測が変わることを示す。</p><p class="sub">PDF: <a href="pdf/blog_005.pdf">blog_005.pdf</a></p></a>
-<a class="card" href="blog006.html"><b>blog_006：温度2点＋変位2点の同化を1ステップずつ追う</b><p>センサの読みから、状態・予報・観測演算子・共分散・ゲイン・更新まで、本番の数値で追う。</p></a>
-<a class="card" href="posters.html"><b>学会発表ポスター（4件）</b><p>オープンCAE／計算工学／計算力学／精密工学。</p><p class="sub">PDF: <a href="pdf/posters.pdf">posters.pdf</a></p></a></body></html>
+<!doctype html><html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱データ同化ブログ ― CHT／OI／EnKF／POD-ROM</title>
+<style>
+ body{font-family:-apple-system,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+   max-width:1040px;margin:0 auto;padding:2rem 1.2rem;line-height:1.8;color:#1b2733;background:#fafbfc}
+ h1{font-size:1.6rem;border-bottom:3px solid #33475b;padding-bottom:.4rem}
+ .card{display:block;border:1px solid #d8dee6;border-radius:12px;padding:1rem 1.2rem;margin:1rem 0;
+   text-decoration:none;color:inherit;background:#fff;transition:.15s}
+ .card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);border-color:#33475b}
+ .card b{font-size:1.15rem;color:#12407a}
+ .card p{margin:.3rem 0 0;color:#54616e;font-size:.95rem}
+ .note{color:#6b7684;font-size:.88rem;margin-top:2rem}
+</style></head><body>
+<h1>熱データ同化 ― CAE解説ブログ</h1>
+<p>中空円筒の熱流体固体連成（OpenFOAM＋FrontISTR）を題材に、データ同化と縮約モデルを図・数式・実データで解説します。</p>
+<a class="card" href="blog001.html"><b>blog_001：CHT熱膨張＋熱伝達率</b><p>OpenFOAM×FrontISTRで温度→熱膨張、面ごとの熱伝達率まで実際に計算。</p></a>
+<a class="card" href="blog002.html"><b>blog_002：OIデータ同化</b><p>最適内挿(OI)を数式と小さな行列の手計算で。温度・変位・発熱量Qの入り方まで。</p></a>
+<a class="card" href="blog003.html"><b>blog_003：アンサンブルカルマンフィルタ</b><p>4個の分身で共分散を作り、EnKFを手計算で理解する。</p></a>
+<a class="card" href="blog004.html"><b>blog_004：POD選定ROM</b><p>PODで場の型を出し、Q-DEIMで代表点を選び、軽いROMを校正。5点→全温度場の復元アニメ付き。</p></a>
+<a class="card" href="blog005.html"><b>blog_005：推定対象で最適センサは変わる</b><p>観測の価値Δを1本の式で導き、行列手計算と実データで「対象ごとに最適観測が違う」を示す。</p></a>
+<a class="card" href="blog006.html"><b>blog_006：温度2点＋変位2点の同化を1ステップずつ</b><p>センサの読みから、状態・予報・観測演算子・共分散・ゲイン・更新まで、本番の数値で追う。</p></a>
+<a class="card" href="opencae2026.html"><b>🎤 オープンCAE学会シンポジウム B-16 発表スライド</b><p>少数の温度・変位観測から熱変形を推定する ― OpenFOAM＋FrontISTR＋データ同化。reveal.js（→キーで進む）。</p></a>
+<a class="card" href="posters.html"><b>学会別・発表ポスター（4学会）</b><p>OpenCAE／計算工学／計算力学／実務応用。核心・図・実データ入りのポスター形式。</p></a>
+<a class="card" href="pdf/blog_001.pdf"><b>📄 PDF版（論文形式・二段組）</b><p><a href="pdf/blog_001.pdf">blog_001</a>／<a href="pdf/blog_002.pdf">blog_002</a>／<a href="pdf/blog_003.pdf">blog_003</a>／<a href="pdf/blog_004.pdf">blog_004</a>／<a href="pdf/blog_005.pdf">blog_005</a>／<a href="pdf/posters.pdf">ポスター(A1×4)</a></p></a>
+<a class="card" href="slides02_full_story.html"><b>📑 研究ノート・スライド：全体のストーリー</b><p>CHT→同化→ROM→観測設計までを1本で追う社内向けスライド（reveal.js）。</p></a>
+<a class="card" href="slides01_pod_qdeim.html"><b>📑 研究ノート・スライド：POD＋Q-DEIM</b><p>PODで場の型を出し、Q-DEIMで代表点を選ぶまでのアルゴリズム解説（reveal.js）。</p></a>
+<p class="note">数式はMathJax、図・アニメGIFは埋め込み表示。ソース：github.com/kamakiri1225/thermal-da-demo</p>
+</body></html>
