@@ -1520,8 +1520,9 @@ seed平均）:</p>
 </table>
 <p>結果は<strong>直感に反します</strong>:</p>
 <ul>
-<li><strong>温度を当てたいなら</strong>、発熱感度の基準は機能する（最大P2
-0.623 K ＜ 最小P4 1.138 K）</li>
+<li><strong>温度を当てたいなら</strong>、この1本の比較では発熱感度の最大点が最小点より良かった（最大P2
+0.623 K ＜ 最小P4 1.138
+K）。ただし2本の配置では発熱感度の上位から選ぶと不利になる（§4-6）</li>
 <li><strong>変形を当てたいのに</strong>、熱感度 <span
 class="math inline">\(W\)</span>
 が<strong>最小</strong>のP3が<strong>いちばん良い</strong>（0.562 µm）。
@@ -1867,7 +1868,7 @@ class="math inline">\(W\)</span></th>
 <tr class="even">
 <td>P2＋P4 vs P0＋P2</td>
 <td>3 指標とも、<strong>5 seed すべてで P2＋P4
-のほうが良い</strong>（温度場は約半分）</td>
+のほうが良い</strong>（温度場は 0.16 K 対 0.33 K）</td>
 </tr>
 <tr class="odd">
 <td>両側に置く組み合わせ同士</td>
@@ -1879,6 +1880,40 @@ P1＋P2（0.25）のどちらが良いかは言えない</td>
 <p>言えるのは「<strong>A 側と O
 側に分けて置くと良い</strong>」までで、「P2＋P4
 が唯一の最適」とまでは言えません。</p>
+<p><strong>結果が乱数の割り当てでどれだけ変わるか。</strong>
+同じ2本でも、観測ノイズなどの乱数をどちらのセンサに割り当てるか（並べる順番）を入れ替えると、結果が変わります。</p>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 36%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>組み合わせ</th>
+<th style="text-align: right;">温度場全体の誤差（並べ方A /
+並べ方B）</th>
+<th style="text-align: right;">反り A−O の誤差（A / B）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P2＋P4</td>
+<td style="text-align: right;">0.157 / 0.150 K</td>
+<td style="text-align: right;">0.24 / 0.25 µm</td>
+</tr>
+<tr class="even">
+<td>P2＋P0</td>
+<td style="text-align: right;">0.327 / <strong>0.528</strong> K</td>
+<td style="text-align: right;">0.53 / <strong>0.76</strong> µm</td>
+</tr>
+</tbody>
+</table>
+<p>P2＋P4 はほとんど変わりませんが、<strong>P2＋P0
+は乱数しだいで大きく変わります</strong>（片側だけの配置は不安定）。上の表の
+P0＋P2 の値は並べ方Aのものです。並べ方Bでは、P2＋P4
+との差は約3倍になります。どちらの並べ方でも P2＋P4
+のほうが良い結果です。</p>
 <p>なお、本番の比較計算（blog_004 §7-6）で使った温度2点 P2＋P0
 は、2本とも A 側にある組み合わせでした。温度だけで同化する場合、P2＋P4
 の約2倍の誤差になります。</p>
@@ -2413,8 +2448,9 @@ href="https://arxiv.org/abs/2507.02500">goal-oriented sensor placement
 (2025/2026)</a>
 は予測対象の不確かさを目的に配置を設計します。「目的別の配置を初めて提案した」とは主張しません。</p>
 <p>さらに優位性を裏付けるには、(1)
-未学習条件のOpenFOAM＋FrontISTRを真値にした独立試験、(2)
-同じ温度・変位センサ数での配置比較、(3)
+未学習条件のOpenFOAM＋FrontISTRを真値にした独立試験（2026-10-02
+時点で計算中）、(2)
+同じ温度・変位センサ数での配置比較（温度2本・候補5点・ROM真値でのみ実施。§4-6）、(3)
 Q/hとholdout変位を同時評価する複数seed試験を優先します。<strong>温度場が合う配置と相対変位・Q/hが合う配置のトレードオフを、独立条件でも示すこと</strong>が次の研究貢献です。調査範囲・最新の原典・実装上の注意は
 <a
 href="19_research_advantage_and_validation.md">研究の優位性と検証計画</a>

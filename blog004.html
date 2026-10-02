@@ -364,11 +364,12 @@ id="toc-b.-重要知りたい場所を測らずに当てる-循環を断つ">7-4
 <li><a href="#c.-温度センサを1本も使わず変位計だけで温度場を直せるか"
 id="toc-c.-温度センサを1本も使わず変位計だけで温度場を直せるか">7-4c.
 温度センサを1本も使わず、変位計だけで温度場を直せるか</a></li>
-<li><a href="#xyz-の全成分を見る-観測していない方向評価点はどうなるか"
-id="toc-xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
-<span class="math inline">\(x\)</span>・<span
-class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
-の全成分を見る ― 観測していない方向・評価点はどうなるか</a></li>
+<li><a href="#x-y-z-の全成分を見る-観測していない方向評価点はどうなるか"
+id="toc-x-y-z-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
+<span class="math inline">\(x\)</span> ・ <span
+class="math inline">\(y\)</span> ・ <span
+class="math inline">\(z\)</span> の全成分を見る ―
+観測していない方向・評価点はどうなるか</a></li>
 </ul></li>
 <li><a href="#観測構成を変えて比べる-本研究の有用性"
 id="toc-観測構成を変えて比べる-本研究の有用性">7-6.
@@ -1673,17 +1674,17 @@ Q-DEIM と gappy-POD は「別の道具」です</h3>
 </tr>
 <tr class="odd">
 <td>入力</td>
-<td>PODモード行列 <span
-class="math inline">\(U_r\)</span>（20,696×5）</td>
-<td>選んだ5点の測定値 <span
-class="math inline">\(T_P\)</span>（5×1）</td>
+<td>PODモード行列 <span class="math inline">\(U_r\)</span>
+（20,696×5）</td>
+<td>選んだ5点の測定値 <span class="math inline">\(T_P\)</span>
+（5×1）</td>
 </tr>
 <tr class="even">
 <td>出力</td>
 <td>測る点の番号 <span
 class="math inline">\(P=\{P_1,\dots,P_5\}\)</span></td>
-<td>全セルの温度 <span class="math inline">\(\hat
-T\)</span>（20,696×1）</td>
+<td>全セルの温度 <span class="math inline">\(\hat T\)</span>
+（20,696×1）</td>
 </tr>
 <tr class="odd">
 <td>中身</td>
@@ -1693,7 +1694,7 @@ T\)</span>（20,696×1）</td>
 <tr class="even">
 <td>計算量</td>
 <td>1回きり。数秒</td>
-<td>毎回。<span class="math inline">\(5^3+20696\times5\)</span>
+<td>毎回。 <span class="math inline">\(5^3+20696\times5\)</span>
 程度＝一瞬</td>
 </tr>
 <tr class="odd">
@@ -1730,7 +1731,7 @@ id="なぜ穴だらけでも復元できるのか">なぜ「穴だらけ」で�
 <p>§3 で見たとおり、温度場は</p>
 <p><span class="math display">\[\hat T=\bar
 T+a_1\varphi_1+a_2\varphi_2+\dots+a_5\varphi_5\]</span></p>
-<p>と書けました。<span class="math inline">\(\bar T\)</span> も <span
+<p>と書けました。 <span class="math inline">\(\bar T\)</span> も <span
 class="math inline">\(\varphi_k\)</span>
 も<strong>計算済みで固定</strong>。時刻ごとに変わるのは <span
 class="math inline">\(a_1,\dots,a_5\)</span> の
@@ -1791,21 +1792,23 @@ class="math inline">\(a_1,\dots,a_5\)</span> の
 </tbody>
 </table>
 <p><span class="math inline">\(U_{r,P}\)</span> は <strong><span
-class="math inline">\(U_r\)</span>（20,696×5）から「測った5行」だけを抜き出した
-5×5 行列</strong>です。 ②で逆行列を取るのはこの 5×5
+class="math inline">\(U_r\)</span>
+（20,696×5）から「測った5行」だけを抜き出した 5×5 行列</strong>です。
+②で逆行列を取るのはこの 5×5
 だけ。だから毎時刻回しても一瞬で終わります。</p>
 <p>②を展開すると、ふつうの連立方程式であることがはっきりします:</p>
 <p><span class="math display">\[
 \begin{aligned}
 \delta_{P_1}&amp;=a_1\varphi_1[P_1]+a_2\varphi_2[P_1]+\dots+a_5\varphi_5[P_1]
-&amp;&amp;\text{←1点目で式1本}\\
+&amp;&amp;(1)\\
 \delta_{P_2}&amp;=a_1\varphi_1[P_2]+a_2\varphi_2[P_2]+\dots+a_5\varphi_5[P_2]
-&amp;&amp;\text{←2点目で式1本}\\
+&amp;&amp;(2)\\
 &amp;\ \ \vdots &amp;&amp;\\
 \delta_{P_5}&amp;=a_1\varphi_1[P_5]+\dots+a_5\varphi_5[P_5]
-&amp;&amp;\text{←5点目で式1本}
+&amp;&amp;(5)
 \end{aligned}
 \]</span></p>
+<p>（右の番号は「何点目の測定で立つ式か」）</p>
 <p><strong>1点測るごとに式が1本立つ。</strong>
 未知が5個なので、5点でちょうど解ける形になります。</p>
 <p>③をセル <span class="math inline">\(c\)</span> 1個について書くと:</p>
@@ -2703,18 +2706,18 @@ T_P\bigr)\quad(5\times1)\]</span></p>
 <p><span
 class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
 <p>ここで <span class="math inline">\(D\)</span> は <strong>FrontISTR
-で事前に作った定数行列</strong>です（<span
-class="math inline">\(2\times5\)</span>）。</p>
+で事前に作った定数行列</strong>です（ <span
+class="math inline">\(2\times5\)</span> ）。</p>
 <figure>
 <img src="img/D_matrix_explained.png" alt="D行列とは何か" />
 <figcaption aria-hidden="true">D行列とは何か</figcaption>
 </figure>
 <p><em>①線形性で <span class="math inline">\(u=W\bar T+\sum
-a_k(W\varphi_k)\)</span> と分けられ、<span
+a_k(W\varphi_k)\)</span> と分けられ、 <span
 class="math inline">\(W\varphi_k\)</span> は <span
 class="math inline">\(a_k\)</span> に依存しない →
 先に計算して保存できる。②FrontISTR を6回（平均場＋5モード）呼ぶだけ。
-③実際の <span class="math inline">\(D\)</span>（<span
+③実際の <span class="math inline">\(D\)</span> （ <span
 class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
 逆向きで反りを生む）。 ④60メンバー分の変位計算が <strong>5.2
 µs</strong>。毎サイクルFEMを呼べば数日かかる。</em></p>
@@ -2738,8 +2741,10 @@ class="math inline">\(2\times5\)</span>
 に並べる</strong></p>
 <p>温度2点と変位2点を観測するなら、メンバーごとに4つの値を並べます:</p>
 <p><span
-class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{\text{温度2点}},\
-\underbrace{u_1^{(m)},\,u_2^{(m)}}_{\text{変位2点}}\bigr)\]</span></p>
+class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{T},\
+\underbrace{u_1^{(m)},\,u_2^{(m)}}_{u}\bigr)\]</span></p>
+<p>（ <span class="math inline">\(T\)</span> ＝温度2点、 <span
+class="math inline">\(u\)</span> ＝変位2点）</p>
 <p>実装はこれだけです:</p>
 <div class="sourceCode" id="cb17"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> disp_of_T5(T5):                      <span class="co"># (…,5) -&gt; (…,2)</span></span>
@@ -2787,9 +2792,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a h
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Yf <span class="kw">is</span> <span class="va">None</span>:</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> Zf <span class="op">@</span> H.T        <span class="co"># 線形観測ならここで作る</span></span></code></pre></div>
-<p>今回の変位写像はたまたま線形（<span
-class="math inline">\(u=u_{\mathrm{mean}}+D\,a\)</span>）ですが、
-<strong>メンバーごとに実ソルバを通すような非線形観測でも、<span
+<p>今回の変位写像はたまたま線形（ <span
+class="math inline">\(u=u_{\mathrm{mean}}+D\,a\)</span> ）ですが、
+<strong>メンバーごとに実ソルバを通すような非線形観測でも、 <span
 class="math inline">\(Y_f\)</span> を渡せば同じ式で動きます</strong>。
 実際 104 では、各メンバーの温度場を FrontISTR に通した変位を <span
 class="math inline">\(Y_f\)</span> にしていました
@@ -2936,10 +2941,9 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 教訓：<strong>変位を合わせたい場所には変位観測を置く。そして評価は差だけでなく個別の変位でも行う</strong>。</em></p>
 <h3 id="b.-重要知りたい場所を測らずに当てる-循環を断つ">7-4b.
 【重要】知りたい場所を測らずに当てる ― 循環を断つ</h3>
-<p>§7-4 のグラフは <span
-class="math inline">\(U_z(A)-U_z(O)\)</span>（上面の反り）を評価していますが、
-「温度2点＋変位2点」の構成では <strong>A と O
-をそのまま観測に使っています</strong>。</p>
+<p>§7-4 のグラフは <span class="math inline">\(U_z(A)-U_z(O)\)</span>
+（上面の反り）を評価していますが、 「温度2点＋変位2点」の構成では
+<strong>A と O をそのまま観測に使っています</strong>。</p>
 <blockquote>
 <p><strong>測った場所の値を当てて「当たりました」と言っているだけ</strong>で、これは<strong>循環</strong>です。</p>
 </blockquote>
@@ -3059,7 +3063,7 @@ class="math inline">\(U_z(O)\)</span>
 <p><strong>③ ※ 同化なしの 0.238 µm に騙されないこと</strong></p>
 <p>同化なしは個別に <strong>5.6 µm も外れている</strong>のに、A と O
 が同じ方向に外れるため <strong>差では相殺</strong>されて小さく見えます。
-<span class="math inline">\(U_z(A)\)</span>・<span
+<span class="math inline">\(U_z(A)\)</span> ・ <span
 class="math inline">\(U_z(O)\)</span>
 の個別グラフ（図の左・中）を見れば、
 灰色の線が真値から大きく離れているのが分かります。</p>
@@ -3112,8 +3116,10 @@ id="なぜ反りを知る必要があるのか-工具長で補正量が変わる
 文献で確かめたところ、<strong>半分正しく、半分違います</strong>。</p>
 <p><strong>正しい部分</strong>：工具の<strong>姿勢</strong>（傾きそのもの）は3軸機では変えられません。</p>
 <p><strong>違う部分</strong>：傾き角は<strong>工具先端では並進の位置ずれに化ける</strong>ので、NCオフセットで補正できます。</p>
-<p><span class="math display">\[\delta \;\simeq\; \theta \times L
-\qquad(\theta:\text{傾き角},\ L:\text{工具長})\]</span></p>
+<p><span class="math display">\[\delta \;\simeq\; \theta \times
+L\]</span></p>
+<p>（ <span class="math inline">\(\theta\)</span> ：傾き角、 <span
+class="math inline">\(L\)</span> ：工具長）</p>
 <p>Yang らはまさにこれを指摘しています。</p>
 <blockquote>
 <p>“The present error compensation technology of computer numerical
@@ -3305,7 +3311,8 @@ id="結論変位計だけで温度場は直せるしかも温度計だけより�
 のとおり、変位計は「<strong>5点温度の重み付き和</strong>」を測っています。
 重みは <span class="math inline">\(D\)</span> の行そのもので、A の <span
 class="math inline">\(U_z\)</span> なら <span
-class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>。
+class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
+。
 <strong>1本で5点すべてに触れている</strong>ので、温度計1本より情報が広いのです。</p>
 </blockquote>
 <h4 id="なぜ変位のほうが強いのか">なぜ変位のほうが強いのか</h4>
@@ -3337,8 +3344,8 @@ class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
 </table>
 <p>温度計2本では「P2 と P0 の値」しか分かりませんが、
 変位計2本は「<strong>5点の重み付き和が2通り</strong>」分かります。
-未知が7個（<span class="math inline">\(T_1..T_5, Q,
-h\)</span>）なので、<strong>広く触れるほうが絞り込みが速い</strong>わけです。</p>
+未知が7個（ <span class="math inline">\(T_1..T_5, Q, h\)</span>
+）なので、<strong>広く触れるほうが絞り込みが速い</strong>わけです。</p>
 <h4 id="ただし組み合わせが最良">ただし組み合わせが最良</h4>
 <p><strong>⑥ 温度2点＋変位2点が 0.127 K で最良</strong>です。③の 0.207 K
 より 1.6倍良い。
@@ -3359,10 +3366,11 @@ h\)</span>）なので、<strong>広く触れるほうが絞り込みが速い</
 <strong>差では相殺</strong>されて小さく見えているだけです（§7-4b）。</p>
 <p>再現:
 <code>OMP_NUM_THREADS=4 python3 run/disp_only_da_check.py</code></p>
-<h3 id="xyz-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
-<span class="math inline">\(x\)</span>・<span
-class="math inline">\(y\)</span>・<span class="math inline">\(z\)</span>
-の全成分を見る ― 観測していない方向・評価点はどうなるか</h3>
+<h3 id="x-y-z-の全成分を見る-観測していない方向評価点はどうなるか">7-5.
+<span class="math inline">\(x\)</span> ・ <span
+class="math inline">\(y\)</span> ・ <span
+class="math inline">\(z\)</span> の全成分を見る ―
+観測していない方向・評価点はどうなるか</h3>
 <p>ここまでの図はすべて <strong><span class="math inline">\(z\)</span>
 成分（上下・軸方向）だけ</strong>でした。 FrontISTR は当然 <span
 class="math inline">\(U_x,U_y,U_z\)</span>
@@ -3413,7 +3421,7 @@ class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
 <p><em>行が成分（上から <span class="math inline">\(U_x,U_y,U_z\)</span>
 ）、列が点（A・O＝観測、B・C＝未観測）。
 灰点線＝同化なし、赤破線＝同化後、太い灰実線＝真値。</em></p>
-<p>5 seed平均、<strong>初回サイクル（<span
+<p>5 seed平均、<strong>初回サイクル（ <span
 class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–300 s
 の MAE</strong>:</p>
 <table style="width:100%;">
@@ -3533,12 +3541,12 @@ class="math inline">\(W=K_s^{-1}H_T\)</span>
 温度場が正しくなれば <span class="math inline">\(W\)</span> を通じて
 <strong><span class="math inline">\(x\)</span> も <span
 class="math inline">\(y\)</span> も <span
-class="math inline">\(z\)</span> も自動的に従います</strong>。 「<span
+class="math inline">\(z\)</span> も自動的に従います</strong>。 「 <span
 class="math inline">\(U_z\)</span> を観測して <span
 class="math inline">\(U_x\)</span>
 が直る」のは不思議なことではなく、当然の帰結です。</p>
 <p><strong>② 評価点（未観測点）は観測点と同じ率で直る。</strong> <span
-class="math inline">\(U_z\)</span> で観測点179倍・評価点172倍、<span
+class="math inline">\(U_z\)</span> で観測点179倍・評価点172倍、 <span
 class="math inline">\(U_x\)</span> で観測点80倍・評価点126倍。
 <strong>「測ったところだけ合っている」のではありません。</strong> これは
 §5-4（未観測セルの温度復元）と同じ主張を、変位の側から確かめたことになります。</p>
@@ -3552,9 +3560,9 @@ A・O・B・C はすべて <span class="math inline">\(y=0\)</span>
 <span class="math inline">\(y\neq0\)</span>
 の点で確かめる必要があります）。</p>
 <blockquote>
-<p><strong>正直な注記</strong>：<span
+<p><strong>正直な注記</strong>： <span
 class="math inline">\(t=30\)</span> s
-の初回サイクルだけを含めて平均すると、<span
+の初回サイクルだけを含めて平均すると、 <span
 class="math inline">\(U_y\)</span> は 0.028 → 0.098 µm
 と「悪化」して見えます。これは<strong>1回目の更新での行き過ぎ</strong>が
 平均を押し上げているだけで、2サイクル目以降は真値に乗っています。
@@ -3660,7 +3668,7 @@ class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
 <p><span class="math display">\[z=(T_1,\dots,T_5,\ q,\ h),\qquad
 Q=15\,q\ [\mathrm W]\]</span></p>
 <p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span
-class="math inline">\(q=1\)</span>）。変位は状態に入れない。</p>
+class="math inline">\(q=1\)</span> ）。変位は状態に入れない。</p>
 <p><strong>観測</strong>（30 s ごと、計20回）　温度2点（P2,
 P0。この計算では発熱感度 <span class="math inline">\(\partial T/\partial
 Q\)</span> の上位2点として選んだ。どちらも A 側）と、 上面 A・O の <span
@@ -3687,38 +3695,37 @@ T_\mathrm{air}+12]\)</span> K</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(q\)</span></td>
-<td>一様分布 <span class="math inline">\([0.3,\ 1.8]\)</span>（<span
-class="math inline">\(Q=4.5\)</span>〜<span
+<td>一様分布 <span class="math inline">\([0.3,\ 1.8]\)</span> （ <span
+class="math inline">\(Q=4.5\)</span> 〜 <span
 class="math inline">\(27\)</span> W）</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(h\)</span></td>
-<td>正規分布 <span class="math inline">\(N(0.02,\
-0.01^2)\)</span>、<span class="math inline">\([10^{-3},0.1]\)</span>
-に制限</td>
+<td>正規分布 <span class="math inline">\(N(0.02,\ 0.01^2)\)</span> 、
+<span class="math inline">\([10^{-3},0.1]\)</span> に制限</td>
 </tr>
 </tbody>
 </table>
-<p><strong>各サイクルの手続き</strong>（<span
-class="math inline">\(t_k=30k\)</span> s、<span
-class="math inline">\(k=1,\dots,20\)</span>）</p>
+<p><strong>各サイクルの手続き</strong>（ <span
+class="math inline">\(t_k=30k\)</span> s、 <span
+class="math inline">\(k=1,\dots,20\)</span> ）</p>
 <ol type="1">
 <li><strong>予報</strong>　各メンバーを、そのメンバー自身の <span
 class="math inline">\(q,h\)</span> を使ってROMで30 s
 前進させる（RK4、刻み2 s）。 <span class="math inline">\(q,h\)</span>
 は前進中は変えない。</li>
-<li><strong>予報観測</strong> <span
-class="math inline">\(Y_f\)</span>（<span
-class="math inline">\(60\times4\)</span>）　各メンバーについて、温度2点はそのまま取り出し、
+<li><strong>予報観測</strong> <span class="math inline">\(Y_f\)</span>
+（ <span class="math inline">\(60\times4\)</span>
+）　各メンバーについて、温度2点はそのまま取り出し、
 変位2点は温度から計算する（§7-0）。 <span
 class="math display">\[u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
 T_P\bigr)\]</span></li>
 <li><strong>共分散膨張</strong>　メンバーの平均からのずれを1.02倍に広げる（標本数不足で分散が縮みすぎるのを防ぐ）。</li>
 <li><strong>ゲイン</strong>　60メンバーの偏差 <span
-class="math inline">\(dZ\)</span>（<span
-class="math inline">\(60\times7\)</span>）、<span
-class="math inline">\(dY\)</span>（<span
-class="math inline">\(60\times4\)</span>）から <span
+class="math inline">\(dZ\)</span> （ <span
+class="math inline">\(60\times7\)</span> ）、 <span
+class="math inline">\(dY\)</span> （ <span
+class="math inline">\(60\times4\)</span> ）から <span
 class="math display">\[C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\
 (7\times4),\quad
   C_{yy}=\frac{dY^{\mathsf T}dY}{59}\ (4\times4),\quad
@@ -3728,15 +3735,15 @@ class="math inline">\(\varepsilon^{(m)}\sim N(0,R)\)</span>
 を足して更新する（摂動観測法）。 <span
 class="math display">\[z^{(m)}\leftarrow
 z^{(m)}+K\bigl(y+\varepsilon^{(m)}-Y_f^{(m)}\bigr)\]</span></li>
-<li><strong>制約</strong>　<span
-class="math inline">\(q\in[0,3]\)</span>、<span
+<li><strong>制約</strong>　 <span
+class="math inline">\(q\in[0,3]\)</span> 、 <span
 class="math inline">\(h\in[10^{-4},0.2]\)</span> に収める。</li>
 </ol>
 <p>これを5つの乱数シード（20260913〜20260917）で繰り返し、平均を取る。</p>
 <p><strong>発熱量 <span class="math inline">\(Q\)</span>
 が同定される仕組み</strong>　手順5で更新されるのは <span
 class="math inline">\(z\)</span> の7成分すべてであり、 <span
-class="math inline">\(q\)</span> はその6番目の成分である。<span
+class="math inline">\(q\)</span> はその6番目の成分である。 <span
 class="math inline">\(q\)</span> の更新量は <span
 class="math inline">\(K\)</span> の6行目 <span
 class="math display">\[K_{q,:}=\mathrm{Cov}(q,\
@@ -3749,7 +3756,7 @@ class="math inline">\(\mathrm{Cov}(q,u)\)</span>
 を直接観測していなくても、 温度と変位の残差 <span
 class="math inline">\(y-Y_f\)</span> が <span
 class="math inline">\(q\)</span> を動かす。</p>
-<p><strong>結果</strong>　20回の更新後、<span
+<p><strong>結果</strong>　20回の更新後、 <span
 class="math inline">\(Q=14.89\)</span> W（真値 15
 W）。加熱期の全5点温度RMSEは 0.160 K、 上面の変位差の誤差は 0.165
 µm（下の表の最終行）。
@@ -3757,9 +3764,9 @@ W）。加熱期の全5点温度RMSEは 0.160 K、 上面の変位差の誤差�
 <h3
 id="この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</h3>
 <p>数字を出す前に定義をはっきりさせます。同じ観測構成で乱数条件を5回変えて計算します。
-<span class="math inline">\(s=1,\ldots,5\)</span>
-が計算番号（seed）、<span class="math inline">\(i=0,\ldots,4\)</span>
-がROMの温度点、 <span class="math inline">\(m=1,\ldots,60\)</span>
+<span class="math inline">\(s=1,\ldots,5\)</span> が計算番号（seed）、
+<span class="math inline">\(i=0,\ldots,4\)</span> がROMの温度点、 <span
+class="math inline">\(m=1,\ldots,60\)</span>
 がEnKFメンバーです。<strong>5 seed
 は再試行の数であり、60メンバーとは別物</strong>です。</p>
 <p>まず各時刻の同化後アンサンブルから、点ごとの推定温度を出します:</p>
@@ -3847,8 +3854,9 @@ class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 <blockquote>
 <p><strong>温度2点の P2＋P0 は、2本とも A 側にあります。</strong>
 温度だけで同化する別の比較（blog_005 §4-6、ROM 真値・5 seed）では、 A
-側と O 側に1本ずつ置いた P2＋P4 のほうが温度場の誤差が約半分でした（0.16
-K 対 0.33 K）。 この表の本番計算を P2＋P4
+側と O 側に1本ずつ置いた P2＋P4 のほうが温度場の誤差が小さく（0.15〜0.16
+K 対 0.33〜0.53 K。P2＋P0 は乱数の割り当てで大きく変わる）、5 seed
+すべてで良い結果でした。 この表の本番計算を P2＋P4
 で回し直す試験は<strong>していません</strong>。</p>
 </blockquote>
 <h2 id="まだ分かっていないこと-代表点選択の未解決問題">8.

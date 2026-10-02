@@ -546,12 +546,13 @@ T)\times(Q^{(m)}-\bar Q)\)</span> を計算し、全部足して <span
 class="math inline">\(N-1\)</span> で割る。
 赤の象限（両方とも平均より上／両方とも下）は積が＋、青の象限（片方だけ上）は積が−。
 <strong>丸い雲なら＋と−が打ち消し合って <span
-class="math inline">\(\mathrm{Cov}\simeq0\)</span>、斜めに伸びれば片方に偏って
-<span class="math inline">\(\mathrm{Cov}\neq0\)</span></strong>。
+class="math inline">\(\mathrm{Cov}\simeq0\)</span>
+、斜めに伸びれば片方に偏って <span
+class="math inline">\(\mathrm{Cov}\neq0\)</span></strong>。
 実データ（サイクル11・60メンバー）で手計算すると <span
-class="math inline">\(\sum=-6.326\)</span>、<span
-class="math inline">\(\mathrm{Cov}=-6.326/59=-0.1072\)</span>、相関
-<span class="math inline">\(-0.287\)</span>。</em></p>
+class="math inline">\(\sum=-6.326\)</span> 、 <span
+class="math inline">\(\mathrm{Cov}=-6.326/59=-0.1072\)</span> 、相関
+<span class="math inline">\(-0.287\)</span> 。</em></p>
 <p>平均からのズレ（deviation）:</p>
 <table>
 <thead>
@@ -683,10 +684,12 @@ alt="パラメータ同定の手順と結果" />
 <p><strong>ステップ1：状態を拡大する</strong></p>
 <p>ふつうは温度だけを状態にします:</p>
 <p><span class="math display">\[z=(T_1,T_2,T_3,T_4,T_5)^{\mathsf
-T}\quad(5次元)\]</span></p>
+T}\]</span></p>
+<p>（5次元）</p>
 <p>ここに推定したいパラメータを<strong>継ぎ足します</strong>:</p>
-<p><span class="math display">\[z=(\underbrace{T_1,\dots,T_5}_{物理量},\
-\underbrace{Q,\ h}_{パラメータ})^{\mathsf T}\quad(7次元)\]</span></p>
+<p><span class="math display">\[z=(\underbrace{T_1,\dots,T_5}_{T},\
+\underbrace{Q,\ h}_{\theta})^{\mathsf T}\]</span></p>
+<p>（7次元。前の5個が物理量＝温度、後ろの2個がパラメータ）</p>
 <p>これだけで、あとは何も変えません。EnKFのコードは「7次元の状態」として扱うだけです。</p>
 <p><strong>ステップ2：メンバーごとに違うパラメータを持たせる</strong></p>
 <p>60個のメンバーに、それぞれ違う <span class="math inline">\(Q\)</span>
@@ -696,8 +699,8 @@ T}\quad(5次元)\]</span></p>
 class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Z[:, :<span class="dv">5</span>] <span class="op">=</span> rng.uniform(T_air<span class="op">-</span><span class="dv">3</span>, T_air<span class="op">+</span><span class="dv">12</span>, (N, <span class="dv">5</span>))   <span class="co"># 温度もバラバラ</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">5</span>]  <span class="op">=</span> rng.uniform(<span class="fl">0.3</span>, <span class="fl">1.8</span>, N)                 <span class="co"># Q（発熱倍率）</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">6</span>]  <span class="op">=</span> np.clip(rng.normal(<span class="fl">0.02</span>, <span class="fl">0.01</span>, N), <span class="fl">1e-3</span>, <span class="fl">0.1</span>)  <span class="co"># h</span></span></code></pre></div>
-<p>前進させるとき、<strong>パラメータは時間で変化させません</strong>（<span
-class="math inline">\(dQ/dt=0\)</span> として運ぶ）。
+<p>前進させるとき、<strong>パラメータは時間で変化させません</strong>（
+<span class="math inline">\(dQ/dt=0\)</span> として運ぶ）。
 温度だけがそのメンバー自身の <span class="math inline">\(Q,h\)</span>
 に従って動きます。</p>
 <p><strong>ステップ3：温度を観測して、状態を丸ごと更新する</strong></p>
@@ -708,15 +711,16 @@ class="math inline">\(H\)</span> の <span
 class="math inline">\(Q\)</span> 成分も <span
 class="math inline">\(h\)</span> 成分もゼロ</strong>:</p>
 <p><span
-class="math display">\[H=\begin{pmatrix}0&amp;1&amp;0&amp;0&amp;0&amp;\color{red}{0}&amp;\color{red}{0}\end{pmatrix}\quad(\text{2番目の温度
-}T_2\text{ だけ測る場合})\]</span></p>
+class="math display">\[H=\begin{pmatrix}0&amp;1&amp;0&amp;0&amp;0&amp;\color{red}{0}&amp;\color{red}{0}\end{pmatrix}\]</span></p>
+<p>（2番目の温度 <span class="math inline">\(T_2\)</span>
+だけ測る場合）</p>
 <p><strong>ステップ4：それでもパラメータが動く</strong></p>
-<p>ここが肝心です。<span class="math inline">\(H\)</span> の <span
+<p>ここが肝心です。 <span class="math inline">\(H\)</span> の <span
 class="math inline">\(Q\)</span> 成分がゼロなのに、なぜ <span
 class="math inline">\(Q\)</span> が更新されるのか。</p>
 <p>ゲインは <span class="math inline">\(K=P H^{\mathsf T}(HPH^{\mathsf
 T}+R)^{-1}\)</span> で、<strong><span class="math inline">\(P\)</span>
-の非対角成分が効きます</strong>。 メンバーを前進させると「<span
+の非対角成分が効きます</strong>。 メンバーを前進させると「 <span
 class="math inline">\(Q\)</span>
 が大きいメンバーほど温度が高い」という関係が自然にできるので:</p>
 <p><span class="math display">\[P\simeq\frac{dZ\,dZ^{\mathsf
@@ -731,12 +735,12 @@ class="math inline">\(Q\)</span> を引っぱります</strong>:</p>
 <h4
 id="本番の計算で実際に使われた数値">本番の計算で実際に使われた数値</h4>
 <p>本研究の本番の計算（観測＝温度 P2・P0 ＋ 上面 A・O の <span
-class="math inline">\(U_z\)</span>、60メンバー、シード 20260913）を
+class="math inline">\(U_z\)</span> 、60メンバー、シード 20260913）を
 そのまま再実行し、更新の瞬間の値を記録した（<code>run/trace_actual_da_cycle.py</code>）。
 <span class="math inline">\(q\)</span> は発熱倍率で <span
 class="math inline">\(Q=15q\)</span> W。初期アンサンブルの平均は <span
 class="math inline">\(Q=17.09\)</span> W。</p>
-<p><strong>サイクル1（<span class="math inline">\(t=30\)</span>
+<p><strong>サイクル1（ <span class="math inline">\(t=30\)</span>
 s）</strong></p>
 <table style="width:100%;">
 <colgroup>
@@ -754,7 +758,7 @@ s）</strong></p>
 <th>予報平均 <span class="math inline">\(\bar Y_f\)</span></th>
 <th>残差 <span class="math inline">\(y-\bar Y_f\)</span></th>
 <th><span class="math inline">\(K_q\)</span></th>
-<th>寄与 <span class="math inline">\(K_q\times\)</span>残差</th>
+<th>寄与 <span class="math inline">\(K_q\times\)</span> 残差</th>
 </tr>
 </thead>
 <tbody>
@@ -792,14 +796,14 @@ s）</strong></p>
 </tr>
 </tbody>
 </table>
-<p>寄与の合計は <span class="math inline">\(-0.278\)</span>（<span
+<p>寄与の合計は <span class="math inline">\(-0.278\)</span> （ <span
 class="math inline">\(Q\)</span> に換算して −4.17 W）で、実際に <span
 class="math inline">\(Q\)</span> は <strong>17.09 → 12.88 W</strong>
 に下がった。
 初期のメンバーは温度を高めにばらつかせてあるので、観測が予報より約5 K
-低く、<span class="math inline">\(Q\)</span>
+低く、 <span class="math inline">\(Q\)</span>
 が大きく引き下げられている。</p>
-<p><strong>サイクル5（<span class="math inline">\(t=150\)</span>
+<p><strong>サイクル5（ <span class="math inline">\(t=150\)</span>
 s）</strong></p>
 <table>
 <thead>
@@ -847,12 +851,13 @@ s）</strong></p>
 </tr>
 </tbody>
 </table>
-<p>温度の残差はほぼ0になっており、<span class="math inline">\(Q\)</span>
+<p>温度の残差はほぼ0になっており、 <span
+class="math inline">\(Q\)</span>
 を動かしているのは<strong>変位の残差</strong>（上面Aの寄与 −0.0394
 が最大）である。 <span class="math inline">\(Q\)</span> は 13.15 → 12.47
 W。</p>
-<p><strong>サイクル10（<span class="math inline">\(t=300\)</span>
-s）</strong>　残差・ゲインとも小さくなり、<span
+<p><strong>サイクル10（ <span class="math inline">\(t=300\)</span>
+s）</strong>　残差・ゲインとも小さくなり、 <span
 class="math inline">\(Q\)</span> は 14.16 → 14.22 W
 とほとんど動かない。</p>
 <p>このシードの最終値は <span class="math inline">\(Q=14.36\)</span>
@@ -862,7 +867,7 @@ W、5シード平均では 14.89 W（真値 15 W）。</p>
 温度が合ってきた後は変位の残差が <span class="math inline">\(Q\)</span>
 を動かしている。 また <span class="math inline">\(K_q\)</span>
 は毎サイクル60メンバーの散らばりから計算し直しているので、サイクルが進むと小さくなる
-（<span class="math inline">\(T\)</span>(P2) の <span
+（ <span class="math inline">\(T\)</span>(P2) の <span
 class="math inline">\(K_q\)</span> は 0.4423 → 0.0991 → 0.0224）。</p>
 <blockquote>
 <p><strong>要点：測っていない量でも、測った量と相関していれば更新される。</strong>
@@ -874,7 +879,7 @@ W止まりだったのは、実際の相関が時間とともに変わるのに�
 </blockquote>
 <h4 id="実際どうなったか-q-は当たる">実際どうなったか ― <span
 class="math inline">\(Q\)</span> は当たる</h4>
-<p>上の図③のとおり、<span class="math inline">\(Q\)</span>
+<p>上の図③のとおり、 <span class="math inline">\(Q\)</span>
 のアンサンブルは真値15
 Wのまわりに収束し、<strong>ばらつき（±1標準偏差）が 6.8 W → 2.1 W
 に縮みます</strong>。 ばらつきが縮むということは、<strong>観測から <span
@@ -884,7 +889,8 @@ class="math inline">\(Q\)</span>
 <thead>
 <tr class="header">
 <th>観測構成</th>
-<th>最終 <span class="math inline">\(Q\)</span> [W]</th>
+<th>最終 <span class="math inline">\(Q\)</span> [W]（600 s、5 seed
+平均）</th>
 </tr>
 </thead>
 <tbody>
@@ -893,12 +899,20 @@ class="math inline">\(Q\)</span>
 <td>16.45（初期値のまま）</td>
 </tr>
 <tr class="even">
-<td>温度1点</td>
-<td>17.08</td>
+<td>温度1点（P2）</td>
+<td>13.74</td>
+</tr>
+<tr class="odd">
+<td>温度1点（P4）</td>
+<td>14.21</td>
+</tr>
+<tr class="even">
+<td>温度2点（P2＋P0）</td>
+<td>14.05</td>
 </tr>
 <tr class="odd">
 <td>温度2点＋変位2点</td>
-<td><strong>14.88</strong></td>
+<td><strong>14.89</strong></td>
 </tr>
 <tr class="even">
 <td>真値</td>
@@ -906,16 +920,17 @@ class="math inline">\(Q\)</span>
 </tr>
 </tbody>
 </table>
+<p>（<code>run/run_da_compare.py</code>、<code>results/da_compare.yaml</code>）</p>
 <h4 id="いつ測るかも設計項目">「いつ測るか」も設計項目</h4>
 <p><span class="math inline">\(Q\)</span> と <span
 class="math inline">\(h\)</span>
 では<strong>効く時間帯が違います</strong>（上図④）。感度を直接積分して確かめたところ:</p>
 <ul>
 <li><span class="math inline">\(\partial T/\partial Q\)</span>
-は<strong>加熱中に大きく、加熱を止めると頭打ち</strong>（<span
+は<strong>加熱中に大きく、加熱を止めると頭打ち</strong>（ <span
 class="math inline">\(t=300\)</span> s で最大）</li>
 <li><span class="math inline">\(\partial T/\partial h\)</span>
-は<strong>冷えていくほど大きくなる</strong>（<span
+は<strong>冷えていくほど大きくなる</strong>（ <span
 class="math inline">\(t=600\)</span> s で最大）</li>
 </ul>
 <p>直感どおりです。ヒータが入っていない時間に <span
@@ -949,8 +964,8 @@ class="math inline">\(Q\)</span> の情報は増えませんし、
 <h3 id="b.-同じ手順で-h-も-と思ったら当たらなかった">4-0-b. 同じ手順で
 <span class="math inline">\(h\)</span> も ―
 と思ったら当たらなかった</h3>
-<p><span
-class="math inline">\(h\)</span>（放熱コンダクタンス）もまったく同じ手順で状態に入れてあります。
+<p><span class="math inline">\(h\)</span>
+（放熱コンダクタンス）もまったく同じ手順で状態に入れてあります。
 ところが<strong>こちらは当たりません</strong>。</p>
 <table>
 <thead>
@@ -979,7 +994,7 @@ class="math inline">\(h\)</span>（放熱コンダクタンス）もまったく
 <h4 id="原因は同化ではなく可同定性">原因は同化ではなく「可同定性」</h4>
 <p>同化の設定を疑う前に、そもそも<strong><span
 class="math inline">\(h\)</span>
-が観測に現れているのか</strong>を確かめました。 同化を一切かけず、<span
+が観測に現れているのか</strong>を確かめました。 同化を一切かけず、 <span
 class="math inline">\(h\)</span> だけを 40%
 変えて600秒まで前進させ、応答の差を測ります:</p>
 <table>
@@ -1021,7 +1036,7 @@ class="math inline">\(h\)</span> での<strong>一様冷却の時定数は約 15
 <h4
 id="当たらないと何が困るのか-実は今回はほとんど困らない">「当たらない」と何が困るのか
 ― 実は今回はほとんど困らない</h4>
-<p>「<span class="math inline">\(h\)</span>
+<p>「 <span class="math inline">\(h\)</span>
 が63%もずれている」と聞くと失敗に見えますが、<strong>今回の600秒の状態推定では、hの大きな誤差と小さな温度・変位誤差が共存しました</strong>。影響が完全にゼロという意味ではありません。
 理由は、当たらない理由とまったく同じです。</p>
 <blockquote>
@@ -1029,7 +1044,7 @@ id="当たらないと何が困るのか-実は今回はほとんど困らない
 <strong><span class="math inline">\(h\)</span>
 を間違えても600秒の温度・変形に現れない</strong>（表裏一体）</p>
 </blockquote>
-<p>実際、<span class="math inline">\(h\)</span> が
+<p>実際、 <span class="math inline">\(h\)</span> が
 0.0251（真値0.0154）のままでも、最終的な精度は</p>
 <table>
 <thead>
@@ -1050,7 +1065,7 @@ id="当たらないと何が困るのか-実は今回はほとんど困らない
 </tbody>
 </table>
 <p>まで下がっています。<strong>「今知りたいこと」は達成できている</strong>わけです。</p>
-<p>では、いつ困るのか。<span class="math inline">\(h\)</span>
+<p>では、いつ困るのか。 <span class="math inline">\(h\)</span>
 のずれが効いてくるのは<strong>予測したい時間が長くなったとき</strong>です。
 同じROMで、真の <span class="math inline">\(h\)</span> と推定した <span
 class="math inline">\(h\)</span> を入れて回し、温度の差を見ました:</p>
@@ -1089,8 +1104,9 @@ class="math inline">\(h\)</span> を入れて回し、温度の差を見まし�
 <span class="math inline">\(\Delta T_{ss}\propto Q/h\)</span>
 なので、</p>
 <p><span class="math display">\[\frac{\Delta
-T_{ss}^{\text{推定}}}{\Delta
-T_{ss}^{\text{真}}}=\frac{h_{\text{真}}}{h_{\text{推定}}}=\frac{0.0154}{0.0251}=0.61\]</span></p>
+T_{ss}^{\mathrm{est}}}{\Delta
+T_{ss}^{\mathrm{true}}}=\frac{h_{\mathrm{true}}}{h_{\mathrm{est}}}=\frac{0.0154}{0.0251}=0.61\]</span></p>
+<p>（est＝推定値、true＝真値）</p>
 <p><strong>定常温度を39%も取り違えます。</strong>
 工作機械の暖機運転のように数時間の挙動を予測したいなら、 <span
 class="math inline">\(h\)</span> の同定は避けて通れません。</p>
@@ -1101,7 +1117,7 @@ class="math inline">\(h\)</span> の同定は避けて通れません。</p>
 観測すれば <span class="math inline">\(h\)</span>
 の情報が蓄積されます。いちばん素直な対処。</li>
 <li><strong>温度差を大きくする。</strong>
-発熱を上げる、あるいは強制対流にする。<span
+発熱を上げる、あるいは強制対流にする。 <span
 class="math inline">\(h(T-T_\infty)\)</span> の項が大きくなるので
 応答がノイズを超えます。</li>
 <li><strong><span class="math inline">\(h\)</span>
@@ -1129,11 +1145,11 @@ href="19_research_advantage_and_validation.md#4-2-短時間のh誤差を原理�
 当たらないのに当たったつもりで使うのが、いちばん危険です。</p>
 </blockquote>
 <blockquote>
-<p><strong>実務での意味：<span class="math inline">\(h\)</span>
+<p><strong>実務での意味： <span class="math inline">\(h\)</span>
 を同定したければ、実験を長くするか、温度差を大きくするか、 <span
 class="math inline">\(h\)</span>
-の影響が増幅される観測量を探すしかありません。</strong>
-逆に言えば、<span class="math inline">\(Q\)</span>
+の影響が増幅される観測量を探すしかありません。</strong> 逆に言えば、
+<span class="math inline">\(Q\)</span>
 のように<strong>短時間で強く効くパラメータは少数観測でも当たる</strong>ということでもあります。
 「何が同定できて、何ができないか」を事前に見積もれるのが、感度を直接計算しておく価値です。</p>
 </blockquote>
@@ -1419,7 +1435,7 @@ class="math inline">\(h\)</span>
 <img src="img/obs_points_progression.png" alt="段階比較の観測点位置" />
 <figcaption aria-hidden="true">段階比較の観測点位置</figcaption>
 </figure>
-<p><em>温度は T1=P2（ヒータ側・高感度）、2点目に
+<p><em>温度は T1=P2（ヒータ側）、2点目に
 T2=P4（反対側）。変位は高W＝上端2点（橙）／低W＝底面2点（灰）。底面固定の中空円柱。</em></p>
 <figure>
 <img src="img/opencae_sensor_progression.png"
