@@ -2111,15 +2111,24 @@ Kまで伸びている</strong>のが危険。</em></p>
 <p>本ケース（20,696セル、モード5本）に Q-DEIM
 をかけると、上の貪欲手順で次の5点が選ばれます:</p>
 <p><img src="img/qdeim_points.png" alt="POD＋Q-DEIMで選んだROM代表点（3D）" width="460"></p>
-<p>5点を個別に読み取れるよう、温度感度（ <span
-class="math inline">\(\partial T/\partial Q\)</span>
-）と実際の変位観測点を 同じ座標系に重ねた図も示します。</p>
+<p>5点を個別に読み取れるよう、5点と実際の変位観測点を同じ座標系に重ねた図も示します。</p>
 <h4
 id="高感度低感度はどういうロジックで決めているか">「高感度／低感度」はどういうロジックで決めているか</h4>
-<p>本研究では
-<strong>温度センサと変位センサで、感度の定義と決め方が違います</strong>。混同しやすいので、レシピ形式でまとめます。</p>
-<p><strong>① 温度センサの高/低感度 ＝ 発熱への温度感度 <span
-class="math inline">\(\partial T/\partial Q\)</span></strong></p>
+<blockquote>
+<p><strong>2026-10-02 訂正</strong>：以前は「温度センサは発熱感度 <span
+class="math inline">\(\partial T/\partial Q\)</span>
+の高い点に置く」と書いていましたが、この選び方はやめました。発熱感度の上位から選ぶと、熱源のある
+A
+側に2本とも集まり、温度場全体や反りを当てるには不利でした（温度2点・ROM真値の比較で、A
+側だけの P2＋P0 は両側の P2＋P4 の約2倍の誤差）。温度センサの選び方は <a
+href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
+にあります（熱感度 <span class="math inline">\(W\)</span>
+と温度のばらつきから選ぶ）。</p>
+</blockquote>
+<p>以下は、本研究の計算で実際に使った「高感度／低感度」の決め方の記録です。</p>
+<p><strong>① 温度点の高/低感度（本番の計算で温度点を選ぶのに使った量）＝
+発熱への温度感度 <span class="math inline">\(\partial T/\partial
+Q\)</span></strong></p>
 <blockquote>
 <p>「ヒータの発熱が変わったとき、<strong>温度がよく反応する場所</strong>はどこか」</p>
 </blockquote>
@@ -2189,9 +2198,9 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <td>底面（固定で動けない）</td>
 </tr>
 <tr class="odd">
-<td>どちらも意味は</td>
-<td>「測る量が、知りたい変化に<strong>よく反応する</strong>場所」を選ぶ、という同じ発想</td>
-<td></td>
+<td>使ってよいか</td>
+<td><strong>温度センサの選び方としては使わない</strong>（上の訂正を参照）</td>
+<td>変位センサの置き場所には有効（よく動く点）</td>
 </tr>
 </tbody>
 </table>
@@ -2226,8 +2235,7 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <tr class="odd">
 <td><strong>P2</strong></td>
 <td>(0.0365, 0.0069, 0.0508)</td>
-<td><strong><span class="math inline">\(\partial T/\partial Q\)</span>
-最大の温度観測候補</strong></td>
+<td><strong>ヒータ側の温度代表点（本番の温度観測点）</strong></td>
 </tr>
 <tr class="even">
 <td>P3</td>
@@ -2237,7 +2245,7 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <tr class="odd">
 <td><strong>P4</strong></td>
 <td>(−0.0351, 0.0008, 0.0008)</td>
-<td><strong>低感度点（比較用）</strong></td>
+<td><strong>反対側（O 側）底面の温度代表点</strong></td>
 </tr>
 </tbody>
 </table>
@@ -3580,11 +3588,10 @@ class="math inline">\(t=300\)</span> s で評価）。 高感度＝ <span
 class="math inline">\(\partial T/\partial Q\)</span>
 最大のP2（ヒータ側）、低感度＝最小のP4（反対側）、
 温度2点(高感度)＝上位2ノード（P2とP0）。上の観測点図（sensor_positions）の色付けと同じ量です。
-なお <strong>変位センサ選びに使う熱感度 <span
-class="math inline">\(W=K_s^{-1}H_T\)</span>
-（温度→変位）とは別物</strong>なので注意 （温度センサは <span
-class="math inline">\(\partial T/\partial Q\)</span> 、変位センサは
-<span class="math inline">\(W\)</span> で選ぶ、という役割分担）。</p>
+なお <strong>熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
+（温度→変位）とは別物</strong>です。
+温度センサを発熱感度で選ぶ方法は現在は使っていません（温度センサの選び方は
+blog_005 §4-6）。</p>
 </blockquote>
 <blockquote>
 <p>実務では、この温度→変位を毎回FrontISTRで解く代わりに、<strong>線形化した感度
@@ -3654,9 +3661,10 @@ class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
 Q=15\,q\ [\mathrm W]\]</span></p>
 <p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span
 class="math inline">\(q=1\)</span>）。変位は状態に入れない。</p>
-<p><strong>観測</strong>（30 s ごと、計20回）　温度2点（発熱感度 <span
-class="math inline">\(\partial T/\partial Q\)</span> の上位2点＝P2,
-P0）と、 上面 A・O の <span class="math inline">\(U_z\)</span>
+<p><strong>観測</strong>（30 s ごと、計20回）　温度2点（P2,
+P0。この計算では発熱感度 <span class="math inline">\(\partial T/\partial
+Q\)</span> の上位2点として選んだ。どちらも A 側）と、 上面 A・O の <span
+class="math inline">\(U_z\)</span>
 の計4個。真値にノイズを足して作る。</p>
 <p><span class="math display">\[y=\bigl(T_{P2},\ T_{P0},\ U_z(A),\
 U_z(O)\bigr)^{\mathrm{true}}+\varepsilon,\qquad
@@ -3815,20 +3823,19 @@ class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 <td>でたらめのまま。<strong>データ同化なしでは推定できない</strong></td>
 </tr>
 <tr class="even">
-<td>温度1点（発熱感度 <span class="math inline">\(\partial T/\partial
-Q\)</span> 最小・P4）</td>
+<td>温度1点（P4・反対側の底面）</td>
 <td>1.036 K</td>
-<td>同化すれば桁違いに改善。ただし感度の低い点は遅い</td>
+<td>同化すれば桁違いに改善</td>
 </tr>
 <tr class="odd">
-<td>温度1点（発熱感度 最大・P2）</td>
+<td>温度1点（P2・ヒータ側）</td>
 <td><strong>0.617 K</strong></td>
-<td><strong>同じ1点でも感度の高い場所に置くと1.7倍良い</strong></td>
+<td>置く場所で結果が変わる</td>
 </tr>
 <tr class="even">
-<td>温度2点（発熱感度 上位2・P2+P0）</td>
+<td>温度2点（P2+P0・どちらも A 側）</td>
 <td>0.503 K</td>
-<td><strong>センサを足すとさらに改善</strong></td>
+<td>センサを足すと改善</td>
 </tr>
 <tr class="odd">
 <td><strong>温度2点＋変位2点</strong></td>
@@ -3838,14 +3845,11 @@ Q\)</span> 最小・P4）</td>
 </tbody>
 </table>
 <blockquote>
-<p><strong>温度センサの選定基準は発熱感度 <span
-class="math inline">\(\partial T/\partial Q\)</span> です。</strong>
-熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
-は<strong>変位センサ</strong>の基準であって、温度センサに流用すると逆効果になります
-（検証：<code>run/why_lowW_wins_check.py</code>。温度RMSEとの相関は
-<span class="math inline">\(\partial T/\partial Q\)</span> −0.835 に対し
-<span class="math inline">\(W\)</span> +0.405）。 詳しくは blog_005
-§4-2b。</p>
+<p><strong>温度2点の P2＋P0 は、2本とも A 側にあります。</strong>
+温度だけで同化する別の比較（blog_005 §4-6、ROM 真値・5 seed）では、 A
+側と O 側に1本ずつ置いた P2＋P4 のほうが温度場の誤差が約半分でした（0.16
+K 対 0.33 K）。 この表の本番計算を P2＋P4
+で回し直す試験は<strong>していません</strong>。</p>
 </blockquote>
 <h2 id="まだ分かっていないこと-代表点選択の未解決問題">8.
 まだ分かっていないこと ― 代表点選択の未解決問題</h2>
