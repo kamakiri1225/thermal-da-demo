@@ -94,7 +94,7 @@
 <section class="toc">
 <h2>目次</h2>
 <p class="toc-hint">章は <b>→ ←</b>、章の中は <b>↓ ↑</b> で移動。<b>Esc</b> で全体表示。各項目はクリックで移動できます</p>
-<div class="toc-grid"><div class="toc-ch"><a class="toc-h" href="#/2/0">1. 背景と目的</a><ol><li><a href="#/2/0">はじめに</a></li><li><a href="#/2/1">目的</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/3/0">2. データ同化の基礎と双子実験</a><ol><li><a href="#/3/0">データ同化とは</a></li><li><a href="#/3/1">データ同化の種類と、今回の選択</a></li><li><a href="#/3/2">OpenFOAM から FrontISTR へ ― 節点補間と双子実験</a></li><li><a href="#/3/3">観測データはどう作られ、どう同化に使われるのか</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/4/0">3. 課題 ― OI と EnKF の限界</a><ol><li><a href="#/4/0">課題① OIでは発熱量が当たらない</a></li><li><a href="#/4/1">課題② EnKFは当たるが計算コストが大きい</a></li><li><a href="#/4/2">パラメータの同定 ― 発熱量 \(Q\) は当たり、放熱 \(h\) は当たらない</a></li><li><a href="#/4/3">課題の整理と、本研究での解決</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/5/0">4. 低次元化 ― POD・Q-DEIM・ROM</a><ol><li><a href="#/5/0">低次元モデル化 ― POD</a></li><li><a href="#/5/1">代表点の選択 ― Q-DEIM</a></li><li><a href="#/5/2">なぜその5点なのか ― PODと測定点の関係</a></li><li><a href="#/5/3">検証 ― 5点で本当に全体が合うのか（時刻歴）</a></li><li><a href="#/5/4">ROMの構築と校正</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/6/0">5. 結果 ― 温度と熱変形の推定</a><ol><li><a href="#/6/0">結果① 温度が精度よく再現できる</a></li><li><a href="#/6/1">結果② 5点から温度分布を復元する</a></li><li><a href="#/6/2">結果③ 測れない場所の熱変形を、測れる場所から当てる</a></li><li><a href="#/6/3">温度センサを1本も使わず、変位計だけで温度場を直せるか</a></li><li><a href="#/6/4">結果③-2　どの方向・どの場所でも当たるのか</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/7/0">6. 観測点の設計 ― 熱感度と観測の価値</a><ol><li><a href="#/7/0">熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</a></li><li><a href="#/7/1">熱感度による観測点の選択</a></li><li><a href="#/7/2">結果④ 観測を増やすほど精度が上がる</a></li><li><a href="#/7/3">観測の価値を1本の式で測る</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/8/0">7. まとめと今後</a><ol><li><a href="#/8/0">まとめ</a></li><li><a href="#/8/1">本研究の強みと、優位性を示す次の検証</a></li><li><a href="#/8/2">限界と今後／公開情報</a></li></ol></div></div>
+<div class="toc-grid"><div class="toc-ch"><a class="toc-h" href="#/2/0">1. 背景と目的</a><ol><li><a href="#/2/0">はじめに</a></li><li><a href="#/2/1">目的</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/3/0">2. データ同化の基礎と双子実験</a><ol><li><a href="#/3/0">データ同化とは</a></li><li><a href="#/3/1">データ同化の種類と、今回の選択</a></li><li><a href="#/3/2">OpenFOAM から FrontISTR へ ― 節点補間と双子実験</a></li><li><a href="#/3/3">観測データはどう作られ、どう同化に使われるのか</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/4/0">3. 課題 ― OI と EnKF の限界</a><ol><li><a href="#/4/0">課題① OIでは発熱量が当たらない</a></li><li><a href="#/4/1">課題② EnKFは当たるが計算コストが大きい</a></li><li><a href="#/4/2">パラメータの同定 ― 発熱量 \(Q\) は当たり、放熱 \(h\) は当たらない</a></li><li><a href="#/4/3">課題の整理と、本研究での解決</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/5/0">4. 低次元化 ― POD・Q-DEIM・ROM</a><ol><li><a href="#/5/0">低次元モデル化 ― POD</a></li><li><a href="#/5/1">代表点の選択 ― Q-DEIM</a></li><li><a href="#/5/2">なぜその5点なのか ― PODと測定点の関係</a></li><li><a href="#/5/3">検証 ― 5点で本当に全体が合うのか（時刻歴）</a></li><li><a href="#/5/4">ROMの構築と校正</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/6/0">5. 結果 ― 温度と熱変形の推定</a><ol><li><a href="#/6/0">結果① 温度が精度よく再現できる</a></li><li><a href="#/6/1">結果② 5点から温度分布を復元する</a></li><li><a href="#/6/2">結果③ 測れない場所の熱変形を、測れる場所から当てる</a></li><li><a href="#/6/3">温度センサを1本も使わず、変位計だけで温度場を直せるか</a></li><li><a href="#/6/4">結果③-2　どの方向・どの場所でも当たるのか</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/7/0">6. 観測点の設計 ― 熱感度と観測の価値</a><ol><li><a href="#/7/0">熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</a></li><li><a href="#/7/1">熱感度による観測点の選択</a></li><li><a href="#/7/2">結果④ 観測を増やすほど精度が上がる</a></li><li><a href="#/7/3">温度センサは熱感度 \(W\) の高い点に置けばよいか</a></li><li><a href="#/7/4">熱感度 \(W\) ＋ 温度のばらつきで、測る前に配置を選ぶ</a></li><li><a href="#/7/5">前提が外れても、選んだ配置は良いままか</a></li><li><a href="#/7/6">観測の価値を1本の式で測る</a></li></ol></div><div class="toc-ch"><a class="toc-h" href="#/8/0">7. まとめと今後</a><ol><li><a href="#/8/0">まとめ</a></li><li><a href="#/8/1">本研究の強みと、優位性を示す次の検証</a></li><li><a href="#/8/2">限界と今後／公開情報</a></li></ol></div></div>
 </section>
 
 <!-- 第1章 背景と目的 -->
@@ -461,19 +461,18 @@ PODは「平均場からの変動」を分解したので、比べる相手も�
 <h2>熱感度 \(W\) はどこから来るのか ― 熱弾性からの導出</h2>
 <p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">熱弾性は温度について<strong>線形</strong>なので、温度から変位への写像が<strong>行列1つ</strong>にまとまる。それが熱感度 \(W\)。
 ①\(K_su=f_\mathrm{th}\) ②\(f_\mathrm{th}=H_T(T-T_\mathrm{ref})\) ③\(u=K_s^{-1}H_T(T-T_\mathrm{ref})\)
-④行＝どこがよく動くか（変位センサ）／列＝どの温度が効くか（温度センサ） ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
+④行＝どこがよく動くか（変位センサの置き場所）／列＝どの点の温度がずれると変位がずれるか ⑤全 \(W\) を作らずPODモード方向だけFrontISTRに通す（6回）</p>
 <div class="scrollfig">
-<img src="img/two_sensitivities.png" alt="2つの感度の使い分け">
 <img src="img/sensitivity_derivation.png" alt="熱感度Wの導出">
 <img src="img/sensitivity_reference.png" alt="熱感度の基準">
 <img src="img/frontistr_sensitivity.png" alt="熱感度Wの空間分布">
 </div>
-<p class="scrollhint">▲ <strong>1枚目＝2つの感度の使い分け</strong>（温度センサは \(\partial T/\partial Q\)、変位センサは \(W\)）。続いて導出、④⑤（\(W\)の読み方・実データ・実装）、
+<p class="scrollhint">▲ 導出、④⑤（\(W\)の読み方・実データ・実装）、
 <strong>熱感度 \(W\) の空間分布</strong>が見えます。分布は<strong>固定した底面（\(U_z=0\)）を基準にした絶対変位</strong>で、
 上へ行くほど膨張が積み上がって大きく動く。実際に測る \(U_z(A)-U_z(O)\) は<strong>2点の相対変位</strong>で、一様な伸びが引き算で消えて「反り」だけが残る</p>
 <div class="key" style="flex:0 0 auto">\( W=K_s^{-1}H_T \)　＝「その場所の温度が1 K上がると、どこが何µm動くか」の一覧表。<strong>これは変位センサを置く場所の基準</strong><br>
 <span style="font-weight:400;font-size:.86em">\(K_s\) が底面固定を含むので固定面の近くは \(K_s^{-1}\) が小さい＝底面は測っても動かない（高Wと低Wで<strong>51倍</strong>の開き）。
-<strong>一方、温度センサの基準は発熱感度 \(\partial T/\partial Q\)</strong>。\(W\) を温度センサに流用すると逆効果になる（温度RMSEとの相関：\(\partial T/\partial Q\) −0.835 に対し \(W\) は +0.405）</span></div>
+温度センサの置き場所は、\(W\) の大小だけでは決まらない（次の3枚）</span></div>
 </section>
 <section data-chapter="観測点の設計 ― 熱感度と観測の価値">
 <h2>熱感度による観測点の選択</h2>
@@ -490,7 +489,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 </section>
 <section data-chapter="観測点の設計 ― 熱感度と観測の価値">
 <h2>結果④ 観測を増やすほど精度が上がる</h2>
-<p style="flex:0 0 auto">温度1点 → 温度2点 → ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
+<p style="flex:0 0 auto">温度1点（P2）→ 温度2点（P2＋P4：A側とO側に1本ずつ）→ ＋変位2点 と観測を増やし、ROM＋EnKF（5 seed平均）で比較した。</p>
 <div class="two">
 <div><img src="img/obs_points_progression.png" alt="観測点の位置">
 <p class="cap">どこで観測しているか（温度：赤・青／変位：橙・灰）</p></div>
@@ -499,6 +498,41 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 </div>
 <div class="key" style="flex:0 0 auto">温度1点 → 2点で<strong>3倍</strong>改善。さらに<strong>変位を足すと未観測の変形まで合う</strong><br>
 <span style="font-weight:400;font-size:.88em">今回の高W候補は低W候補より改善した（低W 0.104 µm → 高W 0.077 µm）</span></div>
+</section>
+<section data-chapter="観測点の設計 ― 熱感度と観測の価値">
+<h2>温度センサは熱感度 \(W\) の高い点に置けばよいか</h2>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">反り \(U_z(A)-U_z(O)\approx 0.47T_0-0.65T_1+0.60T_2+0.04T_3-0.46T_4\)（係数＝熱感度 \(W\) [µm/K]）。
+\(W\) は<strong>その点の推定温度が1 Kずれると、反りが何µmずれるか</strong>を表す。温度センサ1本の試験では、\(W\) 最大の P1 に置いても反りの誤差 0.92 µm で改善せず、\(W\) 最小の P3 が 0.68 µm で最良だった。</p>
+<div class="scrollfig">
+<img src="img/sensor_pair_residual.png" alt="Wと推定温度のずれ">
+<img src="img/sensor_pair_positions.png" alt="候補点と評価点の位置">
+</div>
+<p class="scrollhint">▲ 左＝熱感度 \(W\)（赤＝A側、青＝O側）／右＝150 sで1回同化した後の推定温度のずれ（標準偏差）。下に候補点の位置。枠内スクロール</p>
+<div class="key" style="flex:0 0 auto">反りのずれ ＝ \(W\) ×「推定温度のずれ」。<strong>\(W\) の大きい点（P0・P1・P2・P4）の温度を全部、ずれなく推定する必要がある</strong><br>
+<span style="font-weight:400;font-size:.86em">P0＋P2（A側だけ）：O側のP1・P4が0.8〜1.05 Kずれたまま → 反りのずれ0.97 µm。P2＋P4（両側）：4点とも0.3 K前後 → 0.38 µm。
+<strong>P1は測っていないのに0.36 K</strong>（P4と一緒に温度が動くため）。\(W\) が教えるのは「温度を正確に推定すべき点」で、「センサを置く点」ではない</span></div>
+</section>
+<section data-chapter="観測点の設計 ― 熱感度と観測の価値">
+<h2>熱感度 \(W\) ＋ 温度のばらつきで、測る前に配置を選ぶ</h2>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">候補 \(S\) を測った後に残る反りの分からなさ
+\( \sigma_S^2=w^{\mathsf T}\big(B-BH_S^{\mathsf T}(H_SBH_S^{\mathsf T}+R)^{-1}H_SB\big)w \)。
+\(w\)＝熱感度（FrontISTR）、\(B\)＝温度のばらつき方（発熱0.3〜1.8倍・放熱・初期温度を振ったROM 4000本）。<strong>真の温度分布は不要</strong>。</p>
+<div class="scrollfig">
+<img src="img/sensor_pair_pred_vs_actual.png" alt="予測と実際">
+<img src="img/sensor_pair_compare.png" alt="温度センサ2本の全10通り">
+</div>
+<p class="scrollhint">▲ 上＝同化前の予測 \(\sigma_S\) と実際の反りの誤差（EnKF・5 seed）／下＝全10通りの温度場・反りの誤差（緑＝A側とO側に1本ずつ）。枠内スクロール</p>
+<div class="key" style="flex:0 0 auto">予測の順位と同化結果の順位が一致（<strong>順位相関 0.98</strong>）。選ばれるのは<strong>P2＋P4（A側とO側に1本ずつ）</strong><br>
+<span style="font-weight:400;font-size:.86em">P2＋P0（2本ともA側）に比べ温度場の誤差 0.33→<strong>0.16 K</strong>、反り 0.53→<strong>0.24 µm</strong>（3指標とも5 seed全勝）。
+両側に置く組み合わせ同士の差はseedのばらつき内。<strong>温度センサ1本では順位を当てられなかった</strong>（順位相関0.5）。予測値の大きさ自体は実際の誤差と一致しない</span></div>
+</section>
+<section data-chapter="観測点の設計 ― 熱感度と観測の価値">
+<h2>前提が外れても、選んだ配置は良いままか</h2>
+<p style="flex:0 0 auto;font-size:.62em;margin-bottom:6px">配置は前提どおりの条件で選んだ P2＋P4 のまま。<strong>真値だけ</strong>を、発熱量・放熱・初期温度・熱源の位置で前提から外して同化した（EnKF・5 seed、反りA−Oの誤差）。</p>
+<div class="scrollfig"><img src="img/sensor_pair_robustness.png" alt="前提が外れた真値での順位"></div>
+<div class="key" style="flex:0 0 auto">発熱量（0.2倍・2.5倍）・放熱（0.3倍・3倍）・初期温度（+15 K）が外れても、P2＋P4は<strong>1〜2位</strong>のまま<br>
+<span style="font-weight:400;font-size:.86em"><strong>熱源の位置を間違えると最良の配置は変わる</strong>（熱源がP0なら5位、P4なら2位。予測順位との相関0.72〜0.73）。どの条件でも「両側に置く」は「同じ側に2本」より良い。
+真値も同じROMの双子実験で、OpenFOAM＋FrontISTRを真値にした試験は未実施</span></div>
 </section>
 <section data-chapter="観測点の設計 ― 熱感度と観測の価値">
 <h2>観測の価値を1本の式で測る</h2>
@@ -522,7 +556,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <tr><td><strong>同化</strong></td><td>OI／EnKFで温度・変位を同化</td><td>実ソルバOI例：\(Q\)=8.9 W／104 EnKFの別設定：<strong>14.926 W</strong>（真値15 W。公平な同条件比較ではない）</td></tr>
 <tr class="hi"><td><strong>低次元化</strong></td><td>PODで場を2モードに圧縮（99.9 %）</td><td><strong>0→600 s が31 ms</strong>（実ソルバは分オーダー）</td></tr>
 <tr class="hi"><td><strong>代表点</strong></td><td>Q-DEIMで5点を自動選定しROMを校正</td><td><strong>校正残差 0.0142 K</strong>、比較したランダム配置の最悪1.4 Kより良い復元（大域保証ではない）</td></tr>
-<tr class="hi"><td><strong>観測設計</strong></td><td>温度センサは発熱感度 \(\partial T/\partial Q\)、変位センサは熱感度 \(W\) で選ぶ</td><td><strong>同化なし 4.59 K → 0.16 K</strong>（約29倍）／同じ変位2点でも置き場所で 2.43→0.86 K</td></tr>
+<tr class="hi"><td><strong>観測設計</strong></td><td>変位センサは熱感度 \(W\) の大きい点へ。温度センサは \(W\)＋温度のばらつきから、測る前に選ぶ</td><td>変位2点：置き場所で 2.43→0.86 K／温度2点：予測順位と同化結果の順位相関 0.98、A側だけの配置より温度場の誤差が約半分</td></tr>
 <tr class="hi"><td><strong>観測外評価</strong></td><td><strong>知りたい場所を測らずに</strong>当てる（観測＝中高さ、評価＝上面）</td><td>反りの誤差 <strong>0.081 µm</strong>（振幅の3.0%）。直接測った場合(0.077)とほぼ同じ</td></tr>
 <tr class="hi"><td><strong>センサ構成</strong></td><td><strong>温度センサ0本</strong>（変位計だけ）でも成立するか</td><td>温度RMSE <strong>0.207 K</strong> ― 温度2点だけ(0.453 K)の<strong>2.2倍良い</strong></td></tr>
 </table>
@@ -537,8 +571,8 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <div class="txt"><h3>現在の証拠</h3>
 <p>温度P2/P0のみ：未観測C−D RMSE <strong>0.792 µm</strong><br>＋高W変位S1/S2：<strong>0.158 µm（約80%低下）</strong></p>
 <p>強み：<strong>公開実装と条件を伴う、観測外の相対変位の評価</strong>。同じROM真値での追加観測効果であり、実機精度や固定予算での最適配置は未証明。</p>
-<h3>優位性を裏付ける3項目（<strong>いずれも未実施</strong>・今後の検証）</h3>
-<p>① 未学習条件のCHT＋FrontISTRを真値にする<br>② 同じセンサ数で感度・情報・基準配置を比較<br>③ Q/hとholdout変位の誤差・ばらつきを併記</p></div></div>
+<h3>優位性を裏付ける3項目</h3>
+<p>① 未学習条件のCHT＋FrontISTRを真値にする（<strong>未実施</strong>）<br>② 同じセンサ数での配置比較（<strong>温度2本・候補5点・ROM真値でのみ実施</strong>。変位センサとの組み合わせ・実ソルバ真値は未実施）<br>③ Q/hとholdout変位の誤差・ばらつきを併記（<strong>未実施</strong>）</p></div></div>
 <div class="key">目的別の配置理論は既知。<strong>熱変形で何が改善し、何が改善しないかを独立条件で示す</strong>ことを次の貢献にする。</div>
 <p class="cap"><a href="../docs/19_research_advantage_and_validation.md">原典・条件・検証計画</a> ／ goal-oriented sensor placement: <a href="https://arxiv.org/abs/2507.02500">2025/2026先行研究</a></p>
 </section>

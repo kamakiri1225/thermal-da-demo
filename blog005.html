@@ -337,6 +337,11 @@ id="toc-観測を増やす順番も式の通り">4-4.
 <li><a href="#仕上げ未観測の6点でも動く絵つき"
 id="toc-仕上げ未観測の6点でも動く絵つき">4-5.
 仕上げ：未観測の6点でも（動く絵つき）</a></li>
+<li><a
+href="#熱感度-w-で温度センサの場所は決まるか-反り-ao-を当てたい場合"
+id="toc-熱感度-w-で温度センサの場所は決まるか-反り-ao-を当てたい場合">4-6.
+熱感度 <span class="math inline">\(W\)</span>
+で温度センサの場所は決まるか ― 反り A−O を当てたい場合</a></li>
 </ul></li>
 <li><a href="#まとめ-対象別最適観測の設計表"
 id="toc-まとめ-対象別最適観測の設計表">5. まとめ ―
@@ -505,8 +510,8 @@ class="math inline">\(u\)</span></th>
 の表とぴったり同じです。
 スカラー対象では分散減少と情報量が単調に対応します。全温度ベクトルの情報量は
 <span class="math inline">\(I(\mathbf T;y_{\rm obs})=\tfrac12\ln[\det
-B_{TT}/\det
-B^a_{TT}]\)</span>（正定値の場合）であり、分散和の減少から同じ式では計算できません。上図の全温度場の情報量表示も参考値として読み、厳密な相互情報量の比較には使いません。</p>
+B_{TT}/\det B^a_{TT}]\)</span>
+（正定値の場合）であり、分散和の減少から同じ式では計算できません。上図の全温度場の情報量表示も参考値として読み、厳密な相互情報量の比較には使いません。</p>
 <p><strong>ベイジアンネットワークとして見ると何が嬉しいか</strong></p>
 <ul>
 <li><strong>条件付き独立が図で読める</strong>。たとえば <span
@@ -1392,7 +1397,12 @@ Q\)</span></strong></td>
 「その点を測ると何が分かるか」ではありません。</strong> <span
 class="math inline">\(W\)</span>
 が高い点＝よく動く点＝固定端から遠い「場の端」で、場全体を代表しないためです。</p>
-<p><strong>候補を作るときの使い分け：Q推定には温度の発熱感度、変位観測点にはWの行感度を参照する。</strong>
+<p><strong>2026-10-02
+追記：温度センサの場所を発熱感度の大小で選ぶのもやめました。</strong>
+発熱感度の上位2点（P2・P0）は熱源のある A
+側に集まり、反りや温度場全体を当てるには不利でした。温度センサの選び方は
+§4-6 を参照してください（熱感度 <span class="math inline">\(W\)</span>
+と共分散から選ぶ）。
 感度最大だけで最終精度は決まらず、対象、ノイズ、冗長性、観測時間を含めて配置を検証します。
 （§4-2c の実験結果は当初からこの向きを示していました）</p>
 </blockquote>
@@ -1417,7 +1427,8 @@ class="math inline">\(W\)</span>
 class="math inline">\(\lvert\partial(U_z(A)-U_z(O))/\partial
 T_i\rvert\)</span> [µm/K]</th>
 <th style="text-align: right;">発熱感度 <span
-class="math inline">\(\partial T_i/\partial Q\)</span> [K/W]</th>
+class="math inline">\(\partial T_i/\partial q\)</span>
+[K/q]（K/Wは÷15）</th>
 </tr>
 </thead>
 <tbody>
@@ -1527,7 +1538,7 @@ T_i\)</span> が大きいことは 「<span class="math inline">\(T_i\)</span>
 class="math inline">\(T_i\)</span> を測ると <span
 class="math inline">\(u\)</span>
 の不確かさがどれだけ減るか」</strong>であって、同じではありません。
-実際、<span class="math inline">\(T_i\)</span> 自身のばらつき <span
+実際、 <span class="math inline">\(T_i\)</span> 自身のばらつき <span
 class="math inline">\(\mathrm{Var}(y)\)</span>
 が大きければ分母で損をします。</p>
 <blockquote>
@@ -1581,6 +1592,673 @@ alt="未観測の温度3点・変位3点" />
 <img src="img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元" />
 <figcaption aria-hidden="true">5点から全温度場を復元</figcaption>
 </figure>
+<h3
+id="熱感度-w-で温度センサの場所は決まるか-反り-ao-を当てたい場合">4-6.
+熱感度 <span class="math inline">\(W\)</span>
+で温度センサの場所は決まるか ― 反り A−O を当てたい場合</h3>
+<blockquote>
+<p><strong>この節で分かったこと（先に結論）</strong> 1. <strong>熱感度
+<span class="math inline">\(W\)</span>
+が高い点に温度センサを置いても、反りは当たらない。</strong> 2.
+<strong>反りのずれ ＝ 熱感度 <span class="math inline">\(W\)</span>
+×「その点の推定温度のずれ」。</strong> <span
+class="math inline">\(W\)</span>
+の大きい点の温度を、全部ずれなく推定できるようにする必要がある。 3.
+そのためには、<strong>熱感度 <span class="math inline">\(W\)</span>
+と「温度のばらつき方（共分散 <span class="math inline">\(B\)</span>
+）」を組み合わせて場所を選ぶ</strong>。こうすると同化を回す前に、良い組み合わせの順位を当てられた（順位相関
+0.98）。 4.
+選んだ配置は、発熱量・放熱・初期温度が前提から外れても良いままだった。<strong>熱源の位置を間違えると、最良の組み合わせは当たらない。</strong></p>
+<p>ここでの「熱感度」は、FrontISTR で計算した行列 <span
+class="math inline">\(W\)</span> （温度 → 変位）のことです。</p>
+</blockquote>
+<p>この節は、次の疑問を順に計算で確かめた記録です。</p>
+<ul>
+<li>熱感度が高い点に温度センサを置けば、反りの予測は良くなるのでは？</li>
+<li>A と O を別々に見るとどうなるか？</li>
+<li>A 側と O 側に1本ずつ置くとどうなるか？
+それは微妙な差ではないか？</li>
+<li>なぜそうなるのか？ どうやって場所を選べばよいのか？</li>
+<li>本当の温度分布を知らない段階で、場所を選べるのか？</li>
+<li>前提が外れたらどうなるか？</li>
+</ul>
+<p><strong>共通の条件</strong>（とくに断りがなければ）</p>
+<ul>
+<li>EnKF、60メンバー、30 秒ごとに 20 回更新、温度ノイズ 0.30 K。</li>
+<li>seed は 20260913〜17 の 5 回。誤差は加熱期 30〜300 秒の平均。</li>
+<li>観測は温度だけで、変位は観測していない。</li>
+<li>真値も同化モデルも同じ ROM（双子実験）。<strong>OpenFOAM＋FrontISTR
+を真値にした試験はしていない。</strong></li>
+<li>スクリプト：<code>run/sensor_pair_goal_oriented.py</code>、結果：<code>results/sensor_pair_goal_oriented.json</code></li>
+</ul>
+<figure>
+<img src="img/sensor_pair_positions.png" alt="候補点と評価点の位置" />
+<figcaption aria-hidden="true">候補点と評価点の位置</figcaption>
+</figure>
+<p><em>温度の候補点 P0〜P4 と、反りを評価する上面の A・O。赤は <span
+class="math inline">\(W&gt;0\)</span> （温まると反りが増える）、青は
+<span class="math inline">\(W&lt;0\)</span> の点。ヒータは P2
+にある。</em></p>
+<h4 id="熱感度-w-の高い点に温度センサを1本置くと">① 熱感度 <span
+class="math inline">\(W\)</span> の高い点に温度センサを1本置くと？</h4>
+<p>反り <span class="math inline">\(U_z(A)-U_z(O)\)</span>
+は、5点の温度に <span class="math inline">\(W\)</span>
+を掛けて足したものです（FrontISTR で計算した値。 <span
+class="math inline">\(T\)</span> は基準からの温度差 [K]）。</p>
+<p><span class="math display">\[
+U_z(A)-U_z(O)\approx
+0.47\,T_0-0.65\,T_1+0.60\,T_2+0.04\,T_3-0.46\,T_4\quad[\mu\mathrm m]
+\]</span></p>
+<p>温度センサを1本だけ置き、場所を変えて同化しました。</p>
+<table>
+<thead>
+<tr class="header">
+<th>置いた点</th>
+<th style="text-align: right;">熱感度 <span
+class="math inline">\(W\)</span></th>
+<th style="text-align: right;">反り A−O の誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P1</td>
+<td style="text-align: right;">−0.65（絶対値が最大）</td>
+<td style="text-align: right;">0.92 µm</td>
+</tr>
+<tr class="even">
+<td>P2</td>
+<td style="text-align: right;">+0.60</td>
+<td style="text-align: right;">0.92 µm</td>
+</tr>
+<tr class="odd">
+<td>P0</td>
+<td style="text-align: right;">+0.47</td>
+<td style="text-align: right;">0.91 µm</td>
+</tr>
+<tr class="even">
+<td>P4</td>
+<td style="text-align: right;">−0.46</td>
+<td style="text-align: right;">0.99 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>P3</strong></td>
+<td style="text-align: right;"><strong>+0.04（最小）</strong></td>
+<td style="text-align: right;"><strong>0.68 µm（最良）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>熱感度 <span class="math inline">\(W\)</span>
+が高い点に置いても、反りは良くなりませんでした。</strong>
+一番良かったのは <span class="math inline">\(W\)</span> が一番小さい P3
+です。</p>
+<h4 id="a-と-o-を別々に見ると">② A と O を別々に見ると</h4>
+<table>
+<thead>
+<tr class="header">
+<th>置いた点</th>
+<th>位置</th>
+<th style="text-align: right;">A の誤差</th>
+<th style="text-align: right;">O の誤差</th>
+<th style="text-align: right;">A−O の誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0</td>
+<td>A 側・中段</td>
+<td style="text-align: right;"><strong>0.27</strong></td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">0.91</td>
+</tr>
+<tr class="even">
+<td>P2</td>
+<td>A 側・中段（ヒータ）</td>
+<td style="text-align: right;">0.31</td>
+<td style="text-align: right;"><strong>1.15</strong></td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td>P3</td>
+<td>A 側・底</td>
+<td style="text-align: right;">0.38</td>
+<td style="text-align: right;">0.59</td>
+<td style="text-align: right;"><strong>0.68</strong></td>
+</tr>
+<tr class="even">
+<td>P1</td>
+<td>O 側寄り・中段</td>
+<td style="text-align: right;">1.18</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td>P4</td>
+<td>O 側・底</td>
+<td style="text-align: right;"><strong>1.36</strong></td>
+<td style="text-align: right;"><strong>0.46</strong></td>
+<td style="text-align: right;">0.99</td>
+</tr>
+</tbody>
+</table>
+<p>（単位 µm。300 秒時点の真値は A 5.78、O 3.06、A−O 2.71 µm）</p>
+<ul>
+<li><strong>センサを置いた側だけが合い、反対側は外れます。</strong>
+そのため、差 A−O はどこに置いても約 0.9 µm ずれます。</li>
+<li>P3 は A と O を同じくらい動かす点です（A に +0.64、O に +0.60
+µm/K）。そのため A−O に対する <span class="math inline">\(W\)</span>
+は小さいのですが、測ると A と O
+の両方がそこそこ合い、差の誤差が一番小さくなりました。</li>
+</ul>
+<h4 id="本を-a-側と-o-側に分けると">③ 2本を A 側と O 側に分けると</h4>
+<p>2本の組み合わせ10通りを全部計算しました。評価は、反りだけでなく<strong>温度場全体（20,696セル）</strong>と<strong>変位14点</strong>でも行っています。</p>
+<figure>
+<img src="img/sensor_pair_compare.png" alt="温度センサ2本の全10通り" />
+<figcaption aria-hidden="true">温度センサ2本の全10通り</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>組み合わせ</th>
+<th>置いた側</th>
+<th style="text-align: right;">温度場全体の誤差</th>
+<th style="text-align: right;">変位14点の平均誤差</th>
+<th style="text-align: right;">反り A−O の誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>P2＋P4</strong></td>
+<td>両側</td>
+<td style="text-align: right;"><strong>0.16 ± 0.03 K</strong></td>
+<td style="text-align: right;"><strong>0.15 ± 0.03 µm</strong></td>
+<td style="text-align: right;"><strong>0.24 ± 0.12 µm</strong></td>
+</tr>
+<tr class="even">
+<td>P0＋P4</td>
+<td>両側</td>
+<td style="text-align: right;">0.18 ± 0.05</td>
+<td style="text-align: right;">0.16 ± 0.04</td>
+<td style="text-align: right;">0.29 ± 0.13</td>
+</tr>
+<tr class="odd">
+<td>P0＋P1</td>
+<td>両側</td>
+<td style="text-align: right;">0.27 ± 0.05</td>
+<td style="text-align: right;">0.23 ± 0.06</td>
+<td style="text-align: right;">0.36 ± 0.13</td>
+</tr>
+<tr class="even">
+<td>P3＋P4</td>
+<td>両側</td>
+<td style="text-align: right;">0.29 ± 0.07</td>
+<td style="text-align: right;">0.21 ± 0.06</td>
+<td style="text-align: right;">0.34 ± 0.17</td>
+</tr>
+<tr class="odd">
+<td>P1＋P3</td>
+<td>両側</td>
+<td style="text-align: right;">0.29 ± 0.07</td>
+<td style="text-align: right;">0.22 ± 0.04</td>
+<td style="text-align: right;">0.40 ± 0.10</td>
+</tr>
+<tr class="even">
+<td>P1＋P2</td>
+<td>両側</td>
+<td style="text-align: right;">0.30 ± 0.10</td>
+<td style="text-align: right;">0.25 ± 0.07</td>
+<td style="text-align: right;">0.25 ± 0.02</td>
+</tr>
+<tr class="odd">
+<td>P0＋P2</td>
+<td>同じ側</td>
+<td style="text-align: right;">0.33 ± 0.07</td>
+<td style="text-align: right;">0.31 ± 0.05</td>
+<td style="text-align: right;">0.53 ± 0.12</td>
+</tr>
+<tr class="even">
+<td>P2＋P3</td>
+<td>同じ側</td>
+<td style="text-align: right;">0.35 ± 0.11</td>
+<td style="text-align: right;">0.34 ± 0.13</td>
+<td style="text-align: right;">0.53 ± 0.25</td>
+</tr>
+<tr class="odd">
+<td>P0＋P3</td>
+<td>同じ側</td>
+<td style="text-align: right;">0.38 ± 0.12</td>
+<td style="text-align: right;">0.37 ± 0.15</td>
+<td style="text-align: right;">0.62 ± 0.30</td>
+</tr>
+<tr class="even">
+<td>P1＋P4</td>
+<td>同じ側</td>
+<td style="text-align: right;">0.55 ± 0.19</td>
+<td style="text-align: right;">0.35 ± 0.10</td>
+<td style="text-align: right;">0.79 ± 0.29</td>
+</tr>
+</tbody>
+</table>
+<p>（± は 5 seed の標準偏差）</p>
+<p><strong>微妙な差ではないか？</strong> seed
+ごとに比べると、次のようになりました。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>比べたもの</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>両側に置く 6 通りの平均 vs 同じ側に置く 4 通りの平均</td>
+<td>3 指標とも、<strong>5 seed すべてで両側のほうが良い</strong></td>
+</tr>
+<tr class="even">
+<td>P2＋P4 vs P0＋P2</td>
+<td>3 指標とも、<strong>5 seed すべてで P2＋P4
+のほうが良い</strong>（温度場は約半分）</td>
+</tr>
+<tr class="odd">
+<td>両側に置く組み合わせ同士</td>
+<td><strong>差は seed のばらつきに埋もれる。</strong> P2＋P4（0.24）と
+P1＋P2（0.25）のどちらが良いかは言えない</td>
+</tr>
+</tbody>
+</table>
+<p>言えるのは「<strong>A 側と O
+側に分けて置くと良い</strong>」までで、「P2＋P4
+が唯一の最適」とまでは言えません。</p>
+<p>なお、本番の比較計算（blog_004 §7-6）で使った温度2点 P2＋P0
+は、2本とも A 側にある組み合わせでした。温度だけで同化する場合、P2＋P4
+の約2倍の誤差になります。</p>
+<h4 id="なぜか-反りのずれ-w-推定した温度のずれ">④ なぜか ― 反りのずれ ＝
+<span class="math inline">\(W\)</span> ×「推定した温度のずれ」</h4>
+<p>ここでいう「温度のずれ」は、<strong>同化で推定した温度が真値からどれだけずれているか</strong>のことです。</p>
+<p><strong>推定した温度が 1 K
+ずれると、反りはどれだけずれるか。</strong> 反りは5点の温度に熱感度
+<span class="math inline">\(W\)</span> を掛けて足したものなので、答えは
+<span class="math inline">\(W\)</span> そのものです。</p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>1 K ずれた点</th>
+<th style="text-align: right;">反りのずれ</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P1（ <span class="math inline">\(W=-0.65\)</span> ）</td>
+<td style="text-align: right;"><strong>0.65 µm</strong></td>
+<td>温度を正確に推定する必要がある</td>
+</tr>
+<tr class="even">
+<td>P2（ <span class="math inline">\(W=+0.60\)</span> ）</td>
+<td style="text-align: right;"><strong>0.60 µm</strong></td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td>P0（ <span class="math inline">\(W=+0.47\)</span> ）</td>
+<td style="text-align: right;"><strong>0.47 µm</strong></td>
+<td>同上</td>
+</tr>
+<tr class="even">
+<td>P4（ <span class="math inline">\(W=-0.46\)</span> ）</td>
+<td style="text-align: right;"><strong>0.46 µm</strong></td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td>P3（ <span class="math inline">\(W=+0.04\)</span> ）</td>
+<td style="text-align: right;">0.04 µm</td>
+<td>温度が多少ずれても反りにほとんど響かない</td>
+</tr>
+</tbody>
+</table>
+<p>つまり熱感度 <span class="math inline">\(W\)</span>
+から分かるのは、「<strong>温度がずれると反りが大きくずれる点はどこか</strong>」＝「<strong>温度を正確に推定する必要がある点はどこか</strong>」です。今回は
+P0・P1・P2・P4 の4点です。</p>
+<p><strong>次に、センサを置いた後、各点の推定温度がどれだけずれているかを見ます。</strong></p>
+<figure>
+<img src="img/sensor_pair_residual.png"
+alt="W と測った後に残る温度のずれ" />
+<figcaption aria-hidden="true">W と測った後に残る温度のずれ</figcaption>
+</figure>
+<p><em>左：熱感度 <span class="math inline">\(W\)</span> 。P0・P2
+は＋（A 側）、P1・P4 は−（O 側）。右：150
+秒で1回同化した後の、推定温度のずれの大きさ（標準偏差）。</em></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサの置き方</th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+<th style="text-align: right;">反りのずれ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>（熱感度 <span class="math inline">\(W\)</span> ）</td>
+<td style="text-align: right;">+0.47</td>
+<td style="text-align: right;">−0.65</td>
+<td style="text-align: right;">+0.60</td>
+<td style="text-align: right;">+0.04</td>
+<td style="text-align: right;">−0.46</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td>センサなし</td>
+<td style="text-align: right;">2.49 K</td>
+<td style="text-align: right;">2.23</td>
+<td style="text-align: right;">2.64</td>
+<td style="text-align: right;">2.27</td>
+<td style="text-align: right;">2.25</td>
+<td style="text-align: right;">1.20 µm</td>
+</tr>
+<tr class="odd">
+<td>P0＋P2（A 側だけ）</td>
+<td style="text-align: right;">0.22</td>
+<td style="text-align: right;"><strong>0.80</strong></td>
+<td style="text-align: right;">0.23</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;"><strong>1.05</strong></td>
+<td style="text-align: right;"><strong>0.97 µm</strong></td>
+</tr>
+<tr class="even">
+<td>P2＋P4（両側）</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.36</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;"><strong>0.38 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>P0＋P2</strong>：A 側の P0・P2 の温度は 0.2 K
+のずれで推定できます。しかし、 <span class="math inline">\(W\)</span>
+の大きい O 側の P1・P4 は 0.8〜1.05 K
+ずれたまま残り、反りが大きくずれます。</li>
+<li><strong>P2＋P4</strong>：W の大きい4点すべてが 0.3 K
+前後のずれに収まり、反りが当たります。
+<ul>
+<li><strong>P1 にはセンサがないのに、ずれは 0.36 K です。</strong> P1 は
+P4 と一緒に温度が上がり下がりするので、P4 を測れば P1
+の温度も推定できるからです。</li>
+</ul></li>
+</ul>
+<blockquote>
+<p><strong>まとめると</strong> - 熱感度 <span
+class="math inline">\(W\)</span>
+が高い点ほど、その点の推定温度がずれると反りが大きくずれる。 - だから、
+<span class="math inline">\(W\)</span>
+の大きい点の温度を<strong>全部</strong>、ずれなく推定できるようにセンサを置く必要がある。
+- その点を直接測ってもよいし、一緒に温度が動く別の点を測ってもよい。 -
+熱感度 <span class="math inline">\(W\)</span>
+が高い点に1本置くだけでは、他の <span class="math inline">\(W\)</span>
+の大きい点の温度がずれたまま残るので、反りは当たらない。</p>
+</blockquote>
+<p>（この表は1回だけ同化した場合の値です。20回続けた場合の値ではありません。）</p>
+<h4 id="どうやって選ぶか-w-共分散-b">⑤ どうやって選ぶか ― <span
+class="math inline">\(W\)</span> ＋ 共分散 <span
+class="math inline">\(B\)</span></h4>
+<p>④をそのまま式にします。候補の組み合わせ <span
+class="math inline">\(S\)</span>
+を測った後に残る「反りの分からなさ」は、次の式で計算できます。</p>
+<p><span class="math display">\[
+\sigma_S^2=w^{\mathsf T}\Big(B-BH_S^{\mathsf T}\big(H_SBH_S^{\mathsf
+T}+R\big)^{-1}H_SB\Big)w
+\]</span></p>
+<ul>
+<li><span class="math inline">\(w\)</span>
+：反りに対する5点の熱感度（上の 0.47, −0.65, …）。<strong>FrontISTR
+から。</strong></li>
+<li><span class="math inline">\(B\)</span>
+：5点の温度が「どう一緒にばらつくか」（共分散）。<strong>ROM
+から。</strong></li>
+<li><span class="math inline">\(H_S\)</span> ：組み合わせ <span
+class="math inline">\(S\)</span> の点を取り出す行列。 <span
+class="math inline">\(R\)</span> ：センサのノイズ（0.30 K）。</li>
+<li>括弧の中は「測った後に残る温度の共分散」で、カルマンフィルタの更新式と同じです。</li>
+</ul>
+<p><span class="math inline">\(B\)</span>
+は時刻ごとに変わるので、30〜300 秒の各時刻で計算して平均しました。この
+<span class="math inline">\(\sigma_S\)</span>
+が一番小さい組み合わせを選びます。</p>
+<figure>
+<img src="img/sensor_pair_pred_vs_actual.png"
+alt="同化前の予測と実際の結果" />
+<figcaption aria-hidden="true">同化前の予測と実際の結果</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 36%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>組み合わせ</th>
+<th style="text-align: right;">予測 <span
+class="math inline">\(\sigma_S\)</span> （同化前の計算）</th>
+<th style="text-align: right;">実際の反りの誤差（同化後）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P2＋P4</td>
+<td style="text-align: right;">0.59（1位）</td>
+<td style="text-align: right;">0.24（1位）</td>
+</tr>
+<tr class="even">
+<td>P1＋P2</td>
+<td style="text-align: right;">0.60（2位）</td>
+<td style="text-align: right;">0.25（2位）</td>
+</tr>
+<tr class="odd">
+<td>P0＋P4</td>
+<td style="text-align: right;">0.62（3位）</td>
+<td style="text-align: right;">0.29（3位）</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+</tr>
+<tr class="odd">
+<td>P1＋P4</td>
+<td style="text-align: right;">1.19（最下位）</td>
+<td style="text-align: right;">0.79（最下位）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>順位相関は 0.98。</strong>
+上位3つと最下位が一致しました。</li>
+<li>この式は「＋の点と−の点を1本ずつ」を自動的に選びます。「A 側と O
+側に分ける」は勘ではなく、 <span class="math inline">\(W\)</span>
+の符号から出てきます。</li>
+<li><strong>予測の数値そのもの（0.59
+など）は、実際の誤差（0.24）とは合いません。</strong>
+合うのは順位だけです。</li>
+<li><strong>温度センサ1本では当たりませんでした</strong>（順位相関
+0.5）。予測では P2 が1位でしたが、実際は P3 が最良でした。1本だと予測
+<span class="math inline">\(\sigma\)</span> が 1.22〜1.33
+とほとんど差がないためと考えていますが、確かめていません。</li>
+</ul>
+<h4 id="本当の温度分布を知らないのに-b-を作れるのか">⑥
+本当の温度分布を知らないのに、 <span class="math inline">\(B\)</span>
+を作れるのか</h4>
+<p>作れます。必要なのは本当の温度ではなく、<strong>温度がどうばらつき得るか</strong>です。</p>
+<ul>
+<li>分からない条件を範囲で振って、ROM を 4000 本回しました。
+<ul>
+<li>発熱量：基準の 0.3〜1.8 倍</li>
+<li>放熱係数：平均 0.02、標準偏差 0.01</li>
+<li>初期温度：気温の −3〜+12 K</li>
+</ul></li>
+<li>そのばらつきから <span class="math inline">\(B\)</span>
+を作りました。ROM なので数秒で終わります。</li>
+<li><span class="math inline">\(W\)</span>
+は形状・材料・固定条件だけで決まり、温度分布は要りません。</li>
+</ul>
+<p>つまり、<strong>熱源の位置と、発熱量・放熱のだいたいの範囲</strong>が分かっていれば、測る前に場所を選べます。</p>
+<h4 id="前提が外れたら">⑦ 前提が外れたら？</h4>
+<p>場所の選び方は前提どおりのまま変えず、<strong>真値だけを前提から外して</strong>同化しました。</p>
+<figure>
+<img src="img/sensor_pair_robustness.png"
+alt="前提から外れた真値での順位" />
+<figcaption aria-hidden="true">前提から外れた真値での順位</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>真値の条件</th>
+<th>選んだ P2＋P4 の順位（反り）</th>
+<th>両側に置く平均 vs 同じ側に置く平均（反り）</th>
+<th style="text-align: right;">予測順位との相関</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>前提どおり</td>
+<td>1位</td>
+<td>0.31 vs 0.62 µm</td>
+<td style="text-align: right;">0.98</td>
+</tr>
+<tr class="even">
+<td>発熱量 2.5 倍（範囲外）</td>
+<td>2位</td>
+<td>0.71 vs 1.45</td>
+<td style="text-align: right;">0.92</td>
+</tr>
+<tr class="odd">
+<td>発熱量 0.2 倍（範囲外）</td>
+<td>1位</td>
+<td>0.36 vs 0.59</td>
+<td style="text-align: right;">0.85</td>
+</tr>
+<tr class="even">
+<td>放熱 3 倍</td>
+<td>1位</td>
+<td>0.31 vs 0.62</td>
+<td style="text-align: right;">0.98</td>
+</tr>
+<tr class="odd">
+<td>放熱 0.3 倍</td>
+<td>1位</td>
+<td>0.31 vs 0.62</td>
+<td style="text-align: right;">0.98</td>
+</tr>
+<tr class="even">
+<td>初期温度 +15 K（範囲外）</td>
+<td>1位</td>
+<td>0.41 vs 1.19</td>
+<td style="text-align: right;">0.90</td>
+</tr>
+<tr class="odd">
+<td><strong>熱源が P0（同じ A 側）</strong></td>
+<td><strong>5位</strong></td>
+<td>0.43 vs 1.00</td>
+<td style="text-align: right;"><strong>0.73</strong></td>
+</tr>
+<tr class="even">
+<td><strong>熱源が P4（反対の O 側）</strong></td>
+<td>2位</td>
+<td>1.16 vs 1.87</td>
+<td style="text-align: right;"><strong>0.72</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>発熱量・放熱・初期温度が外れても、選んだ配置はほぼ最良のままでした。</strong></li>
+<li><strong>熱源の位置が違うと、最良の組み合わせは変わりました。</strong>
+熱源が P0 の場合は P0＋P4 が最良で、P2＋P4 は5位でした。</li>
+<li>それでも、どの条件でも「両側に置く」ほうが「同じ側に2本」より良い結果でした。</li>
+</ul>
+<h4 id="まとめ">まとめ</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>問い</th>
+<th>答え</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱感度 <span class="math inline">\(W\)</span>
+の高い点に温度センサを置けばよいか</td>
+<td><strong>いいえ。</strong> 他の <span
+class="math inline">\(W\)</span>
+の大きい点の推定温度がずれたまま残ると、反りは当たらない</td>
+</tr>
+<tr class="even">
+<td>熱感度 <span class="math inline">\(W\)</span> は何の役に立つか</td>
+<td>「<strong>温度を正確に推定する必要がある点はどこか</strong>」が分かる（ずれたときに反りに響く点）</td>
+</tr>
+<tr class="odd">
+<td>どう選べばよいか</td>
+<td><span class="math inline">\(W\)</span> と共分散 <span
+class="math inline">\(B\)</span> から、測った後に残る反りの分からなさ
+<span class="math inline">\(\sigma_S\)</span>
+を計算し、最小の組み合わせを選ぶ。最後は同化で確かめる</td>
+</tr>
+<tr class="even">
+<td>測る前に選べるか</td>
+<td>選べる。熱源の位置と、発熱量・放熱のだいたいの範囲があればよい</td>
+</tr>
+<tr class="odd">
+<td>前提が外れたら</td>
+<td>発熱量・放熱・初期温度のずれには強い。<strong>熱源の位置を間違えると外れる</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>やっていないこと</strong></p>
+<ul>
+<li>真値は ROM の双子実験です。OpenFOAM＋FrontISTR
+を真値にした試験はしていません。</li>
+<li>候補は5点（P0〜P4）の中の2本だけです。3本以上、5点以外の場所は試していません。</li>
+<li>温度センサ1本の場合は、この選び方で順位を当てられませんでした。</li>
+<li>変位センサを加えた構成とは比べていません。</li>
+</ul>
 <hr />
 <h2 id="まとめ-対象別最適観測の設計表">5. まとめ ―
 対象別・最適観測の設計表</h2>
