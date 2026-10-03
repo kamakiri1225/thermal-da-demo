@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>測れない場所の熱変形を、測れる場所から当てる ― 変位をデータ同化の観測に使う</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap">
+<style>
+ :root{--navy:#0B2545;--blue:#1F4E9C;--blue2:#2E75D4;--sky:#59A5F5;
+       --red:#C0392B;--orange:#F2711C;--amber:#FFC857;--green:#1F9D62;
+       --ink:#17212e;--pad:40px;}
+ .reveal{font-family:"Noto Sans JP",sans-serif;color:var(--ink);font-size:28px}
+
+ /* 1280x720 の箱。上にフルブリード見出し、下に本文 */
+ .reveal .slides>section{display:flex!important;flex-direction:column;
+   width:1280px;height:720px;padding:0!important;box-sizing:border-box;
+   overflow:hidden;text-align:left;top:0!important}
+ .reveal .slides>section>*{margin-left:var(--pad);margin-right:var(--pad)}
+ .reveal h2{flex:0 0 auto;margin:0 0 14px!important;padding:14px var(--pad) 13px;
+   font-size:1.02em;color:#fff;background:linear-gradient(100deg,var(--navy),var(--blue) 62%,var(--blue2));
+   font-weight:700;border-bottom:5px solid var(--amber);text-align:left;letter-spacing:.01em}
+ .reveal h2 .tag{float:right;font-size:.62em;font-weight:700;color:var(--navy);
+   background:var(--amber);border-radius:30px;padding:3px 14px;margin-top:2px}
+ .reveal h1,.reveal h2,.reveal h3,.reveal h4,.reveal h5,.reveal h6{text-transform:none;letter-spacing:normal}
+ .reveal h1{font-size:1.5em;color:var(--blue);font-weight:900}
+ .reveal h3{font-size:.78em;color:var(--blue);margin:.15em 0 .14em;flex:0 0 auto;font-weight:700}
+ .reveal p,.reveal li{font-size:.68em;line-height:1.5}
+ .reveal ul,.reveal ol{margin-left:1.2em;flex:0 0 auto}
+ .reveal li{margin-bottom:.2em}
+ .reveal strong{color:var(--red)}
+ .reveal em{color:var(--blue);font-style:normal;font-weight:700}
+ .reveal img{border:none;box-shadow:none;background:none;max-width:100%}
+ .reveal a{color:var(--blue2)}
+
+ /* 図 */
+ .fig{flex:1 1 0;min-height:0;display:grid;grid-template-rows:1fr auto;
+      justify-items:center;align-items:center;overflow:hidden;
+      margin-left:var(--pad);margin-right:var(--pad)}
+ .fig img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ .fig.frame img{border:1px solid #cfdae8;border-radius:8px;box-shadow:0 3px 16px rgba(11,37,69,.14)}
+ .two{display:flex;gap:20px;flex:1 1 0;min-height:0;overflow:hidden;
+      margin-left:var(--pad);margin-right:var(--pad)}
+ .two>div{flex:1;min-width:0;display:grid;grid-template-rows:1fr auto;
+          justify-items:center;align-items:center;overflow:hidden}
+ .two>div.txt{display:flex;flex-direction:column;justify-content:center;align-items:stretch}
+ .two img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;min-height:0}
+ .two.w64>div:first-child{flex:1.75}
+ .two.w46>div:first-child{flex:.72}
+ .cap{font-size:.44em;color:#54646f;text-align:center;margin:5px 0 0;line-height:1.42;flex:0 0 auto}
+
+ /* 表 */
+ .reveal table{font-size:.54em;border-collapse:collapse;width:100%;margin:.15em 0}
+ .reveal table th{background:var(--navy);color:#fff;padding:6px 9px;border:1px solid #2b4a74;font-weight:700}
+ .reveal table td{padding:5px 9px;border:1px solid #c9d4e0}
+ .reveal table tr.hi td{background:#fff5e8;font-weight:700}
+ .reveal table tr.hi td:first-child{box-shadow:inset 5px 0 0 var(--orange)}
+ .reveal table tr.dim td{color:#7a8794;background:#f7f9fb}
+ .reveal table.s{font-size:.47em}
+
+ /* 強調帯 */
+ .key{flex:0 0 auto;background:linear-gradient(95deg,#fff4e6,#fffaf2);
+      border-left:8px solid var(--orange);padding:11px 18px;font-size:.66em;
+      font-weight:700;margin:10px var(--pad) 12px;line-height:1.52;
+      box-shadow:0 2px 10px rgba(242,113,28,.13)}
+ .ask{flex:0 0 auto;background:#eef4fb;border-left:8px solid var(--blue2);
+      padding:9px 18px;font-size:.58em;margin:0 var(--pad) 10px;line-height:1.5}
+ .ask b{color:var(--blue)}
+
+ /* 表紙・章扉・キメスライド（濃色） */
+ .hero{background:radial-gradient(1200px 600px at 78% 12%,#1e63bd 0%,transparent 60%),
+       linear-gradient(140deg,#05152b 0%,#0B2545 48%,#143b71 100%);
+       color:#fff;justify-content:center;align-items:center;text-align:center!important}
+ .hero h1,.hero h3{color:#fff}
+ .hero .ttl{font-size:1.34em;font-weight:900;line-height:1.38;margin:0 60px .3em;
+            text-align:center;text-shadow:0 3px 20px rgba(0,0,0,.35)}
+ .hero .ttl .acc{color:var(--amber)}
+ .hero .sub2{font-size:.66em;color:#bfd6f2;line-height:1.75;text-align:center;margin:0 60px}
+ .hero .rule{width:160px;height:5px;border:none;background:var(--amber);margin:16px auto 20px;border-radius:3px}
+ .hero .foot{font-size:.52em;color:#9fc0e6;line-height:1.8;margin-top:24px;text-align:center}
+ .divn{position:absolute;top:26px;left:46px;font-size:3.4em;font-weight:900;
+       color:rgba(255,255,255,.14);line-height:1}
+ .divtag{font-size:.56em;font-weight:700;color:var(--navy);background:var(--amber);
+         border-radius:30px;padding:5px 20px;margin-bottom:18px;display:inline-block}
+
+ /* 大きい数字のカード */
+ .nums{display:flex;gap:20px;flex:0 1 auto;max-height:400px;align-items:stretch;justify-content:center;
+       margin:14px var(--pad) 10px}
+ .nums>div{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.22);
+           border-radius:14px;padding:18px 16px 14px;display:flex;flex-direction:column;
+           justify-content:center;text-align:center;backdrop-filter:blur(2px)}
+ .nums .lbl{font-size:.46em;color:#bfd6f2;line-height:1.45;margin-bottom:8px}
+ .nums .big{font-size:1.55em;font-weight:900;line-height:1.05;
+            background:linear-gradient(92deg,#FFE08A,#FF8A3D);-webkit-background-clip:text;
+            background-clip:text;color:transparent}
+ .nums .u{font-size:.5em;font-weight:700;color:#fff;margin-top:4px}
+ .nums .note{font-size:.4em;color:#9fc0e6;margin-top:8px;line-height:1.4}
+
+ /* 横並びの小カード（白地） */
+ .cards{display:flex;gap:14px;flex:0 0 auto;margin:0 var(--pad) 10px}
+ .cards>div{flex:1;background:#f2f6fb;border-top:5px solid var(--blue2);
+            border-radius:0 0 8px 8px;padding:9px 13px;font-size:.54em;line-height:1.45}
+ .cards>div b{color:var(--blue);font-weight:700}
+ .cards>div>b:first-child{display:block;font-size:1.06em;margin-bottom:3px}
+ .cards>div.ng{background:#fdeeec;border-top-color:var(--red)}
+ .cards>div.ng>b:first-child{color:var(--red)}
+ .cards>div.ok{background:#eaf7f0;border-top-color:var(--green)}
+ .cards>div.ok>b:first-child{color:var(--green)}
+ .cards>div.hit{background:#fff4e6;border-top-color:var(--orange);box-shadow:0 3px 14px rgba(242,113,28,.2)}
+ .cards>div.hit>b:first-child{color:var(--orange)}
+
+ /* 流派の図 */
+ .lanes{display:flex;flex-direction:column;gap:12px;flex:1 1 0;min-height:0;
+        justify-content:center;margin:0 var(--pad)}
+ .lane{display:flex;align-items:center;gap:16px;border-radius:8px;padding:15px 18px;
+       font-size:.62em;line-height:1.45;background:#f3f6fa;border-left:7px solid #9bb4d0}
+ .lane .n{flex:0 0 46px;font-weight:900;font-size:1.25em;color:#7f94ad}
+ .lane .t{flex:0 0 300px;font-weight:700;color:var(--navy)}
+ .lane .w{flex:1;color:#54646f}
+ .lane.gap{background:linear-gradient(95deg,#fff2df,#fffaf3);border-left-color:var(--orange);
+           border:2px dashed var(--orange);box-shadow:0 3px 16px rgba(242,113,28,.18)}
+ .lane.gap .n{color:var(--orange)}
+ .lane.gap .t{color:#9c4a0a}
+
+ /* 流れ図 */
+ .flow{display:flex;flex-direction:column;gap:7px;flex:1 1 0;min-height:0;
+       justify-content:center;margin:0 var(--pad)}
+ .fbox{border-radius:7px;padding:12px 18px;font-size:.63em;line-height:1.52}
+ .fbox b{font-weight:700}
+ .fbox>b:first-child{display:block;font-size:1.06em;margin-bottom:3px}
+ .f-do{background:#eef3f9;border-left:6px solid var(--blue2)}
+ .f-ng{background:#fdecea;border-left:6px solid var(--red)}
+ .f-hit{background:#fff4e6;border:2px solid var(--orange);border-left:8px solid var(--orange)}
+ .f-ok{background:#eaf6ee;border-left:6px solid var(--green)}
+ .fa{text-align:center;color:#93a6b8;font-size:.5em;margin:-3px 0}
+
+ /* 数式箱 */
+ .math{flex:0 0 auto;margin:6px var(--pad) 10px;background:#f6f9fc;
+       border:1px solid #ccd8e6;border-left:6px solid var(--blue2);
+       border-radius:7px;padding:9px 18px;font-size:.58em;line-height:1.72}
+ .math b{color:var(--blue);margin-right:6px}
+ .math div{margin:2px 0}
+
+ /* 手順ステップ */
+ .steps{display:flex;gap:12px;flex:0 0 auto;margin:0 var(--pad) 8px}
+ .steps>div{flex:1;background:#f1f5fa;border-left:5px solid var(--blue2);
+            padding:8px 12px;font-size:.52em;line-height:1.45}
+ .steps b{color:var(--blue);display:block;font-size:1.06em;margin-bottom:2px}
+
+ /* 目次 */
+ .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;margin:0 var(--pad);
+           font-size:.5em;line-height:1.42;flex:1 1 0;align-content:center}
+ .toc-ch{background:#f3f6fa;border-left:5px solid var(--blue2);padding:8px 13px;border-radius:0 6px 6px 0}
+ .toc-ch.hit{background:#fff4e6;border-left-color:var(--orange)}
+ .toc-h{font-weight:700;color:var(--blue)!important;font-size:1.1em;display:block;margin-bottom:2px}
+ .toc-ch.hit .toc-h{color:#9c4a0a!important}
+ .toc-ch div{color:#54646f}
+ .toc a{text-decoration:none}
+ .toc-hint{font-size:.46em;color:#64737f;margin:0 var(--pad) 8px;flex:0 0 auto}
+
+ .reveal .slide-number{font-size:15px;background:rgba(11,37,69,.84)}
+ .reveal .progress{color:var(--orange);height:5px}
+ /* 登場アニメーション */
+ @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+ .reveal .present .nums>div{animation:pop .5s cubic-bezier(.2,.8,.3,1) both}
+ .reveal .present .nums>div:nth-child(2){animation-delay:.14s}
+ .reveal .present .nums>div:nth-child(3){animation-delay:.28s}
+ .reveal .present .lane{animation:pop .42s cubic-bezier(.2,.8,.3,1) both}
+ .reveal .present .lane:nth-child(2){animation-delay:.08s}
+ .reveal .present .lane:nth-child(3){animation-delay:.16s}
+ .reveal .present .lane:nth-child(4){animation-delay:.24s}
+ .reveal .present .lane:nth-child(5){animation-delay:.34s}
+ .reveal .present .key{animation:pop .5s cubic-bezier(.2,.8,.3,1) both;animation-delay:.2s}
+</style>
+</head>
+<body><div class="reveal"><div class="slides">
+
+<!-- ============ 1. 表紙 ============ -->
+<section class="hero">
+<p class="ttl">測れない場所の熱変形を、<br><span class="acc">測れる場所から当てる</span></p>
+<hr class="rule">
+<p class="sub2">― 温度だけでなく<b style="color:#FFC857">変位</b>もデータ同化の「観測」に使う ―<br>
+OpenFOAM ＋ FrontISTR ＋ POD/Q-DEIM ROM ＋ EnKF（すべてオープンソース）</p>
+<p class="foot">オープンCAE学会シンポジウム　B-16　／　2026年11月12日（木）<br>
+コード・解説記事を公開：github.com/kamakiri1225/thermal-da-demo</p>
+<aside class="notes">
+工作機械の熱変形を題材に、温度だけでなく変位もデータ同化の観測に使うという話をします。
+いちばん伝えたいのは「本当に知りたい場所は測れない。でも測れる場所を選べば当てられる」という点です。
+実装は全部オープンソースで、コードも解説記事も公開しています。
+</aside>
+</section>
+
+<!-- ============ 2. 結論先出し ============ -->
+<section class="hero">
+<h2 style="background:none;border:none;color:#fff;margin:0 0 2px!important;padding:14px 0 0;
+    font-size:.86em;text-align:center;width:100%">結論 ― 本日いちばん伝えたい3つの数字</h2>
+<div class="nums">
+ <div><div class="lbl">評価点 A・O を<br><b style="color:#fff">一度も測らず</b>に<br>当てた反りの誤差</div>
+      <div class="big">0.075</div><div class="u">µm</div>
+      <div class="note">真値の振幅 2.74 µm の 2.7 %<br>（真値＝OpenFOAM＋FrontISTR）</div></div>
+ <div><div class="lbl">同じ A・O を<br><b style="color:#fff">直接測った</b>ときの<br>反りの誤差</div>
+      <div class="big">0.137</div><div class="u">µm</div>
+      <div class="note">知りたい場所を測るより、<br>選んだ別の場所を測るほうが良い</div></div>
+ <div><div class="lbl">係数を決めていない条件で<br>従来の<b style="color:#fff">回帰補正</b>と<br>比べた誤差の比</div>
+      <div class="big">1/3</div><div class="u">回帰 0.29 → 同化 0.10 µm</div>
+      <div class="note">発熱量そのものも 25.07 W と推定<br>（真値 25 W）</div></div>
+</div>
+<p class="sub2" style="font-size:.52em;margin-bottom:14px">
+いずれも真値は OpenFOAM＋FrontISTR の計算結果。<b style="color:#FFC857">実機での検証は未実施</b>です。</p>
+<aside class="notes">
+先に結論を3つ出します。
+1つ目。知りたい場所を一度も測らずに、別の場所の変位2点から反りを0.075マイクロメートルで当てました。振幅の2.7パーセントです。
+2つ目。同じ場所を直接測ると0.137でした。つまり知りたい場所を測るより、選んだ別の場所を測ったほうが正確でした。
+3つ目。モデルの係数を決めていない運転条件でも、従来の回帰補正の約3分の1の誤差です。
+ただし真値はすべて計算で作ったもので、実機検証は未実施です。ここは最後にもう一度申し上げます。
+</aside>
+</section>
+
+<!-- ============ 3. 目次 ============ -->
+<section class="toc">
+<h2>本日の流れ</h2>
+<p class="toc-hint">→ ← で移動します。各章はクリックで飛べます</p>
+<div class="toc-grid">
+<div class="toc-ch"><a class="toc-h" href="#/3">1. 背景 ― なぜ「測れない場所」が問題か</a><div>熱変形と加工精度／既存の4つの流派と空いている場所</div></div>
+<div class="toc-ch"><a class="toc-h" href="#/6">2. 題材と計算の流れ</a><div>中空円筒＋ヒータ／OpenFOAM CHT → FrontISTR／真値の作り方</div></div>
+<div class="toc-ch"><a class="toc-h" href="#/8">3. 道具① 軽いモデル（ROM）</a><div>POD・Q-DEIM で5点／600 秒を 31 ms／どこまで使えるか</div></div>
+<div class="toc-ch"><a class="toc-h" href="#/12">4. 道具② 熱感度 \(W\)（FrontISTR）</a><div>温度 1 K あたり何 µm 動くか／随伴法で 1/1300 の時間に</div></div>
+<div class="toc-ch hit"><a class="toc-h" href="#/15">5. 切り口A ― 変位は「結果」ではなく「情報源」</a><div>変位計1本が5点すべての温度に触れる／正直な比較も示します</div></div>
+<div class="toc-ch hit"><a class="toc-h" href="#/18">6. 切り口B ― 測れない場所を、測れる場所から当てる（目玉）</a><div>15,120 候補から机上で2点を選ぶ／実ソルバ真値で3条件</div></div>
+<div class="toc-ch hit"><a class="toc-h" href="#/25">7. 切り口C ― 学習していない運転条件でも使える</a><div>回帰補正の 1/3 の誤差／発熱量そのものを同定</div></div>
+<div class="toc-ch"><a class="toc-h" href="#/28">8. まとめと正直な限界</a><div>言えること／言えないこと／公開情報</div></div>
+</div>
+<aside class="notes">
+流れです。前半4章は道具の説明、後半の5・6・7章が本題です。オレンジの3つが今日の中身です。
+特に6章の「測れない場所を測れる場所から当てる」が目玉です。
+</aside>
+</section>
+
+<!-- ============ 4. 背景 ============ -->
+<section>
+<h2>背景 ― 工作機械の熱変形は、加工精度を直接悪くする<span class="tag">1. 背景</span></h2>
+<div class="two w64">
+ <div><img src="img/intro_temp_history.png" alt="温度履歴">
+      <p class="cap">ヒータ 15 W を 300 秒入れたときの温度上昇（OpenFOAM CHT）</p></div>
+ <div class="txt">
+  <h3>何が起きるか</h3>
+  <ul style="font-size:.95em">
+   <li>主軸モータ・送り系・切削熱で機械が温まる</li>
+   <li>温まった部分が伸び、<em>工具先端が µm 単位でずれる</em></li>
+   <li>加工誤差の<strong>大きな割合が熱起因</strong>と言われる</li>
+  </ul>
+  <h3>解析だけでは合わない</h3>
+  <ul style="font-size:.95em">
+   <li>熱伝達率・発熱量が<strong>分からない</strong></li>
+   <li>運転条件が変わると前提が崩れる</li>
+  </ul>
+  <h3>そこでデータ同化</h3>
+  <ul style="font-size:.95em">
+   <li>少数のセンサの値で計算を<em>その場で直す</em></li>
+  </ul>
+ </div>
+</div>
+<aside class="notes">
+工作機械は運転すると温まり、温まった部分が伸びて工具先端がマイクロメートル単位でずれます。
+解析で予測したいのですが、熱伝達率や発熱量が分からないので解析だけでは合いません。
+そこで少数のセンサの値で計算をその場で直す、データ同化を使います。
+</aside>
+</section>
+
+<!-- ============ 5. 本当の問題 ============ -->
+<section>
+<h2>本当の問題 ― 知りたい場所には、センサを置けない<span class="tag">1. 背景</span></h2>
+<div class="cards">
+ <div class="ng"><b>知りたい場所</b>工具先端（TCP）の変位。<br>これが加工精度そのもの</div>
+ <div class="ng"><b>置けない理由</b>加工中は切粉・クーラント・工具交換。<br>内部に熱電対は通せない</div>
+ <div class="ok"><b>置ける場所</b>機械の外側、コラム側面、<br>加工点から離れた構造部</div>
+</div>
+<div class="key">だから問いはこうなる：<br>
+<span style="color:var(--navy)">「置ける場所でどう測れば、置けない場所の変形が当たるのか」</span>
+― そして、<strong>その置き場所は設計できるのか。</strong></div>
+<div class="flow">
+ <div class="fbox f-ng"><b>従来のよくある形</b>温度センサを多点に貼る → 回帰式や FEM で工具先端の変位を出す（温度が入力、変位が出力）</div>
+ <div class="fa">▼　本研究</div>
+ <div class="fbox f-hit"><b>本研究の形</b>温度センサ2点 ＋ <strong>置ける場所の変位2点</strong>を観測として同化に入れる →
+ 温度場・<strong>測っていない場所の熱変形</strong>・発熱量を同時に推定する</div>
+</div>
+<aside class="notes">
+ここが本研究の出発点です。
+本当に知りたいのは工具先端の変位ですが、加工中にそこは測れません。切粉もクーラントもあり、工具交換もします。
+測れるのは機械の外側です。
+だから問いは「置ける場所でどう測れば、置けない場所の変形が当たるか」、そして「その置き場所は設計できるのか」になります。
+従来は温度を入力、変位を出力としていました。本研究は変位も観測として入れます。
+</aside>
+</section>
+
+<!-- ============ 6. 既存の4流派 ============ -->
+<section>
+<h2>既存研究の4つの流派と、空いている場所<span class="tag">1. 背景</span></h2>
+<div class="lanes">
+ <div class="lane"><div class="n">①</div><div class="t">回帰・機械学習</div>
+   <div class="w">温度多点 → 変位を回帰／CNN で予測。<b style="color:var(--red)">弱点：学習した運転条件の外で外れる</b></div></div>
+ <div class="lane"><div class="n">②</div><div class="t">詳細 FEM による補償</div>
+   <div class="w">オフラインで FEM を解き、温度から変位を計算。<b style="color:var(--red)">弱点：境界条件が合わないと外れる</b></div></div>
+ <div class="lane"><div class="n">③</div><div class="t">低次元化＋状態推定</div>
+   <div class="w">ROM＋カルマンフィルタで温度場を推定（ETH Zurich 2024 ほか）。<b style="color:var(--red)">観測は温度のみ。変位は出力</b></div></div>
+ <div class="lane"><div class="n">④</div><div class="t">直接測定による補償</div>
+   <div class="w">変位計で測った量をそのまま補正に使う（NIST の「直接法」）。<b style="color:var(--red)">加工中は測れない。状態推定に戻さない</b></div></div>
+ <div class="lane gap"><div class="n">？</div><div class="t">変位を「観測」として状態推定に戻す</div>
+   <div class="w"><b>③は変位を出力、④は補正対象として扱う。この間が空いている</b></div></div>
+</div>
+<p class="cap" style="text-align:left;margin-left:var(--pad)">
+文献調査は 2026-10-03 に英語5回・日本語1回の検索で実施。<b>網羅的な調査ではありません。</b>
+いちばん近いのは ETH Zurich (2024)：ROM＋カルマンフィルタ、観測は温度のみ（25本中13本）、実機で熱変位 67.4 → 33.3 µm。</p>
+<aside class="notes">
+先行研究を調べて、4つの流派に整理しました。
+1つ目は回帰・機械学習。学習した条件の外で外れます。
+2つ目は詳細FEM。境界条件が合わないと外れます。
+3つ目はROMと状態推定。手法の枠組みは本研究とほぼ同じですが、観測は温度だけで、変位は出力です。
+4つ目は直接測定。変位を測ってそのまま補正しますが、加工中は測れず、状態推定には戻しません。
+つまり3と4の間、「変位を観測として状態推定に戻す」ところが空いています。
+ただし文献調査は英語5回・日本語1回で、網羅的ではありません。この点は正直に申し上げます。
+</aside>
+</section>
+
+<!-- ============ 7. 題材 ============ -->
+<section>
+<h2>題材と計算の流れ ― 中空円筒の片側をヒータで温める<span class="tag">2. 題材</span></h2>
+<div class="two w64">
+ <div><img src="img/cht_to_fem_anim.gif" alt="CHTからFEMへ">
+      <p class="cap">OpenFOAM の温度場（左）を節点に補間して FrontISTR で熱変形を計算（右、誇張表示）</p></div>
+ <div class="txt">
+  <table class="s">
+  <tr><th>項目</th><th>設定</th></tr>
+  <tr><td>形状</td><td>中空円筒（外径 75、高さ 100 mm）</td></tr>
+  <tr><td>加熱</td><td>外周の片側にヒータ <b>15 W</b>、0〜300 秒 ON</td></tr>
+  <tr><td>流体</td><td>空気（自然対流）、OpenFOAM CHT</td></tr>
+  <tr><td>固体メッシュ</td><td><b>20,696 セル</b>（温度）／<b>5,040 節点</b>（変形）</td></tr>
+  <tr><td>構造解析</td><td>FrontISTR 熱弾性（底面固定）</td></tr>
+  <tr><td>評価する量</td><td>上面 A・O（±28.7, 0, 100.5）mm の<br><b>反り（高さの差）</b>Uz(A) − Uz(O)</td></tr>
+  <tr><td>反りの振幅</td><td>最大 <b>2.74 µm</b></td></tr>
+  </table>
+  <p class="cap" style="text-align:left">片側加熱なので円筒は<b>傾くように反る</b>。この反りが「工具先端のずれ」に相当します。</p>
+ </div>
+</div>
+<aside class="notes">
+題材は中空円筒です。外周の片側にヒータを15ワット、300秒入れます。
+OpenFOAMで空気と固体を連成して温度を計算し、その温度をFrontISTRに渡して熱変形を計算します。
+固体メッシュは温度が2万セル、変形が5千節点です。
+評価する量は上面のAとOという2点の高さの差、つまり反りです。最大2.74マイクロメートル傾きます。
+この反りが、工作機械でいう工具先端のずれに相当します。
+</aside>
+</section>
+
+<!-- ============ 8. 真値の作り方 ============ -->
+<section>
+<h2>「正解」はどう作ったか ― 2段構えで検証する<span class="tag">2. 題材</span></h2>
+<div class="flow">
+ <div class="fbox f-do"><b>段階1：双子実験（ROM 真値）</b>
+ 同化に使うのと同じ ROM で「正解」を作り、ノイズを足して観測にする。
+ <b style="font-weight:400;display:inline">→ モデルの誤差がない理想条件。アルゴリズムが正しく動くかを確かめる</b></div>
+ <div class="fa">▼　これだけでは「自分のモデルで自分を当てた」ことにしかならない</div>
+ <div class="fbox f-hit"><b>段階2：実ソルバ真値（本発表の主な結果）</b>
+ <strong>真値＝OpenFOAM の固体温度場</strong>と、<strong>その温度を各時刻 FrontISTR に入れて計算した全節点の変位</strong>（21 時刻 × 3 条件）。
+ 同化モデルは ROM のまま。<b style="font-weight:400;display:inline">→ モデル誤差を含んだ条件での検証</b></div>
+ <div class="fa">▼　残っている段階</div>
+ <div class="fbox f-ng"><b>段階3：実機（未実施）</b>
+ 実機での検証は行っていません。設計案のみ（IoT 実験として別途計画）。<strong>本発表の数値はすべて計算で作った真値です。</strong></div>
+</div>
+<div class="math">
+ <b>観測ノイズ</b>温度 \(\sigma_T = 0.30\) K、変位 \(\sigma_u = 0.30\) µm　
+ <b>EnKF</b>60 メンバー、30 秒ごと × 20 サイクル、乗法インフレーション 1.02、<b>5 seed の平均</b>
+</div>
+<aside class="notes">
+検証は2段構えです。
+段階1は双子実験。同化に使うROMで正解も作ります。モデル誤差がないので、アルゴリズムが動くかの確認にしかなりません。
+段階2が本発表の主な結果です。真値をOpenFOAMの温度場と、その温度をFrontISTRに入れて計算した変位にします。同化モデルはROMのままなので、モデル誤差を含んだ検証になります。
+段階3の実機は未実施です。
+観測ノイズは温度0.3ケルビン、変位0.3マイクロメートル。EnKFは60メンバー、5つの乱数の種で平均をとっています。
+</aside>
+</section>
+
+<!-- ============ 9. ROM: POD ============ -->
+<section>
+<h2>道具① 軽いモデル ― 温度場は「2つの型」でほぼ説明できる<span class="tag">3. ROM</span></h2>
+<div class="ask"><b>やったこと</b>OpenFOAM の温度履歴（20,696 セル × 121 時刻）を特異値分解し、場を「型（モード）×時間の係数」の足し算に分解した</div>
+<div class="fig"><img src="img/pod_modes.png" alt="PODモード">
+<p class="cap">左から平均場、モード1（91.8 %）、モード2（8.1 %）、モード3（0.1 %）。各パネルは独立スケール</p></div>
+<div class="cards">
+ <div><b>モード1（91.8 %）</b>全体が同じだけ温まる型。これだけでは<b>反りは生まれない</b></div>
+ <div class="hit"><b>モード2（8.1 %）</b>ヒータ側と反対側の<b>温度差</b>の型。<b>反りを決めるのはこれ</b></div>
+ <div class="ok"><b>合計 99.89 %</b>121 項のうち2項で説明できる。安全をみて<b>5モード</b>を採用し、EnKF の状態はこの5つの係数にする</div>
+</div>
+<aside class="notes">
+EnKFは60メンバー回すので、予報モデルが重いと使えません。そこで軽いモデルを作ります。
+OpenFOAMの温度履歴を特異値分解して、場を型かける時間の係数の足し算に分解します。
+121項あるうち、モード1とモード2の2項で99.9パーセント説明できました。
+モード1は全体が同じだけ温まる型で、これだけでは反りは生まれません。
+モード2がヒータ側と反対側の温度差の型で、反りを決めるのはこれです。
+安全をみて5モードを採用しています。
+</aside>
+</section>
+
+<!-- ============ 10. ROM: Q-DEIM ============ -->
+<section>
+<h2>道具① 軽いモデル ― Q-DEIM で代表5点を自動で選び、600 秒を 31 ms に<span class="tag">3. ROM</span></h2>
+<div class="two w64">
+ <div><img src="img/qdeim_points.png" alt="Q-DEIMで選ばれた代表点">
+      <p class="cap">Q-DEIM（列ピボット付き QR 分解）が選んだ代表5点 P0〜P4。ヒータ側と反対側に分かれて並ぶ</p></div>
+ <div class="txt">
+  <h3>考え方</h3>
+  <ul style="font-size:.95em">
+   <li>5つの型の係数を決めるには、<em>うまい5点</em>の温度が分かればよい</li>
+   <li>その5点を、モード行列の QR 分解が<strong>自動で選ぶ</strong></li>
+  </ul>
+  <h3>ROM の形</h3>
+  <div class="math" style="margin:4px 0;font-size:.55em">
+   \( C_i \dot T_i = \sum_j K_{ij}(T_j - T_i) + h_i A_i (T_\text{air} - T_i) + Q_i \)
+   <div style="font-size:.9em;color:#54646f">5点の集中熱容量モデル。 \(C\) ・ \(K\) は OpenFOAM に合うよう最小二乗で逆算（残差 <b>0.014 K</b>）</div>
+  </div>
+  <div class="key" style="margin:8px 0;font-size:.6em">600 秒の前進積分が <strong>31 ms</strong>。<br>
+  60 メンバー × 20 サイクルでも数十秒で終わる</div>
+  <p class="cap" style="text-align:left">5点から全 20,696 セルを復元するのは gappy-POD（擬似逆行列）。</p>
+ </div>
+</div>
+<aside class="notes">
+5つの型の係数を決めるには、うまい5点の温度が分かればよい。その5点をQR分解が自動で選びます。選ばれた5点はヒータ側と反対側に分かれて並びました。
+ROMは5点の集中熱容量モデルです。熱容量CとコンダクタンスKは、OpenFOAMに合うように最小二乗で逆算します。残差は0.014ケルビンです。
+これで600秒の計算が31ミリ秒。60メンバー20サイクルでも数十秒で終わります。
+5点から全2万セルを戻すのはgappy-POD、擬似逆行列です。
+</aside>
+</section>
+
+<!-- ============ 11. ROMの前提（1点集中） ============ -->
+<section>
+<h2>道具① の前提 ― 発熱は「P2 の1点」に集中して与えている<span class="tag">3. ROM</span></h2>
+<div class="two w46">
+ <div class="txt">
+  <table class="s">
+  <tr><th></th><th>実際のヒータ</th><th>ROM</th></tr>
+  <tr><td>場所</td><td>外周の面<br>（約 5,000 mm²）</td><td><b>P2 の1点だけ</b></td></tr>
+  <tr><td>与え方</td><td>面全体に分散</td><td><b>15 W を全部 P2 に</b></td></tr>
+  </table>
+  <div class="math" style="font-size:.5em;margin:8px 0">
+   <div style="font-family:monospace;color:#1b3a63">heat[:, 2] = q * 15.0 / C[2]</div>
+   <div style="color:#54646f">5点のうち2列目（P2）だけが非ゼロ。 \(C_2 = 93.4\) J/K</div>
+  </div>
+  <p style="font-size:.6em;margin:0"><b style="color:var(--blue)">なぜ1点集中でも合うのか</b><br>
+  <b style="font-weight:400">この前提のもとで</b> \(C\) ・ \(K\) <b style="font-weight:400">を OpenFOAM に合わせて逆算しているため、
+  面に広がる効果が係数に吸収される。</b></p>
+ </div>
+ <div><img src="img/rom_calib_fit.png" alt="ROM校正の当てはまり">
+      <p class="cap">ROM（線）と OpenFOAM（点）。ROM 単体の誤差は最大 <b>0.038 K</b>＝温度センサのノイズ 0.3 K の約 1/8</p></div>
+</div>
+<div class="key" style="font-size:.58em">近似が効くのはどこか：<b style="color:var(--green)">発熱量が変わる・加熱のしかたが変わる → 作り直し不要</b>　／　
+<strong>熱源の位置・形が変わる → ROM の作り直しが必要</strong></div>
+<aside class="notes">
+正直に申し上げると、ROMは発熱をP2という1点に集中して与えています。実際のヒータは5千平方ミリの面です。
+それでも合うのは、この前提のもとで熱容量CとコンダクタンスKをOpenFOAMに合わせて逆算しているからです。面に広がる効果が係数に吸収されます。
+ROM単体の誤差は最大0.038ケルビン、センサノイズの8分の1です。
+ですので、発熱量や加熱のしかたが変わるのは問題ありませんが、熱源の位置や形が変わると作り直しが必要です。
+</aside>
+</section>
+
+<!-- ============ 12. ROM適用範囲 ============ -->
+<section>
+<h2>道具① はどこまで使えるか ― 係数を決めていない条件で確かめる<span class="tag">3. ROM</span></h2>
+<div class="fig"><img src="img/rom_alone_intermittent.png" alt="間欠加熱でのROM単体">
+<p class="cap"><b>ROM 単体</b>（データ同化なし）と OpenFOAM の比較。間欠加熱（150 秒ごとに ON/OFF）。左＝ON/OFF を正しく与えた ROM／右＝「0〜300 秒 一定」のまま動かした ROM</p></div>
+<div class="cards">
+ <div class="ok"><b>15 W・連続　0.038 K</b>ROM の係数を決めた条件そのもの。センサノイズ 0.3 K の約 1/8</div>
+ <div class="hit"><b>25 W／間欠加熱　0.038 K</b><b>係数を決めていない条件</b>でも、ON/OFF さえ正しく与えれば<b>同じ精度</b></div>
+ <div class="ng"><b>ON/OFF を与えないと　1.775 K</b>「0〜300 秒 一定」と仮定したまま。ノイズの<b>約6倍</b>ずれる</div>
+</div>
+<div class="key" style="font-size:.57em">ROM は<b style="color:var(--green)">発熱量・加熱のしかたが変わっても使える</b>。
+条件は<strong>ヒータの ON/OFF をモデルに正しく与えること</strong>。
+同化後に5点から復元した<b style="font-weight:400">全 20,696 セル</b>も、代表点でないセルを含めてノイズ 0.3 K の中に収まる。</div>
+<aside class="notes">
+ROMがどこまで使えるかを確かめました。データ同化はせず、ROM単体とOpenFOAMの比較です。
+図は間欠加熱、150秒ごとにヒータをON/OFFした場合です。
+左はヒータのON/OFFを正しくROMに与えた場合で、線と点がぴったり重なります。誤差は最大0.038ケルビン。
+右はON/OFFを与えず、300秒まで一定として動かした場合で、1.775ケルビンずれます。
+ROMの係数を決めていない25ワットでも、間欠加熱でも、ON/OFFさえ正しく与えればROM単体の誤差は0.038ケルビンのまま、センサノイズの8分の1です。
+同化後に5点から復元した全2万セルも、代表点でないセルを含めてノイズの中に収まっています。
+</aside>
+</section>
+
+<!-- ============ 13. 熱感度 W ============ -->
+<section>
+<h2>道具② 熱感度 \(W\) ― 「温度が 1 K 上がると、どこが何 µm 動くか」<span class="tag">4. 熱感度 W</span></h2>
+<div class="two w64">
+ <div><img src="img/frontistr_sensitivity.png" alt="熱感度の分布">
+      <p class="cap">FrontISTR で計算した熱感度の分布。底面固定なので、上面ほど大きく動く</p></div>
+ <div class="txt">
+  <div class="math" style="font-size:.56em;margin:0 0 8px">
+   <div>\( K_s\, u = H_T\, T \quad\Longrightarrow\quad u = \underbrace{K_s^{-1} H_T}_{\textstyle W}\, T \)</div>
+   <div style="font-size:.88em;color:#54646f">\(K_s\)＝剛性行列、\(H_T\)＝温度の熱荷重への変換、\(W\)＝<b>熱感度行列</b>［µm/K］</div>
+  </div>
+  <h3>\(W\) の読み方</h3>
+  <ul style="font-size:.9em">
+   <li><b>1行</b>＝ある点のある方向の変位</li>
+   <li><b>1列</b>＝ある場所の温度</li>
+   <li>行の中身＝<em>その変位が、どの温度にどれだけ反応するか</em></li>
+  </ul>
+  <div class="key" style="margin:8px 0;font-size:.58em">反り A−O に対する5点温度の感度<br>
+  \( w = (0.47,\; -0.65,\; 0.60,\; 0.04,\; -0.46) \) µm/K<br>
+  <b style="font-weight:400;font-size:.9em">＝ 5点すべてに非ゼロ。符号が <b>＋と−</b> に分かれているのが肝心</b></div>
+  <p class="cap" style="text-align:left">線形熱弾性なので、\(W\) は温度に依らず一度計算すれば使い回せる。</p>
+ </div>
+</div>
+<aside class="notes">
+2つ目の道具は熱感度Wです。温度が1ケルビン上がるとどこが何マイクロメートル動くかを表す行列で、FrontISTRで計算します。
+剛性行列の逆行列と熱荷重変換の積です。1行がある点のある方向の変位、1列がある場所の温度に対応します。
+下の枠が今日の鍵です。反りに対する5点温度の感度は、5点すべてに非ゼロで、しかもプラスとマイナスに分かれています。
+ヒータ側が温まると反りはプラス、反対側が温まるとマイナスという意味です。
+線形熱弾性なので、Wは一度計算すれば使い回せます。
+</aside>
+</section>
+
+<!-- ============ 14. W を速く作る ============ -->
+<section>
+<h2>道具② を速く作る ― 必要な行だけ随伴法で取り出す（1/1300 の時間）<span class="tag">4. 熱感度 W</span></h2>
+<div class="two w46">
+ <div class="txt">
+  <h3>素朴にやると</h3>
+  <p style="font-size:.9em">「節点 \(j\) だけ 1 K 上げて解く」を全節点ぶん繰り返す
+  → <strong>5,040 回の FEM 解析</strong>（54.4 秒）</p>
+  <h3>必要なのは「ある点の変位」だけ</h3>
+  <div class="math" style="font-size:.54em;margin:4px 0">
+   <div>\( W[i,:] = e_i^{\mathsf T} K_s^{-1} H_T = \lambda_i^{\mathsf T} H_T \), where \( K_s \lambda_i = e_i \)</div>
+   <div style="font-size:.9em;color:#54646f">\(e_i\)＝知りたい自由度に 1 を立てた単位荷重。\(K_s\) は対称なので1回解けば \(W\) の1行が出る</div>
+  </div>
+  <table class="s">
+  <tr><th>やり方</th><th>FEM を解く回数</th><th>時間</th></tr>
+  <tr class="dim"><td>全部作る（列で作る）</td><td>5,040 回</td><td>54.4 秒</td></tr>
+  <tr class="hi"><td><b>随伴法（A・O の2行だけ）</b></td><td><b>2 回</b></td><td><b>0.042 秒</b></td></tr>
+  </table>
+  <p class="cap" style="text-align:left">両者の一致は \(1.6\times10^{-15}\)（数値誤差の範囲）。</p>
+ </div>
+ <div><img src="img/W_rows_adjoint.png" alt="随伴法で求めたWの行">
+      <p class="cap">随伴法（単位荷重）で求めた \(W\) の行と、全部作ってから抜き出した行の比較</p></div>
+</div>
+<div class="key" style="font-size:.58em">補足：全節点の<b>分布</b>が必要なときは、
+\(W\Phi = K_s^{-1}(H_T\Phi)\) と括弧を付け替えて<strong>FrontISTR を6回</strong>（平均場 1 回＋モード5本）解けばよい。
+5,040 回ではなく 6 回で、<b>全 5,040 節点 × 3 方向＝15,120 通り</b>の感度が出る。</div>
+<aside class="notes">
+Wを素朴に作ると、節点を1つずつ1ケルビン上げて解くので5千回、54秒かかります。
+でも必要なのは「ある点の変位」の行だけです。単位荷重を立てて1回解けば、その行が出ます。随伴法です。
+2行なら2回、0.042秒。全部作るより1300分の1の時間です。一致は10のマイナス15乗で、数値誤差の範囲です。
+補足ですが、全節点の分布が欲しいときは、Wとモード行列の積を括弧を付け替えて計算すれば、FrontISTRを6回解くだけで全5千節点かける3方向、1万5千通りの感度が出ます。
+これが後で出てくる「候補を全部採点する」の計算基盤になります。
+</aside>
+</section>
+
+<!-- ============ 15. 同化の設計 ============ -->
+<section>
+<h2>同化の中身 ― 何を状態にして、何を観測にするか<span class="tag">4. 熱感度 W</span></h2>
+<div class="math" style="font-size:.54em;margin:0 var(--pad) 6px">
+ <div><b>状態</b>\( z = (T_0, T_1, T_2, T_3, T_4,\; Q,\; h) \)　← 温度5点 ＋ <b>発熱量</b> ＋ <b>放熱係数</b>（パラメータも一緒に推定する）</div>
+ <div><b>温度の観測</b>\( y_T = T_{\text{(そのセル)}} + \varepsilon,\; \sigma_T = 0.30 \) K　　
+ <b>変位の観測</b>\( y_u = \underbrace{w^{\mathsf T} T}_{\text{熱感度}\,\times\,\text{温度}} + \varepsilon,\; \sigma_u = 0.30 \) µm</div>
+</div>
+<div class="key" style="margin:0 var(--pad) 8px;font-size:.6em">
+変位の観測演算子が <b>\(w^{\mathsf T}\)（熱感度 \(W\) の行）</b>であること ― 仕掛けはこれだけです。<br>
+温度計は1本で<b style="font-weight:400">1点</b>しか見ない。<strong>変位計は1本で5点すべてに触れる</strong>（\(w\) が全点非ゼロ）。</div>
+<div class="fig"><img src="img/obs_pipeline.png" alt="観測から更新までの流れ">
+<p class="cap">左＝観測データの作り方（真値 → ノイズ）／右＝メンバーごとの予報観測の作り方／下＝EnKF の更新式。
+<b>同化ループの中で FrontISTR は一度も呼ばない</b>（変位は \(D\) との積で出る）</p></div>
+<aside class="notes">
+同化の中身です。状態は5点の温度に発熱量と放熱係数を足した7つで、パラメータも一緒に推定します。
+温度の観測はそのセルの温度にノイズを足したもの。変位の観測は、熱感度と温度の積にノイズを足したものです。
+この「変位の観測演算子が熱感度Wの行である」というのが仕掛けの全部です。
+温度計は1本で1点しか見ませんが、変位計は1本で5点すべてに触れます。
+図の右下にあるとおり、同化ループの中でFrontISTRは一度も呼びません。変位は行列の積で出ます。だから軽いのです。
+次の章がこの帰結です。
+</aside>
+</section>
+
+<!-- ============ 16. 切り口A 章扉 ============ -->
+<section class="hero">
+<div class="divn">A</div>
+<span class="divtag">切り口 A</span>
+<p class="ttl" style="font-size:1.18em">変位は「結果」ではなく<br><span class="acc">「情報源」</span>である</p>
+<p class="sub2" style="font-size:.6em">熱変形は補正すべき誤差であると同時に、<br>温度場を知るための情報でもある。<br><br>
+<b style="color:#FFC857">変位計1本の読みは、5点すべての温度の重み付き和。<br>だから温度計のない点の温度まで直る。</b></p>
+<aside class="notes">
+ここから本題です。切り口Aは「変位は結果ではなく情報源である」という主張です。
+変位計1本の読みは5点すべての温度の重み付き和なので、温度計を置いていない点の温度まで直ります。
+</aside>
+</section>
+
+<!-- ============ 17. 切り口A 証拠 ============ -->
+<section>
+<h2>変位計だけが、温度計のない点の温度を直している<span class="tag">5. 切り口A</span></h2>
+<div class="two w64">
+ <div><img src="img/blog006_disp_fixes_temp.png" alt="変位が温度を直す">
+      <p class="cap">1サイクルの更新量を「温度計の寄与」と「変位計の寄与」に分けたもの（温度計は P2・P0 の2点のみ）</p></div>
+ <div class="txt">
+  <table class="s">
+  <tr><th>時刻</th><th>点</th><th>温度計の寄与</th><th>変位計の寄与</th></tr>
+  <tr class="hi"><td>30 s</td><td>P3</td><td>―（センサなし）</td><td><b>−4.97 K</b></td></tr>
+  <tr class="hi"><td>30 s</td><td>P4</td><td>―（センサなし）</td><td><b>−7.67 K</b></td></tr>
+  <tr><td>150 s</td><td>全体</td><td>0.000 K（もう残差なし）</td><td><b>まだ直し続ける</b></td></tr>
+  </table>
+  <div class="key" style="margin:8px 0;font-size:.58em">温度計の残差が 0 になった後も、<strong>変位計だけが温度場を直し続ける</strong>。
+  温度計では見えていない情報を持っているということ。</div>
+  <h3>結果への効き方</h3>
+  <table class="s">
+  <tr><th>観測</th><th>温度場 RMSE</th><th>発熱量 \(Q\)（真値 15 W）</th></tr>
+  <tr class="dim"><td>温度2点のみ</td><td>0.503 K</td><td>14.05 W</td></tr>
+  <tr class="hi"><td>＋変位2点</td><td><b>0.160 K</b></td><td><b>14.89 W</b></td></tr>
+  </table>
+ </div>
+</div>
+<aside class="notes">
+証拠を示します。EnKFの1サイクルの更新量を、温度計の寄与と変位計の寄与に分けました。
+30秒の時点で、温度計を置いていないP3とP4が、変位計の情報だけでマイナス5ケルビン、マイナス7.7ケルビン直っています。
+さらに150秒では、温度計の残差はもうゼロなのに、変位計だけが温度場を直し続けています。
+結果として、温度場の誤差は0.5から0.16ケルビンに、発熱量は14.05から14.89ワットになりました。真値は15ワットです。
+</aside>
+</section>
+
+<!-- ============ 18. 切り口A 正直な検証 ============ -->
+<section>
+<h2>では「変位計は温度計より情報量が多い」のか ― 正直に比べる<span class="tag">5. 切り口A</span></h2>
+<div class="ask"><b>条件</b>センサの本数（計4本）と<b>場所</b>をそろえ、<b>そこで何を測るかだけ</b>を変える。
+温度2点（P2・P0）は共通、上面 A・O に<b>温度計2本</b> or <b>変位計2本</b>。真値＝ROM 双子実験、5 seed、エラーバーは seed のばらつき</div>
+<div class="fig"><img src="img/disp_vs_temp_same_place.png" alt="同じ場所で温度か変位か"></div>
+<div class="cards">
+ <div><b>温度場なら互角</b>温度計 0.132 K 対 変位計 0.145 K。<b>差はエラーバーに埋もれる</b>（勝敗 2/5）</div>
+ <div class="hit"><b>反りなら変位計</b>温度計 0.201 µm 対 変位計 <b>0.135 µm</b>（勝敗 <b>4/5</b>）。知りたい量を直接測っているため</div>
+ <div><b>両方つけても</b>6本にしても 0.127 K / 0.136 µm。<b>伸びしろは小さい</b></div>
+</div>
+<div class="key">だから<strong>「変位計のほうが情報量が多い」とは言えません。</strong>
+変位計の本当の価値は <span style="color:var(--navy)">― 温度計を置けない場所に置けること ―</span> にあります。</div>
+<aside class="notes">
+では変位計は温度計より情報量が多いのか。正直に比べました。
+センサの本数と場所をそろえて、そこで何を測るかだけを変えます。
+左のパネル、温度場全体では温度計0.132、変位計0.145で、エラーバーが大きく重なっています。5回中2回しか勝っていません。つまり互角です。
+中のパネル、反りでは変位計が0.135で温度計の0.201より良い。5回中4回勝ちました。知りたい量を直接測っているからです。
+両方つけて6本にしても、ほとんど伸びません。
+ですので「変位計は情報量が多い」とは言えません。当初の予想と違ったので、主張を修正しました。
+変位計の本当の価値は、温度計を置けない場所に置けることです。これが次の章につながります。
+</aside>
+</section>
+
+<!-- ============ 19. 切り口B 章扉 ============ -->
+<section class="hero">
+<div class="divn">B</div>
+<span class="divtag">切り口 B ― 本日の目玉</span>
+<p class="ttl" style="font-size:1.18em">測れない場所を、<br><span class="acc">測れる場所から当てる</span></p>
+<p class="sub2" style="font-size:.6em">工具先端は測れない。<br>
+では<b style="color:#FFC857">どこを測れば、測れない場所が当たるのか。</b><br><br>
+評価点 A・O を<b style="color:#FFC857">一度も観測せず</b>に、<br>別の場所の変位2点だけで A・O の反りを当てる。</p>
+<aside class="notes">
+ここが本日の目玉です。
+工具先端は測れません。ではどこを測れば、測れない場所が当たるのか。
+評価点AとOを一度も観測せずに、別の場所の変位2点だけでAとOの反りを当てる、という試験をしました。
+</aside>
+</section>
+
+<!-- ============ 20. 切り口B 問題設定 ============ -->
+<section>
+<h2>問題設定 ― A・O は一度も測らない<span class="tag">6. 切り口B</span></h2>
+<div class="two w64">
+ <div><img src="img/blog008_obs_points.png" alt="観測点と評価点">
+      <p class="cap">赤＝温度センサ／緑＝選定した変位2点（矢印＝測る方向）／橙＝比較用 B・C／<b>黒＝評価点 A・O（測らない）</b></p></div>
+ <div class="txt">
+  <table class="s">
+  <tr><th>役割</th><th>場所 [mm]</th><th>測るもの</th></tr>
+  <tr><td>温度センサ（共通）</td><td>P2 (36.5, 6.9, 50.8)<br>P0 (21.3, −1.6, 51.6)</td><td>温度</td></tr>
+  <tr class="hi"><td><b>選定した変位1点目</b></td><td>(9.7, −36.2, 100.5)</td><td><b>\(U_x\)</b></td></tr>
+  <tr class="hi"><td><b>選定した変位2点目</b></td><td>(−34.6, 14.4, 100.5)</td><td><b>\(U_z\)</b></td></tr>
+  <tr><td>B・C（比較用）</td><td>(±28, 0, 75)　A・O の真下</td><td>\(U_z\)</td></tr>
+  <tr style="background:#f0f0f0"><td><b>評価点 A・O</b></td><td>(±28.7, 0, 100.5)</td><td><b>測らない</b></td></tr>
+  </table>
+  <div class="key" style="margin:8px 0;font-size:.57em">前の結果（blog_004）は、評価している A・O を<b style="font-weight:400">そのまま観測に使っていました（循環）。</b>
+  ここでは<strong>A・O から 12 mm 以内の節点を候補から除外</strong>して、循環を断っています。</div>
+ </div>
+</div>
+<aside class="notes">
+問題設定です。黒い球が評価点AとO。これは一度も測りません。
+赤が温度センサ2点、これは共通です。緑が選定した変位2点で、矢印が測る方向です。
+橙のBとCは比較用で、AとOの真下25ミリのところです。
+大事なのは、以前の結果は評価しているAとOをそのまま観測に使っていた、つまり循環していたことです。
+ここではAとOから12ミリ以内の節点を候補から外して、循環を断っています。
+</aside>
+</section>
+
+<!-- ============ 21. 切り口B 選び方の式 ============ -->
+<section>
+<h2>どこを測るか ― 測る前に、机上の計算だけで決める<span class="tag">6. 切り口B</span></h2>
+<div class="math" style="font-size:.6em">
+ <div>\( \sigma_S^2 \;=\; w^{\mathsf T}\Big(\,B - B H_S^{\mathsf T}\big(H_S B H_S^{\mathsf T} + R\big)^{-1} H_S B\,\Big)\, w \)</div>
+ <div style="font-size:.86em;color:#54646f">括弧の中はカルマンフィルタの更新式そのもの＝<b>測った後に残る「温度のあいまいさ」</b>。
+ それを \(w\) ではさむと <b>残る「反りのあいまいさ」</b>になる。単位は µm、小さいほど良い。</div>
+</div>
+<table class="s">
+<tr><th>記号</th><th>中身</th><th>どこから来るか</th><th>測定値を使うか</th></tr>
+<tr><td>\(w\)</td><td>反り A−O に対する5点温度の熱感度<br>(0.47, −0.65, 0.60, 0.04, −0.46) µm/K</td><td><b>FrontISTR</b>（随伴法 2 回 or \(W\Phi\) で 6 回）</td><td>使わない</td></tr>
+<tr><td>\(B\)</td><td>5点の温度が「どれくらい・どう連動して」ばらつくか</td><td><b>ROM を 4,000 通り回して数える</b></td><td>使わない</td></tr>
+<tr><td>\(H_S\)</td><td>候補 \(S\) を測るという操作（\(W\) の該当行）</td><td>FrontISTR</td><td>使わない</td></tr>
+<tr><td>\(R\)</td><td>センサのノイズ（変位 0.3 µm）</td><td>仕様</td><td>使わない</td></tr>
+</table>
+<div class="key">ここまで<strong>測定値は一切使っていません。</strong>
+FrontISTR の熱感度と ROM のばらつきだけで、<span style="color:var(--navy)">センサを買う前・取り付ける前に置き場所が決まります。</span></div>
+<p class="cap" style="text-align:left;margin-left:var(--pad)">
+考え方は「いま分かっていないことを、いちばん多く教えてくれる点を選ぶ」。目的（反り A−O）を \(w\) で指定しているので、<b>目的が変われば選ばれる点も変わります</b>。</p>
+
+<aside class="notes">
+どこを測るかを、測る前に決めます。評価の式はこれ1本です。
+括弧の中はカルマンフィルタの更新式そのもので、測った後に残る温度のあいまいさです。それを熱感度wではさむと、残る反りのあいまいさになります。単位はマイクロメートルで、小さいほど良いです。
+使うものは4つ。熱感度wはFrontISTRから、温度のばらつきBはROMを4000通り回して数えます。
+重要なのは、右の列のとおり測定値を一切使っていないことです。センサを買う前に置き場所が決まります。
+また、目的を熱感度wで指定しているので、目的が変われば選ばれる点も変わります。
+</aside>
+</section>
+
+<!-- ============ 22. 切り口B 2段階選定 ============ -->
+<section>
+<h2>選び方 ― 14,754 通りを全部採点し、1点選んだら<b style="color:#FFC857">採点をやり直す</b><span class="tag">6. 切り口B</span></h2>
+<div class="steps">
+ <div><b>ステップ1　候補を並べる</b>FrontISTR を<b>6回</b>解けば、全 5,040 節点 × 3 方向 ＝ <b>15,120 通り</b>の感度が出る。
+ A・O から 12 mm 以内を除いて <b>14,754 通り</b></div>
+ <div><b>ステップ2　全部採点する</b>14,754 通りについて \(\sigma_S\) を計算。表計算で全行に式を入れて最小値を探すのと同じこと</div>
+ <div><b>ステップ3　1位を採る</b>1.186 → <b>0.347 µm</b>（1本で 1/3 以下）</div>
+ <div><b>ステップ4　採点をやり直す</b>2位は1位と<b style="color:var(--red)">ほぼ同じ場所</b>。
+ 1点目を測ったことにして<b>再採点</b> → 0.347 → <b>0.256 µm</b></div>
+</div>
+<div class="fig frame"><img src="img/disp_selection_steps.png" alt="変位2点の選び方">
+<p class="cap">左＝1点目を選ぶときの採点（色が薄いほど良い）／中＝1点目を測った前提で再採点／右＝ \(\sigma\) が下がる様子。
+<b>左と中で「良い場所」が移動している</b>のが肝心</p></div>
+<div class="key" style="font-size:.58em">1点目は<b style="font-weight:400">上面の ±y 側</b>（両側の影響を受ける）／
+2点目は<strong>ヒータの反対側（−x 側）</strong>（1点目で分からなかった情報が欲しくなる）
+― <b style="font-weight:400">「良い2点」は「良い1点を2つ」ではない。</b></div>
+<aside class="notes">
+選び方です。やったことは総当たりで、難しいことはしていません。
+ステップ1。FrontISTRを6回解けば1万5千通りの感度が出ます。AとOの近くを除いて1万4754通り。
+ステップ2。全部採点します。表計算で全行に式を入れて最小値を探すのと同じです。
+ステップ3。1位を採ると、1.186から0.347マイクロメートル。1本測るだけで3分の1以下になります。
+ステップ4がここの肝です。2位をそのまま選んではいけません。2位は1位とほぼ同じ場所で、同じことしか分からないからです。1点目を測ったことにして採点をやり直します。
+図の左と中を見比べてください。良い場所、薄い色のところが移動しています。
+1点目は上面のプラスマイナスy側、2点目はヒータの反対側が選ばれました。
+良い2点は、良い1点を2つ並べたものではない、ということです。
+</aside>
+</section>
+
+<!-- ============ 23. 切り口B 結果（ROM真値） ============ -->
+<section>
+<h2>結果① ― 知りたい場所を測らないほうが、正確だった<span class="tag">6. 切り口B</span></h2>
+<div class="ask"><b>条件</b>真値＝ROM の双子実験、EnKF・5 seed 平均、加熱期 30〜300 秒。
+温度2点（P2・P0）は共通で、<b>変位2点の置き場所だけ</b>を変える。<b>A・O は一度も観測しない</b></div>
+<div class="fig"><img src="img/disp_elsewhere_predict_AO.png" alt="別の場所で測ってAOを当てる"></div>
+<div class="two" style="flex:0 0 auto;max-height:245px">
+ <div class="txt">
+  <table class="s">
+  <tr><th>変位2点をどこに置くか</th><th>反り A−O</th><th>Uz(A)</th><th>温度場</th></tr>
+  <tr class="dim"><td>変位なし（温度2点のみ）</td><td>0.756 µm</td><td>0.234 µm</td><td>0.528 K</td></tr>
+  <tr><td>A・O 自身を測る（<b>循環</b>・参考）</td><td>0.135 µm</td><td>0.138 µm</td><td>0.145 K</td></tr>
+  <tr><td>B・C（A・O の真下 25 mm）</td><td>0.185 µm</td><td>0.151 µm</td><td>0.175 K</td></tr>
+  <tr class="hi"><td><b>選定した2点</b></td><td><b>0.076 µm</b></td><td><b>0.103 µm</b></td><td><b>0.126 K</b></td></tr>
+  <tr class="dim"><td>底面近く \(U_z\)（悪い例）</td><td>0.559 µm</td><td>0.196 µm</td><td>0.408 K</td></tr>
+  </table>
+ </div>
+ <div class="txt">
+  <div class="key" style="margin:0 0 6px;font-size:.56em">A・O を<strong>一度も測らず</strong>に <strong>0.076 µm</strong>（振幅 2.74 µm の 2.8 %）。
+  <b style="font-weight:400">直接測った場合（0.135 µm）より正確</b>。置き場所で<b>7倍</b>変わる</div>
+  <p style="font-size:.53em;margin:0"><b style="color:var(--blue)">なぜ直接測るより良いのか（解釈）</b>
+  A・O の反りは最大 2.7 µm だが、変位計のノイズは 0.3 µm ある。選定した点はもっと大きく動くので、同じノイズでも情報が多く取れる。
+  <strong>この解釈は別計算では確かめていません。</strong></p>
+ </div>
+</div>
+<aside class="notes">
+結果です。
+AとOを一度も測らずに、選定した2点で反りを0.076マイクロメートルで当てました。振幅2.74に対して2.8パーセントです。
+注目していただきたいのは、AとOを直接測った場合、0.135より正確だということです。知りたい場所を測るより、選んだ別の場所を測るほうが良い結果になりました。
+AとOの真下にあるBとCでも0.185で、選定2点には及びません。底面近くだと0.559で、ほとんど改善しません。置き場所で7倍変わります。
+直接測るより良い理由は、信号対雑音比だと考えています。選定した点はもっと大きく動くので、同じノイズでも情報が多く取れる。ただしこの解釈は別の計算では確かめていません。
+</aside>
+</section>
+
+<!-- ============ 24. 切り口B 結果（実ソルバ真値） ============ -->
+<section>
+<h2>結果② ― 真値を OpenFOAM＋FrontISTR にして、3条件で確かめ直す<span class="tag">6. 切り口B</span></h2>
+<div class="ask"><b>条件</b>温度の真値＝OpenFOAM の固体温度場、<b>変位の真値＝その温度を各時刻 FrontISTR に入れて計算した全節点の変位</b>（21 時刻 × 3 条件）。
+同化モデルは ROM のまま。A・O は一度も観測しない。5 seed 平均</div>
+<div class="fig"><img src="img/holdout_AO_realsolver.png" alt="実ソルバ真値でのholdout">
+<p class="cap">黒＝真値（OpenFOAM＋FrontISTR）、灰＝変位なし、橙＝B・C、<b style="color:#1F9D62">緑＝選定2点</b></p></div>
+<div class="two" style="flex:0 0 auto;max-height:235px">
+ <div class="txt">
+  <p style="font-size:.5em;margin:0 0 2px"><b>反り A−O の誤差 [µm]</b>（加熱期の平均）</p>
+  <table class="s">
+  <tr><th>変位2点の置き場所</th><th>15 W</th><th>25 W</th><th>間欠加熱</th></tr>
+  <tr class="dim"><td>変位なし（温度2点のみ）</td><td>0.769</td><td>1.408</td><td>0.630</td></tr>
+  <tr><td>A・O 自身（循環・参考）</td><td>0.137</td><td>0.153</td><td>0.100</td></tr>
+  <tr><td>B・C（真下 25 mm）</td><td>0.187</td><td>0.193</td><td>0.143</td></tr>
+  <tr class="hi"><td><b>選定2点（上面）</b></td><td><b>0.075</b></td><td><b>0.083</b></td><td><b>0.071</b></td></tr>
+  <tr class="dim"><td>底面近く（悪い例）</td><td>0.581</td><td>1.096</td><td>0.480</td></tr>
+  </table>
+ </div>
+ <div class="txt">
+  <p style="font-size:.55em;margin:0;line-height:1.6">
+  ・<b style="color:var(--green)">3条件すべてで 0.07〜0.08 µm</b>。ROM 真値のときと同じ結論<br>
+  ・<b style="color:var(--green)">3条件すべてで、直接測るより正確</b><br>
+  ・25 W（係数を決めていない条件）では変位なしの 1.408 µm から <strong>17 倍</strong>改善<br>
+  ・置き場所が悪いと 25 W で 1.096 µm＝ほとんど改善しない<br>
+  <b style="color:var(--blue)">→ 「置き場所を設計する」ことに意味がある</b></p>
+ </div>
+</div>
+<aside class="notes">
+さきほどの結果は真値もROMでした。モデル誤差がないので、都合が良すぎます。
+そこで真値をOpenFOAMとFrontISTRにして、同じ試験をやり直しました。同化モデルはROMのままです。
+結果は、3条件すべてで0.07から0.08マイクロメートル。ROM真値のときと同じ結論が出ました。
+3条件すべてで、直接測るより正確です。
+25ワットはROMの係数を決めていない条件ですが、変位なしの1.408から17倍改善しています。
+一方で置き場所が悪いと、25ワットで1.096、ほとんど改善しません。だから配置の設計が要るわけです。
+</aside>
+</section>
+
+<!-- ============ 25. 切り口B アニメーション ============ -->
+<section>
+<h2>目で見る ― 色＝温度、形＝熱変形（約 4,000 倍に誇張）<span class="tag">6. 切り口B</span></h2>
+<div class="fig"><img src="img/blog008_3d_anim.gif" alt="温度と熱変形の3Dアニメーション">
+<p class="cap"><b>左＝真値</b>／<b>中＝温度2点だけ</b>／<b>右＝温度2点＋別の場所の変位2点</b>（A・O は一度も測らない）。
+●赤＝温度センサ（3枚とも共通）／■緑＝変位計（右のみ）／●黒＝評価点 A・O（<b>測らない</b>。3枚とも共通）。seed 20260913</p></div>
+<table class="s" style="margin:0 var(--pad)">
+<tr><th>\(t=150\) 秒</th><th>真値</th><th>中：温度2点のみ</th><th>右：＋変位2点（選定）</th></tr>
+<tr><td>反り A−O</td><td>2.57 µm</td><td>1.38 µm</td><td><b>2.56 µm</b></td></tr>
+<tr class="hi"><td>誤差</td><td>―</td><td>1.19 µm</td><td><b>0.01 µm</b></td></tr>
+</table>
+<aside class="notes">
+目で見ていただきます。色が温度、形が熱変形で、4000倍に誇張しています。
+左が真値、中が温度2点だけ、右が温度2点に別の場所の変位2点を足したものです。
+赤い球が温度センサ、緑の立方体が変位計で、右のパネルにだけ現れます。黒い球が評価点AとOで、どのパネルでも測っていません。
+中を見ると、全体が緑がかっていて真値より温度が高めに出ています。形も反りが足りません。
+右は色も形も左の真値とほとんど同じです。150秒の時点で、真値2.57に対して2.56、誤差0.01マイクロメートルです。
+繰り返しますが、黒い球は一度も測っていません。
+</aside>
+</section>
+
+<!-- ============ 26. 切り口C 章扉 ============ -->
+<section class="hero">
+<div class="divn">C</div>
+<span class="divtag">切り口 C ― 裏づけ</span>
+<p class="ttl" style="font-size:1.18em">学習していない運転条件でも、<br><span class="acc">使える</span></p>
+<p class="sub2" style="font-size:.6em">回帰モデルは、係数を決めた条件を外れると外れる。<br>
+物理モデル＋データ同化は、<b style="color:#FFC857">外挿できる。</b><br><br>
+従来の回帰補正と、同じ温度センサ・同じノイズで正面から比べました。</p>
+<aside class="notes">
+切り口Cは裏づけです。
+回帰モデルは係数を決めた条件を外れると外れますが、物理モデルとデータ同化なら外挿できるはずです。
+従来の回帰補正と、同じ温度センサ、同じノイズで正面から比べました。
+</aside>
+</section>
+
+<!-- ============ 27. 切り口C 回帰比較 ============ -->
+<section>
+<h2>従来の回帰補正との比較 ― 同じ温度センサ、同じノイズで<span class="tag">7. 切り口C</span></h2>
+<div class="ask"><b>比べた相手</b>
+\( U_z(A)-U_z(O) = c_0 + c_1 \Delta T_{s1} + c_2 \Delta T_{s2} \)　
+係数は <b>15 W の OpenFOAM＋FrontISTR の結果（21 時刻）</b>で最小二乗。使うときは同化と同じ 0.3 K のノイズを足す（同じ 5 seed）。温度センサは P2＋P4</div>
+<div class="fig"><img src="img/baseline_regression_vs_da.png" alt="回帰補正とデータ同化の比較">
+<p class="cap">反り A−O の誤差（30〜600 秒の平均）。左＝15 W、中＝25 W、右＝間欠加熱</p></div>
+<div class="two" style="flex:0 0 auto;max-height:235px">
+ <div class="txt">
+  <table class="s">
+  <tr><th>真値の条件</th><th>回帰式</th><th>同化<br>温度2点</th><th>同化<br>温度2点＋変位2点</th></tr>
+  <tr><td>15 W（係数を決めた条件）</td><td>0.30</td><td>0.13</td><td><b>0.09</b></td></tr>
+  <tr class="hi"><td><b>25 W（決めていない条件）</b></td><td>0.29</td><td>0.16</td><td><b>0.10</b></td></tr>
+  <tr class="hi"><td><b>間欠加熱（ON/OFF を与える）</b></td><td>0.30</td><td>―</td><td><b>0.08</b></td></tr>
+  <tr class="dim"><td>間欠加熱（ON/OFF を与えない）</td><td><b>0.30</b></td><td>0.89</td><td>0.91 ← <b>負け</b></td></tr>
+  </table>
+  <p class="cap" style="text-align:left">単位は µm。最下行は<b>同化が負けた条件</b>です。</p>
+ </div>
+ <div class="txt">
+  <div class="key" style="margin:0 0 6px;font-size:.56em">加熱のしかたがモデルと合っていれば<strong>回帰式の約 1/3</strong>。<br>
+  合っていないと<strong>約3倍で負ける</strong>。</div>
+  <p style="font-size:.53em;margin:0;line-height:1.55">ROM の中では 300 秒以降は発熱 0 なので、2回目の山を再現できないのが原因。
+  <b style="color:var(--blue)">ON/OFF を与えれば 0.91 → 0.08 µm</b> に戻る。時刻が分からなくても、
+  <b>発熱を時間で変わる値として推定すれば 0.18 µm</b>（それでも回帰式より小さい）。</p>
+ </div>
+</div>
+<aside class="notes">
+比べた相手は、温度2点から反りを出す回帰式です。工作機械の熱変位補正で一般的な方法です。係数は15ワットの計算結果で決めています。使うときは同化と同じ0.3ケルビンのノイズを足します。
+結果、15ワットでも、係数を決めていない25ワットでも、同化は0.09から0.10マイクロメートル。回帰式の0.3に対して約3分の1です。
+ただし一番下の行を見てください。間欠加熱でヒータのON/OFFをモデルに与えないと、同化は0.91で、回帰式の0.3に約3倍負けます。
+ROMの中では300秒以降は発熱ゼロなので、2回目の山を再現できないのです。
+ON/OFF時刻を与えれば0.08に戻ります。時刻が分からない場合も、発熱を時間で変わる値として推定すれば0.18で、回帰式より小さくなります。
+負けた条件も含めて正直にお示しします。
+</aside>
+</section>
+
+<!-- ============ 28. 切り口C 発熱量 ============ -->
+<section>
+<h2>そして回帰式には原理的にできないこと ― 発熱量そのものを当てる<span class="tag">7. 切り口C</span></h2>
+<div class="fig"><img src="img/doc21_Q.png" alt="発熱量の推定">
+<p class="cap">推定した発熱量 \(Q\) の推移。左＝15 W、中＝<b>25 W（係数を決めていない条件）</b>、右＝間欠加熱（真値は 15 W と 0 W の繰り返し）。
+真値＝OpenFOAM＋FrontISTR、温度センサ P2＋P4、5 seed 平均</p></div>
+<div class="cards">
+ <div class="ok"><b>15 W → 14.89 W</b>係数を決めた条件。30 秒で一度下振れした後、100 秒以降は真値に貼りつく</div>
+ <div class="hit"><b>25 W → 24.9〜25.1 W</b><b>係数を決めていない条件</b>でも、200 秒以降は真値に貼りつく</div>
+ <div class="ng"><b>間欠加熱は追えない</b>真値が 15 W と 0 W を繰り返すのに、推定はなだらかにしか動かない（ON/OFF を与えれば解決）</div>
+</div>
+<div class="key">回帰は<b style="font-weight:400">「いまの温度から、いまの変位」</b>しか出せない。
+同化は<strong>「いま何ワット入っているか」まで出す。</strong>
+― 発熱量が分かれば<b style="font-weight:400">条件が変わった先の予測にも使える。</b>これは物理モデルを中に持つことの違いです。</div>
+<p class="cap" style="text-align:left;margin-left:var(--pad)">
+ただし放熱係数 \(h\) は 600 秒の計算では当たりません（時定数が足りない）。これは正直な限界です。</p>
+<aside class="notes">
+もう一つ、回帰式には原理的にできないことがあります。発熱量そのものを当てることです。
+左、真値15ワットに対して14.89ワット。中、係数を決めていない25ワットに対して24.9から25.1ワットと推定できました。
+右の間欠加熱だけは追えていません。真値が15ワットとゼロを繰り返すのに、推定はなだらかにしか動きません。ON/OFFを与えれば解決します。
+回帰式は温度と変位の対応しか持たないので、発熱量という量が式の中に存在しません。
+同化は物理モデルを中に持つので、観測から境界条件そのものを逆算できます。発熱量が分かれば、条件が変わった先の予測にも使えます。
+ただし放熱係数は600秒では当たりません。時定数が足りないためで、これは正直な限界です。
+</aside>
+</section>
+
+<!-- ============ 29. まとめ ============ -->
+<section>
+<h2>まとめ<span class="tag">8. まとめ</span></h2>
+<div class="flow">
+ <div class="fbox f-hit"><b>切り口A　変位は「結果」ではなく「情報源」</b>
+ 変位計1本の読みは熱感度 \(W\) を通じて<strong>5点すべての温度の重み付き和</strong>。温度計のない点の温度まで直る
+ （温度場 0.503 → <strong>0.160 K</strong>、発熱量 14.05 → <strong>14.89 W</strong>）。
+ ただし<b style="font-weight:400">同じ場所なら温度計とほぼ互角</b>。変位計の価値は<b>「置けること」</b></div>
+ <div class="fbox f-hit"><b>切り口B　測れない場所を、測れる場所から当てる（目玉）</b>
+ 評価点 A・O を<strong>一度も測らず</strong>、別の2点の変位で反りを <strong>0.075 µm</strong>（振幅の 2.7 %）。
+ <b>A・O を直接測るより正確</b>（0.137 µm）。実ソルバ真値で3条件とも同じ結論。
+ 置き場所は<strong>測定前に机上計算だけで設計できる</strong>（15,120 候補から \(\sigma_S\) 最小化＋再採点）</div>
+ <div class="fbox f-hit"><b>切り口C　学習していない運転条件でも使える</b>
+ 係数を決めていない 25 W で、従来の回帰補正の<strong>約 1/3</strong>の誤差（0.10 対 0.29 µm）。
+ <b>発熱量そのものも 24.9〜25.1 W と同定</b>（回帰には原理的にできない）</div>
+ <div class="fbox f-do"><b>実装</b>OpenFOAM（CHT）＋FrontISTR（熱弾性）＋Python（POD/Q-DEIM・EnKF）。
+ <b>すべてオープンソース、コードと解説を公開</b>。ROM は 600 秒を 31 ms、熱感度は随伴法で 1/1300 の時間</div>
+</div>
+<aside class="notes">
+まとめます。
+切り口A、変位は結果ではなく情報源です。変位計1本が5点すべての温度に触れるので、温度計のない点の温度まで直ります。ただし同じ場所なら温度計とほぼ互角で、価値は置けることにあります。
+切り口B、これが目玉です。評価点を一度も測らずに、別の2点の変位で反りを0.075マイクロメートル、振幅の2.7パーセントで当てました。直接測るより正確です。しかも置き場所は測定前に机上計算だけで設計できます。
+切り口C、係数を決めていない25ワットでも回帰補正の3分の1。発熱量そのものも当てられます。
+実装はすべてオープンソースで、コードと解説を公開しています。
+</aside>
+</section>
+
+<!-- ============ 30. 正直な限界 ============ -->
+<section>
+<h2>正直な限界と、今後<span class="tag">8. まとめ</span></h2>
+<div class="two">
+ <div class="txt">
+  <h3 style="color:var(--red)">言えないこと（限界）</h3>
+  <table class="s">
+  <tr><th>限界</th><th>なぜ</th></tr>
+  <tr><td><b>実機で有効とは言えない</b></td><td>真値はすべて計算（OpenFOAM＋FrontISTR）。実機検証は<b>未実施</b></td></tr>
+  <tr><td><b>「初めて提案した」とは言わない</b></td><td>文献調査は英語5回・日本語1回。<b>網羅的ではない</b></td></tr>
+  <tr><td>EnKF・POD・変位の同化そのものは新しくない</td><td>いずれも既知の手法。新しいのは<b>組み合わせと設計論</b></td></tr>
+  <tr><td>変位計が温度計より情報量が多いとは言えない</td><td>同じ場所では互角だった</td></tr>
+  <tr><td>どんな機械でも有効とは言えない</td><td><b>熱源の位置が変わると配置も変わる</b></td></tr>
+  <tr><td>放熱係数 \(h\) は当たらない</td><td>600 秒では時定数が足りない</td></tr>
+  <tr><td>「直接測るより正確」の理由</td><td>S/N 比という<b>解釈</b>。別計算で未確認</td></tr>
+  </table>
+ </div>
+ <div class="txt">
+  <h3 style="color:var(--green)">今後</h3>
+  <table class="s">
+  <tr><th>やること</th><th>何が言えるようになるか</th></tr>
+  <tr><td><b>実機実験</b>（ヒータ＋熱電対＋変位計の試作：設計済・未実施）</td><td>実機で成り立つか</td></tr>
+  <tr><td>センサ数をそろえた比較<br>「温度計3本」対「温度計2本＋変位計1本」</td><td>変位計が温度計の<b>代わり</b>になるか</td></tr>
+  <tr><td>既存の配置設計（D 最適・Q-DEIM・相互情報量）との定量比較</td><td>配置設計としての<b>優位性</b></td></tr>
+  <tr><td>文献調査の拡張（精密工学会・日本機械学会）</td><td>新規性の確度</td></tr>
+  <tr><td>ON/OFF を推定する定式化の一般化</td><td>運転条件を知らなくても使えるか</td></tr>
+  </table>
+  <div class="key" style="margin:10px 0 0;font-size:.56em">それでも言えるのは ―
+  <strong>「知りたい場所を測らずに当てる」ことと、「その観測点を測定前に設計できる」こと</strong>を、
+  実ソルバ真値で定量的に示したことです。</div>
+ </div>
+</div>
+<aside class="notes">
+正直な限界を申し上げます。
+真値はすべて計算で作ったもので、実機検証は未実施です。ですので実機で有効とは言えません。
+文献調査も英語5回、日本語1回で網羅的ではないので、初めて提案したとは言いません。
+EnKFもPODも変位の同化も既知の手法で、新しいのは組み合わせと設計論です。
+熱源の位置が変わると配置も変わるので、どんな機械でも有効とは言えません。
+今後は実機実験、センサ数をそろえた比較、既存の配置設計手法との定量比較を考えています。
+それでも言えるのは、知りたい場所を測らずに当てること、その観測点を測定前に設計できることを、実ソルバ真値で定量的に示した点です。
+</aside>
+</section>
+
+<!-- ============ 31. 公開情報 ============ -->
+<section class="hero">
+<p class="ttl" style="font-size:1.05em">コード・解説記事を<span class="acc">公開しています</span></p>
+<hr class="rule">
+<div class="nums" style="flex:0 0 auto">
+ <div><div class="lbl">リポジトリ</div><div class="u" style="font-size:.56em;line-height:1.6">
+   github.com/kamakiri1225/<br>thermal-da-demo<br>
+   <span style="color:#9fc0e6;font-size:.84em">OpenFOAM ケース・FrontISTR 入力・<br>Python（ROM／EnKF／配置選定）一式</span></div></div>
+ <div><div class="lbl">解説記事（全8回）</div><div class="u" style="font-size:.56em;line-height:1.6">
+   kamakiri1225.github.io/<br>thermal-da-demo/<br>
+   <span style="color:#9fc0e6;font-size:.84em">本発表の数値は、すべて記事内に<br>計算条件とコードつきで載せています</span></div></div>
+</div>
+<table class="s" style="margin:0 90px;font-size:.42em">
+<tr><td>blog_001</td><td>OpenFOAM CHT → FrontISTR 熱膨張、面ごとの熱伝達率</td><td>blog_005</td><td>推定対象が変わると最適センサも変わる</td></tr>
+<tr><td>blog_002</td><td>OI（最適内挿）― 3点モデルで手計算</td><td>blog_006</td><td><b>温度2点＋変位2点の同化を1ステップずつ追う</b></td></tr>
+<tr><td>blog_003</td><td>EnKF ― 分身の散らばりで共分散を作る</td><td>blog_007</td><td><b>作った ROM はどこまで使えるか</b></td></tr>
+<tr><td>blog_004</td><td>POD/Q-DEIM で代表点を選ぶ ROM</td><td>blog_008</td><td><b>変位も同化に使う ― 本研究の主張と先行研究</b></td></tr>
+</table>
+<p class="sub2" style="font-size:.74em;margin-top:22px;font-weight:700;color:#FFC857">ご清聴ありがとうございました</p>
+<aside class="notes">
+コードと解説記事を公開しています。
+リポジトリにはOpenFOAMのケース、FrontISTRの入力、PythonのROM・EnKF・配置選定のコード一式があります。
+解説記事は全8回で、本日お示しした数値はすべて計算条件とコードつきで記事に載せています。
+特に blog_006 が同化の中身を1ステップずつ追ったもの、blog_008 が本日の主張と先行研究の整理です。
+ご清聴ありがとうございました。
+</aside>
+</section>
+
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/math/math.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  width: 1280, height: 720,
+  margin: 0,
+  minScale: 0.2, maxScale: 1.6,
+  transition: 'slide',
+  backgroundTransition: 'fade',
+  plugins: [ RevealMath.MathJax3, RevealNotes ],
+  mathjax3: {
+    tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+    options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+  }
+});
+</script>
+</body></html>
