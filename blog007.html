@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_007：作った ROM はどこまで使えるか</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  
+  <style>
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_007：作った ROM はどこまで使えるか</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる"
+id="toc-blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
+ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</a>
+<ul>
+<li><a href="#結論" id="toc-結論">1. 結論</a></li>
+<li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">2. ROM
+は何から作ったか</a></li>
+<li><a href="#確かめに使った条件" id="toc-確かめに使った条件">3.
+確かめに使った条件</a></li>
+<li><a href="#発熱量が変わる場合25-w" id="toc-発熱量が変わる場合25-w">4.
+発熱量が変わる場合（25 W）</a>
+<ul>
+<li><a href="#rom-単体同化なしの予測"
+id="toc-rom-単体同化なしの予測">ROM 単体（同化なし）の予測</a></li>
+<li><a href="#温度分布の型" id="toc-温度分布の型">温度分布の型</a></li>
+<li><a href="#同化すると温度-p2p4-変位-ao5-seed-平均30300-秒"
+id="toc-同化すると温度-p2p4-変位-ao5-seed-平均30300-秒">同化すると（温度
+P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</a></li>
+</ul></li>
+<li><a href="#加熱のしかたが変わる場合間欠加熱"
+id="toc-加熱のしかたが変わる場合間欠加熱">5.
+加熱のしかたが変わる場合（間欠加熱）</a>
+<ul>
+<li><a href="#rom-単体同化なしの予測-1"
+id="toc-rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測</a></li>
+<li><a href="#同化すると反り-ao-の誤差30600-秒の平均"
+id="toc-同化すると反り-ao-の誤差30600-秒の平均">同化すると（反り A−O
+の誤差、30〜600 秒の平均）</a></li>
+</ul></li>
+<li><a href="#長い時間の場合" id="toc-長い時間の場合">6.
+長い時間の場合</a></li>
+<li><a href="#使えるかどうかの決め手-温度分布の型が変わるかどうか"
+id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">7.
+使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</a>
+<ul>
+<li><a href="#確かめ方型で表したときに残る誤差"
+id="toc-確かめ方型で表したときに残る誤差">確かめ方：型で表したときに残る誤差</a></li>
+<li><a href="#型が大きく変わると考えられる場合未確認"
+id="toc-型が大きく変わると考えられる場合未確認">型が大きく変わると考えられる場合（未確認）</a></li>
+<li><a href="#実際の運転中に気づけるか未実施"
+id="toc-実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</a></li>
+</ul></li>
+<li><a href="#観測点は-rom-の代表5点に限られるか"
+id="toc-観測点は-rom-の代表5点に限られるか">8. 観測点は ROM
+の代表5点に限られるか</a>
+<ul>
+<li><a href="#なぜか" id="toc-なぜか">なぜか</a></li>
+<li><a href="#確かめた結果" id="toc-確かめた結果">確かめた結果</a></li>
+<li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
+<li><a href="#実務上の意味" id="toc-実務上の意味">実務上の意味</a></li>
+</ul></li>
+<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">9.
+作り直しが必要なもの</a></li>
+<li><a href="#未確認のこと" id="toc-未確認のこと">10.
+未確認のこと</a></li>
+<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">11.
+使ったスクリプト</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
+ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
+<p><a href="blog_004_pod_selected_rom.md">blog_004</a> で、OpenFOAM
+の計算1本から <strong>5点の熱回路モデル（ROM）</strong> を作りました。
+600 秒の計算が 31 ms で終わる軽いモデルですが、当然こう思います。</p>
+<blockquote>
+<p><strong>この ROM
+は、作ったときと違う条件でも使えるのか？</strong></p>
+</blockquote>
+<p>この記事は、その問いに実際の計算で答えた記録です。
+「確かめた」と書いたものはすべて計算した結果で、確かめていないものは「未確認」と明記しています。</p>
+<blockquote>
+<p><strong>この記事で分かること</strong> 1. 発熱量が変わっても（15 W →
+25 W）、作り直さずに使える 2.
+加熱のしかたが変わっても使える。ただしヒータへの入力の与え方は変える必要がある
+3.
+使えるかどうかの決め手は、<strong>温度分布の「型」が変わるかどうか</strong>
+4. センサは ROM の代表5点に置かなくてよい</p>
+<p>関連記事：ROM の作り方は <a
+href="blog_004_pod_selected_rom.md">blog_004</a>、同化の手順は <a
+href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>、センサの置き場所は
+<a href="blog_005_optimal_sensor_placement.md">blog_005</a>。</p>
+</blockquote>
+<hr />
+<h2 id="結論">1. 結論</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件が変わったとき</th>
+<th>使えるか</th>
+<th>根拠</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>発熱量</strong>が変わる（15 W → 25 W）</td>
+<td><strong>使える</strong>（作り直し不要）</td>
+<td>ROM 単体の誤差 0.11 K、同化すると温度場 0.14〜0.15 K、発熱量も
+24.9〜25.1 W と推定（§4）</td>
+</tr>
+<tr class="even">
+<td><strong>加熱のしかた</strong>が変わる（間欠加熱）</td>
+<td><strong>使える</strong>（作り直し不要）。ただし、ヒータへの入力の与え方を変える必要がある</td>
+<td>ON/OFF を正しく与えれば ROM 単体の誤差 0.038
+K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）</td>
+</tr>
+<tr class="odd">
+<td>25 W より大きく外れた発熱量</td>
+<td><strong>未確認</strong></td>
+<td>同化まで回したのは 25 W だけ</td>
+</tr>
+<tr class="even">
+<td>別の加熱のしかた（ランプ状、30 秒より短い ON/OFF など）</td>
+<td><strong>未確認</strong></td>
+<td>試したのは間欠加熱1通り</td>
+</tr>
+<tr class="odd">
+<td>600 秒より長い運転</td>
+<td><strong>一部だけ確認</strong></td>
+<td>5,000 秒の試験はあるが、真値も ROM（§6）</td>
+</tr>
+<tr class="even">
+<td><strong>熱源の位置</strong>が変わる</td>
+<td><strong>作り直しが必要</strong>（試していない）</td>
+<td>温度分布の「型」そのものが変わるため</td>
+</tr>
+<tr class="odd">
+<td><strong>形状・メッシュ</strong>が変わる</td>
+<td><strong>作り直しが必要</strong></td>
+<td>型が 20,696 セルに結び付いているため</td>
+</tr>
+<tr class="even">
+<td>温度分布の<strong>型（モード）</strong>そのものが大きく変わる</td>
+<td><strong>使えない</strong>（型を作り直す）</td>
+<td>型は固定で、変えられるのは混ぜ具合だけ（§7）</td>
+</tr>
+<tr class="odd">
+<td>周囲温度・取り付け（拘束）条件が変わる</td>
+<td><strong>未確認</strong></td>
+<td>ROM は気温 20 ℃、底面固定で作った</td>
+</tr>
+<tr class="even">
+<td><strong>観測点を代表5点以外にしたい</strong></td>
+<td><strong>できる</strong>（作り直し不要）</td>
+<td>代表点でない2セルでも同化できた（§8）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="rom-は何から作ったか">2. ROM は何から作ったか</h2>
+<p>ROM は、<strong>OpenFOAM の計算1本</strong>（15 W を 0〜300
+秒加熱し、300〜600 秒は自然に冷やす）から作りました。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>部品</th>
+<th>何を決めたか</th>
+<th>その1本の計算から作ったか</th>
+<th>条件が変わると</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POD の型（モード） <span class="math inline">\(U_r\)</span></td>
+<td>温度分布の「型」5つ（20,696 セル × 5）</td>
+<td>0〜600 秒の 121 時刻から</td>
+<td>熱源の位置・形状が変わると作り直し</td>
+</tr>
+<tr class="even">
+<td>代表5点（Q-DEIM）</td>
+<td>測る・計算する5点 P0〜P4</td>
+<td>上の型から</td>
+<td>型と同じ</td>
+</tr>
+<tr class="odd">
+<td>ROM の係数</td>
+<td>熱容量 <span class="math inline">\(C_i\)</span>
+、点どうしの熱の通りやすさ <span class="math inline">\(K_{ij}\)</span>
+、放熱 <span class="math inline">\(h\)</span></td>
+<td>5点の温度履歴に合わせて校正</td>
+<td>物性・形状・放熱の条件が変わると作り直し</td>
+</tr>
+<tr class="even">
+<td>変位の写像 <span class="math inline">\(D\)</span></td>
+<td>型ごとの FrontISTR の変位</td>
+<td>型を FrontISTR に入れて6回計算</td>
+<td>型・拘束条件が変わると作り直し</td>
+</tr>
+<tr class="odd">
+<td>ヒータへの入力</td>
+<td>「ヒータ点（P2）に <span class="math inline">\(q\times15\)</span>
+W、0〜300 秒だけ」</td>
+<td>決め打ち</td>
+<td><strong>加熱のしかたが変わると、ここを変える</strong>（§5）</td>
+</tr>
+</tbody>
+</table>
+<p>ROM の式は次のとおりです。</p>
+<p><span class="math display">\[
+C_i\frac{dT_i}{dt}=\sum_j K_{ij}(T_j-T_i)+P_i(t)-h\,(T_i-T_\mathrm{air})
+\]</span></p>
+<p>（ <span class="math inline">\(P_i(t)\)</span>
+はヒータの発熱。ヒータ点 P2 だけに入る）</p>
+<p><strong>発熱量と加熱のしかたは、右辺のヒータの項 <span
+class="math inline">\(P_i(t)\)</span> にしか入っていません。</strong>
+熱容量・熱の通りやすさ・放熱の部分は、発熱量にも加熱のしかたにもよりません。これが、§4・§5
+で作り直さずに使えた理由です。</p>
+<hr />
+<h2 id="確かめに使った条件">3. 確かめに使った条件</h2>
+<p>真値はすべて、OpenFOAM で計算した温度場と、それを FrontISTR
+に入れて計算した変位です。25 W
+と間欠加熱は、この確認のために新しく計算しました（<code>openfoam/limit/</code>）。</p>
+<figure>
+<img src="img/doc21_conditions.png" alt="3つの条件" />
+<figcaption aria-hidden="true">3つの条件</figcaption>
+</figure>
+<p><em>上：ヒータの発熱。下：OpenFOAM＋FrontISTR で計算した反り
+A−O。</em></p>
+<hr />
+<h2 id="発熱量が変わる場合25-w">4. 発熱量が変わる場合（25 W）</h2>
+<h3 id="rom-単体同化なしの予測">ROM 単体（同化なし）の予測</h3>
+<figure>
+<img src="img/rom_applicability.png" alt="ROM 単体の予測と OpenFOAM" />
+<figcaption aria-hidden="true">ROM 単体の予測と OpenFOAM</figcaption>
+</figure>
+<p><em>点＝OpenFOAM、線＝ROM。発熱量とヒータの ON/OFF
+を正しく与え、同化なしで 0→600 秒を計算した。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">最大の温度上昇</th>
+<th style="text-align: right;">ROM の誤差（5点の最大）</th>
+<th style="text-align: right;">ROM の誤差（平均）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（ROM を作った条件）</td>
+<td style="text-align: right;">5.8 K</td>
+<td style="text-align: right;">0.038 K</td>
+<td style="text-align: right;">0.011 K</td>
+</tr>
+<tr class="even">
+<td><strong>25 W</strong></td>
+<td style="text-align: right;">9.6 K</td>
+<td style="text-align: right;"><strong>0.109 K</strong></td>
+<td style="text-align: right;">0.026 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>25 W でも、ROM の線は OpenFOAM
+の点にほぼ重なっています（中央の図）。</li>
+<li>誤差は 0.04 K から 0.11 K に増えました。温度上昇（9.6 K）の約 1 %
+です。空気への放熱（自然対流）は温度差で強さが変わりますが、ROM
+は一定の係数で近似しているためと考えています（確かめてはいません）。</li>
+</ul>
+<h3 id="温度分布の型">温度分布の型</h3>
+<p>POD の5つの型で 25 W の温度場全体を表したときの誤差は <strong>0.003
+K</strong> でした（15 W では 0.0007
+K）。固体の熱伝導は発熱量に比例するので、温度分布の形はほぼ同じで、大きさだけが変わるためです。</p>
+<h3 id="同化すると温度-p2p4-変位-ao5-seed-平均30300-秒">同化すると（温度
+P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</h3>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">温度場全体の誤差</th>
+<th style="text-align: right;">反り A−O の誤差</th>
+<th style="text-align: right;">推定した発熱量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td style="text-align: right;">0.13 K</td>
+<td style="text-align: right;">0.16 µm</td>
+<td style="text-align: right;">15.10 W</td>
+</tr>
+<tr class="even">
+<td><strong>25 W</strong></td>
+<td style="text-align: right;"><strong>0.14 K</strong></td>
+<td style="text-align: right;"><strong>0.17 µm</strong></td>
+<td style="text-align: right;"><strong>25.07 W</strong></td>
+</tr>
+</tbody>
+</table>
+<p>ROM
+単体で増えた誤差は、同化で補正されてほとんど差がなくなりました。発熱量は同化で毎回推定しているので、ROM
+を作ったときの 15 W に縛られません。</p>
+<p>（詳細：<a
+href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
+②）</p>
+<hr />
+<h2 id="加熱のしかたが変わる場合間欠加熱">5.
+加熱のしかたが変わる場合（間欠加熱）</h2>
+<h3 id="rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測</h3>
+<p>上の図の右が間欠加熱です。</p>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ヒータへの入力の与え方</th>
+<th style="text-align: right;">ROM の誤差（5点の最大）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>正しい ON/OFF（0〜150 秒と 300〜450
+秒）を与える</strong></td>
+<td style="text-align: right;"><strong>0.038
+K</strong>（作った条件と同じ）</td>
+</tr>
+<tr class="even">
+<td>0〜300 秒に一定と仮定したまま</td>
+<td style="text-align: right;">3.77 K（黒の破線）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ROM そのものは間欠加熱でも正しく予測できます。</strong>
+外れたのは、ヒータへの入力を 0〜300
+秒に決め打ちしていたときだけです。</p>
+<h3 id="同化すると反り-ao-の誤差30600-秒の平均">同化すると（反り A−O
+の誤差、30〜600 秒の平均）</h3>
+<figure>
+<img src="img/improve_timeseries.png" alt="改善の試み：時刻歴" />
+<figcaption aria-hidden="true">改善の試み：時刻歴</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ヒータへの入力の与え方</th>
+<th>想定している場面</th>
+<th style="text-align: right;">反りの誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0〜300 秒に一定と仮定</td>
+<td>―</td>
+<td style="text-align: right;">0.91 µm</td>
+</tr>
+<tr class="even">
+<td><strong>ON/OFF 時刻を与える</strong></td>
+<td>主軸・モータを「いつ回したか」が NC 装置から分かる</td>
+<td style="text-align: right;"><strong>0.08 µm</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>発熱を時間で変わる値として推定</strong>（σ=0.4）</td>
+<td>ON/OFF 時刻も分からない</td>
+<td style="text-align: right;"><strong>0.18 µm</strong></td>
+</tr>
+<tr class="even">
+<td>（参考）従来の回帰式</td>
+<td>―</td>
+<td style="text-align: right;">0.30 µm</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>ON/OFF 時刻が分かれば、ROM を作った条件と同じ精度です。</li>
+<li>分からなくても、回帰式より小さい誤差でした。ただし、推定した発熱量はヒータを切った後も
+3〜4 W 残るので、発熱量そのものを知りたい場合はそのまま使えません。σ=0.4
+は、この3条件の結果を見て選んだ値です。</li>
+</ul>
+<p>（詳細：<a
+href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
+④）</p>
+<hr />
+<h2 id="長い時間の場合">6. 長い時間の場合</h2>
+<p>放熱 <span class="math inline">\(h\)</span> を推定できるかを、5,000
+秒まで延ばして調べた試験があります（<a
+href="19_research_advantage_and_validation.md">研究レビュー</a>）。
+<span class="math inline">\(h\)</span> の推定誤差（3 seed 平均）は、600
+秒で 56.7 %、5,000 秒で 1.30 % でした。</p>
+<p>ただし、この試験の<strong>真値は ROM そのもの</strong>です。600
+秒を超える OpenFOAM の計算は行っていないので、<strong>長い時間で ROM
+自体が OpenFOAM と合うかは未確認</strong>です。</p>
+<hr />
+<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">7.
+使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</h2>
+<p>ROM
+が使えるかどうかは、<strong>新しい条件の温度分布が、作ったときの5つの型（モード）の組み合わせで表せるか</strong>で決まります。</p>
+<p><span class="math display">\[
+T(t)pproxar T+U_r\,a(t)
+\]</span></p>
+<p>型 <span class="math inline">\(U_r\)</span>
+は固定で、変えられるのは混ぜ具合 <span
+class="math inline">\(a(t)\)</span> だけです。そのため、</p>
+<ul>
+<li><strong>型の組み合わせで表せる変化</strong>（全体が強く温まる、温まり方の時間変化が違う）→
+<span class="math inline">\(a(t)\)</span>
+が変わるだけなので<strong>使える</strong></li>
+<li><strong>型そのものが変わる変化</strong>（熱い場所が別の場所に移る、新しい形の温度分布が出る）→
+<span class="math inline">\(a(t)\)</span>
+をどう変えても表せないので<strong>使えない</strong></li>
+</ul>
+<h3
+id="確かめ方型で表したときに残る誤差">確かめ方：型で表したときに残る誤差</h3>
+<p>新しい条件の温度場（OpenFOAM の 20,696
+セル全体）を、5つの型の組み合わせで最も近く表したときに残る誤差を計算しました（30〜600
+秒の平均）。</p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">型で表したときに残る誤差</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（ROM を作った条件）</td>
+<td style="text-align: right;">0.0007 K</td>
+<td>型で表せる</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">0.0029 K</td>
+<td>型で表せる（温度上昇 9.6 K に対して 0.03 %）</td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td style="text-align: right;">0.0019 K</td>
+<td>型で表せる</td>
+</tr>
+</tbody>
+</table>
+<p>（<code>run/limit_realsolver_truth.py</code>
+の「近似の誤差」。温度場全体の RMSE）</p>
+<p>25 W
+も間欠加熱も、<strong>型はほとんど変わっていません</strong>。変わったのは混ぜ具合
+<span class="math inline">\(a(t)\)</span>
+と、ヒータへの入力だけでした。だから作り直さずに使えました。</p>
+<h3
+id="型が大きく変わると考えられる場合未確認">型が大きく変わると考えられる場合（未確認）</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>場合</th>
+<th>なぜ型が変わるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱源の位置・数が変わる</td>
+<td>熱い場所そのものが変わる</td>
+</tr>
+<tr class="even">
+<td>冷却のしかたが変わる（ファン、クーラント）</td>
+<td>冷える場所と冷え方の分布が変わる</td>
+</tr>
+<tr class="odd">
+<td>温度差が非常に大きくなる</td>
+<td>自然対流の強さが場所ごとに変わり、温度分布の形が変わる可能性がある</td>
+</tr>
+<tr class="even">
+<td>形状・接触状態が変わる</td>
+<td>熱の通り道が変わる</td>
+</tr>
+</tbody>
+</table>
+<p>これらは試していません。試すには、その条件で OpenFOAM
+を計算し、上の「型で表したときに残る誤差」を見れば判定できます。誤差が大きければ、その条件の計算を加えて型を作り直す必要があります。</p>
+<h3
+id="実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</h3>
+<p>運転中は温度場全体が分からないので、上の誤差は直接計算できません。考えられるのは、同化に使わない確認用のセンサを1本置き、その点の推定値と測定値のずれが急に大きくなったら「型が合わなくなった」と判断する方法です。<strong>試していません。</strong></p>
+<hr />
+<h2 id="観測点は-rom-の代表5点に限られるか">8. 観測点は ROM
+の代表5点に限られるか</h2>
+<p><strong>限られません。</strong>
+温度計も変位計も、好きな場所に置けます。</p>
+<h3 id="なぜか">なぜか</h3>
+<p>ROM
+が計算で追いかける状態は代表5点の温度ですが、<strong>どのセルの温度も5点の温度の一次式で書けます</strong>（gappy-POD
+復元）。</p>
+<p><span class="math display">\[
+T_j=\bar T_j+\psi_j\,U_{rP}^{+}\,\big(T_P-\bar T_P\big)
+\]</span></p>
+<p>（ <span class="math inline">\(\psi_j\)</span> は <span
+class="math inline">\(U_r\)</span> の <span
+class="math inline">\(j\)</span> 行目＝セル <span
+class="math inline">\(j\)</span> の行ベクトル、 <span
+class="math inline">\(T_P\)</span> は代表5点の温度）</p>
+<p>これを観測演算子として使えば、代表点でないセルに置いた温度計もそのまま同化に入れられます。
+変位も同じで、FrontISTR で <span class="math inline">\(D\)</span>
+を作り直せば、どの節点の変位でも観測にできます。</p>
+<p><strong>実際、変位の観測点はすでに代表点ではありません。</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>観測・評価</th>
+<th>場所</th>
+<th>代表5点か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度 P2・P0</td>
+<td>ROM の代表点</td>
+<td>はい</td>
+</tr>
+<tr class="even">
+<td>変位 A・O（観測）</td>
+<td>上面 (±28, 0, 100.5) mm</td>
+<td><strong>いいえ</strong>（FEM 節点）</td>
+</tr>
+<tr class="odd">
+<td>変位 B・C（評価、§7-4b の holdout）</td>
+<td>中段 z=75 mm</td>
+<td><strong>いいえ</strong></td>
+</tr>
+<tr class="even">
+<td>温度場の評価</td>
+<td>全 20,696 セル</td>
+<td><strong>いいえ</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="確かめた結果">確かめた結果</h3>
+<p>代表点でないセルに温度計2本を置いて同化しました（温度のみ、変位なし。EnKF・5
+seed
+平均・加熱期30〜300秒。<code>run/obs_points_not_limited_to_rom.py</code>）。</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>温度計2本の場所</th>
+<th>座標 [mm]</th>
+<th style="text-align: right;">温度場全体の誤差</th>
+<th style="text-align: right;">推定した発熱量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>代表点 P2＋P0（どちらもヒータ側）</td>
+<td>(36.5, 6.9, 50.8)、(21.3, −1.6, 51.6)</td>
+<td style="text-align: right;">0.528 ± 0.198 K</td>
+<td style="text-align: right;">14.05 W</td>
+</tr>
+<tr class="even">
+<td>代表点 P2＋P4（A側とO側に分ける）</td>
+<td>(36.5, 6.9, 50.8)、(−35.1, 0.8, 0.8)</td>
+<td style="text-align: right;"><strong>0.157 ± 0.033 K</strong></td>
+<td style="text-align: right;">14.72 W</td>
+</tr>
+<tr class="odd">
+<td><strong>代表点でない2セル</strong>（A側とO側に分ける）</td>
+<td>(35.1, −0.8, 94.6)、(−32.9, −1.6, 29.7)</td>
+<td style="text-align: right;"><strong>0.258 ± 0.058 K</strong></td>
+<td style="text-align: right;">14.90 W</td>
+</tr>
+<tr class="even">
+<td><strong>代表点でない2セル</strong>（どちらもヒータ側）</td>
+<td>(35.1, −0.8, 94.6)、(29.8, −1.6, 29.7)</td>
+<td style="text-align: right;">0.306 ± 0.047 K</td>
+<td style="text-align: right;">15.61 W</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>代表点でなくても同化できます。</strong>
+代表点でない2セル（0.258 K）は、代表点 P2＋P0（0.528
+K）より良い結果でした。</li>
+<li>効いているのは代表点かどうかではなく、<strong>A側とO側に分かれているか</strong>です（§<a
+href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
+と同じ傾向）。</li>
+<li>ただし、いちばん良いのは代表点 P2＋P4（0.157
+K）でした。代表点は復元に都合のよい点なので、同じ「両側に分ける」配置なら代表点のほうが有利でした。</li>
+</ul>
+<h3 id="注意未確認">注意（未確認）</h3>
+<ul>
+<li>試したのは4通りだけで、系統的には調べていません。</li>
+<li>代表点から大きく外れた場所（型がほとんど出ないセル、§7
+の行ベクトルが短いセル）ばかりに置いた場合は確かめていません。復元がうまくいかない可能性があります。</li>
+<li>真値は ROM の双子実験です。</li>
+</ul>
+<h3 id="実務上の意味">実務上の意味</h3>
+<p><strong>センサは「置ける場所」に置けます。</strong> ROM
+の代表点に合わせて穴を開けたり、治具を作ったりする必要はありません。置いた場所の座標が分かっていれば、その点の観測演算子を作れます。</p>
+<hr />
+<h2 id="作り直しが必要なもの">9. 作り直しが必要なもの</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>変わるもの</th>
+<th>理由</th>
+<th>作り直す手順</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱源の位置・数</td>
+<td>温度分布の型が変わる。ROM のヒータ点も変わる</td>
+<td>OpenFOAM（CHT）→ POD → Q-DEIM → ROM 校正 → FrontISTR で <span
+class="math inline">\(D\)</span></td>
+</tr>
+<tr class="even">
+<td>形状・メッシュ</td>
+<td>型が 20,696 セルに結び付いている</td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td>拘束条件（固定のしかた）</td>
+<td>変位の写像 <span class="math inline">\(D\)</span> が変わる</td>
+<td>FrontISTR で <span class="math inline">\(D\)</span>
+を作り直す（6回）</td>
+</tr>
+<tr class="even">
+<td>材料（熱伝導率・熱容量）</td>
+<td>ROM の係数が変わる</td>
+<td>OpenFOAM → ROM 校正</td>
+</tr>
+</tbody>
+</table>
+<p>手順はすべてスクリプト化してあります（<code>run/select_points_qdeim.py</code>、<code>run/run_da_compare.py</code>
+など）。ただし、OpenFOAM の計算に1本あたり約1〜3時間かかります。</p>
+<hr />
+<h2 id="未確認のこと">10. 未確認のこと</h2>
+<ul>
+<li>25 W 以外の発熱量での同化（特に大きく外れた場合）</li>
+<li>ランプ状に変わる発熱、30 秒より短い間隔の
+ON/OFF（同化の更新間隔より速い変化）</li>
+<li>600 秒を超える運転での ROM 自体の精度（OpenFOAM との比較）</li>
+<li>周囲温度が変わる場合（ROM は気温 20 ℃ で作った）</li>
+<li>実機での精度（すべて計算で作った真値）</li>
+<li>代表点から大きく外れた場所だけに温度計を置いた場合（§8）</li>
+</ul>
+<hr />
+<h2 id="使ったスクリプト">11. 使ったスクリプト</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>内容</th>
+<th>スクリプト</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ROM 単体と OpenFOAM の比較（§4・§5 の図）</td>
+<td><code>run/make_rom_applicability_fig.py</code></td>
+<td><code>results/rom_applicability.json</code></td>
+</tr>
+<tr class="even">
+<td>実ソルバを真値にした同化（§4）</td>
+<td><code>run/limit_realsolver_truth.py</code></td>
+<td><code>results/limit_realsolver_&lt;条件&gt;.json</code></td>
+</tr>
+<tr class="odd">
+<td>加熱のしかたの改善（§5）</td>
+<td><code>run/improve_heating_schedule.py</code></td>
+<td><code>results/improve_heating_schedule.json</code></td>
+</tr>
+<tr class="even">
+<td>観測点は代表5点に限られるか（§8）</td>
+<td><code>run/obs_points_not_limited_to_rom.py</code></td>
+<td><code>results/obs_points_not_limited_to_rom.json</code></td>
+</tr>
+<tr class="odd">
+<td>25 W・間欠加熱の OpenFOAM 計算</td>
+<td><code>openfoam/limit/q25</code>、<code>openfoam/limit/intermittent</code>（リポジトリには含めていない）</td>
+<td>―</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
