@@ -1,0 +1,108 @@
+"""同化で復元した温度場が、代表点以外のセルでも合っているかを全20,696セルで確かめる.
+
+真値は OpenFOAM の温度場そのもの（results/limit_truth_<case>.npz）。
+観測は温度2点(P2+P4)＋変位2点(A/O)。EnKF・60メンバー・30秒ごと・5 seed。
+
+調べること
+  ① 全セルの誤差の分布（ヒストグラムと、半径・高さ別の分布図）
+  ② 代表5点 と それ以外20,691セル で誤差に差があるか
+  ③ 誤差が最大のセルはどこか
+  ④ 誤差の時間変化（最大・95%・平均）
+
+出力: results/check_all_cells_after_da.json, docs/img/all_cells_after_da.png
+再現: OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/check_all_cells_after_da.py
+"""
+from __future__ import annotations
+import os, sys, json
+import numpy as np
+HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
+sys.path.insert(0, ROOT)
+from dacore import plots as _p
+import matplotlib.pyplot as plt
+from dacore import rom_general as rg
+from dacore.enkf import enkf_update
+RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
+NPT=5; IQ=5; IH=6; NAUG=7; DT=2.0; OBS_DT=30.0; T_END=600.0; N_ENS=60
+SIG_T=0.30; SIG_U=0.30; INFL=1.02
+SEEDS=[20260913,20260914,20260915,20260916,20260917]
+TN=[2,4]
+CASES=[("learned","15 W（モデル作成に使った条件）"),("q25","25 W（使っていない条件）"),
+       ("intermittent","15 W 間欠加熱（使っていない条件）")]
+
+
+def main():
+    d=np.load(os.path.join(RES,"rom_calibrated_pod.npz"))
+    C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],NPT); h=float(d["h"]); heat=int(d["heat_node"])
+    kv=np.load(os.path.join(RES,"qdeim_points.npz"))
+    U=kv["pod_modes"].astype(float); mean=kv["mean"].astype(float); pod=kv["cell_idx"]; Cc=kv["cell_centres"]
+    UPp=np.linalg.pinv(U[pod,:]); A=U@UPp
+    op=np.load(os.path.join(RES,"disp_operator.npz")); ub=op["uz_mean"]; Dm=op["Dmode"]
+    disp=lambda T5: ub+((T5-mean[pod])@UPp.T)@Dm.T
+    field=lambda T5: mean+A@(T5-mean[pod])
+    ncell=U.shape[0]; other=np.ones(ncell,bool); other[pod]=False
+    out={"note":"真値＝OpenFOAMの温度場。観測＝温度2点(P2+P4)＋変位2点(A/O)。誤差は|推定−真値|、加熱期30〜300秒、5 seed平均","cases":{}}
+    fig,axs=plt.subplots(3,len(CASES),figsize=(16,12),gridspec_kw=dict(hspace=0.42,wspace=0.26))
+    for j,(case,lab) in enumerate(CASES):
+        z=np.load(os.path.join(RES,f"limit_truth_{case}.npz")); t=z["times"]; Tf=z["Tfield"]; T5=Tf[:,pod]; uz=z["uz"]
+        cyc=t[1:]; heatw=(t[1:]<=300)
+        errs=np.zeros((len(SEEDS),len(cyc),ncell))
+        for si,seed in enumerate(SEEDS):
+            rng=np.random.default_rng(seed); ro=np.random.default_rng(seed+7)
+            Z=np.zeros((N_ENS,NAUG)); Z[:,:NPT]=rng.uniform(rg.T_AIR_K-3,rg.T_AIR_K+12,(N_ENS,NPT))
+            Z[:,IQ]=rng.uniform(0.3,1.8,N_ENS); Z[:,IH]=np.clip(rng.normal(0.02,0.01,N_ENS),1e-3,0.1)
+            Rd=np.diag([SIG_T**2]*len(TN)+[SIG_U**2]*2); tp=0.0
+            for ci,tb in enumerate(cyc,1):
+                Z=Z.copy(); Z[:,:NPT]=rg.integrate_ensemble(Z[:,:NPT],C,Km,Z[:,IH],Z[:,IQ],heat,tp,tb,DT); tp=tb
+                y=np.r_[T5[ci][TN],uz[ci]]+ro.normal(0,np.sqrt(np.diag(Rd)))
+                Yf=np.column_stack([Z[:,TN],disp(Z[:,:NPT])])
+                Z=enkf_update(Z,y,None,Rd,rng,inflation=INFL,Yf=Yf)
+                Z[:,IQ]=np.clip(Z[:,IQ],0,3); Z[:,IH]=np.clip(Z[:,IH],1e-4,0.2)
+                errs[si,ci-1]=np.abs(field(Z[:,:NPT].mean(0))-Tf[ci])
+        e=errs.mean(0)                       # (time, cell) 5 seed平均
+        eh=e[heatw].mean(0)                  # 加熱期平均（セルごと）
+        imax=int(eh.argmax())
+        rise=float(Tf.max()-rg.T_AIR_K)
+        out["cases"][case]=dict(
+            all_mean_K=float(eh.mean()),all_p95_K=float(np.percentile(eh,95)),all_max_K=float(eh.max()),
+            pod5_mean_K=float(eh[pod].mean()),other_mean_K=float(eh[other].mean()),
+            worst_cell=imax,worst_xyz_mm=np.round(Cc[imax]*1000,1).tolist(),
+            max_rise_K=rise,max_err_pct_of_rise=float(100*eh.max()/rise),
+            frac_below_noise=float((eh<SIG_T).mean()))
+        print(f"{case}: 全セル平均 {eh.mean():.3f} K / 95% {np.percentile(eh,95):.3f} / 最大 {eh.max():.3f} K "
+              f"(代表5点 {eh[pod].mean():.3f}, それ以外 {eh[other].mean():.3f})  ノイズ0.3K未満のセル {100*(eh<SIG_T).mean():.1f}%",flush=True)
+        # 行1：ヒストグラム
+        ax=axs[0,j]
+        ax.hist(eh[other],bins=60,color="#2E6FD8",alpha=.85,label=f"代表点以外 {other.sum():,} セル")
+        for pi in pod: ax.axvline(eh[pi],color="#C0392B",lw=1.6)
+        ax.axvline(SIG_T,color="k",ls="--",lw=2,label="温度計のノイズ 0.3 K")
+        ax.set_xlabel("加熱期の平均誤差 [K]"); ax.set_ylabel("セル数"); ax.set_title(lab,fontsize=12)
+        ax.legend(fontsize=9); ax.grid(alpha=.3)
+        ax.text(0.97,0.70,f"平均 {eh.mean():.3f} K\n95% {np.percentile(eh,95):.3f} K\n最大 {eh.max():.3f} K\n"
+                          f"赤線＝代表5点",transform=ax.transAxes,ha="right",fontsize=9.5,
+                bbox=dict(fc="white",ec="#bbb"))
+        # 行2：空間分布（半径 r, 高さ z）
+        ax=axs[1,j]
+        rr=np.linalg.norm(Cc[:,:2],axis=1)*1000; zz=Cc[:,2]*1000
+        sc=ax.scatter(rr,zz,c=eh,s=3,cmap="viridis_r",vmin=0,vmax=max(0.3,float(np.percentile(eh,99))))
+        ax.scatter(np.linalg.norm(Cc[pod,:2],axis=1)*1000,Cc[pod,2]*1000,s=90,marker="o",
+                   facecolor="none",edgecolor="r",lw=2,label="代表5点")
+        ax.scatter(rr[imax],zz[imax],s=110,marker="x",color="k",lw=2.5,label="誤差が最大のセル")
+        ax.set_xlabel("半径 r [mm]"); ax.set_ylabel("高さ z [mm]"); ax.legend(fontsize=9)
+        ax.set_title("セルごとの誤差（加熱期平均）",fontsize=11.5)
+        plt.colorbar(sc,ax=ax,label="誤差 [K]")
+        # 行3：時間変化
+        ax=axs[2,j]
+        ax.axvspan(0,300,color="#FDEBD0",alpha=.45)
+        ax.plot(cyc,e.max(1),"-",color="#C0392B",lw=2,label="全セルの最大")
+        ax.plot(cyc,np.percentile(e,95,axis=1),"-",color="#E67E22",lw=2,label="95%点")
+        ax.plot(cyc,e.mean(1),"-",color="#2E6FD8",lw=2,label="平均")
+        ax.axhline(SIG_T,color="k",ls="--",lw=2,label="温度計のノイズ 0.3 K")
+        ax.set_xlabel("時刻 [s]"); ax.set_ylabel("誤差 [K]"); ax.grid(alpha=.3); ax.legend(fontsize=9)
+        ax.set_title("誤差の時間変化（全セル）",fontsize=11.5); ax.set_ylim(0,max(1.0,float(e.max())*1.1))
+    json.dump(out,open(os.path.join(RES,"check_all_cells_after_da.json"),"w"),ensure_ascii=False,indent=1)
+    fig.suptitle("同化で復元した温度場は、代表5点以外のセルでも合っているか（真値＝OpenFOAM、観測＝温度2点＋変位2点、5 seed 平均）",fontsize=13.5)
+    fig.tight_layout(rect=(0,0,1,0.96)); fig.savefig(os.path.join(IMG,"all_cells_after_da.png"),dpi=150); plt.close(fig)
+    print("wrote all_cells_after_da.png")
+
+
+if __name__=="__main__": main()
