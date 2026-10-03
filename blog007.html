@@ -185,6 +185,19 @@ href="#blog_007作った-rom-はどこまで使えるか-適用範囲を実計�
 id="toc-blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
 ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</a>
 <ul>
+<li><a href="#言葉の説明-モデル作成に使った条件とは"
+id="toc-言葉の説明-モデル作成に使った条件とは">0. 言葉の説明
+―「モデル作成に使った条件」とは</a>
+<ul>
+<li><a href="#rom-はopenfoam-の計算1本から作った"
+id="toc-rom-はopenfoam-の計算1本から作った">ROM は、OpenFOAM
+の計算1本から作った</a></li>
+<li><a href="#使っていない条件-作るときに見ていない条件"
+id="toc-使っていない条件-作るときに見ていない条件">「使っていない条件」＝
+作るときに見ていない条件</a></li>
+<li><a href="#なぜ分けるのか"
+id="toc-なぜ分けるのか">なぜ分けるのか</a></li>
+</ul></li>
 <li><a href="#結論" id="toc-結論">1. 結論</a></li>
 <li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">2. ROM
 は何から作ったか</a></li>
@@ -199,6 +212,9 @@ id="toc-rom-単体同化なしの予測">ROM 単体（同化なし）の予測</
 <li><a href="#同化すると温度-p2p4-変位-ao5-seed-平均30300-秒"
 id="toc-同化すると温度-p2p4-変位-ao5-seed-平均30300-秒">同化すると（温度
 P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</a></li>
+<li><a href="#同化した温度をopenfoam-の温度と時刻歴で比べる"
+id="toc-同化した温度をopenfoam-の温度と時刻歴で比べる">同化した温度を、OpenFOAM
+の温度と時刻歴で比べる</a></li>
 </ul></li>
 <li><a href="#加熱のしかたが変わる場合間欠加熱"
 id="toc-加熱のしかたが変わる場合間欠加熱">5.
@@ -228,6 +244,8 @@ id="toc-観測点は-rom-の代表5点に限られるか">8. 観測点は ROM
 の代表5点に限られるか</a>
 <ul>
 <li><a href="#なぜか" id="toc-なぜか">なぜか</a></li>
+<li><a href="#どこに置いたか"
+id="toc-どこに置いたか">どこに置いたか</a></li>
 <li><a href="#確かめた結果" id="toc-確かめた結果">確かめた結果</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 <li><a href="#実務上の意味" id="toc-実務上の意味">実務上の意味</a></li>
@@ -264,6 +282,76 @@ ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
 href="blog_004_pod_selected_rom.md">blog_004</a>、同化の手順は <a
 href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>、センサの置き場所は
 <a href="blog_005_optimal_sensor_placement.md">blog_005</a>。</p>
+</blockquote>
+<hr />
+<h2 id="言葉の説明-モデル作成に使った条件とは">0. 言葉の説明
+―「モデル作成に使った条件」とは</h2>
+<p>この記事では「モデル作成に使った条件」「使っていない条件」という言い方をします。意味は次のとおりです。</p>
+<h3 id="rom-はopenfoam-の計算1本から作った">ROM は、OpenFOAM
+の計算1本から作った</h3>
+<p>ROM（5点の熱回路モデル）は、ゼロから物性値を積み上げて作ったのではありません。
+<strong>OpenFOAM
+で1回だけ計算した結果に合うように、係数を逆算して作りました。</strong></p>
+<p>その1回の計算が、<strong>15 W のヒータを 0〜300 秒入れ、300〜600
+秒は切る</strong>という条件です。
+この計算の結果（温度分布と、その時間変化）を見ながら、</p>
+<ul>
+<li>POD の型（温度分布のパターン5つ）</li>
+<li>代表5点（Q-DEIM）</li>
+<li>ROM の係数（熱容量・熱の通りやすさ・放熱）</li>
+<li>温度→変位の行列（FrontISTR）</li>
+</ul>
+<p>を決めました。この <strong>15 W・0〜300 秒</strong>
+が「<strong>モデル作成に使った条件</strong>」です。</p>
+<h3
+id="使っていない条件-作るときに見ていない条件">「使っていない条件」＝
+作るときに見ていない条件</h3>
+<p>ROM を作ったあとで、<strong>別の条件で OpenFOAM
+を新しく計算し直した</strong>ものが「使っていない条件」です。
+この記事では2つ用意しました。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>中身</th>
+<th>ROM を作るときに見たか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>15 W・0〜300 秒</strong></td>
+<td>ヒータ 15 W を 0〜300 秒</td>
+<td><strong>見た</strong>（これで ROM を作った）</td>
+</tr>
+<tr class="even">
+<td><strong>25 W・0〜300 秒</strong></td>
+<td>発熱量を 25 W に変えた</td>
+<td><strong>見ていない</strong>（この検証のために新しく計算）</td>
+</tr>
+<tr class="odd">
+<td><strong>15 W 間欠加熱</strong></td>
+<td>0〜150 秒と 300〜450 秒に 15 W</td>
+<td><strong>見ていない</strong>（同上）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="なぜ分けるのか">なぜ分けるのか</h3>
+<p><strong>モデル作成に使った条件で合うのは当たり前</strong>です。その結果に合わせて係数を決めたのですから、合わなければ作り方が間違っています。</p>
+<p>本当に知りたいのは「<strong>作るときに見ていない条件でも合うか</strong>」です。
+合えば「このモデルは使える」、合わなければ「その条件では作り直しが必要」と分かります。</p>
+<p>機械学習でいう「学習データ」と「テストデータ」の関係と同じ考え方ですが、
+ROM
+は学習ではなく最小二乗法で係数を合わせているので、この記事では「モデル作成に使った／使っていない」と書いています。</p>
+<blockquote>
+<p><strong>まとめ</strong> - モデル作成に使った条件（15 W）＝ ROM
+の係数を決めるのに見た計算。合って当然。 - 使っていない条件（25
+W・間欠加熱）＝ ROM
+を作った後に新しく計算した。<strong>ここで合うかが本題。</strong></p>
 </blockquote>
 <hr />
 <h2 id="結論">1. 結論</h2>
@@ -443,7 +531,7 @@ A−O。</em></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td>15 W（ROM を作った条件）</td>
+<td>15 W（モデル作成に使った条件）</td>
 <td style="text-align: right;">5.8 K</td>
 <td style="text-align: right;">0.038 K</td>
 <td style="text-align: right;">0.011 K</td>
@@ -451,7 +539,7 @@ A−O。</em></p>
 <td style="text-align: right;"><strong>約 1/8</strong></td>
 </tr>
 <tr class="even">
-<td><strong>25 W</strong>（使っていない条件）</td>
+<td><strong>25 W</strong>（モデル作成に使っていない条件）</td>
 <td style="text-align: right;">9.6 K</td>
 <td style="text-align: right;"><strong>0.109 K</strong></td>
 <td style="text-align: right;">0.026 K</td>
@@ -521,6 +609,31 @@ P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</h3>
 <p>ROM
 単体で増えた誤差は、同化で補正されてほとんど差がなくなりました。発熱量は同化で毎回推定しているので、ROM
 を作ったときの 15 W に縛られません。</p>
+<h3
+id="同化した温度をopenfoam-の温度と時刻歴で比べる">同化した温度を、OpenFOAM
+の温度と時刻歴で比べる</h3>
+<figure>
+<img src="img/da_vs_openfoam_timeseries.png"
+alt="OpenFOAM と同化した温度の時刻歴" />
+<figcaption aria-hidden="true">OpenFOAM
+と同化した温度の時刻歴</figcaption>
+</figure>
+<p><em>黒＝OpenFOAM（真値）、灰の破線＝同化なし、緑＝温度2点（P2＋P4）、赤＝温度2点＋変位2点。
+行は点（P2 は観測点、P1・P3
+は<strong>観測していない点</strong>）、列は条件。</em></p>
+<ul>
+<li><strong>15 W（左列）と 25
+W（中列）</strong>：緑も赤も黒にほぼ重なっています。<strong>観測していない
+P1・P3 まで合っています。</strong> 灰の破線（同化なし）は 3〜5 ℃
+高いままで、同化が効いていることが分かります。</li>
+<li><strong>25 W（中列）</strong> は ROM
+を作るのに使っていない条件ですが、15 W と同じように合っています。</li>
+<li><strong>間欠加熱（右列）</strong>：150
+秒まではよく合いますが、<strong>その後ずれます</strong>。 黒は 300
+秒で再び加熱されて上がりますが、緑も赤も上がりません。 ROM が「0〜300
+秒に一定の発熱」と仮定しているため、2回目の加熱を予測できないからです（§5
+で改善します）。</li>
+</ul>
 <p>（詳細：<a
 href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ②）</p>
@@ -764,6 +877,67 @@ class="math inline">\(T_P\)</span> は代表5点の温度）</p>
 </tr>
 </tbody>
 </table>
+<h3 id="どこに置いたか">どこに置いたか</h3>
+<figure>
+<img src="img/obs_free_cells.png"
+alt="代表点でないセルに温度計を置く" />
+<figcaption
+aria-hidden="true">代表点でないセルに温度計を置く</figcaption>
+</figure>
+<p><em>左：温度計の位置（横から見た断面）。丸＝代表点、四角＝代表点でないセル、★＝どの配置でも観測していない評価点。
+中・右：評価点の温度が同化でどう合うか（5 seed
+平均、黒＝真値）。</em></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>座標 [mm]</th>
+<th>代表点か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P2</td>
+<td>(36.5, 6.9, 50.8)</td>
+<td>代表点（ヒータ側）</td>
+</tr>
+<tr class="even">
+<td>P0</td>
+<td>(21.3, −1.6, 51.6)</td>
+<td>代表点（ヒータ側）</td>
+</tr>
+<tr class="odd">
+<td>P4</td>
+<td>(−35.1, 0.8, 0.8)</td>
+<td>代表点（反対側の底面）</td>
+</tr>
+<tr class="even">
+<td><strong>自由1</strong></td>
+<td>(35.1, −0.8, 94.6)</td>
+<td><strong>代表点でない</strong>（ヒータ側の上部）</td>
+</tr>
+<tr class="odd">
+<td><strong>自由2</strong></td>
+<td>(−32.9, −1.6, 29.7)</td>
+<td><strong>代表点でない</strong>（反対側の下部）</td>
+</tr>
+<tr class="even">
+<td><strong>自由3</strong></td>
+<td>(29.8, −1.6, 29.7)</td>
+<td><strong>代表点でない</strong>（ヒータ側の下部）</td>
+</tr>
+<tr class="odd">
+<td>評価1・評価2</td>
+<td>(−37.5, 0, 90)、(0, 35.5, 50)</td>
+<td>どの配置でも観測していない</td>
+</tr>
+</tbody>
+</table>
 <h3 id="確かめた結果">確かめた結果</h3>
 <p>代表点でないセルに温度計2本を置いて同化しました（温度のみ、変位なし。EnKF・5
 seed
@@ -814,6 +988,8 @@ seed
 <li><strong>代表点でなくても同化できます。</strong>
 代表点でない2セル（0.258 K）は、代表点 P2＋P0（0.528
 K）より良い結果でした。</li>
+<li>上の図の中央を見ると、<strong>観測していない評価点1（反ヒータ側の上部）の温度</strong>が、青（代表点でない2セル・両側）では黒の真値にほぼ重なり、橙（代表点
+P2＋P0・片側）だけが加熱の前半で 0.5 K ほど外れています。</li>
 <li>効いているのは代表点かどうかではなく、<strong>A側とO側に分かれているか</strong>です（§<a
 href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 と同じ傾向）。</li>
