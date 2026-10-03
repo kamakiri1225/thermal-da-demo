@@ -23,28 +23,42 @@ CASES=[("learned",1.0,"15 W・0〜300 s（ROM を作った条件）"),("q25",25/
 def main():
     d=np.load(os.path.join(RES,"rom_calibrated_pod.npz")); C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],5); h=float(d["h"]); heat=int(d["heat_node"])
     pod=np.load(os.path.join(RES,"qdeim_points.npz"))["cell_idx"]
-    fig,axs=plt.subplots(1,3,figsize=(16,4.8),sharey=True); out={}; cols=["#1f77b4","#ff7f0e","#C0392B","#2ca02c","#9467bd"]
-    for ax,(case,q,lab) in zip(axs,CASES):
+    fig,axs=plt.subplots(2,3,figsize=(16,8.6),gridspec_kw=dict(height_ratios=[1.25,1],hspace=0.30))
+    out={}; cols=["#1f77b4","#ff7f0e","#C0392B","#2ca02c","#9467bd"]
+    for j,(case,q,lab) in enumerate(CASES):
         z=np.load(os.path.join(RES,f"limit_truth_{case}.npz")); t=z["times"]; T5=z["Tfield"][:,pod]
         def run(on):
             T=np.full((1,5),rg.T_AIR_K); tr=[T[0].copy()]
             for k in range(1,len(t)): T=integrate(T,C,Km,np.array([h]),np.array([q]),heat,on,t[k-1],t[k]); tr.append(T[0].copy())
             return np.array(tr)
-        R=run(SCHED[case]); e=np.abs(R-T5)
-        out[case]=dict(max_err_K=float(e.max()),mean_err_K=float(e[1:].mean()),max_rise_K=float(T5.max()-rg.T_AIR_K))
+        R=run(SCHED[case]); e=R-T5
+        out[case]=dict(max_err_K=float(np.abs(e).max()),mean_err_K=float(np.abs(e)[1:].mean()),
+                       max_rise_K=float(T5.max()-rg.T_AIR_K),
+                       pct_of_rise=float(100*np.abs(e).max()/(T5.max()-rg.T_AIR_K)))
+        # 上段：温度の時刻歴
+        ax=axs[0,j]
         for i in range(5):
             ax.plot(t,T5[:,i]-273.15,"o",color=cols[i],ms=4)
             ax.plot(t,R[:,i]-273.15,"-",color=cols[i],lw=1.8,label=f"P{i}")
-        txt=f"ROM の誤差：最大 {e.max():.3f} K"
         if case=="intermittent":
-            W=run(lambda tt:(tt<300.0)); ew=np.abs(W-T5); out[case]["fixed_schedule_max_err_K"]=float(ew.max())
+            W=run(lambda tt:(tt<300.0)); ew=W-T5; out[case]["fixed_schedule_max_err_K"]=float(np.abs(ew).max())
             ax.plot(t,W[:,2]-273.15,"--",color="k",lw=1.5,label="P2：0〜300 s 一定と仮定")
-            txt+=f"\n（0〜300 s 一定と仮定すると最大 {ew.max():.2f} K）"
-        ax.text(0.97,0.04,txt,transform=ax.transAxes,ha="right",fontsize=10.5,bbox=dict(fc="white",ec="#bbb"))
-        ax.set_title(lab,fontsize=12); ax.set_xlabel("時刻 [s]"); ax.grid(alpha=.3)
-    axs[0].set_ylabel("温度 [℃]"); axs[0].legend(fontsize=9,ncol=2,loc="upper left"); axs[2].legend(fontsize=9,loc="upper left")
-    fig.suptitle("ROM 単体の予測（線）と OpenFOAM（点）：発熱量と ON/OFF を正しく与え、同化なしで 0→600 s",fontsize=12.5)
-    fig.tight_layout(rect=(0,0,1,0.93)); fig.savefig(os.path.join(IMG,"rom_applicability.png"),dpi=150); plt.close(fig)
+        ax.set_title(lab,fontsize=12); ax.grid(alpha=.3)
+        ax.tick_params(labelbottom=False)
+        # 下段：誤差（ROM − OpenFOAM）とノイズの幅
+        ax=axs[1,j]
+        ax.axhspan(-0.30,0.30,color="#F6C85F",alpha=.30,zorder=0,
+                   label="温度計のノイズ ±0.30 K" if j==0 else None)
+        for i in range(5): ax.plot(t,e[:,i],"-",color=cols[i],lw=1.7)
+        ax.axhline(0,color="k",lw=.8)
+        ax.set_ylim(-0.45,0.45); ax.grid(alpha=.3); ax.set_xlabel("時刻 [s]")
+        ax.text(0.97,0.05,f"最大 {np.abs(e).max():.3f} K\n（温度上昇 {out[case]['max_rise_K']:.1f} K の {out[case]['pct_of_rise']:.1f} %）",
+                transform=ax.transAxes,ha="right",va="bottom",fontsize=10.5,bbox=dict(fc="white",ec="#bbb"))
+        if j==0: ax.legend(fontsize=10,loc="upper left")
+    axs[0,0].set_ylabel("温度 [℃]"); axs[1,0].set_ylabel("ROM − OpenFOAM [K]")
+    axs[0,0].legend(fontsize=9,ncol=2,loc="upper left"); axs[0,2].legend(fontsize=9,loc="upper left")
+    fig.suptitle("上：ROM 単体の予測（線）と OpenFOAM（点）／下：その差。同化なし、発熱量と ON/OFF を正しく与えて 0→600 s",fontsize=12.5)
+    fig.tight_layout(rect=(0,0,1,0.95)); fig.savefig(os.path.join(IMG,"rom_applicability.png"),dpi=150); plt.close(fig)
     json.dump(out,open(os.path.join(RES,"rom_applicability.json"),"w"),ensure_ascii=False,indent=1); print(out)
 
 
