@@ -161,6 +161,70 @@
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
   
   <style>
@@ -205,11 +269,21 @@ id="toc-なぜ分けるのか">なぜ分けるのか</a></li>
 <li><a href="#条件ごとの判定"
 id="toc-条件ごとの判定">条件ごとの判定</a></li>
 </ul></li>
-<li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">2. ROM
+<li><a href="#まず押さえる-rom-そのものとデータ同化は別の話"
+id="toc-まず押さえる-rom-そのものとデータ同化は別の話">2. まず押さえる ―
+ROM そのものと、データ同化は別の話</a>
+<ul>
+<li><a href="#問い-a-の答え先に書きます"
+id="toc-問い-a-の答え先に書きます">問い A
+の答え（先に書きます）</a></li>
+<li><a href="#では何が問題だったのか"
+id="toc-では何が問題だったのか">では、何が問題だったのか</a></li>
+</ul></li>
+<li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">3. ROM
 は何から作ったか</a></li>
-<li><a href="#確かめに使った条件" id="toc-確かめに使った条件">3.
+<li><a href="#確かめに使った条件" id="toc-確かめに使った条件">4.
 確かめに使った条件</a></li>
-<li><a href="#発熱量が変わる場合25-w" id="toc-発熱量が変わる場合25-w">4.
+<li><a href="#発熱量が変わる場合25-w" id="toc-発熱量が変わる場合25-w">5.
 発熱量が変わる場合（25 W）</a>
 <ul>
 <li><a href="#rom-単体同化なしの予測"
@@ -223,7 +297,7 @@ id="toc-同化した温度をopenfoam-の温度と時刻歴で比べる">同化�
 の温度と時刻歴で比べる</a></li>
 </ul></li>
 <li><a href="#復元した温度場は代表5点以外でも合っているか"
-id="toc-復元した温度場は代表5点以外でも合っているか">5.
+id="toc-復元した温度場は代表5点以外でも合っているか">6.
 復元した温度場は、代表5点以外でも合っているか</a>
 <ul>
 <li><a href="#結果" id="toc-結果">結果</a></li>
@@ -231,7 +305,7 @@ id="toc-復元した温度場は代表5点以外でも合っているか">5.
 id="toc-読み取れること">読み取れること</a></li>
 </ul></li>
 <li><a href="#加熱のしかたが変わる場合間欠加熱"
-id="toc-加熱のしかたが変わる場合間欠加熱">6.
+id="toc-加熱のしかたが変わる場合間欠加熱">7.
 加熱のしかたが変わる場合（間欠加熱）</a>
 <ul>
 <li><a href="#rom-単体同化なしの予測-1"
@@ -240,10 +314,10 @@ id="toc-rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測
 id="toc-同化すると反り-ao-の誤差30600-秒の平均">同化すると（反り A−O
 の誤差、30〜600 秒の平均）</a></li>
 </ul></li>
-<li><a href="#長い時間の場合" id="toc-長い時間の場合">7.
+<li><a href="#長い時間の場合" id="toc-長い時間の場合">8.
 長い時間の場合</a></li>
 <li><a href="#使えるかどうかの決め手-温度分布の型が変わるかどうか"
-id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">8.
+id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">9.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</a>
 <ul>
 <li><a href="#確かめ方型で表したときに残る誤差"
@@ -254,7 +328,7 @@ id="toc-型が大きく変わると考えられる場合未確認">型が大き�
 id="toc-実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</a></li>
 </ul></li>
 <li><a href="#観測点は-rom-の代表5点に限られるか"
-id="toc-観測点は-rom-の代表5点に限られるか">9. 観測点は ROM
+id="toc-観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
 の代表5点に限られるか</a>
 <ul>
 <li><a href="#なぜか" id="toc-なぜか">なぜか</a></li>
@@ -264,11 +338,11 @@ id="toc-どこに置いたか">どこに置いたか</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 <li><a href="#実務上の意味" id="toc-実務上の意味">実務上の意味</a></li>
 </ul></li>
-<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">10.
+<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">11.
 作り直しが必要なもの</a></li>
-<li><a href="#未確認のこと" id="toc-未確認のこと">11.
+<li><a href="#未確認のこと" id="toc-未確認のこと">12.
 未確認のこと</a></li>
-<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">12.
+<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">13.
 使ったスクリプト</a></li>
 </ul></li>
 </ul>
@@ -425,13 +499,14 @@ W・間欠加熱）＝ ROM
 <td><strong>発熱量</strong>が変わる（15 W → 25 W）</td>
 <td><strong>使える</strong>（作り直し不要）</td>
 <td>ROM 単体の誤差 0.11 K、同化すると温度場 0.14〜0.15 K、発熱量も
-24.9〜25.1 W と推定（§4）</td>
+24.9〜25.1 W と推定（§5）</td>
 </tr>
 <tr class="even">
 <td><strong>加熱のしかた</strong>が変わる（間欠加熱）</td>
-<td><strong>使える</strong>（作り直し不要）。ただし、ヒータへの入力の与え方を変える必要がある</td>
+<td><strong>ROM
+そのものは使える</strong>（§2）。データ同化では、ヒータへの入力の与え方を変える必要がある</td>
 <td>ON/OFF を正しく与えれば ROM 単体の誤差 0.038
-K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§6）</td>
+K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§7）</td>
 </tr>
 <tr class="odd">
 <td>25 W より大きく外れた発熱量</td>
@@ -446,7 +521,7 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§6）<
 <tr class="odd">
 <td>600 秒より長い運転</td>
 <td><strong>一部だけ確認</strong></td>
-<td>5,000 秒の試験はあるが、真値も ROM（§7）</td>
+<td>5,000 秒の試験はあるが、真値も ROM（§8）</td>
 </tr>
 <tr class="even">
 <td><strong>熱源の位置</strong>が変わる</td>
@@ -461,7 +536,7 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§6）<
 <tr class="even">
 <td>温度分布の<strong>型（モード）</strong>そのものが大きく変わる</td>
 <td><strong>使えない</strong>（型を作り直す）</td>
-<td>型は固定で、変えられるのは混ぜ具合だけ（§8）</td>
+<td>型は固定で、変えられるのは混ぜ具合だけ（§9）</td>
 </tr>
 <tr class="odd">
 <td>周囲温度・取り付け（拘束）条件が変わる</td>
@@ -471,18 +546,116 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§6）<
 <tr class="even">
 <td><strong>観測点を代表5点以外にしたい</strong></td>
 <td><strong>できる</strong>（作り直し不要）</td>
-<td>代表点でない2セルでも同化できた（§9）</td>
+<td>代表点でない2セルでも同化できた（§10）</td>
 </tr>
 <tr class="odd">
 <td>代表5点<strong>以外</strong>のセルの温度も合うか</td>
 <td><strong>合う</strong></td>
 <td>全20,696セルで誤差 0.3 K 未満（15 W・25
-W）。代表点以外のほうがむしろ小さい（§5）</td>
+W）。代表点以外のほうがむしろ小さい（§6）</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="rom-は何から作ったか">2. ROM は何から作ったか</h2>
+<h2 id="まず押さえる-rom-そのものとデータ同化は別の話">2. まず押さえる ―
+ROM そのものと、データ同化は別の話</h2>
+<p>この記事では2つの問いを扱います。混ざりやすいので、先に分けておきます。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>問い</th>
+<th>何を見るか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>問い A</strong></td>
+<td><strong>ROM
+そのもの</strong>（モデル単体）は、この条件を再現できるか</td>
+<td>発熱量と ON/OFF を<strong>正しく与えて</strong>、同化なしで 0→600
+秒を一気に計算し、OpenFOAM と比べる</td>
+</tr>
+<tr class="even">
+<td><strong>問い B</strong></td>
+<td>その ROM
+を使った<strong>データ同化</strong>は、少ない観測から温度場を推定できるか</td>
+<td>発熱量は<strong>分からないものとして</strong>推定しながら、センサ数本で同化する</td>
+</tr>
+</tbody>
+</table>
+<p><strong>問い A は「モデルとして正しいか」、問い B
+は「実際に使えるか」</strong>です。</p>
+<h3 id="問い-a-の答え先に書きます">問い A の答え（先に書きます）</h3>
+<blockquote>
+<p><strong>ROM そのものは、間欠運転にも使えます。</strong>
+発熱量を変えても使えます。</p>
+</blockquote>
+<p>理由はモデルの式にあります。</p>
+<p><span class="math display">\[
+C_i\frac{dT_i}{dt}=\sum_j K_{ij}(T_j-T_i)+P_i(t)-h\,(T_i-T_\mathrm{air})
+\]</span></p>
+<ul>
+<li>左辺と右辺の第1項・第3項（熱容量、熱の通りやすさ、放熱）は、<strong>時間にも発熱量にもよらない定数</strong>です。</li>
+<li>加熱のしかたが入るのは <strong><span
+class="math inline">\(P_i(t)\)</span>
+（ヒータの発熱）だけ</strong>です。</li>
+<li>つまり、 <span class="math inline">\(P_i(t)\)</span>
+に正しい時間変化を入れさえすれば、<strong>どんな加熱パターンでも計算できます</strong>。ON/OFF
+を何回繰り返しても、途中で大きさを変えても構いません。</li>
+</ul>
+<p>実際に、OpenFOAM で新しく計算した間欠加熱（0〜150 秒と 300〜450 秒に
+15 W）と比べると、</p>
+<table>
+<colgroup>
+<col style="width: 42%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ヒータへの入力の与え方</th>
+<th style="text-align: right;">ROM 単体の誤差（5点の最大）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>正しい ON/OFF を与える</strong></td>
+<td style="text-align: right;"><strong>0.038
+K</strong>（モデル作成に使った条件と同じ）</td>
+</tr>
+<tr class="even">
+<td>0〜300 秒に一定と仮定したまま</td>
+<td style="text-align: right;">3.77 K</td>
+</tr>
+</tbody>
+</table>
+<p><strong>正しく与えれば、モデル作成に使った条件とまったく同じ精度です。</strong></p>
+<h3 id="では何が問題だったのか">では、何が問題だったのか</h3>
+<p>これまで「間欠加熱では合わない」と書いていたのは、<strong>モデルの限界ではなく、プログラムの決め打ち</strong>でした。</p>
+<p><code>dacore/rom_general.py</code> のヒータ関数が</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>HEATER_RATED_W <span class="op">=</span> <span class="fl">15.0</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>HEATER_ON_S    <span class="op">=</span> <span class="fl">300.0</span>        <span class="co"># ← 「0〜300秒だけ発熱」と決め打ち</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span></code></pre></div>
+<p>となっていて、「0〜300 秒だけ発熱する」と書き込まれていました。
+間欠加熱のときは、この関数が実際と食い違うので外れます。<strong>ヒータの関数を差し替えれば解決します</strong>（§7
+の方法1）。</p>
+<blockquote>
+<p><strong>まとめ</strong> - <strong>ROM そのもの（問い
+A）：間欠運転に使える。</strong> 式の構造上、加熱パターンを選びません。
+- <strong>データ同化（問い B）：ヒータの ON/OFF
+をモデルに教える必要がある。</strong>
+教えれば同じ精度、教えないと誤差は約10倍。</p>
+</blockquote>
+<hr />
+<h2 id="rom-は何から作ったか">3. ROM は何から作ったか</h2>
 <p>ROM は、<strong>OpenFOAM の計算1本</strong>（15 W を 0〜300
 秒加熱し、300〜600 秒は自然に冷やす）から作りました。</p>
 <table>
@@ -547,7 +720,7 @@ class="math inline">\(P_i(t)\)</span> にしか入っていません。</strong>
 熱容量・熱の通りやすさ・放熱の部分は、発熱量にも加熱のしかたにもよりません。これが、§4・§5
 で作り直さずに使えた理由です。</p>
 <hr />
-<h2 id="確かめに使った条件">3. 確かめに使った条件</h2>
+<h2 id="確かめに使った条件">4. 確かめに使った条件</h2>
 <p>真値はすべて、OpenFOAM で計算した温度場と、それを FrontISTR
 に入れて計算した変位です。25 W
 と間欠加熱は、この確認のために新しく計算しました（<code>openfoam/limit/</code>）。</p>
@@ -558,7 +731,7 @@ class="math inline">\(P_i(t)\)</span> にしか入っていません。</strong>
 <p><em>上：ヒータの発熱。下：OpenFOAM＋FrontISTR で計算した反り
 A−O。</em></p>
 <hr />
-<h2 id="発熱量が変わる場合25-w">4. 発熱量が変わる場合（25 W）</h2>
+<h2 id="発熱量が変わる場合25-w">5. 発熱量が変わる場合（25 W）</h2>
 <h3 id="rom-単体同化なしの予測">ROM 単体（同化なし）の予測</h3>
 <figure>
 <img src="img/rom_applicability.png" alt="ROM 単体の予測と OpenFOAM" />
@@ -696,7 +869,7 @@ P1・P3 まで合っています。</strong> 灰の破線（同化なし）は 3
 href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ②）</p>
 <hr />
-<h2 id="復元した温度場は代表5点以外でも合っているか">5.
+<h2 id="復元した温度場は代表5点以外でも合っているか">6.
 復元した温度場は、代表5点以外でも合っているか</h2>
 <p>ROM は5点の温度しか追いかけません。そこから POD で 20,696
 セル全体を復元します。
@@ -788,7 +961,7 @@ K ほどありますが、2〜3 回更新すると 0.2 K 以下に落ち着き�
 代表点以外も合っています。合わないのは、加熱のしかたがモデルの仮定と違う場合だけです。</p>
 </blockquote>
 <hr />
-<h2 id="加熱のしかたが変わる場合間欠加熱">6.
+<h2 id="加熱のしかたが変わる場合間欠加熱">7.
 加熱のしかたが変わる場合（間欠加熱）</h2>
 <h3 id="rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測</h3>
 <p>上の図の右が間欠加熱です。</p>
@@ -873,7 +1046,7 @@ K</strong>（作った条件と同じ）</td>
 href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ④）</p>
 <hr />
-<h2 id="長い時間の場合">7. 長い時間の場合</h2>
+<h2 id="長い時間の場合">8. 長い時間の場合</h2>
 <p>放熱 <span class="math inline">\(h\)</span> を推定できるかを、5,000
 秒まで延ばして調べた試験があります（<a
 href="19_research_advantage_and_validation.md">研究レビュー</a>）。
@@ -883,7 +1056,7 @@ href="19_research_advantage_and_validation.md">研究レビュー</a>）。
 秒を超える OpenFOAM の計算は行っていないので、<strong>長い時間で ROM
 自体が OpenFOAM と合うかは未確認</strong>です。</p>
 <hr />
-<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">8.
+<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">9.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</h2>
 <p>ROM
 が使えるかどうかは、<strong>新しい条件の温度分布が、作ったときの5つの型（モード）の組み合わせで表せるか</strong>で決まります。</p>
@@ -976,7 +1149,7 @@ id="型が大きく変わると考えられる場合未確認">型が大きく�
 id="実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</h3>
 <p>運転中は温度場全体が分からないので、上の誤差は直接計算できません。考えられるのは、同化に使わない確認用のセンサを1本置き、その点の推定値と測定値のずれが急に大きくなったら「型が合わなくなった」と判断する方法です。<strong>試していません。</strong></p>
 <hr />
-<h2 id="観測点は-rom-の代表5点に限られるか">9. 観測点は ROM
+<h2 id="観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
 の代表5点に限られるか</h2>
 <p><strong>限られません。</strong>
 温度計も変位計も、好きな場所に置けます。</p>
@@ -1157,7 +1330,7 @@ K）でした。代表点は復元に都合のよい点なので、同じ「両�
 <p><strong>センサは「置ける場所」に置けます。</strong> ROM
 の代表点に合わせて穴を開けたり、治具を作ったりする必要はありません。置いた場所の座標が分かっていれば、その点の観測演算子を作れます。</p>
 <hr />
-<h2 id="作り直しが必要なもの">10. 作り直しが必要なもの</h2>
+<h2 id="作り直しが必要なもの">11. 作り直しが必要なもの</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1199,7 +1372,7 @@ class="math inline">\(D\)</span></td>
 <p>手順はすべてスクリプト化してあります（<code>run/select_points_qdeim.py</code>、<code>run/run_da_compare.py</code>
 など）。ただし、OpenFOAM の計算に1本あたり約1〜3時間かかります。</p>
 <hr />
-<h2 id="未確認のこと">11. 未確認のこと</h2>
+<h2 id="未確認のこと">12. 未確認のこと</h2>
 <ul>
 <li>25 W 以外の発熱量での同化（特に大きく外れた場合）</li>
 <li>ランプ状に変わる発熱、30 秒より短い間隔の
@@ -1210,7 +1383,7 @@ ON/OFF（同化の更新間隔より速い変化）</li>
 <li>代表点から大きく外れた場所だけに温度計を置いた場合（§8）</li>
 </ul>
 <hr />
-<h2 id="使ったスクリプト">12. 使ったスクリプト</h2>
+<h2 id="使ったスクリプト">13. 使ったスクリプト</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1241,12 +1414,12 @@ ON/OFF（同化の更新間隔より速い変化）</li>
 <td><code>results/improve_heating_schedule.json</code></td>
 </tr>
 <tr class="even">
-<td>復元した温度場が全セルで合うか（§5）</td>
+<td>復元した温度場が全セルで合うか（§6）</td>
 <td><code>run/check_all_cells_after_da.py</code></td>
 <td><code>results/check_all_cells_after_da.json</code></td>
 </tr>
 <tr class="odd">
-<td>観測点は代表5点に限られるか（§9）</td>
+<td>観測点は代表5点に限られるか（§10）</td>
 <td><code>run/obs_points_not_limited_to_rom.py</code></td>
 <td><code>results/obs_points_not_limited_to_rom.json</code></td>
 </tr>
