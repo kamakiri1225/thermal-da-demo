@@ -572,7 +572,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <p>温度P2/P0のみ：未観測C−D RMSE <strong>0.792 µm</strong><br>＋高W変位S1/S2：<strong>0.158 µm（約80%低下）</strong></p>
 <p>強み：<strong>公開実装と条件を伴う、観測外の相対変位の評価</strong>。同じROM真値での追加観測効果であり、実機精度や固定予算での最適配置は未証明。</p>
 <h3>優位性を裏付ける3項目</h3>
-<p>① 未学習条件のCHT＋FrontISTRを真値にする（<strong>未実施</strong>）<br>② 同じセンサ数での配置比較（<strong>温度2本・候補5点・ROM真値でのみ実施</strong>。変位センサとの組み合わせ・実ソルバ真値は未実施）<br>③ Q/hとholdout変位の誤差・ばらつきを併記（<strong>未実施</strong>）</p></div></div>
+<p>① モデル作成に使っていない条件（25 W・間欠加熱）のCHT＋FrontISTRを真値にする（<strong>実施</strong>。25 Wは合う、間欠加熱は合わない）<br>② 同じセンサ数での配置比較（<strong>温度2本・候補5点・ROM真値でのみ実施</strong>。変位センサとの組み合わせ・実ソルバ真値は未実施）<br>③ Q/hとholdout変位の誤差・ばらつきを併記（<strong>未実施</strong>）</p></div></div>
 <div class="key">目的別の配置理論は既知。<strong>熱変形で何が改善し、何が改善しないかを独立条件で示す</strong>ことを次の貢献にする。</div>
 <p class="cap"><a href="../docs/19_research_advantage_and_validation.md">原典・条件・検証計画</a> ／ goal-oriented sensor placement: <a href="https://arxiv.org/abs/2507.02500">2025/2026先行研究</a></p>
 </section>
@@ -585,7 +585,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 <li><strong>放熱 \(h_{\rm rom}\) [W/K]は600秒では情報が弱い</strong>。5,000秒のROM外挿試験では3seed平均誤差1.30%に改善。ただしアンサンブル幅は真値の約18%、独立CAE検証は未実施</li>
 <li><strong>Q-DEIM点は「復元に良い点」</strong>であり、推定に最適な保証はない</li>
 <li><strong>発熱量変更の復元試験では誤差が小さい</strong>。伝導は \(Q\) に線形で、\(Q\) はモード係数 \(a\) のスケールに吸収される
-（3〜75 Wで復元誤差 0.0004〜0.0045 K、常にノイズの2桁下）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
+（25 W・間欠加熱を OpenFOAM で新たに計算して確認：型で表したときに残る誤差 0.003 K 以下。ROM 単体の誤差は 25 W で 0.11 K、間欠加熱は ON/OFF を与えれば 0.038 K）。ただし自然対流の \(h\) は \(\Delta T\) に依存するので厳密には非線形</li>
 <li><strong>発熱の位置・分布や形状が変わると作り直し</strong>。モードは20,696セルに紐づくベクトルなので別メッシュでは意味を持たない
 （ただし CHT→POD→Q-DEIM→ROM校正 の手順はそのまま再利用でき、自動化済み）</li>
 <li><strong>観測量は \(z\) 変位2点のみ</strong>。半径方向 \(U_x\) も同程度動くが、観測せずとも直ることを確認済み（結果③-2）。ただし \(y\neq0\) の点や \(U_y\) の可観測性は未検証</li>
@@ -594,7 +594,7 @@ EnKF＋温度2点＋A/O変位にすると<strong>結果③の赤線のように�
 </ul>
 <h3>今後</h3>
 <ul style="font-size:.86em">
-<li><strong>未学習Q・加熱履歴のOpenFOAM＋FrontISTR真値</strong>で独立検証。学習ROMと同じ真値だけで性能を結論しない</li>
+<li><strong>加熱のしかたがモデルと違う場合への対応</strong>（間欠加熱では同化が合わなかった）。ヒータのON/OFF時刻を与える、または発熱を時間で変わる値として推定する（<strong>未実施</strong>）</li>
 <li><strong>同じセンサ数・ノイズ・seed群</strong>で配置を比較し、温度・Q/h・未観測変位差を同時評価</li>
 <li>hの初期分布・観測時間・膨張を分離検証。前処理と同化1周期の全実行時間を計時</li>
 </ul>
