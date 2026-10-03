@@ -120,33 +120,33 @@ def main():
              base_sigma=base,best=best,worst=worst,results=res)
     json.dump(out,open(os.path.join(RES,"disp_point_for_temperature.json"),"w"),ensure_ascii=False,indent=1)
     # ── 図 ──
-    fig=plt.figure(figsize=(16.5,5.4)); gs=fig.add_gridspec(1,3,width_ratios=[1,1,1.35],wspace=0.30)
+    fig=plt.figure(figsize=(17.5,5.4))
+    gs=fig.add_gridspec(1,4,width_ratios=[1,0.78,0.05,1.5],wspace=0.34)
     xx,yy,zz=coords[:,0]*1000,coords[:,1]*1000,coords[:,2]*1000
     vmin,vmax=float(score[:,2].min()),float(score[:,2].max())
     top=zz>100.0
     ax=fig.add_subplot(gs[0,0])
     sc=ax.scatter(xx[top],yy[top],c=score[top,2],s=46,cmap="viridis_r",vmin=vmin,vmax=vmax)
     ax.plot(28,0,"r*",ms=16,label="本番の変位計 A"); ax.plot(-28,0,"b*",ms=16,label="本番の変位計 O")
-    bi=best[0]["node"]; ax.plot(coords[bi,0]*1000,coords[bi,1]*1000,"w^",ms=13,mec="k",label="予測1位")
-    ax.set_aspect("equal"); ax.set_xlabel("x [mm]"); ax.set_ylabel("y [mm]"); ax.legend(fontsize=9,loc="upper right")
-    ax.set_title("上面（z=100.5 mm）を真上から見た図\nヒータは +x 側",fontsize=11.5)
-    plt.colorbar(sc,ax=ax,label="σ [K]（小さいほど良い）")
+    bi=best[0]["node"]; ax.plot(coords[bi,0]*1000,coords[bi,1]*1000,"^",color="w",ms=13,mec="k",label="予測1位")
+    ax.set_aspect("equal"); ax.set_xlabel("x [mm]"); ax.set_ylabel("y [mm]"); ax.legend(fontsize=8.5,loc="lower left")
+    ax.set_title("上面（z=100.5 mm）を真上から\nヒータは +x 側",fontsize=11.5)
     ax=fig.add_subplot(gs[0,1])
     sl=np.abs(yy)<6
-    sc=ax.scatter(xx[sl],zz[sl],c=score[sl,2],s=36,cmap="viridis_r",vmin=vmin,vmax=vmax)
+    sc=ax.scatter(xx[sl],zz[sl],c=score[sl,2],s=30,cmap="viridis_r",vmin=vmin,vmax=vmax)
     ax.set_aspect("equal"); ax.set_xlabel("x [mm]"); ax.set_ylabel("z [mm]")
-    ax.set_title("y≈0 の断面（横から見た図）",fontsize=11.5)
-    plt.colorbar(sc,ax=ax,label="σ [K]")
-    ax=fig.add_subplot(gs[0,2])
+    ax.set_title("y≈0 の断面（横から）",fontsize=11.5)
+    cax=fig.add_subplot(gs[0,2]); plt.colorbar(sc,cax=cax,label="σ [K]（小さいほど良い）")
+    ax=fig.add_subplot(gs[0,3])
     nm=[r["name"].replace("：","\n") for r in res]; v=[r["field_K"] for r in res]; sd=[r["field_K_sd"] for r in res]
     cols=["#9AA5B1"]+["#2E8B57"]*3+["#C0392B"]+["#2E6FD8"]*2+["#E67E22"]
     ax.barh(range(len(v)),v,xerr=sd,color=cols[:len(v)],capsize=3)
-    for i,(x,e_) in enumerate(zip(v,sd)): ax.text(x+e_+0.01,i,f"{x:.3f}",va="center",fontsize=10)
+    for i,(x,e_) in enumerate(zip(v,sd)): ax.text(x+e_+0.012,i,f"{x:.3f}",va="center",fontsize=10)
     ax.set_yticks(range(len(v))); ax.set_yticklabels(nm,fontsize=8.5); ax.invert_yaxis()
-    ax.set_xlim(0,0.78); ax.set_xlabel("温度場RMSE [K]（加熱期・5 seed平均）"); ax.grid(axis="x",alpha=.3)
+    ax.set_xlim(0,0.80); ax.set_xlabel("温度場RMSE [K]（加熱期・5 seed平均）"); ax.grid(axis="x",alpha=.3)
     ax.set_title("実際に同化して確かめた結果",fontsize=11.5)
     fig.suptitle("どこに変位計（上下方向 Uz）を置くと温度推定が良くなるか（温度2点 P2+P0 は固定、変位計1本を追加）",fontsize=13)
-    fig.tight_layout(rect=(0,0,1,0.92)); fig.savefig(os.path.join(IMG,"disp_point_for_temperature.png"),dpi=150); plt.close(fig)
+    fig.tight_layout(rect=(0,0,1,0.91)); fig.savefig(os.path.join(IMG,"disp_point_for_temperature.png"),dpi=150); plt.close(fig)
     print("wrote figure")
 
 
