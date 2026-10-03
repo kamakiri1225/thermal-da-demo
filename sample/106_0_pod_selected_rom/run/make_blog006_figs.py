@@ -34,9 +34,16 @@ def positions():
         used=i in (0,2)
         pl.add_mesh(pv.Sphere(radius=0.0026 if used else 0.0016,center=xyz[i]),color="red" if used else "gray")
         lab=f"P{i} TEMP SENSOR" if used else f"P{i} (not measured)"
-        if i==2: lab+=" / HEATER"
-        pl.add_point_labels([xyz[i]+np.array([0,0,0.009 if i in (0,3) else -0.009])],[lab],font_size=15 if used else 12,
+        if i==2: lab+=" (next to heater)"
+        pl.add_point_labels([xyz[i]+np.array([0,0,{0:0.009,1:0.016,2:-0.009,3:0.009,4:-0.009}[i]])],[lab],font_size=15 if used else 12,
                             text_color="darkred" if used else "dimgray",shape=None,always_visible=True)
+    # ヒータ（ヒートマット）：外周 R=37.5 mm の +X 側中心、周方向 100 mm（±76.4°）、高さ 25.25〜75.25 mm
+    #   102_0_openfoam_hollow_cylinder_heat_transfer/config/geometry.yaml の heater 設定
+    R=0.0375+0.0006; half=0.100/0.0375/2
+    th=np.linspace(-half,half,60); zz=np.linspace(0.05025-0.025,0.05025+0.025,12)
+    TH,ZZ=np.meshgrid(th,zz)
+    hs=pv.StructuredGrid(R*np.cos(TH),R*np.sin(TH),ZZ)
+    pl.add_mesh(hs,color="orangered",opacity=0.55)
     for P,t in [(A,"A: DISP GAUGE (+X top)"),(O,"O: DISP GAUGE (-X top)")]:
         pl.add_mesh(pv.Cube(center=P,x_length=0.004,y_length=0.004,z_length=0.004),color="darkorange")
         pl.add_mesh(pv.Arrow(start=P+np.array([0,0,0.003]),direction=(0,0,1),scale=0.02),color="darkorange")
@@ -45,9 +52,27 @@ def positions():
     tmp=os.path.join(tempfile.mkdtemp(),"p.png"); pl.screenshot(tmp); pl.close()
     img=plt.imread(tmp); mk=np.any(img[...,:3]<0.96,axis=-1); ys,xs=np.where(mk)
     img=img[max(0,ys.min()-12):ys.max()+12,max(0,xs.min()-12):xs.max()+12]; h,w=img.shape[:2]
-    fig,ax=plt.subplots(figsize=(10,10*h/w)); ax.imshow(img); ax.axis("off")
-    ax.set_title("温度2点＋変位2点の位置\n赤＝温度センサ（P2・P0）、橙＝変位計（上面A・O、上下方向 Uz）、灰＝測っていない代表点",fontsize=13)
-    fig.tight_layout(pad=0.2); fig.savefig(os.path.join(IMG,"blog006_sensor_positions.png"),dpi=150,bbox_inches="tight",pad_inches=0.04); plt.close(fig)
+    fig=plt.figure(figsize=(16,16*0.62))
+    ax=fig.add_axes([0.0,0.0,0.56,0.92]); ax.imshow(img); ax.axis("off")
+    ax.set_title("斜めから見た図（朱色の面＝ヒータ）",fontsize=13)
+    # 真上から見た図
+    bx=fig.add_axes([0.60,0.08,0.38,0.80]); ang=np.linspace(0,2*np.pi,361)
+    bx.fill(37.5*np.cos(ang),37.5*np.sin(ang),color="#DCE3EA"); bx.fill(20*np.cos(ang),20*np.sin(ang),color="white")
+    bx.plot(37.5*np.cos(ang),37.5*np.sin(ang),color="#7F8C8D"); bx.plot(20*np.cos(ang),20*np.sin(ang),color="#7F8C8D")
+    th=np.linspace(-half,half,100); bx.plot(39.5*np.cos(th),39.5*np.sin(th),color="orangered",lw=8,solid_capstyle="butt")
+    bx.text(46,0,"ヒータ\n15 W\n高さ 25〜75 mm\n周方向 100 mm\n（約 ±76°）",color="orangered",fontsize=11,va="center")
+    for i in range(5):
+        x,y=xyz[i,0]*1000,xyz[i,1]*1000; used=i in (0,2)
+        bx.plot(x,y,"o",ms=11 if used else 8,color="red" if used else "gray",mec="k")
+        bx.annotate(f"P{i}（z={xyz[i,2]*1000:.0f} mm）"+("\n温度センサ" if used else ""),(x,y),textcoords="offset points",
+                    xytext={0:(-95,-34),1:(8,8),2:(6,22),3:(-12,-48),4:(8,-22)}[i],fontsize=10.5,color="darkred" if used else "dimgray")
+    for P,nm in [(A,"A"),(O,"O")]:
+        bx.plot(P[0]*1000,P[1]*1000,"s",ms=11,color="darkorange",mec="k"); bx.annotate(f"変位計 {nm}（上面）",(P[0]*1000,P[1]*1000),textcoords="offset points",xytext=(-75 if nm=="A" else -30,16),fontsize=10.5,color="darkorange")
+    bx.annotate("",xy=(55,-50),xytext=(42,-50),arrowprops=dict(arrowstyle="->")); bx.text(57,-51,"+X",fontsize=11,va="center")
+    bx.set_xlim(-48,78); bx.set_ylim(-58,58); bx.set_aspect("equal"); bx.axis("off")
+    bx.set_title("真上から見た図（寸法 mm）",fontsize=13)
+    fig.suptitle("温度2点＋変位2点とヒータの位置　赤＝温度センサ（P2・P0）、橙＝変位計（上面 A・O）、灰＝測っていない代表点、朱色＝ヒータ",fontsize=13)
+    fig.savefig(os.path.join(IMG,"blog006_sensor_positions.png"),dpi=150,bbox_inches="tight",pad_inches=0.1); plt.close(fig)
 
 
 def readings():
