@@ -6,7 +6,7 @@ blog_008 §5 は「選定2点」と「悪い例」しか比べていなかった
 次の6つの選び方を適用し、同じ holdout 試験（A・O は一度も観測しない）で比べる。
 
   1. ランダム                 … 20 通りの無作為な2点（下限の目安）
-  2. 熱感度の大きさ最大          … 「よく動く点に置く」という素朴な基準
+  2. よく動く点に置く           … 温度が変わったとき変位がいちばん大きい点（単純な決め方）
   3. Q-DEIM（QR列ピボット）   … Manohar et al. のモードベース選定（DEIM/Q-DEIM）
   4. A最適（trace 最小）      … 5点の温度を一様に良く知る古典的な最適計画
   5. D最適（det 最小）        … 同上（情報行列の行列式）
@@ -15,8 +15,11 @@ blog_008 §5 は「選定2点」と「悪い例」しか比べていなかった
 真値は OpenFOAM＋FrontISTR（results/truth_disp_all_<case>.npz のキャッシュを使う。
 holdout_AO_realsolver.py が作る。FrontISTR の再実行は不要）。3条件 × 5 seed。
 
-出力: results/placement_method_comparison.json, docs/img/placement_method_comparison.png
+出力: results/placement_method_comparison.json
+      docs/img/placement_method_points.png（どこが選ばれたか）
+      docs/img/placement_method_comparison.png（holdout の誤差）
 再現: OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 python3 run/placement_method_comparison.py
+      （図だけ描き直す: python3 run/placement_method_comparison.py --plot-only）
 """
 from __future__ import annotations
 import os, sys, json
@@ -98,9 +101,9 @@ def main():
 
     # ---- 各手法の選定 ----
     methods={}
-    # 2. 熱感度の大きさ最大（素朴）
+    # 2. よく動く点に置く
     nw=np.linalg.norm(Wf,axis=1); order=cand[np.argsort(-nw[cand])]
-    methods["熱感度の大きさ最大（素朴）"]=[int(order[0]),int(order[1])]
+    methods["よく動く点に置く"]=[int(order[0]),int(order[1])]
     # 3. Q-DEIM（候補行列の列ピボット付き QR）
     _,_,piv=qr(Wf[cand].T,pivoting=True)
     methods["Q-DEIM（QR列ピボット）"]=[int(cand[piv[0]]),int(cand[piv[1]])]
@@ -169,22 +172,95 @@ def main():
         print(f"{case:13s} {'ランダム20通り':26s} 中央値 {np.median(rv):.3f}（最良 {np.min(rv):.3f} / 最悪 {np.max(rv):.3f}）µm",flush=True)
     json.dump(out,open(os.path.join(RES,"placement_method_comparison.json"),"w"),ensure_ascii=False,indent=1)
 
-    # ---- 図 ----
-    names=["変位なし（温度2点のみ）","ランダム（20通りの中央値）","熱感度の大きさ最大（素朴）",
-           "Q-DEIM（QR列ピボット）","A最適（温度の trace 最小）","D最適（温度の det 最小）",
-           "A・O 自身（循環・参考）","目的指向（本研究）"]
-    cols=["#9AA5B1","#B0B7BF","#8E6FB0","#2E6FD8","#1F9D62","#E67E22","#BBBBBB","#C0392B"]
+    make_figs(out)
+
+
+# 旧い実行結果のキー名も読めるようにする（図だけ描き直すとき用）
+ALIAS={"熱感度 |w| 最大（素朴）":"よく動く点に置く","熱感度の大きさ最大（素朴）":"よく動く点に置く"}
+ORDER=["変位なし（温度2点のみ）","ランダム（20通りの中央値）","よく動く点に置く",
+       "Q-DEIM（QR列ピボット）","A最適（温度の trace 最小）","D最適（温度の det 最小）",
+       "A・O 自身（循環・参考）","目的指向（本研究）"]
+COLS=["#9AA5B1","#B0B7BF","#8E6FB0","#2E6FD8","#1F9D62","#E67E22","#BBBBBB","#C0392B"]
+
+
+def make_figs(out):
+    m={ALIAS.get(k,k):v for k,v in out["methods"].items()}
+
+    # ---- 図1：どこが選ばれたか（上面を真上から見る）----
+    panels=["よく動く点に置く","Q-DEIM（QR列ピボット）","A最適（温度の trace 最小）",
+            "D最適（温度の det 最小）","A・O 自身（循環・参考）","目的指向（本研究）"]
+    fig,axs=plt.subplots(2,3,figsize=(18.0,8.6))
+    th=np.linspace(0,2*np.pi,241)
+    for ax,nm in zip(axs.ravel(),panels):
+        ax.plot(37.5*np.cos(th),37.5*np.sin(th),color="#8696a7",lw=1.4)
+        ax.plot(20.0*np.cos(th),20.0*np.sin(th),color="#8696a7",lw=1.4)
+        hs=np.linspace(-np.radians(76),np.radians(76),80)
+        ax.plot(38.6*np.cos(hs),38.6*np.sin(hs),color="#C0392B",lw=5,solid_capstyle="butt")
+        ax.text(44,0,"ヒータ側",color="#C0392B",fontsize=10,ha="center",va="center",rotation=-90)
+        ax.plot([28.7,-28.7],[0,0],"o",color="k",ms=9)
+        ax.text(28.7,5.5,"A",fontsize=11,ha="center",fontweight="bold")
+        ax.text(-28.7,5.5,"O",fontsize=11,ha="center",fontweight="bold")
+        col="#C0392B" if nm.startswith("目的指向") else ("#8E6FB0" if nm.startswith("よく動く") else "#2E6FD8")
+        for (x,y,_),c in zip(m[nm]["xyz_mm"],m[nm]["comp"]):
+            ax.plot(x,y,"s",color=col,ms=11,mec="w",mew=1.3,zorder=5)
+            d={"Ux":(1,0),"Uy":(0,1),"Uz":(0,0)}[c]
+            if d!=(0,0):
+                ax.annotate("",xy=(x+13*d[0],y+13*d[1]),xytext=(x,y),
+                            arrowprops=dict(arrowstyle="-|>",color=col,lw=2.2))
+            ax.text(x,y-7.5,c,color=col,fontsize=10,ha="center",va="top",fontweight="bold")
+        e15=m[nm]["AO_um"].get("learned")
+        P=np.array(m[nm]["xyz_mm"]); gap=float(np.linalg.norm(P[0]-P[1]))
+        ax.set_title(f"{nm}\n2点の間隔 {gap:.0f} mm\n"
+                     f"測る前の予測 σ={m[nm]['sigma_pred_um']:.3f} µm\n"
+                     f"→ 実際の誤差 {e15:.3f} µm（15 W）",fontsize=10)
+        ax.set_aspect("equal"); ax.set_xlim(-56,56); ax.set_ylim(-46,46); ax.axis("off")
+    fig.suptitle("どこが選ばれたか ― 上面（z=100.5 mm）を真上から見る。□＝選ばれた変位計、矢印＝測る方向、●＝評価点 A・O（測らない）",
+                 fontsize=12.5)
+    fig.tight_layout(rect=(0,0,1,0.945),h_pad=2.4)
+    fig.savefig(os.path.join(IMG,"placement_method_points.png"),dpi=150); plt.close(fig)
+    print("wrote docs/img/placement_method_points.png")
+
+    # ---- 図1b：発表用に3つだけ大きく（よく動く点 / A最適 / 目的指向）----
+    sel3=["よく動く点に置く","A最適（温度の trace 最小）","目的指向（本研究）"]
+    sub=["温度が変わったとき\n変位がいちばん大きい点","温度場全体を狙う\n（教科書的な最適計画）","反り A−O を狙う\n（目的を指定する）"]
+    fig,axs=plt.subplots(1,3,figsize=(15.0,6.4))
+    for ax,nm,sb in zip(axs,sel3,sub):
+        ax.plot(37.5*np.cos(th),37.5*np.sin(th),color="#8696a7",lw=1.6)
+        ax.plot(20.0*np.cos(th),20.0*np.sin(th),color="#8696a7",lw=1.6)
+        hs=np.linspace(-np.radians(76),np.radians(76),80)
+        ax.plot(38.8*np.cos(hs),38.8*np.sin(hs),color="#C0392B",lw=6,solid_capstyle="butt")
+        ax.text(45,0,"ヒータ側",color="#C0392B",fontsize=11,ha="center",va="center",rotation=-90)
+        ax.plot([28.7,-28.7],[0,0],"o",color="k",ms=11)
+        ax.text(28.7,6.5,"A",fontsize=13,ha="center",fontweight="bold")
+        ax.text(-28.7,6.5,"O",fontsize=13,ha="center",fontweight="bold")
+        col="#C0392B" if nm.startswith("目的指向") else ("#8E6FB0" if nm.startswith("よく動く") else "#1F9D62")
+        for (x,y,_),c in zip(m[nm]["xyz_mm"],m[nm]["comp"]):
+            ax.plot(x,y,"s",color=col,ms=14,mec="w",mew=1.6,zorder=5)
+            d={"Ux":(1,0),"Uy":(0,1),"Uz":(0,0)}[c]
+            if d!=(0,0):
+                ax.annotate("",xy=(x+14*d[0],y+14*d[1]),xytext=(x,y),
+                            arrowprops=dict(arrowstyle="-|>",color=col,lw=2.6))
+            ax.text(x,y-8.5,c,color=col,fontsize=12,ha="center",va="top",fontweight="bold")
+        P=np.array(m[nm]["xyz_mm"]); gap=float(np.linalg.norm(P[0]-P[1]))
+        ax.set_title(f"{nm}\n{sb}\n2点の間隔 {gap:.0f} mm　→　誤差 {m[nm]['AO_um']['learned']:.3f} µm（15 W）",
+                     fontsize=12,color=col)
+        ax.set_aspect("equal"); ax.set_xlim(-52,52); ax.set_ylim(-46,46); ax.axis("off")
+    fig.suptitle("□＝選ばれた変位計、矢印＝測る方向（ $U_z$ は紙面に垂直）、●＝評価点 A・O（測らない）",fontsize=12)
+    fig.tight_layout(rect=(0,0,1,0.95))
+    fig.savefig(os.path.join(IMG,"placement_method_points3.png"),dpi=150); plt.close(fig)
+    print("wrote docs/img/placement_method_points3.png")
+
+    # ---- 図2：holdout の誤差 ----
     fig,axs=plt.subplots(1,3,figsize=(16.5,5.2))
     for ax,(case,lab) in zip(axs,CASES):
-        v=[out["random"][case]["median"] if nm.startswith("ランダム") else out["methods"][nm]["AO_um"][case] for nm in names]
-        ax.barh(range(len(v)),v,color=cols)
-        if True:
-            r=out["random"][case]; i=names.index("ランダム（20通りの中央値）")
-            ax.plot([r["best"],r["worst"]],[i,i],color="#44505c",lw=1.4)
-            ax.plot([r["best"],r["worst"]],[i,i],"|",color="#44505c",ms=8)
-        for i,x in enumerate(v): ax.text(x,i,f" {x:.3f}",va="center",fontsize=9.5)
+        v=[out["random"][case]["median"] if nm.startswith("ランダム") else m[nm]["AO_um"][case] for nm in ORDER]
+        ax.barh(range(len(v)),v,color=COLS)
+        r=out["random"][case]; i=ORDER.index("ランダム（20通りの中央値）")
+        ax.plot([r["best"],r["worst"]],[i,i],color="#44505c",lw=1.4)
+        ax.plot([r["best"],r["worst"]],[i,i],"|",color="#44505c",ms=8)
+        for j,x in enumerate(v): ax.text(x,j,f" {x:.3f}",va="center",fontsize=9.5)
         ax.set_yticks(range(len(v)))
-        ax.set_yticklabels(names,fontsize=9) if ax is axs[0] else ax.set_yticklabels([])
+        ax.set_yticklabels(ORDER,fontsize=9) if ax is axs[0] else ax.set_yticklabels([])
         ax.invert_yaxis(); ax.set_xlabel("観測していない反り A−O の誤差 [µm]")
         ax.set_title(lab,fontsize=12); ax.grid(axis="x",alpha=.3)
     fig.suptitle("配置の選び方を比べる ― 同じ候補 14,754 通り・同じ holdout（A・O は一度も観測しない）"
@@ -194,4 +270,8 @@ def main():
     print("wrote docs/img/placement_method_comparison.png")
 
 
-if __name__=="__main__": main()
+if __name__=="__main__":
+    if "--plot-only" in sys.argv:          # 計算済みの JSON から図だけ描き直す
+        make_figs(json.load(open(os.path.join(RES,"placement_method_comparison.json"),encoding="utf-8")))
+    else:
+        main()
