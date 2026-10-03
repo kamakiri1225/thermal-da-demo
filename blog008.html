@@ -848,6 +848,20 @@ class="math inline">\(U_z\)</span></strong></td>
 </tbody>
 </table>
 <h3 id="結果">4-2. 結果</h3>
+<p>まず、<strong>どこを測って、温度と変位がどう合ったか</strong>を見ます。</p>
+<figure>
+<img src="img/ver1_detail.png" alt="検証1の詳細" />
+<figcaption aria-hidden="true">検証1の詳細</figcaption>
+</figure>
+<p><em>左＝観測点と評価点（上面を真上から見た図）／中＝<strong>温度</strong>：温度計を置いていない代表点
+P4 の時刻歴／ 右＝<strong>変位</strong>：反り A−O
+の時刻歴。黒が真値、色が各構成。帯は加熱中（0〜300 秒）。</em></p>
+<ul>
+<li><strong>中</strong>：温度2点のみ（灰）は真値から離れますが、A・O
+に温度計を足しても変位計を足しても、ほぼ同じように真値に重なります。</li>
+<li><strong>右</strong>：反りも同様で、<strong>温度計（橙）と変位計（赤）の差はほとんど見えません</strong>。</li>
+</ul>
+<p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
 <img src="img/disp_vs_temp_same_place.png"
 alt="同じ場所で温度か変位か" />
@@ -1242,6 +1256,22 @@ id="採点し直すと良い場所が変わる">採点し直すと、良い場�
 の計算と ROM の計算だけで、机上で場所が決まります。
 本当に当たるかは、このあと同化を回して確かめます。</p>
 <h3 id="結果-1">5-3. 結果</h3>
+<p>まず、<strong>どこを測って、温度と変位がどう合ったか</strong>を見ます。</p>
+<figure>
+<img src="img/ver2_detail.png" alt="検証2の詳細" />
+<figcaption aria-hidden="true">検証2の詳細</figcaption>
+</figure>
+<p><em>左＝観測点と評価点／中＝<strong>温度</strong>：温度計を置いていない
+P4／右＝<strong>変位</strong>：一度も観測していない反り A−O。
+黒が真値、色が変位2点の置き場所。</em></p>
+<ul>
+<li><strong>中</strong>：変位なし（灰）は 300
+秒まで真値より高めに外れ続けますが、<strong>変位2点を足すとどの置き場所でも真値に近づきます</strong>。
+底面近く（紫）だけは外れたままです。</li>
+<li><strong>右</strong>：反りは置き場所で大きく変わります。選んだ2点（赤）は<strong>黒い真値にほぼ重なり</strong>、
+変位なし（灰）は加熱中ずっと下に外れています。</li>
+</ul>
+<p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
 <img src="img/disp_elsewhere_predict_AO.png"
 alt="別の場所で測って A・O を当てる" />
@@ -1439,6 +1469,25 @@ href="#5-検証2別の場所の変位で測っていない-aoを当てられる�
 <li>同化モデルは ROM のまま。A・O は一度も観測しない</li>
 </ul>
 <h3 id="結果-2">6-2. 結果</h3>
+<p>3条件それぞれで、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
+<figure>
+<img src="img/ver3_detail.png" alt="検証3の詳細" />
+<figcaption aria-hidden="true">検証3の詳細</figcaption>
+</figure>
+<p><em>上段＝<strong>温度</strong>（温度計を置いていない
+P4）／下段＝<strong>変位</strong>（一度も観測していない反り A−O）。
+左から 15 W・25 W・間欠加熱。黒が真値（OpenFOAM＋FrontISTR）。</em></p>
+<ul>
+<li><strong>温度（上段）</strong>：変位なし（灰）は 300
+秒あたりまで真値より高めに外れますが、変位2点を足すと3条件とも真値に重なります。</li>
+<li><strong>変位（下段）</strong>：間欠加熱（右下）では真値が 150
+秒で落ち、300 秒で再び上がります。
+<strong>この2回目の山まで追えています</strong>（ヒータの ON/OFF
+をモデルに与えているため）。</li>
+<li>25 W（中央下）は ROM
+の係数を決めていない条件ですが、変位なし（灰）が大きく外れるのに対し、選んだ2点（赤）は真値に重なります。</li>
+</ul>
+<p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
 <img src="img/holdout_AO_realsolver.png"
 alt="実ソルバ真値での holdout" />
@@ -1806,8 +1855,19 @@ href="#5-検証2別の場所の変位で測っていない-aoを当てられる�
 の「直接測るより正確」という結果は、
 <strong>測定の前に式が予言していた</strong>ことになります。</p>
 <h3 id="同じ試験にかけた結果">7-6. 同じ試験にかけた結果</h3>
-<p>選ばれた2点それぞれで、A・O を一度も観測しない holdout
-を回します。</p>
+<p>選ばれた2点それぞれで、A・O を一度も観測しない holdout を回します。
+まず、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
+<figure>
+<img src="img/ver4_detail.png" alt="検証4の詳細" />
+<figcaption aria-hidden="true">検証4の詳細</figcaption>
+</figure>
+<p><em>左＝観測点（緑は目的指向が選んだ2点。他の決め方は別の場所）／中＝<strong>温度</strong>（P4）／右＝<strong>変位</strong>（反り
+A−O）。 真値＝OpenFOAM＋FrontISTR、15 W。</em></p>
+<ul>
+<li><strong>中</strong>：「よく動く点に置く」（紫）は、温度でも真値から離れたままです。2点が
+5 mm しか離れておらず、 同じ情報しか入らないためです。</li>
+<li><strong>右</strong>：反りでは差がはっきり出ます。目的指向（赤）が真値にいちばん近く、A最適（緑）がそれに続きます。</li>
+</ul>
 <figure>
 <img src="img/placement_method_comparison.png"
 alt="配置の選び方の比較" />
