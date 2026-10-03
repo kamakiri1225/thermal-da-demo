@@ -248,6 +248,8 @@
 id="toc-blog_004enkfを軽くするrom-pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</a>
 <ul>
+<li><a href="#この記事で確かめること"
+id="toc-この記事で確かめること">この記事で確かめること</a></li>
 <li><a href="#読む前に入力から最終結果まで"
 id="toc-読む前に入力から最終結果まで">読む前に：入力から最終結果まで</a></li>
 <li><a href="#なぜ-rom-が要るか-enkf-は実ソルバだと重すぎる"
@@ -399,6 +401,63 @@ id="toc-参考元になった実装詳細">参考（元になった実装・詳�
 <h1
 id="blog_004enkfを軽くするrom-pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</h1>
+<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>確かめたいこと</strong></td>
+<td>EnKF の予報を軽くするため、温度場を<strong>少数の代表点に落とした
+ROM</strong> を作れるか。その5点から<strong>全 20,696
+セルの温度と熱変形を復元</strong>できるか</td>
+</tr>
+<tr class="even">
+<td><strong>題材</strong></td>
+<td>片側にヒータ（15 W）が付いた中空円筒（外径 75 mm、内径 40 mm、高さ
+100.5 mm、鋼、底面固定）。0〜300 秒加熱、300〜600 秒は自然冷却</td>
+</tr>
+<tr class="odd">
+<td><strong>入力</strong></td>
+<td>OpenFOAM（CHT）で計算した固体の温度履歴（20,696 セル × 121
+時刻）</td>
+</tr>
+<tr class="even">
+<td><strong>真値（正解）</strong></td>
+<td>ROM
+で作った模擬データ（双子実験）。<strong>実機の測定ではありません</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>同化の設定</strong></td>
+<td>EnKF、60メンバー、30 秒ごと20回、偏差膨張 1.02、seed 20260913〜17
+の5回</td>
+</tr>
+<tr class="even">
+<td><strong>ノイズ</strong></td>
+<td>温度 0.30 K、変位 0.30 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>評価</strong></td>
+<td>加熱期 0〜300 秒の平均。復元精度は全 20,696 セルで評価</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>：§7-4 の「温度2点＋変位2点」は、評価している
+A・O をそのまま観測に使っています（循環）。 <strong>A・O
+を測らずに当てた結果は §7-4b と <a
+href="blog_008_novelty_displacement_assimilation.md">blog_008
+§6</a></strong> にあります。</p>
+</blockquote>
+<hr />
 <h2
 id="読む前に入力から最終結果まで">読む前に：入力から最終結果まで</h2>
 <p><strong>目的は、第3回のEnKFで毎回必要になる予報を軽くし、少数の温度状態から全温度場・変位まで復元することです。</strong>
@@ -3235,6 +3294,53 @@ id="結果知りたい量上面の反り真値の振幅-2.735-µm">結果（知�
 </tbody>
 </table>
 <p>（加熱期 60–300 s の MAE、5 seed平均）</p>
+<blockquote>
+<p><strong>この続き（2026-10-03 追記）</strong>：ここでは B/C
+を「人が決めて」測っています。
+その後、<strong>全5,040節点×3成分の中から変位2点を計算で選び直す</strong>試験を行いました（<a
+href="blog_008_novelty_displacement_assimilation.md">blog_008 §6</a>）。
+選定した2点（上面の (9.7, −36.2, 100.5) の <span
+class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span
+class="math inline">\(U_z\)</span> ）だと、 <strong>反りの誤差は 0.076
+µm</strong>（振幅の 2.8 %）で、B/C（0.185 µm）より良い結果でした。</p>
+<p><strong>数値の出どころの違いに注意。</strong> この表と blog_008 §6
+の表は、評価の仕方が違うので直接は比べられません。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>この表（§7-4b）</th>
+<th><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+§6</a></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位の写像</td>
+<td>A/O・B/C 用に個別に作った演算子</td>
+<td>全5,040節点の演算子（<code>run/build_full_disp_operator.py</code>）</td>
+</tr>
+<tr class="even">
+<td>集計の窓</td>
+<td>加熱期 60〜300 s の MAE</td>
+<td>加熱期 30〜300 s の平均</td>
+</tr>
+<tr class="odd">
+<td>A/O を直接測った場合</td>
+<td>0.077 µm</td>
+<td>0.135 µm</td>
+</tr>
+</tbody>
+</table>
+<p><strong>同じ表の中で比べてください。</strong>
+どちらの表でも結論は同じで、
+「知りたい場所を測らなくても当たる」「置き場所で大きく変わる」です。</p>
+</blockquote>
 <h4 id="つの読み取り">3つの読み取り</h4>
 <p><strong>①
 知りたい場所を測らなくても、ほぼ同じ精度で当たる</strong></p>
@@ -3243,7 +3349,10 @@ id="結果知りたい量上面の反り真値の振幅-2.735-µm">結果（知�
 µm）と<strong>ほぼ同じ</strong>です。</p>
 <blockquote>
 <p><strong>「工具先端に変位計を置けなくても、置ける場所に置けばよい」</strong>
-― 実務で意味があるのはこの一点です。</p>
+― 実務で意味があるのはこの一点です。
+さらに、<strong>置ける場所の中からどこを選ぶかも計算で決められます</strong>（<a
+href="blog_008_novelty_displacement_assimilation.md">blog_008
+§6</a>）。</p>
 </blockquote>
 <p><strong>② 温度だけでは反りは当たらない</strong></p>
 <p>温度2点だけだと 0.697 µm（振幅の 25 %）。 個別の <span

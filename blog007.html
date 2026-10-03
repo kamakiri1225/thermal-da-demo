@@ -249,16 +249,14 @@ href="#blog_007作った-rom-はどこまで使えるか-適用範囲を実計�
 id="toc-blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
 ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</a>
 <ul>
-<li><a href="#言葉の説明-モデル作成に使った条件とは"
-id="toc-言葉の説明-モデル作成に使った条件とは">0. 言葉の説明
-―「モデル作成に使った条件」とは</a>
+<li><a href="#この記事で確かめること"
+id="toc-この記事で確かめること">この記事で確かめること</a></li>
+<li><a href="#この記事の前提-rom-は-openfoam-の計算1本から作った"
+id="toc-この記事の前提-rom-は-openfoam-の計算1本から作った">0.
+この記事の前提 ― ROM は OpenFOAM の計算1本から作った</a>
 <ul>
-<li><a href="#rom-はopenfoam-の計算1本から作った"
-id="toc-rom-はopenfoam-の計算1本から作った">ROM は、OpenFOAM
-の計算1本から作った</a></li>
-<li><a href="#使っていない条件-作るときに見ていない条件"
-id="toc-使っていない条件-作るときに見ていない条件">「使っていない条件」＝
-作るときに見ていない条件</a></li>
+<li><a href="#この記事で比べる3つの計算"
+id="toc-この記事で比べる3つの計算">この記事で比べる3つの計算</a></li>
 <li><a href="#なぜ分けるのか"
 id="toc-なぜ分けるのか">なぜ分けるのか</a></li>
 </ul></li>
@@ -276,6 +274,8 @@ ROM そのものと、データ同化は別の話</a>
 <li><a href="#問い-a-の答え先に書きます"
 id="toc-問い-a-の答え先に書きます">問い A
 の答え（先に書きます）</a></li>
+<li><a href="#グラフで確かめる同化なし"
+id="toc-グラフで確かめる同化なし">グラフで確かめる（同化なし）</a></li>
 <li><a href="#では何が問題だったのか"
 id="toc-では何が問題だったのか">では、何が問題だったのか</a></li>
 </ul></li>
@@ -359,6 +359,59 @@ ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
 </blockquote>
 <p>この記事は、その問いに実際の計算で答えた記録です。
 「確かめた」と書いたものはすべて計算した結果で、確かめていないものは「未確認」と明記しています。</p>
+<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>確かめたいこと</strong></td>
+<td><a href="blog_004_pod_selected_rom.md">blog_004</a> で作った
+ROM（5点の熱回路モデル）は、<strong>係数を決めたときと違う条件でも使えるのか</strong>。使えるなら何が変わっても大丈夫で、何が変わると作り直しが要るのか</td>
+</tr>
+<tr class="even">
+<td><strong>2つの問いを分ける</strong></td>
+<td><strong>問い A</strong>：ROM そのもの（同化なし）が OpenFOAM
+を再現できるか／<strong>問い B</strong>：その ROM
+で少数のセンサから同化できるか（§2）</td>
+</tr>
+<tr class="odd">
+<td><strong>真値（正解）</strong></td>
+<td><strong>OpenFOAM で新しく計算した温度場</strong>と、それを FrontISTR
+に入れた変位。ROM 同士の比較ではありません</td>
+</tr>
+<tr class="even">
+<td><strong>比べる3条件</strong></td>
+<td>① 15 W・0〜300 秒（ROM の係数を決めた計算）／② 25 W・0〜300
+秒（新しく計算）／③ 15 W 間欠加熱＝0〜150 秒と 300〜450
+秒（新しく計算）</td>
+</tr>
+<tr class="odd">
+<td><strong>使えると判断する目安</strong></td>
+<td>誤差が<strong>温度計のノイズ 0.3 K
+より小さい</strong>こと（実際に測っても読み取れない差）</td>
+</tr>
+<tr class="even">
+<td><strong>同化の設定</strong>（問い B）</td>
+<td>温度2点（P2＋P4）＋変位2点（A・O）、EnKF・60メンバー・30
+秒ごと20回・5 seed、温度ノイズ 0.30 K、変位ノイズ 0.30 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>評価</strong></td>
+<td>加熱期 30〜300 秒の平均。温度場は<strong>全 20,696
+セル</strong>で評価（代表5点だけではない）</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <blockquote>
 <p><strong>この記事で分かること</strong> 1. 発熱量が変わっても（15 W →
 25 W）、作り直さずに使える 2.
@@ -372,31 +425,17 @@ href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>、センサの置き場
 <a href="blog_005_optimal_sensor_placement.md">blog_005</a>。</p>
 </blockquote>
 <hr />
-<h2 id="言葉の説明-モデル作成に使った条件とは">0. 言葉の説明
-―「モデル作成に使った条件」とは</h2>
-<p>この記事では「モデル作成に使った条件」「使っていない条件」という言い方をします。意味は次のとおりです。</p>
-<h3 id="rom-はopenfoam-の計算1本から作った">ROM は、OpenFOAM
-の計算1本から作った</h3>
-<p>ROM（5点の熱回路モデル）は、ゼロから物性値を積み上げて作ったのではありません。
+<h2 id="この記事の前提-rom-は-openfoam-の計算1本から作った">0.
+この記事の前提 ― ROM は OpenFOAM の計算1本から作った</h2>
+<p>ROM（5点の熱回路モデル）は、物性値を積み上げて作ったのではありません。
 <strong>OpenFOAM
-で1回だけ計算した結果に合うように、係数を逆算して作りました。</strong></p>
-<p>その1回の計算が、<strong>15 W のヒータを 0〜300 秒入れ、300〜600
-秒は切る</strong>という条件です。
-この計算の結果（温度分布と、その時間変化）を見ながら、</p>
-<ul>
-<li>POD の型（温度分布のパターン5つ）</li>
-<li>代表5点（Q-DEIM）</li>
-<li>ROM の係数（熱容量・熱の通りやすさ・放熱）</li>
-<li>温度→変位の行列（FrontISTR）</li>
-</ul>
-<p>を決めました。この <strong>15 W・0〜300 秒</strong>
-が「<strong>モデル作成に使った条件</strong>」です。</p>
-<h3
-id="使っていない条件-作るときに見ていない条件">「使っていない条件」＝
-作るときに見ていない条件</h3>
-<p>ROM を作ったあとで、<strong>別の条件で OpenFOAM
-を新しく計算し直した</strong>ものが「使っていない条件」です。
-この記事では2つ用意しました。</p>
+で1回計算した結果に合うように、係数を逆算して作りました。</strong></p>
+<p>その1回が、<strong>ヒータ 15 W を 0〜300 秒入れ、300〜600
+秒は切る</strong>という計算です。 この結果を見ながら、POD
+の型・代表5点・ROM の係数・温度→変位の行列を決めました。</p>
+<h3 id="この記事で比べる3つの計算">この記事で比べる3つの計算</h3>
+<p>ROM を作ったあと、<strong>別の条件で OpenFOAM
+を新しく計算し直して</strong>、ROM と比べます。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -405,21 +444,21 @@ id="使っていない条件-作るときに見ていない条件">「使って�
 </colgroup>
 <thead>
 <tr class="header">
-<th>条件</th>
-<th>中身</th>
-<th>ROM を作るときに見たか</th>
+<th>呼び方</th>
+<th>ヒータ</th>
+<th>ROM の係数を決めるときに見たか</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>15 W・0〜300 秒</strong></td>
-<td>ヒータ 15 W を 0〜300 秒</td>
-<td><strong>見た</strong>（これで ROM を作った）</td>
+<td>15 W を 0〜300 秒</td>
+<td><strong>見た</strong>（この結果から ROM を作った）</td>
 </tr>
 <tr class="even">
 <td><strong>25 W・0〜300 秒</strong></td>
-<td>発熱量を 25 W に変えた</td>
-<td><strong>見ていない</strong>（この検証のために新しく計算）</td>
+<td>発熱量だけ 25 W に変更</td>
+<td><strong>見ていない</strong>（この記事のために新しく計算）</td>
 </tr>
 <tr class="odd">
 <td><strong>15 W 間欠加熱</strong></td>
@@ -429,18 +468,17 @@ id="使っていない条件-作るときに見ていない条件">「使って�
 </tbody>
 </table>
 <h3 id="なぜ分けるのか">なぜ分けるのか</h3>
-<p><strong>モデル作成に使った条件で合うのは当たり前</strong>です。その結果に合わせて係数を決めたのですから、合わなければ作り方が間違っています。</p>
-<p>本当に知りたいのは「<strong>作るときに見ていない条件でも合うか</strong>」です。
-合えば「このモデルは使える」、合わなければ「その条件では作り直しが必要」と分かります。</p>
-<p>機械学習でいう「学習データ」と「テストデータ」の関係と同じ考え方ですが、
-ROM
-は学習ではなく最小二乗法で係数を合わせているので、この記事では「モデル作成に使った／使っていない」と書いています。</p>
-<blockquote>
-<p><strong>まとめ</strong> - モデル作成に使った条件（15 W）＝ ROM
-の係数を決めるのに見た計算。合って当然。 - 使っていない条件（25
-W・間欠加熱）＝ ROM
-を作った後に新しく計算した。<strong>ここで合うかが本題。</strong></p>
-</blockquote>
+<p><strong>15 W・0〜300
+秒で合うのは当たり前</strong>です。その結果に合わせて係数を決めたのですから、
+合わなければ作り方が間違っています。</p>
+<p>知りたいのは「<strong>係数を決めるときに見ていない条件でも合うか</strong>」です。
+合えば実際の運転で使える見込みがあり、合わなければその条件では作り直しが要ります。</p>
+<p>以下、表や図では次のように書きます。</p>
+<ul>
+<li>「15 W（ROM の係数を決めた計算）」</li>
+<li>「25
+W（新しく計算した条件）」「間欠加熱（新しく計算した条件）」</li>
+</ul>
 <hr />
 <h2 id="結論">1. 結論</h2>
 <h3 id="一言でいうと">一言でいうと</h3>
@@ -609,32 +647,55 @@ class="math inline">\(P_i(t)\)</span>
 に正しい時間変化を入れさえすれば、<strong>どんな加熱パターンでも計算できます</strong>。ON/OFF
 を何回繰り返しても、途中で大きさを変えても構いません。</li>
 </ul>
-<p>実際に、OpenFOAM で新しく計算した間欠加熱（0〜150 秒と 300〜450 秒に
-15 W）と比べると、</p>
+<h3 id="グラフで確かめる同化なし">グラフで確かめる（同化なし）</h3>
+<p>OpenFOAM で新しく計算した間欠加熱（0〜150 秒と 300〜450 秒に 15
+W）と、ROM を直接比べます。
+<strong>データ同化は一切していません。</strong> 発熱量と ON/OFF
+を与えて、ROM を 0→600 秒まで一気に計算しただけです。</p>
+<figure>
+<img src="img/rom_alone_intermittent.png"
+alt="ROM 単体と OpenFOAM の比較（間欠加熱）" />
+<figcaption aria-hidden="true">ROM 単体と OpenFOAM
+の比較（間欠加熱）</figcaption>
+</figure>
+<p><em>点＝OpenFOAM、線＝ROM。左＝ヒータの ON/OFF
+を正しく与えた場合、右＝「0〜300 秒に一定」と決め打ちしたまま。
+下段はその差で、帯は温度計のノイズ ±0.3 K。</em></p>
 <table>
-<colgroup>
-<col style="width: 42%" />
-<col style="width: 57%" />
-</colgroup>
 <thead>
 <tr class="header">
 <th>ヒータへの入力の与え方</th>
 <th style="text-align: right;">ROM 単体の誤差（5点の最大）</th>
+<th style="text-align: right;">誤差の平均</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>正しい ON/OFF を与える</strong></td>
-<td style="text-align: right;"><strong>0.038
-K</strong>（モデル作成に使った条件と同じ）</td>
+<td style="text-align: right;"><strong>0.038 K</strong></td>
+<td style="text-align: right;">0.013 K</td>
 </tr>
 <tr class="even">
 <td>0〜300 秒に一定と仮定したまま</td>
-<td style="text-align: right;">3.77 K</td>
+<td style="text-align: right;">3.775 K</td>
+<td style="text-align: right;">0.699 K</td>
 </tr>
 </tbody>
 </table>
-<p><strong>正しく与えれば、モデル作成に使った条件とまったく同じ精度です。</strong></p>
+<ul>
+<li><strong>左</strong>：5点とも、線（ROM）が点（OpenFOAM）にぴったり重なっています。150
+秒でヒータを切って温度が下がり、300
+秒で入れ直して上がる動きを、<strong>そのまま再現しています</strong>。誤差は最大
+0.038 K で、温度計のノイズ（±0.3 K
+の帯）の中に完全に収まります。この値は、ROM の係数を決めるのに使った 15
+W・0〜300 秒の計算と<strong>まったく同じ精度</strong>です。</li>
+<li><strong>右</strong>：150
+秒以降、ROM（線）だけが上がり続けて、OpenFOAM（点）から離れていきます。ROM
+の中では「まだヒータが入っている」ことになっているからです。300
+秒で今度は ROM が切れるので、逆に下回ります。</li>
+</ul>
+<p><strong>ROM そのものは間欠運転を再現できます。</strong>
+右で外れているのは、モデルの能力ではなく、与えた入力が実際と違うからです。</p>
 <h3 id="では何が問題だったのか">では、何が問題だったのか</h3>
 <p>これまで「間欠加熱では合わない」と書いていたのは、<strong>モデルの限界ではなく、プログラムの決め打ち</strong>でした。</p>
 <p><code>dacore/rom_general.py</code> のヒータ関数が</p>
@@ -762,7 +823,7 @@ A−O。</em></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td>15 W（モデル作成に使った条件）</td>
+<td>15 W（ROM の係数を決めた計算）</td>
 <td style="text-align: right;">5.8 K</td>
 <td style="text-align: right;">0.038 K</td>
 <td style="text-align: right;">0.011 K</td>
@@ -770,7 +831,7 @@ A−O。</em></p>
 <td style="text-align: right;"><strong>約 1/8</strong></td>
 </tr>
 <tr class="even">
-<td><strong>25 W</strong>（モデル作成に使っていない条件）</td>
+<td><strong>25 W</strong>（新しく計算した条件）</td>
 <td style="text-align: right;">9.6 K</td>
 <td style="text-align: right;"><strong>0.109 K</strong></td>
 <td style="text-align: right;">0.026 K</td>
@@ -909,7 +970,7 @@ href="21_advantage_verification.md">研究の優位性を確かめる追加検�
 </thead>
 <tbody>
 <tr class="odd">
-<td>15 W（モデル作成に使った条件）</td>
+<td>15 W（ROM の係数を決めた計算）</td>
 <td style="text-align: right;">0.113 K</td>
 <td style="text-align: right;">0.159 K</td>
 <td style="text-align: right;">0.186 K</td>
@@ -918,7 +979,7 @@ href="21_advantage_verification.md">研究の優位性を確かめる追加検�
 <td style="text-align: right;"><strong>100 %</strong></td>
 </tr>
 <tr class="even">
-<td>25 W（使っていない条件）</td>
+<td>25 W（新しく計算した条件）</td>
 <td style="text-align: right;">0.118 K</td>
 <td style="text-align: right;">0.175 K</td>
 <td style="text-align: right;">0.208 K</td>
@@ -927,7 +988,7 @@ href="21_advantage_verification.md">研究の優位性を確かめる追加検�
 <td style="text-align: right;"><strong>100 %</strong></td>
 </tr>
 <tr class="odd">
-<td>間欠加熱（使っていない条件）</td>
+<td>間欠加熱（新しく計算した条件）</td>
 <td style="text-align: right;">0.240 K</td>
 <td style="text-align: right;">0.547 K</td>
 <td style="text-align: right;">0.633 K</td>
@@ -957,7 +1018,8 @@ K）より小さい誤差に収まりました。</strong> 最大でも 0.186 K�
 K ほどありますが、2〜3 回更新すると 0.2 K 以下に落ち着きます。</p></li>
 </ol>
 <blockquote>
-<p><strong>結論</strong>：モデル作成に使った条件でも、発熱量を変えた条件でも、<strong>復元した温度場は全セルで温度計のノイズより小さい誤差</strong>でした。
+<p><strong>結論</strong>：ROM
+の係数を決めた計算の条件でも、発熱量を変えた条件でも、<strong>復元した温度場は全セルで温度計のノイズより小さい誤差</strong>でした。
 代表点以外も合っています。合わないのは、加熱のしかたがモデルの仮定と違う場合だけです。</p>
 </blockquote>
 <hr />

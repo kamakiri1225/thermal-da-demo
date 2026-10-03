@@ -186,6 +186,8 @@ href="#blog_008本研究の主張-温度だけでなく変位もデータ同化�
 id="toc-blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
 ―「温度だけでなく変位もデータ同化の観測に使う」</a>
 <ul>
+<li><a href="#この記事で確かめること"
+id="toc-この記事で確かめること">この記事で確かめること</a></li>
 <li><a href="#主張したいこと" id="toc-主張したいこと">1.
 主張したいこと</a></li>
 <li><a href="#なぜ変位を入れると良いのか仕組み"
@@ -245,6 +247,65 @@ id="blog_008本研究の主張-温度だけでなく変位もデータ同化の�
 <p>更新日：2026-10-03</p>
 <p>これまでの記事で、温度2点に変位2点を足すと推定が良くなることを示してきました。
 この記事は、<strong>それが研究の主張として成り立つのか</strong>を、先行研究を調べたうえで整理したものです。</p>
+<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>確かめたいこと</strong></td>
+<td>「温度だけでなく<strong>変位も観測としてデータ同化に入れる</strong>」ことが、研究の主張として成り立つか。先行研究にないか、そして実際に効果があるか</td>
+</tr>
+<tr class="even">
+<td><strong>検証1（§5）</strong></td>
+<td><strong>同じ場所</strong>に温度計を置くか変位計を置くかで差が出るか。センサの本数（4本）と場所をそろえ、<strong>測る量だけ</strong>を変える</td>
+</tr>
+<tr class="odd">
+<td><strong>検証2（§6）</strong></td>
+<td>評価点 A・O
+を<strong>一度も観測せず</strong>、別の場所の変位2点だけで A・O
+の変形を当てられるか（<a href="blog_004_pod_selected_rom.md">blog_004
+§7-4</a> の循環を断つ）</td>
+</tr>
+<tr class="even">
+<td><strong>真値（正解）</strong></td>
+<td>ROM で作った模擬データ（双子実験）。実機ではありません</td>
+</tr>
+<tr class="odd">
+<td><strong>共通の観測</strong></td>
+<td>温度2点（P2・P0）。ここに変位2点を足したり、場所を変えたりする</td>
+</tr>
+<tr class="even">
+<td><strong>ノイズ</strong></td>
+<td>温度 0.30 K、変位 0.30 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>同化の設定</strong></td>
+<td>EnKF・60メンバー・30 秒ごと20回・seed 20260913〜17 の5回平均</td>
+</tr>
+<tr class="even">
+<td><strong>評価</strong></td>
+<td>加熱期 30〜300 秒の平均。全 20,696 セルの温度、反り <span
+class="math inline">\(U_z(A)-U_z(O)\)</span> 、個別の <span
+class="math inline">\(U_z(A)\)</span> ・ <span
+class="math inline">\(U_z(O)\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>文献調査の範囲</strong></td>
+<td>2026-10-03
+に英語5回・日本語1回の検索。<strong>網羅的ではありません</strong>（§4）</td>
+</tr>
+</tbody>
+</table>
+<hr />
 <blockquote>
 <p><strong>この記事の結論</strong> 1.
 工作機械の熱変形補正では、<strong>温度を観測して変位を推定する</strong>か、<strong>変位を直接測って補正する</strong>かのどちらかが一般的。
@@ -332,7 +393,7 @@ alt="変位観測が温度を直す仕組み" />
 </tr>
 </tbody>
 </table>
-<p>さらに、<strong>実ソルバ（OpenFOAM＋FrontISTR）を真値にし、モデル作成に使っていない条件</strong>でも確かめました。</p>
+<p>さらに、<strong>実ソルバ（OpenFOAM＋FrontISTR）を真値にし、新しく計算した条件</strong>でも確かめました。</p>
 <table>
 <colgroup>
 <col style="width: 21%" />

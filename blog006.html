@@ -184,6 +184,8 @@
 href="#blog_006温度2点変位2点のデータ同化をセンサの読みから数式まで1ステップずつ追う"
 id="toc-blog_006温度2点変位2点のデータ同化をセンサの読みから数式まで1ステップずつ追う">blog_006：「温度2点＋変位2点」のデータ同化を、センサの読みから数式まで1ステップずつ追う</a>
 <ul>
+<li><a href="#この記事で確かめること"
+id="toc-この記事で確かめること">この記事で確かめること</a></li>
 <li><a href="#どこに何を付けたか" id="toc-どこに何を付けたか">1.
 どこに何を付けたか</a></li>
 <li><a href="#センサが読む値" id="toc-センサが読む値">2.
@@ -279,6 +281,69 @@ K、発熱量は真値 15 W に対して 14.9 W</p>
 数値はすべて本研究の本番の計算（<code>run/run_da_compare.py</code>）と、同じ計算を再実行して途中の値を記録した
 <code>run/trace_displacement_and_Q.py</code>（結果
 <code>results/trace_displacement_and_Q.json</code>）の実際の値です。説明用の仮の値は使っていません。</p>
+<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>確かめたいこと</strong></td>
+<td>温度2点と変位2点の観測を、EnKF
+でどう使って、温度5点・発熱量・放熱を推定しているのか。とくに<strong>変位をどう同化に入れるか</strong>と、<strong>測っていない発熱量がなぜ直るのか</strong></td>
+</tr>
+<tr class="even">
+<td><strong>題材</strong></td>
+<td>片側にヒータ（15 W）が付いた中空円筒（外径 75 mm、内径 40 mm、高さ
+100.5 mm、鋼、底面固定）。0〜300 秒加熱、300〜600 秒は自然冷却</td>
+</tr>
+<tr class="odd">
+<td><strong>真値（正解）</strong></td>
+<td>ROM
+で作った模擬データ（双子実験）。<strong>実機の測定ではありません</strong></td>
+</tr>
+<tr class="even">
+<td><strong>観測</strong></td>
+<td>温度2点（P2・P0）＋ 上面の変位2点（A・O の <span
+class="math inline">\(U_z\)</span> ）。30 秒ごとに20回</td>
+</tr>
+<tr class="odd">
+<td><strong>ノイズ</strong></td>
+<td>温度 0.30 K、変位 0.30 µm（標準偏差）</td>
+</tr>
+<tr class="even">
+<td><strong>同化の設定</strong></td>
+<td>EnKF、60メンバー、偏差膨張 1.02、seed 20260913〜17 の5回</td>
+</tr>
+<tr class="odd">
+<td><strong>推定するもの</strong></td>
+<td>代表5点の温度、発熱倍率 <span class="math inline">\(q\)</span> （
+<span class="math inline">\(Q=15q\)</span> W）、放熱係数 <span
+class="math inline">\(h\)</span> の7つ</td>
+</tr>
+<tr class="even">
+<td><strong>評価</strong></td>
+<td>加熱期 0〜300
+秒の平均。数値は本番の計算（<code>run/run_da_compare.py</code>）と
+<code>run/trace_displacement_and_Q.py</code> の実測値</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>注意</strong>：この記事の構成は、評価している A・O
+をそのまま観測に使っています（§7-4 の循環の問題）。 <strong>A・O
+を測らずに当てた結果は <a
+href="blog_008_novelty_displacement_assimilation.md">blog_008
+§6</a></strong> にあります。</p>
+</blockquote>
+<hr />
 <blockquote>
 <p><strong>この記事で分かること</strong> 1.
 どこに何のセンサを付け、何を読んでいるか 2.
@@ -869,8 +934,8 @@ class="math inline">\(t=30\)</span> 秒では A＝0.98 µm、O＝−0.43
 写像そのものの誤差は、この計算の結果には出てきません。 OpenFOAM
 の温度場全体を FrontISTR に直接入れて計算した真値（ <span
 class="math inline">\(t=30\)</span> 秒で A＝0.97 µm、O＝−0.43
-µm）とは、モデル作成に使った 15 W の条件では 0.001 µm
-程度しか違いませんでした。モデル作成に使っていない条件での違いは、別途計算中です。</p>
+µm）とは、ROM の係数を決めた 15 W の計算では 0.001 µm
+程度しか違いませんでした。新しく計算した条件での違いは、別途計算中です。</p>
 </blockquote>
 <h3 id="変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
 変位は温度をどう直したか（ <span class="math inline">\(t=30\)</span>
@@ -1639,11 +1704,10 @@ class="uri">https://arxiv.org/abs/2507.02500</a>）があります。この研�
 <li><strong>真値は計算で作った模擬データです。</strong>
 本物の実験の値ではありません。</li>
 <li>本番の計算では、<strong>測った値も予報も同じ「変位の写像」で作っています</strong>。この写像の誤差は結果に出てきません。OpenFOAM
-の温度場全体を FrontISTR
-に入れて真値を作り直した試験（モデル作成に使った 15 W
-の条件）では、ほぼ同じ結果でした（温度 0.16 K、反り 0.14 µm。
-<code>run/limit_realsolver_truth.py</code>）。ただし ROM
-を作るのに使った条件そのものなので、合うのは当然です。<strong>モデル作成に使っていない条件（25
+の温度場全体を FrontISTR に入れて真値を作り直した試験（ROM
+の係数を決めた 15 W の計算）では、ほぼ同じ結果でした（温度 0.16 K、反り
+0.14 µm。 <code>run/limit_realsolver_truth.py</code>）。ただし ROM
+を作るのに使った条件そのものなので、合うのは当然です。<strong>新しく計算した条件（25
 W、加熱のしかたを変えた場合）の試験は計算中です。</strong></li>
 <li>温度センサの P2・P0 は、2本とも A 側（+X
 側）にあります。温度だけで同化する比較では、A 側と O 側に分けた P2＋P4
