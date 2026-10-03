@@ -393,7 +393,7 @@ K、発熱量は真値 15 W に対して 14.9 W</p>
 <td><a
 href="blog_008_novelty_displacement_assimilation.md">blog_008</a></td>
 <td><strong>主張と先行研究</strong>。研究としてどこが新しいか</td>
-<td>ROM の双子実験</td>
+<td>ROM（§4・§5）と<br><strong>OpenFOAM＋FrontISTR</strong>（§6・§7）</td>
 </tr>
 </tbody>
 </table>
@@ -459,7 +459,7 @@ class="math inline">\(h\)</span> の7つ</td>
 をそのまま観測に使っています（§7-4 の循環の問題）。 <strong>A・O
 を測らずに当てた結果は <a
 href="blog_008_novelty_displacement_assimilation.md">blog_008
-§6</a></strong> にあります。</p>
+§5</a></strong> にあります。</p>
 </blockquote>
 <hr />
 <blockquote>
@@ -1105,7 +1105,7 @@ class="math inline">\(D\)</span> は
 <li>全 5,040 節点ぶんの <span class="math inline">\(D\)</span>
 も同じ6回で作れます（<code>run/build_full_disp_operator.py</code>）。
 FrontISTR は1回解くと全節点の変位を返すためで、<a
-href="blog_008_novelty_displacement_assimilation.md">blog_008 §6</a> の
+href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a> の
 15,120 通りの候補から変位計を選ぶ計算は、これを使っています。</li>
 </ul>
 <h4 id="できあがった-d">できあがった <span
@@ -2440,13 +2440,13 @@ href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6
 2024</a>
 など）か、変位を直接測って補正する形が一般的。<strong>温度と変位を同時に観測として同化に入れた例は、調べた範囲で見当たらない</strong></td>
 <td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
-§4</a></td>
+§3</a></td>
 </tr>
 <tr class="even">
 <td><strong>主張</strong></td>
 <td>熱変形を「補正すべき対象」から「<strong>温度場を知るための観測情報</strong>」に位置づけ直す</td>
 <td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
-§7-2</a></td>
+§8-2</a></td>
 </tr>
 <tr class="odd">
 <td><strong>この記事が支えている部分</strong></td>
