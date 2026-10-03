@@ -796,6 +796,15 @@ FrontISTR）、 あとは「赤 0.3、青
 0.7」と混ぜるだけで、実際に塗らなくても結果が分かります。
 配合を何通り試しても、塗る作業は最初の3回だけで済みます。</p>
 </blockquote>
+<blockquote>
+<p><strong>行列で見るとどうなるか</strong>は、<a
+href="#w-を作らずに-wphi-を求める--括弧の付け替え">「 <span
+class="math inline">\(W\)</span> を作らずに <span
+class="math inline">\(W\Phi\)</span> を求める ― 括弧の付け替え」</a>で
+小さな数字の例とともに説明します。「熱感度 <span
+class="math inline">\(W\)</span>
+を作ってから掛ければよいのでは」と思った方は、そちらを先に読んでください。</p>
+</blockquote>
 <h4 id="手順">手順</h4>
 <p><strong>ステップ0：FEM のメッシュと材料を用意する</strong></p>
 <p><code>cylinder_mesh.build_cylinder_mesh(4, 48, 20, ...)</code>
@@ -1109,29 +1118,193 @@ FrontISTR 6回版は一致するはずです（同じ要素での比較は未実
 の丸め誤差が原因と考えられる」としましたが、<strong>誤りでした</strong>。float64
 で作り直して同じ結果だったため、撤回します。</p>
 </blockquote>
-<h4
-id="もう1つ分かったこと-6回で解くのは-wphi-を直接解くことだった">もう1つ分かったこと
-― 6回で解くのは <span class="math inline">\(W\Phi\)</span>
-を直接解くことだった</h4>
-<p>上の表で、 <strong><span class="math inline">\(W\Phi\)</span>
-を5列だけ解くと 0.1
-秒</strong>で済んでいます。これは偶然ではありません。</p>
-<p><span class="math display">\[
-W\Phi=K_s^{-1}H_T\Phi
-\]</span></p>
-<p>なので、「 <span class="math inline">\(H_T\Phi\)</span>
-を右辺にして5回解く」のと同じです。 そして <span
-class="math inline">\(H_T\Phi\)</span> は「モード <span
-class="math inline">\(\varphi_k\)</span>
-を温度として入れたときの熱荷重」そのものです。</p>
+<h4 id="w-を作らずに-wphi-を求める-括弧の付け替え"><span
+class="math inline">\(W\)</span> を作らずに <span
+class="math inline">\(W\Phi\)</span> を求める ― 括弧の付け替え</h4>
+<p>ここがいちばん分かりにくいところなので、小さい例で説明します。</p>
 <blockquote>
-<p><strong>本研究の「モードを入れて FrontISTR で解く」は、 <span
-class="math inline">\(W\Phi\)</span>
-を無駄なく計算する方法そのものでした。</strong> <span
-class="math inline">\(W\)</span>
-を丸ごと作るやり方は、必要な5列のために<strong>要らない 5,035
-列も解いている</strong>ことになります。</p>
+<p><strong><span class="math inline">\(W\Phi\)</span> という名前には
+<span class="math inline">\(W\)</span> が入っていますが、計算するのに
+<span class="math inline">\(W\)</span>
+を作る必要はありません。</strong></p>
 </blockquote>
+<p>理由は、行列の掛け算の<strong>括弧を付け替えられる</strong>からです。</p>
+<p><span class="math display">\[
+W\Phi=\big(K_s^{-1}H_T\big)\Phi=K_s^{-1}\big(H_T\Phi\big)
+\]</span></p>
+<p>左の付け方（順番A）は「 <span class="math inline">\(W\)</span>
+を作ってから <span class="math inline">\(\Phi\)</span> を掛ける」、
+右の付け方（順番B）は「先に <span class="math inline">\(\Phi\)</span>
+を掛けてから解く」です。<strong>答えは同じ</strong>です。</p>
+<h5
+id="小さい例で確かめる節点3個モード1つ">小さい例で確かめる（節点3個、モード1つ）</h5>
+<p><span class="math display">\[
+K_s=\begin{pmatrix}2&amp;0&amp;0\\0&amp;2&amp;0\\0&amp;0&amp;2\end{pmatrix},\quad
+H_T=\begin{pmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{pmatrix},\quad
+\Phi=\begin{pmatrix}1\\1\\1\end{pmatrix}
+\]</span></p>
+<p><strong>順番A： <span class="math inline">\(W\)</span>
+を先に作る</strong></p>
+<p><span class="math inline">\(W=K_s^{-1}H_T\)</span> を作るとは、 <span
+class="math inline">\(K_s W=H_T\)</span> を解くことです。 <span
+class="math inline">\(H_T\)</span>
+は3列あるので、<strong>3回</strong>解きます。</p>
+<table>
+<thead>
+<tr class="header">
+<th>回</th>
+<th>解く式</th>
+<th>答え（ <span class="math inline">\(W\)</span> の列）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1回目</td>
+<td><span class="math inline">\(K_s\,w_1=(1,0,0)^{\mathsf
+T}\)</span></td>
+<td><span class="math inline">\((0.5,\ 0,\ 0)\)</span></td>
+</tr>
+<tr class="even">
+<td>2回目</td>
+<td><span class="math inline">\(K_s\,w_2=(0,1,0)^{\mathsf
+T}\)</span></td>
+<td><span class="math inline">\((0,\ 0.5,\ 0)\)</span></td>
+</tr>
+<tr class="odd">
+<td>3回目</td>
+<td><span class="math inline">\(K_s\,w_3=(0,0,1)^{\mathsf
+T}\)</span></td>
+<td><span class="math inline">\((0,\ 0,\ 0.5)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math display">\[
+W=\begin{pmatrix}0.5&amp;0&amp;0\\0&amp;0.5&amp;0\\0&amp;0&amp;0.5\end{pmatrix}
+\quad\Rightarrow\quad
+W\Phi=(0.5,\ 0.5,\ 0.5)^{\mathsf T}
+\]</span></p>
+<p><strong>合計3回</strong>解きました。</p>
+<p><strong>順番B：先に <span class="math inline">\(\Phi\)</span>
+を掛ける</strong></p>
+<p>まず <span class="math inline">\(H_T\Phi\)</span>
+を計算します。これは<strong>掛け算だけ</strong>で、方程式は解きません。</p>
+<p><span class="math display">\[
+H_T\Phi=\begin{pmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{pmatrix}\begin{pmatrix}1\\1\\1\end{pmatrix}=\begin{pmatrix}1\\1\\1\end{pmatrix}
+\]</span></p>
+<p>次に <span class="math inline">\(K_s\,x=(1,1,1)^{\mathsf T}\)</span>
+を解きます。右辺は<strong>1列だけ</strong>なので
+<strong>1回</strong>で終わります。</p>
+<p><span class="math display">\[
+x=(0.5,\ 0.5,\ 0.5)^{\mathsf T}
+\]</span></p>
+<p><strong>合計1回</strong>。順番Aと同じ答えです。</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">解く回数</th>
+<th>何が起きたか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>順番A</td>
+<td style="text-align: right;">3回</td>
+<td><span class="math inline">\(H_T\)</span>
+の<strong>3列</strong>ぶん解いてから、最後に <span
+class="math inline">\(\Phi\)</span> を掛けた</td>
+</tr>
+<tr class="even">
+<td>順番B</td>
+<td style="text-align: right;"><strong>1回</strong></td>
+<td><strong>先に <span class="math inline">\(\Phi\)</span>
+を掛けて1列に減らしてから</strong>解いた</td>
+</tr>
+</tbody>
+</table>
+<p><strong>先に <span class="math inline">\(\Phi\)</span>
+を掛けると、解くべき右辺の本数が減る</strong>。これが順番Bの正体です。</p>
+<p>本研究では、5,040 列が5列に減るので、<strong>5,040
+回が5回</strong>になります。</p>
+<h5 id="frontistr-での対応">FrontISTR での対応</h5>
+<p>順番Bの2つのステップは、FrontISTR の操作そのものです。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>式の上の操作</th>
+<th>FrontISTR での操作</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(H_T\Phi\)</span> の <span
+class="math inline">\(k\)</span> 列目を作る</td>
+<td><strong>モード <span class="math inline">\(\varphi_k\)</span>
+を「節点温度」として入力ファイルに書く</strong></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K_s\,x=H_T\varphi_k\)</span> を解く</td>
+<td><strong>FrontISTR を1回実行する</strong></td>
+</tr>
+<tr class="odd">
+<td>答え <span class="math inline">\(x\)</span></td>
+<td>出てきた<strong>変位</strong> ＝ <span
+class="math inline">\(D_k\)</span> （ <span
+class="math inline">\(W\Phi\)</span> の <span
+class="math inline">\(k\)</span> 列目）</td>
+</tr>
+</tbody>
+</table>
+<p>FrontISTR に温度分布を渡すと、内部で <span
+class="math inline">\(H_T\)</span>
+を掛けて熱荷重を作り、1回解いて変位を返します。
+<strong>この一連の動作が、そのまま順番B</strong>です。 <span
+class="math inline">\(W\)</span> はどこにも現れません。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/run_da_compare.py の build_disp_operator より</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])   <span class="co"># モードkを温度として渡して1回解く</span></span></code></pre></div>
+<p><code>run_field</code> の中でやっているのは、</p>
+<ol type="1">
+<li><code>.cnt</code> ファイルに節点温度（基準温度＋モード）を書く　←
+<span class="math inline">\(H_T\Phi\)</span> の列を作る指示</li>
+<li><code>fistr1</code> を実行する　← <span
+class="math inline">\(K_s^{-1}\)</span> を掛ける（1回の求解）</li>
+<li>出力された変位を読む　← <span class="math inline">\(D_k\)</span>
+が得られる</li>
+</ol>
+<p>の3つだけです。</p>
+<h5 id="実測値">実測値</h5>
+<table>
+<thead>
+<tr class="header">
+<th>やり方</th>
+<th style="text-align: right;">求解の回数</th>
+<th style="text-align: right;">時間（この題材）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>順番A： <span class="math inline">\(W\)</span>
+を作ってから掛ける</td>
+<td style="text-align: right;">5,040 回</td>
+<td style="text-align: right;">54 秒</td>
+</tr>
+<tr class="even">
+<td><strong>順番B：先に <span class="math inline">\(\Phi\)</span>
+を掛けて解く</strong></td>
+<td style="text-align: right;"><strong>5 回</strong></td>
+<td style="text-align: right;"><strong>0.1 秒</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（同じ <span class="math inline">\(K_s\)</span> ・ <span
+class="math inline">\(H_T\)</span>
+から計算し、答えが一致することを確認済み。<code>run/build_D_from_W64.py</code>）</p>
 <h4 id="では-w-を作るのと何が違うのか">では、 <span
 class="math inline">\(W\)</span> を作るのと何が違うのか</h4>
 <p><strong>必要な列だけ解くか、全部解くかの違い</strong>です。</p>
