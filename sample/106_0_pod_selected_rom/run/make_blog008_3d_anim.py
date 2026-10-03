@@ -90,19 +90,25 @@ def main():
         g=pv.UnstructuredGrid(cells,ctypes,co+u*EXAG); g.point_data["T"]=f[near]
         pl=pv.Plotter(off_screen=True,window_size=(620,760))
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=18,show_scalar_bar=False)
-        for p0,c0,r0 in marks:
-            pl.add_mesh(pv.Sphere(radius=r0,center=p0+(u[near_node(p0)]*EXAG)),color=c0)
+        for p0,c0,r0,kind in marks:
+            q0=p0+(u[near_node(p0)]*EXAG)
+            if kind=="temp":      # 温度計：赤い球
+                pl.add_mesh(pv.Sphere(radius=r0,center=q0),color=c0)
+            elif kind=="disp":    # 変位計：緑の立方体＋測る方向の矢印
+                pl.add_mesh(pv.Cube(center=q0,x_length=2*r0,y_length=2*r0,z_length=2*r0),color=c0)
+            else:                 # 評価点：黒い球（測らない）
+                pl.add_mesh(pv.Sphere(radius=r0,center=q0),color=c0)
         pl.camera_position=[(0.26,-0.24,0.21),(0,0,0.05),(0,0,1)]
         pl.set_background("white"); pl.camera.zoom(1.5)
         im=pl.screenshot(return_img=True); pl.close()
         m=np.any(im[...,:3]<246,axis=-1); ys,xs=np.where(m)
         if ys.size==0: return im          # 全部白なら切り取らずそのまま返す
         return im[max(0,ys.min()-4):ys.max()+4,max(0,xs.min()-4):xs.max()+4]
-    marks_obs=[(np.array(A_XYZ),"black",0.0028),(np.array(O_XYZ),"black",0.0028),
-               (coords[sel[0][0]],"#1f9e4b",0.0030),(coords[sel[1][0]],"#1f9e4b",0.0030),
-               (kv["xyz"][2],"red",0.0026),(kv["xyz"][0],"red",0.0026)]
-    marks_t=[(np.array(A_XYZ),"black",0.0028),(np.array(O_XYZ),"black",0.0028),
-             (kv["xyz"][2],"red",0.0026),(kv["xyz"][0],"red",0.0026)]
+    marks_obs=[(np.array(A_XYZ),"#111111",0.0040,"eval"),(np.array(O_XYZ),"#111111",0.0040,"eval"),
+               (coords[sel[0][0]],"#17c04f",0.0040,"disp"),(coords[sel[1][0]],"#17c04f",0.0040,"disp"),
+               (kv["xyz"][2],"red",0.0042,"temp"),(kv["xyz"][0],"red",0.0042,"temp")]
+    marks_t=[(np.array(A_XYZ),"#111111",0.0040,"eval"),(np.array(O_XYZ),"#111111",0.0040,"eval"),
+             (kv["xyz"][2],"red",0.0042,"temp"),(kv["xyz"][0],"red",0.0042,"temp")]
     frames=[]
     for k in range(len(tg)):
         ut=dispall(Ttr[k]); u1=dispall(tOnly[k]); u2=dispall(tDisp[k])
@@ -111,9 +117,9 @@ def main():
              shot(tOnly[k],"TEMP 2 ONLY","#8a1c1c",marks_t),
              shot(tDisp[k],"TEMP 2 + DISP 2 (elsewhere)","#14459c",marks_obs)]
         fig,axes=plt.subplots(1,3,figsize=(13.8,6.4))
-        ttls=[f"真値\n反り A−O = {aoT:5.2f} µm",
-              f"温度2点のみ\n反り {ao1:5.2f} µm（誤差 {abs(ao1-aoT):4.2f}）",
-              f"温度2点＋別の場所の変位2点\n反り {ao2:5.2f} µm（誤差 {abs(ao2-aoT):4.2f}）"]
+        ttls=[f"真値（正解）\n反り A−O = {aoT:5.2f} µm",
+              f"観測＝温度2点（●赤）だけ\n反り {ao1:5.2f} µm（誤差 {abs(ao1-aoT):4.2f} µm）",
+              f"観測＝温度2点（●赤）＋変位2点（■緑）\n反り {ao2:5.2f} µm（誤差 {abs(ao2-aoT):4.2f} µm）"]
         cols=["#1b2430","#c0392b","#14459c"]
         for ax,im,t,c in zip(axes,ims,ttls,cols):
             ax.imshow(im); ax.axis("off"); ax.set_title(t,fontsize=12,weight="bold",color=c)
@@ -122,7 +128,7 @@ def main():
         cax=fig.add_axes([0.25,0.055,0.50,0.022])
         cb=fig.colorbar(sm,cax=cax,orientation="horizontal"); cb.set_label("温度 [℃]",fontsize=10.5)
         fig.suptitle(f"A・O を一度も測らずに熱変形を当てる（t = {tg[k]:.0f} s）\n"
-                     f"形＝熱変形（{EXAG:.0f}倍に誇張）　赤球＝温度センサ　緑球＝観測した変位2点　黒球＝評価点 A・O（測らない）",fontsize=12)
+                     f"色＝温度　形＝熱変形（{EXAG:.0f}倍に誇張）　　●赤＝温度センサ（観測）　■緑＝変位計（観測）　●黒＝評価点 A・O（一度も測らない）",fontsize=12)
         fig.tight_layout(rect=[0,0.09,1,0.88])
         fig.canvas.draw()
         frames.append(Image.fromarray(np.asarray(fig.canvas.buffer_rgba())[:,:,:3].copy()))
