@@ -1899,8 +1899,178 @@ class="math inline">\(U_{r,P}\)</span> が特異に近い）。
 <li><strong>選んだ点が互いに”別々のことを言う”</strong>（1点はモード1を、別の点はモード2をよく映す）なら、
 連立はスッキリ解け、復元は安定。</li>
 </ul>
-<p>図で見ると一目瞭然です。各セルを「そのセルでのモード1・モード2の値」＝<strong>モード指紋</strong>
-<span class="math inline">\((\varphi_1,\varphi_2)\)</span>
+<h4 id="モード指紋とは-行列で書くと">モード指紋とは ― 行列で書くと</h4>
+<p>「モード指紋」は、<strong>ある1つのセルで、5つのモードがそれぞれどんな値を取るか</strong>を並べたものです。POD
+で作ったモード行列 <span class="math inline">\(U_r\)</span> （20,696 行
+× 5 列）の<strong>1行</strong>にあたります。</p>
+<p><span class="math display">\[
+U_r=
+\begin{pmatrix}
+\varphi_1[1] &amp; \varphi_2[1] &amp; \varphi_3[1] &amp; \varphi_4[1]
+&amp; \varphi_5[1]\\
+\varphi_1[2] &amp; \varphi_2[2] &amp; \varphi_3[2] &amp; \varphi_4[2]
+&amp; \varphi_5[2]\\
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots &amp; \vdots\\
+\varphi_1[20696] &amp; \varphi_2[20696] &amp; \varphi_3[20696] &amp;
+\varphi_4[20696] &amp; \varphi_5[20696]
+\end{pmatrix}
+\]</span></p>
+<ul>
+<li><strong>縦の1列</strong>＝1つのモード（温度分布の「型」）。例えば1列目
+<span class="math inline">\(\varphi_1\)</span> はモード1の型で、20,696
+セル分の値が並んでいます。</li>
+<li><strong>横の1行</strong>＝1つのセルの<strong>モード指紋</strong>。この記事では、セル
+<span class="math inline">\(i\)</span> の指紋を <span
+class="math inline">\(\psi_i\)</span> と書きます。</li>
+</ul>
+<p><span class="math display">\[
+\psi_i=\big(\varphi_1[i],\ \varphi_2[i],\ \varphi_3[i],\ \varphi_4[i],\
+\varphi_5[i]\big)
+\]</span></p>
+<p>（ <span class="math inline">\(U_r\)</span> の <span
+class="math inline">\(i\)</span> 行目）</p>
+<p>（ <span class="math inline">\(\varphi_k\)</span> は「モード <span
+class="math inline">\(k\)</span> ＝列」、 <span
+class="math inline">\(\psi_i\)</span> は「セル <span
+class="math inline">\(i\)</span>
+＝行」です。混同しないよう記号を分けています。）</p>
+<p><strong>指紋の長さ</strong>は、その行の5つの値の2乗和の平方根です。</p>
+<p><span class="math display">\[
+\lVert\psi_i\rVert=\sqrt{\varphi_1[i]^2+\varphi_2[i]^2+\varphi_3[i]^2+\varphi_4[i]^2+\varphi_5[i]^2}
+\]</span></p>
+<p>長いセルほど、どこかのモードが大きく出るセルです。測ると、そのモードの混ざり具合がよく分かります。短いセルは、どのモードもほとんど出ないので、測っても情報が少ないセルです。</p>
+<p><strong>実際の値</strong>（この研究の <span
+class="math inline">\(U_r\)</span>
+から抜き出したもの。<code>results/qdeim_points.npz</code> の
+<code>pod_modes</code>）：</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>セル番号</th>
+<th>座標 [mm]</th>
+<th style="text-align: right;">モード1</th>
+<th style="text-align: right;">モード2</th>
+<th style="text-align: right;">モード3</th>
+<th style="text-align: right;">モード4</th>
+<th style="text-align: right;">モード5</th>
+<th style="text-align: right;">指紋の長さ <span
+class="math inline">\(\lVert\psi_i\rVert\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>(0.8, −36.7, 0.9)</td>
+<td style="text-align: right;">−0.0076</td>
+<td style="text-align: right;">0.0033</td>
+<td style="text-align: right;">−0.0041</td>
+<td style="text-align: right;">0.0049</td>
+<td style="text-align: right;">0.0072</td>
+<td style="text-align: right;">0.0126</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>(−24.3, −24.3, 0.8)</td>
+<td style="text-align: right;">−0.0077</td>
+<td style="text-align: right;">0.0075</td>
+<td style="text-align: right;">0.0041</td>
+<td style="text-align: right;">0.0020</td>
+<td style="text-align: right;">0.0094</td>
+<td style="text-align: right;">0.0149</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td>…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+<td style="text-align: right;">…</td>
+</tr>
+<tr class="even">
+<td><strong>7634（P0）</strong></td>
+<td>(21.3, −1.6, 51.6)</td>
+<td style="text-align: right;">−0.0058</td>
+<td style="text-align: right;">−0.0108</td>
+<td style="text-align: right;">−0.0011</td>
+<td style="text-align: right;"><strong>−0.0342</strong></td>
+<td style="text-align: right;">0.0061</td>
+<td style="text-align: right;"><strong>0.0369（最大）</strong></td>
+</tr>
+<tr class="odd">
+<td>7924（P1）</td>
+<td>(−14.1, 33.1, 51.6)</td>
+<td style="text-align: right;">−0.0074</td>
+<td style="text-align: right;">0.0040</td>
+<td style="text-align: right;">0.0016</td>
+<td style="text-align: right;">−0.0081</td>
+<td style="text-align: right;">−0.0241</td>
+<td style="text-align: right;">0.0268</td>
+</tr>
+<tr class="even">
+<td>7765（P2）</td>
+<td>(36.5, 6.9, 50.8)</td>
+<td style="text-align: right;">−0.0047</td>
+<td style="text-align: right;">−0.0146</td>
+<td style="text-align: right;">0.0109</td>
+<td style="text-align: right;">0.0027</td>
+<td style="text-align: right;">−0.0043</td>
+<td style="text-align: right;">0.0195</td>
+</tr>
+<tr class="odd">
+<td>859（P3）</td>
+<td>(35.1, 0.8, 0.8)</td>
+<td style="text-align: right;">−0.0073</td>
+<td style="text-align: right;">−0.0030</td>
+<td style="text-align: right;">−0.0148</td>
+<td style="text-align: right;">0.0047</td>
+<td style="text-align: right;">−0.0068</td>
+<td style="text-align: right;">0.0187</td>
+</tr>
+<tr class="even">
+<td>733（P4）</td>
+<td>(−35.1, 0.8, 0.8)</td>
+<td style="text-align: right;">−0.0077</td>
+<td style="text-align: right;">0.0090</td>
+<td style="text-align: right;">0.0077</td>
+<td style="text-align: right;">−0.0007</td>
+<td style="text-align: right;">0.0090</td>
+<td style="text-align: right;">0.0167</td>
+</tr>
+<tr class="odd">
+<td>19062</td>
+<td>(7.1, −33.7, 25.8)</td>
+<td style="text-align: right;">−0.0069</td>
+<td style="text-align: right;">−0.0009</td>
+<td style="text-align: right;">−0.0005</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">−0.0005</td>
+<td style="text-align: right;">0.0070（最小）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>指紋が一番長いのはセル 7634（0.0369）で、これが Q-DEIM
+の1点目（P0）になります。モード4の値（−0.0342）がとても大きく、モード4をよく映すセルです。</li>
+<li>一番短いのはセル
+19062（0.0070）で、どのモードもほとんど出ません。</li>
+<li>値が 0.01 前後と小さいのは、各モード（各列）を 20,696 セル全体で長さ
+1 にそろえているためです（列の長さはどれも 1.000）。</li>
+</ul>
+<p>下の図は、この指紋のうちモード1・モード2の2つだけを取り出して、平面に置いたものです。</p>
+<p>図で見ると一目瞭然です。各セルを「そのセルでのモード1・モード2の値」＝<strong>モード指紋のうち2成分</strong>
+<span class="math inline">\((\varphi_1[i],\ \varphi_2[i])\)</span>
 として平面に置きます:</p>
 <figure>
 <img src="img/qdeim_concept.png"
@@ -1918,12 +2088,15 @@ aria-hidden="true">Q-DEIMの直感（モード指紋と選点）</figcaption>
 ＝「信号が大きく・互いに独立な点」を貪欲に選ぶ</h3>
 <p>では体積が最大の点集合をどう見つけるか。全組み合わせを試すのは大変なので、Q-DEIM
 は <strong>貪欲法（1点ずつ最善を足す）</strong>
-で選びます。これが「モード行列の転置に <strong>列枢軸付きQR分解</strong>
+選びます。これが「モード行列の転置に <strong>列枢軸付きQR分解</strong>
 をかける」の中身:</p>
 <ol type="1">
-<li><strong>1点目</strong>：全セルの中で、モード指紋の長さ <span
-class="math inline">\(\lVert\varphi_i\rVert\)</span> が
-<strong>最大</strong>の点を選ぶ（一番強く場に効く点）。</li>
+<li><strong>1点目</strong>：全セル（ <span
+class="math inline">\(U_r\)</span> の 20,696
+行）の中で、モード指紋の長さ <span
+class="math inline">\(\lVert\psi_i\rVert\)</span> が
+<strong>最大</strong>のセルを選ぶ（一番強く場に効く点）。実際はセル
+7634（P0、0.0369）。</li>
 <li><strong>2点目</strong>：1点目の方向を全セルから
 <strong>差し引き</strong>（＝1点目で説明できる分を消す）、
 <strong>残り（＝1点目では分からない成分）が最大</strong>の点を選ぶ。</li>
@@ -1978,7 +2151,7 @@ id="実データで貪欲選択を1ステップずつ追う">実データで貪�
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> Ur.copy()                                  <span class="co"># Ur = 先頭5モード (20696×5)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各セルに「残っている情報」の大きさ</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各行（各セルの指紋 ψ_i）の長さ＝「残っている情報」の大きさ</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> <span class="bu">int</span>(np.argmax(norms))                  <span class="co"># ← 最大の点を選ぶ</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> W[p] <span class="op">/</span> np.linalg.norm(W[p])</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    W <span class="op">-=</span> np.outer(W <span class="op">@</span> v, v)                    <span class="co"># ← その方向を全セルから差し引く</span></span></code></pre></div>
