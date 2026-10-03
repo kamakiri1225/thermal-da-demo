@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_008：温度だけでなく変位も同化に使う ― 本研究の主張</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  
+  <style>
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
+  </style>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_008：温度だけでなく変位も同化に使う ―
+本研究の主張</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う"
+id="toc-blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
+―「温度だけでなく変位もデータ同化の観測に使う」</a>
+<ul>
+<li><a href="#主張したいこと" id="toc-主張したいこと">1.
+主張したいこと</a></li>
+<li><a href="#なぜ変位を入れると良いのか仕組み"
+id="toc-なぜ変位を入れると良いのか仕組み">2.
+なぜ変位を入れると良いのか（仕組み）</a></li>
+<li><a href="#実計算での裏づけ" id="toc-実計算での裏づけ">3.
+実計算での裏づけ</a></li>
+<li><a href="#先行研究の調査" id="toc-先行研究の調査">4.
+先行研究の調査</a>
+<ul>
+<li><a href="#見つかった近い研究" id="toc-見つかった近い研究">4-1.
+見つかった近い研究</a></li>
+<li><a href="#いちばん近いのは-eth-zurich-2024"
+id="toc-いちばん近いのは-eth-zurich-2024">4-2. いちばん近いのは ETH
+Zurich (2024)</a></li>
+<li><a href="#分かったこと" id="toc-分かったこと">4-3.
+分かったこと</a></li>
+</ul></li>
+<li><a href="#検証同じ場所に温度計を置いたらどうなるか"
+id="toc-検証同じ場所に温度計を置いたらどうなるか">5.
+【検証】同じ場所に温度計を置いたらどうなるか</a>
+<ul>
+<li><a href="#分かったこと主張の修正"
+id="toc-分かったこと主張の修正">分かったこと（主張の修正）</a></li>
+</ul></li>
+<li><a href="#検証別の場所で変位を測って測っていない-ao-を当てる"
+id="toc-検証別の場所で変位を測って測っていない-ao-を当てる">6.
+【検証】別の場所で変位を測って、測っていない A・O を当てる</a>
+<ul>
+<li><a href="#分かったこと-1"
+id="toc-分かったこと-1">分かったこと</a></li>
+<li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
+</ul></li>
+<li><a href="#主張の書き方" id="toc-主張の書き方">7. 主張の書き方</a>
+<ul>
+<li><a href="#言ってよいこと" id="toc-言ってよいこと">7-1.
+言ってよいこと</a></li>
+<li><a href="#言ってはいけないこと" id="toc-言ってはいけないこと">7-2.
+言ってはいけないこと</a></li>
+<li><a href="#主張を強くするには未実施"
+id="toc-主張を強くするには未実施">7-3.
+主張を強くするには（未実施）</a></li>
+</ul></li>
+<li><a href="#発表での位置づけ案" id="toc-発表での位置づけ案">8.
+発表での位置づけ（案）</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
+―「温度だけでなく変位もデータ同化の観測に使う」</h1>
+<p>更新日：2026-10-03</p>
+<p>これまでの記事で、温度2点に変位2点を足すと推定が良くなることを示してきました。
+この記事は、<strong>それが研究の主張として成り立つのか</strong>を、先行研究を調べたうえで整理したものです。</p>
+<blockquote>
+<p><strong>この記事の結論</strong> 1.
+工作機械の熱変形補正では、<strong>温度を観測して変位を推定する</strong>か、<strong>変位を直接測って補正する</strong>かのどちらかが一般的。
+2.
+<strong>温度と変位を同時に観測としてデータ同化に入れ、温度場・発熱量まで推定した例は、調べた範囲では見当たらない。</strong>
+3.
+手法そのもの（EnKF、POD、変位の同化）は既知。新しいのは<strong>組み合わせ方と、工作機械の熱変形に適用した点</strong>。
+4.
+<strong>同じ場所なら、温度計と変位計はほぼ互角</strong>だった（§5）。変位計の価値は「情報量が多いこと」ではなく、<strong>温度計を置けない場所に置けること</strong>。
+5.
+<strong>別の場所で変位を測れば、一度も測っていない場所の変形を、直接測るより正確に当てられた</strong>（0.076
+µm 対 0.135 µm、§6）。</p>
+</blockquote>
+<hr />
+<h2 id="主張したいこと">1. 主張したいこと</h2>
+<blockquote>
+<p><strong>熱変形を推定したいとき、観測は温度だけでなく、変位も同化に入れたほうがよい。</strong>
+変位計は5点すべての温度に触れるので、温度計のない点の温度まで直り、結果として温度場も発熱量も熱変形も良くなる。
+そして<strong>変位計は、知りたい場所に置く必要がない</strong>。別の場所で測って、測っていない場所の変形を当てられる。</p>
+</blockquote>
+<p>この主張を支える計算結果と、先行研究との関係を以下にまとめます。</p>
+<hr />
+<h2 id="なぜ変位を入れると良いのか仕組み">2.
+なぜ変位を入れると良いのか（仕組み）</h2>
+<p>詳しくは <a href="blog_006_temp2_disp2_step_by_step.md">blog_006
+§7-5b</a> にありますが、要点は3つです。</p>
+<ol type="1">
+<li><strong>変位は5点の温度の足し算</strong>なので、<strong>変位計1本で5点すべてに触れる</strong>（温度計は1本で1点だけ）。</li>
+</ol>
+<p><span class="math display">\[
+U_z(A)=3.970+0.33\,T_0-0.13\,T_1+0.26\,T_2+0.64\,T_3+0.11\,T_4
+\]</span></p>
+<ol start="2" type="1">
+<li>変位がずれていれば、<strong>5点の温度のどこかがずれている</strong>と分かる。</li>
+<li>どの点をどれだけ直すかは、60メンバーのばらつき（共分散）が決める。</li>
+</ol>
+<p>その結果、<strong>温度計を置いていない点の温度まで直ります</strong>。</p>
+<figure>
+<img src="img/blog006_disp_fixes_temp.png"
+alt="変位観測が温度を直す仕組み" />
+<figcaption aria-hidden="true">変位観測が温度を直す仕組み</figcaption>
+</figure>
+<p><em><span class="math inline">\(t=30\)</span>
+秒の更新で、温度計のない P3 を −4.97 K、P4 を −7.67 K
+直しているのは変位計です。 <span class="math inline">\(t=150\)</span>
+秒では温度計のずれがほぼ 0
+になり、温度場を直しているのは変位計だけになります。</em></p>
+<hr />
+<h2 id="実計算での裏づけ">3. 実計算での裏づけ</h2>
+<p>いずれも ROM 双子実験、EnKF・60メンバー・30秒ごと20回・5 seed
+平均、加熱期30〜300秒です。</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測</th>
+<th style="text-align: right;">温度場の誤差</th>
+<th style="text-align: right;">推定した発熱量</th>
+<th>出典</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>同化なし</td>
+<td style="text-align: right;">4.585 K</td>
+<td style="text-align: right;">16.45 W</td>
+<td><a href="blog_004_pod_selected_rom.md">blog_004 §7-6</a></td>
+</tr>
+<tr class="even">
+<td>温度2点のみ（P2＋P0）</td>
+<td style="text-align: right;">0.503 K</td>
+<td style="text-align: right;">14.05 W</td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td><strong>温度2点＋変位2点</strong></td>
+<td style="text-align: right;"><strong>0.160 K</strong></td>
+<td style="text-align: right;"><strong>14.89 W</strong>（真値15 W）</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<p>さらに、<strong>実ソルバ（OpenFOAM＋FrontISTR）を真値にし、モデル作成に使っていない条件</strong>でも確かめました。</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>真値の条件</th>
+<th style="text-align: right;">温度2点のみ</th>
+<th style="text-align: right;"><strong>温度2点＋変位2点</strong></th>
+<th>出典</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>25 W（反りの誤差）</td>
+<td style="text-align: right;">0.74 µm</td>
+<td style="text-align: right;"><strong>0.09 µm</strong></td>
+<td><a
+href="21_advantage_verification.md">21_advantage_verification.md</a></td>
+</tr>
+<tr class="even">
+<td>25 W（発熱量）</td>
+<td style="text-align: right;">23.59 W</td>
+<td style="text-align: right;"><strong>24.91 W</strong>（真値25 W）</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<p><strong>温度センサの置き方が悪くても（P2＋P0
+はどちらもヒータ側）、変位計を足せば当たります。</strong></p>
+<hr />
+<h2 id="先行研究の調査">4. 先行研究の調査</h2>
+<p>2026-10-03
+に、英語5回・日本語1回の検索を行いました。<strong>網羅的な調査ではありません。</strong></p>
+<h3 id="見つかった近い研究">4-1. 見つかった近い研究</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>研究</th>
+<th>手法</th>
+<th><strong>観測に使うもの</strong></th>
+<th>変位の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a
+href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
+Zurich (2024)</a></td>
+<td>カルマンフィルタ＋低次元化FEM</td>
+<td><strong>温度のみ</strong>（5軸機で25本中13本）</td>
+<td>推定結果（出力）</td>
+</tr>
+<tr class="even">
+<td><a href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima et
+al. (2024) CIRP JMST</a></td>
+<td>ROM＋回帰、センサ配置指針</td>
+<td>温度のみ</td>
+<td>出力</td>
+</tr>
+<tr class="odd">
+<td><a
+href="https://tekniker.es/es/methodology-for-the-design-of-a-thermal-distortion-compensation-for-large-machine-tools-based-in-state-space-representation-with-Kalman-filter">Tekniker</a></td>
+<td>状態空間＋カルマンフィルタ</td>
+<td>主軸回転数・温度</td>
+<td>出力</td>
+</tr>
+<tr class="even">
+<td><a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
+の整理</a></td>
+<td>直接法／間接法の分類</td>
+<td>温度（間接法）<strong>または</strong>変位（直接法）</td>
+<td>直接法は変位を測って直接補正。状態推定はしない</td>
+</tr>
+<tr class="odd">
+<td><a
+href="https://openbooks.itmo.ru/en/article/18553/USING_THE_EXTENDED_KALMAN_FILTER_IN_NONSTATIONARY_THERMAL_MEASUREMENT_WHEN_SOLVING_INVERSE_HEAT_TRANSFER_PROBLEMS.html">逆熱伝導問題（EKF）</a></td>
+<td>拡張カルマンフィルタ</td>
+<td>温度のみ</td>
+<td>―</td>
+</tr>
+<tr class="even">
+<td><a href="https://arxiv.org/pdf/1602.02209">Displacement Data
+Assimilation</a></td>
+<td>EnKF</td>
+<td><strong>変位のみ</strong>（流体分野）</td>
+<td>観測として使用</td>
+</tr>
+<tr class="odd">
+<td>日本（特許・論文）</td>
+<td>回帰・CNN・多点温度計測（302点）</td>
+<td>温度のみ</td>
+<td>出力</td>
+</tr>
+</tbody>
+</table>
+<h3 id="いちばん近いのは-eth-zurich-2024">4-2. いちばん近いのは ETH
+Zurich (2024)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>ETH Zurich (2024)</th>
+<th>本研究</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>モデル</td>
+<td>低次元化した FEM</td>
+<td>POD/Q-DEIM の ROM</td>
+</tr>
+<tr class="even">
+<td>同化</td>
+<td>カルマンフィルタ</td>
+<td>EnKF</td>
+</tr>
+<tr class="odd">
+<td><strong>観測</strong></td>
+<td><strong>温度のみ</strong>（25本中13本）</td>
+<td><strong>温度2本＋変位2本</strong></td>
+</tr>
+<tr class="even">
+<td>推定するもの</td>
+<td>温度場 → 熱変位</td>
+<td>温度場・熱変形・<strong>発熱量</strong></td>
+</tr>
+<tr class="odd">
+<td>結果</td>
+<td>未観測温度 RMSE 2.7 ℃、熱変位 67.4 → 33.3 µm（実機）</td>
+<td>温度場 0.16 K、未観測の反り 0.081 µm（計算で作った真値）</td>
+</tr>
+<tr class="even">
+<td>実装</td>
+<td>非公開</td>
+<td><strong>オープンソースで公開</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>手法の枠組みはほぼ同じです。</strong>
+違いは「観測に変位を入れたか」「発熱量まで推定するか」「実装が公開されているか」です。
+ただし ETH
+は<strong>実機</strong>で検証しており、本研究は計算で作った真値だけです。ここは明確に劣ります。</p>
+<h3 id="分かったこと">4-3. 分かったこと</h3>
+<ol type="1">
+<li>工作機械の分野では
+<strong>「温度を測って変位を出す」が標準</strong>です。</li>
+<li>変位を測る方法（直接法）もありますが、<strong>変位をそのまま補正に使うもので、温度場の推定には戻していません</strong>。</li>
+<li><strong>温度と変位を同時に観測として同化に入れた例は見つかりませんでした。</strong></li>
+<li>変位を観測に使う同化自体は、別分野（流体、き裂）にあります。<strong>手法として新しいわけではありません。</strong></li>
+</ol>
+<hr />
+<h2 id="検証同じ場所に温度計を置いたらどうなるか">5.
+【検証】同じ場所に温度計を置いたらどうなるか</h2>
+<p>「変位計のほうが情報量が多いから良い」のかを確かめるため、<strong>同じ場所に温度計を置いた場合</strong>と比べました。
+センサの本数（計4本）と場所をそろえ、変えるのは「そこで何を測るか」だけです（<code>run/disp_vs_temp_same_place.py</code>）。</p>
+<figure>
+<img src="img/disp_vs_temp_same_place.png"
+alt="同じ場所で温度か変位か" />
+<figcaption aria-hidden="true">同じ場所で温度か変位か</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測（温度2点 P2＋P0 は共通）</th>
+<th style="text-align: right;">温度場全体</th>
+<th style="text-align: right;">反り A−O</th>
+<th style="text-align: right;">Uz(A)</th>
+<th style="text-align: right;">Uz(O)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度2点のみ</td>
+<td style="text-align: right;">0.528 K</td>
+<td style="text-align: right;">0.756 µm</td>
+<td style="text-align: right;">0.234 µm</td>
+<td style="text-align: right;">0.922 µm</td>
+</tr>
+<tr class="even">
+<td>＋ A/O に<strong>温度計</strong>2本</td>
+<td style="text-align: right;"><strong>0.132 K</strong></td>
+<td style="text-align: right;">0.201 µm</td>
+<td style="text-align: right;"><strong>0.113 µm</strong></td>
+<td style="text-align: right;">0.154 µm</td>
+</tr>
+<tr class="odd">
+<td>＋ A/O に<strong>変位計</strong>2本（本番）</td>
+<td style="text-align: right;">0.145 K</td>
+<td style="text-align: right;"><strong>0.135 µm</strong></td>
+<td style="text-align: right;">0.138 µm</td>
+<td style="text-align: right;"><strong>0.104 µm</strong></td>
+</tr>
+<tr class="even">
+<td>＋ 両方（計6本）</td>
+<td style="text-align: right;">0.127 K</td>
+<td style="text-align: right;">0.136 µm</td>
+<td style="text-align: right;">0.110 µm</td>
+<td style="text-align: right;">0.117 µm</td>
+</tr>
+</tbody>
+</table>
+<p>seed
+ごとに対応をとった勝敗（変位計が温度計より良かった回数、5回中）：</p>
+<table>
+<thead>
+<tr class="header">
+<th>評価する量</th>
+<th style="text-align: right;">変位計が良かった回数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場全体</td>
+<td style="text-align: right;">2 / 5</td>
+</tr>
+<tr class="even">
+<td><strong>反り A−O</strong></td>
+<td style="text-align: right;"><strong>4 / 5</strong></td>
+</tr>
+<tr class="odd">
+<td>Uz(A)</td>
+<td style="text-align: right;">0 / 5</td>
+</tr>
+<tr class="even">
+<td><strong>Uz(O)</strong></td>
+<td style="text-align: right;"><strong>5 / 5</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="分かったこと主張の修正">分かったこと（主張の修正）</h3>
+<ul>
+<li><strong>温度場全体を当てるなら、同じ場所なら温度計と変位計はほぼ互角</strong>です（0.132
+対 0.145 K、差は seed のばらつきに埋もれる）。</li>
+<li><strong>反りを当てるなら変位計のほうが良い</strong>（0.135 対 0.201
+µm、5回中4回）。知りたい量を直接測っているためです。</li>
+</ul>
+<blockquote>
+<p><strong>したがって「変位計は情報量が多いから優れている」とは言えません。</strong>
+変位計の価値は、<strong>温度計を置けない場所に置けること</strong>にあります。
+工作機械では、加工中の工具先端や内部に熱電対を入れられませんが、変位計なら外側から測れます。</p>
+</blockquote>
+<hr />
+<h2 id="検証別の場所で変位を測って測っていない-ao-を当てる">6.
+【検証】別の場所で変位を測って、測っていない A・O を当てる</h2>
+<p><a href="blog_004_pod_selected_rom.md">blog_004 §7-4</a>
+の構成は、評価している A・O をそのまま観測に使っていました（循環）。
+そこで、<strong>A・O を一度も観測せず</strong>、別の場所の変位2点だけで
+A・O
+を当てられるかを調べました（<code>run/disp_elsewhere_predict_AO.py</code>）。</p>
+<p>変位の候補は、FrontISTR
+6回で作った<strong>全5,040節点×3成分</strong>から選べます。 A・O
+の近く（12 mm
+以内）は候補から除き、残りから「同化前に計算できる指標」で2点を貪欲に選びました。</p>
+<figure>
+<img src="img/disp_elsewhere_predict_AO.png"
+alt="別の場所で測って A・O を当てる" />
+<figcaption aria-hidden="true">別の場所で測って A・O
+を当てる</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>変位2点をどこに置くか</th>
+<th style="text-align: right;"><strong>観測していない反り
+A−O</strong></th>
+<th style="text-align: right;"><strong>観測していない
+Uz(A)</strong></th>
+<th style="text-align: right;">温度場全体</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位なし（温度2点のみ）</td>
+<td style="text-align: right;">0.756 µm</td>
+<td style="text-align: right;">0.234 µm</td>
+<td style="text-align: right;">0.528 K</td>
+</tr>
+<tr class="even">
+<td>A・O 自身を観測（<strong>循環</strong>・参考）</td>
+<td style="text-align: right;">0.135 µm</td>
+<td style="text-align: right;">0.138 µm</td>
+<td style="text-align: right;">0.145 K</td>
+</tr>
+<tr class="odd">
+<td>B・C（中段 z=75 mm の <span class="math inline">\(U_z\)</span>
+）</td>
+<td style="text-align: right;">0.185 µm</td>
+<td style="text-align: right;">0.151 µm</td>
+<td style="text-align: right;">0.175 K</td>
+</tr>
+<tr class="even">
+<td><strong>選定2点</strong>（(9.7, −36.2, 100.5) の <span
+class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span
+class="math inline">\(U_z\)</span> ）</td>
+<td style="text-align: right;"><strong>0.076 µm</strong></td>
+<td style="text-align: right;"><strong>0.103 µm</strong></td>
+<td style="text-align: right;"><strong>0.126 K</strong></td>
+</tr>
+<tr class="odd">
+<td>側面中段 z=50 mm の <span class="math inline">\(U_x\)</span></td>
+<td style="text-align: right;">0.207 µm</td>
+<td style="text-align: right;">0.189 µm</td>
+<td style="text-align: right;">0.248 K</td>
+</tr>
+<tr class="even">
+<td>底面近く z=5 mm の <span class="math inline">\(U_z\)</span>
+（悪い例）</td>
+<td style="text-align: right;">0.559 µm</td>
+<td style="text-align: right;">0.196 µm</td>
+<td style="text-align: right;">0.408 K</td>
+</tr>
+</tbody>
+</table>
+<h3 id="分かったこと-1">分かったこと</h3>
+<ol type="1">
+<li><strong>A・O を一度も測らずに、反りを 0.076 µm
+で当てられました。</strong> 真値の振幅 2.74 µm に対して 2.8 %
+です。</li>
+<li><strong>A・O を直接測った場合（0.135 µm）より正確です。</strong>
+測る場所を選べば、知りたい場所を測らないほうが良い結果になりました。
+<ul>
+<li>理由は信号対雑音比と考えています。A・O の反りは最大 2.7 µm
+ですが、変位計のノイズは 0.3 µm あります。
+選定した点は変位がもっと大きく動くので、同じノイズでも情報が多く取れます。<strong>この解釈は確かめていません。</strong></li>
+</ul></li>
+<li><strong>置き場所で大きく変わります。</strong> 底面近く（0.559
+µm）は、変位なし（0.756
+µm）から少ししか改善しません。底面は固定されていてほとんど動かないためです。</li>
+<li>選定は<strong>同化を回す前</strong>に、FrontISTR の熱感度と ROM
+で作った温度のばらつきだけで計算しています（<a
+href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
+と同じ方法）。</li>
+</ol>
+<blockquote>
+<p><strong>これが本研究のいちばん強い結果だと考えています。</strong>
+工作機械で本当に知りたいのは工具先端の変位ですが、加工中にそこは測れません。
+<strong>測れる場所で変位を測り、測れない場所の変形を当てる</strong>ことを、計算で示せました。</p>
+</blockquote>
+<h3 id="注意未確認">注意（未確認）</h3>
+<ul>
+<li>真値は ROM
+の双子実験です。実ソルバ（OpenFOAM＋FrontISTR）を真値にした試験はしていません。</li>
+<li>「直接測るより正確」の理由（信号対雑音比）は解釈で、別の計算では確かめていません。</li>
+<li>選定した2点は上面にあります。この形状では上面がよく動くためで、他の形状では変わります。</li>
+</ul>
+<hr />
+<h2 id="主張の書き方">7. 主張の書き方</h2>
+<h3 id="言ってよいこと">7-1. 言ってよいこと</h3>
+<blockquote>
+<p>工作機械の熱変形補正では、温度を観測して変位を推定する形か、変位を直接測って補正する形が一般的である。
+本研究は<strong>温度と変位を同時に観測としてデータ同化に入れ</strong>、温度センサのない点の温度・測っていない点の熱変形・発熱量を同時に推定した。
+とくに、<strong>A・O を一度も観測せずに、別の場所の変位2点から反りを
+0.076 µm（振幅の2.8 %）で推定</strong>できた。これは A・O
+を直接測った場合（0.135 µm）より正確である。
+<strong>調べた範囲では、この形の報告は見当たらない。</strong></p>
+</blockquote>
+<p>「調べた範囲では」を必ず付けます。英語5回・日本語1回の検索だけが根拠だからです。</p>
+<h3 id="言ってはいけないこと">7-2. 言ってはいけないこと</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>言わない</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>「初めて提案した」</td>
+<td>網羅的な文献調査をしていない</td>
+</tr>
+<tr class="even">
+<td>「EnKF／POD／変位の同化が新しい」</td>
+<td>いずれも既知の手法</td>
+</tr>
+<tr class="odd">
+<td>「変位計は温度計より情報量が多い」</td>
+<td>同じ場所では互角だった（§5）</td>
+</tr>
+<tr class="even">
+<td>「実機で有効」</td>
+<td>真値はすべて計算で作ったもの</td>
+</tr>
+<tr class="odd">
+<td>「どんな機械でも有効」</td>
+<td>熱源の位置が変わると配置も変わる（<a
+href="blog_007_rom_applicability.md">blog_007</a>）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="主張を強くするには未実施">7-3. 主張を強くするには（未実施）</h3>
+<ol type="1">
+<li><strong>文献調査を広げる</strong>：精密工学会・日本機械学会の論文、構造ヘルスモニタリング分野。</li>
+<li><strong>センサ数をそろえた比較</strong>：「温度計3本」対「温度計2本＋変位計1本」。変位計が温度計の代わりになるかを示す。</li>
+<li><strong>実ソルバを真値にした holdout 試験</strong>：§6 を
+OpenFOAM＋FrontISTR の真値で確かめる。</li>
+<li><strong>実機での検証</strong>：<code>IoT/thermal_expansion_experiment/</code>
+に計画があるが、未実施。</li>
+</ol>
+<hr />
+<h2 id="発表での位置づけ案">8. 発表での位置づけ（案）</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>章</th>
+<th>言うこと</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>背景</td>
+<td>熱変形補正では温度を測って変位を推定するのが一般的</td>
+</tr>
+<tr class="even">
+<td>課題</td>
+<td>温度計は1本で1点しか見られない。置けない場所もある</td>
+</tr>
+<tr class="odd">
+<td><strong>本研究の主張</strong></td>
+<td><strong>変位も観測として同化に入れる</strong>。変位計は5点すべての温度に触れるので、温度計のない点の温度まで直る。しかも<strong>知りたい場所に置く必要がない</strong></td>
+</tr>
+<tr class="even">
+<td>結果</td>
+<td>温度場 0.503 → 0.160 K、発熱量 14.05 → 14.89 W。<strong>A・O
+を測らずに反り 0.076 µm</strong>（直接測るより正確）</td>
+</tr>
+<tr class="odd">
+<td>限界</td>
+<td>計算で作った真値のみ。実機は未実施。文献調査も網羅的ではない</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
