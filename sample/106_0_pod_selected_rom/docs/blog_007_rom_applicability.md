@@ -14,7 +14,7 @@
 > |---|---|---|
 > | [blog_006](blog_006_temp2_disp2_step_by_step.md) | **同化の手順**。温度2点＋変位2点をどう使い、なぜ発熱量が直るか | ROM の双子実験 |
 > | [blog_007](blog_007_rom_applicability.md) | **ROM の適用範囲**。条件が変わっても使えるか | **OpenFOAM＋FrontISTR** |
-> | [blog_008](blog_008_novelty_displacement_assimilation.md) | **主張と先行研究**。研究としてどこが新しいか | ROM の双子実験 |
+> | [blog_008](blog_008_novelty_displacement_assimilation.md) | **主張と先行研究**。研究としてどこが新しいか | ROM（§4・§5）と<br>**OpenFOAM＋FrontISTR**（§6・§7） |
 >
 > 数値は重複を避け、各記事が担当する検証だけを載せています。
 

@@ -13,7 +13,7 @@
 > |---|---|---|
 > | [blog_006](blog_006_temp2_disp2_step_by_step.md) | **同化の手順**。温度2点＋変位2点をどう使い、なぜ発熱量が直るか | ROM の双子実験 |
 > | [blog_007](blog_007_rom_applicability.md) | **ROM の適用範囲**。条件が変わっても使えるか | **OpenFOAM＋FrontISTR** |
-> | [blog_008](blog_008_novelty_displacement_assimilation.md) | **主張と先行研究**。研究としてどこが新しいか | ROM の双子実験 |
+> | [blog_008](blog_008_novelty_displacement_assimilation.md) | **主張と先行研究**。研究としてどこが新しいか | ROM（§4・§5）と<br>**OpenFOAM＋FrontISTR**（§6・§7） |
 >
 > 数値は重複を避け、各記事が担当する検証だけを載せています。
 
@@ -31,7 +31,7 @@
 | **評価** | 加熱期 0〜300 秒の平均。数値は本番の計算（`run/run_da_compare.py`）と `run/trace_displacement_and_Q.py` の実測値 |
 
 > **注意**：この記事の構成は、評価している A・O をそのまま観測に使っています（§7-4 の循環の問題）。
-> **A・O を測らずに当てた結果は [blog_008 §6](blog_008_novelty_displacement_assimilation.md)** にあります。
+> **A・O を測らずに当てた結果は [blog_008 §5](blog_008_novelty_displacement_assimilation.md)** にあります。
 
 ---
 
@@ -331,7 +331,7 @@ for k in range(5):
 - $\bar u$ と $D$ は `results/disp_operator.npz` に保存し、以後は読むだけにしています（キャッシュ）。
   **同化の最中に FrontISTR を呼ぶことは一度もありません。**
 - 全 5,040 節点ぶんの $D$ も同じ6回で作れます（`run/build_full_disp_operator.py`）。
-  FrontISTR は1回解くと全節点の変位を返すためで、[blog_008 §6](blog_008_novelty_displacement_assimilation.md) の
+  FrontISTR は1回解くと全節点の変位を返すためで、[blog_008 §5](blog_008_novelty_displacement_assimilation.md) の
   15,120 通りの候補から変位計を選ぶ計算は、これを使っています。
 
 #### できあがった $D$
@@ -872,8 +872,8 @@ $$
 
 | | 内容 | 詳しくは |
 |---|---|---|
-| **先行研究の調査** | 工作機械の熱変形補正は、温度を観測して変位を推定する形（[ETH 2024](https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb) など）か、変位を直接測って補正する形が一般的。**温度と変位を同時に観測として同化に入れた例は、調べた範囲で見当たらない** | [blog_008 §4](blog_008_novelty_displacement_assimilation.md) |
-| **主張** | 熱変形を「補正すべき対象」から「**温度場を知るための観測情報**」に位置づけ直す | [blog_008 §7-2](blog_008_novelty_displacement_assimilation.md) |
+| **先行研究の調査** | 工作機械の熱変形補正は、温度を観測して変位を推定する形（[ETH 2024](https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb) など）か、変位を直接測って補正する形が一般的。**温度と変位を同時に観測として同化に入れた例は、調べた範囲で見当たらない** | [blog_008 §3](blog_008_novelty_displacement_assimilation.md) |
+| **主張** | 熱変形を「補正すべき対象」から「**温度場を知るための観測情報**」に位置づけ直す | [blog_008 §8-2](blog_008_novelty_displacement_assimilation.md) |
 | **この記事が支えている部分** | 変位計1本が5点すべての温度に触れるので、温度計のない点の温度まで直る（§7-5b・§14） | 本記事 |
 
 **手法そのものは新しくありません。** POD、Q-DEIM、EnKF、目的に応じたセンサ配置の考え方には先行研究があります
