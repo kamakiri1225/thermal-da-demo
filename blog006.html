@@ -268,11 +268,11 @@ id="toc-ステップ2予報-各メンバーを-30-秒進める">6. ステップ2
 id="toc-ステップ3観測演算子-メンバーの状態からセンサの読みを作る">7.
 ステップ3：観測演算子 ― メンバーの状態から「センサの読み」を作る</a>
 <ul>
-<li><a href="#温度から変位への写像-d-を事前に1回だけ作る"
-id="toc-温度から変位への写像-d-を事前に1回だけ作る">7-1.
-温度から変位への写像 <span class="math inline">\(D\)</span>
-を、事前に1回だけ作る</a></li>
-<li><a href="#実際の行列" id="toc-実際の行列">7-2. 実際の行列</a></li>
+<li><a href="#温度から変位をどう計算するか"
+id="toc-温度から変位をどう計算するか">7-1.
+温度から変位をどう計算するか</a></li>
+<li><a href="#実際の行列計算の順に" id="toc-実際の行列計算の順に">7-2.
+実際の行列（計算の順に）</a></li>
 <li><a href="#メンバーで計算してみる-t30-秒の予報メンバー1"
 id="toc-メンバーで計算してみる-t30-秒の予報メンバー1">7-3.
 1メンバーで計算してみる（ <span class="math inline">\(t=30\)</span>
@@ -708,55 +708,245 @@ T}
 class="math inline">\(T_2\)</span> と <span
 class="math inline">\(T_0\)</span> をそのまま取り出すだけです。</p>
 <p><strong>変位の2つ</strong>は状態に入っていないので、温度から計算します。ここが「変位を同化に使う」ための中心部分なので、実際にやったことを順に書きます。</p>
-<h3 id="温度から変位への写像-d-を事前に1回だけ作る">7-1.
-温度から変位への写像 <span class="math inline">\(D\)</span>
-を、事前に1回だけ作る</h3>
-<p>変位は状態に入れないので、<strong>温度から変位を計算する仕組み</strong>が要ります。それが行列
-<span class="math inline">\(D\)</span> です。 ここでは <span
-class="math inline">\(D\)</span>
-を<strong>どうやって作ったか</strong>を手順で書きます。</p>
-<h4 id="なぜ6回で済むのか">なぜ6回で済むのか</h4>
-<p><strong>ふつうに考えると、毎時刻 FrontISTR
-を解かないといけません。</strong> 温度は 30 秒ごとに変わり、メンバーも
-60 通りあるので、20 サイクル × 60 メンバー＝<strong>1,200 回</strong>の
-FEM 解析になります。
-これでは「軽くする」という目的が達成できません。</p>
-<p>これを
-<strong>6回</strong>で済ませられるのは、次の2つが重なっているからです。</p>
-<p><strong>① 熱弾性は温度について線形</strong></p>
+<h3 id="温度から変位をどう計算するか">7-1.
+温度から変位をどう計算するか</h3>
+<p>変位は状態に入れないので、<strong>温度から変位を計算する仕組み</strong>が要ります。
+ここでは、いちばん素直な「熱感度 <span class="math inline">\(W\)</span>
+を使う方法」から順に説明します。</p>
+<hr />
+<h4 id="ステップ1-w-があれば変位は1行で出る">ステップ1： <span
+class="math inline">\(W\)</span> があれば、変位は1行で出る</h4>
+<p>熱弾性は温度について線形なので、温度と変位の関係は<strong>行列1つ</strong>で書けます。</p>
+<p><span class="math display">\[
+u=W\,(T-T_\mathrm{ref})
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>中身</th>
+<th>大きさ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T\)</span></td>
+<td>全 5,040 節点の温度</td>
+<td>5,040</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span></td>
+<td><strong>熱感度</strong>（温度 → 変位の表）</td>
+<td>15,120 × 5,040</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(u\)</span></td>
+<td>全節点の変位（5,040 節点 × 3 方向）</td>
+<td>15,120</td>
+</tr>
+</tbody>
+</table>
+<p><strong><span class="math inline">\(W\)</span> の <span
+class="math inline">\((i,j)\)</span>
+成分の意味は、そのまま読めます。</strong></p>
+<blockquote>
+<p><strong>節点 <span class="math inline">\(j\)</span> の温度が 1 K
+上がると、変位自由度 <span class="math inline">\(i\)</span> が何 µm
+動くか</strong></p>
+</blockquote>
+<p>代表5点について、上面 A・O
+の上下変位に対する値はこうなっています。</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A の <span class="math inline">\(U_z\)</span> [µm/K]</td>
+<td style="text-align: right;">+0.329</td>
+<td style="text-align: right;">−0.134</td>
+<td style="text-align: right;">+0.261</td>
+<td style="text-align: right;">+0.639</td>
+<td style="text-align: right;">+0.115</td>
+</tr>
+<tr class="even">
+<td>O の <span class="math inline">\(U_z\)</span> [µm/K]</td>
+<td style="text-align: right;">−0.141</td>
+<td style="text-align: right;">+0.520</td>
+<td style="text-align: right;">−0.343</td>
+<td style="text-align: right;">+0.601</td>
+<td style="text-align: right;">+0.573</td>
+</tr>
+</tbody>
+</table>
+<p>「P3 の温度が 1 K 上がると A が 0.639 µm
+上がる」と、物理的にそのまま読めます。</p>
+<h4 id="ステップ2-w-を-frontistr-からどう作るか">ステップ2： <span
+class="math inline">\(W\)</span> を FrontISTR からどう作るか</h4>
 <p>FrontISTR が解いているのは</p>
 <p><span class="math display">\[
 K_s\,u=H_T\,(T-T_\mathrm{ref})
 \]</span></p>
-<p>で（ <span class="math inline">\(K_s\)</span> ：剛性行列、 <span
-class="math inline">\(H_T\)</span> ：温度を熱ひずみの力に変える行列）、
-<strong>温度を2倍にすれば変位も2倍、温度を足し算すれば変位も足し算</strong>になります。</p>
+<p>なので、 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
+です。実際に作るには2つの向きがあります。</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>向き</th>
+<th>FrontISTR に入れるもの</th>
+<th>1回の求解で得られるもの</th>
+<th style="text-align: right;">全部欲しいときの回数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>列で作る</strong></td>
+<td>「節点 <span class="math inline">\(j\)</span> だけ 1 K 上げる」</td>
+<td><span class="math inline">\(W\)</span> の <strong>1列</strong></td>
+<td style="text-align: right;">5,040 回（<strong>54 秒</strong>）</td>
+</tr>
+<tr class="even">
+<td><strong>行で作る（随伴法）</strong></td>
+<td>「点 <span class="math inline">\(i\)</span>
+に単位荷重を掛ける」</td>
+<td><span class="math inline">\(W\)</span> の <strong>1行</strong></td>
+<td style="text-align: right;">知りたい点の数だけ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>行で作る（随伴法）</strong>は、 <span
+class="math inline">\(K_s\)</span> が対称であることを使います。</p>
+<p><span class="math display">\[
+W[i,:]=e_i^{\mathsf T}K_s^{-1}H_T=\big(K_s^{-1}e_i\big)^{\mathsf
+T}H_T=\lambda_i^{\mathsf T}H_T
+\]</span></p>
+<p><span class="math inline">\(\lambda_i\)</span> は「点 <span
+class="math inline">\(i\)</span> に単位荷重を掛けたときの変位場」です。
+<strong>知りたい点に 1 N の力を掛けて1回解けば、その点の「全 5,040
+節点の温度に対する感度」が丸ごと出ます。</strong></p>
+<p>実際に A・O
+の2点で試しました（<code>run/W_rows_by_adjoint.py</code>）。</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>やり方</th>
+<th style="text-align: right;">求解回数</th>
+<th style="text-align: right;">時間</th>
+<th style="text-align: right;">全体構築版との差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>随伴法（A・O の2点）</strong></td>
+<td style="text-align: right;"><strong>2 回</strong></td>
+<td style="text-align: right;"><strong>0.042 秒</strong></td>
+<td style="text-align: right;">1.6×10⁻¹⁵（一致）</td>
+</tr>
+<tr class="even">
+<td>全部作る</td>
+<td style="text-align: right;">5,040 回</td>
+<td style="text-align: right;">54.4 秒</td>
+<td style="text-align: right;">―</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img src="img/W_rows_adjoint.png" alt="W の行を随伴法で求める" />
+<figcaption aria-hidden="true">W の行を随伴法で求める</figcaption>
+</figure>
+<p><strong>変位を知りたい点が少ないなら、随伴法が速くて分かりやすい</strong>です。</p>
+<h4
+id="ステップ3ところが同化は5点の温度しか持っていない">ステップ3：ところが、同化は5点の温度しか持っていない</h4>
+<p>ここで問題が出ます。</p>
+<pre><code>同化が推定しているもの ：代表5点の温度（T0〜T4）
+W が必要とするもの     ：5,040 節点の温度
+                        ↑ 5,035 点ぶんの穴がある</code></pre>
+<p>この穴を埋めるのが <strong>POD</strong> です（<a
+href="blog_004_pod_selected_rom.md">blog_004 §5</a>）。 <span
+class="math inline">\(T_{\mathrm{all}}\)</span> は全節点の温度です。</p>
+<p><span class="math display">\[
+T_{\mathrm{all}}=\bar T+U_r\,a,\qquad a=U_{rP}^{+}\big(T_5-\bar T_P\big)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(U_r\)</span>
+：モード5つを並べた行列（5,040 × 5）</li>
+<li><span class="math inline">\(a\)</span>
+：モードの混ぜ具合（5個の数）</li>
+</ul>
 <blockquote>
-<p>温度場 <span class="math inline">\(T_A\)</span> の変位が <span
-class="math inline">\(u_A\)</span> 、温度場 <span
-class="math inline">\(T_B\)</span> の変位が <span
-class="math inline">\(u_B\)</span> なら、 温度場 <span
-class="math inline">\((3T_A+2T_B)\)</span> の変位は <span
-class="math inline">\((3u_A+2u_B)\)</span>
-です。解き直す必要はありません。</p>
+<p><strong>モードは「5点から全節点の温度を復元する道具」</strong>であって、変位の計算のためのものではありません。</p>
 </blockquote>
-<p><strong>② 温度場は5つのパターンの組み合わせで書ける</strong></p>
-<p>POD により、どの時刻の温度場も次の形に表せます（<a
-href="blog_004_pod_selected_rom.md">blog_004 §2</a>）。</p>
+<h4 id="ステップ42つをつなぐと-d-になる">ステップ4：2つをつなぐと <span
+class="math inline">\(D\)</span> になる</h4>
+<p>ステップ1の式に、ステップ3の温度を代入します。</p>
 <p><span class="math display">\[
-T_{\mathrm{all}}\approx\bar
-T_{\mathrm{all}}+a_1\varphi_1+a_2\varphi_2+a_3\varphi_3+a_4\varphi_4+a_5\varphi_5
+u=W\big(\bar T+U_r a-T_\mathrm{ref}\big)
+=\underbrace{W(\bar T-T_\mathrm{ref})}_{\bar u}+\underbrace{W
+U_r}_{D}\,a
 \]</span></p>
-<p><strong>時刻ごとに変わるのは混ぜ具合 <span
-class="math inline">\(a_1\dots a_5\)</span> だけ</strong>で、パターン
-<span class="math inline">\(\varphi_k\)</span> は固定です。</p>
-<p><strong>①＋②から</strong></p>
-<p>温度場が「平均場 ＋
-5つのパターンの組み合わせ」で、変形がその足し算で決まるなら、
-<strong>平均場と5つのパターンそれぞれの変位を1回ずつ調べておけばよい</strong>ことになります。</p>
 <p><span class="math display">\[
-u\approx\bar u+a_1 D_1+a_2 D_2+a_3 D_3+a_4 D_4+a_5 D_5
+\boxed{\ u=\bar u+D\,a,\qquad D=W U_r\ }
 \]</span></p>
+<p><strong><span class="math inline">\(D\)</span> は「 <span
+class="math inline">\(W\)</span>
+にモードを掛けたもの」</strong>です。モードを足しているのではありません。</p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+<th>大きさ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\bar u\)</span></td>
+<td>平均の温度場での変位</td>
+<td>15,120</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D=WU_r\)</span></td>
+<td><strong>モード1つあたりの変位分布</strong></td>
+<td>15,120 × <strong>5</strong></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(D\)</span>
+の列が5本しかないのは、<strong>温度場が5つのモードの組み合わせに限られる</strong>からです。</p>
+<h4 id="ステップ5-d-は-w-を作らずに求められる">ステップ5： <span
+class="math inline">\(D\)</span> は <span
+class="math inline">\(W\)</span> を作らずに求められる</h4>
+<p>ここが実装上のポイントです。 <span
+class="math inline">\(D=WU_r\)</span> を計算するのに、 <span
+class="math inline">\(W\)</span> を作る必要はありません。</p>
+<p><span class="math display">\[
+D=WU_r=\big(K_s^{-1}H_T\big)U_r=K_s^{-1}\big(H_T U_r\big)
+\]</span></p>
+<p><strong>括弧を右に付け替える</strong>と、「 <span
+class="math inline">\(H_T U_r\)</span> を右辺にして解く」になります。
+そして <span class="math inline">\(H_T U_r\)</span> の <span
+class="math inline">\(k\)</span> 列目は「<strong>モード <span
+class="math inline">\(\varphi_k\)</span>
+を温度として入れたときの熱荷重</strong>」です。</p>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -764,106 +954,110 @@ u\approx\bar u+a_1 D_1+a_2 D_2+a_3 D_3+a_4 D_4+a_5 D_5
 </colgroup>
 <thead>
 <tr class="header">
-<th>調べるもの</th>
-<th>回数</th>
+<th>やること</th>
+<th>FrontISTR の操作</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>平均場 <span class="math inline">\(\bar T_{\mathrm{all}}\)</span>
-の変位 <span class="math inline">\(\bar u\)</span></td>
-<td>1回</td>
+<td><span class="math inline">\(H_T U_r\)</span> の <span
+class="math inline">\(k\)</span> 列目を作る</td>
+<td>モード <span class="math inline">\(\varphi_k\)</span>
+を<strong>節点温度として入力ファイルに書く</strong></td>
 </tr>
 <tr class="even">
-<td>パターン <span
-class="math inline">\(\varphi_1\dots\varphi_5\)</span> それぞれの変位
-<span class="math inline">\(D_1\dots D_5\)</span></td>
-<td>5回</td>
+<td><span class="math inline">\(K_s^{-1}\)</span> を掛ける</td>
+<td><strong>FrontISTR を1回実行する</strong></td>
 </tr>
 <tr class="odd">
-<td><strong>合計</strong></td>
-<td><strong>6回</strong></td>
+<td>答え</td>
+<td>出てきた変位 ＝ <span class="math inline">\(D_k\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>あとは混ぜ具合 <span class="math inline">\(a\)</span>
-を掛けて足すだけなので、<strong>1,200 回の FEM が
-6回</strong>になります。</p>
+<p>つまり、</p>
 <blockquote>
-<p><strong>たとえると色の配合表です。</strong>
-赤・青・黄のインクを1色ずつ単独で塗って、どう見えるかを調べておけば（＝6回の
-FrontISTR）、 あとは「赤 0.3、青
-0.7」と混ぜるだけで、実際に塗らなくても結果が分かります。
-配合を何通り試しても、塗る作業は最初の3回だけで済みます。</p>
+<p><strong>「モード <span class="math inline">\(\varphi_k\)</span>
+を温度だと思って FrontISTR
+に入れ、普通に解く」を5回繰り返す</strong></p>
 </blockquote>
-<blockquote>
-<p><strong>行列で見るとどうなるか</strong>は、<a
-href="#w-を作らずに-wphi-を求める--括弧の付け替え">「 <span
-class="math inline">\(W\)</span> を作らずに <span
-class="math inline">\(W\Phi\)</span> を求める ― 括弧の付け替え」</a>で
-小さな数字の例とともに説明します。「熱感度 <span
-class="math inline">\(W\)</span>
-を作ってから掛ければよいのでは」と思った方は、そちらを先に読んでください。</p>
-</blockquote>
-<h4 id="手順">手順</h4>
-<p><strong>ステップ0：FEM のメッシュと材料を用意する</strong></p>
-<p><code>cylinder_mesh.build_cylinder_mesh(4, 48, 20, ...)</code>
-で円筒メッシュ（<strong>5,040 節点</strong>）を作り、
-ヤング率・ポアソン比・線膨張係数を設定し、底面を固定します。 OpenFOAM
-のセル（20,696 個）と FEM の節点は数も位置も違うので、 <strong>各 FEM
-節点に、いちばん近い OpenFOAM
-セルを1つ割り当てておきます</strong>（<code>cKDTree</code>
-で最近傍探索）。</p>
-<p><strong>ステップ1（1回目）：平均の温度場を入れる</strong></p>
-<p>POD の平均場 <span class="math inline">\(\bar
-T_{\mathrm{all}}\)</span> （20,696 セル、22.21〜23.79 ℃）を、上の対応で
-FEM の節点温度に移し、FrontISTR を1回解きます。</p>
-<p>出てきた変位が <span class="math inline">\(\bar u\)</span> です。</p>
+<p>だけで <span class="math inline">\(D\)</span>
+が手に入ります（平均場で1回足して計 <strong>6回</strong>）。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/run_da_compare.py の build_disp_operator より</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>uz_mean <span class="op">=</span> run_field(mean[near])                  <span class="co"># 1回目：平均の温度場 → ū</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])   <span class="co"># 2〜6回目：モードkを温度として入れる → D_k</span></span></code></pre></div>
+<p><code>run_field</code> の中身は、①<code>.cnt</code> に節点温度を書く
+→ ②<code>fistr1</code> を実行 → ③変位を読む、の3つだけです。</p>
+<h4 id="どちらで考えてもよい">どちらで考えてもよい</h4>
 <table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th></th>
-<th style="text-align: right;">A（+X 上面）</th>
-<th style="text-align: right;">O（−X 上面）</th>
+<th><span class="math inline">\(W\)</span> から考える</th>
+<th><span class="math inline">\(D\)</span> から考える</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(\bar u\)</span></td>
-<td style="text-align: right;"><strong>3.970 µm</strong></td>
-<td style="text-align: right;"><strong>2.601 µm</strong></td>
+<td>式</td>
+<td><span class="math inline">\(u=W(T-T_\mathrm{ref})\)</span></td>
+<td><span class="math inline">\(u=\bar u+D\,a\)</span></td>
+</tr>
+<tr class="even">
+<td>分かりやすさ</td>
+<td><strong>物理的に素直</strong>（温度 → 変位の表）</td>
+<td>モード係数という中間物が要る</td>
+</tr>
+<tr class="odd">
+<td>作るコスト</td>
+<td>列で 5,040 回（54 秒）／行で数回</td>
+<td><strong>6 回</strong></td>
+</tr>
+<tr class="even">
+<td>保存サイズ</td>
+<td>194 MB（float64、全体）</td>
+<td>15,120 × 5 の小さな行列</td>
+</tr>
+<tr class="odd">
+<td>実機規模</td>
+<td><span class="math inline">\(W\)</span> は数百 GB で非現実的</td>
+<td>モード数だけなので変わらない</td>
 </tr>
 </tbody>
 </table>
-<p><strong>ステップ2〜6（2〜6回目）：モードを1つずつ入れる</strong></p>
-<p>モード <span class="math inline">\(\varphi_k\)</span>
-は実在する温度分布ではなく「温度分布のパターン」です。
-これを<strong>無理やり温度として</strong> FrontISTR
-に入れ、「このパターンだけで変形したらどうなるか」を調べます。</p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])    <span class="co"># 基準温度 + モードk を入れて1回解く</span></span></code></pre></div>
+<p><strong>理解するときは <span class="math inline">\(W\)</span>
+、実装するときは <span class="math inline">\(D\)</span></strong>
+と考えると見通しがよくなります。 両者は <span
+class="math inline">\(D=WU_r\)</span> でつながっています。</p>
+<h4 id="実装上の補足">実装上の補足</h4>
 <ul>
-<li><code>Tref</code>
-は基準温度（これを入れると変位ゼロ）。そこにモードを足すので、<strong>モードのぶんだけの変位</strong>が出ます。</li>
-<li><code>U[near, k]</code> が「モード <span
-class="math inline">\(k\)</span> を FEM 節点に移したもの」です。</li>
-<li>モード1の値は −0.0077〜−0.0047
-と小さいですが、線形なので大きさは問題になりません（後で <span
-class="math inline">\(a_k\)</span> を掛けて戻します）。</li>
-</ul>
-<p>5回繰り返して、 <span class="math inline">\(D_1\)</span> 〜 <span
-class="math inline">\(D_5\)</span> が得られます。</p>
-<p><strong>ステップ7：結果を保存する</strong></p>
-<p><span class="math inline">\(\bar u\)</span> と <span
-class="math inline">\(D\)</span> を
+<li>OpenFOAM のセル温度は、FEM
+の各節点にいちばん近いセルの値を渡しました。</li>
+<li>A と O は、上面 <span class="math inline">\(z=100.5\)</span> mm、
+<span class="math inline">\(x=\pm28\)</span> mm
+にいちばん近い節点です。</li>
+<li><span class="math inline">\(\bar u\)</span> と <span
+class="math inline">\(D\)</span> は
 <code>results/disp_operator.npz</code>
-に保存し、以後はこれを読むだけにします（キャッシュ）。
+に保存し、以後は読むだけにしています（キャッシュ）。
 <strong>同化の最中に FrontISTR
-を呼ぶことは一度もありません。</strong></p>
+を呼ぶことは一度もありません。</strong></li>
+<li>全 5,040 節点ぶんの <span class="math inline">\(D\)</span>
+も同じ6回で作れます（<code>run/build_full_disp_operator.py</code>）。
+FrontISTR は1回解くと全節点の変位を返すためで、<a
+href="blog_008_novelty_displacement_assimilation.md">blog_008 §6</a> の
+15,120 通りの候補から変位計を選ぶ計算は、これを使っています。</li>
+</ul>
 <h4 id="できあがった-d">できあがった <span
 class="math inline">\(D\)</span></h4>
-<p>上面 A・O の上下方向だけを取り出すと、2行 × 5列の小さな行列です。</p>
+<p>上面 A・O の上下方向だけを取り出すと、2行 × 5列です。</p>
 <table>
 <thead>
 <tr class="header">
@@ -899,495 +1093,14 @@ class="math inline">\(D_5\)</span></th>
 </tr>
 </tbody>
 </table>
-<ul>
-<li><strong>行</strong>＝どの点のどの方向の変位か</li>
-<li><strong>列</strong>＝どのモードに対する応答か</li>
-</ul>
-<p>例えば <span class="math inline">\(D_2\)</span>
+<p>（ <span class="math inline">\(\bar u\)</span> は A が 3.970 µm、O が
+2.601 µm）</p>
+<p><span class="math inline">\(D_2\)</span>
 の列を見ると、モード2が増えると A は下がり（−0.0088）、O
 は上がり（+0.0120）ます。
 <strong>モード2は「片側だけ熱い」パターンなので、反りを作るモード</strong>だと読めます。</p>
-<h4 id="別のやり方-熱感度-w-から-d-を作ることもできる">別のやり方 ―
-熱感度 <span class="math inline">\(W\)</span> から <span
-class="math inline">\(D\)</span> を作ることもできる</h4>
-<p>「FrontISTR から熱感度行列 <span class="math inline">\(W\)</span>
-を出して、 <span class="math inline">\(D=W\Phi\)</span>
-で計算すればよいのでは」と考えることもできます。
-<strong>そのとおりで、数学的には同じものです。</strong></p>
-<p><span class="math inline">\(W\)</span> は「温度が 1 K
-上がると、どこが何 µm 動くか」の表で、</p>
-<p><span class="math display">\[
-W=K_s^{-1}H_T
-\]</span></p>
-<p>です。温度場をモードで表すと <span
-class="math inline">\(T-T_\mathrm{ref}=\Phi a\)</span> （ <span
-class="math inline">\(\Phi\)</span> ＝モードを並べた行列）なので、</p>
-<p><span class="math display">\[
-u=W(T-T_\mathrm{ref})=W\Phi\,a
-\quad\Rightarrow\quad
-D=W\Phi
-\]</span></p>
-<p>となり、確かに <span class="math inline">\(D\)</span>
-が得られます。実際、この研究で作った <span
-class="math inline">\(D\)</span> と <span
-class="math inline">\(W\)</span> の関係を数値で確かめると、</p>
-<p><span class="math display">\[
-W=D\,U_{rP}^{+},\qquad D=W\,U_{rP}
-\]</span></p>
-<p>が成り立っています（計算して一致を確認済み）。 <span
-class="math inline">\(W\)</span> の値は次のとおりです。</p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th style="text-align: right;">P0</th>
-<th style="text-align: right;">P1</th>
-<th style="text-align: right;">P2</th>
-<th style="text-align: right;">P3</th>
-<th style="text-align: right;">P4</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A の <span class="math inline">\(U_z\)</span> [µm/K]</td>
-<td style="text-align: right;">+0.329</td>
-<td style="text-align: right;">−0.134</td>
-<td style="text-align: right;">+0.261</td>
-<td style="text-align: right;">+0.639</td>
-<td style="text-align: right;">+0.115</td>
-</tr>
-<tr class="even">
-<td>O の <span class="math inline">\(U_z\)</span> [µm/K]</td>
-<td style="text-align: right;">−0.141</td>
-<td style="text-align: right;">+0.520</td>
-<td style="text-align: right;">−0.343</td>
-<td style="text-align: right;">+0.601</td>
-<td style="text-align: right;">+0.573</td>
-</tr>
-</tbody>
-</table>
-<h4 id="実際に-wphi-でも作れるか試した2026-10-03">実際に <span
-class="math inline">\(W\Phi\)</span>
-でも作れるか試した（2026-10-03）</h4>
-<p>105 で構築済みの <span class="math inline">\(W\)</span> を使い、
-<span class="math inline">\(D=W\Phi\)</span> を計算して FrontISTR
-6回版と比べました
-（<code>run/build_D_from_W.py</code>、<code>run/build_D_from_W64.py</code>）。</p>
-<table>
-<colgroup>
-<col style="width: 20%" />
-<col style="width: 26%" />
-<col style="width: 26%" />
-<col style="width: 26%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>やり方</th>
-<th style="text-align: right;">求解の回数</th>
-<th style="text-align: right;">時間</th>
-<th style="text-align: right;">FrontISTR 6回版との最大差</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">\(W\)</span> を float32 で構築（105
-の保存値）</td>
-<td style="text-align: right;">5,040 回</td>
-<td style="text-align: right;">―</td>
-<td style="text-align: right;">1.881×10⁻³ µm（8.6 %）</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(W\)</span> を <strong>float64</strong>
-で構築</td>
-<td style="text-align: right;">5,040 回</td>
-<td style="text-align: right;">54 秒</td>
-<td style="text-align: right;"><strong>1.881×10⁻³ µm（8.6
-%）</strong></td>
-</tr>
-<tr class="odd">
-<td><strong><span class="math inline">\(W\Phi\)</span>
-を5列だけ解く</strong>（float64）</td>
-<td style="text-align: right;"><strong>5 回</strong></td>
-<td style="text-align: right;"><strong>0.1 秒</strong></td>
-<td style="text-align: right;">1.881×10⁻³ µm（8.6 %）</td>
-</tr>
-</tbody>
-</table>
-<p>（拘束した底面 240 節点を除く 4,800 節点で比較。相関は
-0.998〜0.9999）</p>
-<p><strong>3通りとも、まったく同じ差になりました。</strong></p>
-<h4 id="の差は何だったのか-要素の種類が違った">8.6 % の差は何だったのか
-― 要素の種類が違った</h4>
-<p>差の原因は<strong>メッシュの要素タイプの違い</strong>でした。</p>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>要素</th>
-<th>要素数</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>106 の FrontISTR 6回（<code>fistr_case.py</code>）</td>
-<td><strong>TYPE=361</strong>（六面体1次要素）</td>
-<td>3,840</td>
-</tr>
-<tr class="even">
-<td>105 の <span class="math inline">\(W\)</span>
-（<code>dumpw_cylinder.py</code>）</td>
-<td><strong>TYPE=341</strong>（四面体1次要素）</td>
-<td>六面体を6分割して 23,040</td>
-</tr>
-</tbody>
-</table>
-<p>105 は DUMPW で <span class="math inline">\(K_s\)</span> と <span
-class="math inline">\(H_T\)</span>
-を取り出すために、六面体を四面体に分割しています。
-<strong>四面体1次要素は曲げに対して硬くなる</strong>ので、変形が小さめに出ます。</p>
-<p>モード番号が上がるほど差が大きくなるのも、これで説明がつきます。</p>
-<table>
-<thead>
-<tr class="header">
-<th>モード</th>
-<th style="text-align: right;">傾き（ <span
-class="math inline">\(W\)</span> 版 ÷ FEM 版）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td style="text-align: right;">0.996</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td style="text-align: right;">0.978</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td style="text-align: right;">0.964</td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td style="text-align: right;">0.939</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td style="text-align: right;">0.893</td>
-</tr>
-</tbody>
-</table>
-<p>高次のモードほど空間的に細かく曲がるパターンなので、四面体要素の硬さが効きます。</p>
-<blockquote>
-<p><strong>つまり 8.6 %
-の差は、手法の優劣ではなく「別のメッシュで比べた」ためです。</strong>
-同じ要素で作れば <span class="math inline">\(D=W\Phi\)</span> と
-FrontISTR 6回版は一致するはずです（同じ要素での比較は未実施）。</p>
-</blockquote>
-<p><strong>確かめて否定したこと</strong></p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>疑ったこと</th>
-<th>結果</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>CG ソルバの収束が足りない</td>
-<td><strong>違う</strong>。許容誤差を 10⁻⁸ → 10⁻¹⁴
-にしても結果は変わらなかった</td>
-</tr>
-<tr class="even">
-<td>float32 の丸め誤差</td>
-<td><strong>違う</strong>。float64 で作り直しても同じ差だった</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p><strong>2026-10-03 訂正</strong>：この検証を最初に書いたとき「float32
-の丸め誤差が原因と考えられる」としましたが、<strong>誤りでした</strong>。float64
-で作り直して同じ結果だったため、撤回します。</p>
-</blockquote>
-<h4 id="w-を作らずに-wphi-を求める-括弧の付け替え"><span
-class="math inline">\(W\)</span> を作らずに <span
-class="math inline">\(W\Phi\)</span> を求める ― 括弧の付け替え</h4>
-<p>ここがいちばん分かりにくいところなので、小さい例で説明します。</p>
-<blockquote>
-<p><strong><span class="math inline">\(W\Phi\)</span> という名前には
-<span class="math inline">\(W\)</span> が入っていますが、計算するのに
-<span class="math inline">\(W\)</span>
-を作る必要はありません。</strong></p>
-</blockquote>
-<p>理由は、行列の掛け算の<strong>括弧を付け替えられる</strong>からです。</p>
-<p><span class="math display">\[
-W\Phi=\big(K_s^{-1}H_T\big)\Phi=K_s^{-1}\big(H_T\Phi\big)
-\]</span></p>
-<p>左の付け方（順番A）は「 <span class="math inline">\(W\)</span>
-を作ってから <span class="math inline">\(\Phi\)</span> を掛ける」、
-右の付け方（順番B）は「先に <span class="math inline">\(\Phi\)</span>
-を掛けてから解く」です。<strong>答えは同じ</strong>です。</p>
-<h5
-id="小さい例で確かめる節点3個モード1つ">小さい例で確かめる（節点3個、モード1つ）</h5>
-<p><span class="math display">\[
-K_s=\begin{pmatrix}2&amp;0&amp;0\\0&amp;2&amp;0\\0&amp;0&amp;2\end{pmatrix},\quad
-H_T=\begin{pmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{pmatrix},\quad
-\Phi=\begin{pmatrix}1\\1\\1\end{pmatrix}
-\]</span></p>
-<p><strong>順番A： <span class="math inline">\(W\)</span>
-を先に作る</strong></p>
-<p><span class="math inline">\(W=K_s^{-1}H_T\)</span> を作るとは、 <span
-class="math inline">\(K_s W=H_T\)</span> を解くことです。 <span
-class="math inline">\(H_T\)</span>
-は3列あるので、<strong>3回</strong>解きます。</p>
-<table>
-<thead>
-<tr class="header">
-<th>回</th>
-<th>解く式</th>
-<th>答え（ <span class="math inline">\(W\)</span> の列）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1回目</td>
-<td><span class="math inline">\(K_s\,w_1=(1,0,0)^{\mathsf
-T}\)</span></td>
-<td><span class="math inline">\((0.5,\ 0,\ 0)\)</span></td>
-</tr>
-<tr class="even">
-<td>2回目</td>
-<td><span class="math inline">\(K_s\,w_2=(0,1,0)^{\mathsf
-T}\)</span></td>
-<td><span class="math inline">\((0,\ 0.5,\ 0)\)</span></td>
-</tr>
-<tr class="odd">
-<td>3回目</td>
-<td><span class="math inline">\(K_s\,w_3=(0,0,1)^{\mathsf
-T}\)</span></td>
-<td><span class="math inline">\((0,\ 0,\ 0.5)\)</span></td>
-</tr>
-</tbody>
-</table>
-<p><span class="math display">\[
-W=\begin{pmatrix}0.5&amp;0&amp;0\\0&amp;0.5&amp;0\\0&amp;0&amp;0.5\end{pmatrix}
-\quad\Rightarrow\quad
-W\Phi=(0.5,\ 0.5,\ 0.5)^{\mathsf T}
-\]</span></p>
-<p><strong>合計3回</strong>解きました。</p>
-<p><strong>順番B：先に <span class="math inline">\(\Phi\)</span>
-を掛ける</strong></p>
-<p>まず <span class="math inline">\(H_T\Phi\)</span>
-を計算します。これは<strong>掛け算だけ</strong>で、方程式は解きません。</p>
-<p><span class="math display">\[
-H_T\Phi=\begin{pmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{pmatrix}\begin{pmatrix}1\\1\\1\end{pmatrix}=\begin{pmatrix}1\\1\\1\end{pmatrix}
-\]</span></p>
-<p>次に <span class="math inline">\(K_s\,x=(1,1,1)^{\mathsf T}\)</span>
-を解きます。右辺は<strong>1列だけ</strong>なので
-<strong>1回</strong>で終わります。</p>
-<p><span class="math display">\[
-x=(0.5,\ 0.5,\ 0.5)^{\mathsf T}
-\]</span></p>
-<p><strong>合計1回</strong>。順番Aと同じ答えです。</p>
-<table>
-<thead>
-<tr class="header">
-<th></th>
-<th style="text-align: right;">解く回数</th>
-<th>何が起きたか</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>順番A</td>
-<td style="text-align: right;">3回</td>
-<td><span class="math inline">\(H_T\)</span>
-の<strong>3列</strong>ぶん解いてから、最後に <span
-class="math inline">\(\Phi\)</span> を掛けた</td>
-</tr>
-<tr class="even">
-<td>順番B</td>
-<td style="text-align: right;"><strong>1回</strong></td>
-<td><strong>先に <span class="math inline">\(\Phi\)</span>
-を掛けて1列に減らしてから</strong>解いた</td>
-</tr>
-</tbody>
-</table>
-<p><strong>先に <span class="math inline">\(\Phi\)</span>
-を掛けると、解くべき右辺の本数が減る</strong>。これが順番Bの正体です。</p>
-<p>本研究では、5,040 列が5列に減るので、<strong>5,040
-回が5回</strong>になります。</p>
-<h5 id="frontistr-での対応">FrontISTR での対応</h5>
-<p>順番Bの2つのステップは、FrontISTR の操作そのものです。</p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>式の上の操作</th>
-<th>FrontISTR での操作</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">\(H_T\Phi\)</span> の <span
-class="math inline">\(k\)</span> 列目を作る</td>
-<td><strong>モード <span class="math inline">\(\varphi_k\)</span>
-を「節点温度」として入力ファイルに書く</strong></td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(K_s\,x=H_T\varphi_k\)</span> を解く</td>
-<td><strong>FrontISTR を1回実行する</strong></td>
-</tr>
-<tr class="odd">
-<td>答え <span class="math inline">\(x\)</span></td>
-<td>出てきた<strong>変位</strong> ＝ <span
-class="math inline">\(D_k\)</span> （ <span
-class="math inline">\(W\Phi\)</span> の <span
-class="math inline">\(k\)</span> 列目）</td>
-</tr>
-</tbody>
-</table>
-<p>FrontISTR に温度分布を渡すと、内部で <span
-class="math inline">\(H_T\)</span>
-を掛けて熱荷重を作り、1回解いて変位を返します。
-<strong>この一連の動作が、そのまま順番B</strong>です。 <span
-class="math inline">\(W\)</span> はどこにも現れません。</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/run_da_compare.py の build_disp_operator より</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])   <span class="co"># モードkを温度として渡して1回解く</span></span></code></pre></div>
-<p><code>run_field</code> の中でやっているのは、</p>
-<ol type="1">
-<li><code>.cnt</code> ファイルに節点温度（基準温度＋モード）を書く　←
-<span class="math inline">\(H_T\Phi\)</span> の列を作る指示</li>
-<li><code>fistr1</code> を実行する　← <span
-class="math inline">\(K_s^{-1}\)</span> を掛ける（1回の求解）</li>
-<li>出力された変位を読む　← <span class="math inline">\(D_k\)</span>
-が得られる</li>
-</ol>
-<p>の3つだけです。</p>
-<h5 id="実測値">実測値</h5>
-<table>
-<thead>
-<tr class="header">
-<th>やり方</th>
-<th style="text-align: right;">求解の回数</th>
-<th style="text-align: right;">時間（この題材）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>順番A： <span class="math inline">\(W\)</span>
-を作ってから掛ける</td>
-<td style="text-align: right;">5,040 回</td>
-<td style="text-align: right;">54 秒</td>
-</tr>
-<tr class="even">
-<td><strong>順番B：先に <span class="math inline">\(\Phi\)</span>
-を掛けて解く</strong></td>
-<td style="text-align: right;"><strong>5 回</strong></td>
-<td style="text-align: right;"><strong>0.1 秒</strong></td>
-</tr>
-</tbody>
-</table>
-<p>（同じ <span class="math inline">\(K_s\)</span> ・ <span
-class="math inline">\(H_T\)</span>
-から計算し、答えが一致することを確認済み。<code>run/build_D_from_W64.py</code>）</p>
-<h4 id="では-w-を作るのと何が違うのか">では、 <span
-class="math inline">\(W\)</span> を作るのと何が違うのか</h4>
-<p><strong>必要な列だけ解くか、全部解くかの違い</strong>です。</p>
-<table>
-<colgroup>
-<col style="width: 21%" />
-<col style="width: 28%" />
-<col style="width: 21%" />
-<col style="width: 28%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>やり方</th>
-<th style="text-align: right;">求解の回数</th>
-<th>保存するもの</th>
-<th style="text-align: right;">この題材での時間</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>モードを入れて解く（本研究）</strong></td>
-<td style="text-align: right;"><strong>6回</strong></td>
-<td>5,040×3 行 × <strong>5列</strong> の小さな行列</td>
-<td style="text-align: right;">数十秒</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(W\)</span> を丸ごと作る</td>
-<td style="text-align: right;"><strong>5,040 回</strong></td>
-<td>5,040 行 × 5,040 列 ＝ <strong>194 MB</strong>（float64）</td>
-<td style="text-align: right;">54 秒＋ダンプ作業</td>
-</tr>
-</tbody>
-</table>
-<p><span class="math inline">\(W\)</span>
-は「どの節点の温度が、どの節点の変位に効くか」を<strong>全組み合わせ</strong>で持つ行列です。
-しかし同化で必要なのは、<strong>温度場が5つのモードの組み合わせに限られた場合の変位</strong>だけで、
-<span class="math inline">\(W\)</span>
-の全体を知る必要はありません。</p>
-<p>実機規模（数十万節点）では <span class="math inline">\(W\)</span>
-は数百 GB になるので、丸ごと作る選択肢はなくなります。
-一方、モードを入れて解く方法は<strong>モードの数だけ</strong>解けばよいので、規模が大きくなっても変わりません。</p>
-<p><strong>使い分け</strong></p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>欲しいもの</th>
-<th>向いているやり方</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong><span class="math inline">\(D\)</span> だけ</strong></td>
-<td><strong>モードを入れて解く（6回）</strong>。拘束節点の処理も要らない</td>
-</tr>
-<tr class="even">
-<td><strong><span class="math inline">\(W\)</span>
-自体も</strong>（変位計の置き場所を <span
-class="math inline">\(W\)</span> の行の大きさで比べたいなど）</td>
-<td><span class="math inline">\(W\)</span> を作る（105
-の方式）。ただし拘束節点では <span class="math inline">\(W\)</span>
-が壊れるので除外が必要</td>
-</tr>
-<tr class="odd">
-<td>実機規模</td>
-<td>モードを入れて解く一択</td>
-</tr>
-</tbody>
-</table>
-<h4 id="全節点版も同じ6回で作れる">全節点版も同じ6回で作れる</h4>
-<p>FrontISTR は1回解くと<strong>全節点の変位</strong>を返します。 そこで
-A・O だけでなく全 5,040
-節点を保存すれば、<strong>同じ6回で全節点×3方向の <span
-class="math inline">\(D\)</span></strong> が手に入ります
-（<code>run/build_full_disp_operator.py</code>、<code>results/dispop_allnodes.npz</code>）。
-<a href="blog_008_novelty_displacement_assimilation.md">blog_008 §6</a>
-で 15,120
-通りの候補から変位計の場所を選べたのは、これがあるからです。</p>
-<h4 id="使い方">使い方</h4>
-<p>同化の中では、5点の温度から次の2回の掛け算だけで変位が出ます。</p>
+<h3 id="実際の行列計算の順に">7-2. 実際の行列（計算の順に）</h3>
+<p>§7-1 でできた道具を、同化で使う順に並べます。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1415,9 +1128,8 @@ class="math inline">\(a\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>FEM を解かないので一瞬で終わります。これが ROM
+<p><strong>FEM を解かないので一瞬で終わります。</strong> これが ROM
 を軽くできる理由の一つです。</p>
-<h3 id="実際の行列">7-2. 実際の行列</h3>
 <p><strong>① 5点の温度から POD の係数を出す。</strong>
 5点で測った温度と平均場との差 <span
 class="math inline">\(\delta\)</span> から、係数 <span
