@@ -319,7 +319,8 @@ class="math inline">\(Q\)</span> が、なぜ直るのか</a></li>
 <li><a href="#全-20-回の推移seed-20260913"
 id="toc-全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
 20260913）</a></li>
-<li><a href="#結果" id="toc-結果">15. 結果</a></li>
+<li><a href="#結果-何が分かったか" id="toc-結果-何が分かったか">15. 結果
+― 何が分かったか</a></li>
 <li><a href="#この研究の優位性実際にやったことで言えること"
 id="toc-この研究の優位性実際にやったことで言えること">16.
 この研究の優位性（実際にやったことで言えること）</a>
@@ -2032,7 +2033,27 @@ class="math inline">\(Q\)</span>
 - この seed の最終値は 14.36 W、5 seed 平均では 14.89 W（真値 15
 W）。</p>
 </blockquote>
-<h2 id="結果">15. 結果</h2>
+<h2 id="結果-何が分かったか">15. 結果 ― 何が分かったか</h2>
+<blockquote>
+<p><strong>この記事で分かったこと</strong> 1.
+<strong>変位は状態に入れない。</strong> 温度から行列1つで計算する（
+<span class="math inline">\(u=\bar u+D\,a\)</span> 、 <span
+class="math inline">\(D=WU_r\)</span> ）。同化中に FEM は1回も解かない。
+2. <strong>変位計1本が5点すべての温度に触れる。</strong>
+だから温度計のない点（P1・P3・P4）の温度まで直る。 <span
+class="math inline">\(t=30\)</span> 秒では変位計だけで P3 を −4.97 K、P4
+を −7.67 K 直していた。 3. <strong>温度計のずれが 0
+になった後は、変位計だけが温度場を直している</strong>（ <span
+class="math inline">\(t=150\)</span> 秒）。 4.
+<strong>測っていない発熱量 <span class="math inline">\(Q\)</span>
+が直るのは、60メンバーのばらつき（共分散）を通じて</strong>。 <span
+class="math inline">\(Q\)</span>
+を真値に近づけたのは主に温度センサで、変位計の直接の寄与は小さかった（5
+seed 平均で温度 +11.4 W、変位 −1.6 W）。 5. 結果：温度2点だけ 0.503 K →
+<strong>変位2点を足して 0.160 K</strong>、 <span
+class="math inline">\(Q\)</span> は 14.05 → <strong>14.89
+W</strong>（真値 15 W）。</p>
+</blockquote>
 <table>
 <thead>
 <tr class="header">
@@ -2131,8 +2152,10 @@ class="uri">https://arxiv.org/abs/2507.02500</a>）があります。この研�
 の温度場全体を FrontISTR に入れて真値を作り直した試験（ROM
 の係数を決めた 15 W の計算）では、ほぼ同じ結果でした（温度 0.16 K、反り
 0.14 µm。 <code>run/limit_realsolver_truth.py</code>）。ただし ROM
-を作るのに使った条件そのものなので、合うのは当然です。<strong>新しく計算した条件（25
-W、加熱のしかたを変えた場合）の試験は計算中です。</strong></li>
+を作るのに使った条件そのものなので、合うのは当然です。新しく計算した条件（25
+W、間欠加熱）での試験は <a
+href="blog_007_rom_applicability.md">blog_007</a> にあります。25 W
+でも全セルがノイズ 0.3 K 未満で合いました。</li>
 <li>温度センサの P2・P0 は、2本とも A 側（+X
 側）にあります。温度だけで同化する比較では、A 側と O 側に分けた P2＋P4
 のほうが良い結果でした（<a
