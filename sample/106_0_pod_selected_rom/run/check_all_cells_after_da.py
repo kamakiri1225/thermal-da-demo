@@ -21,6 +21,8 @@ from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
 from dacore.enkf import enkf_update
+sys.path.insert(0, HERE)
+from improve_heating_schedule import integrate as integ_on
 RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
 KC0=273.15
 NPT=5; IQ=5; IH=6; NAUG=7; DT=2.0; OBS_DT=30.0; T_END=600.0; N_ENS=60
@@ -29,6 +31,12 @@ SEEDS=[20260913,20260914,20260915,20260916,20260917]
 TN=[2,4]
 CASES=[("learned","15 W（ROM の係数を決めた計算）"),("q25","25 W（新しく計算した条件）"),
        ("intermittent","15 W 間欠加熱（新しく計算した条件）")]
+# ヒータの ON/OFF。既定（決め打ち）は 0〜300 秒、間欠加熱の正解は 0〜150 と 300〜450 秒
+SCHED={"learned":lambda t:(t<300.0),"q25":lambda t:(t<300.0),
+       "intermittent":lambda t:(t<150.0)|((t>=300.0)&(t<450.0))}
+FIXED=lambda t:(t<300.0)
+# ON/OFF を与えるか（環境変数 KNOWN_SCHEDULE=1 で有効）
+USE_KNOWN=os.environ.get("KNOWN_SCHEDULE","0")=="1"
 
 
 def main():
@@ -54,7 +62,8 @@ def main():
             Z[:,IQ]=rng.uniform(0.3,1.8,N_ENS); Z[:,IH]=np.clip(rng.normal(0.02,0.01,N_ENS),1e-3,0.1)
             Rd=np.diag([SIG_T**2]*len(TN)+[SIG_U**2]*2); tp=0.0
             for ci,tb in enumerate(cyc,1):
-                Z=Z.copy(); Z[:,:NPT]=rg.integrate_ensemble(Z[:,:NPT],C,Km,Z[:,IH],Z[:,IQ],heat,tp,tb,DT); tp=tb
+                on=SCHED[case] if USE_KNOWN else FIXED
+                Z=Z.copy(); Z[:,:NPT]=integ_on(Z[:,:NPT],C,Km,Z[:,IH],Z[:,IQ],heat,on,tp,tb); tp=tb
                 y=np.r_[T5[ci][TN],uz[ci]]+ro.normal(0,np.sqrt(np.diag(Rd)))
                 Yf=np.column_stack([Z[:,TN],disp(Z[:,:NPT])])
                 Z=enkf_update(Z,y,None,Rd,rng,inflation=INFL,Yf=Yf)
@@ -104,9 +113,12 @@ def main():
         if j==0: ax.set_ylabel("セル数"); ax.legend(fontsize=9)
         ax.set_title(f"全セルの誤差　平均 {eh.mean():.3f} / 最大 {eh.max():.3f} K　0.3 K未満 {100*(eh<SIG_T).mean():.0f}%",
                      fontsize=10.5)
-    json.dump(out,open(os.path.join(RES,"check_all_cells_after_da.json"),"w"),ensure_ascii=False,indent=1)
-    fig.suptitle("同化で復元した温度は、代表5点以外のセルでも合っているか\n黒点＝OpenFOAM（真値）、色線＝同化後の推定、帯＝温度計のノイズ ±0.3 K。観測は温度2点＋変位2点、5 seed 平均",fontsize=13)
-    fig.tight_layout(rect=(0,0,1,0.945)); fig.savefig(os.path.join(IMG,"all_cells_after_da.png"),dpi=150); plt.close(fig)
+    out["known_schedule"]=USE_KNOWN
+    tag="_known" if USE_KNOWN else ""
+    json.dump(out,open(os.path.join(RES,f"check_all_cells_after_da{tag}.json"),"w"),ensure_ascii=False,indent=1)
+    fig.suptitle(("同化で復元した温度は、代表5点以外のセルでも合っているか"
+                  +("（ヒータのON/OFFをモデルに与えた場合）" if USE_KNOWN else "（ヒータは0〜300秒に一定と仮定したまま）"))+"\n黒点＝OpenFOAM（真値）、色線＝同化後の推定、帯＝温度計のノイズ ±0.3 K。観測は温度2点＋変位2点、5 seed 平均",fontsize=13)
+    fig.tight_layout(rect=(0,0,1,0.945)); fig.savefig(os.path.join(IMG,f"all_cells_after_da{tag}.png"),dpi=150); plt.close(fig)
     print("wrote all_cells_after_da.png")
 
 

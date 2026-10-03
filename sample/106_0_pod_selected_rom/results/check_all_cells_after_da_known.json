@@ -1,0 +1,54 @@
+{
+ "note": "真値＝OpenFOAMの温度場。観測＝温度2点(P2+P4)＋変位2点(A/O)。誤差は|推定−真値|、加熱期30〜300秒、5 seed平均",
+ "cases": {
+  "learned": {
+   "all_mean_K": 0.11250211256601775,
+   "all_p95_K": 0.15937701711898286,
+   "all_max_K": 0.18602954073459957,
+   "pod5_mean_K": 0.14210151331991122,
+   "other_mean_K": 0.11249495984242926,
+   "worst_cell": 7765,
+   "worst_xyz_mm": [
+    36.5,
+    6.9,
+    50.8
+   ],
+   "max_rise_K": 5.77573000000001,
+   "max_err_pct_of_rise": 3.220883606654038,
+   "frac_below_noise": 1.0
+  },
+  "q25": {
+   "all_mean_K": 0.11783787655353933,
+   "all_p95_K": 0.17535675216116342,
+   "all_max_K": 0.20774098646729042,
+   "pod5_mean_K": 0.1503542223818417,
+   "other_mean_K": 0.11783001894737524,
+   "worst_cell": 7765,
+   "worst_xyz_mm": [
+    36.5,
+    6.9,
+    50.8
+   ],
+   "max_rise_K": 9.619180000000028,
+   "max_err_pct_of_rise": 2.159653800711597,
+   "frac_below_noise": 1.0
+  },
+  "intermittent": {
+   "all_mean_K": 0.09676773080685233,
+   "all_p95_K": 0.12690995658619814,
+   "all_max_K": 0.16772187943291555,
+   "pod5_mean_K": 0.11969507210195889,
+   "other_mean_K": 0.09676219039283292,
+   "worst_cell": 7925,
+   "worst_xyz_mm": [
+    -16.9,
+    32.6,
+    51.6
+   ],
+   "max_rise_K": 5.670270000000016,
+   "max_err_pct_of_rise": 2.9579169851332487,
+   "frac_below_noise": 1.0
+  }
+ },
+ "known_schedule": true
+}
