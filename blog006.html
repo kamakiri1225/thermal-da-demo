@@ -291,6 +291,28 @@ id="toc-b.-なぜ変位を測ると温度計のない点の温度まで直るの
 id="toc-変位計を入れなかった場合との比較">7-6.
 変位計を入れなかった場合との比較</a></li>
 </ul></li>
+<li><a href="#どの場所の変位でも観測にできる-理論の組み立て"
+id="toc-どの場所の変位でも観測にできる-理論の組み立て">7-7.
+どの場所の変位でも観測にできる ― 理論の組み立て</a>
+<ul>
+<li><a href="#何が問題なのか" id="toc-何が問題なのか">7-7-1.
+何が問題なのか</a></li>
+<li><a href="#段階でつなぐ" id="toc-段階でつなぐ">7-7-2.
+3段階でつなぐ</a></li>
+<li><a href="#まとめると5点の温度の一次式になる"
+id="toc-まとめると5点の温度の一次式になる">7-7-3.
+まとめると「5点の温度の一次式」になる</a></li>
+<li><a href="#実際の値blog_008-5-で選んだ2点"
+id="toc-実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008 §5
+で選んだ2点）</a></li>
+<li><a href="#enkf-にどう入るか" id="toc-enkf-にどう入るか">7-7-5. EnKF
+にどう入るか</a></li>
+<li><a href="#なぜ事前計算だけで済むのか"
+id="toc-なぜ事前計算だけで済むのか">7-7-6.
+なぜ事前計算だけで済むのか</a></li>
+<li><a href="#成り立つ条件と限界" id="toc-成り立つ条件と限界">7-7-7.
+成り立つ条件と限界</a></li>
+</ul></li>
 <li><a href="#ステップ4平均とばらつき偏差"
 id="toc-ステップ4平均とばらつき偏差">8.
 ステップ4：平均とばらつき（偏差）</a></li>
@@ -1644,6 +1666,291 @@ class="math inline">\(Q\)</span></th>
 </tbody>
 </table>
 <p>（真値 15 W）</p>
+<h2 id="どの場所の変位でも観測にできる-理論の組み立て">7-7.
+どの場所の変位でも観測にできる ― 理論の組み立て</h2>
+<p><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+§5</a> では、A・O
+ではなく<strong>別の場所</strong>の変位を観測に使いました。 ROM
+が追いかけるのは代表5点の温度だけなのに、なぜ任意の場所の変位を観測にできるのか。ここを順に組み立てます。</p>
+<h3 id="何が問題なのか">7-7-1. 何が問題なのか</h3>
+<p>EnKF
+が観測を使うには、<strong>「状態から観測値を計算する関数」</strong>が必要です。これを観測演算子と呼びます。</p>
+<p><span class="math display">\[
+y=h(z)+\varepsilon
+\]</span></p>
+<p>状態 <span class="math inline">\(z\)</span> は <span
+class="math inline">\((T_0,\dots,T_4,q,h)\)</span> の7つしかありません。
+いっぽう観測したいのは、たとえば節点 4994 の <span
+class="math inline">\(U_x\)</span> です。</p>
+<blockquote>
+<p><strong>5つの温度から、節点 4994 の <span
+class="math inline">\(U_x\)</span> を計算できるか？</strong></p>
+</blockquote>
+<p>これができれば観測に使えます。できなければ使えません。</p>
+<h3 id="段階でつなぐ">7-7-2. 3段階でつなぐ</h3>
+<p>答えは<strong>できる</strong>で、3つの段階をつなぐだけです。</p>
+<pre><code>  5点の温度 T
+      │ ① POD（gappy 復元）
+      ▼
+  全 20,696 セルの温度
+      │ ② 熱弾性（線形）
+      ▼
+  全 5,040 節点 × 3 方向の変位
+      │ ③ 欲しい成分を取り出す
+      ▼
+  節点 4994 の Ux</code></pre>
+<p><strong>① 5点 → 全体の温度</strong>（<a
+href="#ステップ3ところが同化は5点の温度しか持っていない">§7-1
+ステップ3</a>）</p>
+<p><span class="math display">\[
+T_{\mathrm{all}}=\bar T+U_r\,a,\qquad a=U_{rP}^{+}\big(T-\bar T_P\big)
+\]</span></p>
+<p><strong>② 温度 → 変位</strong>（<a
+href="#ステップ1-w-があれば変位は1行で出る">§7-1 ステップ1</a>）</p>
+<p><span class="math display">\[
+u=\bar u+D\,a,\qquad D=WU_r
+\]</span></p>
+<p><strong>③ 欲しい成分だけ取り出す</strong></p>
+<p><span class="math inline">\(u\)</span> は 15,120 個の数（5,040 節点 ×
+3 方向）です。そのうち1つを選ぶだけです。</p>
+<h3 id="まとめると5点の温度の一次式になる">7-7-3.
+まとめると「5点の温度の一次式」になる</h3>
+<p>①〜③をつなぐと、<strong>どの場所のどの方向の変位も、5点の温度の一次式</strong>で書けます。</p>
+<p><span class="math display">\[
+\boxed{\ u_{(i,c)}=\bar u_{(i,c)}+w_{(i,c)}^{\mathsf T}\big(T-\bar
+T_P\big),\qquad w_{(i,c)}=D_{(i,c)}\,U_{rP}^{+}\ }
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+<th>大きさ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\((i,c)\)</span></td>
+<td>節点 <span class="math inline">\(i\)</span> の方向 <span
+class="math inline">\(c\)</span> （ <span
+class="math inline">\(U_x,U_y,U_z\)</span> のどれか）</td>
+<td>―</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\bar u_{(i,c)}\)</span></td>
+<td>平均の温度場でのその変位</td>
+<td>スカラー</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(D_{(i,c)}\)</span></td>
+<td><span class="math inline">\(D\)</span>
+の該当行（モード1〜5に対する応答）</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(w_{(i,c)}\)</span></td>
+<td><strong>5点の温度に対する熱感度</strong> [µm/K]</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p><strong><span class="math inline">\(w\)</span>
+が5つの数になることが肝心です。</strong>
+状態の温度が5つしかないので、観測演算子も5つの係数で書き切れます。</p>
+<h3 id="実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008 §5
+で選んだ2点）</h3>
+<p><strong>選定1点目：節点 4994、(9.7, −36.2, 100.5) mm の <span
+class="math inline">\(U_x\)</span></strong></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th><span class="math inline">\(D\)</span> の行（モード1〜5）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(D_{(4994,x)}\)</span></td>
+<td>(−0.00206, +0.02100, −0.00877, +0.01251, −0.01364)</td>
+</tr>
+</tbody>
+</table>
+<p>これに <span class="math inline">\(U_{rP}^{+}\)</span>
+を掛けると、5点温度に対する感度になります。</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(w\)</span> [µm/K]</td>
+<td style="text-align: right;"><strong>−0.532</strong></td>
+<td style="text-align: right;">+0.596</td>
+<td style="text-align: right;"><strong>−0.763</strong></td>
+<td style="text-align: right;">+0.286</td>
+<td style="text-align: right;">+0.290</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(\bar u = -1.738\)</span> µm
+なので、観測演算子は</p>
+<p><span class="math display">\[
+U_x(4994)=-1.738-0.532\,(T_0-296.659)+0.596\,(T_1-295.698)-0.763\,(T_2-296.938)+0.286\,(T_3-296.146)+0.290\,(T_4-295.361)
+\]</span></p>
+<p><strong>選定2点目：節点 4909、(−34.6, 14.4, 100.5) mm の <span
+class="math inline">\(U_z\)</span></strong></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(w\)</span> [µm/K]</td>
+<td style="text-align: right;">−0.169</td>
+<td style="text-align: right;">+0.595</td>
+<td style="text-align: right;">−0.309</td>
+<td style="text-align: right;">+0.427</td>
+<td style="text-align: right;"><strong>+0.666</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（ <span class="math inline">\(\bar u = 2.505\)</span> µm）</p>
+<h3 id="enkf-にどう入るか">7-7-5. EnKF にどう入るか</h3>
+<p>観測演算子が決まれば、あとは §7-3 以降と同じです。<strong>EnKF
+の式は一切変わりません。</strong></p>
+<p>メンバー <span class="math inline">\(m\)</span>
+の予報観測は、その一次式に自分の温度を入れるだけです。</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># メンバーごとの予報観測（run/disp_elsewhere_predict_AO.py より）</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Z[:, TN],                                  <span class="co"># 温度2点：状態からそのまま取り出す</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    u0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mean[pod]) <span class="op">@</span> w,         <span class="co"># 変位：一次式で計算する</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
+<p>あとは共分散 <span class="math inline">\(C_{zy}\)</span> とゲイン
+<span class="math inline">\(K\)</span>
+を作って更新するだけです（§9〜§11）。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測の種類</th>
+<th>予報観測の作り方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>代表点の温度</td>
+<td>状態から<strong>そのまま取り出す</strong></td>
+</tr>
+<tr class="even">
+<td>代表点でないセルの温度</td>
+<td><span class="math inline">\(T_j=\bar T_j+\psi_j U_{rP}^{+}(T-\bar
+T_P)\)</span> （<a href="blog_007_rom_applicability.md">blog_007
+§10</a>）</td>
+</tr>
+<tr class="odd">
+<td><strong>どの節点のどの方向の変位でも</strong></td>
+<td><span class="math inline">\(u=\bar u+w^{\mathsf T}(T-\bar
+T_P)\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>どれも「5点温度の一次式」という同じ形</strong>です。EnKF
+から見れば区別はありません。</p>
+<h3 id="なぜ事前計算だけで済むのか">7-7-6.
+なぜ事前計算だけで済むのか</h3>
+<p><span class="math inline">\(w_{(i,c)}=D_{(i,c)}U_{rP}^{+}\)</span>
+の両方が<strong>時間によらない固定の行列</strong>だからです。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>部品</th>
+<th>作り方</th>
+<th>時間で変わるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(U_{rP}^{+}\)</span></td>
+<td>POD から1回</td>
+<td>変わらない</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D\)</span> （全 5,040 節点 × 3 方向 ×
+5）</td>
+<td><strong>FrontISTR 6回</strong>（§7-1）</td>
+<td>変わらない</td>
+</tr>
+</tbody>
+</table>
+<p>FrontISTR
+は1回解くと全節点の変位を返すので、<strong>6回で全節点ぶんの <span
+class="math inline">\(D\)</span>
+が揃います</strong>（<code>run/build_full_disp_operator.py</code>）。
+あとは候補の行を引いて <span class="math inline">\(U_{rP}^{+}\)</span>
+を掛けるだけなので、<strong>15,120 通りの候補すべてについて <span
+class="math inline">\(w\)</span> を作っても追加の FEM
+は不要</strong>です。 <a
+href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a>
+で全候補を総当たりで採点できたのは、これが理由です。</p>
+<h3 id="成り立つ条件と限界">7-7-7. 成り立つ条件と限界</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>熱弾性が温度について線形であること</strong></td>
+<td><span class="math inline">\(u=W(T-T_\mathrm{ref})\)</span>
+が成り立つ前提。大変形や温度依存の材料物性があると崩れる</td>
+</tr>
+<tr class="even">
+<td><strong>温度場が5つのモードで表せること</strong></td>
+<td>①が成り立つ前提。型が変われば作り直し（<a
+href="blog_007_rom_applicability.md">blog_007 §9</a>）</td>
+</tr>
+<tr class="odd">
+<td>変位の観測点が FEM メッシュ上にあること</td>
+<td><span class="math inline">\(D\)</span>
+の行が必要。メッシュ外の点は補間が要る（未実施）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>限界</strong>：観測点をどこに置いても、<strong>情報の出どころは5点の温度</strong>です。
+変位を増やしても、5つの数より多くの情報は引き出せません。
+変位計を増やすと効くのは、<strong>ノイズに対して有利になる</strong>のと、<strong>5つの数の組み合わせの見え方が変わる</strong>ためです。</p>
+</blockquote>
+<hr />
 <h2 id="ステップ4平均とばらつき偏差">8.
 ステップ4：平均とばらつき（偏差）</h2>
 <p><span class="math display">\[

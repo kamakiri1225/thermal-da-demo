@@ -223,6 +223,8 @@ id="toc-変位の候補はどう選んだか-実際にやった作業">変位の
 <li><a href="#結果" id="toc-結果">結果</a></li>
 <li><a href="#分かったこと-1"
 id="toc-分かったこと-1">分かったこと</a></li>
+<li><a href="#追加実ソルバを真値にして確かめ直す2026-10-03"
+id="toc-追加実ソルバを真値にして確かめ直す2026-10-03">【追加】実ソルバを真値にして確かめ直す（2026-10-03）</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 </ul></li>
 <li><a href="#工作機械の研究全体の中での位置づけ"
@@ -618,6 +620,92 @@ Zurich (2024)</h3>
 </blockquote>
 <p>「変位計のほうが情報量が多いから良い」のかを確かめるため、<strong>同じ場所に温度計を置いた場合</strong>と比べました。
 センサの本数（計4本）と場所をそろえ、変えるのは「そこで何を測るか」だけです（<code>run/disp_vs_temp_same_place.py</code>）。</p>
+<h4 id="どこに何を置いたか">どこに何を置いたか</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>座標 [mm]</th>
+<th>何を測るか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>P2</strong></td>
+<td>(36.5, 6.9, 50.8) ヒータ側・中段</td>
+<td>温度（4構成すべて共通）</td>
+</tr>
+<tr class="even">
+<td><strong>P0</strong></td>
+<td>(21.3, −1.6, 51.6) 同じヒータ側・中段</td>
+<td>温度（4構成すべて共通）</td>
+</tr>
+<tr class="odd">
+<td><strong>A</strong></td>
+<td>(28.7, 0, 100.5) 上面・ヒータ側</td>
+<td>構成により <strong>温度</strong> または <strong>変位 <span
+class="math inline">\(U_z\)</span></strong></td>
+</tr>
+<tr class="even">
+<td><strong>O</strong></td>
+<td>(−28.7, 0, 100.5) 上面・反対側</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>変位計</strong>は A・O の FEM 節点そのものに置きます。</li>
+<li><strong>温度計</strong>は A・O にいちばん近い OpenFOAM セル、(26.6,
+−1.6, 98.8) と (−26.6, −1.6, 98.8) mm
+に置きます（代表5点ではないセルですが、<a
+href="blog_007_rom_applicability.md">blog_007 §10</a>
+のとおり同化できます）。</li>
+<li><strong>評価しているのも同じ A・O</strong>
+なので、この節の結果は循環を含みます。循環を断った試験は §5 です。</li>
+</ul>
+<p>4つの構成は次のとおりです。</p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>構成</th>
+<th>観測の中身</th>
+<th style="text-align: right;">本数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度2点のみ</td>
+<td>温度 P2・P0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td>＋A/O に温度計2本</td>
+<td>温度 P2・P0・<strong>A・O</strong>（計4点とも温度）</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td>＋A/O に変位計2本（本番）</td>
+<td>温度 P2・P0 ＋ <strong>変位 A・O の <span
+class="math inline">\(U_z\)</span></strong></td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td>＋両方</td>
+<td>温度 P2・P0・A・O ＋ 変位 A・O</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
 <figure>
 <img src="img/disp_vs_temp_same_place.png"
 alt="同じ場所で温度か変位か" />
@@ -1168,10 +1256,86 @@ href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 工作機械で本当に知りたいのは工具先端の変位ですが、加工中にそこは測れません。
 <strong>測れる場所で変位を測り、測れない場所の変形を当てる</strong>ことを、計算で示せました。</p>
 </blockquote>
+<h3
+id="追加実ソルバを真値にして確かめ直す2026-10-03">【追加】実ソルバを真値にして確かめ直す（2026-10-03）</h3>
+<p>上の結果は真値も ROM の双子実験でした。<strong>真値を
+OpenFOAM＋FrontISTR にして</strong>同じ試験をやり直しました
+（<code>run/holdout_AO_realsolver.py</code>）。</p>
+<ul>
+<li>温度の真値＝OpenFOAM の固体温度場</li>
+<li><strong>変位の真値＝その温度場を各時刻 FrontISTR
+に入れて計算した全節点の変位</strong>（21 時刻 × 3 条件）</li>
+<li>同化モデルは ROM のまま。A・O は一度も観測しない</li>
+</ul>
+<figure>
+<img src="img/holdout_AO_realsolver.png"
+alt="実ソルバ真値での holdout" />
+<figcaption aria-hidden="true">実ソルバ真値での holdout</figcaption>
+</figure>
+<p><em>黒＝真値（OpenFOAM＋FrontISTR）、灰＝変位なし、橙＝B・C、緑＝選定2点。5
+seed 平均。</em></p>
+<p><strong>反り A−O の誤差 [µm]</strong>（加熱期 30〜300 秒の平均）</p>
+<table>
+<thead>
+<tr class="header">
+<th>変位2点をどこに置くか</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位なし（温度2点のみ）</td>
+<td style="text-align: right;">0.769</td>
+<td style="text-align: right;">1.408</td>
+<td style="text-align: right;">0.630</td>
+</tr>
+<tr class="even">
+<td>A・O 自身を観測（<strong>循環</strong>・参考）</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.153</td>
+<td style="text-align: right;">0.100</td>
+</tr>
+<tr class="odd">
+<td>B・C（中段 z=75 mm）</td>
+<td style="text-align: right;">0.187</td>
+<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.143</td>
+</tr>
+<tr class="even">
+<td><strong>選定2点（上面）</strong></td>
+<td style="text-align: right;"><strong>0.075</strong></td>
+<td style="text-align: right;"><strong>0.083</strong></td>
+<td style="text-align: right;"><strong>0.071</strong></td>
+</tr>
+<tr class="odd">
+<td>底面近く z=5 mm（悪い例）</td>
+<td style="text-align: right;">0.581</td>
+<td style="text-align: right;">1.096</td>
+<td style="text-align: right;">0.480</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ROM
+真値のときと同じ結論が、実ソルバ真値でも得られました。</strong></p>
+<ol type="1">
+<li><strong>A・O を一度も測らずに、3条件すべてで 0.07〜0.08 µm</strong>
+で当てられました。</li>
+<li><strong>3条件すべてで、A・O を直接測る（0.10〜0.15
+µm）より正確</strong>です。</li>
+<li>係数を決めていない条件（25 W・間欠加熱）でも成立します。25 W
+では変位なしの 1.408 µm から <strong>17 倍</strong>改善しました。</li>
+<li>置き場所で大きく変わります。底面近くは 25 W で 1.096 µm
+と、ほとんど改善しません。</li>
+</ol>
+<blockquote>
+<p><strong>これで切り口B（測れない場所を、測れる場所から当てる）が、実ソルバ真値でも裏づけられました。</strong></p>
+</blockquote>
 <h3 id="注意未確認">注意（未確認）</h3>
 <ul>
-<li>真値は ROM
-の双子実験です。実ソルバ（OpenFOAM＋FrontISTR）を真値にした試験はしていません。</li>
+<li>上の表（0.076 µm など）は ROM
+の双子実験です。実ソルバ真値での結果は【追加】のとおりで、同じ結論でした。</li>
 <li>「直接測るより正確」の理由（信号対雑音比）は解釈で、別の計算では確かめていません。</li>
 <li>選定した2点は上面にあります。この形状では上面がよく動くためで、他の形状では変わります。</li>
 </ul>
@@ -1391,7 +1555,8 @@ href="21_advantage_verification.md">21_advantage_verification.md</a>）。</p>
 </table>
 <p>目玉である切り口Bは、いまのところ ROM
 の双子実験でしか確かめていません。 <strong>実ソルバを真値にした holdout
-試験</strong>を加えると、主張がいちばん固くなります。</p>
+試験は実施済み</strong>で（§5
+の【追加】）、3条件とも同じ結論でした。残るのは実機検証と文献調査です。</p>
 <hr />
 <h2 id="主張の書き方">7. 主張の書き方</h2>
 <h3 id="言ってよいこと">7-1. 言ってよいこと</h3>
@@ -1444,8 +1609,8 @@ href="blog_007_rom_applicability.md">blog_007</a>）</td>
 <ol type="1">
 <li><strong>文献調査を広げる</strong>：精密工学会・日本機械学会の論文、構造ヘルスモニタリング分野。</li>
 <li><strong>センサ数をそろえた比較</strong>：「温度計3本」対「温度計2本＋変位計1本」。変位計が温度計の代わりになるかを示す。</li>
-<li><strong>実ソルバを真値にした holdout 試験</strong>：§5 を
-OpenFOAM＋FrontISTR の真値で確かめる。</li>
+<li><del>実ソルバを真値にした holdout 試験</del> →
+<strong>実施済み</strong>（§5 の【追加】）。</li>
 <li><strong>実機での検証</strong>：<code>IoT/thermal_expansion_experiment/</code>
 に計画があるが、未実施。</li>
 </ol>
