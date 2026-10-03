@@ -145,34 +145,7 @@ def main():
     fig.savefig(os.path.join(IMG,"blog008_obs_points.png"),dpi=150,bbox_inches="tight",pad_inches=0.12); plt.close(fig)
     print("[fig] 3D done")
 
-    # ── 2) アニメーション ──
-    sty={"変位なし（温度2点のみ）":("#9AA5B1","--"),"B・C（中段 z=75 mm）":("#E67E22","-"),"選定2点（上面）":("#1f9e4b","-")}
-    fig,axs=plt.subplots(1,3,figsize=(15,4.6))
-    lines={}
-    for ax,ttl,yl in zip(axs,["観測していない Uz(A)","観測していない Uz(O)","観測していない 反り A−O"],["µm"]*3):
-        ax.set_xlim(0,600); ax.set_xlabel("時刻 [s]"); ax.set_ylabel(f"変位 [{yl}]"); ax.grid(alpha=.3); ax.set_title(ttl,fontsize=12)
-        ax.axvspan(0,300,color="#FDEBD0",alpha=.45)
-    axs[0].set_ylim(-1,12); axs[1].set_ylim(-1,11); axs[2].set_ylim(-0.5,4.5)
-    for k,ax in enumerate(axs):
-        lines[("truth",k)],=ax.plot([],[],color="k",lw=3.0,label="真値")
-        for nm,(c,ls) in sty.items(): lines[(nm,k)],=ax.plot([],[],ls,color=c,lw=2.0,label=nm)
-    axs[0].legend(fontsize=9,loc="upper left")
-    ttl=fig.suptitle("",fontsize=13)
-    def frame(f):
-        t=tg[:f+1]
-        for k in range(3):
-            tv=truth[:f+1,0] if k==0 else (truth[:f+1,1] if k==1 else truth[:f+1,0]-truth[:f+1,1])
-            lines[("truth",k)].set_data(t,tv)
-            for nm in sty:
-                r=runs[nm][:f+1]
-                v=r[:,0] if k==0 else (r[:,1] if k==1 else r[:,0]-r[:,1])
-                lines[(nm,k)].set_data(t,v)
-        ttl.set_text(f"A・O を一度も観測せずに当てる（t = {tg[f]:.0f} s、5 seed 平均）")
-        return list(lines.values())+[ttl]
-    ani=FuncAnimation(fig,frame,frames=len(tg),interval=320,blit=False)
-    fig.tight_layout(rect=(0,0,1,0.92))
-    ani.save(os.path.join(IMG,"blog008_AO_anim.gif"),writer=PillowWriter(fps=3))
-    plt.close(fig); print("[fig] gif done")
+    # グラフのアニメーションは分かりにくいため廃止（3Dアニメは run/make_blog008_3d_anim.py）
 
 
 if __name__=="__main__": main()

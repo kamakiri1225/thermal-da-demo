@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from dacore import rom_general as rg
 from dacore.enkf import enkf_update
 RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
+KC0=273.15
 NPT=5; IQ=5; IH=6; NAUG=7; DT=2.0; OBS_DT=30.0; T_END=600.0; N_ENS=60
 SIG_T=0.30; SIG_U=0.30; INFL=1.02
 SEEDS=[20260913,20260914,20260915,20260916,20260917]
@@ -41,7 +42,8 @@ def main():
     field=lambda T5: mean+A@(T5-mean[pod])
     ncell=U.shape[0]; other=np.ones(ncell,bool); other[pod]=False
     out={"note":"真値＝OpenFOAMの温度場。観測＝温度2点(P2+P4)＋変位2点(A/O)。誤差は|推定−真値|、加熱期30〜300秒、5 seed平均","cases":{}}
-    fig,axs=plt.subplots(3,len(CASES),figsize=(16,12),gridspec_kw=dict(hspace=0.42,wspace=0.26))
+    fig,axs=plt.subplots(4,len(CASES),figsize=(16.5,15.5),
+                         gridspec_kw=dict(hspace=0.38,wspace=0.24,height_ratios=[1,1,1,0.85]))
     for j,(case,lab) in enumerate(CASES):
         z=np.load(os.path.join(RES,f"limit_truth_{case}.npz")); t=z["times"]; Tf=z["Tfield"]; T5=Tf[:,pod]; uz=z["uz"]
         cyc=t[1:]; heatw=(t[1:]<=300)
@@ -72,41 +74,39 @@ def main():
             frac_below_noise=float((eh<SIG_T).mean()))
         print(f"{case}: 全セル平均 {eh.mean():.3f} K / 95% {np.percentile(eh,95):.3f} / 最大 {eh.max():.3f} K "
               f"(代表5点 {eh[pod].mean():.3f}, それ以外 {eh[other].mean():.3f})  ノイズ0.3K未満のセル {100*(eh<SIG_T).mean():.1f}%",flush=True)
-        # 行1：ヒストグラム
-        ax=axs[0,j]
-        ax.hist(eh[other],bins=60,color="#2E6FD8",alpha=.85,label=f"代表点以外 {other.sum():,} セル")
-        for pi in pod: ax.axvline(eh[pi],color="#C0392B",lw=1.6)
+        # ── 温度そのもの（主役）：誤差が最小・中央・最大のセル ──
+        order=np.argsort(eh)
+        picks=[(int(order[0]),"誤差が最小","#2E6FD8"),
+               (int(order[len(order)//2]),"中央（50%点）","#E67E22"),
+               (int(order[-1]),"誤差が最大","#C0392B")]
+        for row,(c_,nm_,col_) in enumerate(picks):
+            ax=axs[row,j]; ax.axvspan(0,300,color="#FDEBD0",alpha=.40)
+            ax.plot(t,Tf[:,c_]-KC0,"o",color="k",ms=5,label="OpenFOAM（真値）")
+            ax.plot(t[1:],est[:,c_]-KC0,"-",color=col_,lw=2.3,label="同化後の推定")
+            ax.fill_between(t[1:],est[:,c_]-KC0-SIG_T,est[:,c_]-KC0+SIG_T,color=col_,alpha=.20,
+                            label="±0.3 K（温度計のノイズ）")
+            ax.grid(alpha=.3)
+            xyz=np.round(Cc[c_]*1000,0).astype(int).tolist()
+            ax.set_title(f"{nm_}のセル {xyz} mm　平均誤差 {eh[c_]:.3f} K",fontsize=11)
+            if j==0: ax.set_ylabel("温度 [℃]")
+            if row==0 and j==0: ax.legend(fontsize=9,loc="lower right")
+            ax.tick_params(labelbottom=False)
+            if row==0:
+                ax.text(0.03,0.95,lab,transform=ax.transAxes,va="top",fontsize=11,weight="bold",
+                        bbox=dict(fc="white",ec="#bbb"))
+        # ── 補助：全セルの誤差の分布 ──
+        ax=axs[3,j]
+        ax.hist(eh[other],bins=60,color="#8FA8C8",alpha=.9,label=f"代表点以外 {other.sum():,} セル")
+        for pi in pod: ax.axvline(eh[pi],color="#C0392B",lw=1.4)
         ax.axvline(SIG_T,color="k",ls="--",lw=2,label="温度計のノイズ 0.3 K")
-        ax.set_xlabel("加熱期の平均誤差 [K]"); ax.set_ylabel("セル数"); ax.set_title(lab,fontsize=12)
-        ax.legend(fontsize=9); ax.grid(alpha=.3)
-        ax.text(0.97,0.70,f"平均 {eh.mean():.3f} K\n95% {np.percentile(eh,95):.3f} K\n最大 {eh.max():.3f} K\n"
-                          f"赤線＝代表5点",transform=ax.transAxes,ha="right",fontsize=9.5,
-                bbox=dict(fc="white",ec="#bbb"))
-        # 行2：空間分布（半径 r, 高さ z）
-        ax=axs[1,j]
-        rr=np.linalg.norm(Cc[:,:2],axis=1)*1000; zz=Cc[:,2]*1000
-        sc=ax.scatter(rr,zz,c=eh,s=3,cmap="viridis_r",vmin=0,vmax=max(0.3,float(np.percentile(eh,99))))
-        ax.scatter(np.linalg.norm(Cc[pod,:2],axis=1)*1000,Cc[pod,2]*1000,s=90,marker="o",
-                   facecolor="none",edgecolor="r",lw=2,label="代表5点")
-        ax.scatter(rr[imax],zz[imax],s=110,marker="x",color="k",lw=2.5,label="誤差が最大のセル")
-        ax.set_xlabel("半径 r [mm]"); ax.set_ylabel("高さ z [mm]"); ax.legend(fontsize=9)
-        ax.set_title("セルごとの誤差（加熱期平均）",fontsize=11.5)
-        plt.colorbar(sc,ax=ax,label="誤差 [K]")
-        # 行3：温度そのものの時刻歴（誤差が大きい順に代表的な未観測セルを3つ）
-        ax=axs[2,j]
-        ax.axvspan(0,300,color="#FDEBD0",alpha=.45)
-        pick=[imax,int(np.argsort(eh)[len(eh)//2]),int(eh.argmin())]
-        nm=["誤差が最大のセル","中央のセル","誤差が最小のセル"]
-        cols3=["#C0392B","#E67E22","#2E6FD8"]
-        for c_,n_,col_ in zip(pick,nm,cols3):
-            ax.plot(t,Tf[:,c_]-273.15,"o",color=col_,ms=4)
-            ax.plot(t[1:],est[:,c_]-273.15,"-",color=col_,lw=1.9,
-                    label=f"{n_} ({np.round(Cc[c_]*1000,0).astype(int).tolist()} mm)")
-        ax.set_xlabel("時刻 [s]"); ax.set_ylabel("温度 [℃]"); ax.grid(alpha=.3); ax.legend(fontsize=8.5,loc="lower right")
-        ax.set_title("温度そのもの（点＝OpenFOAM、線＝同化後）",fontsize=11.5)
+        for c_,nm_,col_ in picks: ax.axvline(eh[c_],color=col_,lw=2.4,ls=":")
+        ax.set_xlabel("加熱期の平均誤差 [K]"); ax.grid(alpha=.3)
+        if j==0: ax.set_ylabel("セル数"); ax.legend(fontsize=9)
+        ax.set_title(f"全セルの誤差　平均 {eh.mean():.3f} / 最大 {eh.max():.3f} K　0.3 K未満 {100*(eh<SIG_T).mean():.0f}%",
+                     fontsize=10.5)
     json.dump(out,open(os.path.join(RES,"check_all_cells_after_da.json"),"w"),ensure_ascii=False,indent=1)
-    fig.suptitle("同化で復元した温度場は、代表5点以外のセルでも合っているか（真値＝OpenFOAM、観測＝温度2点＋変位2点、5 seed 平均）",fontsize=13.5)
-    fig.tight_layout(rect=(0,0,1,0.96)); fig.savefig(os.path.join(IMG,"all_cells_after_da.png"),dpi=150); plt.close(fig)
+    fig.suptitle("同化で復元した温度は、代表5点以外のセルでも合っているか\n黒点＝OpenFOAM（真値）、色線＝同化後の推定、帯＝温度計のノイズ ±0.3 K。観測は温度2点＋変位2点、5 seed 平均",fontsize=13)
+    fig.tight_layout(rect=(0,0,1,0.945)); fig.savefig(os.path.join(IMG,"all_cells_after_da.png"),dpi=150); plt.close(fig)
     print("wrote all_cells_after_da.png")
 
 
