@@ -952,6 +952,49 @@ class="math inline">\(U_z\)</span> ）</td>
 </table>
 <h3 id="分かったこと-1">分かったこと</h3>
 <figure>
+<img src="img/blog008_3d_anim.gif"
+alt="温度分布と熱変形の3Dアニメーション" />
+<figcaption
+aria-hidden="true">温度分布と熱変形の3Dアニメーション</figcaption>
+</figure>
+<p><em>左＝真値、中＝温度2点のみ、右＝温度2点＋別の場所の変位2点（A・O
+は一度も測らない）。 <strong>色＝温度、形＝熱変形</strong>（790
+倍に誇張）。赤球＝温度センサ、緑球＝観測した変位2点、黒球＝評価点
+A・O。seed 20260913。</em></p>
+<p>形と色で、何が起きているか一目で分かります。例えば <span
+class="math inline">\(t=150\)</span> 秒では</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">反り A−O</th>
+<th style="text-align: right;">誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>真値</td>
+<td style="text-align: right;">2.57 µm</td>
+<td style="text-align: right;">―</td>
+</tr>
+<tr class="even">
+<td>温度2点のみ（中）</td>
+<td style="text-align: right;">1.38 µm</td>
+<td style="text-align: right;">1.19 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>温度2点＋別の場所の変位2点（右）</strong></td>
+<td style="text-align: right;"><strong>2.56 µm</strong></td>
+<td style="text-align: right;"><strong>0.01 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>中（温度2点のみ）</strong>：全体が緑がかっていて、真値（左）より温度が高めに出ています。形も反りが足りません。</li>
+<li><strong>右（変位2点を足す）</strong>：色も形も左の真値とほとんど同じです。<strong>A・O（黒球）は一度も測っていません。</strong></li>
+</ul>
+<p>グラフでも見ておきます。</p>
+<figure>
 <img src="img/blog008_AO_anim.gif" alt="A・O が同化で合っていく様子" />
 <figcaption aria-hidden="true">A・O が同化で合っていく様子</figcaption>
 </figure>
