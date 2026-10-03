@@ -198,7 +198,13 @@ id="toc-使っていない条件-作るときに見ていない条件">「使っ
 <li><a href="#なぜ分けるのか"
 id="toc-なぜ分けるのか">なぜ分けるのか</a></li>
 </ul></li>
-<li><a href="#結論" id="toc-結論">1. 結論</a></li>
+<li><a href="#結論" id="toc-結論">1. 結論</a>
+<ul>
+<li><a href="#一言でいうと" id="toc-一言でいうと">一言でいうと</a></li>
+<li><a href="#判定の目安" id="toc-判定の目安">判定の目安</a></li>
+<li><a href="#条件ごとの判定"
+id="toc-条件ごとの判定">条件ごとの判定</a></li>
+</ul></li>
 <li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">2. ROM
 は何から作ったか</a></li>
 <li><a href="#確かめに使った条件" id="toc-確かめに使った条件">3.
@@ -216,8 +222,16 @@ P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</a></li>
 id="toc-同化した温度をopenfoam-の温度と時刻歴で比べる">同化した温度を、OpenFOAM
 の温度と時刻歴で比べる</a></li>
 </ul></li>
+<li><a href="#復元した温度場は代表5点以外でも合っているか"
+id="toc-復元した温度場は代表5点以外でも合っているか">5.
+復元した温度場は、代表5点以外でも合っているか</a>
+<ul>
+<li><a href="#結果" id="toc-結果">結果</a></li>
+<li><a href="#読み取れること"
+id="toc-読み取れること">読み取れること</a></li>
+</ul></li>
 <li><a href="#加熱のしかたが変わる場合間欠加熱"
-id="toc-加熱のしかたが変わる場合間欠加熱">5.
+id="toc-加熱のしかたが変わる場合間欠加熱">6.
 加熱のしかたが変わる場合（間欠加熱）</a>
 <ul>
 <li><a href="#rom-単体同化なしの予測-1"
@@ -226,10 +240,10 @@ id="toc-rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測
 id="toc-同化すると反り-ao-の誤差30600-秒の平均">同化すると（反り A−O
 の誤差、30〜600 秒の平均）</a></li>
 </ul></li>
-<li><a href="#長い時間の場合" id="toc-長い時間の場合">6.
+<li><a href="#長い時間の場合" id="toc-長い時間の場合">7.
 長い時間の場合</a></li>
 <li><a href="#使えるかどうかの決め手-温度分布の型が変わるかどうか"
-id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">7.
+id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">8.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</a>
 <ul>
 <li><a href="#確かめ方型で表したときに残る誤差"
@@ -240,7 +254,7 @@ id="toc-型が大きく変わると考えられる場合未確認">型が大き�
 id="toc-実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</a></li>
 </ul></li>
 <li><a href="#観測点は-rom-の代表5点に限られるか"
-id="toc-観測点は-rom-の代表5点に限られるか">8. 観測点は ROM
+id="toc-観測点は-rom-の代表5点に限られるか">9. 観測点は ROM
 の代表5点に限られるか</a>
 <ul>
 <li><a href="#なぜか" id="toc-なぜか">なぜか</a></li>
@@ -250,11 +264,11 @@ id="toc-どこに置いたか">どこに置いたか</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 <li><a href="#実務上の意味" id="toc-実務上の意味">実務上の意味</a></li>
 </ul></li>
-<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">9.
+<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">10.
 作り直しが必要なもの</a></li>
-<li><a href="#未確認のこと" id="toc-未確認のこと">10.
+<li><a href="#未確認のこと" id="toc-未確認のこと">11.
 未確認のこと</a></li>
-<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">11.
+<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">12.
 使ったスクリプト</a></li>
 </ul></li>
 </ul>
@@ -355,6 +369,44 @@ W・間欠加熱）＝ ROM
 </blockquote>
 <hr />
 <h2 id="結論">1. 結論</h2>
+<h3 id="一言でいうと">一言でいうと</h3>
+<blockquote>
+<p><strong>熱源の位置と形状が同じなら、この ROM
+はそのまま使えます。</strong>
+発熱量が変わっても、加熱のしかた（いつ入れて切るか）が変わっても、作り直しは要りません。
+ただし<strong>加熱のしかたが変わる場合は、「いつヒータが入っているか」をモデルに教える</strong>必要があります。
+<strong>熱源の位置・形状・材料が変わったら作り直し</strong>です。</p>
+</blockquote>
+<h3 id="判定の目安">判定の目安</h3>
+<p>ROM が「使えている」かどうかは、次の2つで判断しました。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>見るもの</th>
+<th>使えると判断する目安</th>
+<th>なぜその目安か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>ROM
+単体の誤差</strong>（同化なし、発熱量を正しく与えた場合）</td>
+<td><strong>温度計のノイズ 0.3 K より小さい</strong></td>
+<td>実際にセンサで測っても、その差は読み取れないため</td>
+</tr>
+<tr class="even">
+<td><strong>同化した後の温度場の誤差</strong></td>
+<td><strong>0.3 K より小さい</strong>（代表点以外も含む）</td>
+<td>同上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="条件ごとの判定">条件ごとの判定</h3>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -379,7 +431,7 @@ W・間欠加熱）＝ ROM
 <td><strong>加熱のしかた</strong>が変わる（間欠加熱）</td>
 <td><strong>使える</strong>（作り直し不要）。ただし、ヒータへの入力の与え方を変える必要がある</td>
 <td>ON/OFF を正しく与えれば ROM 単体の誤差 0.038
-K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）</td>
+K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§6）</td>
 </tr>
 <tr class="odd">
 <td>25 W より大きく外れた発熱量</td>
@@ -394,7 +446,7 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）<
 <tr class="odd">
 <td>600 秒より長い運転</td>
 <td><strong>一部だけ確認</strong></td>
-<td>5,000 秒の試験はあるが、真値も ROM（§6）</td>
+<td>5,000 秒の試験はあるが、真値も ROM（§7）</td>
 </tr>
 <tr class="even">
 <td><strong>熱源の位置</strong>が変わる</td>
@@ -409,7 +461,7 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）<
 <tr class="even">
 <td>温度分布の<strong>型（モード）</strong>そのものが大きく変わる</td>
 <td><strong>使えない</strong>（型を作り直す）</td>
-<td>型は固定で、変えられるのは混ぜ具合だけ（§7）</td>
+<td>型は固定で、変えられるのは混ぜ具合だけ（§8）</td>
 </tr>
 <tr class="odd">
 <td>周囲温度・取り付け（拘束）条件が変わる</td>
@@ -419,7 +471,13 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）<
 <tr class="even">
 <td><strong>観測点を代表5点以外にしたい</strong></td>
 <td><strong>できる</strong>（作り直し不要）</td>
-<td>代表点でない2セルでも同化できた（§8）</td>
+<td>代表点でない2セルでも同化できた（§9）</td>
+</tr>
+<tr class="odd">
+<td>代表5点<strong>以外</strong>のセルの温度も合うか</td>
+<td><strong>合う</strong></td>
+<td>全20,696セルで誤差 0.3 K 未満（15 W・25
+W）。代表点以外のほうがむしろ小さい（§5）</td>
 </tr>
 </tbody>
 </table>
@@ -474,7 +532,7 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§5）<
 <td>「ヒータ点（P2）に <span class="math inline">\(q\times15\)</span>
 W、0〜300 秒だけ」</td>
 <td>決め打ち</td>
-<td><strong>加熱のしかたが変わると、ここを変える</strong>（§5）</td>
+<td><strong>加熱のしかたが変わると、ここを変える</strong>（§6）</td>
 </tr>
 </tbody>
 </table>
@@ -638,7 +696,99 @@ P1・P3 まで合っています。</strong> 灰の破線（同化なし）は 3
 href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ②）</p>
 <hr />
-<h2 id="加熱のしかたが変わる場合間欠加熱">5.
+<h2 id="復元した温度場は代表5点以外でも合っているか">5.
+復元した温度場は、代表5点以外でも合っているか</h2>
+<p>ROM は5点の温度しか追いかけません。そこから POD で 20,696
+セル全体を復元します。
+では、<strong>復元した温度は代表5点以外のセルでも合っているのか</strong>を、全セルで確かめました（<code>run/check_all_cells_after_da.py</code>）。</p>
+<p>真値は OpenFOAM
+の温度場そのものです。観測は温度2点（P2＋P4）＋変位2点（A/O）、5 seed
+平均です。</p>
+<figure>
+<img src="img/all_cells_after_da.png" alt="全セルの誤差" />
+<figcaption aria-hidden="true">全セルの誤差</figcaption>
+</figure>
+<p><em>上：全セルの誤差のヒストグラム（青＝代表点以外の 20,691
+セル、赤い縦線＝代表5点、破線＝温度計のノイズ 0.3 K）。
+中：セルごとの誤差を半径・高さで見た分布（赤丸＝代表5点、×＝誤差が最大のセル）。
+下：誤差の時間変化（最大・95%点・平均）。</em></p>
+<h3 id="結果">結果</h3>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+<col style="width: 14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">全セルの平均</th>
+<th style="text-align: right;">95%点</th>
+<th style="text-align: right;">最大</th>
+<th style="text-align: right;">代表5点の平均</th>
+<th style="text-align: right;"><strong>代表点以外の平均</strong></th>
+<th style="text-align: right;">0.3 K 未満のセル</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（モデル作成に使った条件）</td>
+<td style="text-align: right;">0.113 K</td>
+<td style="text-align: right;">0.159 K</td>
+<td style="text-align: right;">0.186 K</td>
+<td style="text-align: right;">0.142 K</td>
+<td style="text-align: right;"><strong>0.112 K</strong></td>
+<td style="text-align: right;"><strong>100 %</strong></td>
+</tr>
+<tr class="even">
+<td>25 W（使っていない条件）</td>
+<td style="text-align: right;">0.118 K</td>
+<td style="text-align: right;">0.175 K</td>
+<td style="text-align: right;">0.208 K</td>
+<td style="text-align: right;">0.150 K</td>
+<td style="text-align: right;"><strong>0.118 K</strong></td>
+<td style="text-align: right;"><strong>100 %</strong></td>
+</tr>
+<tr class="odd">
+<td>間欠加熱（使っていない条件）</td>
+<td style="text-align: right;">0.240 K</td>
+<td style="text-align: right;">0.547 K</td>
+<td style="text-align: right;">0.633 K</td>
+<td style="text-align: right;">0.321 K</td>
+<td style="text-align: right;">0.240 K</td>
+<td style="text-align: right;">69.8 %</td>
+</tr>
+</tbody>
+</table>
+<p>（加熱期 30〜300 秒の平均誤差）</p>
+<h3 id="読み取れること">読み取れること</h3>
+<ol type="1">
+<li><p><strong>代表点以外のほうが、むしろ誤差が小さい。</strong> 15 W
+では代表5点 0.142 K に対し、代表点以外は 0.112 K でした。25 W
+でも同じ傾向です。
+代表5点はヒータの近くや底面など<strong>温度変化が大きい場所</strong>に選ばれているので、誤差もそこで大きくなります。
+「測った点だけ合って、ほかは合っていない」という心配は<strong>不要</strong>でした。</p></li>
+<li><p><strong>15 W と 25 W では、20,696 セルすべてが温度計のノイズ（0.3
+K）より小さい誤差に収まりました。</strong> 最大でも 0.186 K・0.208 K
+です。中段の分布図を見ても、色が一様で、特定の場所だけ大きく外れるということはありません。</p></li>
+<li><p><strong>間欠加熱だけは合いません。</strong> 誤差が 0.3 K
+を超えるセルが 30 % あり、最大 0.633 K です。
+下段の時間変化を見ると、<strong>300 秒以降（2回目の加熱）で誤差が 3 K
+近くまで跳ね上がっています</strong>。 ROM が「0〜300
+秒に一定の発熱」と仮定しているためで、§6 の方法で改善できます。</p></li>
+<li><p><strong>誤差は時間とともに減ります。</strong> 最初の 30 秒は 0.6
+K ほどありますが、2〜3 回更新すると 0.2 K 以下に落ち着きます。</p></li>
+</ol>
+<blockquote>
+<p><strong>結論</strong>：モデル作成に使った条件でも、発熱量を変えた条件でも、<strong>復元した温度場は全セルで温度計のノイズより小さい誤差</strong>でした。
+代表点以外も合っています。合わないのは、加熱のしかたがモデルの仮定と違う場合だけです。</p>
+</blockquote>
+<hr />
+<h2 id="加熱のしかたが変わる場合間欠加熱">6.
 加熱のしかたが変わる場合（間欠加熱）</h2>
 <h3 id="rom-単体同化なしの予測-1">ROM 単体（同化なし）の予測</h3>
 <p>上の図の右が間欠加熱です。</p>
@@ -723,7 +873,7 @@ K</strong>（作った条件と同じ）</td>
 href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ④）</p>
 <hr />
-<h2 id="長い時間の場合">6. 長い時間の場合</h2>
+<h2 id="長い時間の場合">7. 長い時間の場合</h2>
 <p>放熱 <span class="math inline">\(h\)</span> を推定できるかを、5,000
 秒まで延ばして調べた試験があります（<a
 href="19_research_advantage_and_validation.md">研究レビュー</a>）。
@@ -733,7 +883,7 @@ href="19_research_advantage_and_validation.md">研究レビュー</a>）。
 秒を超える OpenFOAM の計算は行っていないので、<strong>長い時間で ROM
 自体が OpenFOAM と合うかは未確認</strong>です。</p>
 <hr />
-<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">7.
+<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">8.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</h2>
 <p>ROM
 が使えるかどうかは、<strong>新しい条件の温度分布が、作ったときの5つの型（モード）の組み合わせで表せるか</strong>で決まります。</p>
@@ -826,7 +976,7 @@ id="型が大きく変わると考えられる場合未確認">型が大きく�
 id="実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</h3>
 <p>運転中は温度場全体が分からないので、上の誤差は直接計算できません。考えられるのは、同化に使わない確認用のセンサを1本置き、その点の推定値と測定値のずれが急に大きくなったら「型が合わなくなった」と判断する方法です。<strong>試していません。</strong></p>
 <hr />
-<h2 id="観測点は-rom-の代表5点に限られるか">8. 観測点は ROM
+<h2 id="観測点は-rom-の代表5点に限られるか">9. 観測点は ROM
 の代表5点に限られるか</h2>
 <p><strong>限られません。</strong>
 温度計も変位計も、好きな場所に置けます。</p>
@@ -1007,7 +1157,7 @@ K）でした。代表点は復元に都合のよい点なので、同じ「両�
 <p><strong>センサは「置ける場所」に置けます。</strong> ROM
 の代表点に合わせて穴を開けたり、治具を作ったりする必要はありません。置いた場所の座標が分かっていれば、その点の観測演算子を作れます。</p>
 <hr />
-<h2 id="作り直しが必要なもの">9. 作り直しが必要なもの</h2>
+<h2 id="作り直しが必要なもの">10. 作り直しが必要なもの</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1049,7 +1199,7 @@ class="math inline">\(D\)</span></td>
 <p>手順はすべてスクリプト化してあります（<code>run/select_points_qdeim.py</code>、<code>run/run_da_compare.py</code>
 など）。ただし、OpenFOAM の計算に1本あたり約1〜3時間かかります。</p>
 <hr />
-<h2 id="未確認のこと">10. 未確認のこと</h2>
+<h2 id="未確認のこと">11. 未確認のこと</h2>
 <ul>
 <li>25 W 以外の発熱量での同化（特に大きく外れた場合）</li>
 <li>ランプ状に変わる発熱、30 秒より短い間隔の
@@ -1060,7 +1210,7 @@ ON/OFF（同化の更新間隔より速い変化）</li>
 <li>代表点から大きく外れた場所だけに温度計を置いた場合（§8）</li>
 </ul>
 <hr />
-<h2 id="使ったスクリプト">11. 使ったスクリプト</h2>
+<h2 id="使ったスクリプト">12. 使ったスクリプト</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1086,16 +1236,21 @@ ON/OFF（同化の更新間隔より速い変化）</li>
 <td><code>results/limit_realsolver_&lt;条件&gt;.json</code></td>
 </tr>
 <tr class="odd">
-<td>加熱のしかたの改善（§5）</td>
+<td>加熱のしかたの改善（§6）</td>
 <td><code>run/improve_heating_schedule.py</code></td>
 <td><code>results/improve_heating_schedule.json</code></td>
 </tr>
 <tr class="even">
-<td>観測点は代表5点に限られるか（§8）</td>
+<td>復元した温度場が全セルで合うか（§5）</td>
+<td><code>run/check_all_cells_after_da.py</code></td>
+<td><code>results/check_all_cells_after_da.json</code></td>
+</tr>
+<tr class="odd">
+<td>観測点は代表5点に限られるか（§9）</td>
 <td><code>run/obs_points_not_limited_to_rom.py</code></td>
 <td><code>results/obs_points_not_limited_to_rom.json</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>25 W・間欠加熱の OpenFOAM 計算</td>
 <td><code>openfoam/limit/q25</code>、<code>openfoam/limit/intermittent</code>（リポジトリには含めていない）</td>
 <td>―</td>
