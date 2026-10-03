@@ -1,6 +1,6 @@
 # 索引 ― 「これが知りたい」から探す
 
-**本編は `blog_001`〜`blog_006` の6本です。** 優位性・先行研究の確認範囲・追加検証は [研究レビュー](19_research_advantage_and_validation.md) を参照してください。**従来の回帰補正との比較・学習していない条件での実ソルバ検証は [21_advantage_verification.md](21_advantage_verification.md)** にあります。 下の逆引き表から目的の節へ飛んでください。
+**本編は `blog_001`〜`blog_006` の6本です。** 優位性・先行研究の確認範囲・追加検証は [研究レビュー](19_research_advantage_and_validation.md) を参照してください。**従来の回帰補正との比較・モデル作成に使っていない条件での実ソルバ検証は [21_advantage_verification.md](21_advantage_verification.md)**、**ROM の適用範囲（どの条件で使えるか）は [22_rom_applicability.md](22_rom_applicability.md)** にあります。 下の逆引き表から目的の節へ飛んでください。
 
 Webで読む（数式・図・GIFつき）: <https://kamakiri1225.github.io/thermal-da-demo/>
 

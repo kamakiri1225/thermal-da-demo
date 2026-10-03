@@ -106,7 +106,7 @@
 
 ## 追加検証の結果（2026-10-03）
 
-詳しくは [docs/21_advantage_verification.md](../docs/21_advantage_verification.md)。真値は OpenFOAM＋FrontISTR の計算結果。
+詳しくは [docs/21_advantage_verification.md](../docs/21_advantage_verification.md)。 ROM の適用範囲は [docs/22_rom_applicability.md](../docs/22_rom_applicability.md)。真値は OpenFOAM＋FrontISTR の計算結果。
 
 | 確かめたこと | 結果 |
 |---|---|
