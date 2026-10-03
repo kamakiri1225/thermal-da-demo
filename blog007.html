@@ -303,6 +303,9 @@ id="toc-復元した温度場は代表5点以外でも合っているか">6.
 <li><a href="#結果" id="toc-結果">結果</a></li>
 <li><a href="#読み取れること"
 id="toc-読み取れること">読み取れること</a></li>
+<li><a href="#追加ヒータの-onoff-をモデルに与えると間欠加熱でも合う"
+id="toc-追加ヒータの-onoff-をモデルに与えると間欠加熱でも合う">【追加】ヒータの
+ON/OFF をモデルに与えると、間欠加熱でも合う</a></li>
 </ul></li>
 <li><a href="#加熱のしかたが変わる場合間欠加熱"
 id="toc-加熱のしかたが変わる場合間欠加熱">7.
@@ -590,7 +593,8 @@ K（作った条件と同じ）。同化でも反りの誤差 0.08 µm（§7）<
 <td>代表5点<strong>以外</strong>のセルの温度も合うか</td>
 <td><strong>合う</strong></td>
 <td>全20,696セルで誤差 0.3 K 未満（15 W・25
-W）。代表点以外のほうがむしろ小さい（§6）</td>
+W・間欠加熱※）。代表点以外のほうがむしろ小さい（§6）<br>※間欠加熱はヒータの
+ON/OFF をモデルに与えた場合</td>
 </tr>
 </tbody>
 </table>
@@ -1031,10 +1035,106 @@ OpenFOAM（点）にほぼ重なっています。</strong> 15 W と 25 W
 mm）でも、加熱から冷却まで線と点が離れません。 間欠加熱だけは、300
 秒以降で線が点から大きく離れます（2回目の加熱を予測できないため）。</p></li>
 </ol>
+<h3
+id="追加ヒータの-onoff-をモデルに与えると間欠加熱でも合う">【追加】ヒータの
+ON/OFF をモデルに与えると、間欠加熱でも合う</h3>
+<p>上の結果で間欠加熱だけ合わなかったのは、<strong>同化に使った ROM
+が「0〜300 秒に一定の発熱」の決め打ちのまま</strong>だったからです（§2
+の問い B）。 そこで、ヒータの ON/OFF
+時刻だけをモデルに与えて、同じ検証をやり直しました（<code>KNOWN_SCHEDULE=1 python3 run/check_all_cells_after_da.py</code>）。</p>
+<figure>
+<img src="img/all_cells_after_da_known.png"
+alt="全セルの温度（ON/OFF を与えた場合）" />
+<figcaption aria-hidden="true">全セルの温度（ON/OFF
+を与えた場合）</figcaption>
+</figure>
+<p><em>ヒータの ON/OFF
+をモデルに与えた場合。見方は上の図と同じ。</em></p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">全セルの平均</th>
+<th style="text-align: right;">最大</th>
+<th style="text-align: right;">代表点以外の平均</th>
+<th style="text-align: right;">0.3 K 未満のセル</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td style="text-align: right;">0.113 K</td>
+<td style="text-align: right;">0.186 K</td>
+<td style="text-align: right;">0.112 K</td>
+<td style="text-align: right;">100 %</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">0.118 K</td>
+<td style="text-align: right;">0.208 K</td>
+<td style="text-align: right;">0.118 K</td>
+<td style="text-align: right;">100 %</td>
+</tr>
+<tr class="odd">
+<td><strong>間欠加熱（ON/OFF を与えた）</strong></td>
+<td style="text-align: right;"><strong>0.097 K</strong></td>
+<td style="text-align: right;"><strong>0.168 K</strong></td>
+<td style="text-align: right;"><strong>0.097 K</strong></td>
+<td style="text-align: right;"><strong>100 %</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（15 W と 25 W は ON/OFF が元々 0〜300
+秒なので、上の表と同じ値です）</p>
+<p><strong>間欠加熱の誤差は 0.240 K → 0.097 K、最大は 0.633 K → 0.168 K
+になりました。</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>間欠加熱の比較</th>
+<th style="text-align: right;">平均</th>
+<th style="text-align: right;">最大</th>
+<th style="text-align: right;">0.3 K 未満</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ヒータを「0〜300 秒に一定」と仮定したまま</td>
+<td style="text-align: right;">0.240 K</td>
+<td style="text-align: right;">0.633 K</td>
+<td style="text-align: right;">69.8 %</td>
+</tr>
+<tr class="even">
+<td><strong>ON/OFF 時刻を与える</strong></td>
+<td style="text-align: right;"><strong>0.097 K</strong></td>
+<td style="text-align: right;"><strong>0.168 K</strong></td>
+<td style="text-align: right;"><strong>100 %</strong></td>
+</tr>
+</tbody>
+</table>
+<p>図の右列を見ると、<strong>黒点が完全に帯の中に収まっています</strong>。2回の加熱で温度が階段状に上がる様子も、線が点に重なったまま追えています。
+しかも<strong>3条件のなかで間欠加熱がいちばん誤差が小さい</strong>（0.097
+K）という結果になりました。
+加熱が2回に分かれるぶん温度上昇が緩やかで、同化が追いやすかったためと考えられますが、確かめてはいません。</p>
 <blockquote>
 <p><strong>結論</strong>：ROM
 の係数を決めた計算の条件でも、発熱量を変えた条件でも、<strong>復元した温度場は全セルで温度計のノイズより小さい誤差</strong>でした。
-代表点以外も合っています。合わないのは、加熱のしかたがモデルの仮定と違う場合だけです。</p>
+代表点以外も合っています。 間欠加熱も、<strong>ヒータの ON/OFF
+をモデルに与えれば全セルがノイズ以下</strong>に収まります。
+合わないのは、加熱のしかたがモデルの仮定と食い違ったまま同化した場合だけです。</p>
 </blockquote>
 <hr />
 <h2 id="加熱のしかたが変わる場合間欠加熱">7.
