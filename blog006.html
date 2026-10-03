@@ -217,6 +217,9 @@ id="toc-観測データ測った値の作り方">7-4.
 id="toc-変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
 変位は温度をどう直したか（ <span class="math inline">\(t=30\)</span>
 秒と <span class="math inline">\(t=150\)</span> 秒）</a></li>
+<li><a href="#b.-なぜ変位を測ると温度計のない点の温度まで直るのか"
+id="toc-b.-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
+なぜ変位を測ると「温度計のない点」の温度まで直るのか</a></li>
 <li><a href="#変位計を入れなかった場合との比較"
 id="toc-変位計を入れなかった場合との比較">7-6.
 変位計を入れなかった場合との比較</a></li>
@@ -952,6 +955,148 @@ class="math inline">\(d_T,d_u\)</span> はそれぞれのずれ）</p>
 class="math inline">\(Q\)</span>
 も、変位計のずれだけで直されています</strong>。</li>
 </ul>
+<h3 id="b.-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
+なぜ変位を測ると「温度計のない点」の温度まで直るのか</h3>
+<p>ここがいちばん分かりにくいところなので、3段階に分けて説明します。</p>
+<figure>
+<img src="img/blog006_disp_fixes_temp.png"
+alt="変位観測が温度を直す仕組み" />
+<figcaption aria-hidden="true">変位観測が温度を直す仕組み</figcaption>
+</figure>
+<p><em>本番計算（seed 20260913）の実際の値。温度計は P2・P0
+の2本だけで、P1・P3・P4 には温度計がない。</em></p>
+<h4 id="変位計1本が5点すべての温度に触れている">①
+変位計1本が、5点すべての温度に触れている</h4>
+<p>7-2 で見たとおり、変位は5点の温度の足し算です。</p>
+<p><span class="math display">\[
+U_z(A)=3.970+0.33\,T_0-0.13\,T_1+0.26\,T_2+0.64\,T_3+0.11\,T_4
+\]</span></p>
+<p><span class="math display">\[
+U_z(O)=2.601-0.14\,T_0+0.52\,T_1-0.34\,T_2+0.60\,T_3+0.57\,T_4
+\]</span></p>
+<p>（係数は熱感度 <span class="math inline">\(W\)</span> [µm/K]、 <span
+class="math inline">\(T\)</span> は基準からの温度差）</p>
+<p><strong>温度計は1本で1点しか見られませんが、変位計は1本で5点すべてに触れます。</strong>
+これが決定的な違いです。 特に P3（係数 +0.64 と
++0.60）は、どちらの変位計にも強く効いています。</p>
+<h4 id="変位がずれていれば5点の温度のどこかがずれている">②
+変位がずれていれば、5点の温度のどこかがずれている</h4>
+<p>変位の予測が真値より大きければ、上の式の右辺が大きすぎる、つまり<strong>どこかの点の温度が高すぎる</strong>ということです。</p>
+<p>ただし、これだけでは「どの点が悪いのか」は決まりません。
+図②は「熱感度 <span class="math inline">\(W\)</span> ×
+まだ分かっていない温度の幅」を点ごとに並べたものです。 P3 が 1.45 µm
+といちばん大きく、「P3
+の温度がずれていると、変位が大きくずれる」と読めます。</p>
+<h4 id="どの点をどれだけ直すかは60メンバーのばらつきが決める">③
+どの点をどれだけ直すかは、60メンバーのばらつきが決める</h4>
+<p>最終的に決めるのは、60メンバーの共分散です。60通りの計算の中には</p>
+<blockquote>
+<p>「変位 A を大きく予測したメンバーは、P3
+の温度も高く予測している」</p>
+</blockquote>
+<p>という関係が自然にできています。この関係が強い点ほど、変位のずれが大きく配分されます。
+これは §9・§10 の <span class="math inline">\(C_{zy}\)</span> と <span
+class="math inline">\(K\)</span> そのもので、<strong>人が「P3
+を直せ」と指定しているわけではありません</strong>。</p>
+<h4 id="実際にどれだけ直ったか">実際にどれだけ直ったか</h4>
+<p>更新の式を「温度計の分」と「変位計の分」に分けた内訳です（§7-5
+の表と同じもの）。</p>
+<p><strong><span class="math inline">\(t=30\)</span>
+秒</strong>（温度計のずれが −4.96 K、−4.86 K と大きい時期）</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0（温度計あり）</th>
+<th style="text-align: right;">P1（なし）</th>
+<th style="text-align: right;">P2（温度計あり）</th>
+<th style="text-align: right;">P3（なし）</th>
+<th style="text-align: right;">P4（なし）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計2本による補正</td>
+<td style="text-align: right;">−4.02 K</td>
+<td style="text-align: right;">−9.35 K</td>
+<td style="text-align: right;">−5.01 K</td>
+<td style="text-align: right;">+0.54 K</td>
+<td style="text-align: right;">+3.96 K</td>
+</tr>
+<tr class="even">
+<td><strong>変位計2本による補正</strong></td>
+<td style="text-align: right;">−0.71 K</td>
+<td style="text-align: right;"><strong>+4.21 K</strong></td>
+<td style="text-align: right;">+0.10 K</td>
+<td style="text-align: right;"><strong>−4.97 K</strong></td>
+<td style="text-align: right;"><strong>−7.67 K</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>温度計を置いていない P3・P4 を、変位計が 5〜8 K
+も直しています。</strong> P3・P4
+は底面にあり、温度計（P2・P0、どちらも中段のヒータ側）から遠い点です。</p>
+<p><strong><span class="math inline">\(t=150\)</span>
+秒</strong>（温度計のずれがほぼ 0 になった後）</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計2本による補正</td>
+<td style="text-align: right;">0.000 K</td>
+<td style="text-align: right;">0.000 K</td>
+<td style="text-align: right;">0.000 K</td>
+<td style="text-align: right;">0.000 K</td>
+<td style="text-align: right;">0.000 K</td>
+</tr>
+<tr class="even">
+<td><strong>変位計2本による補正</strong></td>
+<td style="text-align: right;">−0.081 K</td>
+<td style="text-align: right;">+0.029 K</td>
+<td style="text-align: right;">−0.110 K</td>
+<td style="text-align: right;">−0.031 K</td>
+<td style="text-align: right;">+0.036 K</td>
+</tr>
+</tbody>
+</table>
+<p>温度計のずれが 0
+になると、温度計は何も直せません。<strong>この時期に温度場を直しているのは変位計だけ</strong>です。</p>
+<h4 id="まとめ">まとめ</h4>
+<blockquote>
+<ol type="1">
+<li>変位は5点の温度の足し算なので、<strong>変位計1本で5点すべてに触れる</strong>。</li>
+<li>変位がずれていれば、5点の温度のどこかがずれていると分かる。</li>
+<li>どの点をどれだけ直すかは、60メンバーのばらつき（共分散）が決める。</li>
+<li>その結果、<strong>温度計を置いていない点の温度まで直る</strong>。</li>
+</ol>
+</blockquote>
+<p>これが、温度2点だけの 0.503 K が、変位2点を足すと 0.160 K
+になる理由です（§7-6）。</p>
 <h3 id="変位計を入れなかった場合との比較">7-6.
 変位計を入れなかった場合との比較</h3>
 <p>同じ計算で、変位計を外して温度2点（P2・P0）だけにした結果です（5 seed
