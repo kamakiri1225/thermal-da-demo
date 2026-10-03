@@ -39,14 +39,13 @@ def disp_timeseries():
     fig.savefig(out,dpi=140); plt.close(fig); print("wrote",out)
 
 
-# 温度センサの選定基準は「発熱感度 dT/dQ」。
-# 熱感度 W（温度→変位）は変位センサの基準で、温度センサに使うと逆効果になる
-# （run/why_lowW_wins_check.py：温度RMSEとの相関 dT/dQ -0.835 vs W +0.405）
+# 凡例は「どこに置いたか」だけを書く。温度センサを発熱感度 dT/dQ で選ぶ考え方は
+# 2026-10-02 にやめた（docs/blog_005 §4-6）。本番の P2+P0 はどちらもヒータ側(A側)。
 RENAME={"同化なし(free run)":"同化なし",
-        "温度1点(発熱感度 低)":"温度1点:P4 反ヒータ側底面(dT/dQ 低 2.6)",
-        "温度1点(発熱感度 高)":"温度1点:P2 ヒータ側(dT/dQ 高 5.7)",
-        "温度2点(発熱感度 上位2)":"温度2点:P2+P0(dT/dQ 上位2)",
-        "温度2点+変位2点":"温度2点+変位2点(上面A/O)"}
+        "温度1点(発熱感度 低)":"温度1点:P4（反対側の底面）",
+        "温度1点(発熱感度 高)":"温度1点:P2（ヒータ側）",
+        "温度2点(発熱感度 上位2)":"温度2点:P2+P0（どちらもヒータ側）",
+        "温度2点+変位2点":"温度2点+変位2点（A/Oを観測に使用＝循環）"}
 
 def disp_da_timeseries():
     """EnKF/OI比較用：FrontISTR真値を太線で重ねた変位差の時系列。"""
@@ -60,7 +59,7 @@ def disp_da_timeseries():
     # 各設定について5 seedの平均を表示（ばらつきは薄い帯）
     colors=["0.45","tab:orange","tab:blue","tab:green","tab:red"]
     fig=plt.figure(figsize=(11.6,6.0))
-    ax=fig.add_axes([0.075,0.155,0.905,0.70])   # 余白を固定座標で管理（tight_layoutの隙間対策）
+    ax=fig.add_axes([0.075,0.215,0.905,0.645])   # 余白を固定座標で管理（下に注記2行ぶんを確保）
     ax.axvspan(0,300,color="orange",alpha=.07,label="加熱期（ヒータON）")
     ax.plot(t,truth,color="black",lw=4.4,zorder=10,label="FrontISTR真値（A−O）")
     ax.annotate("真値（黒太線）",xy=(370,float(np.interp(370,t,truth))),xytext=(430,1.7),
@@ -75,11 +74,12 @@ def disp_da_timeseries():
     ax.axhline(0,color="k",lw=.8)
     ax.set_xlabel("時間 [s]"); ax.set_ylabel("変位差 Uz(A)−Uz(O) [µm]")
     ax.grid(alpha=.3)
-    fig.suptitle("FrontISTR真値とデータ同化後の変位差（5 seed平均）",fontsize=13.5,weight="bold",y=0.985)
+    fig.suptitle("データ同化後の変位差（5 seed平均）― 赤は A・O を観測に使った参考値",fontsize=13,weight="bold",y=0.985)
     hd,lb=ax.get_legend_handles_labels()
     fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=4,fontsize=11,frameon=False)
-    fig.text(0.5,0.022,"温度RMSE: 同化なし4.59K → 温度1点 低感度1.04／高感度0.62K（発熱感度が高い点のほうが1.7倍良い）"
-             "→ 温度2点0.50K、変位2点を足すと0.16K（約29倍改善）",ha="center",fontsize=11,color="#333")
+    fig.text(0.5,0.012,"赤は評価点 A・O をそのまま観測に使っているので、当たって当然（循環）。測らずに当てた結果は §7-4b（誤差0.081µm）\n"
+             "温度RMSE: 同化なし4.59K → 温度1点 P4 1.04／P2 0.62K → 温度2点(P2+P0) 0.50K → 変位2点を足して0.16K",
+             ha="center",fontsize=10.5,color="#333")
     out=os.path.join(IMG,"blog_disp_timeseries_truth_vs_da.png")
     fig.savefig(out,dpi=160,bbox_inches="tight"); plt.close(fig); print("wrote",out)
 
@@ -117,7 +117,7 @@ def disp_da_timeseries_points():
     fig.legend(hd,lb,loc="upper center",bbox_to_anchor=(0.5,0.945),ncol=6,fontsize=11.5,frameon=False)
     key=list(rms.keys())
     r=lambda k:"/".join(f"{v:.2f}" for v in rms[k])
-    fig.text(0.5,0.035,"温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。変位2点(赤)は両点とも合う",
+    fig.text(0.5,0.035,"温度1点は“センサに近い側”しか合わない（P2ヒータ側→A良/O悪、P4底→O良/A悪）。赤はA・Oを観測に使っているので合って当然（循環）",
              ha="center",fontsize=11.5,weight="bold",color="#222")
     fig.text(0.5,0.006,f"加熱期RMSE[µm]（同化なし/P4底/P2/2点/2点+変位）  Uz(A): {r(key[0])} ｜ Uz(O): {r(key[1])} ｜ 差: {r(key[2])}",
              ha="center",fontsize=9.5,color="#444")
