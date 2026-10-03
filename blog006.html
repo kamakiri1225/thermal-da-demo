@@ -321,15 +321,9 @@ id="toc-全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
 20260913）</a></li>
 <li><a href="#結果-何が分かったか" id="toc-結果-何が分かったか">15. 結果
 ― 何が分かったか</a></li>
-<li><a href="#この研究の優位性実際にやったことで言えること"
-id="toc-この研究の優位性実際にやったことで言えること">16.
-この研究の優位性（実際にやったことで言えること）</a>
-<ul>
-<li><a href="#言えること" id="toc-言えること">16-1. 言えること</a></li>
-<li><a href="#言わないこと先行研究があるもの確かめていないもの"
-id="toc-言わないこと先行研究があるもの確かめていないもの">16-2.
-言わないこと（先行研究があるもの・確かめていないもの）</a></li>
-</ul></li>
+<li><a href="#この研究の優位性と先行研究との関係"
+id="toc-この研究の優位性と先行研究との関係">16.
+この研究の優位性と、先行研究との関係</a></li>
 <li><a href="#限界やっていないこと注意"
 id="toc-限界やっていないこと注意">17.
 限界（やっていないこと・注意）</a></li>
@@ -2077,72 +2071,53 @@ W）</td>
 </tbody>
 </table>
 <p>（5 seed 平均。 <code>run/run_da_compare.py</code>）</p>
-<h2 id="この研究の優位性実際にやったことで言えること">16.
-この研究の優位性（実際にやったことで言えること）</h2>
-<h3 id="言えること">16-1. 言えること</h3>
+<h2 id="この研究の優位性と先行研究との関係">16.
+この研究の優位性と、先行研究との関係</h2>
+<p><strong>この記事で分かったことが、研究としてどういう位置にあるか</strong>は、<a
+href="blog_008_novelty_displacement_assimilation.md">blog_008</a>
+に独立した記事としてまとめました。 要点だけ書くと、次のとおりです。</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th>優位性</th>
-<th>根拠（この研究で実際にやったこと）</th>
+<th></th>
+<th>内容</th>
+<th>詳しくは</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>オープンソースだけで、熱流体解析から熱変形・データ同化・低次元化までを一続きにつないだ</strong></td>
-<td>OpenFOAM（CHT）→ FrontISTR（熱弾性）→ EnKF → POD／Q-DEIM の ROM
-を、すべて公開ソフトと Python で実装（blog_001〜004）</td>
+<td><strong>先行研究の調査</strong></td>
+<td>工作機械の熱変形補正は、温度を観測して変位を推定する形（<a
+href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
+2024</a>
+など）か、変位を直接測って補正する形が一般的。<strong>温度と変位を同時に観測として同化に入れた例は、調べた範囲で見当たらない</strong></td>
+<td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+§4</a></td>
 </tr>
 <tr class="even">
-<td><strong>変位計の値を、状態を増やさずに同化に使える</strong></td>
-<td>温度→変位の写像を FrontISTR 6 回で作り（§7）、毎回の同化で FEM
-を呼ばない。ROM で 600 秒が 31 ms</td>
+<td><strong>主張</strong></td>
+<td>熱変形を「補正すべき対象」から「<strong>温度場を知るための観測情報</strong>」に位置づけ直す</td>
+<td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+§7-2</a></td>
 </tr>
 <tr class="odd">
-<td><strong>変位計を入れると、温度も発熱量もよく当たる</strong></td>
-<td>温度2点だけ 0.503 K → ＋変位2点で 0.160 K。 <span
-class="math inline">\(Q\)</span> は 14.05 → 14.89 W（真値 15 W）。
-変位計は温度を直す（§7-5）。ただし <span
-class="math inline">\(Q\)</span>
-を真値に近づける直接の補正は主に温度センサによる（§14 の訂正）</td>
-</tr>
-<tr class="even">
-<td><strong>測っていない場所の熱変形を推定できる</strong></td>
-<td>中段だけ測って上面の反りを誤差 0.081 µm（<a
-href="blog_004_pod_selected_rom.md">blog_004 §7-4b</a>）</td>
-</tr>
-<tr class="odd">
-<td><strong>センサの置き場所を、測る前に計算で選べる</strong></td>
-<td>熱感度 <span class="math inline">\(W\)</span>
-と温度のばらつきから選んだ順位が、同化結果の順位とほぼ一致（順位相関
-0.98。<a href="blog_005_optimal_sensor_placement.md">blog_005
-§4-6</a>）</td>
-</tr>
-<tr class="even">
-<td><strong>手順と条件をすべて公開している</strong></td>
-<td>スクリプト・設定・結果ファイルをリポジトリで公開。この記事の数値は
-<code>run/trace_displacement_and_Q.py</code> で再現できる</td>
+<td><strong>この記事が支えている部分</strong></td>
+<td>変位計1本が5点すべての温度に触れるので、温度計のない点の温度まで直る（§7-5b・§14）</td>
+<td>本記事</td>
 </tr>
 </tbody>
 </table>
-<h3 id="言わないこと先行研究があるもの確かめていないもの">16-2.
-言わないこと（先行研究があるもの・確かめていないもの）</h3>
-<ul>
-<li><strong>POD、Q-DEIM、EnKF、目的に応じたセンサ配置の考え方そのものは新しくありません。</strong>
-例えば工作機械の ROM と配置の実験検証（Teshima et al., 2024, <a
-href="https://doi.org/10.1016/j.cirpj.2024.10.015"
-class="uri">https://doi.org/10.1016/j.cirpj.2024.10.015</a>）や、予測対象の不確かさを目的にした配置設計（<a
-href="https://arxiv.org/abs/2507.02500"
-class="uri">https://arxiv.org/abs/2507.02500</a>）があります。この研究の新しさは、それらをオープンソースの熱流体・熱弾性解析と一続きにつなぎ、熱変形（反り）で評価した点です。</li>
-<li><strong>実機で精度が出ることは示していません。</strong>
-すべて計算で作った模擬データです。</li>
-<li><strong>どんな機械・条件にも通用することは示していません。</strong>
-熱源の位置が変わると、選ぶ置き場所も変わりました（blog_005 §4-6）。</li>
-</ul>
+<p><strong>手法そのものは新しくありません。</strong>
+POD、Q-DEIM、EnKF、目的に応じたセンサ配置の考え方には先行研究があります
+（<a href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima et
+al. 2024</a>、<a href="https://arxiv.org/abs/2507.02500">goal-oriented
+sensor placement 2025</a>）。
+新しいのは<strong>組み合わせ方と、変位を観測に入れた点</strong>です。</p>
 <h2 id="限界やっていないこと注意">17.
 限界（やっていないこと・注意）</h2>
 <ul>

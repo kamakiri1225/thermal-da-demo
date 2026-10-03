@@ -227,17 +227,37 @@ id="toc-変位の候補はどう選んだか-実際にやった作業">変位の
 id="toc-分かったこと-1">分かったこと</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 </ul></li>
-<li><a href="#主張の書き方" id="toc-主張の書き方">7. 主張の書き方</a>
+<li><a href="#工作機械の研究全体の中での位置づけ"
+id="toc-工作機械の研究全体の中での位置づけ">7.
+工作機械の研究全体の中での位置づけ</a>
 <ul>
-<li><a href="#言ってよいこと" id="toc-言ってよいこと">7-1.
+<li><a href="#既存の4つの流派" id="toc-既存の4つの流派">7-1.
+既存の4つの流派</a></li>
+<li><a href="#切り口a変位は結果ではなく情報源である"
+id="toc-切り口a変位は結果ではなく情報源である">7-2.
+切り口A：変位は「結果」ではなく「情報源」である</a></li>
+<li><a href="#切り口b測れない場所を測れる場所から当てる設計論目玉"
+id="toc-切り口b測れない場所を測れる場所から当てる設計論目玉">7-3.
+切り口B：測れない場所を、測れる場所から当てる設計論（目玉）</a></li>
+<li><a href="#切り口c運転条件が変わっても使える①への差別化"
+id="toc-切り口c運転条件が変わっても使える①への差別化">7-4.
+切り口C：運転条件が変わっても使える（①への差別化）</a></li>
+<li><a href="#組み立て方の提案" id="toc-組み立て方の提案">7-5.
+組み立て方の提案</a></li>
+<li><a href="#今の弱点と埋める手段" id="toc-今の弱点と埋める手段">7-6.
+今の弱点と、埋める手段</a></li>
+</ul></li>
+<li><a href="#主張の書き方" id="toc-主張の書き方">8. 主張の書き方</a>
+<ul>
+<li><a href="#言ってよいこと" id="toc-言ってよいこと">8-1.
 言ってよいこと</a></li>
-<li><a href="#言ってはいけないこと" id="toc-言ってはいけないこと">7-2.
+<li><a href="#言ってはいけないこと" id="toc-言ってはいけないこと">8-2.
 言ってはいけないこと</a></li>
 <li><a href="#主張を強くするには未実施"
-id="toc-主張を強くするには未実施">7-3.
+id="toc-主張を強くするには未実施">8-3.
 主張を強くするには（未実施）</a></li>
 </ul></li>
-<li><a href="#発表での位置づけ案" id="toc-発表での位置づけ案">8.
+<li><a href="#発表での位置づけ案" id="toc-発表での位置づけ案">9.
 発表での位置づけ（案）</a></li>
 </ul></li>
 </ul>
@@ -248,6 +268,15 @@ id="blog_008本研究の主張-温度だけでなく変位もデータ同化の�
 <p>更新日：2026-10-03</p>
 <p>これまでの記事で、温度2点に変位2点を足すと推定が良くなることを示してきました。
 この記事は、<strong>それが研究の主張として成り立つのか</strong>を、先行研究を調べたうえで整理したものです。</p>
+<blockquote>
+<p><strong>この記事は、本研究の「主張」と「先行研究との関係」をまとめた記事です。</strong>
+計算の中身は <a
+href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>（同化の手順）、
+<a href="blog_007_rom_applicability.md">blog_007</a>（ROM
+の適用範囲）にあります。
+<strong>工作機械の研究全体の中でどこに位置するか</strong>は §7
+です。</p>
+</blockquote>
 <h2 id="この記事で確かめること">この記事で確かめること</h2>
 <table>
 <colgroup>
@@ -1140,8 +1169,253 @@ href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 の温度のばらつきだけで決められる。</p>
 </blockquote>
 <hr />
-<h2 id="主張の書き方">7. 主張の書き方</h2>
-<h3 id="言ってよいこと">7-1. 言ってよいこと</h3>
+<h2 id="工作機械の研究全体の中での位置づけ">7.
+工作機械の研究全体の中での位置づけ</h2>
+<p>ここまでの検証をふまえ、<strong>工作機械の熱変形研究のどこに本研究が入るか</strong>を整理します。</p>
+<h3 id="既存の4つの流派">7-1. 既存の4つの流派</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>流派</th>
+<th>やり方</th>
+<th>弱点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>① 回帰・機械学習</strong></td>
+<td>温度センサ多点 → 変位を回帰／CNN で予測</td>
+<td>学習した運転条件の外で外れる。物理が入っていない</td>
+</tr>
+<tr class="even">
+<td><strong>② FEM ベースの補償</strong></td>
+<td>詳細 FEM をオフラインで解き、温度から変位を計算</td>
+<td>境界条件（熱伝達率・発熱量）が合わないと外れる</td>
+</tr>
+<tr class="odd">
+<td><strong>③ 低次元化＋状態推定</strong></td>
+<td>ROM＋カルマンフィルタで温度場を推定（<a
+href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
+2024</a> など）</td>
+<td><strong>観測は温度のみ。変位は出力</strong></td>
+</tr>
+<tr class="even">
+<td><strong>④ 直接測定による補償</strong></td>
+<td>変位計で TCP を測って直接補正（<a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
+の整理</a> の「直接法」）</td>
+<td>加工中は測れない。状態推定には戻さない</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>③と④の間が空いています。</strong>
+③は変位を「出力」、④は変位を「補正対象」として扱っていて、
+<strong>変位を「観測」として状態推定に戻す流派がありません。</strong></p>
+</blockquote>
+<h3 id="切り口a変位は結果ではなく情報源である">7-2.
+切り口A：変位は「結果」ではなく「情報源」である</h3>
+<blockquote>
+<p><strong>熱変形は補正すべき誤差であると同時に、温度場を知るための情報源でもある。</strong></p>
+</blockquote>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>根拠（すべて計算済み）</th>
+<th>数値</th>
+<th>出典</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位計1本が5点すべての温度に触れる（温度計は1点のみ）</td>
+<td>熱感度 <span class="math inline">\(W\)</span>
+の行が全点に非ゼロ</td>
+<td>§2</td>
+</tr>
+<tr class="even">
+<td>温度計のない点の温度が、変位計だけで直る</td>
+<td><span class="math inline">\(t=30\)</span> 秒で P3 を −4.97 K、P4 を
+−7.67 K</td>
+<td><a href="blog_006_temp2_disp2_step_by_step.md">blog_006
+§7-5b</a></td>
+</tr>
+<tr class="odd">
+<td>温度計のずれが 0 になった後も、変位計だけが温度場を直し続ける</td>
+<td><span class="math inline">\(t=150\)</span> 秒で温度の寄与 0.000
+K</td>
+<td>同上</td>
+</tr>
+<tr class="even">
+<td>結果</td>
+<td>温度場 0.503 → <strong>0.160 K</strong></td>
+<td>§3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>なぜ新しいか</strong>：④では変位は補正量として消費され、③では観測に入っていません。
+<strong>「変位を測ると温度が分かる」という逆方向の情報の流れ</strong>は、調べた範囲（§4）で報告が見当たりません。</p>
+<blockquote>
+<p><strong>発表での言い方</strong>
+従来、熱変形は補正すべき対象であった。本研究は、<strong>熱変形を温度場推定の観測情報として用いる</strong>ことで、
+温度センサのない位置の温度・発熱量まで同時に推定できることを示す。</p>
+</blockquote>
+<h3 id="切り口b測れない場所を測れる場所から当てる設計論目玉">7-3.
+切り口B：測れない場所を、測れる場所から当てる設計論（目玉）</h3>
+<blockquote>
+<p><strong>工具先端は測れない。測れる場所をどこにすれば、測れない場所が当たるかを設計できる。</strong></p>
+</blockquote>
+<table>
+<thead>
+<tr class="header">
+<th>構成</th>
+<th style="text-align: right;">測っていない A−O の反りの誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度2点のみ</td>
+<td style="text-align: right;">0.756 µm</td>
+</tr>
+<tr class="even">
+<td>A・O 自身を測る（循環・参考）</td>
+<td style="text-align: right;">0.135 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>選定した別の2点を測る</strong></td>
+<td style="text-align: right;"><strong>0.076 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>知りたい場所を直接測るより正確</strong>という結果です（§6）。
+しかも置き場所は、<strong>同化を回す前に机上計算だけで決められます</strong>（全
+15,120 候補から選定）。</p>
+<p><strong>なぜ新しいか</strong>：④は「測れる場所を測って、そこを補正する」。
+本研究は「<strong>測れる場所を測って、測れない場所を当てる</strong>」。さらに<strong>その場所を設計できる</strong>。</p>
+<blockquote>
+<p><strong>発表での言い方</strong>
+加工中の工具先端に変位計は置けない。本研究は、置ける位置での変位観測から、
+<strong>一度も測らない位置の熱変形を振幅の 2.8 %
+の誤差で推定</strong>し、
+さらに<strong>その観測位置を事前計算で設計できる</strong>ことを示す。</p>
+</blockquote>
+<h3 id="切り口c運転条件が変わっても使える①への差別化">7-4.
+切り口C：運転条件が変わっても使える（①への差別化）</h3>
+<blockquote>
+<p><strong>回帰モデルは学習した条件を外れると外れる。物理モデル＋同化は外挿できる。</strong></p>
+</blockquote>
+<p>真値は OpenFOAM＋FrontISTR（<a
+href="blog_007_rom_applicability.md">blog_007</a>、<a
+href="21_advantage_verification.md">21_advantage_verification.md</a>）。</p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">回帰式</th>
+<th style="text-align: right;">同化（温度2点＋変位2点）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（回帰式の係数を決めた条件）</td>
+<td style="text-align: right;">0.30 µm</td>
+<td style="text-align: right;"><strong>0.09 µm</strong></td>
+</tr>
+<tr class="even">
+<td><strong>25 W（決めていない条件）</strong></td>
+<td style="text-align: right;">0.29 µm</td>
+<td style="text-align: right;"><strong>0.10 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>間欠加熱（ON/OFF を与える）</td>
+<td style="text-align: right;">0.30 µm</td>
+<td style="text-align: right;"><strong>0.08 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>約3分の1の誤差</strong>です。さらに<strong>発熱量そのものを
+25.07 W と推定</strong>できています（真値 25 W）。
+これは回帰モデルには原理的にできません。</p>
+<p><strong>なぜ新しいか</strong>：①の弱点（外挿できない）を、実ソルバを真値にした試験で定量的に示しています。</p>
+<h3 id="組み立て方の提案">7-5. 組み立て方の提案</h3>
+<p><strong>A を主、B を目玉、C
+を裏づけ</strong>にするのが強いと考えます。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>役割</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>主張（A）</strong></td>
+<td>熱変形を「補正対象」から「<strong>観測情報</strong>」に位置づけ直す</td>
+</tr>
+<tr class="even">
+<td><strong>目玉（B）</strong></td>
+<td>測れない場所の変形を、測れる場所から<strong>直接測定より正確に</strong>推定（0.076
+対 0.135 µm）。しかも置き場所を事前設計できる</td>
+</tr>
+<tr class="odd">
+<td><strong>裏づけ（C）</strong></td>
+<td>係数を決めていない運転条件でも、従来の回帰補正の
+<strong>1/3</strong> の誤差。発熱量も同定できる</td>
+</tr>
+</tbody>
+</table>
+<h3 id="今の弱点と埋める手段">7-6. 今の弱点と、埋める手段</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>弱点</th>
+<th>埋める手段</th>
+<th>状況</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>真値がすべて計算（実機なし）</td>
+<td><code>IoT/thermal_expansion_experiment/</code> の実験</td>
+<td><strong>未実施</strong>（設計・試作案のみ）</td>
+</tr>
+<tr class="even">
+<td>文献調査が英語5回・日本語1回</td>
+<td>精密工学会・日本機械学会の論文を追加調査</td>
+<td><strong>未実施</strong></td>
+</tr>
+<tr class="odd">
+<td>切り口Bの holdout が ROM 真値のみ</td>
+<td>§6 を OpenFOAM 真値でやり直す</td>
+<td><strong>未実施</strong></td>
+</tr>
+</tbody>
+</table>
+<p>目玉である切り口Bは、いまのところ ROM
+の双子実験でしか確かめていません。 <strong>実ソルバを真値にした holdout
+試験</strong>を加えると、主張がいちばん固くなります。</p>
+<hr />
+<h2 id="主張の書き方">8. 主張の書き方</h2>
+<h3 id="言ってよいこと">8-1. 言ってよいこと</h3>
 <blockquote>
 <p>工作機械の熱変形補正では、温度を観測して変位を推定する形か、変位を直接測って補正する形が一般的である。
 本研究は<strong>温度と変位を同時に観測としてデータ同化に入れ</strong>、温度センサのない点の温度・測っていない点の熱変形・発熱量を同時に推定した。
@@ -1151,7 +1425,7 @@ href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 <strong>調べた範囲では、この形の報告は見当たらない。</strong></p>
 </blockquote>
 <p>「調べた範囲では」を必ず付けます。英語5回・日本語1回の検索だけが根拠だからです。</p>
-<h3 id="言ってはいけないこと">7-2. 言ってはいけないこと</h3>
+<h3 id="言ってはいけないこと">8-2. 言ってはいけないこと</h3>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -1187,7 +1461,7 @@ href="blog_007_rom_applicability.md">blog_007</a>）</td>
 </tr>
 </tbody>
 </table>
-<h3 id="主張を強くするには未実施">7-3. 主張を強くするには（未実施）</h3>
+<h3 id="主張を強くするには未実施">8-3. 主張を強くするには（未実施）</h3>
 <ol type="1">
 <li><strong>文献調査を広げる</strong>：精密工学会・日本機械学会の論文、構造ヘルスモニタリング分野。</li>
 <li><strong>センサ数をそろえた比較</strong>：「温度計3本」対「温度計2本＋変位計1本」。変位計が温度計の代わりになるかを示す。</li>
@@ -1197,7 +1471,7 @@ OpenFOAM＋FrontISTR の真値で確かめる。</li>
 に計画があるが、未実施。</li>
 </ol>
 <hr />
-<h2 id="発表での位置づけ案">8. 発表での位置づけ（案）</h2>
+<h2 id="発表での位置づけ案">9. 発表での位置づけ（案）</h2>
 <table>
 <colgroup>
 <col style="width: 50%" />
