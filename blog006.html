@@ -716,32 +716,85 @@ class="math inline">\(T_0\)</span> をそのまま取り出すだけです。</p
 class="math inline">\(D\)</span>
 を<strong>どうやって作ったか</strong>を手順で書きます。</p>
 <h4 id="なぜ6回で済むのか">なぜ6回で済むのか</h4>
-<p>熱弾性は<strong>温度について線形</strong>です。FrontISTR
-が解いているのは</p>
+<p><strong>ふつうに考えると、毎時刻 FrontISTR
+を解かないといけません。</strong> 温度は 30 秒ごとに変わり、メンバーも
+60 通りあるので、20 サイクル × 60 メンバー＝<strong>1,200 回</strong>の
+FEM 解析になります。
+これでは「軽くする」という目的が達成できません。</p>
+<p>これを
+<strong>6回</strong>で済ませられるのは、次の2つが重なっているからです。</p>
+<p><strong>① 熱弾性は温度について線形</strong></p>
+<p>FrontISTR が解いているのは</p>
 <p><span class="math display">\[
 K_s\,u=H_T\,(T-T_\mathrm{ref})
 \]</span></p>
 <p>で（ <span class="math inline">\(K_s\)</span> ：剛性行列、 <span
 class="math inline">\(H_T\)</span> ：温度を熱ひずみの力に変える行列）、
 <strong>温度を2倍にすれば変位も2倍、温度を足し算すれば変位も足し算</strong>になります。</p>
-<p>いっぽう温度場は、POD
-で5つのパターン（モード）の組み合わせに表せます（<a
+<blockquote>
+<p>温度場 <span class="math inline">\(T_A\)</span> の変位が <span
+class="math inline">\(u_A\)</span> 、温度場 <span
+class="math inline">\(T_B\)</span> の変位が <span
+class="math inline">\(u_B\)</span> なら、 温度場 <span
+class="math inline">\((3T_A+2T_B)\)</span> の変位は <span
+class="math inline">\((3u_A+2u_B)\)</span>
+です。解き直す必要はありません。</p>
+</blockquote>
+<p><strong>② 温度場は5つのパターンの組み合わせで書ける</strong></p>
+<p>POD により、どの時刻の温度場も次の形に表せます（<a
 href="blog_004_pod_selected_rom.md">blog_004 §2</a>）。</p>
 <p><span class="math display">\[
 T_{\mathrm{all}}\approx\bar
 T_{\mathrm{all}}+a_1\varphi_1+a_2\varphi_2+a_3\varphi_3+a_4\varphi_4+a_5\varphi_5
 \]</span></p>
-<p>線形なので、変位も同じ形で書けます。</p>
+<p><strong>時刻ごとに変わるのは混ぜ具合 <span
+class="math inline">\(a_1\dots a_5\)</span> だけ</strong>で、パターン
+<span class="math inline">\(\varphi_k\)</span> は固定です。</p>
+<p><strong>①＋②から</strong></p>
+<p>温度場が「平均場 ＋
+5つのパターンの組み合わせ」で、変形がその足し算で決まるなら、
+<strong>平均場と5つのパターンそれぞれの変位を1回ずつ調べておけばよい</strong>ことになります。</p>
 <p><span class="math display">\[
 u\approx\bar u+a_1 D_1+a_2 D_2+a_3 D_3+a_4 D_4+a_5 D_5
 \]</span></p>
-<p><strong>つまり「平均の温度場の変位」と「モード5つそれぞれの変位」さえ分かれば、あとは混ぜるだけ</strong>です。
-だから FrontISTR は <strong>1＋5＝6回</strong>で済みます。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>調べるもの</th>
+<th>回数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>平均場 <span class="math inline">\(\bar T_{\mathrm{all}}\)</span>
+の変位 <span class="math inline">\(\bar u\)</span></td>
+<td>1回</td>
+</tr>
+<tr class="even">
+<td>パターン <span
+class="math inline">\(\varphi_1\dots\varphi_5\)</span> それぞれの変位
+<span class="math inline">\(D_1\dots D_5\)</span></td>
+<td>5回</td>
+</tr>
+<tr class="odd">
+<td><strong>合計</strong></td>
+<td><strong>6回</strong></td>
+</tr>
+</tbody>
+</table>
+<p>あとは混ぜ具合 <span class="math inline">\(a\)</span>
+を掛けて足すだけなので、<strong>1,200 回の FEM が
+6回</strong>になります。</p>
 <blockquote>
 <p><strong>たとえると色の配合表です。</strong>
 赤・青・黄のインクを1色ずつ単独で塗って、どう見えるかを調べておけば（＝6回の
 FrontISTR）、 あとは「赤 0.3、青
-0.7」と混ぜるだけで、実際に塗らなくても結果が分かります。</p>
+0.7」と混ぜるだけで、実際に塗らなくても結果が分かります。
+配合を何通り試しても、塗る作業は最初の3回だけで済みます。</p>
 </blockquote>
 <h4 id="手順">手順</h4>
 <p><strong>ステップ0：FEM のメッシュと材料を用意する</strong></p>
@@ -907,154 +960,219 @@ class="math inline">\(W\)</span> の値は次のとおりです。</p>
 <h4 id="実際に-wphi-でも作れるか試した2026-10-03">実際に <span
 class="math inline">\(W\Phi\)</span>
 でも作れるか試した（2026-10-03）</h4>
-<p>105 で構築済みの <span class="math inline">\(W\)</span> （5,040 節点
-× 5,040 温度自由度、97 MB）を読み込み、 106 の POD モード <span
-class="math inline">\(\Phi\)</span> を掛けて <span
-class="math inline">\(D=W\Phi\)</span> を計算し、FrontISTR
-6回版と比べました（<code>run/build_D_from_W.py</code>）。</p>
+<p>105 で構築済みの <span class="math inline">\(W\)</span> を使い、
+<span class="math inline">\(D=W\Phi\)</span> を計算して FrontISTR
+6回版と比べました
+（<code>run/build_D_from_W.py</code>、<code>run/build_D_from_W64.py</code>）。</p>
 <table>
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 40%" />
-<col style="width: 30%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>比べた範囲</th>
-<th style="text-align: right;">最大差</th>
-<th>モードごとの相関</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>全 5,040 節点</td>
-<td style="text-align: right;">923,319 µm（破綻）</td>
-<td>0.00〜0.04</td>
-</tr>
-<tr class="even">
-<td><strong>拘束した底面 240 節点を除く 4,800 節点</strong></td>
-<td style="text-align: right;"><strong>0.0019 µm</strong></td>
-<td><strong>0.998〜0.9999</strong></td>
-</tr>
-</tbody>
-</table>
-<p><strong>拘束節点を除けば一致します。</strong> A・O の行で見ると</p>
-<table>
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th style="text-align: right;"><span
-class="math inline">\(D_1\)</span></th>
-<th style="text-align: right;"><span
-class="math inline">\(D_2\)</span></th>
-<th style="text-align: right;"><span
-class="math inline">\(D_3\)</span></th>
-<th style="text-align: right;"><span
-class="math inline">\(D_4\)</span></th>
-<th style="text-align: right;"><span
-class="math inline">\(D_5\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A： <span class="math inline">\(W\Phi\)</span></td>
-<td style="text-align: right;">−0.00773</td>
-<td style="text-align: right;">−0.00869</td>
-<td style="text-align: right;">−0.00623</td>
-<td style="text-align: right;">−0.00647</td>
-<td style="text-align: right;">+0.00076</td>
-</tr>
-<tr class="even">
-<td>A：FrontISTR 6回</td>
-<td style="text-align: right;">−0.00773</td>
-<td style="text-align: right;">−0.00878</td>
-<td style="text-align: right;">−0.00627</td>
-<td style="text-align: right;">−0.00654</td>
-<td style="text-align: right;">+0.00080</td>
-</tr>
-<tr class="odd">
-<td>O： <span class="math inline">\(W\Phi\)</span></td>
-<td style="text-align: right;">−0.01017</td>
-<td style="text-align: right;">+0.01166</td>
-<td style="text-align: right;">−0.00673</td>
-<td style="text-align: right;">+0.00165</td>
-<td style="text-align: right;">−0.00975</td>
-</tr>
-<tr class="even">
-<td>O：FrontISTR 6回</td>
-<td style="text-align: right;">−0.01023</td>
-<td style="text-align: right;">+0.01195</td>
-<td style="text-align: right;">−0.00722</td>
-<td style="text-align: right;">+0.00217</td>
-<td style="text-align: right;">−0.01082</td>
-</tr>
-</tbody>
-</table>
-<p><strong>注意点が3つあります。</strong></p>
-<ol type="1">
-<li><strong>拘束節点では <span class="math inline">\(W\)</span>
-が壊れます。</strong> 底面の固定節点では <span
-class="math inline">\(W\)</span> が最大 <strong>15.8 m/K</strong>
-という物理的にあり得ない値になります（有効な節点では 7.6×10⁻⁸
-m/K）。固定されていて方程式が解かれていないためで、<strong>必ず除外が必要</strong>です。</li>
-<li><strong>完全一致ではありません。</strong> O 点のモード5 で −0.00975
-対 −0.01082（差 11 %）など、ずれが残ります。 <span
-class="math inline">\(W\)</span> を 97 MB に収めるため
-<strong>float32</strong> で保存しており、5,040
-項の足し算で丸め誤差が蓄積したためと考えていますが、<strong>確かめていません。</strong></li>
-<li><strong><span class="math inline">\(W\)</span>
-を作るほうが重い</strong>（下の表）。</li>
-</ol>
-<h4 id="ではなぜ-w-を作らずにモードを入れて6回解くのか">では、なぜ <span
-class="math inline">\(W\)</span>
-を作らずに「モードを入れて6回解く」のか</h4>
-<p><strong><span class="math inline">\(W\)</span>
-を丸ごと作るほうが重いからです。</strong></p>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>やり方</th>
-<th>必要な FEM の求解回数</th>
-<th>作られるもの</th>
+<th style="text-align: right;">求解の回数</th>
+<th style="text-align: right;">時間</th>
+<th style="text-align: right;">FrontISTR 6回版との最大差</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(W\)</span> を丸ごと作る</td>
-<td><strong>温度自由度の数だけ</strong>（この題材で 5,040
-回、実機なら数十万回）</td>
-<td>5,040×3 行 × 5,040 列の巨大な行列</td>
+<td><span class="math inline">\(W\)</span> を float32 で構築（105
+の保存値）</td>
+<td style="text-align: right;">5,040 回</td>
+<td style="text-align: right;">―</td>
+<td style="text-align: right;">1.881×10⁻³ µm（8.6 %）</td>
 </tr>
 <tr class="even">
+<td><span class="math inline">\(W\)</span> を <strong>float64</strong>
+で構築</td>
+<td style="text-align: right;">5,040 回</td>
+<td style="text-align: right;">54 秒</td>
+<td style="text-align: right;"><strong>1.881×10⁻³ µm（8.6
+%）</strong></td>
+</tr>
+<tr class="odd">
+<td><strong><span class="math inline">\(W\Phi\)</span>
+を5列だけ解く</strong>（float64）</td>
+<td style="text-align: right;"><strong>5 回</strong></td>
+<td style="text-align: right;"><strong>0.1 秒</strong></td>
+<td style="text-align: right;">1.881×10⁻³ µm（8.6 %）</td>
+</tr>
+</tbody>
+</table>
+<p>（拘束した底面 240 節点を除く 4,800 節点で比較。相関は
+0.998〜0.9999）</p>
+<p><strong>3通りとも、まったく同じ差になりました。</strong></p>
+<h4 id="の差は何だったのか-要素の種類が違った">8.6 % の差は何だったのか
+― 要素の種類が違った</h4>
+<p>差の原因は<strong>メッシュの要素タイプの違い</strong>でした。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>要素</th>
+<th>要素数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>106 の FrontISTR 6回（<code>fistr_case.py</code>）</td>
+<td><strong>TYPE=361</strong>（六面体1次要素）</td>
+<td>3,840</td>
+</tr>
+<tr class="even">
+<td>105 の <span class="math inline">\(W\)</span>
+（<code>dumpw_cylinder.py</code>）</td>
+<td><strong>TYPE=341</strong>（四面体1次要素）</td>
+<td>六面体を6分割して 23,040</td>
+</tr>
+</tbody>
+</table>
+<p>105 は DUMPW で <span class="math inline">\(K_s\)</span> と <span
+class="math inline">\(H_T\)</span>
+を取り出すために、六面体を四面体に分割しています。
+<strong>四面体1次要素は曲げに対して硬くなる</strong>ので、変形が小さめに出ます。</p>
+<p>モード番号が上がるほど差が大きくなるのも、これで説明がつきます。</p>
+<table>
+<thead>
+<tr class="header">
+<th>モード</th>
+<th style="text-align: right;">傾き（ <span
+class="math inline">\(W\)</span> 版 ÷ FEM 版）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">0.996</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">0.978</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">0.964</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">0.939</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td style="text-align: right;">0.893</td>
+</tr>
+</tbody>
+</table>
+<p>高次のモードほど空間的に細かく曲がるパターンなので、四面体要素の硬さが効きます。</p>
+<blockquote>
+<p><strong>つまり 8.6 %
+の差は、手法の優劣ではなく「別のメッシュで比べた」ためです。</strong>
+同じ要素で作れば <span class="math inline">\(D=W\Phi\)</span> と
+FrontISTR 6回版は一致するはずです（同じ要素での比較は未実施）。</p>
+</blockquote>
+<p><strong>確かめて否定したこと</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>疑ったこと</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CG ソルバの収束が足りない</td>
+<td><strong>違う</strong>。許容誤差を 10⁻⁸ → 10⁻¹⁴
+にしても結果は変わらなかった</td>
+</tr>
+<tr class="even">
+<td>float32 の丸め誤差</td>
+<td><strong>違う</strong>。float64 で作り直しても同じ差だった</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>2026-10-03 訂正</strong>：この検証を最初に書いたとき「float32
+の丸め誤差が原因と考えられる」としましたが、<strong>誤りでした</strong>。float64
+で作り直して同じ結果だったため、撤回します。</p>
+</blockquote>
+<h4
+id="もう1つ分かったこと-6回で解くのは-wphi-を直接解くことだった">もう1つ分かったこと
+― 6回で解くのは <span class="math inline">\(W\Phi\)</span>
+を直接解くことだった</h4>
+<p>上の表で、 <strong><span class="math inline">\(W\Phi\)</span>
+を5列だけ解くと 0.1
+秒</strong>で済んでいます。これは偶然ではありません。</p>
+<p><span class="math display">\[
+W\Phi=K_s^{-1}H_T\Phi
+\]</span></p>
+<p>なので、「 <span class="math inline">\(H_T\Phi\)</span>
+を右辺にして5回解く」のと同じです。 そして <span
+class="math inline">\(H_T\Phi\)</span> は「モード <span
+class="math inline">\(\varphi_k\)</span>
+を温度として入れたときの熱荷重」そのものです。</p>
+<blockquote>
+<p><strong>本研究の「モードを入れて FrontISTR で解く」は、 <span
+class="math inline">\(W\Phi\)</span>
+を無駄なく計算する方法そのものでした。</strong> <span
+class="math inline">\(W\)</span>
+を丸ごと作るやり方は、必要な5列のために<strong>要らない 5,035
+列も解いている</strong>ことになります。</p>
+</blockquote>
+<h4 id="では-w-を作るのと何が違うのか">では、 <span
+class="math inline">\(W\)</span> を作るのと何が違うのか</h4>
+<p><strong>必要な列だけ解くか、全部解くかの違い</strong>です。</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>やり方</th>
+<th style="text-align: right;">求解の回数</th>
+<th>保存するもの</th>
+<th style="text-align: right;">この題材での時間</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
 <td><strong>モードを入れて解く（本研究）</strong></td>
-<td><strong>6回</strong></td>
-<td>5,040×3 行 × <strong>5列</strong>の小さな行列</td>
+<td style="text-align: right;"><strong>6回</strong></td>
+<td>5,040×3 行 × <strong>5列</strong> の小さな行列</td>
+<td style="text-align: right;">数十秒</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(W\)</span> を丸ごと作る</td>
+<td style="text-align: right;"><strong>5,040 回</strong></td>
+<td>5,040 行 × 5,040 列 ＝ <strong>194 MB</strong>（float64）</td>
+<td style="text-align: right;">54 秒＋ダンプ作業</td>
 </tr>
 </tbody>
 </table>
 <p><span class="math inline">\(W\)</span>
-は「どの節点の温度が、どの節点の変位に効くか」を全組み合わせで持つ行列です。
-これを作るには、節点温度を1つずつ 1 K
-だけ上げて解く、という作業を節点の数だけ繰り返す必要があります。</p>
-<p>しかし同化で必要なのは、<strong>温度場が5つのモードの組み合わせに限られた場合の変位</strong>だけです。
-<span class="math inline">\(W\)</span> の全体を知る必要はなく、 <span
-class="math inline">\(W\Phi\)</span> の5列だけ分かればよい。
-<strong>それを直接出すのが「モードを入れて解く」</strong>というやり方です。
-<span class="math inline">\(\Phi\)</span> を右から掛けた結果だけを、FEM
-に直接計算させている、ということになります。</p>
+は「どの節点の温度が、どの節点の変位に効くか」を<strong>全組み合わせ</strong>で持つ行列です。
+しかし同化で必要なのは、<strong>温度場が5つのモードの組み合わせに限られた場合の変位</strong>だけで、
+<span class="math inline">\(W\)</span>
+の全体を知る必要はありません。</p>
+<p>実機規模（数十万節点）では <span class="math inline">\(W\)</span>
+は数百 GB になるので、丸ごと作る選択肢はなくなります。
+一方、モードを入れて解く方法は<strong>モードの数だけ</strong>解けばよいので、規模が大きくなっても変わりません。</p>
 <p><strong>使い分け</strong></p>
 <table>
 <colgroup>
@@ -1070,29 +1188,22 @@ class="math inline">\(W\Phi\)</span> の5列だけ分かればよい。
 <tbody>
 <tr class="odd">
 <td><strong><span class="math inline">\(D\)</span> だけ</strong></td>
-<td><strong>FrontISTR 6回</strong>。 <span
-class="math inline">\(W\)</span> も拘束節点の処理も要らない</td>
+<td><strong>モードを入れて解く（6回）</strong>。拘束節点の処理も要らない</td>
 </tr>
 <tr class="even">
 <td><strong><span class="math inline">\(W\)</span>
 自体も</strong>（変位計の置き場所を <span
 class="math inline">\(W\)</span> の行の大きさで比べたいなど）</td>
-<td><span class="math inline">\(W\)</span> を作って <span
-class="math inline">\(D=W\Phi\)</span> も同時に得る（105 の方式）</td>
+<td><span class="math inline">\(W\)</span> を作る（105
+の方式）。ただし拘束節点では <span class="math inline">\(W\)</span>
+が壊れるので除外が必要</td>
 </tr>
 <tr class="odd">
-<td>実機規模（数十万節点）</td>
-<td><strong>モードを入れて解く一択</strong>。 <span
-class="math inline">\(W\)</span> は数百 GB になる</td>
+<td>実機規模</td>
+<td>モードを入れて解く一択</td>
 </tr>
 </tbody>
 </table>
-<p>（105 では、FrontISTR の <code>DUMPW=YES</code> で <span
-class="math inline">\(K_s\)</span> と <span
-class="math inline">\(H_T\)</span> を書き出し、 <span
-class="math inline">\(K_s\)</span> を LU 分解して 5,040 列を解いて <span
-class="math inline">\(W\)</span>
-を構築しています。約2分かかります。）</p>
 <h4 id="全節点版も同じ6回で作れる">全節点版も同じ6回で作れる</h4>
 <p>FrontISTR は1回解くと<strong>全節点の変位</strong>を返します。 そこで
 A・O だけでなく全 5,040
