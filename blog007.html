@@ -418,15 +418,27 @@ A−O。</em></p>
 <img src="img/rom_applicability.png" alt="ROM 単体の予測と OpenFOAM" />
 <figcaption aria-hidden="true">ROM 単体の予測と OpenFOAM</figcaption>
 </figure>
-<p><em>点＝OpenFOAM、線＝ROM。発熱量とヒータの ON/OFF
-を正しく与え、同化なしで 0→600 秒を計算した。</em></p>
+<p><em>上：点＝OpenFOAM、線＝ROM（同化なし、0→600
+秒を一気に計算）。下：その差。 帯は温度計のノイズ ±0.30 K
+の幅。</em></p>
+<p><strong>どの程度使えるか</strong>を、この図の下段で判断できます。</p>
 <table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th>条件</th>
 <th style="text-align: right;">最大の温度上昇</th>
 <th style="text-align: right;">ROM の誤差（5点の最大）</th>
-<th style="text-align: right;">ROM の誤差（平均）</th>
+<th style="text-align: right;">誤差の平均</th>
+<th style="text-align: right;">温度上昇に対する比</th>
+<th style="text-align: right;">温度計のノイズ 0.3 K との比</th>
 </tr>
 </thead>
 <tbody>
@@ -435,22 +447,47 @@ A−O。</em></p>
 <td style="text-align: right;">5.8 K</td>
 <td style="text-align: right;">0.038 K</td>
 <td style="text-align: right;">0.011 K</td>
+<td style="text-align: right;">0.7 %</td>
+<td style="text-align: right;"><strong>約 1/8</strong></td>
 </tr>
 <tr class="even">
-<td><strong>25 W</strong></td>
+<td><strong>25 W</strong>（使っていない条件）</td>
 <td style="text-align: right;">9.6 K</td>
 <td style="text-align: right;"><strong>0.109 K</strong></td>
 <td style="text-align: right;">0.026 K</td>
+<td style="text-align: right;"><strong>1.1 %</strong></td>
+<td style="text-align: right;"><strong>約 1/3</strong></td>
+</tr>
+<tr class="odd">
+<td>間欠加熱（ON/OFF を与える）</td>
+<td style="text-align: right;">5.7 K</td>
+<td style="text-align: right;">0.038 K</td>
+<td style="text-align: right;">0.013 K</td>
+<td style="text-align: right;">0.7 %</td>
+<td style="text-align: right;">約 1/8</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>25 W でも、ROM の線は OpenFOAM
-の点にほぼ重なっています（中央の図）。</li>
-<li>誤差は 0.04 K から 0.11 K に増えました。温度上昇（9.6 K）の約 1 %
-です。空気への放熱（自然対流）は温度差で強さが変わりますが、ROM
+<li><strong>どの条件でも、ROM の誤差は温度計のノイズ（±0.3
+K）の帯に完全に収まっています。</strong>
+実際にセンサで測っても、この差は読み取れない水準です。</li>
+<li>25 W
+でも、上段の線（ROM）は点（OpenFOAM）にほぼ重なっています。</li>
+<li>誤差は 0.038 K から 0.109 K へ約3倍に増えましたが、温度上昇が 5.8 K
+から 9.6 K に増えたぶんを考えると、<strong>温度上昇に対する比は 0.7 % →
+1.1 %</strong> とわずかな増加です。</li>
+<li>増えた理由は、空気への放熱（自然対流）が温度差で強さが変わるのに、ROM
 は一定の係数で近似しているためと考えています（確かめてはいません）。</li>
 </ul>
+<blockquote>
+<p><strong>判断</strong>：この題材では、ROM 単体の予測は
+<strong>OpenFOAM の代わりとして使える水準</strong>です。 600 秒の計算が
+31 ms で終わり、誤差は温度計のノイズ以下だからです。
+ただし、これは同化なしで発熱量と ON/OFF
+を<strong>正しく与えた場合</strong>の話です。実際には発熱量は分からないので、同化でそれを推定します（§4
+の下の表）。</p>
+</blockquote>
 <h3 id="温度分布の型">温度分布の型</h3>
 <p>POD の5つの型で 25 W の温度場全体を表したときの誤差は <strong>0.003
 K</strong> でした（15 W では 0.0007
@@ -516,9 +553,11 @@ K</strong>（作った条件と同じ）</td>
 </tr>
 </tbody>
 </table>
-<p><strong>ROM そのものは間欠加熱でも正しく予測できます。</strong>
-外れたのは、ヒータへの入力を 0〜300
-秒に決め打ちしていたときだけです。</p>
+<p><strong>ROM そのものは間欠加熱でも正しく予測できます</strong>（誤差
+0.038 K ＝ ROM を作った条件と同じ、温度計のノイズの約
+1/8）。外れたのは、ヒータへの入力を 0〜300
+秒に決め打ちしていたときだけで、そのときは 3.77 K ＝ ノイズの 12
+倍にもなりました。</p>
 <h3 id="同化すると反り-ao-の誤差30600-秒の平均">同化すると（反り A−O
 の誤差、30〜600 秒の平均）</h3>
 <figure>
