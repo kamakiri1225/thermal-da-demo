@@ -457,8 +457,8 @@ href="21_advantage_verification.md">21</a></td>
 </tr>
 <tr class="odd">
 <td><strong>配置の選び方が既存法より良い</strong></td>
-<td>目的指向 0.075 対 A最適 0.090・D最適 0.108・Q-DEIM 0.137・素朴 0.564
-µm（15 W）</td>
+<td>目的指向 0.075 対 A最適 0.090・D最適 0.108・Q-DEIM 0.137 µm（15
+W）</td>
 <td>§5【追加】配置法の比較</td>
 </tr>
 </tbody>
@@ -1344,18 +1344,181 @@ seed 平均。</em></p>
 </blockquote>
 <h3
 id="追加既存の配置法と比べる2026-10-03">【追加】既存の配置法と比べる（2026-10-03）</h3>
+<h4 id="この節は何をしたか">この節は何をしたか</h4>
+<p>変位計を<strong>どこに置くか決める方法</strong>を6通り用意し、<strong>決め方だけを変えて、ほかの条件は全部そろえて</strong>比べました。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="odd">
+<td><strong>なぜやったか</strong></td>
+<td>前の節は「選定2点」と「底面近く（悪い例）」を比べただけで、<strong>選び方そのものが良い</strong>という証拠になっていなかった</td>
+</tr>
+<tr class="even">
+<td><strong>何をしたか</strong></td>
+<td>同じ候補 14,754 通りに6つの決め方を適用し、<strong>同じ holdout
+試験</strong>（A・O を一度も観測しない）にかけた</td>
+</tr>
+<tr class="odd">
+<td><strong>比べた相手</strong></td>
+<td>無作為配置／「よく動く点に置く」／Q-DEIM／A最適／D最適（後ろ3つは教科書的な方法）</td>
+</tr>
+<tr class="even">
+<td><strong>真値</strong></td>
+<td>OpenFOAM＋FrontISTR。15 W・25 W・間欠加熱の3条件 × 5 seed</td>
+</tr>
+<tr class="odd">
+<td><strong>何が得られたか</strong></td>
+<td>本研究の決め方が<strong>3条件とも最小</strong>（0.075／0.083／0.071
+µm）。ただし2位の A最適（0.090 µm）との差は <strong>15〜20
+%</strong></td>
+</tr>
+<tr class="even">
+<td><strong>いちばんの収穫</strong></td>
+<td>「温度場全体を良く知る配置」と「反りを良く知る配置」は<strong>別物</strong>だと示せたこと。そして「よく動く点に置く」は<strong>無作為より悪い</strong>こと</td>
+</tr>
+</tbody>
+</table>
+<h4 id="この節の構成">この節の構成</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>何をするか</th>
+<th>そこで何が分かるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>ステップ0</strong></td>
+<td>ここまでの比較の弱点を確認する</td>
+<td>「良い点と悪い点を比べただけ」だと分かる</td>
+</tr>
+<tr class="even">
+<td><strong>ステップ1</strong></td>
+<td>土俵をそろえる（候補・本数・試験・真値・乱数）</td>
+<td>変えるのは<strong>決め方だけ</strong>になる</td>
+</tr>
+<tr class="odd">
+<td><strong>ステップ2</strong></td>
+<td>比べる6つの決め方を並べ、<strong>何を小さくしようとしているか</strong>で分類する</td>
+<td>比較の軸は「<strong>温度場を狙う</strong>か<strong>反りを狙う</strong>か」だと分かる</td>
+</tr>
+<tr class="even">
+<td><strong>ステップ3</strong></td>
+<td>同化を回す前に、<strong>選ばれた場所</strong>を図で見る</td>
+<td>「よく動く点に置く」は2点が <strong>5 mm</strong>
+しか離れないと分かる</td>
+</tr>
+<tr class="odd">
+<td><strong>ステップ4</strong></td>
+<td>選ばれた2点それぞれで holdout 試験を回す</td>
+<td>誤差の順位が出る</td>
+</tr>
+<tr class="even">
+<td><strong>分かったこと</strong></td>
+<td>①〜⑥として整理する</td>
+<td>上の「何が得られたか」の中身</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="ステップ0ここまでの比較では何が足りないのか">ステップ0：ここまでの比較では、何が足りないのか</h4>
+<p>前の節で比べたのは、この4つでした。</p>
+<table>
+<thead>
+<tr class="header">
+<th>比べた相手</th>
+<th style="text-align: right;">反り A−O の誤差（15 W）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位なし</td>
+<td style="text-align: right;">0.769 µm</td>
+</tr>
+<tr class="even">
+<td>A・O 自身を測る</td>
+<td style="text-align: right;">0.137 µm</td>
+</tr>
+<tr class="odd">
+<td>B・C（A・O の真下）</td>
+<td style="text-align: right;">0.187 µm</td>
+</tr>
+<tr class="even">
+<td><strong>選定2点</strong></td>
+<td style="text-align: right;"><strong>0.075 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>底面近く（悪い例）</td>
+<td style="text-align: right;">0.581 µm</td>
+</tr>
+</tbody>
+</table>
+<p>これで言えるのは「<strong>選んだ点は、適当に決めた点より良かった</strong>」だけです。
+底面近くは固定端でほとんど動かないので、負けて当たり前です。</p>
 <blockquote>
-<p><strong>この節で知りたいこと</strong>：選び方が「既存の最適センサ配置法」より良いのか。σ
-の最小化は本当に効いているのか</p>
-<p><strong>条件</strong>：同じ候補集合（14,754
-通り）に6つの選び方を適用し、<strong>同じ holdout 試験</strong>（A・O
-は一度も観測しない）で比べる。真値＝OpenFOAM＋FrontISTR、3条件 × 5
-seed（<code>run/placement_method_comparison.py</code>）</p>
+<p><strong>本当に知りたいのは「σ
+を最小化するという選び方そのものが良いのか」です。</strong>
+センサ配置の決め方には教科書的な方法がいくつもあります。それらと比べて初めて、
+「この選び方が効いている」と言えます。</p>
 </blockquote>
-<p>ここまでは「選定2点」と「悪い例（底面近く）」しか比べていませんでした。
-<strong>それでは「良い点を選んだ」としか言えません。</strong>
-既存の配置法と比べます。</p>
-<h4 id="比べた6つの選び方">比べた6つの選び方</h4>
+<p>そこで、<strong>選び方だけを変えて、ほかは全部同じにした比較</strong>を行いました。</p>
+<h4 id="ステップ1土俵をそろえる">ステップ1：土俵をそろえる</h4>
+<p>比べるときに変えてよいのは「選び方」だけです。それ以外は全部そろえます。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>そろえるもの</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>候補集合</td>
+<td>全 5,040 節点 × 3 方向のうち、A・O から 12 mm 以上離れた
+<strong>14,754 通り</strong>（全手法で共通）</td>
+</tr>
+<tr class="even">
+<td>使う情報</td>
+<td>FrontISTR の熱感度 <span class="math inline">\(W\)</span> と、ROM を
+4,000 通り回して作った温度のばらつき <span
+class="math inline">\(B\)</span>
+だけ。<strong>測定値は使わない</strong></td>
+</tr>
+<tr class="odd">
+<td>センサの本数</td>
+<td>温度2点（P2・P0）＋ <strong>変位2点</strong>（全手法で共通）</td>
+</tr>
+<tr class="even">
+<td>試験</td>
+<td>A・O を<strong>一度も観測しない</strong> holdout。同化は EnKF・60
+メンバー・30 秒ごと</td>
+</tr>
+<tr class="odd">
+<td>真値</td>
+<td>OpenFOAM の温度場 ＋ それを FrontISTR に入れた全節点変位。15 W／25
+W／間欠加熱の3条件</td>
+</tr>
+<tr class="even">
+<td>乱数</td>
+<td>同じ 5 seed</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ステップ2比べる相手を決める">ステップ2：比べる相手を決める</h4>
+<p><strong>「何を小さくしようとしているか」で分類</strong>すると、次の6つになります。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1365,105 +1528,151 @@ seed（<code>run/placement_method_comparison.py</code>）</p>
 <thead>
 <tr class="header">
 <th>選び方</th>
-<th>何を最小化するか</th>
-<th>目的（反り A−O）を知っているか</th>
+<th>何を小さくするか</th>
+<th>狙っている対象</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>ランダム</strong></td>
 <td>― （20 通りの無作為な2点）</td>
-<td>―</td>
+<td>― （下限の目安）</td>
 </tr>
 <tr class="even">
-<td><strong>熱感度 <span class="math inline">\(\lVert w \rVert\)</span>
-最大</strong></td>
-<td>―（「よく動く点に置く」という素朴な基準）</td>
-<td>いいえ</td>
+<td><strong>よく動く点に置く</strong></td>
+<td>― 温度が変わったとき<strong>変位がいちばん大きく動く</strong>点</td>
+<td>―</td>
 </tr>
 <tr class="odd">
 <td><strong>Q-DEIM（QR 列ピボット）</strong></td>
-<td>モード行列の条件数（DEIM/Q-DEIM の標準的な選び方）</td>
-<td>いいえ</td>
+<td>モード行列の条件数</td>
+<td>温度場（モード係数）</td>
 </tr>
 <tr class="even">
 <td><strong>A最適</strong></td>
 <td>温度5点の事後共分散の <strong>trace</strong></td>
-<td>いいえ</td>
+<td><strong>温度場全体</strong></td>
 </tr>
 <tr class="odd">
 <td><strong>D最適</strong></td>
 <td>温度5点の事後共分散の <strong>det</strong></td>
-<td>いいえ</td>
+<td><strong>温度場全体</strong></td>
 </tr>
 <tr class="even">
 <td><strong>目的指向（本研究）</strong></td>
 <td><span class="math inline">\(\sigma_S^2=w^{\mathsf
-T}(\cdots)w\)</span> ＝ <strong>反りの</strong>あいまいさ</td>
-<td><strong>はい</strong></td>
+T}(\cdots)w\)</span></td>
+<td><strong>反り A−O</strong></td>
 </tr>
 </tbody>
 </table>
-<p>A最適・D最適は実験計画法の教科書的な基準で、「温度場全体をいちばん良く知る配置」を選びます。
+<p>A最適・D最適は実験計画法の教科書に出てくる基準です。Q-DEIM は ROM
+の分野で標準的な点の選び方で、 <a
+href="blog_004_pod_selected_rom.md">blog_004 §4</a> で ROM
+の代表5点を選んだのと同じ方法です。</p>
+<blockquote>
+<p><strong>比較の軸はここです。</strong> A最適・D最適・Q-DEIM
+は「<strong>温度場を</strong>いちばん良く知る配置」を選びます。
 本研究だけが「<strong>反り A−O
-をいちばん良く知る配置</strong>」を選びます。ここが比較の軸です。</p>
-<h4 id="選ばれた点">選ばれた点</h4>
+を</strong>いちばん良く知る配置」を選びます（ <span
+class="math inline">\(w\)</span> で目的を指定しているため）。</p>
+<p><strong>温度場を良く知れば、反りも良く分かるはずだ</strong> ―
+これが正しいなら、A最適と本研究は同じ答えになるはずです。
+違う答えになるなら、「目的を指定すること」に意味があることになります。</p>
+</blockquote>
+<h4
+id="ステップ3まずどこが選ばれたかを見る">ステップ3：まず「どこが選ばれたか」を見る</h4>
+<p>同化を回す前に、<strong>選ばれた場所そのもの</strong>を見ます。選定はすべて机上の計算だけで終わっています。</p>
+<figure>
+<img src="img/placement_method_points.png" alt="どこが選ばれたか" />
+<figcaption aria-hidden="true">どこが選ばれたか</figcaption>
+</figure>
+<p><em>上面（z=100.5
+mm）を真上から見た図。□＝選ばれた変位計、矢印＝測る方向（ <span
+class="math inline">\(U_z\)</span> は紙面に垂直なので矢印なし）、
+●＝評価点 A・O（測らない）、赤い弧＝ヒータ側。</em></p>
 <table>
 <colgroup>
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
 <col style="width: 23%" />
 <col style="width: 23%" />
-<col style="width: 23%" />
-<col style="width: 30%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>選び方</th>
 <th>1点目</th>
 <th>2点目</th>
+<th style="text-align: right;"><strong>2点の間隔</strong></th>
 <th style="text-align: right;">測る前の予測 <span
 class="math inline">\(\sigma\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>熱感度 <span class="math inline">\(\lVert w \rVert\)</span>
-最大</td>
-<td>(26.5, 26.5, 100.5) <span class="math inline">\(U_y\)</span></td>
-<td>(22.8, <strong>29.8</strong>, 100.5) <span
-class="math inline">\(U_y\)</span></td>
+<td>よく動く点に置く</td>
+<td>(26.5, 26.5) <span class="math inline">\(U_y\)</span></td>
+<td>(22.8, 29.8) <span class="math inline">\(U_y\)</span></td>
+<td style="text-align: right;"><strong>5.0 mm</strong></td>
 <td style="text-align: right;">1.007 µm</td>
 </tr>
 <tr class="even">
 <td>Q-DEIM</td>
-<td>(26.5, 26.5, 100.5) <span class="math inline">\(U_y\)</span></td>
-<td>(4.9, −37.2, 100.5) <span class="math inline">\(U_x\)</span></td>
+<td>(26.5, 26.5) <span class="math inline">\(U_y\)</span></td>
+<td>(4.9, −37.2) <span class="math inline">\(U_x\)</span></td>
+<td style="text-align: right;">67.3 mm</td>
 <td style="text-align: right;">0.324 µm</td>
 </tr>
 <tr class="odd">
 <td>A最適</td>
-<td>(−29.8, 22.8, 100.5) <span class="math inline">\(U_z\)</span></td>
-<td>(−29.8, −22.8, 100.5) <span class="math inline">\(U_x\)</span></td>
+<td>(−29.8, 22.8) <span class="math inline">\(U_z\)</span></td>
+<td>(−29.8, −22.8) <span class="math inline">\(U_x\)</span></td>
+<td style="text-align: right;">45.6 mm</td>
 <td style="text-align: right;">0.277 µm</td>
 </tr>
 <tr class="even">
 <td>D最適</td>
-<td>(−36.2, 9.7, 100.5) <span class="math inline">\(U_z\)</span></td>
-<td>(−18.8, −32.5, 100.5) <span class="math inline">\(U_y\)</span></td>
+<td>(−36.2, 9.7) <span class="math inline">\(U_z\)</span></td>
+<td>(−18.8, −32.5) <span class="math inline">\(U_y\)</span></td>
+<td style="text-align: right;">45.6 mm</td>
 <td style="text-align: right;">0.353 µm</td>
 </tr>
 <tr class="odd">
+<td>A・O 自身（循環・参考）</td>
+<td>(28.7, 0) <span class="math inline">\(U_z\)</span></td>
+<td>(−28.7, 0) <span class="math inline">\(U_z\)</span></td>
+<td style="text-align: right;">57.4 mm</td>
+<td style="text-align: right;">0.319 µm</td>
+</tr>
+<tr class="even">
 <td><strong>目的指向（本研究）</strong></td>
-<td>(9.7, −36.2, 100.5) <span class="math inline">\(U_x\)</span></td>
-<td>(−34.6, 14.4, 100.5) <span class="math inline">\(U_z\)</span></td>
+<td>(9.7, −36.2) <span class="math inline">\(U_x\)</span></td>
+<td>(−34.6, 14.4) <span class="math inline">\(U_z\)</span></td>
+<td style="text-align: right;">67.3 mm</td>
 <td style="text-align: right;"><strong>0.256 µm</strong></td>
 </tr>
 </tbody>
 </table>
-<p><strong>熱感度 <span class="math inline">\(\lVert w \rVert\)</span>
-最大の2点を見てください。</strong> (26.5, 26.5) と (22.8, 29.8)
-で、<strong>ほとんど同じ場所</strong>です。
-「よく動く点」は固まって存在するので、素朴に上位2つを採ると<strong>同じことを2回測る</strong>ことになります。</p>
-<h4 id="結果-1">結果</h4>
+<p>座標は mm、上面なので z は省略しています。</p>
+<p><strong>この時点で2つ分かります。</strong></p>
+<p><strong>(1) 「よく動く点に置く」は、2点が 5 mm
+しか離れていません。</strong>
+左上のパネルで、2つの□がほとんど重なっているのが見えます。
+「よく動く点」は上面の特定の向きに<strong>固まって存在する</strong>ので、単純に上位2つを採ると
+<strong>ほとんど同じ場所を2回測る</strong>ことになります。 <a
+href="#ステップ4採点をやり直して2点目を選ぶ">§5 ステップ4</a> で
+「2位をそのまま選んではいけない」と書いたのは、まさにこれです。</p>
+<p><strong>(2) 式は「A・O
+を直接測るのは最善ではない」と、同化を回す前に言っています。</strong>
+A・O 自身を測る構成の予測は 0.319 µm で、目的指向の 0.256 µm
+より大きい。 <a
+href="#5-検証別の場所で変位を測って測っていない-aobrを当てる">§5</a>
+の「直接測るより正確」という結果は、
+<strong>測定の前に式が予言していた</strong>ことになります。</p>
+<h4 id="ステップ4同じ試験にかける">ステップ4：同じ試験にかける</h4>
+<p>選ばれた2点それぞれで、A・O を一度も観測しない holdout
+を回します。</p>
 <figure>
 <img src="img/placement_method_comparison.png"
 alt="配置の選び方の比較" />
@@ -1494,8 +1703,7 @@ alt="配置の選び方の比較" />
 <td style="text-align: right;">0.246</td>
 </tr>
 <tr class="odd">
-<td>熱感度 <span class="math inline">\(\lVert w \rVert\)</span>
-最大（素朴）</td>
+<td>よく動く点に置く</td>
 <td style="text-align: right;">0.564</td>
 <td style="text-align: right;">1.075</td>
 <td style="text-align: right;">0.448</td>
@@ -1535,31 +1743,78 @@ alt="配置の選び方の比較" />
 <p>ランダムの散らばり（20 通り）：15 W で最良 0.140 / 最悪 0.655、25 W
 で最良 0.153 / 最悪 1.213 µm。</p>
 <h3 id="分かったこと配置法の比較">分かったこと（配置法の比較）</h3>
-<ol type="1">
-<li><strong>目的指向が3条件すべてで1位でした。</strong> ただし2位の
-A最適との差は 0.075 対 0.090（15 W）で、<strong>15〜20 %
-の差</strong>です。劇的な差ではありません。</li>
-<li><strong>はっきり差がつくのは素朴な基準に対してです。</strong>
-「よく動く点に置く」（熱感度 <span class="math inline">\(\lVert w
-\rVert\)</span> 最大）は 0.448〜1.075 µm
-で、<strong>ランダムより悪い</strong>条件もありました。2点が隣り合ってしまい、同じ情報を2回測るためです。</li>
-<li><strong>「何を最小化するか」が結果を決めます。</strong>
+<p><strong>①
+「温度場を良く知れば反りも分かる」は、だいたい正しいが、最善ではありません。</strong>
+A最適（温度場を狙う）は 0.090 µm、目的指向（反りを狙う）は 0.075 µm。
+<strong>目的を指定したほうが良かった</strong>ものの、差は 15〜20 %
+で、劇的ではありません。
+ステップ2で立てた問いへの答えは「<strong>目的の指定には意味があるが、効き目は限定的</strong>」です。</p>
+<p><strong>②
+はっきり差がつくのは「よく動く点に置く」に対してです。</strong>
+「よく動く点に置く」は 0.448〜1.075 µm
+で、<strong>ランダム（0.246〜0.471 µm）より悪い</strong>。
+理由はステップ3で見たとおり、2点が 5 mm しか離れていないからです。
+<strong>よく動く点を2つ選ぶのではなく、違うことを教えてくれる2点を選ぶ</strong>必要があります。</p>
+<p><strong>③ 「何を最小化するか」が結果を決めます。</strong>
 D最適は自分の指標（logdet
-−25.284）では6つの中で最良ですが、<strong>反りの誤差では
-A最適にも目的指向にも負けます</strong>。温度場全体を良く知ることと、反りを良く知ることは別です。</li>
-<li><strong>良い配置はすべて「ヒータの反対側（−x
-側）」を含みます。</strong> 素朴な基準だけが両方とも +x
-側を選び、失敗しました。</li>
-<li><strong>測る前の予測 <span class="math inline">\(\sigma\)</span>
-の順位は、実際の順位とほぼ一致しました。</strong> 予測：目的指向 0.256
-＜ A最適 0.277 ＜ Q-DEIM 0.324 ＜ D最適 0.353 ＜ 素朴 1.007 実際（15
-W）：目的指向 0.075 ＜ A最適 0.090 ＜ D最適 0.108 ＜ Q-DEIM 0.137 ＜
-素朴 0.564 <strong>D最適と Q-DEIM
-だけが入れ替わりました</strong>（順位相関 0.9）。</li>
-<li><strong>目的指向も A最適も D最適も、A・O を直接測る（0.100〜0.153
-µm）より良い結果でした。</strong>
-「知りたい場所を測らないほうが良い」のは、特定の配置法に固有の話ではありません。</li>
-</ol>
+−25.284）では6つの中で最良です。<strong>自分の土俵では勝っています。</strong>
+それでも反りの誤差では A最適にも目的指向にも負けました。
+<strong>温度場全体を良く知ることと、反りを良く知ることは別</strong>だということです。</p>
+<p><strong>④ 良い配置はすべて「ヒータの反対側（−x
+側）」を含みます。</strong>
+図を見ると、上位4つ（Q-DEIM・A最適・D最適・目的指向）はどれも −x
+側に点を持っています。 「よく動く点に置く」だけが両方とも +x
+側（ヒータ側）を選び、失敗しました。
+反りは「ヒータ側と反対側の温度差」で決まるので、<strong>片側だけ見ていては差が分からない</strong>、ということです。</p>
+<p><strong>⑤ 測る前の予測 <span class="math inline">\(\sigma\)</span>
+の順位は、実際の順位をほぼ当てました。</strong></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>1位</th>
+<th>2位</th>
+<th>3位</th>
+<th>4位</th>
+<th>5位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>予測 <span class="math inline">\(\sigma\)</span></td>
+<td>目的指向 0.256</td>
+<td>A最適 0.277</td>
+<td>Q-DEIM 0.324</td>
+<td>D最適 0.353</td>
+<td>よく動く点 1.007</td>
+</tr>
+<tr class="even">
+<td>実際（15 W）</td>
+<td>目的指向 0.075</td>
+<td>A最適 0.090</td>
+<td><strong>D最適 0.108</strong></td>
+<td><strong>Q-DEIM 0.137</strong></td>
+<td>よく動く点 0.564</td>
+</tr>
+</tbody>
+</table>
+<p><strong>D最適と Q-DEIM だけが入れ替わりました</strong>（順位相関
+0.9）。完全ではありませんが、
+<strong>買う前・取り付ける前に、おおよその優劣は分かる</strong>ということです。</p>
+<p><strong>⑥ どの「まともな」選び方でも、A・O
+を直接測るより良い結果でした。</strong> Q-DEIM 0.137、D最適 0.108、A最適
+0.090、目的指向 0.075 に対し、A・O 自身は 0.137 µm。
+「<strong>知りたい場所を測らないほうが良い</strong>」のは、特定の選び方に固有の話ではなく、
+<strong>この問題の性質</strong>だと考えられます（A・O の反りは 2.7 µm
+しかないのに、ノイズは 0.3 µm あるため）。</p>
 <h4 id="言えること言えないこと">言えること・言えないこと</h4>
 <table>
 <colgroup>
@@ -1575,16 +1830,19 @@ W）：目的指向 0.075 ＜ A最適 0.090 ＜ D最適 0.108 ＜ Q-DEIM 0.137 �
 <tbody>
 <tr class="odd">
 <td>この形状・この目的（反り
-A−O）・2点の場合、目的指向が3条件とも最小だった</td>
-<td>目的指向が一般に最適だということ（2点・1形状・1目的しか試していない）</td>
+A−O）・変位2点の場合、目的指向が3条件とも最小だった</td>
+<td>目的指向が一般に最適だということ（<strong>2点・1形状・1目的量しか試していない</strong>）</td>
 </tr>
 <tr class="even">
-<td>素朴な「よく動く点に置く」は危険（ランダムより悪いことがある）</td>
+<td>「よく動く点に置く」は危険（ランダムより悪いことがある）</td>
 <td>A最適が常に2位だということ</td>
 </tr>
 <tr class="odd">
-<td>予測 <span class="math inline">\(\sigma\)</span>
-で順位をほぼ当てられる（順位相関 0.9）</td>
+<td>目的を指定すると、温度場だけを狙う配置より良くなる（15〜20 %）</td>
+<td>その差が実用上の意味を持つかどうか</td>
+</tr>
+<tr class="even">
+<td>測る前の予測で順位をほぼ当てられる（順位相関 0.9）</td>
 <td>順位が完全に当たること（D最適と Q-DEIM は入れ替わった）</td>
 </tr>
 </tbody>
