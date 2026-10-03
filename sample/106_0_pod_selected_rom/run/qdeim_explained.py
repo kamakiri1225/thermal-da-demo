@@ -27,13 +27,13 @@ def main():
     Ur = U[:, :R].copy()
 
     print("=" * 70)
-    print("【貪欲選択を1ステップずつ】各セルは r=%d 次元のモード指紋（Uの行）を持つ" % R)
+    print("【貪欲選択を1ステップずつ】各セルは r=%d 次元の行ベクトル（Uの行）を持つ" % R)
     W = Ur.copy(); picked = []
     for k in range(R):
         norms = np.linalg.norm(W, axis=1)
         p = int(np.argmax(norms)); picked.append(p)
         print(f"\n-- {k+1}点目: cell{p}  座標 {np.round(C[p]*1000,1)} mm  残差ノルム {norms[p]:.5f}")
-        print(f"   指紋 = {Ur[p]}")
+        print(f"   行ベクトル = {Ur[p]}")
         v = W[p] / np.linalg.norm(W[p])
         W -= np.outer(W @ v, v)
         print(f"   この方向を全セルから差し引く → 残りの最大 {np.linalg.norm(W,axis=1).max():.5f}")

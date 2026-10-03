@@ -1,6 +1,6 @@
 """Q-DEIMの直感を説明する概念図（blog_004 §4用）.
 
-各セルは「モード指紋」(φ1_i, φ2_i)を持つ。r点から場を復元するには、
+各セルは行ベクトル（Uの行）(φ1_i, φ2_i)を持つ。r点から場を復元するには、
 選点でのモード行列 Φ_P が良条件（行列式が大きい＝可逆）である必要がある。
 Q-DEIMは「信号が大きく・互いに独立な点」を貪欲に選ぶ（＝Φ_Pの体積を大きくする）。
 
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 IMG=os.path.join(ROOT,"docs","img")
 
-# 候補セルの「モード指紋」(mode1, mode2)
+# 候補セルの行ベクトル（Uの行）(mode1, mode2)
 CELLS={"a":(0.9,0.15),"b":(0.75,-0.45),"c":(0.55,0.55),"d":(0.35,0.10),
        "e":(-0.15,0.75),"f":(0.15,-0.35),"g":(-0.55,-0.25),"h":(0.20,0.85)}
 
@@ -59,7 +59,7 @@ def main():
     panel(axR,("a","d"),"tab:red",
           "悪い選び方（似た2点）",
           "モードから見てそっくりな2点\n→平行四辺形がぺちゃんこ＝ノイズ爆発")
-    fig.suptitle("Q-DEIMの気持ち：各セルの『モード指紋』(φ1,φ2)から、指紋が最も張り合う点を選ぶ",
+    fig.suptitle("Q-DEIMの考え方：各セルの行ベクトル（モード1・モード2の値）が、最も張り合う点を選ぶ",
                  fontsize=13.5,weight="bold")
     fig.tight_layout(rect=[0,0,1,0.95])
     out=os.path.join(IMG,"qdeim_concept.png"); fig.savefig(out,dpi=140); plt.close(fig)
