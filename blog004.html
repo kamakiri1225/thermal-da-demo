@@ -1899,10 +1899,13 @@ class="math inline">\(U_{r,P}\)</span> が特異に近い）。
 <li><strong>選んだ点が互いに”別々のことを言う”</strong>（1点はモード1を、別の点はモード2をよく映す）なら、
 連立はスッキリ解け、復元は安定。</li>
 </ul>
-<h4 id="モード指紋とは-行列で書くと">モード指紋とは ― 行列で書くと</h4>
-<p>「モード指紋」は、<strong>ある1つのセルで、5つのモードがそれぞれどんな値を取るか</strong>を並べたものです。POD
+<h4 id="セルごとのモードの値-u_r-の1行を見る">セルごとのモードの値 ―
+<span class="math inline">\(U_r\)</span> の1行を見る</h4>
+<p>Q-DEIM
+の点の選び方を理解するには、<strong>ある1つのセルで、5つのモードがそれぞれどんな値を取るか</strong>を見る必要があります。これは、POD
 で作ったモード行列 <span class="math inline">\(U_r\)</span> （20,696 行
-× 5 列）の<strong>1行</strong>にあたります。</p>
+× 5
+列）の<strong>1行</strong>です。この記事では、これを「セルの行ベクトル」と呼びます。</p>
 <p><span class="math display">\[
 U_r=
 \begin{pmatrix}
@@ -1919,8 +1922,8 @@ U_r=
 <li><strong>縦の1列</strong>＝1つのモード（温度分布の「型」）。例えば1列目
 <span class="math inline">\(\varphi_1\)</span> はモード1の型で、20,696
 セル分の値が並んでいます。</li>
-<li><strong>横の1行</strong>＝1つのセルの<strong>モード指紋</strong>。この記事では、セル
-<span class="math inline">\(i\)</span> の指紋を <span
+<li><strong>横の1行</strong>＝1つのセルの<strong>行ベクトル</strong>（そのセルでの5つのモードの値）。この記事では、セル
+<span class="math inline">\(i\)</span> の行ベクトルを <span
 class="math inline">\(\psi_i\)</span> と書きます。</li>
 </ul>
 <p><span class="math display">\[
@@ -1934,7 +1937,7 @@ class="math inline">\(k\)</span> ＝列」、 <span
 class="math inline">\(\psi_i\)</span> は「セル <span
 class="math inline">\(i\)</span>
 ＝行」です。混同しないよう記号を分けています。）</p>
-<p><strong>指紋の長さ</strong>は、その行の5つの値の2乗和の平方根です。</p>
+<p><strong>行ベクトルの長さ</strong>は、その行の5つの値の2乗和の平方根です。</p>
 <p><span class="math display">\[
 \lVert\psi_i\rVert=\sqrt{\varphi_1[i]^2+\varphi_2[i]^2+\varphi_3[i]^2+\varphi_4[i]^2+\varphi_5[i]^2}
 \]</span></p>
@@ -1963,7 +1966,7 @@ class="math inline">\(U_r\)</span>
 <th style="text-align: right;">モード3</th>
 <th style="text-align: right;">モード4</th>
 <th style="text-align: right;">モード5</th>
-<th style="text-align: right;">指紋の長さ <span
+<th style="text-align: right;">行ベクトルの長さ <span
 class="math inline">\(\lVert\psi_i\rVert\)</span></th>
 </tr>
 </thead>
@@ -2061,27 +2064,27 @@ class="math inline">\(\lVert\psi_i\rVert\)</span></th>
 </tbody>
 </table>
 <ul>
-<li>指紋が一番長いのはセル 7634（0.0369）で、これが Q-DEIM
+<li>行ベクトルが一番長いのはセル 7634（0.0369）で、これが Q-DEIM
 の1点目（P0）になります。モード4の値（−0.0342）がとても大きく、モード4をよく映すセルです。</li>
 <li>一番短いのはセル
 19062（0.0070）で、どのモードもほとんど出ません。</li>
 <li>値が 0.01 前後と小さいのは、各モード（各列）を 20,696 セル全体で長さ
 1 にそろえているためです（列の長さはどれも 1.000）。</li>
 </ul>
-<p>下の図は、この指紋のうちモード1・モード2の2つだけを取り出して、平面に置いたものです。</p>
-<p>図で見ると一目瞭然です。各セルを「そのセルでのモード1・モード2の値」＝<strong>モード指紋のうち2成分</strong>
+<p>下の図は、この行ベクトルのうちモード1・モード2の2つだけを取り出して、平面に置いたものです。</p>
+<p>図で見ると一目瞭然です。各セルを「そのセルでのモード1・モード2の値」＝<strong>行ベクトルのうち2成分</strong>
 <span class="math inline">\((\varphi_1[i],\ \varphi_2[i])\)</span>
 として平面に置きます:</p>
 <figure>
 <img src="img/qdeim_concept.png"
-alt="Q-DEIMの直感（モード指紋と選点）" />
+alt="Q-DEIMの直感（行ベクトルと選点）" />
 <figcaption
-aria-hidden="true">Q-DEIMの直感（モード指紋と選点）</figcaption>
+aria-hidden="true">Q-DEIMの直感（行ベクトルと選点）</figcaption>
 </figure>
-<p><em>左（良い）：<strong>指紋が直交気味の2点</strong>を選ぶと、原点からの2ベクトルが作る平行四辺形が広い
+<p><em>左（良い）：<strong>行ベクトルが直交気味の2点</strong>を選ぶと、原点からの2ベクトルが作る平行四辺形が広い
 ＝ <span class="math inline">\(\lvert\det U_{r,P}\rvert\)</span>
 が大（0.735）＝連立がよく解ける。
-右（悪い）：<strong>指紋がそっくりな2点</strong>だと平行四辺形がぺちゃんこ＝
+右（悪い）：<strong>行ベクトルがそっくりな2点</strong>だと平行四辺形がぺちゃんこ＝
 <span class="math inline">\(\det\)</span> が小（0.038）＝ノイズが爆発。
 つまり「<strong>選点でのモード行列式（体積）が大きい点集合ほど、復元が安定</strong>」。</em></p>
 <h3 id="q-deim-信号が大きく互いに独立な点を貪欲に選ぶ">4-2. Q-DEIM
@@ -2093,7 +2096,7 @@ aria-hidden="true">Q-DEIMの直感（モード指紋と選点）</figcaption>
 <ol type="1">
 <li><strong>1点目</strong>：全セル（ <span
 class="math inline">\(U_r\)</span> の 20,696
-行）の中で、モード指紋の長さ <span
+行）の中で、行ベクトルの長さ <span
 class="math inline">\(\lVert\psi_i\rVert\)</span> が
 <strong>最大</strong>のセルを選ぶ（一番強く場に効く点）。実際はセル
 7634（P0、0.0369）。</li>
@@ -2104,7 +2107,7 @@ class="math inline">\(\lVert\psi_i\rVert\)</span> が
 点そろうまで繰り返す。</li>
 </ol>
 <p><strong>「新しい点ほど、すでに選んだ点では分からない情報を最大にする」</strong>
-という素直な戦略です。 上の図なら、まず一番長い指紋の
+という素直な戦略です。 上の図なら、まず行ベクトルが一番長い
 <strong>a</strong>（モード1が最大）を選び、次に a
 の向きを消して残りが最大の <strong>h</strong>（モード2が最大）を選ぶ →
 直交気味の良いペアになります。列枢軸QRはこの手順を数値的に安定に行うだけで、魔法ではありません。</p>
@@ -2151,7 +2154,7 @@ id="実データで貪欲選択を1ステップずつ追う">実データで貪�
 <div class="sourceCode" id="cb13"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> Ur.copy()                                  <span class="co"># Ur = 先頭5モード (20696×5)</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各行（各セルの指紋 ψ_i）の長さ＝「残っている情報」の大きさ</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各行（各セルの行ベクトル ψ_i）の長さ＝「残っている情報」の大きさ</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> <span class="bu">int</span>(np.argmax(norms))                  <span class="co"># ← 最大の点を選ぶ</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> W[p] <span class="op">/</span> np.linalg.norm(W[p])</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    W <span class="op">-=</span> np.outer(W <span class="op">@</span> v, v)                    <span class="co"># ← その方向を全セルから差し引く</span></span></code></pre></div>
@@ -2589,7 +2592,10 @@ class="math inline">\(a_1,a_2,\dots\)</span>
 ）で、<strong>全セルで共通</strong>。5点の測定から決まる。</li>
 <li><span class="math inline">\(\varphi_{k,i}\)</span> …
 <strong>そのセルがモード <span class="math inline">\(k\)</span>
-をどれだけ受け取るか</strong>（＝セルの指紋）。POD
+をどれだけ受け取るか</strong>（＝ <span
+class="math inline">\(U_r\)</span> の <span
+class="math inline">\(i\)</span> 行目、 <span
+class="math inline">\(k\)</span> 番目の値）。POD
 で1度だけ決まり、<strong>時間によらず固定</strong>。</li>
 </ul>
 <p>だから各セルの温度は「<strong>下地 <span class="math inline">\(\bar
@@ -2618,7 +2624,7 @@ class="math inline">\(a(t)\)</span>
 <p><strong>ここが肝心</strong>：遠いセルは「近くの5点からの距離で内挿」しているのでは
 <strong>ありません</strong>。 5点で決めた係数 <span
 class="math inline">\(a\)</span> を、そのセル
-<strong>自身のモード指紋</strong> <span
+<strong>自身の行ベクトル</strong> <span
 class="math inline">\(\varphi_{k,i}\)</span> に掛けて計算します。
 だから「5点から遠い反対側のセル」も、モードの形を通じてちゃんと値が決まります。</p>
 <p><strong>具体例（2モードで確認）</strong>：3セルA,B,C、平均 <span
@@ -2647,7 +2653,7 @@ class="math inline">\(\det=0.8\cdot(-0.6)-0.1\cdot0.5=-0.53\)</span>
 =\frac{1}{-0.53}\begin{pmatrix}-0.53\\ -0.265\end{pmatrix}
 =\begin{pmatrix}1\\ 0.5\end{pmatrix}.\]</span></p>
 <p>この <span class="math inline">\(a=(1,0.5)\)</span>
-を、<strong>一度も測っていないC</strong> の指紋 <span
+を、<strong>一度も測っていないC</strong> の行ベクトル <span
 class="math inline">\(\varphi_{\cdot,C}=(0.3,\ 0.7)\)</span>
 に掛けると:</p>
 <p><span class="math display">\[\hat T_C=\bar
