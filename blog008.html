@@ -215,6 +215,11 @@ id="toc-分かったこと主張の修正">分かったこと（主張の修正�
 id="toc-検証別の場所で変位を測って測っていない-ao-を当てる">6.
 【検証】別の場所で変位を測って、測っていない A・O を当てる</a>
 <ul>
+<li><a href="#どこを測ってどこを評価したか"
+id="toc-どこを測ってどこを評価したか">どこを測って、どこを評価したか</a></li>
+<li><a href="#変位の候補はどう選んだか"
+id="toc-変位の候補はどう選んだか">変位の候補はどう選んだか</a></li>
+<li><a href="#結果" id="toc-結果">結果</a></li>
 <li><a href="#分かったこと-1"
 id="toc-分かったこと-1">分かったこと</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
@@ -600,10 +605,80 @@ alt="同じ場所で温度か変位か" />
 そこで、<strong>A・O を一度も観測せず</strong>、別の場所の変位2点だけで
 A・O
 を当てられるかを調べました（<code>run/disp_elsewhere_predict_AO.py</code>）。</p>
-<p>変位の候補は、FrontISTR
-6回で作った<strong>全5,040節点×3成分</strong>から選べます。 A・O
-の近く（12 mm
-以内）は候補から除き、残りから「同化前に計算できる指標」で2点を貪欲に選びました。</p>
+<h3
+id="どこを測ってどこを評価したか">どこを測って、どこを評価したか</h3>
+<figure>
+<img src="img/blog008_obs_points.png" alt="観測点と評価点" />
+<figcaption aria-hidden="true">観測点と評価点</figcaption>
+</figure>
+<p><em>赤＝温度センサ（P2・P0）／緑＝選定した変位2点（矢印＝測る方向）／橙＝B・C／黒＝評価点
+A・O。 <strong>A・O は一度も観測していません。</strong></em></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>役割</th>
+<th>場所</th>
+<th>測るもの</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度センサ（共通）</td>
+<td>P2 (36.5, 6.9, 50.8)、P0 (21.3, −1.6, 51.6) mm</td>
+<td>温度</td>
+</tr>
+<tr class="even">
+<td><strong>選定した変位1点目</strong></td>
+<td>(9.7, −36.2, 100.5) mm（上面、−y 寄り）</td>
+<td><strong><span class="math inline">\(U_x\)</span>
+（半径方向）</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>選定した変位2点目</strong></td>
+<td>(−34.6, 14.4, 100.5) mm（上面、ヒータの反対側）</td>
+<td><strong><span class="math inline">\(U_z\)</span>
+（上下方向）</strong></td>
+</tr>
+<tr class="even">
+<td>B・C（比較用）</td>
+<td>(±28, 0, 75) mm（A・O の真下、25 mm 下）</td>
+<td><span class="math inline">\(U_z\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>評価点 A・O</strong></td>
+<td>(±28.7, 0, 100.5) mm（上面）</td>
+<td><strong>測らない</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="変位の候補はどう選んだか">変位の候補はどう選んだか</h3>
+<ol type="1">
+<li><strong>候補をそろえる</strong>：FrontISTR
+を6回回して、<strong>全5,040節点×3成分＝15,120通り</strong>の「温度→変位」の関係を作る（1回の解析で全節点の変位が出るので追加の
+FEM は不要）。</li>
+<li><strong>A・O の近くを除く</strong>：A・O から 12 mm 以内は「A・O
+を測ったのと同じ」なので候補から外す。</li>
+<li><strong>測った後に残る「反りの分からなさ」を計算する</strong>：</li>
+</ol>
+<p><span class="math display">\[
+\sigma_S^2=w^{\mathsf T}\Big(B-BH_S^{\mathsf T}(H_SBH_S^{\mathsf
+T}+R)^{-1}H_SB\Big)w
+\]</span></p>
+<p><span class="math inline">\(w\)</span> は反り A−O
+に対する熱感度（FrontISTR）、 <span class="math inline">\(B\)</span>
+は温度のばらつき（ROM を4000通り回して作る）。<a
+href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
+で温度センサを選んだのと同じ式で、対象を反りにしたものです。 4.
+<strong>1点ずつ足す（貪欲法）</strong>：1点目で 0.347 µm、2点目を足して
+0.256 µm。 5. <strong>最後に同化で確かめる</strong>。</p>
+<p><strong>ここまで測定値は一切使っていません。</strong>
+机上の計算だけで場所が決まります。</p>
+<h3 id="結果">結果</h3>
 <figure>
 <img src="img/disp_elsewhere_predict_AO.png"
 alt="別の場所で測って A・O を当てる" />
@@ -671,6 +746,14 @@ class="math inline">\(U_z\)</span> ）</td>
 </tbody>
 </table>
 <h3 id="分かったこと-1">分かったこと</h3>
+<figure>
+<img src="img/blog008_AO_anim.gif" alt="A・O が同化で合っていく様子" />
+<figcaption aria-hidden="true">A・O が同化で合っていく様子</figcaption>
+</figure>
+<p><em>観測していない Uz(A)・Uz(O)・反り A−O
+が、同化のたびに真値（黒）へ近づく様子。
+灰＝変位なし（温度2点のみ）、橙＝B・C を測る、緑＝選定2点を測る。5 seed
+平均。</em></p>
 <ol type="1">
 <li><strong>A・O を一度も測らずに、反りを 0.076 µm
 で当てられました。</strong> 真値の振幅 2.74 µm に対して 2.8 %
