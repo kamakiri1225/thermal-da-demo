@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from dacore import rom_general as rg
 from improve_heating_schedule import integrate, SCHED
 RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
-CASES=[("learned",1.0,"15 W・0〜300 s（ROM を作った条件）"),("q25",25/15,"25 W・0〜300 s（使っていない）"),("intermittent",1.0,"15 W 間欠加熱（使っていない）")]
+CASES=[("learned",1.0,"15 W・0〜300 s（ROM の係数を決めた計算）"),("q25",25/15,"25 W・0〜300 s（新しく計算した条件）"),("intermittent",1.0,"15 W 間欠加熱（新しく計算した条件）")]
 
 
 def main():

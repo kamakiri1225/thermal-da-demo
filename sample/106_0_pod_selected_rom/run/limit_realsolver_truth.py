@@ -9,8 +9,8 @@
 
 真値のケース（CASE）:
   learned      … 102_0 の CHT（15 W, 0〜300 s）。ROM の校正・POD に使った条件そのもの
-  q25          … 25 W, 0〜300 s（モデル作成に使っていない発熱量）            openfoam/limit/q25
-  intermittent … 15 W を 0〜150 s と 300〜450 s（モデル作成に使っていない加熱履歴。ROM の仮定と異なる）
+  q25          … 25 W, 0〜300 s（新しく計算した条件発熱量）            openfoam/limit/q25
+  intermittent … 15 W を 0〜150 s と 300〜450 s（新しく計算した条件加熱履歴。ROM の仮定と異なる）
                                                                    openfoam/limit/intermittent
 
 出力: results/limit_realsolver_<CASE>.json, results/limit_truth_<CASE>.npz（FrontISTR 真値のキャッシュ）
@@ -37,8 +37,8 @@ NR,NTH,NZ=4,48,20; R_IN,R_OUT,H=0.020,0.0375,0.1005
 Tref=MATERIAL["reference_temperature_K"]
 A_XYZ=np.array([0.028,0,H]); O_XYZ=np.array([-0.028,0,H])
 CASES={"learned":(os.path.join(SAMPLE,"102_0_openfoam_hollow_cylinder_heat_transfer"),"15 W・0〜300 s（ROMの校正に使った条件）"),
-       "q25":(os.path.join(ROOT,"openfoam","limit","q25"),"25 W・0〜300 s（モデル作成に使っていない発熱量）"),
-       "intermittent":(os.path.join(ROOT,"openfoam","limit","intermittent"),"15 W・0〜150 s と 300〜450 s（モデル作成に使っていない加熱履歴）")}
+       "q25":(os.path.join(ROOT,"openfoam","limit","q25"),"25 W・0〜300 s（新しく計算した条件発熱量）"),
+       "intermittent":(os.path.join(ROOT,"openfoam","limit","intermittent"),"15 W・0〜150 s と 300〜450 s（新しく計算した条件加熱履歴）")}
 CONFIGS=[("同化なし",None,False),("温度2点 P2+P0（A側だけ）",[2,0],False),("温度2点 P2+P4（両側）",[2,4],False),
          ("温度 P2+P0＋変位 A/O",[2,0],True),("温度 P2+P4＋変位 A/O",[2,4],True)]
 

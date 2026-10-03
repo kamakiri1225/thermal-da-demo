@@ -23,9 +23,9 @@ RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
 NPT=5; IQ=5; IH=6; NAUG=7; DT=2.0; OBS_DT=30.0; T_END=600.0; N_ENS=60
 SIG_T=0.30; SIG_U=0.30; INFL=1.02
 SEEDS=[20260913,20260914,20260915,20260916,20260917]
-CASES=[("learned","15 W・0〜300 s（モデル作成に使った条件）"),
-       ("q25","25 W・0〜300 s（使っていない条件）"),
-       ("intermittent","15 W 間欠加熱（使っていない条件）")]
+CASES=[("learned","15 W・0〜300 s（ROM の係数を決めた計算）"),
+       ("q25","25 W・0〜300 s（新しく計算した条件）"),
+       ("intermittent","15 W 間欠加熱（新しく計算した条件）")]
 SHOW=[(2,"P2（ヒータ横・観測点）"),(1,"P1（反対側・未観測）"),(3,"P3（底面・未観測）")]
 
 
