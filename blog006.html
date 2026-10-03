@@ -293,9 +293,12 @@ href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>。</p>
 <h2 id="どこに何を付けたか">1. どこに何を付けたか</h2>
 <figure>
 <img src="img/blog006_sensor_positions.png"
-alt="温度2点＋変位2点の位置" />
-<figcaption aria-hidden="true">温度2点＋変位2点の位置</figcaption>
+alt="温度2点＋変位2点とヒータの位置" />
+<figcaption
+aria-hidden="true">温度2点＋変位2点とヒータの位置</figcaption>
 </figure>
+<p><em>左：斜めから見た図。右：真上から見た図（ヒータの周方向の範囲と、各点の高さ
+z）。</em></p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -329,8 +332,45 @@ class="math inline">\(U_z\)</span> ）</td>
 </tbody>
 </table>
 <p>題材は、片側にヒータが付いた中空円筒（外径 75 mm、内径 40 mm、高さ
-100.5 mm、鋼）です。 ヒータは 0〜300 秒に 15 W、300〜600
-秒は切って自然に冷やします。</p>
+100.5 mm、鋼）です。底面を固定しています。</p>
+<p><strong>ヒータの位置</strong>（図の朱色）：外周の +X
+側に巻いたヒートマットです。</p>
+<table>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>中心</td>
+<td>+X 方向（角度 0°）、高さ 50.25 mm</td>
+</tr>
+<tr class="even">
+<td>高さ方向の範囲</td>
+<td>25.25〜75.25 mm（50 mm）</td>
+</tr>
+<tr class="odd">
+<td>周方向の範囲</td>
+<td>外周に沿って 100 mm（約 −76°〜+76°）</td>
+</tr>
+<tr class="even">
+<td>発熱</td>
+<td>0〜300 秒に 15 W、300〜600 秒は切って自然に冷やす</td>
+</tr>
+</tbody>
+</table>
+<p>（<code>102_0_openfoam_hollow_cylinder_heat_transfer/config/geometry.yaml</code>
+の設定）</p>
+<ul>
+<li>温度センサ P2 はヒータのすぐ内側（+X 側、高さ 51 mm）、P0 も同じ +X
+側の高さ 52 mm にあります。<strong>2本ともヒータ側（A
+側）</strong>です。</li>
+<li>変位計 A はヒータ側の上面、O は反対側の上面です。</li>
+<li>測っていない代表点は、P1（高さ 52 mm、+Y
+寄りの反対側）、P3（ヒータ側の底）、P4（反対側の底）です。</li>
+</ul>
 <blockquote>
 <p>この計算は<strong>本物の実験ではなく、計算で作った模擬データ（双子実験）</strong>です。センサの値は計算結果にノイズを足して作りました。</p>
 </blockquote>
@@ -826,8 +866,8 @@ class="math inline">\(t=30\)</span> 秒では A＝0.98 µm、O＝−0.43
 写像そのものの誤差は、この計算の結果には出てきません。 OpenFOAM
 の温度場全体を FrontISTR に直接入れて計算した真値（ <span
 class="math inline">\(t=30\)</span> 秒で A＝0.97 µm、O＝−0.43
-µm）とは、学習に使った 15 W の条件では 0.001 µm
-程度しか違いませんでした。学習していない条件での違いは、別途計算中です。</p>
+µm）とは、モデル作成に使った 15 W の条件では 0.001 µm
+程度しか違いませんでした。モデル作成に使っていない条件での違いは、別途計算中です。</p>
 </blockquote>
 <h3 id="変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
 変位は温度をどう直したか（ <span class="math inline">\(t=30\)</span>
@@ -1336,12 +1376,28 @@ class="math inline">\(\mathrm{Cov}(q,Y)\approx0\)</span>
 ）ためです。</li>
 <li>20 回の合計では、温度の分が −0.36 W、変位の分が −2.79 W でした（合計
 −3.16 W。実際の変化 17.09 → 14.36 W は −2.73 W
-で、差は観測摂動と上下限の影響）。この seed では、 <strong><span
-class="math inline">\(Q\)</span>
-を真値の方向へ動かした量の大部分は変位計によるもの</strong>でした。</li>
-<li>この seed の最終値は 14.36 W、5 seed 平均では 14.89 W（真値 15
-W）。</li>
+で、差は観測摂動と上下限の影響）。ただし、符号つきの合計は「行き過ぎて戻る」動きも足し引きしているので、どちらが
+<span class="math inline">\(Q\)</span> を当てたかは分かりません。</li>
 </ul>
+<blockquote>
+<p><strong>2026-10-02 訂正</strong>：以前ここに「 <span
+class="math inline">\(Q\)</span>
+を真値の方向へ動かした量の大部分は変位計によるもの」と書いていましたが、誤りでした。
+各回の補正を「真値 15 W
+に近づける向きを＋」として数え直すと（<code>run/q_contribution_seeds.py</code>）、この
+seed で温度センサ +11.56 W、変位計 −0.95 W、5 seed 平均でも温度センサ
++11.40 W、変位計 −1.57 W でした。 <strong><span
+class="math inline">\(Q\)</span>
+を真値に近づけているのは主に温度センサです。</strong> 変位計の <span
+class="math inline">\(Q\)</span>
+への直接の補正は、平均するとむしろ真値から遠ざける向きでした。
+それでも、変位計を入れると最終の <span class="math inline">\(Q\)</span>
+は良くなります（温度2点だけ 14.05 W → 変位計を足して 14.89 W、5 seed
+平均）。変位計は <span class="math inline">\(Q\)</span>
+を直接動かすより、温度を直すことを通して効いていると考えられますが、確かめてはいません。
+- この seed の最終値は 14.36 W、5 seed 平均では 14.89 W（真値 15
+W）。</p>
+</blockquote>
 <h2 id="結果">15. 結果</h2>
 <table>
 <thead>
@@ -1394,9 +1450,10 @@ W）</td>
 <tr class="odd">
 <td><strong>変位計を入れると、温度も発熱量もよく当たる</strong></td>
 <td>温度2点だけ 0.503 K → ＋変位2点で 0.160 K。 <span
-class="math inline">\(Q\)</span> は 14.05 → 14.89 W（真値 15 W）。 <span
-class="math inline">\(t=150\)</span>
-秒以降の補正は主に変位計による（§7-5、§14）</td>
+class="math inline">\(Q\)</span> は 14.05 → 14.89 W（真値 15 W）。
+変位計は温度を直す（§7-5）。ただし <span
+class="math inline">\(Q\)</span>
+を真値に近づける直接の補正は主に温度センサによる（§14 の訂正）</td>
 </tr>
 <tr class="even">
 <td><strong>測っていない場所の熱変形を推定できる</strong></td>
@@ -1437,10 +1494,11 @@ class="uri">https://arxiv.org/abs/2507.02500</a>）があります。この研�
 <li><strong>真値は計算で作った模擬データです。</strong>
 本物の実験の値ではありません。</li>
 <li>本番の計算では、<strong>測った値も予報も同じ「変位の写像」で作っています</strong>。この写像の誤差は結果に出てきません。OpenFOAM
-の温度場全体を FrontISTR に入れて真値を作り直した試験（学習に使った 15 W
+の温度場全体を FrontISTR
+に入れて真値を作り直した試験（モデル作成に使った 15 W
 の条件）では、ほぼ同じ結果でした（温度 0.16 K、反り 0.14 µm。
 <code>run/limit_realsolver_truth.py</code>）。ただし ROM
-を作るのに使った条件そのものなので、合うのは当然です。<strong>学習していない条件（25
+を作るのに使った条件そのものなので、合うのは当然です。<strong>モデル作成に使っていない条件（25
 W、加熱のしかたを変えた場合）の試験は計算中です。</strong></li>
 <li>温度センサの P2・P0 は、2本とも A 側（+X
 側）にあります。温度だけで同化する比較では、A 側と O 側に分けた P2＋P4
