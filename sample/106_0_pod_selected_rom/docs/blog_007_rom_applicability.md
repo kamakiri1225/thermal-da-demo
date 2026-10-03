@@ -571,7 +571,7 @@ $$
 
 | 変わるもの | 理由 | 作り直す手順 |
 |---|---|---|
-| 熱源の位置・数 | 温度分布の型が変わる。ROM のヒータ点も変わる | OpenFOAM（CHT）→ POD → Q-DEIM → ROM 校正 → FrontISTR で $D$ |
+| 熱源の位置・数 | 温度分布の型が変わる。ROM は発熱を P2 の1点に集中して与えており（[blog_004 §6-1b](blog_004_pod_selected_rom.md)）、その前提で $C$ ・ $K$ を校正しているため | OpenFOAM（CHT）→ POD → Q-DEIM → ROM 校正 → FrontISTR で $D$ |
 | 形状・メッシュ | 型が 20,696 セルに結び付いている | 同上 |
 | 拘束条件（固定のしかた） | 変位の写像 $D$ が変わる | FrontISTR で $D$ を作り直す（6回） |
 | 材料（熱伝導率・熱容量） | ROM の係数が変わる | OpenFOAM → ROM 校正 |
