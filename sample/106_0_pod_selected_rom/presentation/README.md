@@ -11,7 +11,7 @@
 | **04** | [`04_intro_literature.md`](04_intro_literature.md) | 導入の文献調査（75%の出典）・メーカー4社比較・ISO 230-3・測定方法 | スライド2の根拠 |
 | **05** | [`05_overview.md`](05_overview.md) | 発表内容6項目の概要 | 全体像の確認 |
 | **06** | [`06_conference_posters.html`](06_conference_posters.html) / [`.pdf`](06_conference_posters.pdf) | 学会別ポスター4学会分（OpenCAE／計算工学／計算力学／実務応用） | 別学会への打診 |
-| **07** | [`07_slides_displacement.html`](07_slides_displacement.html) / [`.pdf`](07_slides_displacement.pdf) | **発表スライド（新構成・34枚）**「測れない場所の熱変形を、測れる場所から当てる」。切り口A／B／C で組み立て直したもの。全スライドに**話す原稿**（reveal.js の **S** キーでノート表示） | **本番（新）** |
+| **07** | [`07_slides_displacement.html`](07_slides_displacement.html) / [`.pdf`](07_slides_displacement.pdf) | **発表スライド（新構成・23枚）**「測れない場所の熱変形を、測れる場所から当てる」。切り口A／B／C で組み立て直したもの。全スライドに**話す原稿**（reveal.js の **S** キーでノート表示） | **本番（新）** |
 
 公開版スライド: <https://kamakiri1225.github.io/thermal-da-demo/opencae2026.html>
 
@@ -56,10 +56,13 @@ Node.js、mathjax-full、beautifulsoup4、WeasyPrint、PyMuPDFが必要です。
 | 先行研究 | 言及なし | **4つの流派と「空いている場所」**を1枚で |
 | 配置設計 | 「悪い例」との比較のみ | **既存の配置法（A最適・D最適・Q-DEIM・素朴・ランダム）と同じ土俵で比較**（2026-10-03 追加） |
 | 限界 | 1枚 | 1枚（**言えないこと**を7項目で明示） |
-| 原稿 | なし | **全34枚に話す原稿**（S キー） |
+| 原稿 | なし | **全23枚に話す原稿**（S キー） |
+| 1枚の密度 | 条件・表・カード・結論を全部載せる | **見出し（結論文）＋大きい図1つ＋結論1行**。細部は原稿とブログへ |
 
+- **20分発表の想定で23枚**（1枚あたり約50秒）。会場のスクリーンで読めるよう、
+  スライド用の図（`docs/img/slide_*.png`、`run/make_slide_figs.py` で生成）を別に作って使っています。
 - 図は `../docs/img/` を参照しています。フォルダごと移動する場合は相対パスに注意してください。
-- reveal.js と MathJax は CDN から読み込みます。**会場でネットが使えない場合に備えて PDF 版**（`07_slides_displacement.pdf`、34ページ、16:9）を同梱しています。
+- reveal.js と MathJax は CDN から読み込みます。**会場でネットが使えない場合に備えて PDF 版**（`07_slides_displacement.pdf`、23ページ、16:9）を同梱しています。
 - PDF は各スライドを 2560×1440 で描画して束ねたものです。アニメーション GIF は1コマ目で止まります。
 
 公開版: <https://kamakiri1225.github.io/thermal-da-demo/opencae2026_b.html>
