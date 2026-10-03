@@ -1,0 +1,21 @@
+{
+ "note": "D=WΦ の3通りと FrontISTR 6回版の比較（Uz成分、[µm]）。valid＝拘束節点を除く4,800節点",
+ "time_mode_solve_s": 0.1,
+ "time_full_W_s": 54.4,
+ "W64_MB": 193.8,
+ "WΦを5列で求解(float64)": {
+  "max_abs_diff_um": 0.0018805550556371814,
+  "mean_abs_diff_um": 0.0002993840866193874,
+  "max_rel_pct": 8.598183350236289
+ },
+ "Wをfloat64で構築": {
+  "max_abs_diff_um": 0.0018805550556419848,
+  "mean_abs_diff_um": 0.0002993840866191722,
+  "max_rel_pct": 8.598183350258251
+ },
+ "Wをfloat32で構築(105保存値)": {
+  "max_abs_diff_um": 0.0018805551279842663,
+  "mean_abs_diff_um": 0.0002993840863684835,
+  "max_rel_pct": 8.598183681018151
+ }
+}
