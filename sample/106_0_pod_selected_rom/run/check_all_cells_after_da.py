@@ -45,7 +45,7 @@ def main():
     for j,(case,lab) in enumerate(CASES):
         z=np.load(os.path.join(RES,f"limit_truth_{case}.npz")); t=z["times"]; Tf=z["Tfield"]; T5=Tf[:,pod]; uz=z["uz"]
         cyc=t[1:]; heatw=(t[1:]<=300)
-        errs=np.zeros((len(SEEDS),len(cyc),ncell))
+        errs=np.zeros((len(SEEDS),len(cyc),ncell)); ests=np.zeros_like(errs)
         for si,seed in enumerate(SEEDS):
             rng=np.random.default_rng(seed); ro=np.random.default_rng(seed+7)
             Z=np.zeros((N_ENS,NAUG)); Z[:,:NPT]=rng.uniform(rg.T_AIR_K-3,rg.T_AIR_K+12,(N_ENS,NPT))
@@ -57,8 +57,10 @@ def main():
                 Yf=np.column_stack([Z[:,TN],disp(Z[:,:NPT])])
                 Z=enkf_update(Z,y,None,Rd,rng,inflation=INFL,Yf=Yf)
                 Z[:,IQ]=np.clip(Z[:,IQ],0,3); Z[:,IH]=np.clip(Z[:,IH],1e-4,0.2)
-                errs[si,ci-1]=np.abs(field(Z[:,:NPT].mean(0))-Tf[ci])
+                fe=field(Z[:,:NPT].mean(0))
+                errs[si,ci-1]=np.abs(fe-Tf[ci]); ests[si,ci-1]=fe
         e=errs.mean(0)                       # (time, cell) 5 seed平均
+        est=ests.mean(0)                     # 同化後の温度場（5 seed平均）
         eh=e[heatw].mean(0)                  # 加熱期平均（セルごと）
         imax=int(eh.argmax())
         rise=float(Tf.max()-rg.T_AIR_K)
@@ -90,15 +92,18 @@ def main():
         ax.set_xlabel("半径 r [mm]"); ax.set_ylabel("高さ z [mm]"); ax.legend(fontsize=9)
         ax.set_title("セルごとの誤差（加熱期平均）",fontsize=11.5)
         plt.colorbar(sc,ax=ax,label="誤差 [K]")
-        # 行3：時間変化
+        # 行3：温度そのものの時刻歴（誤差が大きい順に代表的な未観測セルを3つ）
         ax=axs[2,j]
         ax.axvspan(0,300,color="#FDEBD0",alpha=.45)
-        ax.plot(cyc,e.max(1),"-",color="#C0392B",lw=2,label="全セルの最大")
-        ax.plot(cyc,np.percentile(e,95,axis=1),"-",color="#E67E22",lw=2,label="95%点")
-        ax.plot(cyc,e.mean(1),"-",color="#2E6FD8",lw=2,label="平均")
-        ax.axhline(SIG_T,color="k",ls="--",lw=2,label="温度計のノイズ 0.3 K")
-        ax.set_xlabel("時刻 [s]"); ax.set_ylabel("誤差 [K]"); ax.grid(alpha=.3); ax.legend(fontsize=9)
-        ax.set_title("誤差の時間変化（全セル）",fontsize=11.5); ax.set_ylim(0,max(1.0,float(e.max())*1.1))
+        pick=[imax,int(np.argsort(eh)[len(eh)//2]),int(eh.argmin())]
+        nm=["誤差が最大のセル","中央のセル","誤差が最小のセル"]
+        cols3=["#C0392B","#E67E22","#2E6FD8"]
+        for c_,n_,col_ in zip(pick,nm,cols3):
+            ax.plot(t,Tf[:,c_]-273.15,"o",color=col_,ms=4)
+            ax.plot(t[1:],est[:,c_]-273.15,"-",color=col_,lw=1.9,
+                    label=f"{n_} ({np.round(Cc[c_]*1000,0).astype(int).tolist()} mm)")
+        ax.set_xlabel("時刻 [s]"); ax.set_ylabel("温度 [℃]"); ax.grid(alpha=.3); ax.legend(fontsize=8.5,loc="lower right")
+        ax.set_title("温度そのもの（点＝OpenFOAM、線＝同化後）",fontsize=11.5)
     json.dump(out,open(os.path.join(RES,"check_all_cells_after_da.json"),"w"),ensure_ascii=False,indent=1)
     fig.suptitle("同化で復元した温度場は、代表5点以外のセルでも合っているか（真値＝OpenFOAM、観測＝温度2点＋変位2点、5 seed 平均）",fontsize=13.5)
     fig.tight_layout(rect=(0,0,1,0.96)); fig.savefig(os.path.join(IMG,"all_cells_after_da.png"),dpi=150); plt.close(fig)

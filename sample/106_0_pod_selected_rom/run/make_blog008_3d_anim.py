@@ -26,7 +26,7 @@ N_ENS=60; SIG_T=0.30; SIG_U=0.30; INFL=1.02; SEED=20260913
 TN=[2,0]
 SEL=[((0.0097,-0.0362,0.1005),0),((-0.0346,0.0144,0.1005),2)]
 A_XYZ=(0.028,0.0,0.1005); O_XYZ=(-0.028,0.0,0.1005)
-EXAG=4000.0        # 変形の誇張倍率
+EXAG=None          # 変形の誇張倍率（最大変位が5 mmになるよう自動設定）
 
 
 def main():
@@ -66,7 +66,11 @@ def main():
             rec.append(Z[:,:NPT].mean(0).copy())
         return np.array(rec)
     tOnly=run([]); tDisp=run(sel)
-    print("[anim] DA done",flush=True)
+    # 誇張倍率：全フレームの最大変位が 5 mm に見えるよう自動設定
+    global EXAG
+    mx=max(np.abs(dispall(x)).max() for arr in (Ttr,tOnly,tDisp) for x in arr)
+    EXAG=0.005/mx
+    print(f"[anim] DA done. 最大変位 {mx*1e6:.2f} µm → 誇張倍率 {EXAG:.0f}倍",flush=True)
 
     import pyvista as pv, vtk
     from PIL import Image
@@ -84,16 +88,16 @@ def main():
     def shot(T5,title,col,marks):
         f=field(T5)-KC; u=dispall(T5)
         g=pv.UnstructuredGrid(cells,ctypes,co+u*EXAG); g.point_data["T"]=f[near]
-        pl=pv.Plotter(off_screen=True,window_size=(470,600))
+        pl=pv.Plotter(off_screen=True,window_size=(620,760))
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=18,show_scalar_bar=False)
         for p0,c0,r0 in marks:
             pl.add_mesh(pv.Sphere(radius=r0,center=p0+(u[near_node(p0)]*EXAG)),color=c0)
-        pl.add_text(title,position="upper_left",font_size=10,color=col)
         pl.camera_position=[(0.26,-0.24,0.21),(0,0,0.05),(0,0,1)]
-        pl.set_background("white"); pl.camera.zoom(1.30)
+        pl.set_background("white"); pl.camera.zoom(1.5)
         im=pl.screenshot(return_img=True); pl.close()
         m=np.any(im[...,:3]<246,axis=-1); ys,xs=np.where(m)
-        return im[ys.min()-4:ys.max()+4,xs.min()-4:xs.max()+4]
+        if ys.size==0: return im          # 全部白なら切り取らずそのまま返す
+        return im[max(0,ys.min()-4):ys.max()+4,max(0,xs.min()-4):xs.max()+4]
     marks_obs=[(np.array(A_XYZ),"black",0.0028),(np.array(O_XYZ),"black",0.0028),
                (coords[sel[0][0]],"#1f9e4b",0.0030),(coords[sel[1][0]],"#1f9e4b",0.0030),
                (kv["xyz"][2],"red",0.0026),(kv["xyz"][0],"red",0.0026)]
@@ -106,17 +110,20 @@ def main():
         ims=[shot(Ttr[k],"TRUTH","black",marks_t),
              shot(tOnly[k],"TEMP 2 ONLY","#8a1c1c",marks_t),
              shot(tDisp[k],"TEMP 2 + DISP 2 (elsewhere)","#14459c",marks_obs)]
-        fig,axes=plt.subplots(1,3,figsize=(13.2,5.2))
+        fig,axes=plt.subplots(1,3,figsize=(13.8,6.4))
         ttls=[f"真値\n反り A−O = {aoT:5.2f} µm",
               f"温度2点のみ\n反り {ao1:5.2f} µm（誤差 {abs(ao1-aoT):4.2f}）",
               f"温度2点＋別の場所の変位2点\n反り {ao2:5.2f} µm（誤差 {abs(ao2-aoT):4.2f}）"]
         cols=["#1b2430","#c0392b","#14459c"]
         for ax,im,t,c in zip(axes,ims,ttls,cols):
-            ax.imshow(im); ax.axis("off"); ax.set_title(t,fontsize=11.5,weight="bold",color=c)
+            ax.imshow(im); ax.axis("off"); ax.set_title(t,fontsize=12,weight="bold",color=c)
+        # 温度のカラーバー
+        sm=plt.cm.ScalarMappable(cmap="turbo",norm=plt.Normalize(*clim))
+        cax=fig.add_axes([0.25,0.055,0.50,0.022])
+        cb=fig.colorbar(sm,cax=cax,orientation="horizontal"); cb.set_label("温度 [℃]",fontsize=10.5)
         fig.suptitle(f"A・O を一度も測らずに熱変形を当てる（t = {tg[k]:.0f} s）\n"
-                     f"色＝温度 19.5〜26.5 ℃、形＝熱変形（{EXAG:.0f}倍に誇張）　"
-                     f"赤球＝温度センサ、緑球＝観測した変位2点、黒球＝評価点 A・O（測らない）",fontsize=12)
-        fig.tight_layout(rect=[0,0,1,0.86])
+                     f"形＝熱変形（{EXAG:.0f}倍に誇張）　赤球＝温度センサ　緑球＝観測した変位2点　黒球＝評価点 A・O（測らない）",fontsize=12)
+        fig.tight_layout(rect=[0,0.09,1,0.88])
         fig.canvas.draw()
         frames.append(Image.fromarray(np.asarray(fig.canvas.buffer_rgba())[:,:,:3].copy()))
         plt.close(fig)
