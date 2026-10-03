@@ -219,8 +219,9 @@ id="toc-検証別の場所で変位を測って測っていない-ao-を当て�
 <ul>
 <li><a href="#どこを測ってどこを評価したか"
 id="toc-どこを測ってどこを評価したか">どこを測って、どこを評価したか</a></li>
-<li><a href="#変位の候補はどう選んだか"
-id="toc-変位の候補はどう選んだか">変位の候補はどう選んだか</a></li>
+<li><a href="#変位の候補はどう選んだか-実際にやった作業"
+id="toc-変位の候補はどう選んだか-実際にやった作業">変位の候補はどう選んだか
+― 実際にやった作業</a></li>
 <li><a href="#結果" id="toc-結果">結果</a></li>
 <li><a href="#分かったこと-1"
 id="toc-分かったこと-1">分かったこと</a></li>
@@ -717,18 +718,61 @@ A・O。 <strong>A・O は一度も観測していません。</strong></em></p>
 </tr>
 </tbody>
 </table>
-<h3 id="変位の候補はどう選んだか">変位の候補はどう選んだか</h3>
-<p><strong>考え方</strong>：「その点を測ったら、反り A−O
-がどれだけはっきりするか」を<strong>候補すべてについて計算し、いちばんはっきりする点を選ぶ</strong>。それだけです。</p>
-<h4 id="使う指標-測った後に残る反りの分からなさ">使う指標 ―
-測った後に残る「反りの分からなさ」</h4>
-<p>同化を始める前、反り A−O
-は「だいたいこのくらい」としか分かりません。このあいまいさを標準偏差
-<span class="math inline">\(\sigma\)</span> [µm] で表します。</p>
-<p><span class="math display">\[
-\sigma_S^2=w^{\mathsf T}\Big(B-BH_S^{\mathsf T}(H_SBH_S^{\mathsf
-T}+R)^{-1}H_SB\Big)w
-\]</span></p>
+<h3
+id="変位の候補はどう選んだか-実際にやった作業">変位の候補はどう選んだか
+― 実際にやった作業</h3>
+<p>やったことは<strong>総当たり</strong>です。難しいことはしていません。</p>
+<h4
+id="ステップ1候補を全部リストアップする15120-通り">ステップ1：候補を全部リストアップする（15,120
+通り）</h4>
+<p>FrontISTR
+を<strong>6回だけ</strong>回しました（平均の温度場で1回、POD
+のモード5つで1回ずつ）。 FEM
+は1回解くと<strong>全節点の変位</strong>が出るので、この6回で</p>
+<blockquote>
+<p><strong>全 5,040 節点 × 3 方向（x, y, z）＝ 15,120 通り</strong></p>
+</blockquote>
+<p>すべてについて「5点の温度が変わると、その点のその方向の変位がどれだけ動くか」が分かります。追加の
+FEM 計算は要りません。</p>
+<p>A・O から 12 mm 以内の節点は「A・O
+を測ったのと同じ」になるので候補から外し、<strong>14,754
+通り</strong>が残りました。</p>
+<h4
+id="ステップ2候補を1つずつ採点する">ステップ2：候補を1つずつ採点する</h4>
+<p>候補を1つ取り出して、こう問います。</p>
+<blockquote>
+<p><strong>「ここに変位計を1本置いたら、反り A−O
+はどれくらい『はっきり』するか」</strong></p>
+</blockquote>
+<p>この「はっきり度」を数値で出します。単位は µm
+で、<strong>小さいほど良い</strong>です。この記事では <span
+class="math inline">\(\sigma\)</span> と書きます。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>状態</th>
+<th><span class="math inline">\(\sigma\)</span> の意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度2点だけ（変位なし）</td>
+<td><strong>1.186 µm</strong>。反りの振幅が 2.74 µm
+なので、半分近く分かっていない</td>
+</tr>
+<tr class="even">
+<td>ある候補を1本足したあと</td>
+<td>その候補を測ると、どこまで絞り込めるか</td>
+</tr>
+</tbody>
+</table>
+<p>これを <strong>14,754
+通りすべてについて計算</strong>します。表計算で全行に式を入れて、最小値を探すのと同じことです。</p>
+<p>採点に使うのは次の2つだけで、<strong>測定値は使いません</strong>。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -737,59 +781,47 @@ T}+R)^{-1}H_SB\Big)w
 </colgroup>
 <thead>
 <tr class="header">
-<th>記号</th>
+<th>使うもの</th>
 <th>中身</th>
-<th>どこから来るか</th>
+<th>どこから</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(w\)</span></td>
-<td>反り A−O に対する5点温度の熱感度 (0.47, −0.65, 0.60, 0.04, −0.46)
-µm/K</td>
-<td>FrontISTR</td>
+<td><strong>熱感度</strong></td>
+<td>5点の温度が 1 K 変わると、その点の変位が何 µm 動くか</td>
+<td>FrontISTR（ステップ1で作ったもの）</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(B\)</span></td>
-<td>5点の温度がどうばらつくか</td>
-<td>ROM を4000通り回して作る</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">\(H_S\)</span></td>
-<td>候補 <span class="math inline">\(S\)</span> を測る演算子</td>
-<td>候補の熱感度</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(R\)</span></td>
-<td>センサのノイズ（温度 0.3 K、変位 0.3 µm）</td>
-<td>仕様</td>
+<td><strong>温度のばらつき</strong></td>
+<td>発熱量や初期温度が分からないせいで、5点の温度がどれくらい・どう連動してばらつくか</td>
+<td>ROM を 4000 通り回して数える</td>
 </tr>
 </tbody>
 </table>
-<p>括弧の中は「測った後に残る温度のあいまいさ」で、カルマンフィルタの更新式と同じ形です。
+<details>
+<summary>
+採点の式（興味がある人だけ）
+</summary>
+<p><span class="math display">\[\sigma_S^2=w^{\mathsf
+T}\Big(B-BH_S^{\mathsf T}(H_SBH_S^{\mathsf
+T}+R)^{-1}H_SB\Big)w\]</span></p>
+<p><span class="math inline">\(w\)</span> ＝反り A−O
+に対する5点温度の熱感度 (0.47, −0.65, 0.60, 0.04, −0.46) µm/K、 <span
+class="math inline">\(B\)</span> ＝5点の温度のばらつき（共分散）、 <span
+class="math inline">\(H_S\)</span> ＝候補 <span
+class="math inline">\(S\)</span> を測る演算子、 <span
+class="math inline">\(R\)</span> ＝センサのノイズ（0.3 µm）。
+括弧の中はカルマンフィルタの更新式そのもので、「測った後に残る温度のあいまいさ」です。
 それを <span class="math inline">\(w\)</span>
-ではさむと、「残る<strong>反りの</strong>あいまいさ」になります。</p>
-<p><strong>温度2点（P2＋P0）だけのとき、 <span
-class="math inline">\(\sigma=1.186\)</span> µm</strong>
-でした。反りの振幅が 2.74 µm
-なので、半分近く分かっていない状態です。</p>
-<h4 id="手順を1点ずつ">手順を1点ずつ</h4>
-<figure>
-<img src="img/disp_selection_steps.png" alt="変位2点の選び方" />
-<figcaption aria-hidden="true">変位2点の選び方</figcaption>
-</figure>
-<p><em>左・中：候補ごとの <span class="math inline">\(\sigma\)</span>
-（上面を真上から見た図、 <span class="math inline">\(U_z\)</span>
-を測る場合）。色が薄いほど良い候補。 右： <span
-class="math inline">\(\sigma\)</span>
-が1点足すごとに下がる様子。</em></p>
-<p><strong>1点目</strong>：A・O の近く（12 mm 以内）を除いた
-<strong>14,754 個の候補すべて</strong>について <span
-class="math inline">\(\sigma\)</span> を計算し、最小の点を選びます。</p>
+ではさむと「残る<strong>反りの</strong>あいまいさ」になります。</p>
+</details>
+<h4 id="ステップ31位を選ぶ1点目">ステップ3：1位を選ぶ（1点目）</h4>
+<p>14,754 通りの採点結果を小さい順に並べます。</p>
 <table>
 <thead>
 <tr class="header">
-<th></th>
+<th>順位</th>
 <th>候補</th>
 <th style="text-align: right;"><span
 class="math inline">\(\sigma\)</span></th>
@@ -797,43 +829,49 @@ class="math inline">\(\sigma\)</span></th>
 </thead>
 <tbody>
 <tr class="odd">
-<td>1位</td>
-<td><strong>(9.7, −36.2, 100.5) の <span
+<td><strong>1位</strong></td>
+<td><strong>(9.7, −36.2, 100.5) mm の <span
 class="math inline">\(U_x\)</span></strong></td>
 <td style="text-align: right;"><strong>0.347 µm</strong></td>
 </tr>
 <tr class="even">
 <td>2位</td>
-<td>(9.7, 36.2, 100.5) の <span class="math inline">\(U_x\)</span></td>
+<td>(9.7, <strong>+36.2</strong>, 100.5) mm の <span
+class="math inline">\(U_x\)</span></td>
 <td style="text-align: right;">0.347 µm</td>
 </tr>
 <tr class="odd">
 <td>3位</td>
-<td>(14.4, −34.6, 100.5) の <span
+<td>(14.4, −34.6, 100.5) mm の <span
 class="math inline">\(U_x\)</span></td>
 <td style="text-align: right;">0.347 µm</td>
 </tr>
 <tr class="even">
-<td>中央値</td>
+<td>…（中央値）</td>
 <td>―</td>
 <td style="text-align: right;">1.026 µm</td>
 </tr>
 <tr class="odd">
 <td>最下位</td>
-<td>(37.5, 0, 0) の <span class="math inline">\(U_y\)</span></td>
-<td style="text-align: right;">1.186 µm（測らないのと同じ）</td>
+<td>(37.5, 0, 0) mm の <span class="math inline">\(U_y\)</span></td>
+<td style="text-align: right;">1.186 µm ＝ 測らないのと同じ</td>
 </tr>
 </tbody>
 </table>
-<p>1.186 µm → <strong>0.347
-µm</strong>。1本測るだけで、あいまいさが約3分の1になりました。</p>
-<p><strong>2点目</strong>：<strong>1点目を測った前提で</strong> <span
-class="math inline">\(\sigma\)</span>
-を全候補について計算し直し、また最小を選びます。</p>
+<p>1位を採用します。これで 1.186 → <strong>0.347
+µm</strong>。1本測るだけで3分の1以下になりました。</p>
+<h4
+id="ステップ4採点をやり直して2点目を選ぶ">ステップ4：<strong>採点をやり直して</strong>、2点目を選ぶ</h4>
+<p>ここが肝心です。<strong>2位をそのまま選んではいけません。</strong></p>
+<p>2位は (9.7, <strong>+36.2</strong>, 100.5) で、1位とは y
+の符号が違うだけの<strong>ほぼ同じ場所</strong>です。
+1点目で分かったことと同じことしか分からないので、足しても意味がありません。</p>
+<p>そこで、<strong>1点目を測ったことにして、14,753
+通りを採点し直します</strong>。</p>
 <table>
 <thead>
 <tr class="header">
-<th></th>
+<th>順位</th>
 <th>候補</th>
 <th style="text-align: right;"><span
 class="math inline">\(\sigma\)</span></th>
@@ -841,48 +879,69 @@ class="math inline">\(\sigma\)</span></th>
 </thead>
 <tbody>
 <tr class="odd">
-<td>1位</td>
-<td><strong>(−34.6, 14.4, 100.5) の <span
+<td><strong>1位</strong></td>
+<td><strong>(−34.6, 14.4, 100.5) mm の <span
 class="math inline">\(U_z\)</span></strong></td>
 <td style="text-align: right;"><strong>0.256 µm</strong></td>
 </tr>
 <tr class="even">
 <td>2位</td>
-<td>(−36.2, 9.7, 100.5) の <span class="math inline">\(U_z\)</span></td>
+<td>(−36.2, 9.7, 100.5) mm の <span
+class="math inline">\(U_z\)</span></td>
 <td style="text-align: right;">0.256 µm</td>
 </tr>
 <tr class="odd">
-<td>3位</td>
-<td>(−32.5, 18.7, 100.5) の <span
-class="math inline">\(U_z\)</span></td>
-<td style="text-align: right;">0.257 µm</td>
-</tr>
-<tr class="even">
-<td>中央値</td>
+<td>…（中央値）</td>
 <td>―</td>
 <td style="text-align: right;">0.330 µm</td>
 </tr>
 </tbody>
 </table>
-<p>0.347 µm → <strong>0.256 µm</strong>。</p>
-<h4 id="点ずつ足すのがなぜ大事か">「1点ずつ足す」のがなぜ大事か</h4>
-<p><strong>2点目の計算をやり直すのが要点です。</strong>
-1点目を測った後は「まだ分かっていないこと」が変わるので、候補の良し悪しも変わります。</p>
-<p>図の左（1点目）と中（2点目）を見比べると、<strong>良い候補の場所が移っています</strong>。</p>
-<ul>
-<li>1点目のとき：上面の −y 側・+y 側（薄い色）が良い。</li>
-<li>2点目のとき：1点目を測った後なので、<strong>ヒータの反対側（−x
-側）</strong>が良くなる。</li>
-</ul>
-<p>やり直さずに「1位と2位をそのまま選ぶ」と、2位は1位のすぐ隣（(9.7,
-36.2,
-100.5)）なので、<strong>同じことを2回測る</strong>ことになり、あまり改善しません。</p>
+<p>0.347 → <strong>0.256 µm</strong>。これで2点決まりました。</p>
+<h4
+id="採点し直すと良い場所が変わる">採点し直すと、良い場所が変わる</h4>
+<figure>
+<img src="img/disp_selection_steps.png" alt="変位2点の選び方" />
+<figcaption aria-hidden="true">変位2点の選び方</figcaption>
+</figure>
+<p><em>左＝1点目を選ぶときの採点（色が薄いほど良い）、中＝1点目を測った前提で採点し直したとき、右＝
+<span class="math inline">\(\sigma\)</span> が下がる様子。</em></p>
+<p>左と中を見比べてください。<strong>良い場所（薄い色）が移動しています。</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>良い場所</th>
+<th>なぜ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1点目のとき</td>
+<td>上面の ±y 側</td>
+<td>ヒータ側と反対側の両方の影響を受ける</td>
+</tr>
+<tr class="even">
+<td>2点目のとき</td>
+<td><strong>ヒータの反対側（−x 側）</strong></td>
+<td>1点目で分からなかった「反対側の情報」が欲しくなる</td>
+</tr>
+</tbody>
+</table>
+<h4 id="まとめ">まとめ</h4>
 <blockquote>
-<p>式が難しければ、こう考えてください。
-<strong>「いま分かっていないことを、いちばん多く教えてくれる点を1つ選ぶ。選んだら、何が分かっていないかを数え直して、また1つ選ぶ。」</strong></p>
+<p><strong>やったこと</strong>：候補 14,754
+通りを全部採点して1位を選ぶ。選んだら採点をやり直して、また1位を選ぶ。</p>
+<p><strong>考え方</strong>：いま分かっていないことを、いちばん多く教えてくれる点を選ぶ。選んだら「何が分かっていないか」を更新して、また選ぶ。</p>
 </blockquote>
-<p><strong>ここまで測定値は一切使っていません。</strong>
-机上の計算だけで場所が決まります。</p>
+<p><strong>ここまで測定値は一切使っていません。</strong> FrontISTR
+の計算と ROM の計算だけで、机上で場所が決まります。
+本当に当たるかは、このあと同化を回して確かめます。</p>
 <h3 id="結果">結果</h3>
 <figure>
 <img src="img/disp_elsewhere_predict_AO.png"
@@ -957,10 +1016,32 @@ alt="温度分布と熱変形の3Dアニメーション" />
 <figcaption
 aria-hidden="true">温度分布と熱変形の3Dアニメーション</figcaption>
 </figure>
-<p><em>左＝真値、中＝温度2点のみ、右＝温度2点＋別の場所の変位2点（A・O
+<p><em>左＝真値、中＝温度2点だけ、右＝温度2点＋変位2点（A・O
 は一度も測らない）。 <strong>色＝温度、形＝熱変形</strong>（790
-倍に誇張）。赤球＝温度センサ、緑球＝観測した変位2点、黒球＝評価点
-A・O。seed 20260913。</em></p>
+倍に誇張）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>印</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>●赤い球</strong></td>
+<td>温度センサ（P2・P0。3枚とも共通）</td>
+</tr>
+<tr class="even">
+<td><strong>■緑の立方体</strong></td>
+<td>変位計（右のパネルにだけ現れる。選定した2点）</td>
+</tr>
+<tr class="odd">
+<td><strong>●黒い球</strong></td>
+<td>評価点 A・O（<strong>一度も測らない</strong>。3枚とも共通）</td>
+</tr>
+</tbody>
+</table>
+<p>（seed 20260913）</p>
 <p>形と色で、何が起きているか一目で分かります。例えば <span
 class="math inline">\(t=150\)</span> 秒では</p>
 <table>
