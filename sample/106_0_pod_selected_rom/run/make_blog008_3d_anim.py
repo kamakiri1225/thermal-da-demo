@@ -26,7 +26,7 @@ N_ENS=60; SIG_T=0.30; SIG_U=0.30; INFL=1.02; SEED=20260913
 TN=[2,0]
 SEL=[((0.0097,-0.0362,0.1005),0),((-0.0346,0.0144,0.1005),2)]
 A_XYZ=(0.028,0.0,0.1005); O_XYZ=(-0.028,0.0,0.1005)
-EXAG=None          # 変形の誇張倍率（最大変位が5 mmになるよう自動設定）
+EXAG=None          # 変形の誇張倍率（最大変位が 12 mm になるよう自動設定）
 
 
 def main():
@@ -69,7 +69,7 @@ def main():
     # 誇張倍率：全フレームの最大変位が 5 mm に見えるよう自動設定
     global EXAG
     mx=max(np.abs(dispall(x)).max() for arr in (Ttr,tOnly,tDisp) for x in arr)
-    EXAG=0.005/mx
+    EXAG=0.012/mx
     print(f"[anim] DA done. 最大変位 {mx*1e6:.2f} µm → 誇張倍率 {EXAG:.0f}倍",flush=True)
 
     import pyvista as pv, vtk
@@ -99,7 +99,7 @@ def main():
             else:                 # 評価点：黒い球（測らない）
                 pl.add_mesh(pv.Sphere(radius=r0,center=q0),color=c0)
         pl.camera_position=[(0.26,-0.24,0.21),(0,0,0.05),(0,0,1)]
-        pl.set_background("white"); pl.camera.zoom(1.5)
+        pl.set_background("white"); pl.camera.zoom(1.35)
         im=pl.screenshot(return_img=True); pl.close()
         m=np.any(im[...,:3]<246,axis=-1); ys,xs=np.where(m)
         if ys.size==0: return im          # 全部白なら切り取らずそのまま返す
