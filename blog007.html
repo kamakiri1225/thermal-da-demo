@@ -703,9 +703,11 @@ alt="ROM 単体と OpenFOAM の比較（間欠加熱）" />
 <figcaption aria-hidden="true">ROM 単体と OpenFOAM
 の比較（間欠加熱）</figcaption>
 </figure>
-<p><em>点＝OpenFOAM、線＝ROM。左＝ヒータの ON/OFF
-を正しく与えた場合、右＝「0〜300 秒に一定」と決め打ちしたまま。
-下段はその差で、帯は温度計のノイズ ±0.3 K。</em></p>
+<p><em>太い薄い線＝OpenFOAM、細い破線＝ROM（同じ色が同じ点）。<strong>左＝ヒータの
+ON/OFF を OpenFOAM と同じ（0〜150 秒・300〜450 秒）に与えた
+ROM</strong>：破線が太い線の上にぴったり乗っている＝合っている。右＝比較のため、ON/OFF
+を与えず「0〜300 秒に一定」と決め打ちしたままの ROM：150
+秒以降で外れる。下段はその差で、帯は温度計のノイズ ±0.3 K。</em></p>
 <table>
 <thead>
 <tr class="header">
