@@ -1,4 +1,4 @@
-"""観測データをどう作り、どう同化に使うかの手続きを1枚の流れ図にする.
+"""観測データをどう作り、どうデータ同化に使うかの手続きを1枚の流れ図にする.
 
 左  : 観測データの作り方（双子実験）。真値にノイズを載せて y を作る
 右  : 予報観測 Yf の作り方（メンバーごとに温度→変位を計算）
@@ -69,7 +69,7 @@ def main():
     ax.text(0.50,0.030,"ループの中で FrontISTR は一度も呼ばない（$D$ は事前計算）",
             ha="center",fontsize=17,color=GRAY,weight="bold")
 
-    fig.suptitle("観測データの作り方と、同化での使い方",fontsize=26,weight="bold",y=0.995)
+    fig.suptitle("観測データの作り方と、データ同化での使い方",fontsize=26,weight="bold",y=0.995)
     fig.tight_layout(rect=[0,0,1,0.965])
     o=os.path.join(IMG,"obs_pipeline.png"); fig.savefig(o,dpi=110); plt.close(fig)
     print("wrote",o)

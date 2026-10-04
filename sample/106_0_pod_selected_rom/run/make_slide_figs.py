@@ -145,7 +145,7 @@ def main():
 
 
 def da_cycle_slide():
-    """⑦ 同化の1サイクル（スライド用。①〜④の4箱だけを大きな文字で）"""
+    """⑦ データ同化の1サイクル（スライド用。①〜④の4箱だけを大きな文字で）"""
     from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
     fig=plt.figure(figsize=(14,6.0)); ax=fig.add_axes([0,0,1,1]); ax.axis("off")
     ax.text(0.5,0.94,"ROM は 2 秒刻みで進め、30 秒ごとに補正する（600 秒で 20 回）",ha="center",
