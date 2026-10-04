@@ -157,6 +157,11 @@ def build():
             if src.exists():
                 shutil.copy2(src, OUT / rel)
 
+    stale_pdfs = [md for md in mds if (DOCS / "pdf" / (md.name[:8] + ".pdf")).exists()
+                  and (DOCS / "pdf" / (md.name[:8] + ".pdf")).stat().st_mtime < md.stat().st_mtime]
+    pdf_note = ('<p class="note">PDFには更新前の記事が含まれます。最新の説明は下のHTML記事を読んでください。</p>'
+                if stale_pdfs else "")
+
     cards = "".join(
         f'<a class="card" href="{s.replace("_","")}.html"><b>{TITLES[s]}</b>'
         f'<p>{LEAD[s]}</p>'
@@ -169,7 +174,7 @@ def build():
         f'<h1>熱データ同化 研究ノート</h1>'
         f'<p class="note">このページは<b>あなたのPCの中だけ</b>で動いています'
         f'（<code>{OUT}</code>）。インターネットには公開されていません。</p>'
-        f'{cards}'
+        f'{pdf_note}{cards}'
         f'<a class="card" href="posters.html"><b>学会発表ポスター（4件）</b>'
         f'<p>オープンCAE／計算工学／計算力学／精密工学。</p>'
         f'<p class="sub">PDF: <a href="pdf/posters.pdf">posters.pdf</a></p></a>'
