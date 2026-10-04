@@ -1001,6 +1001,90 @@ class="math inline">\(h\)</span>
 <p>（真値は <span class="math inline">\(T\)</span> ＝ 294.26, 293.32,
 294.81, 293.47, 293.18 K、 <span class="math inline">\(q\)</span> ＝ 1、
 <span class="math inline">\(h\)</span> ＝ 0.0154）</p>
+<h4
+id="変位は状態に入っていない-それで正しい">変位は「状態」に入っていない
+― それで正しい</h4>
+<p>上の式の左辺・右辺の最初のベクトル（状態）には、<strong>変位がありません。</strong>
+変位が入っているのは、右端の「ずれ」の3・4行目と、 <span
+class="math inline">\(K\)</span> の3・4列目だけです。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>変位はどこにあるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>状態 <span class="math inline">\(z\)</span>
+（左辺、右辺の最初のベクトル）</td>
+<td><strong>入れない</strong>。 <span class="math inline">\(T_0\sim
+T_4,\ q,\ h\)</span> の7つだけ</td>
+</tr>
+<tr class="even">
+<td>ずれ（右端の 4×1）</td>
+<td><strong>3・4行目</strong>＝変位計 S1・S2 の実測 − 予想</td>
+</tr>
+<tr class="odd">
+<td>換算表 <span class="math inline">\(K\)</span> （7×4）</td>
+<td><strong>3・4列目</strong>＝変位のずれ 1 µm
+あたり、7つをどれだけ直すか</td>
+</tr>
+</tbody>
+</table>
+<p>変位を状態に入れないのは、<strong>変位は5点の温度から一意に決まる</strong>からです（線形の熱弾性）。</p>
+<p><span class="math display">\[
+u = \bar u + W\,\big(T_P - \bar T_P\big)
+\]</span></p>
+<p>状態に変位も入れると、温度と変位が別々に直されて食い違うおそれがあります。
+そこで状態には温度だけを持たせ、<strong>変位は、直した後の5点温度から計算し直します。</strong></p>
+<p>1回目の値で確かめます（ <span class="math inline">\(T_P^{a}-\bar
+T_P\)</span> ＝ −2.371, −2.203, −2.091, −3.001, −2.079 K）。</p>
+<p><span class="math display">\[
+\begin{aligned}
+u_{S1}^{a} &amp;= -1.738 + (-0.532)(-2.371) + (0.596)(-2.203) +
+(-0.763)(-2.091) + (0.286)(-3.001) + (0.290)(-2.079)\\
+&amp;= -1.738 + 1.261 - 1.313 + 1.595 - 0.858 - 0.603 = -1.655\
+\mu\mathrm{m}\\[4pt]
+u_{S2}^{a} &amp;= 2.505 + (-0.169)(-2.371) + (0.595)(-2.203) +
+(-0.309)(-2.091) + (0.427)(-3.001) + (0.666)(-2.079)\\
+&amp;= 2.505 + 0.401 - 1.311 + 0.646 - 1.281 - 1.385 = -0.425\
+\mu\mathrm{m}
+\end{aligned}
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>変位</th>
+<th style="text-align: right;">直す前の予想</th>
+<th
+style="text-align: right;"><strong>直した後に計算し直した値</strong></th>
+<th style="text-align: right;">実測</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位計 S1（ <span class="math inline">\(U_x\)</span> ）</td>
+<td style="text-align: right;">−2.312 µm</td>
+<td style="text-align: right;"><strong>−1.655 µm</strong></td>
+<td style="text-align: right;">−1.652 µm</td>
+</tr>
+<tr class="even">
+<td>変位計 S2（ <span class="math inline">\(U_z\)</span> ）</td>
+<td style="text-align: right;">+5.178 µm</td>
+<td style="text-align: right;"><strong>−0.425 µm</strong></td>
+<td style="text-align: right;">−0.443 µm</td>
+</tr>
+</tbody>
+</table>
+<p><strong>状態は温度しか直していないのに、変位も実測にほぼ一致しました。</strong>
+変位のずれを使って温度を直したので、直した温度から計算した変位が合うのは、この仕組みのとおりです。
+評価点 A・O など、観測していない場所の変位も同じ式（ <span
+class="math inline">\(W\)</span> の行を変えるだけ）で計算します。</p>
 <h4 id="q発熱と-h放熱はどうやって推定されるのか">q（発熱）と
 h（放熱）は、どうやって推定されるのか</h4>
 <p><strong>q の行だけを取り出すと、こういう計算です。</strong></p>
