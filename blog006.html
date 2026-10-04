@@ -263,13 +263,13 @@ id="toc-同化で毎回やること-流れタイミングなぜそれでよい�
 id="toc-サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
 1サイクルの4ステップ（例： <span class="math inline">\(t=0 \to
 30\)</span> 秒、1回目の補正）</a></li>
-<li><a href="#b-センサの読みを予想する-何をしているのか"
-id="toc-b-センサの読みを予想する-何をしているのか">3-3. (b)
+<li><a href="#センサの読みを予想する-何をしているのか"
+id="toc-センサの読みを予想する-何をしているのか">3-3. ②
 センサの読みを予想する ― 何をしているのか</a></li>
 <li><a
-href="#c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか"
-id="toc-c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
-(c) 補正 ― 代表点以外のセンサのずれを、どうやって ROM
+href="#補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか"
+id="toc-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+③ 補正 ― 代表点以外のセンサのずれを、どうやって ROM
 の5点に反映させるのか</a></li>
 <li><a href="#理論なぜ5点を直すだけで全体が直るのか"
 id="toc-理論なぜ5点を直すだけで全体が直るのか">3-5.
@@ -279,6 +279,9 @@ id="toc-なぜループの中で全セルを復元しなくてよいのか">3-6.
 なぜループの中で全セルを復元しなくてよいのか</a></li>
 <li><a href="#成り立つ条件" id="toc-成り立つ条件">3-7.
 成り立つ条件</a></li>
+<li><a href="#コードで確認する観測点以外の情報が代表5点qhへ入る手続き"
+id="toc-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
+コードで確認する：観測点以外の情報が、代表5点・Q・hへ入る手続き</a></li>
 </ul></li>
 <li><a href="#記号" id="toc-記号">4. 記号</a></li>
 <li><a href="#ステップ1状態-分からないものを7つ並べる"
@@ -682,8 +685,9 @@ class="math inline">\(h\)</span> の直す量に換算して直す →
 <img src="img/da_cycle_timeline.png" alt="データ同化の1サイクル" />
 <figcaption aria-hidden="true">データ同化の1サイクル</figcaption>
 </figure>
-<p><em>①600 秒の時間軸。赤線が補正のタイミング（30 秒ごと、20
-回）／②1サイクルの中身／③EnKF が直すものと、計算で出すもの。</em></p>
+<p><em>上＝時間軸（ROM は 2 秒刻み、補正は 30 秒ごとに 20
+回）／中＝1サイクルの例（①予報 → ②センサ値の予測 → ③EnKF で補正 →
+④次の予報へ）／下＝代表点以外の観測で代表5点を直せる理由。</em></p>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -740,18 +744,18 @@ class="math inline">\(h\)</span> の直す量に換算して直す →
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>(a) 予報</strong></td>
+<td><strong>① 予報</strong></td>
 <td>60 メンバーそれぞれを ROM で 30
 秒進める。計算するのは<strong>代表5点の温度だけ</strong></td>
 <td>60 メンバーの平均で P4 ＝ 298.03 K（真値 293.18 K）</td>
 </tr>
 <tr class="even">
-<td><strong>(b) 読みを予想</strong></td>
+<td><strong>② センサ値の予測</strong></td>
 <td>各メンバーについて「<strong>このメンバーの温度が正しいなら、センサは何を示すはずか</strong>」を計算する</td>
 <td>変位計2（代表点以外）の予想の平均 ＝ 5.178 µm</td>
 </tr>
 <tr class="odd">
-<td><strong>(c) 補正</strong></td>
+<td><strong>③ 補正</strong></td>
 <td>予想と実測の<strong>ずれ</strong>を、5点温度・ <span
 class="math inline">\(q\)</span> ・ <span
 class="math inline">\(h\)</span>
@@ -760,7 +764,7 @@ class="math inline">\(h\)</span>
 直す</strong></td>
 </tr>
 <tr class="even">
-<td><strong>(d) 次へ</strong></td>
+<td><strong>④ 次の予報へ</strong></td>
 <td>直した5点温度・ <span class="math inline">\(q\)</span> ・ <span
 class="math inline">\(h\)</span> が、<strong>次の ROM
 の初期値</strong>になる（ <span class="math inline">\(30 \to 60\)</span>
@@ -789,29 +793,29 @@ gappy-POD で復元 → 補正 → ROM」という理解との対応</h4>
 <tbody>
 <tr class="odd">
 <td>ROM で計算（代表5点）</td>
-<td><strong>そのとおり</strong>（(a)）</td>
+<td><strong>そのとおり</strong>（①）</td>
 </tr>
 <tr class="even">
 <td>gappy-POD で復元</td>
 <td><strong>センサの場所の分だけ</strong>計算する。全 20,696
-セルは復元しない（(b)）</td>
+セルは復元しない（②）</td>
 </tr>
 <tr class="odd">
 <td>データ同化で補正（代表5点も補正される）</td>
 <td><strong>そのとおり</strong>。直すのは5点温度と <span
 class="math inline">\(q\)</span> ・ <span
-class="math inline">\(h\)</span> の <strong>7つだけ</strong>（(c)）</td>
+class="math inline">\(h\)</span> の <strong>7つだけ</strong>（③）</td>
 </tr>
 <tr class="even">
 <td>ROM で計算 → 繰り返し</td>
 <td><strong>そのとおり</strong>。直した値から次の 30
-秒を予報する（(d)→(a)）</td>
+秒を予報する（④→①）</td>
 </tr>
 </tbody>
 </table>
 <p>全セルの温度・全節点の変位は、<strong>評価のときだけ</strong>、直した5点温度から計算します。ループの中で
 FrontISTR は呼びません。</p>
-<h3 id="b-センサの読みを予想する-何をしているのか">3-3. (b)
+<h3 id="センサの読みを予想する-何をしているのか">3-3. ②
 センサの読みを予想する ― 何をしているのか</h3>
 <p><strong>やっていることは「5点の温度のずれに、センサごとの重みを掛けて足す」だけです。</strong></p>
 <p>例として、メンバー1の <span class="math inline">\(t=30\)</span>
@@ -925,8 +929,8 @@ POD</strong>（§7-7）</td>
 1」という特別な場合にすぎません。
 だから、<strong>センサを代表点以外に置いても、扱いはまったく同じ</strong>です。</p>
 <h3
-id="c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
-(c) 補正 ― 代表点以外のセンサのずれを、どうやって ROM
+id="補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+③ 補正 ― 代表点以外のセンサのずれを、どうやって ROM
 の5点に反映させるのか</h3>
 <p>ここがいちばん大事なところです。4段階で説明します。数値は §3-2
 と同じ1回目（ <span class="math inline">\(t=30\)</span> 秒）です。</p>
@@ -1287,6 +1291,260 @@ K、発熱量を −11.15 W 直した。 -
 5点を直せば、全セルの温度も全節点の変位もそろって直る（重みを掛けて足すだけの関係だから）。</p>
 </blockquote>
 <p>以下、これを数式で1つずつ書きます。</p>
+<hr />
+<h3 id="コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
+コードで確認する：観測点以外の情報が、代表5点・Q・hへ入る手続き</h3>
+<p><strong>この節は一般的なEnKFの紹介ではなく、106のコードを確認した説明です。</strong>
+以下の2種類の計算を区別します。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>確認したファイル</th>
+<th>観測構成・この節で確認すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a
+href="../run/obs_points_not_limited_to_rom.py"><code>run/obs_points_not_limited_to_rom.py</code></a></td>
+<td>代表点以外の温度2セルも観測に使えること。変位観測は使わない</td>
+</tr>
+<tr class="even">
+<td><a
+href="../run/run_holdout_displacement_support.py"><code>run/run_holdout_displacement_support.py</code></a></td>
+<td>温度P2/P0＋高W点S1/S2の <span class="math inline">\(U_z\)</span>
+を使い、別のC/Dの変位を評価すること</td>
+</tr>
+<tr class="odd">
+<td><a href="../dacore/enkf.py"><code>dacore/enkf.py</code></a></td>
+<td>両方の計算で共通に使う、7変数のEnKF更新</td>
+</tr>
+<tr class="even">
+<td><a
+href="../dacore/rom_general.py"><code>dacore/rom_general.py</code></a></td>
+<td>更新後の温度・発熱量・放熱条件を使う、次のROM時間積分</td>
+</tr>
+</tbody>
+</table>
+<p>本記事の他の節にある <span class="math inline">\(U_x\)</span> と
+<span class="math inline">\(U_z\)</span>
+を用いた数値例とは観測構成が異なります。<strong>代表点以外の温度観測の試験と、変位を追加したholdout試験は別の実験</strong>であり、数値を混ぜません。</p>
+<h4 id="zは次のrom計算が読む60メンバー分の表">①
+Zは「次のROM計算が読む、60メンバー分の表」</h4>
+<p>コードの <code>Z</code>
+は60行×7列です。行はメンバー、列は代表5点の温度と2つのパラメータです。</p>
+<p><span class="math display">\[
+Z=
+\begin{bmatrix}
+T_0^{(1)}&amp;T_1^{(1)}&amp;T_2^{(1)}&amp;T_3^{(1)}&amp;T_4^{(1)}&amp;q^{(1)}&amp;h^{(1)}\\
+T_0^{(2)}&amp;T_1^{(2)}&amp;T_2^{(2)}&amp;T_3^{(2)}&amp;T_4^{(2)}&amp;q^{(2)}&amp;h^{(2)}\\
+\vdots&amp;\vdots&amp;\vdots&amp;\vdots&amp;\vdots&amp;\vdots&amp;\vdots\\
+T_0^{(60)}&amp;T_1^{(60)}&amp;T_2^{(60)}&amp;T_3^{(60)}&amp;T_4^{(60)}&amp;q^{(60)}&amp;h^{(60)}
+\end{bmatrix}.
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>列（Pythonは0始まり）</th>
+<th>内容</th>
+<th>単位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Z[:, :5]</code></td>
+<td>代表5点の温度</td>
+<td>K</td>
+</tr>
+<tr class="even">
+<td><code>Z[:, 5]</code></td>
+<td>発熱倍率 <span class="math inline">\(q=\texttt{q\_scale}\)</span>
+。発熱量は <span class="math inline">\(Q=15q\)</span> W</td>
+<td>無次元</td>
+</tr>
+<tr class="odd">
+<td><code>Z[:, 6]</code></td>
+<td><span class="math inline">\(h=h_{\mathrm{ROM}}\)</span>
+。各ノード共通の放熱コンダクタンス</td>
+<td>W/K</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(h\)</span> は表面熱伝達率［W/(m²
+K)］ではありません。30秒まで予報した直後なら、この表の温度は<strong>30秒の補正前温度</strong>です。</p>
+<h4 id="代表点以外のセンサは観測予報に入れる">②
+代表点以外のセンサは「観測予報」に入れる</h4>
+<p>代表5点を取り出す行列を <span class="math inline">\(P\)</span>
+、固定したPOD基底を <span class="math inline">\(\Phi\)</span>
+、セルごとの時間平均温度場を <span
+class="math inline">\(\overline{\mathbf T}\)</span>
+とします。代表5点温度 <span class="math inline">\(\mathbf
+T_r^{(m)}\)</span> から、任意の観測セル <span
+class="math inline">\(s\)</span> の予測温度は、</p>
+<p><span class="math display">\[
+T_{s,f}^{(m)}
+=\overline T_s
++\Phi_{s,:}(P\Phi)^+
+\left(\mathbf T_r^{(m)}-P\overline{\mathbf T}\right)
+\]</span></p>
+<p>で求めます。上付き <span class="math inline">\(+\)</span>
+は擬似逆行列、 <span class="math inline">\(f\)</span>
+は補正前を表します。</p>
+<p><code>obs_points_not_limited_to_rom.py</code>
+の代表点外の観測予報は、実際に次の式です。</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>UPp <span class="op">=</span> np.linalg.pinv(U[pod, :])</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    mean[c] <span class="op">+</span> (U[c] <span class="op">@</span> UPp) <span class="op">@</span> (Z[:, :NPT] <span class="op">-</span> mean[pod]).T</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> c <span class="kw">in</span> idx</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span></code></pre></div>
+<p><code>idx</code>
+は観測セル番号です。<strong>センサ位置の温度を8個目の状態として追加せず、60メンバーの観測予報
+<code>Yf</code> に入れます。</strong>
+観測セル分だけを計算できるので、同化のたびに全20,696セルを復元する必要はありません。</p>
+<p>変位のholdout試験では、FrontISTRの事前計算結果 <span
+class="math inline">\(\mathbf u_0,D\)</span> から、</p>
+<p><span class="math display">\[
+\mathbf u_f^{(m)}
+=\mathbf u_0+D(P\Phi)^+
+\left(\mathbf T_r^{(m)}-P\overline{\mathbf T}\right)
+\]</span></p>
+<p>を作ります。コードではS1/S2の2成分だけを温度P2/P0の予報と並べ、4成分の
+<code>Yf</code> にします。C/Dは評価専用で、観測に含めません。</p>
+<h4 id="共分散から観測との差-7変数の修正量を求める">③
+共分散から「観測との差 → 7変数の修正量」を求める</h4>
+<p><code>dacore/enkf.py</code>
+は、状態と観測予報の偏差から次を計算します。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>C_zy <span class="op">=</span> dZ.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>C_yy <span class="op">=</span> dY.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span>n_ens)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>innov <span class="op">=</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps) <span class="op">-</span> Yf</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>gain_T <span class="op">=</span> np.linalg.solve(C_yy <span class="op">+</span> R, C_zy.T)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> innov <span class="op">@</span> gain_T</span></code></pre></div>
+<p><code>dZ</code> と <code>dY</code>
+は、それぞれ60メンバー平均からの偏差です。この実験では計算前に、状態・観測予報の平均まわりの偏差を1.02倍しています。以下の更新式の予報値は、その処理後の値です。</p>
+<p>温度2点＋変位2点の場合の大きさは、</p>
+<p><span class="math display">\[
+\underbrace{Z_a}_{60\times7}
+=
+\underbrace{Z_f}_{60\times7}
++
+\underbrace{\mathrm{innov}}_{60\times4}
+\underbrace{K^{\mathsf T}}_{4\times7}.
+\]</span></p>
+<p><strong>最後の行で、温度の5列だけでなく、qの列とhの列も書き換えます。</strong>
+変位は観測成分であり、独立した変位状態を更新するわけではありません。</p>
+<h4 id="qhの補正で実際に何をしているか">④
+Q・hの補正で、実際に何をしているか</h4>
+<p>メンバー <span class="math inline">\(m\)</span> の4成分の差を、</p>
+<p><span class="math display">\[
+\mathbf r^{(m)}=
+\begin{bmatrix}r_{T_{P2}}^{(m)}&amp;r_{T_{P0}}^{(m)}&amp;r_{u_{S1}}^{(m)}&amp;r_{u_{S2}}^{(m)}\end{bmatrix}^{\mathsf
+T}
+=\mathbf y_{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\mathbf y_f^{(m)}
+\]</span></p>
+<p>とします。カルマンゲインの6行目（Pythonの行番号5）を <span
+class="math inline">\(K_{q,:}\)</span> 、7行目（行番号6）を <span
+class="math inline">\(K_{h,:}\)</span> とすると、</p>
+<p><span class="math display">\[
+q_a^{(m)}=q_f^{(m)}+\sum_{\ell=1}^{4}K_{q,\ell}r_\ell^{(m)},
+\qquad
+h_a^{(m)}=h_f^{(m)}+\sum_{\ell=1}^{4}K_{h,\ell}r_\ell^{(m)}.
+\]</span></p>
+<p>したがって、範囲制限前の発熱量の修正は、</p>
+<p><span class="math display">\[
+Q_a^{(m)}-Q_f^{(m)}
+=15\sum_{\ell=1}^{4}K_{q,\ell}r_\ell^{(m)}
+\]</span></p>
+<p>です。<strong>温度・変位の観測との差を、共分散で決まる係数に掛けて、発熱量と放熱条件の修正量にしています。</strong>
+熱収支からQ・hを別々に直接逆算する処理でも、毎回最小二乗法でROMを再校正する処理でもありません。</p>
+<p>係数を理解するため、温度センサ <span class="math inline">\(s\)</span>
+が1点だけの場合に限ると、</p>
+<p><span class="math display">\[
+K_{q,s}
+=\frac{\mathrm{cov}(q_f,T_{s,f})}
+{\mathrm{var}(T_{s,f})+\sigma_s^2},
+\qquad
+K_{h,s}
+=\frac{\mathrm{cov}(h_f,T_{s,f})}
+{\mathrm{var}(T_{s,f})+\sigma_s^2}.
+\]</span></p>
+<p><span class="math inline">\(\sigma_s^2\)</span>
+は観測誤差分散です。Qが大きいメンバーほど予測温度が高いなら、Qと温度の共分散は正になります。この条件で予測が観測より高ければ、Qを下げる方向の補正になります。hと温度の共分散が負なら、同じずれはhを上げる方向に働きます。</p>
+<p><strong>これは符号を説明する1点観測の例です。コードに「温度が高ければQを下げる」という条件分岐はありません。</strong>
+実際の複数観測では観測間の共分散も含めた行列計算で決まり、修正方向をこの例だけでは判断できません。</p>
+<p>同化ループでは、更新後に次の範囲制限を行います。</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">5</span>] <span class="op">=</span> np.clip(Z[:, <span class="dv">5</span>], <span class="dv">0</span>, <span class="dv">3</span>)       <span class="co"># Qは0〜45 W</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">6</span>] <span class="op">=</span> np.clip(Z[:, <span class="dv">6</span>], <span class="fl">.0001</span>, <span class="fl">.2</span>)  <span class="co"># hは0.0001〜0.2 W/K</span></span></code></pre></div>
+<h4 id="書き換えたzを次のromが読む">⑤ 書き換えたZを、次のROMが読む</h4>
+<p>呼び出し側の <code>Z = enkf_update(...)</code> で、補正後の表が
+<code>Z</code>
+に入ります。次の予報では、その表を次のように使います（holdout試験の呼び出し）。</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Z[:, :<span class="dv">5</span>] <span class="op">=</span> b.rg.integrate_ensemble(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    Z[:, :<span class="dv">5</span>], C, km, Z[:, <span class="dv">6</span>], Z[:, <span class="dv">5</span>], hn, ta, tb, <span class="fl">2.</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>例えば30秒の補正後なら、<code>ta=30</code>, <code>tb=60</code>
+です。</p>
+<table>
+<thead>
+<tr class="header">
+<th>次のROMへ渡すもの</th>
+<th>変わるもの</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>補正後の <code>Z[:, :5]</code></td>
+<td>30秒から出発する5点の初期温度</td>
+</tr>
+<tr class="even">
+<td>補正後の <code>Z[:, 5]</code></td>
+<td>次の区間で使用する発熱量 <span
+class="math inline">\(Q=15q\)</span></td>
+</tr>
+<tr class="odd">
+<td>補正後の <code>Z[:, 6]</code></td>
+<td>次の区間で使用する放熱の強さ</td>
+</tr>
+</tbody>
+</table>
+<p>ROMの式は、</p>
+<p><span class="math display">\[
+C_i\dot T_i=
+\sum_{j\ne i}K_{ij}(T_j-T_i)
++\delta_{i,i_{\mathrm{heat}}}\,15q\,\chi_{\mathrm{ON}}(t)
+-h(T_i-T_{\mathrm{air}})
+\]</span></p>
+<p>です。 <span class="math inline">\(C_i\)</span> は熱容量［J/K］、
+<span class="math inline">\(K_{ij}\)</span>
+は校正済みのノード間コンダクタンス［W/K］、 <span
+class="math inline">\(i_{\mathrm{heat}}\)</span>
+はヒータ入力ノードです。 <span
+class="math inline">\(\delta_{i,i_{\mathrm{heat}}}\)</span>
+はそのノードだけ1、それ以外0。 <span
+class="math inline">\(\chi_{\mathrm{ON}}\)</span> は <span
+class="math inline">\(t&lt;300\)</span> 秒で1、 <span
+class="math inline">\(t\ge300\)</span> 秒で0です。</p>
+<p><strong>温度の補正は「次の計算の出発点」に、Q・hの補正は「次の計算の発熱・放熱条件」に反映されます。</strong>
+Cとノード間Kはこの同化で更新しません。各メンバーのq・hは観測間では一定です。300秒以降はヒータ入力が0になりますが、推定しているq自体を0に設定するわけではありません。</p>
+<h4 id="更新すると正しく同定できるは別">⑥
+「更新する」と「正しく同定できる」は別</h4>
+<p>Qを下げることとhを上げることは、どちらも温度上昇を抑え得ます。観測の時刻歴に十分な違いが現れないと、両者を区別しにくくなります。</p>
+<p>したがって、<strong>Q・hを状態に入れれば自動的に同定できるわけではありません。</strong>
+観測予報との共分散が補正を伝える経路であり、観測情報が不足したりモデル誤差があったりすれば、温度・変位が合ってもQ・hには誤差が残り得ます。代表点以外の観測についても、使えることと良い配置であることは別です。</p>
 <hr />
 <h2 id="記号">4. 記号</h2>
 <table>
@@ -1669,11 +1927,11 @@ class="math inline">\(k\)</span> 列目を作る</td>
 </blockquote>
 <p>だけで <span class="math inline">\(D\)</span>
 が手に入ります（平均場で1回足して計 <strong>6回</strong>）。</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/run_da_compare.py の build_disp_operator より</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>uz_mean <span class="op">=</span> run_field(mean[near])                  <span class="co"># 1回目：平均の温度場 → ū</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])   <span class="co"># 2〜6回目：モードkを温度として入れる → D_k</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/run_da_compare.py の build_disp_operator より</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>uz_mean <span class="op">=</span> run_field(mean[near])                  <span class="co"># 1回目：平均の温度場 → ū</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    Dmode[:, k] <span class="op">=</span> run_field(Tref <span class="op">+</span> U[near, k])   <span class="co"># 2〜6回目：モードkを温度として入れる → D_k</span></span></code></pre></div>
 <p><code>run_field</code> の中身は、①<code>.cnt</code> に節点温度を書く
 → ②<code>fistr1</code> を実行 → ③変位を読む、の3つだけです。</p>
 <h4 id="どちらで考えてもよい">どちらで考えてもよい</h4>
@@ -2467,12 +2725,12 @@ class="math inline">\(U_z\)</span></strong></p>
 の式は一切変わりません。</strong></p>
 <p>メンバー <span class="math inline">\(m\)</span>
 の予報観測は、その一次式に自分の温度を入れるだけです。</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># メンバーごとの予報観測（run/disp_elsewhere_predict_AO.py より）</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    Z[:, TN],                                  <span class="co"># 温度2点：状態からそのまま取り出す</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    u0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mean[pod]) <span class="op">@</span> w,         <span class="co"># 変位：一次式で計算する</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># メンバーごとの予報観測（run/disp_elsewhere_predict_AO.py より）</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    Z[:, TN],                                  <span class="co"># 温度2点：状態からそのまま取り出す</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    u0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mean[pod]) <span class="op">@</span> w,         <span class="co"># 変位：一次式で計算する</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
 <p>あとは共分散 <span class="math inline">\(C_{zy}\)</span> とゲイン
 <span class="math inline">\(K\)</span>
 を作って更新するだけです（§9〜§11）。</p>
