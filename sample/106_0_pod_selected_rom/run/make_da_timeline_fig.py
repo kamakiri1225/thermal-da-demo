@@ -1,90 +1,93 @@
-"""データ同化の1サイクルが「いつ・何を」しているかを、時間軸つきで図解する.
+"""ROM代表点と観測位置の違い、観測から状態へ戻るEnKF更新を図解する。
 
-ROM（代表5点）で予報 → 観測点での予測値を作る（gappy-POD／熱感度 W の1行との内積）
-→ EnKF で 5点温度・Q・h を補正 → 補正後の値から次の予報、を 30 秒ごとに繰り返す。
-画面で読めるよう、文字は大きく・文は短くしている。
-
-出力: docs/img/da_cycle_timeline.png
 再現: python3 run/make_da_timeline_fig.py
+出力: docs/img/da_cycle_timeline.png / .svg
+画像だけを更新し、ブログ本文や解析結果には触れない。
 """
-from __future__ import annotations
-import os, sys
-import numpy as np
-HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
-sys.path.insert(0, ROOT)
+from pathlib import Path
+import sys
+ROOT = Path(__file__).absolute().parent.parent
+sys.path.insert(0, str(ROOT))
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-IMG=os.path.join(ROOT,"docs","img")
-NAVY="#0B2545"; BLUE="#2E6FD8"; RED="#C0392B"; GREEN="#1F9D62"; ORANGE="#E67E22"; GRAY="#8696a7"
+
+NAVY = '#17324f'
+BLUE = '#2463b4'
+GREEN = '#19764f'
+ORANGE = '#bd5b14'
+RED = '#b73434'
 
 
-def box(ax,x,y,w,h,title,body,fc,ec):
-    ax.add_patch(FancyBboxPatch((x,y),w,h,boxstyle="round,pad=0.01,rounding_size=0.02",
-                                fc=fc,ec=ec,lw=3,transform=ax.transAxes))
-    ax.text(x+w/2,y+h-0.06,title,transform=ax.transAxes,ha="center",va="top",fontsize=21,
-            fontweight="bold",color=ec)
-    ax.text(x+w/2,y+h/2-0.07,body,transform=ax.transAxes,ha="center",va="center",fontsize=18.5,
-            color="#1b2430",linespacing=1.5)
+def panel(ax, x, y, w, h, title, lines, color, fill):
+    ax.add_patch(FancyBboxPatch((x,y),w,h,boxstyle='round,pad=0.02,rounding_size=0.12',
+                              facecolor=fill,edgecolor=color,linewidth=2))
+    ax.text(x+.18,y+h-.22,title,ha='left',va='top',fontsize=18,color=color,weight='bold')
+    for offset,text,size in lines:
+        ax.text(x+.18,y+h-offset,text,ha='left',va='top',fontsize=size,color=NAVY,linespacing=1.5)
 
 
-def arrow(ax,x0,y0,x1,y1,c=NAVY):
-    ax.add_patch(FancyArrowPatch((x0,y0),(x1,y1),transform=ax.transAxes,arrowstyle="-|>",
-                                 mutation_scale=34,lw=3.5,color=c))
+def arrow(ax, start, end, color=NAVY):
+    ax.add_patch(FancyArrowPatch(start,end,arrowstyle='-|>',mutation_scale=20,
+                               linewidth=2.2,color=color,shrinkA=0,shrinkB=0))
 
 
 def main():
-    fig=plt.figure(figsize=(14,10.5))
+    fig,ax = plt.subplots(figsize=(20,12))
+    fig.subplots_adjust(left=.02,right=.98,bottom=.02,top=.98)
+    ax.set_xlim(0,20); ax.set_ylim(0,12); ax.axis('off')
+    ax.text(.2,11.8,'代表点以外の観測を、どうROMの補正に使うか',fontsize=27,weight='bold',color=NAVY,va='top')
+    ax.text(.2,11.13,'観測点の値をROMへ代入するのではなく、観測との差から「代表5点・Q・h」を更新する。',fontsize=18,color=NAVY)
 
-    # ---------- ① 600 秒の時間軸 ----------
-    ax=fig.add_axes([0.04,0.78,0.92,0.17])
-    ax.text(-30,1.75,"① 時間の流れ（0〜600 秒）",fontsize=22,fontweight="bold",color=NAVY,va="bottom")
-    ax.axvspan(0,300,ymin=.12,ymax=.62,color="#FDEBD0",alpha=.9)
-    ax.text(150,1.15,"ヒータ ON",ha="center",fontsize=17,color="#a0522d",fontweight="bold")
-    ax.plot([0,600],[0.5,0.5],color=GRAY,lw=3)
-    for t in np.arange(30,601,30):
-        ax.plot([t,t],[0.15,0.85],color=RED,lw=3.2)
-    ax.text(0,-0.25,"0",ha="center",va="top",fontsize=17)
-    for t in (300,600): ax.text(t,-0.25,f"{t} 秒",ha="center",va="top",fontsize=17)
-    ax.text(450,1.15,"赤線＝30 秒ごとに補正（20 回）",ha="center",fontsize=17,color=RED,fontweight="bold")
-    ax.set_xlim(-30,630); ax.set_ylim(-0.9,1.75); ax.axis("off")
+    # 上段: 予報と補正を同じ物理時刻として区別する。
+    ax.text(.2,10.55,'時間：ROMは2秒刻みで進める ／ 観測による補正は30秒ごと',fontsize=18,weight='bold',color=NAVY)
+    xs=[.9,4.0,7.1,10.2,13.3,16.4,19.3]
+    ax.plot([xs[0],xs[-1]],[9.88,9.88],color='#8696a7',lw=3)
+    for x,label in zip(xs,['0秒','30秒','60秒','90秒','…','300秒','600秒']):
+        ax.plot([x,x],[9.71,10.05],color=RED if label!='0秒' else NAVY,lw=2.5)
+        ax.text(x,9.47,label,ha='center',fontsize=16,color=NAVY)
+    ax.text(5.55,10.08,'補正 → 予報 → 補正',ha='center',fontsize=14,color=RED)
+    ax.text(.9,9.02,'0〜300秒：加熱　／　300〜600秒：冷却　／　30, 60, …, 600秒で計20回補正',fontsize=16,color=NAVY)
 
-    # ---------- ② 1 サイクル ----------
-    ax2=fig.add_axes([0.02,0.30,0.96,0.43]); ax2.axis("off")
-    ax2.text(0.01,1.02,"② 30 秒ごとの1サイクル（例：30 → 60 秒）",transform=ax2.transAxes,
-             fontsize=22,fontweight="bold",color=NAVY)
-    Y=0.20; H=0.72; W=0.225
-    box(ax2,0.010,Y,W,H,"(a) 予報","ROM で\n30 秒進める\n\n（5 点の温度\nだけ計算）","#eef3fb",BLUE)
-    box(ax2,0.258,Y,W,H,"(b) 読みを予想","このメンバーが\n正しいなら、\nセンサは何を\n示すはずか\n\n5 点の温度に\n重みを掛けて足す","#f2f8f4",GREEN)
-    box(ax2,0.506,Y,W,H,"(c) 補正","予想と実測の\nずれを、\n5 点温度・Q・h\nの直す量に\n換算して直す\n\n（換算表＝K）","#fff4e6",ORANGE)
-    box(ax2,0.754,Y,0.228,H,"(d) 次へ","直した 5 点温度\nと Q・h が、\n次の ROM の\n初期値になる","#fdeeec",RED)
-    for x0,x1 in [(0.236,0.256),(0.484,0.504),(0.732,0.752)]:
-        arrow(ax2,x0,Y+H/2,x1,Y+H/2)
-    yb=0.07
-    ax2.plot([0.87,0.87],[Y-0.005,yb],color=RED,lw=3.5,transform=ax2.transAxes)
-    ax2.plot([0.87,0.12],[yb,yb],color=RED,lw=3.5,transform=ax2.transAxes)
-    arrow(ax2,0.12,yb,0.12,Y-0.005,c=RED)
-    ax2.text(0.495,yb-0.10,"20 回くりかえす",transform=ax2.transAxes,ha="center",fontsize=19,
-             color=RED,fontweight="bold")
+    # センサ観測は計算とは別の入力。60秒の更新へ明示してつなぐ。
+    panel(ax,10.4,7.70,4.35,.98,'60秒の観測値',[(.50,'温度センサ・変位センサの値',16)],RED,'#fff1ee')
+    arrow(ax,(12.57,7.68),(12.57,6.91),RED)
+    ax.text(13.02,7.23,'同じ60秒で比較',fontsize=14,color=RED,va='center')
 
-    # ---------- ③ 状態と従属量 ----------
-    ax3=fig.add_axes([0.02,0.02,0.96,0.22]); ax3.axis("off")
-    ax3.text(0.01,0.92,"③ 直すもの と 計算で出すもの",transform=ax3.transAxes,
-             fontsize=22,fontweight="bold",color=NAVY,va="top")
-    ax3.add_patch(FancyBboxPatch((0.01,0.05),0.47,0.58,boxstyle="round,pad=0.01",fc="#fff4e6",
-                                 ec=ORANGE,lw=2.5,transform=ax3.transAxes))
-    ax3.text(0.245,0.50,"EnKF が直すもの",transform=ax3.transAxes,ha="center",fontsize=19,
-             fontweight="bold",color=ORANGE)
-    ax3.text(0.245,0.22,"代表 5 点の温度・Q・h\n（この 7 つだけ）",transform=ax3.transAxes,ha="center",
-             va="center",fontsize=18)
-    ax3.add_patch(FancyBboxPatch((0.52,0.05),0.465,0.58,boxstyle="round,pad=0.01",fc="#f2f8f4",
-                                 ec=GREEN,lw=2.5,transform=ax3.transAxes))
-    ax3.text(0.755,0.50,"5 点温度から計算で出すもの",transform=ax3.transAxes,ha="center",fontsize=19,
-             fontweight="bold",color=GREEN)
-    ax3.text(0.755,0.22,"代表点以外の温度（gappy-POD）\n変位（熱感度 W）",transform=ax3.transAxes,
-             ha="center",va="center",fontsize=18)
-    fig.savefig(os.path.join(IMG,"da_cycle_timeline.png"),dpi=130,facecolor="white"); plt.close(fig)
-    print("wrote docs/img/da_cycle_timeline.png")
+    y=3.43; h=3.45; w=4.35
+    panel(ax,.2,y,w,h,'① ROMで30 → 60秒を予報',[
+        (.78,'30秒で補正した状態から出発',16),
+        (1.37,'各メンバーのQ・hを使い、\n代表5点の温度を時間積分',17),
+        (2.63,'60メンバーそれぞれで計算',15)],BLUE,'#edf4ff')
+    panel(ax,5.3,y,w,h,'② 60秒のセンサ値を予測',[
+        (.78,'温度：gappy-PODで\n観測セルの温度を求める',17),
+        (1.81,'変位：FrontISTRで事前計算\nした応答から求める',17),
+        (2.90,'観測位置は代表5点以外も可',15)],GREEN,'#eef8f2')
+    panel(ax,10.4,y,w,h,'③ 60秒の状態をEnKFで補正',[
+        (.78,'観測 − 予測 ＝ 観測との差',17),
+        (1.42,'60メンバーの共分散から\nカルマンゲインKを求める',17),
+        (2.49,'K × 観測との差で\n代表5点・Q・hを更新',17)],ORANGE,'#fff4e6')
+    panel(ax,15.5,y,w,h,'④ 補正後から次の予報へ',[
+        (.78,'60秒の補正後の状態を保存',16),
+        (1.45,'代表5点温度 → 次の初期温度\nQ・h → 次の計算のパラメータ',16),
+        (2.58,'ROMで60 → 90秒を予報\n90秒の観測で再び補正',17)],BLUE,'#edf4ff')
+    for x in [4.57,9.67,14.77]:
+        arrow(ax,(x,5.14),(x+.68,5.14))
+    ax.text(.2,7.20,'1サイクルの例：30秒の補正後 → 60秒の補正 → 次の予報',fontsize=19,weight='bold',color=NAVY)
+
+    # 一番の疑問: センサのずれが代表点に戻る経路を独立表示。
+    panel(ax,.2,.98,19.65,2.0,'なぜ、代表点以外の観測で代表5点を直せるのか？',[
+        (.58,'各メンバーで「代表点の温度・Q・h」と「センサ位置の予測値」を対応させ、共分散を計算する。',17),
+        (1.02,'その関係から、各センサのずれを7変数の補正量へ変換する係数K（7行 × 観測数の列）を作る。',17),
+        (1.47,'補正後の状態 ＝ 補正前の状態 ＋ K ×（観測 ＋ メンバーごとの観測摂動 − 予測）',17)],ORANGE,'#fff9ef')
+    ax.text(.2,.52,'更新する状態：温度5個・q_scale・h_ROM の7変数（Q = 15 q_scale）。h_ROMは放熱コンダクタンス［W/K］。',fontsize=14,color=NAVY)
+    ax.text(.2,.17,'注：全温度場や変位を直接更新するのではない。補正は同じ時刻で行い、物理時間を進めない。',fontsize=14,color=NAVY)
+    img=ROOT/'docs'/'img'
+    fig.savefig(img/'da_cycle_timeline.png',dpi=160,facecolor='white')
+    fig.savefig(img/'da_cycle_timeline.svg',facecolor='white')
+    plt.close(fig)
+    print('Updated docs/img/da_cycle_timeline.png and .svg')
 
 
-if __name__=="__main__": main()
+if __name__ == '__main__':
+    main()
