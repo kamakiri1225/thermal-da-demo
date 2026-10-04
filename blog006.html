@@ -1233,6 +1233,209 @@ class="math inline">\(P^a=(I-KH)P^f\)</span>
 を、毎サイクル 60 メンバーの散らばりで数え直しているだけです（OI
 は同じ式で <span class="math inline">\(B\)</span> を固定して使う）。</p>
 <h4
+id="参考データ同化の手法の比較-線形か非線形かガウスを仮定するか">参考：データ同化の手法の比較
+― 線形か非線形か、ガウスを仮定するか</h4>
+<p>上の導出は、どの手法でも「1回の補正」の部分はほぼ共通です。手法の違いは、<strong>モデルや観測が非線形のときにどう扱うか</strong>、<strong>予報の共分散をどう作るか</strong>、<strong>ガウス分布を仮定するか</strong>にあります。</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>手法</th>
+<th>分類</th>
+<th>システムモデル（予報）</th>
+<th>観測モデル</th>
+<th>ガウス分布の仮定</th>
+<th>予報の共分散</th>
+<th>必要なもの</th>
+<th>計算の重さ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>OI</strong>（最適内挿）</td>
+<td>逐次（1時刻ずつ）</td>
+<td>何でもよい（共分散の計算には使わない）</td>
+<td>線形</td>
+<td>する</td>
+<td><span class="math inline">\(B\)</span> を<strong>固定</strong></td>
+<td><span class="math inline">\(B\)</span> を事前に決める</td>
+<td>とても軽い</td>
+</tr>
+<tr class="even">
+<td><strong>3D-Var</strong>（3次元変分法）</td>
+<td>変分（1時刻）</td>
+<td>何でもよい（同上）</td>
+<td>非線形でもよい（反復で <span class="math inline">\(J\)</span>
+を最小化）</td>
+<td>する</td>
+<td><span class="math inline">\(B\)</span> を<strong>固定</strong></td>
+<td>観測演算子の微分（接線形・随伴）</td>
+<td>軽い〜中</td>
+</tr>
+<tr class="odd">
+<td><strong>4D-Var</strong>（4次元変分法）</td>
+<td>変分（時間窓全体）</td>
+<td><strong>非線形でもよい</strong></td>
+<td>非線形でもよい</td>
+<td>する</td>
+<td>窓の始めに <span class="math inline">\(B\)</span>
+。窓の中はモデルで伝わる</td>
+<td><strong>モデルの接線形・随伴コード</strong></td>
+<td>重い（開発も大変）</td>
+</tr>
+<tr class="even">
+<td><strong>KF</strong>（カルマンフィルタ）</td>
+<td>逐次</td>
+<td><strong>線形のみ</strong></td>
+<td><strong>線形のみ</strong></td>
+<td>する（線形・ガウスなら厳密に最適）</td>
+<td><span class="math inline">\(P^f=MP^aM^{\mathsf T}+Q\)</span>
+で毎回作り直す</td>
+<td>モデルの行列 <span class="math inline">\(M\)</span></td>
+<td>状態が多いと重い（ <span class="math inline">\(n\times n\)</span>
+の行列）</td>
+</tr>
+<tr class="odd">
+<td><strong>EKF</strong>（拡張カルマンフィルタ）</td>
+<td>逐次</td>
+<td>非線形（毎回ヤコビアンで線形化）</td>
+<td>非線形（同上）</td>
+<td>する</td>
+<td>線形化した <span class="math inline">\(M\)</span> で <span
+class="math inline">\(P\)</span> を伝える</td>
+<td>ヤコビアン（微分）</td>
+<td>状態が多いと重い。非線形が強いと発散することがある</td>
+</tr>
+<tr class="even">
+<td><strong>EnKF</strong>（アンサンブルカルマンフィルタ）</td>
+<td>逐次</td>
+<td><strong>非線形でもよい</strong>（メンバーをそのまま進める）</td>
+<td><strong>非線形でもよい</strong>（メンバーごとに予想を計算）</td>
+<td><strong>補正のときだけ</strong>する（平均と共分散だけ使う）</td>
+<td><strong>メンバーの散らばりから毎回数える</strong></td>
+<td>微分不要。モデルを <span class="math inline">\(N\)</span>
+回回す</td>
+<td>モデル <span class="math inline">\(N\)</span> 回分（今回 60
+回）</td>
+</tr>
+<tr class="odd">
+<td><strong>PF</strong>（粒子フィルタ）</td>
+<td>逐次</td>
+<td>非線形でもよい</td>
+<td>非線形でもよい</td>
+<td><strong>しない</strong>（どんな分布でもよい）</td>
+<td>共分散を使わず、粒子の重みで分布を表す</td>
+<td>微分不要</td>
+<td>状態が多いと、必要な粒子数が急に増える（次元の呪い）</td>
+</tr>
+</tbody>
+</table>
+<p><em>EnKF の派生として、乱数を足さずに補正する
+ETKF、近くの観測だけを使う LETKF、同じ観測を何回かに分けて入れる ES-MDA
+などがあります。</em></p>
+<p><strong>今回の問題に当てはめると</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>今回の問題</th>
+<th>手法選びへの影響</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>システムモデル（ROM）</td>
+<td><strong>非線形</strong>（放熱 <span
+class="math inline">\(h\,(T-T_{\mathrm{air}})\)</span>
+が状態どうしの掛け算）</td>
+<td>KF はそのままでは使えない</td>
+</tr>
+<tr class="even">
+<td>観測モデル</td>
+<td><strong>線形</strong>（ <span class="math inline">\(H\)</span>
+は定数の重みの行。§3-2 ②）</td>
+<td>どの手法でも扱える</td>
+</tr>
+<tr class="odd">
+<td>分布</td>
+<td>熱伝導は線形に近く、誤差もガウス分布とみなせる</td>
+<td>PF の「非ガウスに強い」利点が活きない</td>
+</tr>
+<tr class="even">
+<td>状態の数</td>
+<td>ROM で7つ（元の温度場は約 20,000 セル）</td>
+<td>7つなら軽い。20,000 なら PF は粒子が足りない</td>
+</tr>
+<tr class="odd">
+<td>推定したいもの</td>
+<td>温度に加えて、発熱 <span class="math inline">\(q\)</span> と放熱
+<span class="math inline">\(h\)</span> も</td>
+<td>状態に入れて、共分散で直せる手法がよい</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>手法</th>
+<th>今回の扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>EnKF</strong></td>
+<td><strong>採用</strong>。非線形の ROM
+をそのまま回せる、微分が要らない、 <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> を状態に入れて直せる。ROM が 31 ms
+なので 60 メンバーでも軽い</td>
+</tr>
+<tr class="even">
+<td>OI</td>
+<td>仕組みを説明するために使った（<a
+href="blog_002_oi_data_assimilation.md">blog_002</a>）。 <span
+class="math inline">\(B\)</span> を固定するので <span
+class="math inline">\(Q\)</span> が当たりにくい（実ソルバで 8.9 W
+止まり）</td>
+</tr>
+<tr class="odd">
+<td>PF</td>
+<td>試したが<strong>不採用</strong>。400 粒子でも有効な粒子が実質 1
+個になり、誤差が EnKF の約 6 倍（<a
+href="blog_003_ensemble_kalman_filter.md">blog_003 §5-2</a>）</td>
+</tr>
+<tr class="even">
+<td>EKF</td>
+<td><strong>試していない</strong>。状態7つなら使えるが、ROM
+のヤコビアン（ <span class="math inline">\(h\)</span>
+についての微分を含む）を毎回作る必要があり、EnKF のほうが実装が簡単</td>
+</tr>
+<tr class="odd">
+<td>3D-Var・4D-Var</td>
+<td><strong>試していない</strong>。4D-Var
+は随伴コードが必要で、今回は対象外</td>
+</tr>
+</tbody>
+</table>
+<h4
 id="変位は状態に入っていない-それで正しい">変位は「状態」に入っていない
 ― それで正しい</h4>
 <p>上の式の左辺・右辺の最初のベクトル（状態）には、<strong>変位がありません。</strong>
