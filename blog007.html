@@ -1002,6 +1002,96 @@ P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</h3>
 <h3
 id="データ同化した温度をopenfoam-の温度と時刻歴で比べる">データ同化した温度を、OpenFOAM
 の温度と時刻歴で比べる</h3>
+<p><strong>この節でやったこと</strong>：OpenFOAM
+の計算を「本物の機械」とみなし、そこからセンサの読みだけを取り出して ROM
+でデータ同化しました。 データ同化で推定した温度が、OpenFOAM
+の温度（＝正解）にどこまで合うかを、時間を追って比べます。</p>
+<p><strong>手順</strong>（
+<code>run/make_da_vs_openfoam_timeseries.py</code> ）</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>段階</th>
+<th>やったこと</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① 正解を用意する</td>
+<td>OpenFOAM で 3 条件（15 W・25
+W・間欠加熱）を計算した固体の温度。変位の正解は、その温度場を FrontISTR
+に入れて計算した上面 A・O の <span
+class="math inline">\(U_z\)</span></td>
+</tr>
+<tr class="even">
+<td>② センサの読みを作る</td>
+<td>正解から、<strong>30 秒ごと</strong>に「温度計 P2・P4
+の温度」と「変位計 A・O の変位」を取り出し、ノイズ（温度 0.3 K、変位 0.3
+µm）を足す</td>
+</tr>
+<tr class="odd">
+<td>③ データ同化を始める</td>
+<td>ROM で 60 メンバーを用意。最初の温度は 17〜32 ℃、<strong>発熱量は
+4.5〜27 W のばらばら</strong>（正解は教えない）</td>
+</tr>
+<tr class="even">
+<td>④ 30 秒ごとにくりかえす</td>
+<td>ROM で 30 秒予報 →
+②のセンサの読みと比べて、5点温度・発熱量・放熱を補正（EnKF）。0〜600
+秒で 20 回</td>
+</tr>
+<tr class="odd">
+<td>⑤ 比べる</td>
+<td>各時刻の補正後の温度（60 メンバーの平均）を、5
+つの乱数で回した平均にし、OpenFOAM の温度と並べる</td>
+</tr>
+</tbody>
+</table>
+<p><strong>図の4本の線</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>線</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>黒</strong></td>
+<td>OpenFOAM の温度（正解）</td>
+</tr>
+<tr class="even">
+<td>灰の破線</td>
+<td><strong>データ同化なし</strong>：③の 60 メンバーを補正せず ROM
+で進めただけ（発熱量の初期平均は約 17 W で、最初の温度も高め）</td>
+</tr>
+<tr class="odd">
+<td>緑</td>
+<td>温度計 P2・P4 の2本だけでデータ同化</td>
+</tr>
+<tr class="even">
+<td>赤</td>
+<td>温度計2本 ＋ 変位計 A・O の2本でデータ同化</td>
+</tr>
+</tbody>
+</table>
+<p><strong>行は代表点</strong>：P2 は温度計を置いた点、<strong>P1・P3
+は温度計を置いていない点</strong>（ここが合えば、測っていない場所も推定できている）。
+<strong>列は条件</strong>：左＝15 W（ROM の係数を決めた条件）、中＝25
+W（決めていない条件）、右＝間欠加熱。</p>
+<p><strong>注意（右列）</strong>：この計算では ROM に<strong>ヒータの
+ON/OFF を教えていません</strong>（プログラムの初期設定「0〜300
+秒に一定」のまま）。 15 W・25 W は実際も 0〜300
+秒なので一致しますが、間欠加熱だけは実際（0〜150 秒・300〜450
+秒）と食い違っています。</p>
 <figure>
 <img src="img/da_vs_openfoam_timeseries.png"
 alt="OpenFOAM とデータ同化した温度の時刻歴" />
@@ -1020,9 +1110,10 @@ P1・P3 まで合っています。</strong> 灰の破線（データ同化な�
 を作るのに使っていない条件ですが、15 W と同じように合っています。</li>
 <li><strong>間欠加熱（右列）</strong>：150
 秒まではよく合いますが、<strong>その後ずれます</strong>。 黒は 300
-秒で再び加熱されて上がりますが、緑も赤も上がりません。 ROM が「0〜300
-秒に一定の発熱」と仮定しているため、2回目の加熱を予測できないからです（§5
-で改善します）。</li>
+秒で再び加熱されて上がりますが、緑も赤も上がりません。 ROM に ON/OFF
+を教えておらず「0〜300
+秒に一定の発熱」のままなので、2回目の加熱を予測できないからです。
+<strong>ON/OFF を教えると合います</strong>（§6 の【追加】、§7）。</li>
 </ul>
 <p>（詳細：<a
 href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
