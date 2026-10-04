@@ -144,4 +144,35 @@ def main():
     print("wrote slide_disp_fixes_temp.png")
 
 
-if __name__=="__main__": main()
+def da_cycle_slide():
+    """⑦ 同化の1サイクル（スライド用。①〜④の4箱だけを大きな文字で）"""
+    from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+    fig=plt.figure(figsize=(14,6.0)); ax=fig.add_axes([0,0,1,1]); ax.axis("off")
+    ax.text(0.5,0.94,"ROM は 2 秒刻みで進め、30 秒ごとに補正する（600 秒で 20 回）",ha="center",
+            fontsize=20,fontweight="bold",color=NAVY,transform=ax.transAxes)
+    items=[("① ROM で予報","30 → 60 秒\n代表 5 点の温度だけ\n時間積分する\n（各メンバーの Q・h）",BLUE,"#eef3fb"),
+           ("② センサ値を予想","温度：gappy-POD の1行\n変位：熱感度 W の1行\n× 5 点の温度\n代表点以外でも可",GREEN,"#eaf7f0"),
+           ("③ EnKF で補正","t = 60 秒\n予想と実測のずれ\n× カルマンゲイン K\n→ 5 点温度・Q・h を直す",ORANGE,"#fff4e6"),
+           ("④ 次の予報へ","直した 5 点温度\n→ 次の初期値\nQ・h → 次のパラメータ\n60 → 90 秒を予報",RED,"#fdeeec")]
+    W=0.225; X0=0.02; G=0.023; Y=0.24; H=0.60
+    for k,(t,b,ec,fc) in enumerate(items):
+        x=X0+k*(W+G)
+        ax.add_patch(FancyBboxPatch((x,Y),W,H,boxstyle="round,pad=0.006,rounding_size=0.02",
+                                    fc=fc,ec=ec,lw=3,transform=ax.transAxes))
+        ax.text(x+W/2,Y+H-0.07,t,ha="center",va="top",fontsize=21,fontweight="bold",color=ec,transform=ax.transAxes)
+        ax.text(x+W/2,Y+H/2-0.06,b,ha="center",va="center",fontsize=17,linespacing=1.55,transform=ax.transAxes)
+        if k<3:
+            ax.add_patch(FancyArrowPatch((x+W+0.002,Y+H/2),(x+W+G-0.002,Y+H/2),transform=ax.transAxes,
+                                         arrowstyle="-|>",mutation_scale=28,lw=3,color=NAVY))
+    yb=0.12; xa=X0+W/2; xd=X0+3*(W+G)+W/2
+    ax.plot([xd,xd],[Y-0.01,yb],color=RED,lw=3,transform=ax.transAxes)
+    ax.plot([xd,xa],[yb,yb],color=RED,lw=3,transform=ax.transAxes)
+    ax.add_patch(FancyArrowPatch((xa,yb),(xa,Y-0.01),transform=ax.transAxes,arrowstyle="-|>",
+                                 mutation_scale=28,lw=3,color=RED))
+    ax.text(0.5,0.035,"20 回くりかえす",ha="center",fontsize=19,fontweight="bold",color=RED,transform=ax.transAxes)
+    fig.savefig(os.path.join(IMG,"slide_da_cycle.png"),dpi=150,facecolor="white"); plt.close(fig)
+    print("wrote slide_da_cycle.png")
+
+
+if __name__=="__main__":
+    main(); da_cycle_slide()
