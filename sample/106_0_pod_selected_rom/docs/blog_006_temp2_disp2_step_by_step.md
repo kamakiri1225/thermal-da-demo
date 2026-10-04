@@ -668,6 +668,7 @@ $$
 
 $$
 P=
+\overbrace{
 \begin{bmatrix}
 0 & \cdots & 0 & 1_{(7634)} & 0 & \cdots & \cdots & \cdots & 0\\
 0 & \cdots & \cdots & \cdots & \cdots & 1_{(7924)} & 0 & \cdots & 0\\
@@ -675,10 +676,16 @@ P=
 0 & \cdots & 1_{(859)} & 0 & \cdots & \cdots & \cdots & \cdots & 0\\
 0 & 1_{(733)} & 0 & \cdots & \cdots & \cdots & \cdots & \cdots & 0
 \end{bmatrix}
-\quad (5\times 20{,}696)
+}^{\text{20,696 columns = cells}}
+\left.\vphantom{\begin{bmatrix}0\\0\\0\\0\\0\end{bmatrix}}\right\rbrace\ \text{5 rows = P0 to P4}
 $$
 
-（ $1_{(7634)}$ は 7634 番目の列に 1 があるという意味）です。
+| | 数 | 意味 |
+|---|---:|---|
+| **列**（上の波かっこ） | 20,696 | OpenFOAM の固体の**セル数**。1列＝1セル |
+| **行**（右の波かっこ） | 5 | **代表点の数**（P0〜P4）。1行＝「どのセルを取り出すか」 |
+
+（ $1_{(7634)}$ は 7634 番目の列＝7634 番のセルに 1 があるという意味）です。
 $P\overline{\mathbf T}$ は「平均温度場から、代表5点の値を取り出したもの」、 $P\Phi$ は「型から、代表5点の行を取り出したもの」です。
 実際の計算では $P$ を作らず、 `mean[pod]` 、 `U[pod, :]` と行番号で取り出しています。
 
@@ -782,6 +789,53 @@ $$
 \underbrace{\mathrm{innov}}_{60\times4}
 \underbrace{K^{\mathsf T}}_{4\times7}.
 $$
+
+**innov（イノベーション）とは**：カルマンフィルタの用語で、**「実測と予想のずれ」**のことです。
+「観測して初めて分かった、新しい情報」という意味でこう呼びます（§3-4 段階1 の「ずれ」と同じもの）。
+
+メンバー $m$ について、4つのセンサのずれを縦に並べたものが
+
+$$
+\mathbf r^{(m)}=
+\begin{bmatrix} r_{T_{P2}}\\ r_{T_{P0}}\\ r_{u_{S1}}\\ r_{u_{S2}}\end{bmatrix}^{(m)}
+=
+\underbrace{\begin{bmatrix} y_{T_{P2}}\\ y_{T_{P0}}\\ y_{u_{S1}}\\ y_{u_{S2}}\end{bmatrix}}_{\text{measured}}
++
+\underbrace{\begin{bmatrix} \varepsilon_1\\ \varepsilon_2\\ \varepsilon_3\\ \varepsilon_4\end{bmatrix}^{(m)}}_{\text{noise}}
+-
+\underbrace{\begin{bmatrix} \hat T_{P2}\\ \hat T_{P0}\\ \hat u_{S1}\\ \hat u_{S2}\end{bmatrix}^{(m)}}_{\text{predicted}}
+$$
+
+です（実測 ＋ メンバーごとに足す観測ノイズ － そのメンバーの予想）。
+これを 60 メンバー分、**1行に1メンバー**ずつ横向きにして積んだ 60 × 4 の行列が `innov` です。
+
+$$
+\mathrm{innov}=
+\begin{bmatrix}
+\mathbf r^{(1)\mathsf T}\\ \mathbf r^{(2)\mathsf T}\\ \vdots\\ \mathbf r^{(60)\mathsf T}
+\end{bmatrix}
+=
+\begin{bmatrix}
+r_{T_{P2}}^{(1)} & r_{T_{P0}}^{(1)} & r_{u_{S1}}^{(1)} & r_{u_{S2}}^{(1)}\\
+r_{T_{P2}}^{(2)} & r_{T_{P0}}^{(2)} & r_{u_{S1}}^{(2)} & r_{u_{S2}}^{(2)}\\
+\vdots & \vdots & \vdots & \vdots\\
+r_{T_{P2}}^{(60)} & r_{T_{P0}}^{(60)} & r_{u_{S1}}^{(60)} & r_{u_{S2}}^{(60)}
+\end{bmatrix}
+\quad (60\times4)
+$$
+
+列は左から「温度計 P2・温度計 P0・変位計 S1・変位計 S2」のずれです。
+1回目（ $t=30$ 秒）の 60 メンバー平均は、ノイズの平均がほぼ 0 になるので、§3-4 段階1 の表と同じ
+
+$$
+\overline{\mathbf r}\approx
+\begin{bmatrix}-4.69\ \mathrm{K} & -4.63\ \mathrm{K} & +0.66\ \mu\mathrm{m} & -5.62\ \mu\mathrm{m}\end{bmatrix}
+$$
+
+になります（観測ノイズを入れない場合の値）。
+
+`innov` に $K^{\mathsf T}$ （4 × 7）を右から掛けると、60 × 7 の「各メンバーの7つの直す量」になります。
+メンバー $m$ の行だけを見ると $\mathbf r^{(m)\mathsf T}K^{\mathsf T}=(K\,\mathbf r^{(m)})^{\mathsf T}$ で、§3-4 の「ずれ × 換算表」と同じ計算です。
 
 **最後の行で、温度の5列だけでなく、qの列とhの列も書き換えます。** 変位は観測成分であり、独立した変位状態を更新するわけではありません。
 
