@@ -9,6 +9,7 @@ matplotlib のグラフと組み合わせる。3D 側の文字は記号（P0, S1
   explain_weighted_sum.png       … blog_006 §3-3：「ずれ × 重み → 足す」でセンサの読みを予想する
   explain_correction_by_sensor.png … blog_006 §3-4：各センサのずれが、代表5点をどれだけ直したか
   explain_after_correction.png   … blog_006 §3-4 段階4：補正の前後と、そこから計算した次の 30 秒
+  explain_q_h_update.png         … blog_006 §3-2 ③：q（発熱）と h（放熱）がセンサのずれから直される仕組み
 
 数値は blog_006 と同じ計算（seed 20260913、t=30 秒の1回目の補正、真値＝ROM の双子実験）。
 再現: OMP_NUM_THREADS=4 python3 run/make_explain_3d_figs.py
@@ -231,5 +232,44 @@ def fig_after_correction():
     return zb,za,Tt,Zo[:,:5].mean(0),Zn[:,:5].mean(0)
 
 
+def fig_q_h_scatter():
+    """§3-2 ③：q（発熱）と h（放熱）が、センサのずれからどう直されるか（60 メンバーの散布図）"""
+    d=np.load(os.path.join(RES,"rom_calibrated_pod.npz"))
+    C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],5); h=float(d["h"]); heat=int(d["heat_node"])
+    U,mean,pod,Cc=load(); UPp=np.linalg.pinv(U[pod]); mp=mean[pod]
+    op=np.load(os.path.join(RES,"dispop_allnodes.npz")); um=op["u_mean"]; Dall=op["D"]; co=op["coords"]
+    Wall=np.einsum("nck,kj->ncj",Dall,UPp)
+    near=lambda x:int(np.linalg.norm(co-np.array(x),axis=1).argmin())
+    i2=near((-0.0346,0.0144,0.1005)); w=Wall[i2,2]; u0=um[i2,2]
+    rng=np.random.default_rng(20260913)
+    Z=np.zeros((60,7)); Z[:,:5]=rng.uniform(rg.T_AIR_K-3,rg.T_AIR_K+12,(60,5))
+    Z[:,5]=rng.uniform(0.3,1.8,60); Z[:,6]=np.clip(rng.normal(0.02,0.01,60),1e-3,0.1)
+    Z[:,:5]=rg.integrate_ensemble(Z[:,:5],C,Km,Z[:,6],Z[:,5],heat,0,30,2.0)
+    T=np.full(5,rg.T_AIR_K); _,tr=rg.integrate_single(T,C,Km,h,1.0,heat,0,30,2.0); Tt=tr[-1]
+    sens=[("温度計 P2 の予想 [K]",Z[:,2],Tt[2],0.3),("変位計 S2 の予想 [µm]",u0+(Z[:,:5]-mp)@w,u0+w@(Tt-mp),0.3)]
+    fig,axs=plt.subplots(2,2,figsize=(15,10.5))
+    for col,(lab,yp,yo,sig) in enumerate(sens):
+        for row,(par,scale,ylab,true) in enumerate([(Z[:,5],15,"発熱量 Q = 15q [W]",15.0),(Z[:,6],1,"放熱 h [W/K]",h)]):
+            ax=axs[row,col]; v=par*scale
+            ax.scatter(yp,v,s=55,color=BLUE if row==0 else GRAY,alpha=.75,label="60 メンバー（1点＝1メンバー）")
+            cov=np.cov(v,yp)[0,1]; var=np.var(yp,ddof=1); k=cov/(var+sig**2)
+            xs=np.linspace(yp.min(),yp.max(),50); ax.plot(xs,v.mean()+k*(xs-yp.mean()),color=RED,lw=2.6,
+                    label=f"傾き＝Cov／(Var＋σ²)＝{k:.3g}")
+            ax.axvline(yo,color="k",lw=2,ls="--",label="実測（真値）")
+            ax.axhline(true,color=GREEN,lw=2,ls=":",label="正解")
+            new=v.mean()+k*(yo-yp.mean())
+            ax.annotate("",xy=(yo,new),xytext=(yp.mean(),v.mean()),arrowprops=dict(arrowstyle="-|>",color=RED,lw=3))
+            ax.plot(yp.mean(),v.mean(),"o",color="k",ms=10); ax.plot(yo,new,"*",color=RED,ms=20)
+            ax.set_xlabel(lab); ax.set_ylabel(ylab); ax.grid(alpha=.3)
+            r=np.corrcoef(v,yp)[0,1]
+            ax.set_title(f"{ylab.split(' ')[0]} と {lab.split('の')[0]}：相関 {r:+.2f}\n平均 {v.mean():.3g} → {new:.3g}（このセンサ1本だけで直した場合）",fontsize=14)
+            if row==0 and col==0: ax.legend(fontsize=11.5,loc="upper left")
+    fig.suptitle("q（発熱）と h（放熱）は、なぜセンサのずれから直されるのか（1回目 t=30 秒、60 メンバー）",fontsize=17,weight="bold")
+    fig.text(0.5,0.008,"上：Q が大きいメンバーほど予想も大きい（右上がり）→ 実測が予想より小さいので Q が下げられる。\n"
+             "下：h と予想の関係が弱い → h はほとんど直らない（放熱 約 0.1 W は発熱 15 W の約 1/150）",ha="center",fontsize=13,color=NAVY)
+    fig.tight_layout(rect=(0,0.05,1,0.94)); fig.savefig(os.path.join(IMG,"explain_q_h_update.png"),dpi=125,facecolor="white"); plt.close(fig)
+    print("wrote explain_q_h_update.png")
+
+
 if __name__=="__main__":
-    fig_free_weights(); fig_weighted_sum(); fig_correction(); fig_after_correction()
+    fig_free_weights(); fig_weighted_sum(); fig_correction(); fig_after_correction(); fig_q_h_scatter()
