@@ -1667,6 +1667,18 @@ q\ \xrightarrow{\ \text{ROM 30 s}\ }\ T_P\ \xrightarrow{\ H\ }\ \hat y
 秒後に温度が高くなり、温度計の予想も変位計の予想も大きくなる。</strong>
 実測が予想より小さければ「 <span class="math inline">\(q\)</span>
 が大きすぎた」と判断して下げます。</p>
+<p><strong>下の図の読み方</strong></p>
+<ul>
+<li><strong>いつの図か</strong>：0→30 秒を ROM
+で予報し終えた<strong>直後（ <span class="math inline">\(t=30\)</span>
+秒）、1回目の補正をする直前</strong>です（図の上の時間軸の赤い印）。</li>
+<li><strong>1つの点＝1つのメンバー</strong>：横軸＝そのメンバーが「センサはこう読むはず」と予想した値、縦軸＝そのメンバーが仮定している発熱量
+<span class="math inline">\(Q\)</span> （上段）または放熱 <span
+class="math inline">\(h\)</span> （下段）。</li>
+<li><strong>黒丸</strong>＝60
+メンバーの平均、<strong>黒い破線</strong>＝実際のセンサの読み、<strong>緑の点線</strong>＝正解。</li>
+<li><strong>赤い線</strong>＝点の散らばりから求めた傾き。黒丸から赤い線に沿って、破線（実測）の位置まで動かした<strong>赤い星</strong>が「直した後」の値です。</li>
+</ul>
 <figure>
 <img src="img/explain_q_h_update.png" alt="q と h の推定のしくみ" />
 <figcaption aria-hidden="true">q と h の推定のしくみ</figcaption>
