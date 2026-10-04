@@ -250,136 +250,144 @@ id="toc-blog_006温度2点変位2点のデータ同化をセンサの読みか�
 <ul>
 <li><a href="#この記事で確かめること"
 id="toc-この記事で確かめること">この記事で確かめること</a></li>
-<li><a href="#どこに何を付けたか" id="toc-どこに何を付けたか">1.
+<li><a href="#1-どこに何を付けたか" id="toc-1-どこに何を付けたか">1.
 どこに何を付けたか</a></li>
-<li><a href="#センサが読む値" id="toc-センサが読む値">2.
+<li><a href="#2-センサが読む値" id="toc-2-センサが読む値">2.
 センサが読む値</a></li>
-<li><a href="#データ同化で毎回やること-流れタイミングなぜそれでよいか"
-id="toc-データ同化で毎回やること-流れタイミングなぜそれでよいか">3.
+<li><a
+href="#3-データ同化で毎回やること--流れタイミングなぜそれでよいか"
+id="toc-3-データ同化で毎回やること--流れタイミングなぜそれでよいか">3.
 データ同化で毎回やること ― 流れ・タイミング・なぜそれでよいか</a>
 <ul>
-<li><a href="#時間の流れ" id="toc-時間の流れ">3-1. 時間の流れ</a></li>
-<li><a href="#サイクルの4ステップ例-t0-to-30-秒1回目の補正"
-id="toc-サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
+<li><a href="#3-1-時間の流れ" id="toc-3-1-時間の流れ">3-1.
+時間の流れ</a></li>
+<li><a href="#3-2-1サイクルの4ステップ例-t0-to-30-秒1回目の補正"
+id="toc-3-2-1サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
 1サイクルの4ステップ（例： <span class="math inline">\(t=0 \to
 30\)</span> 秒、1回目の補正）</a></li>
-<li><a href="#センサの読みを予想する-何をしているのか"
-id="toc-センサの読みを予想する-何をしているのか">3-3. ②
+<li><a href="#3-3-②-センサの読みを予想する--何をしているのか"
+id="toc-3-3-②-センサの読みを予想する--何をしているのか">3-3. ②
 センサの読みを予想する ― 何をしているのか</a></li>
 <li><a
-href="#補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか"
-id="toc-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+href="#3-4-③-補正--代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか"
+id="toc-3-4-③-補正--代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
 ③ 補正 ― 代表点以外のセンサのずれを、どうやって ROM
 の5点に反映させるのか</a></li>
-<li><a href="#理論なぜ5点を直すだけで全体が直るのか"
-id="toc-理論なぜ5点を直すだけで全体が直るのか">3-5.
+<li><a href="#3-5-理論なぜ5点を直すだけで全体が直るのか"
+id="toc-3-5-理論なぜ5点を直すだけで全体が直るのか">3-5.
 理論：なぜ5点を直すだけで全体が直るのか</a></li>
-<li><a href="#なぜループの中で全セルを復元しなくてよいのか"
-id="toc-なぜループの中で全セルを復元しなくてよいのか">3-6.
+<li><a href="#3-6-なぜループの中で全セルを復元しなくてよいのか"
+id="toc-3-6-なぜループの中で全セルを復元しなくてよいのか">3-6.
 なぜループの中で全セルを復元しなくてよいのか</a></li>
-<li><a href="#成り立つ条件" id="toc-成り立つ条件">3-7.
+<li><a href="#3-7-成り立つ条件" id="toc-3-7-成り立つ条件">3-7.
 成り立つ条件</a></li>
-<li><a href="#コードで確認する観測点以外の情報が代表5点qhへ入る手続き"
-id="toc-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
+<li><a
+href="#3-8-コードで確認する観測点以外の情報が代表5点qhへ入る手続き"
+id="toc-3-8-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
 コードで確認する：観測点以外の情報が、代表5点・Q・hへ入る手続き</a></li>
 </ul></li>
-<li><a href="#記号" id="toc-記号">4. 記号</a></li>
-<li><a href="#ステップ1状態-分からないものを7つ並べる"
-id="toc-ステップ1状態-分からないものを7つ並べる">5. ステップ1：状態 ―
+<li><a href="#4-記号" id="toc-4-記号">4. 記号</a></li>
+<li><a href="#5-ステップ1状態--分からないものを7つ並べる"
+id="toc-5-ステップ1状態--分からないものを7つ並べる">5. ステップ1：状態 ―
 分からないものを7つ並べる</a></li>
-<li><a href="#ステップ2予報-各メンバーを-30-秒進める"
-id="toc-ステップ2予報-各メンバーを-30-秒進める">6. ステップ2：予報 ―
+<li><a href="#6-ステップ2予報--各メンバーを-30-秒進める"
+id="toc-6-ステップ2予報--各メンバーを-30-秒進める">6. ステップ2：予報 ―
 各メンバーを 30 秒進める</a></li>
-<li><a href="#ステップ3観測演算子-メンバーの状態からセンサの読みを作る"
-id="toc-ステップ3観測演算子-メンバーの状態からセンサの読みを作る">7.
+<li><a
+href="#7-ステップ3観測演算子--メンバーの状態からセンサの読みを作る"
+id="toc-7-ステップ3観測演算子--メンバーの状態からセンサの読みを作る">7.
 ステップ3：観測演算子 ― メンバーの状態から「センサの読み」を作る</a>
 <ul>
-<li><a href="#温度計は代表5点に置かなくてよい-観測演算子の一般形"
-id="toc-温度計は代表5点に置かなくてよい-観測演算子の一般形">7-0.
+<li><a href="#7-0-温度計は代表5点に置かなくてよい--観測演算子の一般形"
+id="toc-7-0-温度計は代表5点に置かなくてよい--観測演算子の一般形">7-0.
 温度計は代表5点に置かなくてよい ― 観測演算子の一般形</a></li>
-<li><a href="#温度から変位をどう計算するか"
-id="toc-温度から変位をどう計算するか">7-1.
+<li><a href="#7-1-温度から変位をどう計算するか"
+id="toc-7-1-温度から変位をどう計算するか">7-1.
 温度から変位をどう計算するか</a></li>
-<li><a href="#実際の行列計算の順に" id="toc-実際の行列計算の順に">7-2.
-実際の行列（計算の順に）</a></li>
-<li><a href="#メンバーで計算してみる-t30-秒の予報メンバー1"
-id="toc-メンバーで計算してみる-t30-秒の予報メンバー1">7-3.
+<li><a href="#7-2-実際の行列計算の順に"
+id="toc-7-2-実際の行列計算の順に">7-2. 実際の行列（計算の順に）</a></li>
+<li><a href="#7-3-1メンバーで計算してみる-t30-秒の予報メンバー1"
+id="toc-7-3-1メンバーで計算してみる-t30-秒の予報メンバー1">7-3.
 1メンバーで計算してみる（ <span class="math inline">\(t=30\)</span>
 秒の予報、メンバー1）</a></li>
-<li><a href="#観測データ測った値の作り方"
-id="toc-観測データ測った値の作り方">7-4.
+<li><a href="#7-4-観測データ測った値の作り方"
+id="toc-7-4-観測データ測った値の作り方">7-4.
 観測データ（測った値）の作り方</a></li>
-<li><a href="#変位は温度をどう直したか-t30-秒と-t150-秒"
-id="toc-変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
+<li><a href="#7-5-変位は温度をどう直したか-t30-秒と-t150-秒"
+id="toc-7-5-変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
 変位は温度をどう直したか（ <span class="math inline">\(t=30\)</span>
 秒と <span class="math inline">\(t=150\)</span> 秒）</a></li>
-<li><a href="#b.-なぜ変位を測ると温度計のない点の温度まで直るのか"
-id="toc-b.-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
+<li><a href="#7-5b-なぜ変位を測ると温度計のない点の温度まで直るのか"
+id="toc-7-5b-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
 なぜ変位を測ると「温度計のない点」の温度まで直るのか</a></li>
-<li><a href="#変位計を入れなかった場合との比較"
-id="toc-変位計を入れなかった場合との比較">7-6.
+<li><a href="#7-6-変位計を入れなかった場合との比較"
+id="toc-7-6-変位計を入れなかった場合との比較">7-6.
 変位計を入れなかった場合との比較</a></li>
 </ul></li>
-<li><a href="#どの場所の変位でも観測にできる-理論の組み立て"
-id="toc-どの場所の変位でも観測にできる-理論の組み立て">7-7.
+<li><a href="#7-7-どの場所の変位でも観測にできる--理論の組み立て"
+id="toc-7-7-どの場所の変位でも観測にできる--理論の組み立て">7-7.
 どの場所の変位でも観測にできる ― 理論の組み立て</a>
 <ul>
 <li><a
-href="#rom-の状態は温度5つだけ-そこから任意の点の変位が計算できれば観測に使える"
-id="toc-rom-の状態は温度5つだけ-そこから任意の点の変位が計算できれば観測に使える">7-7-1.
+href="#7-7-1-rom-の状態は温度5つだけ--そこから任意の点の変位が計算できれば観測に使える"
+id="toc-7-7-1-rom-の状態は温度5つだけ--そこから任意の点の変位が計算できれば観測に使える">7-7-1.
 ROM の状態は温度5つだけ ―
 そこから任意の点の変位が計算できれば、観測に使える</a></li>
-<li><a href="#段階でつなぐ" id="toc-段階でつなぐ">7-7-2.
+<li><a href="#7-7-2-3段階でつなぐ" id="toc-7-7-2-3段階でつなぐ">7-7-2.
 3段階でつなぐ</a></li>
-<li><a href="#まとめると5点の温度の一次式になる"
-id="toc-まとめると5点の温度の一次式になる">7-7-3.
+<li><a href="#7-7-3-まとめると5点の温度の一次式になる"
+id="toc-7-7-3-まとめると5点の温度の一次式になる">7-7-3.
 まとめると「5点の温度の一次式」になる</a></li>
-<li><a href="#実際の値blog_008-5-で選んだ2点"
-id="toc-実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008 §5
-で選んだ2点）</a></li>
-<li><a href="#enkf-にどう入るか" id="toc-enkf-にどう入るか">7-7-5. EnKF
-にどう入るか</a></li>
-<li><a href="#なぜ事前計算だけで済むのか"
-id="toc-なぜ事前計算だけで済むのか">7-7-6.
+<li><a href="#7-7-4-実際の値blog_008-5-で選んだ2点"
+id="toc-7-7-4-実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008
+§5 で選んだ2点）</a></li>
+<li><a href="#7-7-5-enkf-にどう入るか"
+id="toc-7-7-5-enkf-にどう入るか">7-7-5. EnKF にどう入るか</a></li>
+<li><a href="#7-7-6-なぜ事前計算だけで済むのか"
+id="toc-7-7-6-なぜ事前計算だけで済むのか">7-7-6.
 なぜ事前計算だけで済むのか</a></li>
-<li><a href="#成り立つ条件と限界" id="toc-成り立つ条件と限界">7-7-7.
-成り立つ条件と限界</a></li>
+<li><a href="#7-7-7-成り立つ条件と限界"
+id="toc-7-7-7-成り立つ条件と限界">7-7-7. 成り立つ条件と限界</a></li>
 </ul></li>
-<li><a href="#ステップ4平均とばらつき偏差"
-id="toc-ステップ4平均とばらつき偏差">8.
+<li><a href="#8-ステップ4平均とばらつき偏差"
+id="toc-8-ステップ4平均とばらつき偏差">8.
 ステップ4：平均とばらつき（偏差）</a></li>
-<li><a href="#ステップ5共分散-一緒に動く関係を-60-個から数える"
-id="toc-ステップ5共分散-一緒に動く関係を-60-個から数える">9.
+<li><a href="#9-ステップ5共分散--一緒に動く関係を-60-個から数える"
+id="toc-9-ステップ5共分散--一緒に動く関係を-60-個から数える">9.
 ステップ5：共分散 ― 「一緒に動く関係」を 60 個から数える</a></li>
-<li><a href="#ステップ6カルマンゲイン"
-id="toc-ステップ6カルマンゲイン">10. ステップ6：カルマンゲイン</a></li>
-<li><a href="#ステップ7更新-ずれを7つの状態に配る"
-id="toc-ステップ7更新-ずれを7つの状態に配る">11. ステップ7：更新 ―
+<li><a href="#10-ステップ6カルマンゲイン"
+id="toc-10-ステップ6カルマンゲイン">10.
+ステップ6：カルマンゲイン</a></li>
+<li><a href="#11-ステップ7更新--ずれを7つの状態に配る"
+id="toc-11-ステップ7更新--ずれを7つの状態に配る">11. ステップ7：更新 ―
 ずれを7つの状態に配る</a></li>
-<li><a href="#発熱量-q-の推定-式を1行ずつ"
-id="toc-発熱量-q-の推定-式を1行ずつ">12. 発熱量 <span
+<li><a href="#12-発熱量-q-の推定--式を1行ずつ"
+id="toc-12-発熱量-q-の推定--式を1行ずつ">12. 発熱量 <span
 class="math inline">\(Q\)</span> の推定 ― 式を1行ずつ</a>
 <ul>
-<li><a href="#q-の更新式を取り出す" id="toc-q-の更新式を取り出す">12-1.
-<span class="math inline">\(q\)</span> の更新式を取り出す</a></li>
-<li><a href="#t30-秒の実際の値" id="toc-t30-秒の実際の値">12-2. <span
+<li><a href="#12-1-q-の更新式を取り出す"
+id="toc-12-1-q-の更新式を取り出す">12-1. <span
+class="math inline">\(q\)</span> の更新式を取り出す</a></li>
+<li><a href="#12-2-t30-秒の実際の値"
+id="toc-12-2-t30-秒の実際の値">12-2. <span
 class="math inline">\(t=30\)</span> 秒の実際の値</a></li>
-<li><a href="#t150-秒の実際の値" id="toc-t150-秒の実際の値">12-3. <span
+<li><a href="#12-3-t150-秒の実際の値"
+id="toc-12-3-t150-秒の実際の値">12-3. <span
 class="math inline">\(t=150\)</span> 秒の実際の値</a></li>
 </ul></li>
-<li><a href="#状態にない-q-がなぜ直るのか"
-id="toc-状態にない-q-がなぜ直るのか">13. 状態にない <span
+<li><a href="#13-状態にない-q-がなぜ直るのか"
+id="toc-13-状態にない-q-がなぜ直るのか">13. 状態にない <span
 class="math inline">\(Q\)</span> が、なぜ直るのか</a></li>
-<li><a href="#全-20-回の推移seed-20260913"
-id="toc-全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
+<li><a href="#14-全-20-回の推移seed-20260913"
+id="toc-14-全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
 20260913）</a></li>
-<li><a href="#結果-何が分かったか" id="toc-結果-何が分かったか">15. 結果
-― 何が分かったか</a></li>
-<li><a href="#この研究の優位性と先行研究との関係"
-id="toc-この研究の優位性と先行研究との関係">16.
+<li><a href="#15-結果--何が分かったか"
+id="toc-15-結果--何が分かったか">15. 結果 ― 何が分かったか</a></li>
+<li><a href="#16-この研究の優位性と先行研究との関係"
+id="toc-16-この研究の優位性と先行研究との関係">16.
 この研究の優位性と、先行研究との関係</a></li>
-<li><a href="#限界やっていないこと注意"
-id="toc-限界やっていないこと注意">17.
+<li><a href="#17-限界やっていないこと注意"
+id="toc-17-限界やっていないこと注意">17.
 限界（やっていないこと・注意）</a></li>
 </ul></li>
 </ul>
@@ -412,18 +420,18 @@ id="blog_006温度2点変位2点のデータ同化をセンサの読みから数
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="blog_006_temp2_disp2_step_by_step.md">blog_006</a></td>
+<td><a href="blog006.html">blog_006</a></td>
 <td><strong>データ同化の手順</strong>。温度2点＋変位2点をどう使い、なぜ発熱量が直るか</td>
 <td>ROM の双子実験</td>
 </tr>
 <tr class="even">
-<td><a href="blog_007_rom_applicability.md">blog_007</a></td>
+<td><a href="blog007.html">blog_007</a></td>
 <td><strong>ROM の適用範囲</strong>。条件が変わっても使えるか</td>
 <td><strong>OpenFOAM＋FrontISTR</strong></td>
 </tr>
 <tr class="odd">
 <td><a
-href="blog_008_novelty_displacement_assimilation.md">blog_008</a></td>
+href="blog008.html">blog_008</a></td>
 <td><strong>主張と先行研究</strong>。研究としてどこが新しいか</td>
 <td>ROM（§4・§5）と<br><strong>OpenFOAM＋FrontISTR</strong>（§6・§7）</td>
 </tr>
@@ -490,7 +498,7 @@ class="math inline">\(h\)</span> の7つ</td>
 <p><strong>注意</strong>：この記事の構成は、評価している A・O
 をそのまま観測に使っています（§7-4 の循環の問題）。 <strong>A・O
 を測らずに当てた結果は <a
-href="blog_008_novelty_displacement_assimilation.md">blog_008
+href="blog008.html">blog_008
 §5</a></strong> にあります。</p>
 </blockquote>
 <hr />
@@ -502,13 +510,13 @@ href="blog_008_novelty_displacement_assimilation.md">blog_008
 が、なぜ直るのか（実際の数値で） 4.
 この研究の優位性（実際にやったことで言えること）</p>
 <p>関連：EnKF の一般的な説明は <a
-href="blog_003_ensemble_kalman_filter.md">blog_003</a>、POD
-と変位の写像は <a href="blog_004_pod_selected_rom.md">blog_004
+href="blog003.html">blog_003</a>、POD
+と変位の写像は <a href="blog004.html">blog_004
 §7-0</a>、センサの置き場所は <a
-href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>。</p>
+href="blog005.html">blog_005 §4-6</a>。</p>
 </blockquote>
 <hr />
-<h2 id="どこに何を付けたか">1. どこに何を付けたか</h2>
+<h2 id="1-どこに何を付けたか">1. どこに何を付けたか</h2>
 <figure>
 <img src="img/blog006_sensor_positions.png"
 alt="温度2点＋変位2点とヒータの位置" />
@@ -592,7 +600,7 @@ class="math inline">\(U_z\)</span> ）</td>
 <blockquote>
 <p>この計算は<strong>本物の実験ではなく、計算で作った模擬データ（双子実験）</strong>です。センサの値は計算結果にノイズを足して作りました。</p>
 </blockquote>
-<h2 id="センサが読む値">2. センサが読む値</h2>
+<h2 id="2-センサが読む値">2. センサが読む値</h2>
 <figure>
 <img src="img/blog006_sensor_readings.png" alt="センサが読む値" />
 <figcaption aria-hidden="true">センサが読む値</figcaption>
@@ -668,7 +676,7 @@ class="math inline">\(U_z\)</span> ）</td>
 と後述の変位の写像で作っています。OpenFOAM＋FrontISTR
 で直接作った上の値との差は、温度場で 0.001 K、反りで 0.001 µm
 でした。）</p>
-<h2 id="データ同化で毎回やること-流れタイミングなぜそれでよいか">3.
+<h2 id="3-データ同化で毎回やること--流れタイミングなぜそれでよいか">3.
 データ同化で毎回やること ― 流れ・タイミング・なぜそれでよいか</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong> 1.
@@ -686,7 +694,7 @@ class="math inline">\(h\)</span> の直す量に換算して直す →
 直すか」を教える。直した5点温度が次の ROM の初期値になる 3.
 代表点以外の温度も変位も「5点温度に重みを掛けて足したもの」だから</p>
 </blockquote>
-<h3 id="時間の流れ">3-1. 時間の流れ</h3>
+<h3 id="3-1-時間の流れ">3-1. 時間の流れ</h3>
 <figure>
 <img src="img/da_cycle_timeline.png" alt="データ同化の1サイクル" />
 <figcaption aria-hidden="true">データ同化の1サイクル</figcaption>
@@ -732,7 +740,7 @@ class="math inline">\(h\)</span> の直す量に換算して直す →
 <p><strong>予報している 30
 秒の間は、センサを使いません。補正する瞬間は、時間を進めません。</strong>
 この2つが交互に来ます。</p>
-<h3 id="サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
+<h3 id="3-2-1サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
 1サイクルの4ステップ（例： <span class="math inline">\(t=0 \to
 30\)</span> 秒、1回目の補正）</h3>
 <table>
@@ -780,10 +788,10 @@ class="math inline">\(h\)</span> が、<strong>次の ROM
 </tbody>
 </table>
 <p>例の数値は、温度計2本（P2・P0）＋<strong>代表点以外の変位計2本</strong>（<a
-href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a>
+href="blog008.html">blog_008 §5</a>
 で選んだ上面の2点）でデータ同化したときの、seed 20260913 の1回目です。
 真値は ROM の双子実験です。</p>
-<h4 id="rom-gappy-pod-で復元-補正-romという理解との対応">「ROM →
+<h4 id="rom--gappy-pod-で復元--補正--romという理解との対応">「ROM →
 gappy-POD で復元 → 補正 → ROM」という理解との対応</h4>
 <table>
 <colgroup>
@@ -904,7 +912,7 @@ class="math inline">\(w_{S2}=D_{S2}U_{rP}^{-1}\)</span> （µm/K）</td>
 <p><strong>この例では、温度計2本は代表点（P2・P0）に置いています（本番の構成と同じ）。変位計2本（S1・S2）は代表点ではありません</strong>（上面の
 FEM 節点）。
 温度計を代表点以外に置いた場合も同じ式でデータ同化できることは、§7-0 と
-<a href="blog_007_rom_applicability.md">blog_007 §10</a>
+<a href="blog007.html">blog_007 §10</a>
 で確かめています。</p>
 <p><strong>温度計の行も変位計の行も、同じ「5つの数字」の行として並んでいるだけです。</strong>
 温度計を代表点以外に置けば1・2行目が gappy-POD
@@ -1007,14 +1015,14 @@ class="math inline">\(h\)</span>
 294.81, 293.47, 293.18 K、 <span class="math inline">\(q\)</span> ＝ 1、
 <span class="math inline">\(h\)</span> ＝ 0.0154）</p>
 <h4
-id="この補正式はどこから来たのか-ベイズの定理から">この補正式はどこから来たのか
+id="この補正式はどこから来たのか--ベイズの定理から">この補正式はどこから来たのか
 ― ベイズの定理から</h4>
 <p>上の行列式は、<strong>ベイズの定理</strong>と「<strong>誤差はガウス分布（正規分布）に従う</strong>」という仮定から導かれます。今回の問題（状態
 7 つ、観測 4 つ）に当てはめて、順に書きます。</p>
 <blockquote>
 <p><strong>記号の注意（OI とカルマンフィルタ）</strong>
 1回の補正の式の形は、OI（<a
-href="blog_002_oi_data_assimilation.md">blog_002</a>）もカルマンフィルタも同じです。違いは<strong>予報の共分散を固定するか、毎回作り直すか</strong>だけです。</p>
+href="blog002.html">blog_002</a>）もカルマンフィルタも同じです。違いは<strong>予報の共分散を固定するか、毎回作り直すか</strong>だけです。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1151,7 +1159,7 @@ T}\big(HP^fH^{\mathsf T}+R\big)^{-1}
 <p>これが補正式です。 <span class="math inline">\(y-Hz^f\)</span>
 が上の行列式の「ずれ（4×1）」、 <span class="math inline">\(K\)</span>
 が「換算表（7×4）」です（途中の式の詳細は <a
-href="blog_002_oi_data_assimilation.md">blog_002「更新式が出てくる理由」</a>）。</p>
+href="blog002.html">blog_002「更新式が出てくる理由」</a>）。</p>
 <ul>
 <li><strong>⑦ 「ガウス分布の条件付き」として見ても同じ</strong>：状態
 <span class="math inline">\(z\)</span> とセンサの読み <span
@@ -1233,7 +1241,7 @@ class="math inline">\(P^a=(I-KH)P^f\)</span>
 を、毎サイクル 60 メンバーの散らばりで数え直しているだけです（OI
 は同じ式で <span class="math inline">\(B\)</span> を固定して使う）。</p>
 <h4
-id="参考データ同化の手法の比較-線形か非線形かガウスを仮定するか">参考：データ同化の手法の比較
+id="参考データ同化の手法の比較--線形か非線形かガウスを仮定するか">参考：データ同化の手法の比較
 ― 線形か非線形か、ガウスを仮定するか</h4>
 <p>上の導出は、どの手法でも「1回の補正」の部分はほぼ共通です。手法の違いは、<strong>モデルや観測が非線形のときにどう扱うか</strong>、<strong>予報の共分散をどう作るか</strong>、<strong>ガウス分布を仮定するか</strong>にあります。</p>
 <table>
@@ -1513,7 +1521,7 @@ class="math inline">\(h\)</span> を状態に入れて直せる。ROM が 31 ms
 <tr class="even">
 <td>OI</td>
 <td>仕組みを説明するために使った（<a
-href="blog_002_oi_data_assimilation.md">blog_002</a>）。 <span
+href="blog002.html">blog_002</a>）。 <span
 class="math inline">\(B\)</span> を固定するので <span
 class="math inline">\(Q\)</span> が当たりにくい（実ソルバで 8.9 W
 止まり）</td>
@@ -1522,7 +1530,7 @@ class="math inline">\(Q\)</span> が当たりにくい（実ソルバで 8.9 W
 <td>PF</td>
 <td>試したが<strong>不採用</strong>。400 粒子でも有効な粒子が実質 1
 個になり、誤差が EnKF の約 6 倍（<a
-href="blog_003_ensemble_kalman_filter.md">blog_003 §5-2</a>）</td>
+href="blog003.html">blog_003 §5-2</a>）</td>
 </tr>
 <tr class="even">
 <td>EKF</td>
@@ -1538,7 +1546,7 @@ href="blog_003_ensemble_kalman_filter.md">blog_003 §5-2</a>）</td>
 </tbody>
 </table>
 <h4
-id="変位は状態に入っていない-それで正しい">変位は「状態」に入っていない
+id="変位は状態に入っていない--それで正しい">変位は「状態」に入っていない
 ― それで正しい</h4>
 <p>上の式の左辺・右辺の最初のベクトル（状態）には、<strong>変位がありません。</strong>
 変位が入っているのは、右端の「ずれ」の3・4行目と、 <span
@@ -1693,8 +1701,8 @@ class="math inline">\(h\,(T-T_{\mathrm{air}}) \approx 0.02 \times 5 =
 が少し違っても温度も変位もほとんど変わらないので、センサの予想と h
 の連動（共分散）がほとんど見えず、観測から h
 は決まりません</strong>（600 秒では当たらない。<a
-href="blog_003_ensemble_kalman_filter.md">blog_003 §4-0-b</a>）。</p>
-<h3 id="センサの読みを予想する-何をしているのか">3-3. ②
+href="blog003.html">blog_003 §4-0-b</a>）。</p>
+<h3 id="3-3-②-センサの読みを予想する--何をしているのか">3-3. ②
 センサの読みを予想する ― 何をしているのか</h3>
 <p><strong>やっていることは「5点の温度のずれに、センサごとの重みを掛けて足す」だけです。</strong></p>
 <p>例として、メンバー1の <span class="math inline">\(t=30\)</span>
@@ -1870,7 +1878,7 @@ class="math inline">\(D_{S1}\)</span>
 class="math inline">\((-0.007,\ -0.016,\ -0.001,\ 0.993,\
 0.040)\)</span></td>
 <td><strong>gappy-POD</strong> の、そのセルの1行（<a
-href="blog_004_pod_selected_rom.md">blog_004</a>）</td>
+href="blog004.html">blog_004</a>）</td>
 </tr>
 <tr class="odd">
 <td><strong>代表点以外の変位計</strong></td>
@@ -1884,7 +1892,7 @@ POD</strong>（§7-7）</td>
 1」という特別な場合にすぎません。
 だから、<strong>センサを代表点以外に置いても、扱いはまったく同じ</strong>です。</p>
 <h3
-id="補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+id="3-4-③-補正--代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
 ③ 補正 ― 代表点以外のセンサのずれを、どうやって ROM
 の5点に反映させるのか</h3>
 <p>ここがいちばん大事なところです。4段階で説明します。数値は §3-2
@@ -1941,8 +1949,8 @@ id="段階1センサごとにずれを出す">段階1：センサごとに「ず
 </table>
 <p>最初の予報は全体に温度が高すぎる（平均 17 W で計算しているが真値は 15
 W、初期温度も高め）ので、ずれが大きく出ています。</p>
-<h4 id="段階2ずれ-直す量の換算表を作るカルマンゲイン-k">段階2：「ずれ →
-直す量」の換算表を作る（カルマンゲイン <span
+<h4 id="段階2ずれ--直す量の換算表を作るカルマンゲイン-k-">段階2：「ずれ
+→ 直す量」の換算表を作る（カルマンゲイン <span
 class="math inline">\(K\)</span> ）</h4>
 <p><strong>ずれは「センサの場所・センサの単位」の量</strong>です。直したいのは「代表5点の温度と
 <span class="math inline">\(q\)</span> ・ <span
@@ -2172,7 +2180,7 @@ class="math inline">\(h\)</span> [W/K]</th>
 W）の方向へ動きました。 放熱 <span class="math inline">\(h\)</span>
 は逆に真値から離れています（ <span class="math inline">\(h\)</span> は
 600 秒の計算では当たらない。<a
-href="blog_003_ensemble_kalman_filter.md">blog_003 §4-0-b</a>）。</p>
+href="blog003.html">blog_003 §4-0-b</a>）。</p>
 <p><em>発熱量が §3-4 段階3 の −3.98
 W（平均だけで計算した値）と少し違うのは、実際の補正ではメンバーごとに観測ノイズ分の乱数を足し、
 <span class="math inline">\(q\)</span> ・ <span
@@ -2223,7 +2231,7 @@ class="math inline">\(K_{kj}\)</span></td>
 <tr class="odd">
 <td><span class="math inline">\(\delta_{k,2}\)</span></td>
 <td>ヒータの点 P2 だけ 1（発熱は P2 に入れる。<a
-href="blog_004_pod_selected_rom.md">blog_004 §6-1b</a>）</td>
+href="blog004.html">blog_004 §6-1b</a>）</td>
 </tr>
 </tbody>
 </table>
@@ -2649,7 +2657,7 @@ class="math inline">\(w\)</span> （5つの数字）が違うだけです。 <sp
 class="math inline">\(w\)</span> さえ分かれば、 <span
 class="math inline">\(\mathrm{Cov}(z,T_P)\,w\)</span>
 で換算表の列が作れます。</p>
-<h3 id="理論なぜ5点を直すだけで全体が直るのか">3-5.
+<h3 id="3-5-理論なぜ5点を直すだけで全体が直るのか">3-5.
 理論：なぜ5点を直すだけで全体が直るのか</h3>
 <p>小さな例で、行列の成分を全部書いて確かめます。
 読み取る量を3つ選びます：<strong>代表点以外の温度計
@@ -2789,7 +2797,7 @@ class="math inline">\(y^{a}\)</span></th>
 T_P\)</span> から補正が決まっています。</strong>
 全セル・全節点でも同じで、 <span class="math inline">\(L\)</span>
 の行が増えるだけです。だから、5点を直せば全体がそろって直り、互いに矛盾もしません。</p>
-<h3 id="なぜループの中で全セルを復元しなくてよいのか">3-6.
+<h3 id="3-6-なぜループの中で全セルを復元しなくてよいのか">3-6.
 なぜループの中で全セルを復元しなくてよいのか</h3>
 <p>補正の式（ <span class="math inline">\(K\)</span>
 ）に出てくるのは<strong>センサの場所の予想だけ</strong>です。全セルの値は式に出てきません。</p>
@@ -2831,7 +2839,7 @@ T_P\)</span> から補正が決まっています。</strong>
 </table>
 <p>だから 60 メンバー × 20
 回でも、1回のデータ同化が数十秒で終わります。</p>
-<h3 id="成り立つ条件">3-7. 成り立つ条件</h3>
+<h3 id="3-7-成り立つ条件">3-7. 成り立つ条件</h3>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -2848,7 +2856,7 @@ T_P\)</span> から補正が決まっています。</strong>
 <td>温度場が POD の5モードで表せる</td>
 <td>熱源の位置・形が変わると表せない → ROM と gappy-POD
 の作り直しが必要（<a
-href="blog_007_rom_applicability.md">blog_007</a>）</td>
+href="blog007.html">blog_007</a>）</td>
 </tr>
 <tr class="even">
 <td>線形熱弾性（重みが温度に依らない）</td>
@@ -2888,7 +2896,8 @@ K、発熱量を −11.15 W 直した。 -
 </blockquote>
 <p>以下、これを数式で1つずつ書きます。</p>
 <hr />
-<h3 id="コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
+<h3
+id="3-8-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">3-8.
 コードで確認する：観測点以外の情報が、代表5点・Q・hへ入る手続き</h3>
 <p><strong>この節は一般的なEnKFの紹介ではなく、106のコードを確認した説明です。</strong>
 以下の2種類の計算を区別します。</p>
@@ -2906,22 +2915,22 @@ K、発熱量を −11.15 W 直した。 -
 <tbody>
 <tr class="odd">
 <td><a
-href="../run/obs_points_not_limited_to_rom.py"><code>run/obs_points_not_limited_to_rom.py</code></a></td>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/run/obs_points_not_limited_to_rom.py"><code>run/obs_points_not_limited_to_rom.py</code></a></td>
 <td>代表点以外の温度2セルも観測に使えること。変位観測は使わない</td>
 </tr>
 <tr class="even">
 <td><a
-href="../run/run_holdout_displacement_support.py"><code>run/run_holdout_displacement_support.py</code></a></td>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/run/run_holdout_displacement_support.py"><code>run/run_holdout_displacement_support.py</code></a></td>
 <td>温度P2/P0＋高W点S1/S2の <span class="math inline">\(U_z\)</span>
 を使い、別のC/Dの変位を評価すること</td>
 </tr>
 <tr class="odd">
-<td><a href="../dacore/enkf.py"><code>dacore/enkf.py</code></a></td>
+<td><a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/dacore/enkf.py"><code>dacore/enkf.py</code></a></td>
 <td>両方の計算で共通に使う、7変数のEnKF更新</td>
 </tr>
 <tr class="even">
 <td><a
-href="../dacore/rom_general.py"><code>dacore/rom_general.py</code></a></td>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/dacore/rom_general.py"><code>dacore/rom_general.py</code></a></td>
 <td>更新後の温度・発熱量・放熱条件を使う、次のROM時間積分</td>
 </tr>
 </tbody>
@@ -2929,7 +2938,7 @@ href="../dacore/rom_general.py"><code>dacore/rom_general.py</code></a></td>
 <p>本記事の他の節にある <span class="math inline">\(U_x\)</span> と
 <span class="math inline">\(U_z\)</span>
 を用いた数値例とは観測構成が異なります。<strong>代表点以外の温度観測の試験と、変位を追加したholdout試験は別の実験</strong>であり、数値を混ぜません。</p>
-<h4 id="zは次のrom計算が読む60メンバー分の表">①
+<h4 id="①-zは次のrom計算が読む60メンバー分の表">①
 Zは「次のROM計算が読む、60メンバー分の表」</h4>
 <p>コードの <code>Z</code>
 は60行×7列です。行はメンバー、列は代表5点の温度と2つのパラメータです。</p>
@@ -2977,7 +2986,7 @@ T_0^{(60)}&amp;T_1^{(60)}&amp;T_2^{(60)}&amp;T_3^{(60)}&amp;T_4^{(60)}&amp;q^{(6
 </table>
 <p><span class="math inline">\(h\)</span> は表面熱伝達率［W/(m²
 K)］ではありません。30秒まで予報した直後なら、この表の温度は<strong>30秒の補正前温度</strong>です。</p>
-<h4 id="代表点以外のセンサは観測予報に入れる">②
+<h4 id="②-代表点以外のセンサは観測予報に入れる">②
 代表点以外のセンサは「観測予報」に入れる</h4>
 <p>代表5点を取り出す行列を <span class="math inline">\(P\)</span>
 、固定したPOD基底を <span class="math inline">\(\Phi\)</span>
@@ -3163,7 +3172,7 @@ class="math inline">\(\mathbf u_0,D\)</span> から、</p>
 \]</span></p>
 <p>を作ります。コードではS1/S2の2成分だけを温度P2/P0の予報と並べ、4成分の
 <code>Yf</code> にします。C/Dは評価専用で、観測に含めません。</p>
-<h4 id="共分散から観測との差-7変数の修正量を求める">③
+<h4 id="③-共分散から観測との差--7変数の修正量を求める">③
 共分散から「観測との差 → 7変数の修正量」を求める</h4>
 <p><code>dacore/enkf.py</code>
 は、状態と観測予報の偏差から次を計算します。</p>
@@ -3303,7 +3312,7 @@ r^{(m)})^{\mathsf T}\)</span> で、§3-4 の「ずれ ×
 換算表」と同じ計算です。</p>
 <p><strong>最後の行で、温度の5列だけでなく、qの列とhの列も書き換えます。</strong>
 変位は観測成分であり、独立した変位状態を更新するわけではありません。</p>
-<h4 id="qhの補正で実際に何をしているか">④
+<h4 id="④-qhの補正で実際に何をしているか">④
 Q・hの補正で、実際に何をしているか</h4>
 <p>メンバー <span class="math inline">\(m\)</span> の4成分の差を、</p>
 <p><span class="math display">\[
@@ -3346,7 +3355,8 @@ K_{h,s}
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">5</span>] <span class="op">=</span> np.clip(Z[:, <span class="dv">5</span>], <span class="dv">0</span>, <span class="dv">3</span>)       <span class="co"># Qは0〜45 W</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Z[:, <span class="dv">6</span>] <span class="op">=</span> np.clip(Z[:, <span class="dv">6</span>], <span class="fl">.0001</span>, <span class="fl">.2</span>)  <span class="co"># hは0.0001〜0.2 W/K</span></span></code></pre></div>
-<h4 id="書き換えたzを次のromが読む">⑤ 書き換えたZを、次のROMが読む</h4>
+<h4 id="⑤-書き換えたzを次のromが読む">⑤
+書き換えたZを、次のROMが読む</h4>
 <p>呼び出し側の <code>Z = enkf_update(...)</code> で、補正後の表が
 <code>Z</code>
 に入ります。次の予報では、その表を次のように使います（holdout試験の呼び出し）。</p>
@@ -3398,13 +3408,13 @@ class="math inline">\(t&lt;300\)</span> 秒で1、 <span
 class="math inline">\(t\ge300\)</span> 秒で0です。</p>
 <p><strong>温度の補正は「次の計算の出発点」に、Q・hの補正は「次の計算の発熱・放熱条件」に反映されます。</strong>
 Cとノード間Kはこのデータ同化で更新しません。各メンバーのq・hは観測間では一定です。300秒以降はヒータ入力が0になりますが、推定しているq自体を0に設定するわけではありません。</p>
-<h4 id="更新すると正しく同定できるは別">⑥
+<h4 id="⑥-更新すると正しく同定できるは別">⑥
 「更新する」と「正しく同定できる」は別</h4>
 <p>Qを下げることとhを上げることは、どちらも温度上昇を抑え得ます。観測の時刻歴に十分な違いが現れないと、両者を区別しにくくなります。</p>
 <p>したがって、<strong>Q・hを状態に入れれば自動的に同定できるわけではありません。</strong>
 観測予報との共分散が補正を伝える経路であり、観測情報が不足したりモデル誤差があったりすれば、温度・変位が合ってもQ・hには誤差が残り得ます。代表点以外の観測についても、使えることと良い配置であることは別です。</p>
 <hr />
-<h2 id="記号">4. 記号</h2>
+<h2 id="4-記号">4. 記号</h2>
 <table>
 <thead>
 <tr class="header">
@@ -3443,7 +3453,7 @@ class="math inline">\(i=1,\dots,60\)</span> ）</td>
 </tr>
 </tbody>
 </table>
-<h2 id="ステップ1状態-分からないものを7つ並べる">5. ステップ1：状態 ―
+<h2 id="5-ステップ1状態--分からないものを7つ並べる">5. ステップ1：状態 ―
 分からないものを7つ並べる</h2>
 <p>7個の値を並べます。</p>
 <p><span class="math display">\[
@@ -3478,7 +3488,7 @@ z=(T_0,\ T_1,\ T_2,\ T_3,\ T_4,\ q,\ h)^{\mathsf T}
 </table>
 <p>最初の 60 メンバーの平均は <span
 class="math inline">\(Q=17.09\)</span> W でした。</p>
-<h2 id="ステップ2予報-各メンバーを-30-秒進める">6. ステップ2：予報 ―
+<h2 id="6-ステップ2予報--各メンバーを-30-秒進める">6. ステップ2：予報 ―
 各メンバーを 30 秒進める</h2>
 <p>各メンバー <span class="math inline">\(i\)</span>
 を、<strong>自分の</strong> <span class="math inline">\(q_i\)</span> と
@@ -3499,7 +3509,7 @@ class="math inline">\(K_{kj}\)</span>
 class="math inline">\(h\)</span>
 は時間で変えずに、そのまま次の時刻へ持ち越します。</li>
 </ul>
-<h2 id="ステップ3観測演算子-メンバーの状態からセンサの読みを作る">7.
+<h2 id="7-ステップ3観測演算子--メンバーの状態からセンサの読みを作る">7.
 ステップ3：観測演算子 ― メンバーの状態から「センサの読み」を作る</h2>
 <p>この記事の構成では、センサは4つです。</p>
 <p><span class="math display">\[
@@ -3514,7 +3524,7 @@ class="math inline">\(T_0\)</span> をそのまま取り出せば済みます。
 代表点以外のセルに置いた場合の手続きを、次の §7-0 で説明します。</p>
 <p><strong>変位の2つ</strong>は状態に入っていないので、温度から計算します（§7-1
 以降）。変位計の A・O も、もともと代表点ではありません。</p>
-<h3 id="温度計は代表5点に置かなくてよい-観測演算子の一般形">7-0.
+<h3 id="7-0-温度計は代表5点に置かなくてよい--観測演算子の一般形">7-0.
 温度計は代表5点に置かなくてよい ― 観測演算子の一般形</h3>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：ROM
@@ -3525,7 +3535,7 @@ class="math inline">\(T_0\)</span> をそのまま取り出せば済みます。
 <h4
 id="手続き1任意のセルの温度を代表5点の温度で書く">手続き1：任意のセルの温度を、代表5点の温度で書く</h4>
 <p>温度場全体を、POD の5つの型（モード）の重ね合わせで近似します（<a
-href="blog_004_pod_selected_rom.md">blog_004 §2・§5</a>）。</p>
+href="blog004.html">blog_004 §2・§5</a>）。</p>
 <p><span class="math display">\[
 T \approx \bar T + U_r\,a
 \]</span></p>
@@ -3636,7 +3646,7 @@ class="math inline">\(T_j = T_k\)</span>
 別の仕組みを使っているわけではありません。</p>
 <h4
 id="手続き3代表点以外のセルでは重みが5点に分かれる">手続き3：代表点以外のセルでは、重みが5点に分かれる</h4>
-<p><a href="blog_007_rom_applicability.md">blog_007 §10</a>
+<p><a href="blog007.html">blog_007 §10</a>
 で温度計を置いた、代表点ではない2セルの重みです。</p>
 <table style="width:100%;">
 <colgroup>
@@ -3823,7 +3833,7 @@ class="math inline">\(U_{rP}^{-1}\)</span> ）、
 <code>Z[:, :NPT] - mean[pod]</code>
 が各メンバーの5点温度のずれです。</p>
 <h4 id="実際にデータ同化できたか">実際にデータ同化できたか</h4>
-<p><a href="blog_007_rom_applicability.md">blog_007 §10</a>
+<p><a href="blog007.html">blog_007 §10</a>
 で、温度計2本を代表点以外のセルに置いてデータ同化しました（温度のみ、変位なし、真値は
 ROM の双子実験、5 seed 平均）。</p>
 <table>
@@ -3862,7 +3872,7 @@ class="math inline">\(\psi_j\)</span>
 が小さいセル）だけに置いた場合は確かめていません（<strong>未確認</strong>）。</li>
 <li>熱源の位置・形が変わって型が変わると、重み <span
 class="math inline">\(g_j\)</span> も作り直しが必要です（<a
-href="blog_007_rom_applicability.md">blog_007</a>）。</li>
+href="blog007.html">blog_007</a>）。</li>
 </ul>
 <blockquote>
 <p><strong>この節で分かったこと</strong> - ROM
@@ -3876,7 +3886,7 @@ class="math inline">\(g_j\)</span>
 実際に、代表点以外の2セルに温度計を置いてもデータ同化でき、この例では
 P2＋P0 より誤差が小さかった（0.258 対 0.528 K）。</p>
 </blockquote>
-<h3 id="温度から変位をどう計算するか">7-1.
+<h3 id="7-1-温度から変位をどう計算するか">7-1.
 温度から変位をどう計算するか</h3>
 <p>変位は状態に入れないので、<strong>温度から変位を計算する仕組み</strong>が要ります。
 ここでは、いちばん素直な「熱感度 <span class="math inline">\(W\)</span>
@@ -4049,7 +4059,7 @@ id="ステップ3ところがデータ同化は5点の温度しか持ってい�
 W が必要とするもの     ：5,040 節点の温度
                         ↑ 5,035 点ぶんの穴がある</code></pre>
 <p>この穴を埋めるのが <strong>POD</strong> です（<a
-href="blog_004_pod_selected_rom.md">blog_004 §5</a>）。 <span
+href="blog004.html">blog_004 §5</a>）。 <span
 class="math inline">\(T_{\mathrm{all}}\)</span> は全節点の温度です。</p>
 <p><span class="math display">\[
 T_{\mathrm{all}}=\bar T+U_r\,a,\qquad a=U_{rP}^{+}\big(T_5-\bar T_P\big)
@@ -4220,7 +4230,7 @@ class="math inline">\(D\)</span> は
 <li>全 5,040 節点ぶんの <span class="math inline">\(D\)</span>
 も同じ6回で作れます（<code>run/build_full_disp_operator.py</code>）。
 FrontISTR は1回解くと全節点の変位を返すためで、<a
-href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a> の
+href="blog008.html">blog_008 §5</a> の
 15,120 通りの候補から変位計を選ぶ計算は、これを使っています。</li>
 </ul>
 <h4 id="できあがった-d">できあがった <span
@@ -4267,7 +4277,7 @@ class="math inline">\(D_5\)</span></th>
 の列を見ると、モード2が増えると A は下がり（−0.0088）、O
 は上がり（+0.0120）ます。
 <strong>モード2は「片側だけ熱い」パターンなので、反りを作るモード</strong>だと読めます。</p>
-<h3 id="実際の行列計算の順に">7-2. 実際の行列（計算の順に）</h3>
+<h3 id="7-2-実際の行列計算の順に">7-2. 実際の行列（計算の順に）</h3>
 <p>§7-1 でできた道具を、データ同化で使う順に並べます。</p>
 <table>
 <colgroup>
@@ -4456,7 +4466,7 @@ class="math inline">\(W=D\,U_{rP}^{+}\)</span>
 <p><span class="math display">\[
 \begin{pmatrix}U_z(A)\\U_z(O)\end{pmatrix}=\bar u+W\,(T-\bar T_P)
 \]</span></p>
-<h3 id="メンバーで計算してみる-t30-秒の予報メンバー1">7-3.
+<h3 id="7-3-1メンバーで計算してみる-t30-秒の予報メンバー1">7-3.
 1メンバーで計算してみる（ <span class="math inline">\(t=30\)</span>
 秒の予報、メンバー1）</h3>
 <table>
@@ -4505,7 +4515,7 @@ class="math inline">\(q=1.68\)</span>
 メンバー全部でこれを計算した平均が、 <span
 class="math inline">\(t=30\)</span> 秒の予報平均 A＝6.648 µm、O＝5.186
 µm です（§12 の表）。</p>
-<h3 id="観測データ測った値の作り方">7-4.
+<h3 id="7-4-観測データ測った値の作り方">7-4.
 観測データ（測った値）の作り方</h3>
 <p>本研究は双子実験なので、「測った値」も計算で作りました。</p>
 <ol type="1">
@@ -4529,7 +4539,7 @@ class="math inline">\(t=30\)</span> 秒で A＝0.97 µm、O＝−0.43
 µm）とは、ROM の係数を決めた 15 W の計算では 0.001 µm
 程度しか違いませんでした。新しく計算した条件での違いは、別途計算中です。</p>
 </blockquote>
-<h3 id="変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
+<h3 id="7-5-変位は温度をどう直したか-t30-秒と-t150-秒">7-5.
 変位は温度をどう直したか（ <span class="math inline">\(t=30\)</span>
 秒と <span class="math inline">\(t=150\)</span> 秒）</h3>
 <p>更新の式（§11）は、ずれを「温度センサの分」と「変位計の分」に分けて書けます。</p>
@@ -4612,7 +4622,7 @@ class="math inline">\(d_T,d_u\)</span> はそれぞれのずれ）</p>
 class="math inline">\(Q\)</span>
 も、変位計のずれだけで直されています</strong>。</li>
 </ul>
-<h3 id="b.-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
+<h3 id="7-5b-なぜ変位を測ると温度計のない点の温度まで直るのか">7-5b.
 なぜ変位を測ると「温度計のない点」の温度まで直るのか</h3>
 <p>ここがいちばん分かりにくいところなので、3段階に分けて説明します。</p>
 <figure>
@@ -4622,7 +4632,7 @@ alt="変位観測が温度を直す仕組み" />
 </figure>
 <p><em>本番計算（seed 20260913）の実際の値。温度計は P2・P0
 の2本だけで、P1・P3・P4 には温度計がない。</em></p>
-<h4 id="変位計1本が5点すべての温度に触れている">①
+<h4 id="①-変位計1本が5点すべての温度に触れている">①
 変位計1本が、5点すべての温度に触れている</h4>
 <p>7-2 で見たとおり、変位は5点の温度の足し算です。</p>
 <p><span class="math display">\[
@@ -4636,7 +4646,7 @@ class="math inline">\(T\)</span> は基準からの温度差）</p>
 <p><strong>温度計は1本で1点しか見られませんが、変位計は1本で5点すべてに触れます。</strong>
 これが決定的な違いです。 特に P3（係数 +0.64 と
 +0.60）は、どちらの変位計にも強く効いています。</p>
-<h4 id="変位がずれていれば5点の温度のどこかがずれている">②
+<h4 id="②-変位がずれていれば5点の温度のどこかがずれている">②
 変位がずれていれば、5点の温度のどこかがずれている</h4>
 <p>変位の予測が真値より大きければ、上の式の右辺が大きすぎる、つまり<strong>どこかの点の温度が高すぎる</strong>ということです。</p>
 <p>ただし、これだけでは「どの点が悪いのか」は決まりません。
@@ -4644,7 +4654,7 @@ class="math inline">\(T\)</span> は基準からの温度差）</p>
 まだ分かっていない温度の幅」を点ごとに並べたものです。 P3 が 1.45 µm
 といちばん大きく、「P3
 の温度がずれていると、変位が大きくずれる」と読めます。</p>
-<h4 id="どの点をどれだけ直すかは60メンバーのばらつきが決める">③
+<h4 id="③-どの点をどれだけ直すかは60メンバーのばらつきが決める">③
 どの点をどれだけ直すかは、60メンバーのばらつきが決める</h4>
 <p>最終的に決めるのは、60メンバーの共分散です。60通りの計算の中には</p>
 <blockquote>
@@ -4754,7 +4764,7 @@ class="math inline">\(K\)</span> そのもので、<strong>人が「P3
 </blockquote>
 <p>これが、温度2点だけの 0.503 K が、変位2点を足すと 0.160 K
 になる理由です（§7-6）。</p>
-<h3 id="変位計を入れなかった場合との比較">7-6.
+<h3 id="7-6-変位計を入れなかった場合との比較">7-6.
 変位計を入れなかった場合との比較</h3>
 <p>同じ計算で、変位計を外して温度2点（P2・P0）だけにした結果です（5 seed
 平均、<code>run/run_da_compare.py</code>）。</p>
@@ -4781,14 +4791,14 @@ class="math inline">\(Q\)</span></th>
 </tbody>
 </table>
 <p>（真値 15 W）</p>
-<h2 id="どの場所の変位でも観測にできる-理論の組み立て">7-7.
+<h2 id="7-7-どの場所の変位でも観測にできる--理論の組み立て">7-7.
 どの場所の変位でも観測にできる ― 理論の組み立て</h2>
-<p><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+<p><a href="blog008.html">blog_008
 §5</a> では、A・O
 ではなく<strong>別の場所</strong>の変位を観測に使いました。 ROM
 が追いかけるのは代表5点の温度だけなのに、なぜ任意の場所の変位を観測にできるのか。ここを順に組み立てます。</p>
 <h3
-id="rom-の状態は温度5つだけ-そこから任意の点の変位が計算できれば観測に使える">7-7-1.
+id="7-7-1-rom-の状態は温度5つだけ--そこから任意の点の変位が計算できれば観測に使える">7-7-1.
 ROM の状態は温度5つだけ ―
 そこから任意の点の変位が計算できれば、観測に使える</h3>
 <p>EnKF
@@ -4805,7 +4815,7 @@ class="math inline">\(U_x\)</span> です。</p>
 class="math inline">\(U_x\)</span> を計算できるか？</strong></p>
 </blockquote>
 <p>これができれば観測に使えます。できなければ使えません。</p>
-<h3 id="段階でつなぐ">7-7-2. 3段階でつなぐ</h3>
+<h3 id="7-7-2-3段階でつなぐ">7-7-2. 3段階でつなぐ</h3>
 <p>答えは<strong>できる</strong>で、3つの段階をつなぐだけです。</p>
 <pre><code>  5点の温度 T
       │ ① POD（gappy 復元）
@@ -4831,7 +4841,7 @@ u=\bar u+D\,a,\qquad D=WU_r
 <p><strong>③ 欲しい成分だけ取り出す</strong></p>
 <p><span class="math inline">\(u\)</span> は 15,120 個の数（5,040 節点 ×
 3 方向）です。そのうち1つを選ぶだけです。</p>
-<h3 id="まとめると5点の温度の一次式になる">7-7-3.
+<h3 id="7-7-3-まとめると5点の温度の一次式になる">7-7-3.
 まとめると「5点の温度の一次式」になる</h3>
 <p>①〜③をつなぐと、<strong>どの場所のどの方向の変位も、5点の温度の一次式</strong>で書けます。</p>
 <p><span class="math display">\[
@@ -4875,8 +4885,8 @@ class="math inline">\(U_x,U_y,U_z\)</span> のどれか）</td>
 <p><strong><span class="math inline">\(w\)</span>
 が5つの数になることが肝心です。</strong>
 状態の温度が5つしかないので、観測演算子も5つの係数で書き切れます。</p>
-<h3 id="実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008 §5
-で選んだ2点）</h3>
+<h3 id="7-7-4-実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008
+§5 で選んだ2点）</h3>
 <p><strong>選定1点目：節点 4994、(9.7, −36.2, 100.5) mm の <span
 class="math inline">\(U_x\)</span></strong></p>
 <table>
@@ -4947,7 +4957,7 @@ class="math inline">\(U_z\)</span></strong></p>
 </tbody>
 </table>
 <p>（ <span class="math inline">\(\bar u = 2.505\)</span> µm）</p>
-<h3 id="enkf-にどう入るか">7-7-5. EnKF にどう入るか</h3>
+<h3 id="7-7-5-enkf-にどう入るか">7-7-5. EnKF にどう入るか</h3>
 <p>観測演算子が決まれば、あとは §7-3 以降と同じです。<strong>EnKF
 の式は一切変わりません。</strong></p>
 <p>メンバー <span class="math inline">\(m\)</span>
@@ -4980,7 +4990,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a hr
 <tr class="even">
 <td>代表点でないセルの温度</td>
 <td><span class="math inline">\(T_j=\bar T_j+\psi_j U_{rP}^{+}(T-\bar
-T_P)\)</span> （<a href="blog_007_rom_applicability.md">blog_007
+T_P)\)</span> （<a href="blog007.html">blog_007
 §10</a>）</td>
 </tr>
 <tr class="odd">
@@ -4992,7 +5002,7 @@ T_P)\)</span></td>
 </table>
 <p><strong>どれも「5点温度の一次式」という同じ形</strong>です。EnKF
 から見れば区別はありません。</p>
-<h3 id="なぜ事前計算だけで済むのか">7-7-6.
+<h3 id="7-7-6-なぜ事前計算だけで済むのか">7-7-6.
 なぜ事前計算だけで済むのか</h3>
 <p><span class="math inline">\(w_{(i,c)}=D_{(i,c)}U_{rP}^{+}\)</span>
 の両方が<strong>時間によらない固定の行列</strong>だからです。</p>
@@ -5031,9 +5041,9 @@ class="math inline">\(D\)</span>
 を掛けるだけなので、<strong>15,120 通りの候補すべてについて <span
 class="math inline">\(w\)</span> を作っても追加の FEM
 は不要</strong>です。 <a
-href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a>
+href="blog008.html">blog_008 §5</a>
 で全候補を総当たりで採点できたのは、これが理由です。</p>
-<h3 id="成り立つ条件と限界">7-7-7. 成り立つ条件と限界</h3>
+<h3 id="7-7-7-成り立つ条件と限界">7-7-7. 成り立つ条件と限界</h3>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -5054,7 +5064,7 @@ href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a>
 <tr class="even">
 <td><strong>温度場が5つのモードで表せること</strong></td>
 <td>①が成り立つ前提。型が変われば作り直し（<a
-href="blog_007_rom_applicability.md">blog_007 §9</a>）</td>
+href="blog007.html">blog_007 §9</a>）</td>
 </tr>
 <tr class="odd">
 <td>変位の観測点が FEM メッシュ上にあること</td>
@@ -5069,7 +5079,7 @@ href="blog_007_rom_applicability.md">blog_007 §9</a>）</td>
 変位計を増やすと効くのは、<strong>ノイズに対して有利になる</strong>のと、<strong>5つの数の組み合わせの見え方が変わる</strong>ためです。</p>
 </blockquote>
 <hr />
-<h2 id="ステップ4平均とばらつき偏差">8.
+<h2 id="8-ステップ4平均とばらつき偏差">8.
 ステップ4：平均とばらつき（偏差）</h2>
 <p><span class="math display">\[
 \bar z=\frac{1}{60}\sum_i z_i,\qquad \bar Y=\frac{1}{60}\sum_i Y_i
@@ -5079,7 +5089,7 @@ dz_i=z_i-\bar z,\qquad dY_i=Y_i-\bar Y
 \]</span></p>
 <p>偏差は 1.02
 倍に広げます（インフレーション。ばらつきが縮みすぎて更新が止まるのを防ぐ）。</p>
-<h2 id="ステップ5共分散-一緒に動く関係を-60-個から数える">9.
+<h2 id="9-ステップ5共分散--一緒に動く関係を-60-個から数える">9.
 ステップ5：共分散 ― 「一緒に動く関係」を 60 個から数える</h2>
 <p><span class="math display">\[
 C_{zy}=\frac{1}{59}\sum_i dz_i\,dY_i^{\mathsf T}\qquad(7\times4)
@@ -5098,7 +5108,7 @@ C_{yy}=\frac{1}{59}\sum_i dY_i\,dY_i^{\mathsf T}\qquad(4\times4)
 class="math inline">\(C_{zy}\)</span> の <span
 class="math inline">\((q,\ T(\mathrm{P2}))\)</span>
 成分は正になります。</p>
-<h2 id="ステップ6カルマンゲイン">10. ステップ6：カルマンゲイン</h2>
+<h2 id="10-ステップ6カルマンゲイン">10. ステップ6：カルマンゲイン</h2>
 <p><span class="math display">\[
 K=C_{zy}\,\big(C_{yy}+R\big)^{-1},\qquad R=\mathrm{diag}(0.3^2,\ 0.3^2,\
 0.3^2,\ 0.3^2)
@@ -5108,7 +5118,7 @@ K=C_{zy}\,\big(C_{yy}+R\big)^{-1},\qquad R=\mathrm{diag}(0.3^2,\ 0.3^2,\
 <p><span class="math inline">\(K\)</span> は 7×4 の行列で、「センサ
 <span class="math inline">\(j\)</span> のずれ 1 単位で、状態 <span
 class="math inline">\(k\)</span> をどれだけ直すか」を表します。</p>
-<h2 id="ステップ7更新-ずれを7つの状態に配る">11. ステップ7：更新 ―
+<h2 id="11-ステップ7更新--ずれを7つの状態に配る">11. ステップ7：更新 ―
 ずれを7つの状態に配る</h2>
 <p>各メンバーで</p>
 <p><span class="math display">\[
@@ -5125,9 +5135,9 @@ class="math inline">\(R\)</span>
 <p><span class="math display">\[
 \bar z\leftarrow\bar z+K\,\big(y-\bar Y\big)
 \]</span></p>
-<h2 id="発熱量-q-の推定-式を1行ずつ">12. 発熱量 <span
+<h2 id="12-発熱量-q-の推定--式を1行ずつ">12. 発熱量 <span
 class="math inline">\(Q\)</span> の推定 ― 式を1行ずつ</h2>
-<h3 id="q-の更新式を取り出す">12-1. <span
+<h3 id="12-1-q-の更新式を取り出す">12-1. <span
 class="math inline">\(q\)</span> の更新式を取り出す</h3>
 <p>§11 の更新式の、 <span class="math inline">\(q\)</span>
 の行だけを書きます。</p>
@@ -5152,7 +5162,7 @@ K_{q,:}=\mathrm{Cov}(q,Y)\,\big(C_{yy}+R\big)^{-1}
 <p>1 つのセンサだけなら <span
 class="math inline">\(K_q=\mathrm{Cov}(q,y)/(\mathrm{Var}(y)+r)\)</span>
 という割り算になりますが、4つあるので、センサどうしの重なり（同じ情報を2回数えない）も含めて逆行列で決まります。</p>
-<h3 id="t30-秒の実際の値">12-2. <span
+<h3 id="12-2-t30-秒の実際の値">12-2. <span
 class="math inline">\(t=30\)</span> 秒の実際の値</h3>
 <table>
 <thead>
@@ -5282,7 +5292,7 @@ W）。式の <span class="math inline">\(-4.17\)</span> W との差 0.04 W
 class="math inline">\(\varepsilon_i\)</span> や上下限（ <span
 class="math inline">\(0\le q\le3\)</span>
 ）の影響と考えていますが、内訳は確かめていません。</p>
-<h3 id="t150-秒の実際の値">12-3. <span
+<h3 id="12-3-t150-秒の実際の値">12-3. <span
 class="math inline">\(t=150\)</span> 秒の実際の値</h3>
 <table>
 <thead>
@@ -5340,7 +5350,7 @@ class="math inline">\(t=30\)</span> ）→ 0.0087（ <span
 class="math inline">\(t=150\)</span> ）に縮み、それに合わせて <span
 class="math inline">\(K_q\)</span> も小さくなっています。</li>
 </ul>
-<h2 id="状態にない-q-がなぜ直るのか">13. 状態にない <span
+<h2 id="13-状態にない-q-がなぜ直るのか">13. 状態にない <span
 class="math inline">\(Q\)</span> が、なぜ直るのか</h2>
 <p>センサは <span class="math inline">\(Q\)</span>
 を直接は測っていません。それでも <span
@@ -5353,7 +5363,7 @@ class="math inline">\(\mathrm{Cov}(q,Y)\neq0\)</span> だからです。</p>
 class="math inline">\(\mathrm{Cov}(q,Y)\)</span>
 で、これを通して、測った温度・変位のずれが <span
 class="math inline">\(Q\)</span> に振り分けられます。</p>
-<h2 id="全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
+<h2 id="14-全-20-回の推移seed-20260913">14. 全 20 回の推移（seed
 20260913）</h2>
 <table>
 <colgroup>
@@ -5488,7 +5498,7 @@ class="math inline">\(Q\)</span>
 - この seed の最終値は 14.36 W、5 seed 平均では 14.89 W（真値 15
 W）。</p>
 </blockquote>
-<h2 id="結果-何が分かったか">15. 結果 ― 何が分かったか</h2>
+<h2 id="15-結果--何が分かったか">15. 結果 ― 何が分かったか</h2>
 <blockquote>
 <p><strong>この記事で分かったこと</strong> 1.
 <strong>変位は状態に入れない。</strong> 温度から行列1つで計算する（
@@ -5533,10 +5543,10 @@ W）</td>
 </tbody>
 </table>
 <p>（5 seed 平均。 <code>run/run_da_compare.py</code>）</p>
-<h2 id="この研究の優位性と先行研究との関係">16.
+<h2 id="16-この研究の優位性と先行研究との関係">16.
 この研究の優位性と、先行研究との関係</h2>
 <p><strong>この記事で分かったことが、研究としてどういう位置にあるか</strong>は、<a
-href="blog_008_novelty_displacement_assimilation.md">blog_008</a>
+href="blog008.html">blog_008</a>
 に独立した記事としてまとめました。 要点だけ書くと、次のとおりです。</p>
 <table>
 <colgroup>
@@ -5558,13 +5568,13 @@ href="blog_008_novelty_displacement_assimilation.md">blog_008</a>
 href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
 2024</a>
 など）か、変位を直接測って補正する形が一般的。<strong>温度と変位を同時に観測としてデータ同化に入れた例は、調べた範囲で見当たらない</strong></td>
-<td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+<td><a href="blog008.html">blog_008
 §3</a></td>
 </tr>
 <tr class="even">
 <td><strong>主張</strong></td>
 <td>熱変形を「補正すべき対象」から「<strong>温度場を知るための観測情報</strong>」に位置づけ直す</td>
-<td><a href="blog_008_novelty_displacement_assimilation.md">blog_008
+<td><a href="blog008.html">blog_008
 §8-2</a></td>
 </tr>
 <tr class="odd">
@@ -5580,7 +5590,7 @@ POD、Q-DEIM、EnKF、目的に応じたセンサ配置の考え方には先行�
 al. 2024</a>、<a href="https://arxiv.org/abs/2507.02500">goal-oriented
 sensor placement 2025</a>）。
 新しいのは<strong>組み合わせ方と、変位を観測に入れた点</strong>です。</p>
-<h2 id="限界やっていないこと注意">17.
+<h2 id="17-限界やっていないこと注意">17.
 限界（やっていないこと・注意）</h2>
 <ul>
 <li><strong>真値は計算で作った模擬データです。</strong>
@@ -5591,16 +5601,16 @@ sensor placement 2025</a>）。
 0.14 µm。 <code>run/limit_realsolver_truth.py</code>）。ただし ROM
 を作るのに使った条件そのものなので、合うのは当然です。新しく計算した条件（25
 W、間欠加熱）での試験は <a
-href="blog_007_rom_applicability.md">blog_007</a> にあります。25 W
+href="blog007.html">blog_007</a> にあります。25 W
 でも全セルがノイズ 0.3 K 未満で合いました。</li>
 <li>温度センサの P2・P0 は、2本とも A 側（+X
 側）にあります。温度だけでデータ同化する比較では、A 側と O 側に分けた
 P2＋P4 のほうが良い結果でした（<a
-href="blog_005_optimal_sensor_placement.md">blog_005
+href="blog005.html">blog_005
 §4-6</a>）。この記事の計算を P2＋P4 でやり直す試験はしていません。</li>
 <li>放熱 <span class="math inline">\(h\)</span> は 600
 秒の計算では当たりません（<a
-href="blog_003_ensemble_kalman_filter.md">blog_003 §4-0-b</a>）。</li>
+href="blog003.html">blog_003 §4-0-b</a>）。</li>
 </ul>
 </body>
 </html>

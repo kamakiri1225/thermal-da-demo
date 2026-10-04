@@ -245,14 +245,14 @@
 <nav id="TOC" role="doc-toc">
 <ul>
 <li><a
-href="#blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる"
-id="toc-blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
+href="#blog_007作った-rom-はどこまで使えるか--適用範囲を実計算で確かめる"
+id="toc-blog_007作った-rom-はどこまで使えるか--適用範囲を実計算で確かめる">blog_007：作った
 ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</a>
 <ul>
 <li><a href="#この記事で確かめること"
 id="toc-この記事で確かめること">この記事で確かめること</a></li>
-<li><a href="#この記事の前提-rom-は-openfoam-の計算1本から作った"
-id="toc-この記事の前提-rom-は-openfoam-の計算1本から作った">0.
+<li><a href="#0-この記事の前提--rom-は-openfoam-の計算1本から作った"
+id="toc-0-この記事の前提--rom-は-openfoam-の計算1本から作った">0.
 この記事の前提 ― ROM は OpenFOAM の計算1本から作った</a>
 <ul>
 <li><a href="#この記事で比べる3つの計算"
@@ -260,16 +260,16 @@ id="toc-この記事で比べる3つの計算">この記事で比べる3つの�
 <li><a href="#なぜ分けるのか"
 id="toc-なぜ分けるのか">なぜ分けるのか</a></li>
 </ul></li>
-<li><a href="#結論" id="toc-結論">1. 結論</a>
+<li><a href="#1-結論" id="toc-1-結論">1. 結論</a>
 <ul>
 <li><a href="#一言でいうと" id="toc-一言でいうと">一言でいうと</a></li>
 <li><a href="#判定の目安" id="toc-判定の目安">判定の目安</a></li>
 <li><a href="#条件ごとの判定"
 id="toc-条件ごとの判定">条件ごとの判定</a></li>
 </ul></li>
-<li><a href="#まず押さえる-rom-そのものとデータ同化は別の話"
-id="toc-まず押さえる-rom-そのものとデータ同化は別の話">2. まず押さえる ―
-ROM そのものと、データ同化は別の話</a>
+<li><a href="#2-まず押さえる--rom-そのものとデータ同化は別の話"
+id="toc-2-まず押さえる--rom-そのものとデータ同化は別の話">2.
+まず押さえる ― ROM そのものと、データ同化は別の話</a>
 <ul>
 <li><a href="#問い-a-の答え先に書きます"
 id="toc-問い-a-の答え先に書きます">問い A
@@ -277,30 +277,30 @@ id="toc-問い-a-の答え先に書きます">問い A
 <li><a href="#グラフで確かめるデータ同化なし"
 id="toc-グラフで確かめるデータ同化なし">グラフで確かめる（データ同化なし）</a></li>
 <li><a
-href="#間欠加熱で合わなかった原因-ヒータの-onoff-を0300-秒と決め打ちしていた"
-id="toc-間欠加熱で合わなかった原因-ヒータの-onoff-を0300-秒と決め打ちしていた">間欠加熱で合わなかった原因
+href="#間欠加熱で合わなかった原因--ヒータの-onoff-を0300-秒と決め打ちしていた"
+id="toc-間欠加熱で合わなかった原因--ヒータの-onoff-を0300-秒と決め打ちしていた">間欠加熱で合わなかった原因
 ― ヒータの ON/OFF を「0〜300 秒」と決め打ちしていた</a></li>
 </ul></li>
-<li><a href="#rom-は何から作ったか" id="toc-rom-は何から作ったか">3. ROM
-は何から作ったか</a></li>
-<li><a href="#確かめに使った条件" id="toc-確かめに使った条件">4.
+<li><a href="#3-rom-は何から作ったか" id="toc-3-rom-は何から作ったか">3.
+ROM は何から作ったか</a></li>
+<li><a href="#4-確かめに使った条件" id="toc-4-確かめに使った条件">4.
 確かめに使った条件</a></li>
-<li><a href="#発熱量が変わる場合25-w" id="toc-発熱量が変わる場合25-w">5.
-発熱量が変わる場合（25 W）</a>
+<li><a href="#5-発熱量が変わる場合25-w"
+id="toc-5-発熱量が変わる場合25-w">5. 発熱量が変わる場合（25 W）</a>
 <ul>
 <li><a href="#rom-単体データ同化なしの予測"
 id="toc-rom-単体データ同化なしの予測">ROM
 単体（データ同化なし）の予測</a></li>
 <li><a href="#温度分布の型" id="toc-温度分布の型">温度分布の型</a></li>
-<li><a href="#データ同化すると温度-p2p4-変位-ao5-seed-平均30300-秒"
-id="toc-データ同化すると温度-p2p4-変位-ao5-seed-平均30300-秒">データ同化すると（温度
+<li><a href="#データ同化すると温度-p2p4--変位-ao5-seed-平均30300-秒"
+id="toc-データ同化すると温度-p2p4--変位-ao5-seed-平均30300-秒">データ同化すると（温度
 P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</a></li>
 <li><a href="#データ同化した温度をopenfoam-の温度と時刻歴で比べる"
 id="toc-データ同化した温度をopenfoam-の温度と時刻歴で比べる">データ同化した温度を、OpenFOAM
 の温度と時刻歴で比べる</a></li>
 </ul></li>
-<li><a href="#復元した温度場は代表5点以外でも合っているか"
-id="toc-復元した温度場は代表5点以外でも合っているか">6.
+<li><a href="#6-復元した温度場は代表5点以外でも合っているか"
+id="toc-6-復元した温度場は代表5点以外でも合っているか">6.
 復元した温度場は、代表5点以外でも合っているか</a>
 <ul>
 <li><a href="#結果" id="toc-結果">結果</a></li>
@@ -310,8 +310,8 @@ id="toc-読み取れること">読み取れること</a></li>
 id="toc-追加ヒータの-onoff-をモデルに与えると間欠加熱でも合う">【追加】ヒータの
 ON/OFF をモデルに与えると、間欠加熱でも合う</a></li>
 </ul></li>
-<li><a href="#加熱のしかたが変わる場合間欠加熱"
-id="toc-加熱のしかたが変わる場合間欠加熱">7.
+<li><a href="#7-加熱のしかたが変わる場合間欠加熱"
+id="toc-7-加熱のしかたが変わる場合間欠加熱">7.
 加熱のしかたが変わる場合（間欠加熱）</a>
 <ul>
 <li><a href="#rom-単体データ同化なしの予測-1"
@@ -321,10 +321,10 @@ id="toc-rom-単体データ同化なしの予測-1">ROM
 id="toc-データ同化すると反り-ao-の誤差30600-秒の平均">データ同化すると（反り
 A−O の誤差、30〜600 秒の平均）</a></li>
 </ul></li>
-<li><a href="#長い時間の場合" id="toc-長い時間の場合">8.
+<li><a href="#8-長い時間の場合" id="toc-8-長い時間の場合">8.
 長い時間の場合</a></li>
-<li><a href="#使えるかどうかの決め手-温度分布の型が変わるかどうか"
-id="toc-使えるかどうかの決め手-温度分布の型が変わるかどうか">9.
+<li><a href="#9-使えるかどうかの決め手--温度分布の型が変わるかどうか"
+id="toc-9-使えるかどうかの決め手--温度分布の型が変わるかどうか">9.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</a>
 <ul>
 <li><a href="#確かめ方型で表したときに残る誤差"
@@ -334,8 +334,8 @@ id="toc-型が大きく変わると考えられる場合未確認">型が大き�
 <li><a href="#実際の運転中に気づけるか未実施"
 id="toc-実際の運転中に気づけるか未実施">実際の運転中に気づけるか（未実施）</a></li>
 </ul></li>
-<li><a href="#観測点は-rom-の代表5点に限られるか"
-id="toc-観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
+<li><a href="#10-観測点は-rom-の代表5点に限られるか"
+id="toc-10-観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
 の代表5点に限られるか</a>
 <ul>
 <li><a href="#なぜか" id="toc-なぜか">なぜか</a></li>
@@ -345,19 +345,19 @@ id="toc-どこに置いたか">どこに置いたか</a></li>
 <li><a href="#注意未確認" id="toc-注意未確認">注意（未確認）</a></li>
 <li><a href="#実務上の意味" id="toc-実務上の意味">実務上の意味</a></li>
 </ul></li>
-<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">11.
-作り直しが必要なもの</a></li>
-<li><a href="#未確認のこと" id="toc-未確認のこと">12.
+<li><a href="#11-作り直しが必要なもの"
+id="toc-11-作り直しが必要なもの">11. 作り直しが必要なもの</a></li>
+<li><a href="#12-未確認のこと" id="toc-12-未確認のこと">12.
 未確認のこと</a></li>
-<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">13.
+<li><a href="#13-使ったスクリプト" id="toc-13-使ったスクリプト">13.
 使ったスクリプト</a></li>
 </ul></li>
 </ul>
 </nav>
 <h1
-id="blog_007作った-rom-はどこまで使えるか-適用範囲を実計算で確かめる">blog_007：作った
+id="blog_007作った-rom-はどこまで使えるか--適用範囲を実計算で確かめる">blog_007：作った
 ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
-<p><a href="blog_004_pod_selected_rom.md">blog_004</a> で、OpenFOAM
+<p><a href="blog004.html">blog_004</a> で、OpenFOAM
 の計算1本から <strong>5点の熱回路モデル（ROM）</strong> を作りました。
 600 秒の計算が 31 ms で終わる軽いモデルですが、当然こう思います。</p>
 <blockquote>
@@ -383,18 +383,18 @@ ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="blog_006_temp2_disp2_step_by_step.md">blog_006</a></td>
+<td><a href="blog006.html">blog_006</a></td>
 <td><strong>データ同化の手順</strong>。温度2点＋変位2点をどう使い、なぜ発熱量が直るか</td>
 <td>ROM の双子実験</td>
 </tr>
 <tr class="even">
-<td><a href="blog_007_rom_applicability.md">blog_007</a></td>
+<td><a href="blog007.html">blog_007</a></td>
 <td><strong>ROM の適用範囲</strong>。条件が変わっても使えるか</td>
 <td><strong>OpenFOAM＋FrontISTR</strong></td>
 </tr>
 <tr class="odd">
 <td><a
-href="blog_008_novelty_displacement_assimilation.md">blog_008</a></td>
+href="blog008.html">blog_008</a></td>
 <td><strong>主張と先行研究</strong>。研究としてどこが新しいか</td>
 <td>ROM（§4・§5）と<br><strong>OpenFOAM＋FrontISTR</strong>（§6・§7）</td>
 </tr>
@@ -417,7 +417,7 @@ href="blog_008_novelty_displacement_assimilation.md">blog_008</a></td>
 <tbody>
 <tr class="odd">
 <td><strong>確かめたいこと</strong></td>
-<td><a href="blog_004_pod_selected_rom.md">blog_004</a> で作った
+<td><a href="blog004.html">blog_004</a> で作った
 ROM（5点の熱回路モデル）は、<strong>係数を決めたときと違う条件でも使えるのか</strong>。使えるなら何が変わっても大丈夫で、何が変わると作り直しが要るのか</td>
 </tr>
 <tr class="even">
@@ -463,12 +463,12 @@ ROM（5点の熱回路モデル）は、<strong>係数を決めたときと違�
 使えるかどうかの決め手は、<strong>温度分布の「型」が変わるかどうか</strong>
 4. センサは ROM の代表5点に置かなくてよい</p>
 <p>関連記事：ROM の作り方は <a
-href="blog_004_pod_selected_rom.md">blog_004</a>、データ同化の手順は <a
-href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>、センサの置き場所は
-<a href="blog_005_optimal_sensor_placement.md">blog_005</a>。</p>
+href="blog004.html">blog_004</a>、データ同化の手順は <a
+href="blog006.html">blog_006</a>、センサの置き場所は
+<a href="blog005.html">blog_005</a>。</p>
 </blockquote>
 <hr />
-<h2 id="この記事の前提-rom-は-openfoam-の計算1本から作った">0.
+<h2 id="0-この記事の前提--rom-は-openfoam-の計算1本から作った">0.
 この記事の前提 ― ROM は OpenFOAM の計算1本から作った</h2>
 <p>ROM（5点の熱回路モデル）は、物性値を積み上げて作ったのではありません。
 <strong>OpenFOAM
@@ -523,7 +523,7 @@ href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>、センサの置き場
 W（新しく計算した条件）」「間欠加熱（新しく計算した条件）」</li>
 </ul>
 <hr />
-<h2 id="結論">1. 結論</h2>
+<h2 id="1-結論">1. 結論</h2>
 <h3 id="一言でいうと">一言でいうと</h3>
 <blockquote>
 <p><strong>熱源の位置と形状が同じなら、この ROM
@@ -639,8 +639,8 @@ ON/OFF をモデルに与えた場合</td>
 </tbody>
 </table>
 <hr />
-<h2 id="まず押さえる-rom-そのものとデータ同化は別の話">2. まず押さえる ―
-ROM そのものと、データ同化は別の話</h2>
+<h2 id="2-まず押さえる--rom-そのものとデータ同化は別の話">2.
+まず押さえる ― ROM そのものと、データ同化は別の話</h2>
 <p>この記事では2つの問いを扱います。混ざりやすいので、先に分けておきます。</p>
 <table>
 <colgroup>
@@ -742,7 +742,7 @@ W・0〜300 秒の計算と<strong>まったく同じ精度</strong>です。</l
 <p><strong>ROM そのものは間欠運転を再現できます。</strong>
 右で外れているのは、モデルの能力ではなく、与えた入力が実際と違うからです。</p>
 <h3
-id="間欠加熱で合わなかった原因-ヒータの-onoff-を0300-秒と決め打ちしていた">間欠加熱で合わなかった原因
+id="間欠加熱で合わなかった原因--ヒータの-onoff-を0300-秒と決め打ちしていた">間欠加熱で合わなかった原因
 ― ヒータの ON/OFF を「0〜300 秒」と決め打ちしていた</h3>
 <p>これまで「間欠加熱では合わない」と書いていたのは、<strong>モデルの限界ではなく、プログラムの決め打ち</strong>でした。</p>
 <p><code>dacore/rom_general.py</code> のヒータ関数が</p>
@@ -763,7 +763,7 @@ A）：間欠運転に使える。</strong> 式の構造上、加熱パターン
 教えれば同じ精度、教えないと誤差は約10倍。</p>
 </blockquote>
 <hr />
-<h2 id="rom-は何から作ったか">3. ROM は何から作ったか</h2>
+<h2 id="3-rom-は何から作ったか">3. ROM は何から作ったか</h2>
 <p>ROM は、<strong>OpenFOAM の計算1本</strong>（15 W を 0〜300
 秒加熱し、300〜600 秒は自然に冷やす）から作りました。</p>
 <table>
@@ -828,7 +828,7 @@ class="math inline">\(P_i(t)\)</span> にしか入っていません。</strong>
 熱容量・熱の通りやすさ・放熱の部分は、発熱量にも加熱のしかたにもよりません。これが、§4・§5
 で作り直さずに使えた理由です。</p>
 <hr />
-<h2 id="確かめに使った条件">4. 確かめに使った条件</h2>
+<h2 id="4-確かめに使った条件">4. 確かめに使った条件</h2>
 <p>真値はすべて、OpenFOAM で計算した温度場と、それを FrontISTR
 に入れて計算した変位です。25 W
 と間欠加熱は、この確認のために新しく計算しました（<code>openfoam/limit/</code>）。</p>
@@ -839,7 +839,7 @@ class="math inline">\(P_i(t)\)</span> にしか入っていません。</strong>
 <p><em>上：ヒータの発熱。下：OpenFOAM＋FrontISTR で計算した反り
 A−O。</em></p>
 <hr />
-<h2 id="発熱量が変わる場合25-w">5. 発熱量が変わる場合（25 W）</h2>
+<h2 id="5-発熱量が変わる場合25-w">5. 発熱量が変わる場合（25 W）</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：発熱量が ROM
 の係数を決めたときの 15 W と違っても、ROM は使えるか</p>
@@ -928,7 +928,7 @@ K）の帯に完全に収まっています。</strong>
 K</strong> でした（15 W では 0.0007
 K）。固体の熱伝導は発熱量に比例するので、温度分布の形はほぼ同じで、大きさだけが変わるためです。</p>
 <h3
-id="データ同化すると温度-p2p4-変位-ao5-seed-平均30300-秒">データ同化すると（温度
+id="データ同化すると温度-p2p4--変位-ao5-seed-平均30300-秒">データ同化すると（温度
 P2＋P4 ＋ 変位 A・O、5 seed 平均、30〜300 秒）</h3>
 <table>
 <thead>
@@ -983,7 +983,7 @@ P1・P3 まで合っています。</strong> 灰の破線（データ同化な�
 で改善します）。</li>
 </ul>
 <p>（詳細：<a
-href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ②）</p>
 <blockquote>
 <p><strong>この節で分かったこと</strong> - 発熱量が 15 W → 25 W
@@ -996,7 +996,7 @@ href="21_advantage_verification.md">研究の優位性を確かめる追加検�
 に縛られない。</p>
 </blockquote>
 <hr />
-<h2 id="復元した温度場は代表5点以外でも合っているか">6.
+<h2 id="6-復元した温度場は代表5点以外でも合っているか">6.
 復元した温度場は、代表5点以外でも合っているか</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：ROM
@@ -1218,7 +1218,7 @@ K 対 0.142 K）。「測った点だけ合う」心配は不要。 - 15 W・25 
 K）。</p>
 </blockquote>
 <hr />
-<h2 id="加熱のしかたが変わる場合間欠加熱">7.
+<h2 id="7-加熱のしかたが変わる場合間欠加熱">7.
 加熱のしかたが変わる場合（間欠加熱）</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：ヒータの入れ方が変わっても ROM
@@ -1308,7 +1308,7 @@ A−O の誤差、30〜600 秒の平均）</h3>
 は、この3条件の結果を見て選んだ値です。</li>
 </ul>
 <p>（詳細：<a
-href="21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">研究の優位性を確かめる追加検証</a>
 ④）</p>
 <blockquote>
 <p><strong>この節で分かったこと</strong> - <strong>ROM
@@ -1320,17 +1320,17 @@ href="21_advantage_verification.md">研究の優位性を確かめる追加検�
 3〜4 W 残る。</p>
 </blockquote>
 <hr />
-<h2 id="長い時間の場合">8. 長い時間の場合</h2>
+<h2 id="8-長い時間の場合">8. 長い時間の場合</h2>
 <p>放熱 <span class="math inline">\(h\)</span> を推定できるかを、5,000
 秒まで延ばして調べた試験があります（<a
-href="19_research_advantage_and_validation.md">研究レビュー</a>）。
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究レビュー</a>）。
 <span class="math inline">\(h\)</span> の推定誤差（3 seed 平均）は、600
 秒で 56.7 %、5,000 秒で 1.30 % でした。</p>
 <p>ただし、この試験の<strong>真値は ROM そのもの</strong>です。600
 秒を超える OpenFOAM の計算は行っていないので、<strong>長い時間で ROM
 自体が OpenFOAM と合うかは未確認</strong>です。</p>
 <hr />
-<h2 id="使えるかどうかの決め手-温度分布の型が変わるかどうか">9.
+<h2 id="9-使えるかどうかの決め手--温度分布の型が変わるかどうか">9.
 使えるかどうかの決め手 ― 温度分布の「型」が変わるかどうか</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：条件が変わったとき、「使える／作り直し」をどう判断すればよいか</p>
@@ -1435,7 +1435,7 @@ id="実際の運転中に気づけるか未実施">実際の運転中に気づ�
 型が変わりそうなのは、熱源の位置・冷却方法・形状が変わる場合（いずれも未確認）。</p>
 </blockquote>
 <hr />
-<h2 id="観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
+<h2 id="10-観測点は-rom-の代表5点に限られるか">10. 観測点は ROM
 の代表5点に限られるか</h2>
 <blockquote>
 <p><strong>この節で知りたいこと</strong>：センサは Q-DEIM
@@ -1606,7 +1606,7 @@ K）より良い結果でした。</li>
 <li>上の図の中央を見ると、<strong>観測していない評価点1（反ヒータ側の上部）の温度</strong>が、青（代表点でない2セル・両側）では黒の真値にほぼ重なり、橙（代表点
 P2＋P0・片側）だけが加熱の前半で 0.5 K ほど外れています。</li>
 <li>効いているのは代表点かどうかではなく、<strong>A側とO側に分かれているか</strong>です（§<a
-href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
+href="blog005.html">blog_005 §4-6</a>
 と同じ傾向）。</li>
 <li>ただし、いちばん良いのは代表点 P2＋P4（0.157
 K）でした。代表点は復元に都合のよい点なので、同じ「両側に分ける」配置なら代表点のほうが有利でした。</li>
@@ -1632,7 +1632,7 @@ K）でした。代表点は復元に都合のよい点なので、同じ「両�
 に合わせて穴を開ける必要はない。</p>
 </blockquote>
 <hr />
-<h2 id="作り直しが必要なもの">11. 作り直しが必要なもの</h2>
+<h2 id="11-作り直しが必要なもの">11. 作り直しが必要なもの</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1650,7 +1650,7 @@ K）でした。代表点は復元に都合のよい点なので、同じ「両�
 <tr class="odd">
 <td>熱源の位置・数</td>
 <td>温度分布の型が変わる。ROM は発熱を P2 の1点に集中して与えており（<a
-href="blog_004_pod_selected_rom.md">blog_004 §6-1b</a>）、その前提で
+href="blog004.html">blog_004 §6-1b</a>）、その前提で
 <span class="math inline">\(C\)</span> ・ <span
 class="math inline">\(K\)</span> を校正しているため</td>
 <td>OpenFOAM（CHT）→ POD → Q-DEIM → ROM 校正 → FrontISTR で <span
@@ -1677,7 +1677,7 @@ class="math inline">\(D\)</span></td>
 <p>手順はすべてスクリプト化してあります（<code>run/select_points_qdeim.py</code>、<code>run/run_da_compare.py</code>
 など）。ただし、OpenFOAM の計算に1本あたり約1〜3時間かかります。</p>
 <hr />
-<h2 id="未確認のこと">12. 未確認のこと</h2>
+<h2 id="12-未確認のこと">12. 未確認のこと</h2>
 <ul>
 <li>25 W 以外の発熱量でのデータ同化（特に大きく外れた場合）</li>
 <li>ランプ状に変わる発熱、30 秒より短い間隔の
@@ -1688,7 +1688,7 @@ ON/OFF（データ同化の更新間隔より速い変化）</li>
 <li>代表点から大きく外れた場所だけに温度計を置いた場合（§8）</li>
 </ul>
 <hr />
-<h2 id="使ったスクリプト">13. 使ったスクリプト</h2>
+<h2 id="13-使ったスクリプト">13. 使ったスクリプト</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />

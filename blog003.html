@@ -251,65 +251,67 @@ id="toc-blog_003アンサンブルカルマンフィルタenkf-分身の散ら�
 <ul>
 <li><a href="#読む前にoiから何を変えるのか"
 id="toc-読む前にoiから何を変えるのか">読む前に：OIから何を変えるのか</a></li>
-<li><a href="#アンサンブル分身とは" id="toc-アンサンブル分身とは">1.
+<li><a href="#1-アンサンブル分身とは" id="toc-1-アンサンブル分身とは">1.
 アンサンブル（分身）とは</a></li>
-<li><a href="#enkf-の手順1サイクル" id="toc-enkf-の手順1サイクル">2.
+<li><a href="#2-enkf-の手順1サイクル" id="toc-2-enkf-の手順1サイクル">2.
 EnKF の手順（1サイクル）</a>
 <ul>
-<li><a href="#平均共分散コードを同じ向きで書く"
-id="toc-平均共分散コードを同じ向きで書く">2-1.
+<li><a href="#2-1-平均共分散コードを同じ向きで書く"
+id="toc-2-1-平均共分散コードを同じ向きで書く">2-1.
 平均・共分散・コードを同じ向きで書く</a></li>
-<li><a href="#平均を更新と全メンバーを更新の違い"
-id="toc-平均を更新と全メンバーを更新の違い">2-2.
+<li><a href="#2-2-平均を更新と全メンバーを更新の違い"
+id="toc-2-2-平均を更新と全メンバーを更新の違い">2-2.
 「平均を更新」と「全メンバーを更新」の違い</a></li>
 </ul></li>
-<li><a href="#手計算で-enkf-をやってみる2点分身4つ観測1点"
-id="toc-手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
+<li><a href="#3-手計算で-enkf-をやってみる2点分身4つ観測1点"
+id="toc-3-手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
 をやってみる（2点・分身4つ・観測1点）</a>
 <ul>
-<li><a href="#分身の予報" id="toc-分身の予報">3-1. 分身の予報</a></li>
-<li><a href="#散らばりから標本共分散を作る"
-id="toc-散らばりから標本共分散を作る">3-2.
+<li><a href="#3-1-分身の予報" id="toc-3-1-分身の予報">3-1.
+分身の予報</a></li>
+<li><a href="#3-2-散らばりから標本共分散を作る"
+id="toc-3-2-散らばりから標本共分散を作る">3-2.
 散らばりから標本共分散を作る</a></li>
-<li><a href="#カルマンゲイン" id="toc-カルマンゲイン">3-3.
+<li><a href="#3-3-カルマンゲイン" id="toc-3-3-カルマンゲイン">3-3.
 カルマンゲイン</a></li>
-<li><a href="#更新平均で見る" id="toc-更新平均で見る">3-4.
+<li><a href="#3-4-更新平均で見る" id="toc-3-4-更新平均で見る">3-4.
 更新（平均で見る）</a></li>
 </ul></li>
-<li><a href="#発熱量qへ情報が伝わる仕組みと実計算の結果"
-id="toc-発熱量qへ情報が伝わる仕組みと実計算の結果">4.
+<li><a href="#4-発熱量qへ情報が伝わる仕組みと実計算の結果"
+id="toc-4-発熱量qへ情報が伝わる仕組みと実計算の結果">4.
 発熱量Qへ情報が伝わる仕組みと、実計算の結果</a>
 <ul>
-<li><a href="#パラメータ同定の手順-状態を拡大し観測との差で更新する"
-id="toc-パラメータ同定の手順-状態を拡大し観測との差で更新する">4-0.
+<li><a
+href="#4-0-パラメータ同定の手順--状態を拡大し観測との差で更新する"
+id="toc-4-0-パラメータ同定の手順--状態を拡大し観測との差で更新する">4-0.
 パラメータ同定の手順 ― 状態を拡大し、観測との差で更新する</a></li>
-<li><a href="#b.-同じ手順で-h-も-と思ったら当たらなかった"
-id="toc-b.-同じ手順で-h-も-と思ったら当たらなかった">4-0-b. 同じ手順で
-<span class="math inline">\(h\)</span> も ―
+<li><a href="#4-0-b-同じ手順で-h-も--と思ったら当たらなかった"
+id="toc-4-0-b-同じ手順で-h-も--と思ったら当たらなかった">4-0-b.
+同じ手順で <span class="math inline">\(h\)</span> も ―
 と思ったら当たらなかった</a></li>
 </ul></li>
-<li><a href="#その代わりのコスト" id="toc-その代わりのコスト">5.
+<li><a href="#5-その代わりのコスト" id="toc-5-その代わりのコスト">5.
 その代わりのコスト</a></li>
-<li><a href="#他の手法ではだめなのか-粒子フィルタと比べる"
-id="toc-他の手法ではだめなのか-粒子フィルタと比べる">5-2.
+<li><a href="#5-2-他の手法ではだめなのか--粒子フィルタと比べる"
+id="toc-5-2-他の手法ではだめなのか--粒子フィルタと比べる">5-2.
 他の手法ではだめなのか ― 粒子フィルタと比べる</a>
 <ul>
 <li><a href="#粒子フィルタを実際に回してみた結果"
 id="toc-粒子フィルタを実際に回してみた結果">粒子フィルタを実際に回してみた結果</a></li>
 </ul></li>
-<li><a href="#観測をどう増やすかいつ入れるか-romenkf-の実験2つ"
-id="toc-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
+<li><a href="#6-観測をどう増やすかいつ入れるか-romenkf-の実験2つ"
+id="toc-6-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
 観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</a>
 <ul>
-<li><a href="#今回の条件では観測の追加で改善した温度1点2点変位2点"
-id="toc-今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
+<li><a href="#6-1-今回の条件では観測の追加で改善した温度1点2点変位2点"
+id="toc-6-1-今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
 今回の条件では観測の追加で改善した（温度1点→2点→＋変位2点）</a></li>
-<li><a href="#いつ観測するかで-q-と-h-の推定が変わる"
-id="toc-いつ観測するかで-q-と-h-の推定が変わる">6-2.
+<li><a href="#6-2-いつ観測するかで-q-と-h-の推定が変わる"
+id="toc-6-2-いつ観測するかで-q-と-h-の推定が変わる">6-2.
 「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
 class="math inline">\(h\)</span> の推定が変わる</a></li>
 </ul></li>
-<li><a href="#回のまとめ" id="toc-回のまとめ">7. 3回のまとめ</a>
+<li><a href="#7-3回のまとめ" id="toc-7-3回のまとめ">7. 3回のまとめ</a>
 <ul>
 <li><a href="#参考元になった実装詳細"
 id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
@@ -369,7 +371,7 @@ class="math inline">\(Q=15q_{\mathrm{scale}}\)</span> Wです。
 変位は温度から計算する観測予報であり、独立した状態として時間積分しません。
 ROMの <span class="math inline">\(h\)</span> は放熱コンダクタンス [W/K]
 です。ROMの構築と全場復元は<a
-href="blog_004_pod_selected_rom.md">第4回</a>へ進みます。</p>
+href="blog004.html">第4回</a>へ進みます。</p>
 <p>第3回は <strong>アンサンブルカルマンフィルタ（EnKF）</strong>
 です。前回（blog_002）の OI は 背景共分散 <span
 class="math inline">\(B\)</span> を
@@ -389,7 +391,7 @@ class="math inline">\(B\)</span>
 を分身の散らばりが教えてくれる</strong>。</p>
 </blockquote>
 <hr />
-<h2 id="アンサンブル分身とは">1. アンサンブル（分身）とは</h2>
+<h2 id="1-アンサンブル分身とは">1. アンサンブル（分身）とは</h2>
 <p>「予報がどれくらい外れるか（共分散 <span
 class="math inline">\(B\)</span> ）」を人間が決めるのは難しい。 そこで
 EnKF は、<strong>少しずつ違う初期値・パラメータを持った <span
@@ -409,7 +411,7 @@ class="math inline">\(N\)</span> 個の分身</strong>を用意して、
 <p><strong>この共分散は状況に応じて毎サイクル作り直される</strong>（＝流れ依存）。ここが固定
 <span class="math inline">\(B\)</span> の OI との決定的な差です。</p>
 <hr />
-<h2 id="enkf-の手順1サイクル">2. EnKF の手順（1サイクル）</h2>
+<h2 id="2-enkf-の手順1サイクル">2. EnKF の手順（1サイクル）</h2>
 <ol type="1">
 <li><strong>予報（forecast）</strong>：全分身をシミュレーションで次の観測時刻まで前進。</li>
 <li><strong>標本共分散</strong>：分身たちの平均とズレから共分散 <span
@@ -425,7 +427,7 @@ class="math display">\[x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bi
 <p>更新後の分身の
 <strong>平均</strong>が推定値、<strong>散らばり</strong>が不確かさです。</p>
 <hr />
-<h3 id="平均共分散コードを同じ向きで書く">2-1.
+<h3 id="2-1-平均共分散コードを同じ向きで書く">2-1.
 平均・共分散・コードを同じ向きで書く</h3>
 <p><span class="math inline">\(N\)</span> はメンバー数、 <span
 class="math inline">\(n\)</span> は状態数、 <span
@@ -478,7 +480,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a hr
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span><span class="bu">len</span>(Zf))</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps <span class="op">-</span> Yf) <span class="op">@</span> gain_T</span></code></pre></div>
 <p>逆行列の記号は理論式に使いますが、コードは連立方程式を解きます。変位に基準値の切片がある場合も、<code>Yf</code>に基準値込みの観測予報を渡せば同じ式で更新できます。</p>
-<h3 id="平均を更新と全メンバーを更新の違い">2-2.
+<h3 id="2-2-平均を更新と全メンバーを更新の違い">2-2.
 「平均を更新」と「全メンバーを更新」の違い</h3>
 <p>更新式をN人分足してNで割ると、</p>
 <p><span class="math display">\[
@@ -490,9 +492,9 @@ class="math inline">\(\bar\epsilon\)</span>
 は一般に0ではありません。次の手計算は <span
 class="math inline">\(\bar\epsilon=0\)</span>
 の平均更新を説明します。実装では各員に異なる摂動を与え、更新後の散らばりも残します。その散らばりはモデルと有限標本に依存する推定であり、真の誤差そのものではありません。</p>
-<h2 id="手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
+<h2 id="3-手計算で-enkf-をやってみる2点分身4つ観測1点">3. 手計算で EnKF
 をやってみる（2点・分身4つ・観測1点）</h2>
-<h3 id="分身の予報">3-1. 分身の予報</h3>
+<h3 id="3-1-分身の予報">3-1. 分身の予報</h3>
 <p>状態を2点の温度 <span class="math inline">\(x=(T_1,T_2)\)</span>
 とし、分身を
 <strong>4つ</strong>用意して前進させたら、次の予報になったとします。</p>
@@ -532,7 +534,7 @@ class="math inline">\(\bar\epsilon=0\)</span>
 </tr>
 </tbody>
 </table>
-<h3 id="散らばりから標本共分散を作る">3-2.
+<h3 id="3-2-散らばりから標本共分散を作る">3-2.
 散らばりから標本共分散を作る</h3>
 <figure>
 <img src="img/covariance_explained.png"
@@ -606,7 +608,7 @@ class="math inline">\(C_{12}=4.67&gt;0\)</span> 、つまり <strong>「
 class="math inline">\(T_2\)</span>
 も高い」</strong>と分身たちが教えている。
 この相関は人間が置いたのではなく、<strong>シミュレーションの結果から自動で出てきた</strong>ものです。</p>
-<h3 id="カルマンゲイン">3-3. カルマンゲイン</h3>
+<h3 id="3-3-カルマンゲイン">3-3. カルマンゲイン</h3>
 <p>点1を観測（ <span class="math inline">\(H=(1,\ 0)\)</span>
 ）、観測ノイズ <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
 <ul>
@@ -622,7 +624,7 @@ class="math display">\[K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\
 4.67\end{pmatrix}
 =\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
 =\begin{pmatrix}0.987\\ 0.691\end{pmatrix}\]</span></p>
-<h3 id="更新平均で見る">3-4. 更新（平均で見る）</h3>
+<h3 id="3-4-更新平均で見る">3-4. 更新（平均で見る）</h3>
 <p>以下は観測摂動の平均を0とした計算です。有限メンバーの摂動観測法では、実際の平均には
 <span class="math inline">\(K\bar\epsilon\)</span> が加わります。</p>
 <p>観測 <span class="math inline">\(y=30\)</span> （真値 <span
@@ -662,12 +664,12 @@ class="math inline">\(C\)</span> を分身から作った</strong>のが違い�
 さらに更新後は
 <strong>分身の散らばりが縮む</strong>（不確かさが減った、を表す）。</p>
 <hr />
-<h2 id="発熱量qへ情報が伝わる仕組みと実計算の結果">4.
+<h2 id="4-発熱量qへ情報が伝わる仕組みと実計算の結果">4.
 発熱量Qへ情報が伝わる仕組みと、実計算の結果</h2>
-<h3 id="パラメータ同定の手順-状態を拡大し観測との差で更新する">4-0.
+<h3 id="4-0-パラメータ同定の手順--状態を拡大し観測との差で更新する">4-0.
 パラメータ同定の手順 ― 状態を拡大し、観測との差で更新する</h3>
 <p>実際の106の「P2/P0＋変位S1/S2」の計算を一続きに追う場合は、<a
-href="20_actual_enkf_displacement_and_heat_identification.md">実施した手順と最初の更新の実数値</a>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/20_actual_enkf_displacement_and_heat_identification.md">実施した手順と最初の更新の実数値</a>
 を先に読んでください。以下には別の観測構成の例も含まれます。</p>
 <p>「温度を推定する」話をしてきましたが、<strong>同じ仕組みで発熱量
 <span class="math inline">\(Q\)</span> や放熱 <span
@@ -678,7 +680,7 @@ augmentation）</strong>を行い、各メンバーのQ・hで予報した温度
 状態に入れることは更新の準備であり、正しく同定できることの保証ではありません。</p>
 <p>代表点以外のセンサがどうROMへ反映されるか、<code>Z</code>
 のq・hの列がどう書き換わり次の時間積分へ渡るかは、 <a
-href="blog_006_temp2_disp2_step_by_step.md#3-8-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">blog_006
+href="blog006.html#3-8-コードで確認する観測点以外の情報が代表5点qhへ入る手続き">blog_006
 §3-8「コードで確認する：観測点以外の情報が、代表5点・Q・hへ入る手続き」</a>に、実装との対応をまとめました。</p>
 <figure>
 <img src="img/param_identification.png"
@@ -882,7 +884,7 @@ OIで <span class="math inline">\(Q\)</span> が9
 W止まりだったのは、実際の相関が時間とともに変わるのに固定していたからでした（blog_002
 §3-6）。</p>
 </blockquote>
-<h4 id="実際どうなったか-q-は当たる">実際どうなったか ― <span
+<h4 id="実際どうなったか--q-は当たる">実際どうなったか ― <span
 class="math inline">\(Q\)</span> は当たる</h4>
 <p>上の図③のとおり、 <span class="math inline">\(Q\)</span>
 のアンサンブルは真値15
@@ -966,8 +968,8 @@ class="math inline">\(Q\)</span> の情報は増えませんし、
 </tbody>
 </table>
 <p><strong>センサ設計は「どこに置くか」だけでなく「いつ記録するか」まで含みます。</strong></p>
-<h3 id="b.-同じ手順で-h-も-と思ったら当たらなかった">4-0-b. 同じ手順で
-<span class="math inline">\(h\)</span> も ―
+<h3 id="4-0-b-同じ手順で-h-も--と思ったら当たらなかった">4-0-b.
+同じ手順で <span class="math inline">\(h\)</span> も ―
 と思ったら当たらなかった</h3>
 <p><span class="math inline">\(h\)</span>
 （放熱コンダクタンス）もまったく同じ手順で状態に入れてあります。
@@ -1040,7 +1042,7 @@ class="math inline">\(h\)</span> での<strong>一様冷却の時定数は約 15
 しか見ていません。冷え始めたところで実験が終わっているので、
 放熱の情報が蓄積されないのです。</p>
 <h4
-id="当たらないと何が困るのか-実は今回はほとんど困らない">「当たらない」と何が困るのか
+id="当たらないと何が困るのか--実は今回はほとんど困らない">「当たらない」と何が困るのか
 ― 実は今回はほとんど困らない</h4>
 <p>「 <span class="math inline">\(h\)</span>
 が63%もずれている」と聞くと失敗に見えますが、<strong>今回の600秒の状態推定では、hの大きな誤差と小さな温度・変位誤差が共存しました</strong>。影響が完全にゼロという意味ではありません。
@@ -1116,7 +1118,7 @@ T_{ss}^{\mathrm{true}}}=\frac{h_{\mathrm{true}}}{h_{\mathrm{est}}}=\frac{0.0154}
 <p><strong>定常温度を39%も取り違えます。</strong>
 工作機械の暖機運転のように数時間の挙動を予測したいなら、 <span
 class="math inline">\(h\)</span> の同定は避けて通れません。</p>
-<h4 id="どうするか-5つの選択肢">どうするか ― 5つの選択肢</h4>
+<h4 id="どうするか--5つの選択肢">どうするか ― 5つの選択肢</h4>
 <ol type="1">
 <li><strong>観測期間を延ばす。</strong>
 一様冷却の時定数は約15,800秒。その1/3（約5,000秒＝1.4時間）まで
@@ -1147,7 +1149,7 @@ class="math inline">\(Q\)</span> の推定が安定します ―
 を先に計算しておけば、
 <strong>実験前に「このセンサ構成・観測時間ではhの情報が弱い可能性」を評価できます。</strong>
 単回の応答がノイズより小さいだけでは同定不能と断定できません。長時間の同一ROM試験ではh平均の誤差が改善しています（<a
-href="19_research_advantage_and_validation.md#4-2-短時間のh誤差を原理的に同定不能と解釈しない">最新の条件・限界</a>）。
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md#4-2-短時間のh誤差を原理的に同定不能と解釈しない">最新の条件・限界</a>）。
 当たらないのに当たったつもりで使うのが、いちばん危険です。</p>
 </blockquote>
 <blockquote>
@@ -1300,7 +1302,7 @@ Wを示した図ではありません。</p>
 </figure>
 <p><em>データ同化を重ねるごとに全点温度RMSEが下がる。</em></p>
 <hr />
-<h2 id="その代わりのコスト">5. その代わりのコスト</h2>
+<h2 id="5-その代わりのコスト">5. その代わりのコスト</h2>
 <p>EnKF の弱点は <strong>重さ</strong>です。共分散を作るために
 <strong>分身を <span class="math inline">\(N\)</span>
 個、毎サイクル全部前進</strong>させます。
@@ -1315,7 +1317,7 @@ class="math inline">\(N\)</span> 倍）</li>
 に置き換える</strong>のが、106 の POD+Q-DEIM の役割でした
 （0〜600秒が数秒で回るので、EnKF を何度も試せる）。</p>
 <hr />
-<h2 id="他の手法ではだめなのか-粒子フィルタと比べる">5-2.
+<h2 id="5-2-他の手法ではだめなのか--粒子フィルタと比べる">5-2.
 他の手法ではだめなのか ― 粒子フィルタと比べる</h2>
 <p>データ同化の手法はEnKFだけではありません。代表的なものを並べると:</p>
 <figure>
@@ -1430,10 +1432,10 @@ class="math inline">\(Q\)</span> や <span
 class="math inline">\(h\)</span>
 を状態に入れて同時推定</strong>できます。</p>
 <hr />
-<h2 id="観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
+<h2 id="6-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
 観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</h2>
 <p>軽いROMの上でEnKFを何度も回せるようになったので、観測設計の実験を2つ紹介します。</p>
-<h3 id="今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
+<h3 id="6-1-今回の条件では観測の追加で改善した温度1点2点変位2点">6-1.
 今回の条件では観測の追加で改善した（温度1点→2点→＋変位2点）</h3>
 <p>まず
 <strong>どこで観測しているか</strong>（この種の図はDA結果とセットで必ず示します）:</p>
@@ -1494,7 +1496,7 @@ Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ
 </tr>
 </tbody>
 </table>
-<h3 id="いつ観測するかで-q-と-h-の推定が変わる">6-2.
+<h3 id="6-2-いつ観測するかで-q-と-h-の推定が変わる">6-2.
 「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
 class="math inline">\(h\)</span> の推定が変わる</h3>
 <p>観測の効き目は<strong>場所だけでなく時間</strong>にもあります。同じ温度2点で、データ同化する時間窓だけを変えると:</p>
@@ -1514,7 +1516,7 @@ class="math inline">\(h\)</span>
 は温度応答がノイズ以下のため依然難しい。</em></p>
 <p>まとめると、観測設計は「<strong>どこで（空間）・何を（種類）・いつ（時間）</strong>」の3軸で考える、というのが実験から見えた形です。</p>
 <hr />
-<h2 id="回のまとめ">7. 3回のまとめ</h2>
+<h2 id="7-3回のまとめ">7. 3回のまとめ</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />

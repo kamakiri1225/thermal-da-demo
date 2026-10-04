@@ -181,8 +181,8 @@
 <nav id="TOC" role="doc-toc">
 <ul>
 <li><a
-href="#blog_002oi最適内挿でデータ同化-まず数式と小さな行列でoiとは何かを理解する"
-id="toc-blog_002oi最適内挿でデータ同化-まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
+href="#blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する"
+id="toc-blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
 ― まず数式と小さな行列で「OIとは何か」を理解する</a>
 <ul>
 <li><a href="#読む前にこの記事で分かること"
@@ -193,70 +193,73 @@ id="toc-記号の約束状態観測誤差を分ける">記号の約束：状態�
 <li><a href="#更新式が出てくる理由"
 id="toc-更新式が出てくる理由">更新式が出てくる理由</a></li>
 </ul></li>
-<li><a href="#ミニ模型3つの温度点" id="toc-ミニ模型3つの温度点">1.
+<li><a href="#1-ミニ模型3つの温度点" id="toc-1-ミニ模型3つの温度点">1.
 ミニ模型：3つの温度点</a></li>
-<li><a href="#oi-のしくみ4つの部品と1本の式"
-id="toc-oi-のしくみ4つの部品と1本の式">2. OI
+<li><a href="#2-oi-のしくみ4つの部品と1本の式"
+id="toc-2-oi-のしくみ4つの部品と1本の式">2. OI
 のしくみ（4つの部品と1本の式）</a></li>
-<li><a href="#手計算で-oi-をやってみる3点観測1点"
-id="toc-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
+<li><a href="#3-手計算で-oi-をやってみる3点観測1点"
+id="toc-3-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
 をやってみる（3点・観測1点）</a>
 <ul>
-<li><a href="#部品に数字を入れる" id="toc-部品に数字を入れる">3-1.
-部品に数字を入れる</a></li>
-<li><a href="#カルマンゲイン-k-を計算"
-id="toc-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
+<li><a href="#3-1-部品に数字を入れる"
+id="toc-3-1-部品に数字を入れる">3-1. 部品に数字を入れる</a></li>
+<li><a href="#3-2-カルマンゲイン-k-を計算"
+id="toc-3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
 class="math inline">\(K\)</span> を計算</a></li>
-<li><a href="#更新answer" id="toc-更新answer">3-3.
+<li><a href="#3-3-更新answer" id="toc-3-3-更新answer">3-3.
 更新（answer）</a></li>
-<li><a href="#結果を真値と比べる" id="toc-結果を真値と比べる">3-4.
-結果を真値と比べる</a></li>
-<li><a href="#温度変位発熱量-q-が更新式のどこに入るか文字式"
-id="toc-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
+<li><a href="#3-4-結果を真値と比べる"
+id="toc-3-4-結果を真値と比べる">3-4. 結果を真値と比べる</a></li>
+<li><a href="#3-5-温度変位発熱量-q-が更新式のどこに入るか文字式"
+id="toc-3-5-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
 温度・変位・発熱量 <span class="math inline">\(Q\)</span>
 が更新式のどこに入るか（文字式）</a></li>
-<li><a href="#温度を測ると-q-が動く文字式"
-id="toc-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
+<li><a href="#3-6-温度を測ると-q-が動く文字式"
+id="toc-3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
 class="math inline">\(Q\)</span> が動く（文字式）</a></li>
-<li><a href="#変位を測ると全部動く文字式"
-id="toc-変位を測ると全部動く文字式">3-7.
+<li><a href="#3-7-変位を測ると全部動く文字式"
+id="toc-3-7-変位を測ると全部動く文字式">3-7.
 変位を測ると全部動く（文字式）</a></li>
-<li><a href="#q-が同定できる周辺化積分の正体"
-id="toc-q-が同定できる周辺化積分の正体">3-8. 「 <span
+<li><a href="#3-8--q-が同定できる周辺化積分の正体"
+id="toc-3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span
 class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</a></li>
 </ul></li>
-<li><a href="#どこを測ると効くか-熱感度-w-の分布で観測点を選ぶ"
-id="toc-どこを測ると効くか-熱感度-w-の分布で観測点を選ぶ">4.
+<li><a href="#4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ"
+id="toc-4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ">4.
 どこを測ると効くか ― 熱感度 <span class="math inline">\(W\)</span>
 の分布で観測点を選ぶ</a>
 <ul>
-<li><a href="#熱感度-wk_s-1h_t-とは" id="toc-熱感度-wk_s-1h_t-とは">4-1.
-熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span> とは</a></li>
-<li><a href="#感度の分布図" id="toc-感度の分布図">4-2.
+<li><a href="#4-1-熱感度-wk_s-1h_t-とは"
+id="toc-4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span
+class="math inline">\(W=K_s^{-1}H_T\)</span> とは</a></li>
+<li><a href="#4-2-感度の分布図" id="toc-4-2-感度の分布図">4-2.
 感度の分布（図）</a></li>
-<li><a href="#実際の選定手順105106" id="toc-実際の選定手順105106">4-3.
+<li><a href="#4-3-実際の選定手順105106"
+id="toc-4-3-実際の選定手順105106">4-3.
 実際の選定手順（105→106）</a></li>
 </ul></li>
-<li><a href="#感度が低い点で測るとどうなるかoi-で確かめる失敗例"
-id="toc-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
+<li><a href="#5-感度が低い点で測るとどうなるかoi-で確かめる失敗例"
+id="toc-5-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
 感度が低い点で測るとどうなるか（OI で確かめる失敗例）</a></li>
-<li><a href="#実モデル104実ソルバで回した比較"
-id="toc-実モデル104実ソルバで回した比較">6.
+<li><a href="#6-実モデル104実ソルバで回した比較"
+id="toc-6-実モデル104実ソルバで回した比較">6.
 実モデル（104実ソルバ）で回した比較</a>
 <ul>
-<li><a href="#σqスタディ発熱の背景分散を変える"
-id="toc-σqスタディ発熱の背景分散を変える">6-1.
+<li><a href="#6-1-σqスタディ発熱の背景分散を変える"
+id="toc-6-1-σqスタディ発熱の背景分散を変える">6-1.
 σQスタディ：発熱の背景分散を変える</a></li>
-<li><a href="#σtスタディ温度誤差の大きさを変える"
-id="toc-σtスタディ温度誤差の大きさを変える">6-2.
+<li><a href="#6-2-σtスタディ温度誤差の大きさを変える"
+id="toc-6-2-σtスタディ温度誤差の大きさを変える">6-2.
 σTスタディ：温度誤差の大きさを変える</a></li>
 </ul></li>
-<li><a href="#と106で何が同じで何が違うか"
-id="toc-と106で何が同じで何が違うか">7.
+<li><a href="#7-104と106で何が同じで何が違うか"
+id="toc-7-104と106で何が同じで何が違うか">7.
 104と106で何が同じで、何が違うか</a></li>
-<li><a href="#まとめ-第2回で押さえたこと"
-id="toc-まとめ-第2回で押さえたこと">8. まとめ ― 第2回で押さえたこと</a>
+<li><a href="#8-まとめ--第2回で押さえたこと"
+id="toc-8-まとめ--第2回で押さえたこと">8. まとめ ―
+第2回で押さえたこと</a>
 <ul>
 <li><a href="#参考元になった実装詳細"
 id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
@@ -265,13 +268,13 @@ id="toc-参考元になった実装詳細">参考（元になった実装・詳�
 </ul>
 </nav>
 <h1
-id="blog_002oi最適内挿でデータ同化-まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
+id="blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
 ― まず数式と小さな行列で「OIとは何か」を理解する</h1>
 <h2
 id="読む前にこの記事で分かること">読む前に：この記事で分かること</h2>
 <p><strong>目的は、温度・変位の観測から、測っていない温度と発熱量をどう補正するかを理解することです。</strong>
 <a
-href="blog_001_cht_thermal_expansion_and_htc.md">前回</a>の温度→熱変位計算を「予報」に使い、その予報を観測で直します。</p>
+href="blog001.html">前回</a>の温度→熱変位計算を「予報」に使い、その予報を観測で直します。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -304,7 +307,7 @@ href="blog_001_cht_thermal_expansion_and_htc.md">前回</a>の温度→熱変位
 </tbody>
 </table>
 <p>ここでROMは「温度を少数変数で時間発展させる軽量モデル」です。作り方は<a
-href="blog_004_pod_selected_rom.md">第4回</a>で説明します。
+href="blog004.html">第4回</a>で説明します。
 §5と§6は<strong>モデルも背景共分散の作り方も異なる実験</strong>です。同じ結果の続きを示すものではありません。</p>
 <pre class="mermaid"><code>flowchart LR
  A[&quot;物理モデルで予報&quot;] --&gt; B[&quot;予報温度から観測温度・変位を計算&quot;]
@@ -411,7 +414,7 @@ class="math inline">\(d=y-Hx^b\)</span> と置いて整理すると、</p>
 <p>これが次節の更新式です。観測誤差が大きい成分ほど重みが小さくなる理由も、目的関数の
 <span class="math inline">\(R^{-1}\)</span>
 から分かります。これは仮定した誤差モデルでの最適性であり、各点の実誤差が毎回減る保証ではありません。</p>
-<h2 id="ミニ模型3つの温度点">1. ミニ模型：3つの温度点</h2>
+<h2 id="1-ミニ模型3つの温度点">1. ミニ模型：3つの温度点</h2>
 <p>本物は固体20,696セルですが、いきなりは分かりません。まず
 <strong>3点だけの温度</strong> で考えます。</p>
 <ul>
@@ -427,7 +430,7 @@ class="math inline">\(x^b=(25,\ 25,\ 25)\)</span>
 <p>やりたいのは、<strong>1点だけ温度計を置いて測り</strong>、その1点の情報から
 <strong>3点全部を真値へ寄せる</strong>ことです。</p>
 <hr />
-<h2 id="oi-のしくみ4つの部品と1本の式">2. OI
+<h2 id="2-oi-のしくみ4つの部品と1本の式">2. OI
 のしくみ（4つの部品と1本の式）</h2>
 <p>OI は次の4つの部品でできています。</p>
 <ol type="1">
@@ -467,9 +470,9 @@ class="math inline">\(K\)</span> を作るのに <span
 class="math inline">\(B\)</span>
 （点どうしの連動）が効くので、次に具体的な数字で計算してみます。</p>
 <hr />
-<h2 id="手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
+<h2 id="3-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
 をやってみる（3点・観測1点）</h2>
-<h3 id="部品に数字を入れる">3-1. 部品に数字を入れる</h3>
+<h3 id="3-1-部品に数字を入れる">3-1. 部品に数字を入れる</h3>
 <p><strong>背景共分散 <span class="math inline">\(B\)</span>
 の中身</strong>：いきなり数字にせず、まず記号で書くと構造が見えます。
 <span class="math inline">\(B\)</span> の
@@ -510,7 +513,7 @@ B=\begin{pmatrix}4 &amp; 2 &amp; 0.8\\ 2 &amp; 4 &amp; 2\\ 0.8 &amp; 2
 <p><strong>観測演算子</strong> <span class="math inline">\(H=(1,\ 0,\
 0)\)</span> 。<strong>観測ノイズ</strong> 温度計の標準偏差 0.3 ℃ なので
 <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
-<h3 id="カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
+<h3 id="3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
 class="math inline">\(K\)</span> を計算</h3>
 <p><span class="math inline">\(H=(1,\ 0,\ 0)\)</span>
 が点1を抜き出すので、 <span class="math inline">\(BH^{\mathsf
@@ -535,14 +538,14 @@ R=0.09\)</span> ）:</p>
 でほぼ観測を信じる。点2は 0.489、点3は 0.196 と、
 <strong>測っていない点にも <span class="math inline">\(B\)</span>
 の相関を通じて補正が配られる</strong>。近い点2ほど強く、遠い点3ほど弱く。</p>
-<h3 id="更新answer">3-3. 更新（answer）</h3>
+<h3 id="3-3-更新answer">3-3. 更新（answer）</h3>
 <p>予報のハズレ： <span class="math inline">\(y-Hx^b=30-25=5\)</span>
 ℃。これをゲインで配分:</p>
 <p><span class="math display">\[x^a=x^b+K\times5
 =\begin{pmatrix}25\\ 25\\ 25\end{pmatrix}
 +\begin{pmatrix}0.978\\ 0.489\\ 0.196\end{pmatrix}\times5
 =\begin{pmatrix}29.89\\ 27.44\\ 25.98\end{pmatrix}\]</span></p>
-<h3 id="結果を真値と比べる">3-4. 結果を真値と比べる</h3>
+<h3 id="3-4-結果を真値と比べる">3-4. 結果を真値と比べる</h3>
 <table>
 <colgroup>
 <col style="width: 20%" />
@@ -594,7 +597,7 @@ class="math inline">\(B\)</span>
 「点1が予報より5℃高かった → 連動する点2も高いはず」と <span
 class="math inline">\(B\)</span>
 が教えてくれるので、補正が全体に広がります。</p>
-<h3 id="温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
+<h3 id="3-5-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
 温度・変位・発熱量 <span class="math inline">\(Q\)</span>
 が更新式のどこに入るか（文字式）</h3>
 <p>ここまでは温度だけでした。本研究の狙いは
@@ -645,7 +648,7 @@ class="math inline">\(Q\)</span> が同定できるのは、この <span
 class="math inline">\(B_{TQ}\neq0\)</span> のおかげ</strong>（＝温度が
 <span class="math inline">\(Q\)</span> で決まるから）です。</p>
 </blockquote>
-<h3 id="温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
+<h3 id="3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
 class="math inline">\(Q\)</span> が動く（文字式）</h3>
 <p>温度計を点1に置くと <span class="math inline">\(H=(1,\ 0,\
 0)\)</span> 、観測ノイズ分散を <span class="math inline">\(R=r\)</span>
@@ -673,7 +676,7 @@ class="math inline">\(B_{T_1Q}\)</span> 。 <strong>「温度を測ると <span
 class="math inline">\(Q\)</span> が同定される」の正体は、この <span
 class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span></strong>
 です。</p>
-<h3 id="変位を測ると全部動く文字式">3-7.
+<h3 id="3-7-変位を測ると全部動く文字式">3-7.
 変位を測ると全部動く（文字式）</h3>
 <p>変位計は温度を直接は測らず、<strong>温度の重み付き和</strong>を測ります。だから
 <strong>観測演算子 <span class="math inline">\(H\)</span> が感度 <span
@@ -706,7 +709,7 @@ class="math inline">\(s\)</span> と <span
 class="math inline">\(w\)</span>
 の内積」で決まる、というのが文字式で読み取れる要点です。</p>
 <h4
-id="なぜ変位を測ると温度まで良くなるのか-分散で丁寧に導く">なぜ「変位を測ると温度まで良くなる」のか
+id="なぜ変位を測ると温度まで良くなるのか--分散で丁寧に導く">なぜ「変位を測ると温度まで良くなる」のか
 ― 分散で丁寧に導く</h4>
 <p>「変位計は温度を測っていないのに、なぜ温度が良くなるのか」を、共分散の式で最後まで追います。</p>
 <p><strong>① 変位のズレ＝温度誤差の射影</strong>。温度の予報誤差を <span
@@ -857,7 +860,7 @@ class="math inline">\(\varphi\)</span>
 ③ 観測ノイズが信号より小さい（ <span class="math inline">\(r\lt
 g^2\sigma_a^2\)</span> ）</p>
 </blockquote>
-<h3 id="q-が同定できる周辺化積分の正体">3-8. 「 <span
+<h3 id="3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span
 class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</h3>
 <p><span class="math inline">\(Q\)</span> の更新だけ取り出すと、ゲインの
@@ -930,7 +933,7 @@ class="math inline">\(Q\)</span>
 （60秒ごとに何度も更新）。この決め打ちの弱さを分身の散らばりで作り直すのが
 EnKF（blog_003）です。</p>
 <hr />
-<h2 id="どこを測ると効くか-熱感度-w-の分布で観測点を選ぶ">4.
+<h2 id="4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ">4.
 どこを測ると効くか ― 熱感度 <span class="math inline">\(W\)</span>
 の分布で観測点を選ぶ</h2>
 <p>3点模型では「点1を測る」と決め打ちしましたが、本研究では
@@ -938,7 +941,7 @@ EnKF（blog_003）です。</p>
 <strong>変位センサ</strong>をどこに置くかは、FrontISTR で求めた
 <strong>熱感度 <span class="math inline">\(W\)</span></strong>
 の<strong>分布</strong>で決めます。</p>
-<h3 id="熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span
+<h3 id="4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span
 class="math inline">\(W=K_s^{-1}H_T\)</span> とは</h3>
 <p>温度節点ベクトルを <span class="math inline">\(T\)</span>
 、基準温度との差を <span class="math inline">\(\Delta T=T-T_{\rm
@@ -955,7 +958,7 @@ class="math inline">\(i\)</span> がどれだけ変わるか（m/K）」です�
 class="math inline">\(S_i=\sum_j \lvert W_{ij}\rvert\)</span>
 を比べます。 <span class="math inline">\(S_i\)</span>
 が大きい場所ほど、<strong>温度変化に大きく応答し得る候補</strong>です。ただし実際の誤差の空間分布と観測ノイズも考慮する必要があります。</p>
-<h3 id="感度の分布図">4-2. 感度の分布（図）</h3>
+<h3 id="4-2-感度の分布図">4-2. 感度の分布（図）</h3>
 <p>この <span class="math inline">\(W\)</span>
 の行感度を円筒上に色で描くと、<strong>どこが高感度か</strong>が一目で分かります。</p>
 <figure>
@@ -977,7 +980,7 @@ class="math inline">\(W\)</span>
 <li><strong>A/Oは上面の高W域にありますが、感度ランキングで選んだ2点と同一とは限りません。</strong>
 §5では高W/低W観測点とA/O評価位置を分けて示します。104のA/Oが感度解析で選定されたと、この図だけからは言えません。</li>
 </ul>
-<h3 id="実際の選定手順105106">4-3. 実際の選定手順（105→106）</h3>
+<h3 id="4-3-実際の選定手順105106">4-3. 実際の選定手順（105→106）</h3>
 <p>この感度は 106
 のROM中で推測したものではなく、<strong>105でFrontISTRを実行して得た結果</strong>を使いました。</p>
 <ol type="1">
@@ -998,10 +1001,10 @@ class="math inline">\(S_i\)</span>
 の大きい点に置けばよいわけではありません。 <span
 class="math inline">\(W\)</span>
 と温度のばらつきを組み合わせて選びます（<a
-href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>）。</p>
+href="blog005.html">blog_005 §4-6</a>）。</p>
 </blockquote>
 <hr />
-<h2 id="感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
+<h2 id="5-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
 感度が低い点で測るとどうなるか（OI で確かめる失敗例）</h2>
 <p>第4節で選んだ観測点を、実際に <strong>OI（固定 <span
 class="math inline">\(B\)</span> ）</strong> で回して確かめます。まず
@@ -1112,7 +1115,7 @@ class="math inline">\(W\)</span>
 自体は105のFrontISTR計算由来。再現は
 <code>run/blog_oi_disp_selection.py</code>。EnKF版でも同じ傾向です。）</p>
 <hr />
-<h2 id="実モデル104実ソルバで回した比較">6.
+<h2 id="6-実モデル104実ソルバで回した比較">6.
 実モデル（104実ソルバ）で回した比較</h2>
 <p>ここまでは考え方の理解でした。ここからは
 <strong>104のOpenFOAM＋FrontISTR実ソルバ</strong>で回した結果です
@@ -1135,9 +1138,9 @@ aria-hidden="true">σQ/σTスタディの観測点・評価点の位置（3D）<
 z=75 mm）</strong>。
 C−D差は「データ同化に使っていない別の変位差」で、<strong>データ同化がその未観測点まで当たるか（汎化）</strong>を見る評価量です。
 （A/Oは実際には上面の +X/−X 節点列の平均。側面投影版は <a
-href="18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a> の
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a> の
 <code>oi_evaluation_locations.png</code> 参照。）</em></p>
-<h3 id="σqスタディ発熱の背景分散を変える">6-1.
+<h3 id="6-1-σqスタディ発熱の背景分散を変える">6-1.
 σQスタディ：発熱の背景分散を変える</h3>
 <p>背景発熱量の標準偏差を <span
 class="math inline">\(\sigma_Q=0.5,2,6,50\)</span> Wと変え、 <span
@@ -1157,7 +1160,7 @@ Wに届きませんでした。 つまり、<strong>温度分布がよく合っ�
 が同じ精度で同定できるとは限らない</strong>（弱可同定）。 今回試した
 <span class="math inline">\(\sigma_Q\)</span>
 の範囲ではQの改善は小さく、固定した感度・観測配置を含めた設計の見直しが必要です。OI一般の限界とまでは言えません。</p>
-<h3 id="σtスタディ温度誤差の大きさを変える">6-2.
+<h3 id="6-2-σtスタディ温度誤差の大きさを変える">6-2.
 σTスタディ：温度誤差の大きさを変える</h3>
 <p>背景温度の標準偏差 <span
 class="math inline">\(\sigma_T=0.3,0.75,1.237,1.5\)</span> K
@@ -1176,10 +1179,10 @@ alt="実ソルバOI：σT 4条件の温度・変位・変位差" />
 この固定共分散・固定感度のOIでは、σTだけで温度場・変位差・ <span
 class="math inline">\(Q\)</span> を同時に真値へ合わせることはできません
 （OI一般の限界ではなく、今回の観測配置と共分散近似に対する結論）。詳細は
-<a href="18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a>
+<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a>
 参照。</p>
 <hr />
-<h2 id="と106で何が同じで何が違うか">7.
+<h2 id="7-104と106で何が同じで何が違うか">7.
 104と106で何が同じで、何が違うか</h2>
 <table>
 <colgroup>
@@ -1222,7 +1225,8 @@ class="math inline">\(Q\)</span> を同時に真値へ合わせることはで�
 今回の104ではBの調整だけでQは真値へ届きませんでしたが、これはOI一般の不可能性を意味しません。
 次回は予報メンバーから毎回共分散を作るEnKFを説明します。EnKFでも観測情報が乏しければ同定は難しくなります。</p>
 <hr />
-<h2 id="まとめ-第2回で押さえたこと">8. まとめ ― 第2回で押さえたこと</h2>
+<h2 id="8-まとめ--第2回で押さえたこと">8. まとめ ―
+第2回で押さえたこと</h2>
 <ol type="1">
 <li><strong>OIは更新式1本</strong>： <span
 class="math inline">\(x^a=x^b+K(y-Hx^b)\)</span> 、 <span
@@ -1264,7 +1268,7 @@ class="math inline">\(B\)</span> を毎サイクル作り直す</strong>やり�
 <li>全ストーリー：<code>blog_004_pod_selected_rom.md</code></li>
 </ul>
 <p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
-href="19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
 を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>
