@@ -54,15 +54,18 @@ def main():
         if j==1:
             ax.fill_between(tt,0,40,where=[ON_FIXED(x) for x in tt],color="none",hatch="///",edgecolor="#999",
                             linewidth=0.0,label="ROMが仮定したON")
-        for i in range(5):
-            ax.plot(t,T5[:,i]-273.15,"o",color=COLS[i],ms=5)
-            ax.plot(t,R[:,i]-273.15,"-",color=COLS[i],lw=2.0,label=f"P{i}")
+        for i in range(5):   # OpenFOAM＝太い薄い線、ROM＝細い破線（重なっても両方見えるように）
+            ax.plot(t,T5[:,i]-273.15,"-",color=COLS[i],lw=8,alpha=.28,solid_capstyle="round")
+            ax.plot(t,R[:,i]-273.15,"--",color=COLS[i],lw=1.8,label=f"P{i}")
+        from matplotlib.lines import Line2D
+        style=[Line2D([0],[0],color="#555",lw=8,alpha=.28,label="OpenFOAM（太い薄い線）"),
+               Line2D([0],[0],color="#555",lw=1.8,ls="--",label="ROM（細い破線）")]
         ax.set_ylim(19,27); ax.set_ylabel("温度 [℃]"); ax.grid(alpha=.3)
         ax.set_title(f"{lab}\n{sub}",fontsize=12)
         ax.tick_params(labelbottom=False)
-        if j==0: ax.legend(fontsize=9,ncol=3,loc="upper left")
-        ax.text(0.98,0.04,("点＝OpenFOAM、線＝ROM"),transform=ax.transAxes,ha="right",fontsize=10,
-                bbox=dict(fc="white",ec="#bbb"))
+        if j==0:
+            l1=ax.legend(fontsize=9,ncol=3,loc="upper left"); ax.add_artist(l1)
+        ax.legend(handles=style,fontsize=10,loc="lower right",framealpha=.95)
     # 下段：誤差
     for j,(e,lab) in enumerate([(et,"正しく与えた場合"),(ef,"決め打ちのまま")]):
         ax=fig.add_subplot(gs[1,j])
