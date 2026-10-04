@@ -896,7 +896,7 @@ class="math inline">\(m=121\)</span> ）です。
 <span class="math inline">\(X\)</span> でも <span
 class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> と書けるのか ―
 制限はない</h4>
-<p><strong>書けます。<span class="math inline">\(X\)</span>
+<p><strong>書けます。 <span class="math inline">\(X\)</span>
 に制限はありません。</strong> 実数の行列なら、</p>
 <table>
 <colgroup>
@@ -1192,6 +1192,129 @@ class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
 （アルゴリズムとしてはLAPACKの <code>gesdd</code>
 が呼ばれ、二重対角化してから反復で特異値を求めます。
 ただし<strong>使う側が知っておくべきは上の分解の意味だけ</strong>です。）</p>
+<h4 id="文字式で追う--3点--4時刻の分解">文字式で追う ― 3点 ×
+4時刻の分解</h4>
+<p>数字の前に、同じ大きさ（3点 ×
+4時刻）の場合を<strong>文字のまま</strong>展開します。</p>
+<p><strong>① 入力：平均を引いた温度の行列 <span
+class="math inline">\(X\)</span> （3 × 4）</strong></p>
+<p><span class="math inline">\(x_{it}\)</span> ＝ 点 <span
+class="math inline">\(i\)</span> の、時刻 <span
+class="math inline">\(t\)</span> の「平均からのずれ」（ <span
+class="math inline">\(i=1,2,3\)</span> 、 <span
+class="math inline">\(t=1,\dots,4\)</span> ）。</p>
+<p><span class="math display">\[
+X=\begin{pmatrix}
+x_{11}&amp;x_{12}&amp;x_{13}&amp;x_{14}\\
+x_{21}&amp;x_{22}&amp;x_{23}&amp;x_{24}\\
+x_{31}&amp;x_{32}&amp;x_{33}&amp;x_{34}
+\end{pmatrix}
+\]</span></p>
+<p><strong>② SVD が返す3つ</strong></p>
+<p><span class="math display">\[
+U=\begin{pmatrix}u_{11}&amp;u_{12}&amp;u_{13}\\
+u_{21}&amp;u_{22}&amp;u_{23}\\
+u_{31}&amp;u_{32}&amp;u_{33}\end{pmatrix},\quad
+\Sigma=\begin{pmatrix}\sigma_1&amp;0&amp;0\\ 0&amp;\sigma_2&amp;0\\
+0&amp;0&amp;\sigma_3\end{pmatrix},\quad
+V^{\mathsf T}=\begin{pmatrix}v_{11}&amp;v_{21}&amp;v_{31}&amp;v_{41}\\
+v_{12}&amp;v_{22}&amp;v_{32}&amp;v_{42}\\
+v_{13}&amp;v_{23}&amp;v_{33}&amp;v_{43}\end{pmatrix}
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(U\)</span> の <span
+class="math inline">\(k\)</span> 列目 <span
+class="math inline">\(u_k=(u_{1k},u_{2k},u_{3k})^{\mathsf
+T}\)</span></td>
+<td>型 <span class="math inline">\(k\)</span>
+の<strong>場所ごとの重み</strong>（3点分）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma_k\)</span></td>
+<td>型 <span class="math inline">\(k\)</span> の<strong>大きさ</strong>
+<span
+class="math inline">\((\sigma_1\ge\sigma_2\ge\sigma_3\ge0)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(V\)</span> の <span
+class="math inline">\(k\)</span> 列目 <span
+class="math inline">\(v_k=(v_{1k},\dots,v_{4k})^{\mathsf
+T}\)</span></td>
+<td>型 <span class="math inline">\(k\)</span>
+の<strong>時刻ごとの係数</strong>（4時刻分）。 <span
+class="math inline">\(V^{\mathsf T}\)</span> では <span
+class="math inline">\(k\)</span> 行目に横に並ぶ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>③ 掛け算すると、成分は「3つの型の足し算」になる</strong></p>
+<p><span class="math inline">\(U\Sigma V^{\mathsf T}\)</span> の <span
+class="math inline">\((i,t)\)</span> 成分を計算すると（ <span
+class="math inline">\(\Sigma\)</span> の対角以外が 0 なので、 <span
+class="math inline">\(k\)</span> が一致する項だけ残る）</p>
+<p><span class="math display">\[
+x_{it} = \sigma_1\,u_{i1}\,v_{t1} + \sigma_2\,u_{i2}\,v_{t2} +
+\sigma_3\,u_{i3}\,v_{t3}
+\]</span></p>
+<p>たとえば点1・時刻1は <span
+class="math inline">\(x_{11}=\sigma_1u_{11}v_{11}+\sigma_2u_{12}v_{12}+\sigma_3u_{13}v_{13}\)</span>
+です。 <strong>「点 <span class="math inline">\(i\)</span> ・時刻 <span
+class="math inline">\(t\)</span> の温度のずれ」＝「型 <span
+class="math inline">\(k\)</span> の大きさ × 点 <span
+class="math inline">\(i\)</span> での型の重み × 時刻 <span
+class="math inline">\(t\)</span>
+での型の係数」を、型ごとに足したもの。</strong></p>
+<p><strong>④ 型1つ分を行列で書くと</strong></p>
+<p><span class="math display">\[
+\sigma_1\,u_1v_1^{\mathsf T}
+=\sigma_1\begin{pmatrix}u_{11}\\ u_{21}\\ u_{31}\end{pmatrix}
+\begin{pmatrix}v_{11}&amp;v_{21}&amp;v_{31}&amp;v_{41}\end{pmatrix}
+=\sigma_1\begin{pmatrix}
+u_{11}v_{11}&amp;u_{11}v_{21}&amp;u_{11}v_{31}&amp;u_{11}v_{41}\\
+u_{21}v_{11}&amp;u_{21}v_{21}&amp;u_{21}v_{31}&amp;u_{21}v_{41}\\
+u_{31}v_{11}&amp;u_{31}v_{21}&amp;u_{31}v_{31}&amp;u_{31}v_{41}
+\end{pmatrix}
+\]</span></p>
+<p><strong>この行列は、どの列も <span class="math inline">\(u_1\)</span>
+の定数倍</strong>（列 <span class="math inline">\(t\)</span> ＝ <span
+class="math inline">\(\sigma_1v_{t1}\times u_1\)</span> ）。
+つまり「<strong>温度分布の形は <span class="math inline">\(u_1\)</span>
+のまま、時刻ごとに強さ <span
+class="math inline">\(\sigma_1v_{t1}\)</span>
+だけが変わる</strong>」型です。型2・型3も同じ形で、3つ足すと <span
+class="math inline">\(X\)</span> に戻ります。</p>
+<p><span class="math display">\[
+X=\sigma_1u_1v_1^{\mathsf T}+\sigma_2u_2v_2^{\mathsf
+T}+\sigma_3u_3v_3^{\mathsf T}
+\]</span></p>
+<p><strong>⑤ 型を捨てたときの誤差</strong></p>
+<p>型3を捨てた近似 <span
+class="math inline">\(X_2=\sigma_1u_1v_1^{\mathsf
+T}+\sigma_2u_2v_2^{\mathsf T}\)</span> との差は <span
+class="math inline">\(\sigma_3u_3v_3^{\mathsf T}\)</span>
+だけで、その全成分の2乗の合計は</p>
+<p><span class="math display">\[
+\sum_{i,t}\big(X-X_2\big)_{it}^2=\sigma_3^2
+\]</span></p>
+<p>（ <span class="math inline">\(u_3\)</span> ・ <span
+class="math inline">\(v_3\)</span> は長さ1なので）。<strong>捨てた型の
+<span class="math inline">\(\sigma^2\)</span>
+がそのまま誤差になる</strong>ので、 <span
+class="math inline">\(\sigma\)</span>
+の小さい型から捨てればよい、というのが「少ないモードで済む」理由です。</p>
+<p>次の数値例は、この文字に実データを入れたものです。</p>
 <h4 id="数字で最後まで追う--3点--4時刻の完全分解">数字で最後まで追う ―
 3点 × 4時刻の完全分解</h4>
 <p>言葉だけでは分かりにくいので、<strong>実データから3点・4時刻だけ抜き出して全部書き下します</strong>
