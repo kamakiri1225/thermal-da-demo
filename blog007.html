@@ -895,8 +895,12 @@ B（データ同化あり）の両方を見る</p>
 <img src="img/rom_applicability.png" alt="ROM 単体の予測と OpenFOAM" />
 <figcaption aria-hidden="true">ROM 単体の予測と OpenFOAM</figcaption>
 </figure>
-<p><em>上：点＝OpenFOAM、線＝ROM（データ同化なし、0→600
-秒を一気に計算）。下：その差。 帯は温度計のノイズ ±0.30 K
+<p><em>上：<strong>太い薄い線＝OpenFOAM</strong>、<strong>細い破線＝ROM</strong>（同じ色が同じ点。データ同化なし、0→600
+秒を一気に計算）。 3列とも、ROM には<strong>発熱量とヒータの ON/OFF を
+OpenFOAM
+と同じに</strong>与えています。破線が太い線の真ん中に乗っていれば合っている。
+右列の黒い点線は参考で、ON/OFF を与えず「0〜300 秒一定」のままにした
+ROM（P2）。下：ROM と OpenFOAM の差。帯は温度計のノイズ ±0.30 K
 の幅。</em></p>
 <p><strong>どの程度使えるか</strong>を、この図の下段で判断できます。</p>
 <table>
@@ -950,7 +954,7 @@ B（データ同化あり）の両方を見る</p>
 K）の帯に完全に収まっています。</strong>
 実際にセンサで測っても、この差は読み取れない水準です。</li>
 <li>25 W
-でも、上段の線（ROM）は点（OpenFOAM）にほぼ重なっています。</li>
+でも、上段の細い破線（ROM）は太い薄い線（OpenFOAM）にほぼ重なっています。</li>
 <li>誤差は 0.038 K から 0.109 K へ約3倍に増えましたが、温度上昇が 5.8 K
 から 9.6 K に増えたぶんを考えると、<strong>温度上昇に対する比は 0.7 % →
 1.1 %</strong> とわずかな増加です。</li>
