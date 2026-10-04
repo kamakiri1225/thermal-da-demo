@@ -892,6 +892,90 @@ class="math inline">\(m=121\)</span> ）です。
 「直交」とは、2つの列の内積が 0 ＝
 型どうしが重なりを持たない、という意味です。
 具体的な数値（3点×4時刻）は、この節の後半「数字で最後まで追う」にあります。</p>
+<h4 id="どんな-x-でも-xusigma-vmathsf-t-と書けるのか--制限はない">どんな
+<span class="math inline">\(X\)</span> でも <span
+class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> と書けるのか ―
+制限はない</h4>
+<p><strong>書けます。<span class="math inline">\(X\)</span>
+に制限はありません。</strong> 実数の行列なら、</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>必要か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>正方行列（ <span class="math inline">\(N=m\)</span> ）</td>
+<td><strong>不要</strong>。本ケースは 20,696 × 121 の縦長</td>
+</tr>
+<tr class="even">
+<td>対称・正定値</td>
+<td><strong>不要</strong>（固有値分解と違うところ）</td>
+</tr>
+<tr class="odd">
+<td>逆行列を持つ（フルランク）</td>
+<td><strong>不要</strong>。ランクが低ければ、0 の特異値が出るだけ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>なぜ必ず書けるのか（3行の証明）</strong></p>
+<ol type="1">
+<li><span class="math inline">\(X^{\mathsf T}X\)</span> （ <span
+class="math inline">\(m\times m\)</span> ）は、どんな <span
+class="math inline">\(X\)</span>
+でも<strong>対称</strong>で、固有値が<strong>0以上</strong>です（ <span
+class="math inline">\(v^{\mathsf T}X^{\mathsf T}Xv=\lVert
+Xv\rVert^2\ge0\)</span> だから）。
+対称行列は必ず直交する固有ベクトルで対角化できるので、 <span
+class="math inline">\(X^{\mathsf T}X=V\Lambda V^{\mathsf T}\)</span> 、
+<span
+class="math inline">\(\Lambda=\mathrm{diag}(\lambda_1,\lambda_2,\dots)\)</span>
+、 <span class="math inline">\(\lambda_k\ge0\)</span> 。</li>
+<li><span class="math inline">\(\sigma_k=\sqrt{\lambda_k}\)</span>
+（0以上なので必ず平方根が取れる）、 <span
+class="math inline">\(u_k=Xv_k/\sigma_k\)</span> （ <span
+class="math inline">\(\sigma_k&gt;0\)</span> のもの）と置くと、 <span
+class="math inline">\(u_k\)</span> も長さ1で互いに直交します（ <span
+class="math inline">\(u_j^{\mathsf T}u_k=v_j^{\mathsf T}X^{\mathsf
+T}Xv_k/(\sigma_j\sigma_k)=\lambda_k v_j^{\mathsf
+T}v_k/(\sigma_j\sigma_k)\)</span> ）。</li>
+<li><span class="math inline">\(Xv_k=\sigma_ku_k\)</span> を全部の <span
+class="math inline">\(k\)</span> で並べると <span
+class="math inline">\(XV=U\Sigma\)</span> 。右から <span
+class="math inline">\(V^{\mathsf T}\)</span> を掛けて <span
+class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> 。</li>
+</ol>
+<p><strong>決まり方について</strong></p>
+<ul>
+<li>特異値 <span class="math inline">\(\sigma_k\)</span> は、 <span
+class="math inline">\(X\)</span>
+から<strong>ただ1通りに決まります</strong>（大きい順に並べた場合）。</li>
+<li><span class="math inline">\(u_k\)</span> ・ <span
+class="math inline">\(v_k\)</span>
+は、特異値がすべて違えば<strong>符号だけ</strong>任意です（ <span
+class="math inline">\(u_k\)</span> と <span
+class="math inline">\(v_k\)</span> を同時に反転しても同じ <span
+class="math inline">\(X\)</span>
+）。後半の「符号には任意性があります」はこのことです。</li>
+<li><span class="math inline">\(r\)</span> （使う型の数）は、0
+でない特異値の数＝ <span class="math inline">\(X\)</span>
+の<strong>ランク</strong>です。本ケースは時刻が 121 なので <span
+class="math inline">\(r\le121\)</span> 。</li>
+</ul>
+<p><strong>上の式で <span class="math inline">\(V^{\mathsf
+T}V=I\)</span> を使ってよい理由</strong>： <span
+class="math inline">\(V\)</span>
+の列は手順1の直交する固有ベクトルなので、 <span
+class="math inline">\(V^{\mathsf T}V=I\)</span> が必ず成り立ちます（
+<code>full_matrices=False</code> で <span
+class="math inline">\(U\)</span> を 121 列に絞っても、 <span
+class="math inline">\(V\)</span> は 121 × 121 のままなので同じ）。</p>
 <h4
 id="なぜ-svd-の-u-が-pod-のモードになり-lambda_ksigma_k2-になるのか">なぜ
 SVD の <span class="math inline">\(U\)</span> が POD のモードになり、
