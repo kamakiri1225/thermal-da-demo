@@ -1145,6 +1145,46 @@ href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod
 <p>真値は OpenFOAM
 の温度場そのものです。観測は温度2点（P2＋P4）＋変位2点（A/O）、5 seed
 平均です。</p>
+<p><strong>ROM と OpenFOAM の条件が合っているか</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>列</th>
+<th>OpenFOAM のヒータ</th>
+<th>ROM に与えたヒータ</th>
+<th>条件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>左：15 W</td>
+<td>0〜300 秒 ON</td>
+<td>0〜300 秒 ON</td>
+<td><strong>合っている</strong></td>
+</tr>
+<tr class="even">
+<td>中：25 W</td>
+<td>0〜300 秒 ON</td>
+<td>0〜300 秒 ON（発熱量はデータ同化で推定）</td>
+<td><strong>合っている</strong></td>
+</tr>
+<tr class="odd">
+<td>右：間欠加熱</td>
+<td>0〜150 秒・300〜450 秒 ON</td>
+<td><strong>0〜300 秒 ON のまま（ON/OFF を教えていない）</strong></td>
+<td><strong>合っていない</strong></td>
+</tr>
+</tbody>
+</table>
+<p>右列は ON/OFF を教えていないので、2回目の加熱（300
+秒以降）で外れます。 <strong>ON/OFF
+を教えて条件を合わせた場合の図は、この節の最後の【追加】にあります（そちらでは右列も合います）。</strong></p>
 <figure>
 <img src="img/all_cells_after_da.png" alt="全セルの温度と誤差" />
 <figcaption aria-hidden="true">全セルの温度と誤差</figcaption>
@@ -1196,7 +1236,7 @@ K。黒点が帯の中に入っていれば「測っても区別できない精�
 <td style="text-align: right;"><strong>100 %</strong></td>
 </tr>
 <tr class="odd">
-<td>間欠加熱（新しく計算した条件）</td>
+<td>間欠加熱（ON/OFF を教えていない）</td>
 <td style="text-align: right;">0.240 K</td>
 <td style="text-align: right;">0.547 K</td>
 <td style="text-align: right;">0.633 K</td>
@@ -1209,34 +1249,25 @@ K。黒点が帯の中に入っていれば「測っても区別できない精�
 <p>（加熱期 30〜300 秒の平均誤差）</p>
 <h3 id="読み取れること">読み取れること</h3>
 <ol type="1">
-<li><p><strong>上3段のグラフを見ると、15 W と 25 W
-では黒点が帯の中に収まっています。</strong>
+<li><p><strong>15 W と 25
+W（条件が合っている列）では、黒点が帯の中に収まっています。</strong>
 いちばん誤差が大きいセル（ヒータ横 (36, 7, 51)
 mm）でも、加熱から冷却まで線が点から離れません。 温度でいうと
 <strong>5.8 K 上がるうちの 0.19 K</strong>（25 W では 9.6 K 中 0.21
-K）のずれです。</p></li>
-<li><p><strong>間欠加熱（右列）だけは、300
-秒を過ぎると黒点が帯から大きく外れます。</strong> 真値は2回目の加熱で
-24〜25 ℃ まで上がりますが、推定は 23 ℃ 付近で止まっています。 ずれは最大
-0.633 K で、グラフでもはっきり分かります。</p></li>
+K）のずれです。 最下段の分布を見ても、<strong>20,696
+セルすべてが温度計のノイズ（0.3
+K）より小さい誤差</strong>に収まりました。</p></li>
 <li><p><strong>代表点以外のほうが、むしろ誤差が小さい。</strong> 15 W
 では代表5点 0.142 K に対し、代表点以外は 0.112 K でした。25 W
 でも同じ傾向です。
 代表5点はヒータの近くや底面など<strong>温度変化が大きい場所</strong>に選ばれているので、誤差もそこで大きくなります。
 「測った点だけ合って、ほかは合っていない」という心配は<strong>不要</strong>でした。</p></li>
-<li><p><strong>15 W と 25 W では、20,696 セルすべてが温度計のノイズ（0.3
-K）より小さい誤差に収まりました。</strong> 最大でも 0.186 K・0.208 K
-です。中段の分布図を見ても、色が一様で、特定の場所だけ大きく外れるということはありません。</p></li>
-<li><p><strong>間欠加熱だけは合いません。</strong> 誤差が 0.3 K
-を超えるセルが 30 % あり、最大 0.633 K です。
-下段の時間変化を見ると、<strong>300 秒以降（2回目の加熱）で誤差が 3 K
-近くまで跳ね上がっています</strong>。 ROM が「0〜300
-秒に一定の発熱」と仮定しているためで、§6 の方法で改善できます。</p></li>
-<li><p><strong>下段を見ると、データ同化後の線（線）が
-OpenFOAM（点）にほぼ重なっています。</strong> 15 W と 25 W
-では、誤差が最大のセル（ヒータ横 (36, 7, 51)
-mm）でも、加熱から冷却まで線と点が離れません。 間欠加熱だけは、300
-秒以降で線が点から大きく離れます（2回目の加熱を予測できないため）。</p></li>
+<li><p><strong>間欠加熱（右列、ON/OFF を教えていない）は、300
+秒を過ぎると黒点が帯から大きく外れます。</strong> 真値は2回目の加熱で
+24〜25 ℃ まで上がりますが、推定は 23 ℃ 付近で止まっています（最大 0.633
+K、0.3 K を超えるセルが 30 %）。 ROM が「0〜300
+秒に一定の発熱」のままで、2回目の加熱を予測できないためです。<strong>ON/OFF
+を教えると合います（下の【追加】）。</strong></p></li>
 </ol>
 <h3
 id="追加ヒータの-onoff-をモデルに与えると間欠加熱でも合う">【追加】ヒータの
