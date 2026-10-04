@@ -901,6 +901,11 @@ class="math inline">\(w_{S2}=D_{S2}U_{rP}^{-1}\)</span> （µm/K）</td>
 </tr>
 </tbody>
 </table>
+<p><strong>この例では、温度計2本は代表点（P2・P0）に置いています（本番の構成と同じ）。変位計2本（S1・S2）は代表点ではありません</strong>（上面の
+FEM 節点）。
+温度計を代表点以外に置いた場合も同じ式でデータ同化できることは、§7-0 と
+<a href="blog_007_rom_applicability.md">blog_007 §10</a>
+で確かめています。</p>
 <p><strong>温度計の行も変位計の行も、同じ「5つの数字」の行として並んでいるだけです。</strong>
 温度計を代表点以外に置けば1・2行目が gappy-POD
 の行（§7-0）に変わり、変位計の場所を変えれば3・4行目が変わります。
@@ -1001,6 +1006,184 @@ class="math inline">\(h\)</span>
 <p>（真値は <span class="math inline">\(T\)</span> ＝ 294.26, 293.32,
 294.81, 293.47, 293.18 K、 <span class="math inline">\(q\)</span> ＝ 1、
 <span class="math inline">\(h\)</span> ＝ 0.0154）</p>
+<h4
+id="この補正式はどこから来たのか-ベイズの定理から">この補正式はどこから来たのか
+― ベイズの定理から</h4>
+<p>上の行列式は、<strong>ベイズの定理</strong>と「<strong>誤差はガウス分布（正規分布）に従う</strong>」という仮定から導かれます。今回の問題（状態
+7 つ、観測 4 つ）に当てはめて、順に書きます。</p>
+<ul>
+<li><p><strong>① 何を求めたいか</strong>：センサの読み <span
+class="math inline">\(y\)</span> （4×1）が得られたときの、状態 <span
+class="math inline">\(z\)</span> （7×1）の確率分布 <span
+class="math inline">\(p(z\mid y)\)</span>
+。これが分かれば、いちばん確からしい <span
+class="math inline">\(z\)</span> が「直した後の値」になる。</p></li>
+<li><p><strong>② ベイズの定理</strong>：</p></li>
+</ul>
+<p><span class="math display">\[
+p(z\mid y) = \frac{p(y\mid z)\,p(z)}{p(y)} \;\propto\; p(y\mid z)\,p(z)
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(p(z)\)</span>
+＝<strong>事前分布</strong>：センサを見る前の予報。「状態はだいたい
+<span class="math inline">\(z^f\)</span> のあたり」</p></li>
+<li><p><span class="math inline">\(p(y\mid z)\)</span>
+＝<strong>尤度</strong>：「状態が <span class="math inline">\(z\)</span>
+なら、センサはこう読むはず」</p></li>
+<li><p><span class="math inline">\(p(z\mid y)\)</span>
+＝<strong>事後分布</strong>：センサを見た後の、状態の分布</p></li>
+<li><p><strong>③ 予報をガウス分布とみなす（事前分布）</strong>：平均
+<span class="math inline">\(z^f\)</span> 、共分散 <span
+class="math inline">\(B\)</span>
+（7×7。「状態の7つがどれだけばらつき、どう連動するか」）</p></li>
+</ul>
+<p><span class="math display">\[
+p(z) \propto \exp\!\Big(-\tfrac12\,(z-z^f)^{\mathsf T}
+B^{-1}(z-z^f)\Big)
+\]</span></p>
+<ul>
+<li><strong>④
+観測の式と、そのガウス分布（尤度）</strong>：センサの読みは状態の一次式＋ノイズ</li>
+</ul>
+<p><span class="math display">\[
+y = Hz + \varepsilon,\qquad \varepsilon \sim N(0,\ R),\qquad
+R=\mathrm{diag}(0.3^2,\ 0.3^2,\ 0.3^2,\ 0.3^2)
+\]</span></p>
+<p><span class="math display">\[
+p(y\mid z) \propto \exp\!\Big(-\tfrac12\,(y-Hz)^{\mathsf T}
+R^{-1}(y-Hz)\Big)
+\]</span></p>
+<p>ここで <span class="math inline">\(H\)</span> （4×7）は、②
+の観測行列（4×5）の右に、 <span class="math inline">\(q\)</span> ・
+<span class="math inline">\(h\)</span> の列として 0
+を2列足したものです。</p>
+<p><span class="math display">\[
+H=
+\begin{bmatrix}
+0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+-0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290 &amp; 0 &amp;
+0\\
+-0.169 &amp; 0.595 &amp; -0.309 &amp; 0.427 &amp; 0.666 &amp; 0 &amp; 0
+\end{bmatrix}
+\]</span></p>
+<p>（行は上から温度計 P2・温度計 P0・変位計 S1・変位計 S2、列は <span
+class="math inline">\(T_0\sim T_4,\ q,\ h\)</span> ） <strong><span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> の列が 0 ＝センサは <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> を直接は見ていない。</strong> それでも
+<span class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> が直るのは ⑦ の共分散のおかげです。</p>
+<ul>
+<li><strong>⑤
+掛け合わせる</strong>：ガウス分布どうしの積はガウス分布なので、事後分布もガウス分布になる。指数の中身は</li>
+</ul>
+<p><span class="math display">\[
+J(z) = \tfrac12\,(z-z^f)^{\mathsf T}B^{-1}(z-z^f) +
+\tfrac12\,(y-Hz)^{\mathsf T}R^{-1}(y-Hz)
+\]</span></p>
+<p>で、 <span class="math inline">\(p(z\mid y)\propto e^{-J(z)}\)</span>
+。<strong><span class="math inline">\(J\)</span> を最小にする <span
+class="math inline">\(z\)</span>
+が、いちばん確からしい状態</strong>です。
+第1項は「予報から離れすぎない」、第2項は「センサの読みから離れすぎない」で、それぞれ
+<span class="math inline">\(B\)</span> ・ <span
+class="math inline">\(R\)</span> の逆数で重みをつけた綱引きです。</p>
+<ul>
+<li><strong>⑥ 最小にする（微分して 0）</strong>：</li>
+</ul>
+<p><span class="math display">\[
+\nabla J = B^{-1}(z-z^f) - H^{\mathsf T}R^{-1}(y-Hz) = 0
+\;\;\Longrightarrow\;\;
+z^{a} = z^f + \big(B^{-1}+H^{\mathsf T}R^{-1}H\big)^{-1}H^{\mathsf
+T}R^{-1}\big(y-Hz^f\big)
+\]</span></p>
+<p>行列の公式 <span class="math inline">\(\big(B^{-1}+H^{\mathsf
+T}R^{-1}H\big)^{-1}H^{\mathsf T}R^{-1} = BH^{\mathsf T}\big(HBH^{\mathsf
+T}+R\big)^{-1}\)</span> を使うと、逆行列が 4×4
+だけで済む形になります。</p>
+<p><span class="math display">\[
+z^{a} = z^f + K\big(y - Hz^f\big),\qquad K = BH^{\mathsf
+T}\big(HBH^{\mathsf T}+R\big)^{-1}
+\]</span></p>
+<p>これが補正式です。 <span class="math inline">\(y-Hz^f\)</span>
+が上の行列式の「ずれ（4×1）」、 <span class="math inline">\(K\)</span>
+が「換算表（7×4）」です（途中の式の詳細は <a
+href="blog_002_oi_data_assimilation.md">blog_002「更新式が出てくる理由」</a>）。</p>
+<ul>
+<li><strong>⑦ 「ガウス分布の条件付き」として見ても同じ</strong>：状態
+<span class="math inline">\(z\)</span> とセンサの読み <span
+class="math inline">\(y\)</span> を並べた 11×1
+のベクトルは、ガウス分布に従います。</li>
+</ul>
+<p><span class="math display">\[
+\begin{bmatrix} z\\ y\end{bmatrix}
+\sim
+N\!\left(
+\begin{bmatrix} z^f\\ Hz^f\end{bmatrix},\;
+\begin{bmatrix} B &amp; BH^{\mathsf T}\\ HB &amp; HBH^{\mathsf
+T}+R\end{bmatrix}
+\right)
+\]</span></p>
+<p>このとき「 <span class="math inline">\(y\)</span> が分かったときの
+<span class="math inline">\(z\)</span>
+」の平均は、ガウス分布の公式から</p>
+<p><span class="math display">\[
+z^{a} = z^f + \underbrace{BH^{\mathsf
+T}}_{\mathrm{Cov}(z,\,y)}\;\underbrace{\big(HBH^{\mathsf
+T}+R\big)^{-1}}_{\mathrm{Cov}(y,\,y)^{-1}}\;\big(y - Hz^f\big)
+\]</span></p>
+<p>で、⑥
+と同じ式になります。<strong>ガウス過程回帰の予測式（「観測点との共分散」×「観測点どうしの共分散の逆行列」×「観測値」）と同じ形</strong>です。
+<strong><span class="math inline">\(BH^{\mathsf T}\)</span>
+は「状態とセンサの読みの共分散」</strong>で、 <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> の行は「 <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span>
+とセンサの読みが一緒にどう動くか」です。 <span
+class="math inline">\(H\)</span> の <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> の列が 0 でも、 <span
+class="math inline">\(B\)</span> の中で <span
+class="math inline">\(q\)</span> と温度が連動していれば（§3-4 の <span
+class="math inline">\(\mathrm{Cov}(q,T_4)=0.527\)</span> ）、 <span
+class="math inline">\(BH^{\mathsf T}\)</span> の <span
+class="math inline">\(q\)</span> の行は 0 にならず、 <span
+class="math inline">\(q\)</span> が直ります。</p>
+<ul>
+<li><strong>⑧ EnKF での置き換え</strong>： <span
+class="math inline">\(B\)</span> は 7×7 の行列ですが、予報の中で ROM を
+30 秒進めるので、 <span class="math inline">\(B\)</span> は「30
+秒前のばらつきが ROM でどう広がったか」で決まります。しかも ROM には放熱
+<span class="math inline">\(h\,(T-T_{\mathrm{air}})\)</span>
+という<strong>状態どうしの掛け算</strong>（ <span
+class="math inline">\(h\)</span> と温度）があり、式で <span
+class="math inline">\(B\)</span> を追うのは面倒です。そこで <strong>60
+メンバーの散らばりから数えます</strong>（§3-4）。</li>
+</ul>
+<p><span class="math display">\[
+BH^{\mathsf T} \;\approx\; C_{zy}=\mathrm{Cov}(z,\ \hat y),\qquad
+HBH^{\mathsf T} \;\approx\; C_{yy}=\mathrm{Cov}(\hat y,\ \hat y)
+\;\;\Longrightarrow\;\;
+K = C_{zy}\big(C_{yy}+R\big)^{-1}
+\]</span></p>
+<ul>
+<li><strong>⑨ メンバーごとに補正する</strong>：60
+メンバーそれぞれに、観測ノイズと同じ大きさの乱数 <span
+class="math inline">\(\varepsilon^{(i)}\)</span>
+を足した観測を与えて直します。</li>
+</ul>
+<p><span class="math display">\[
+z^{a(i)} = z^{f(i)} + K\big(y + \varepsilon^{(i)} - \hat y^{(i)}\big)
+\]</span></p>
+<p>乱数を足すのは、補正後の 60 メンバーの散らばりが、⑤
+の事後分布の散らばり（共分散 <span
+class="math inline">\((I-KH)B\)</span>
+）と一致するようにするためです（摂動観測法）。</p>
+<p><strong>まとめると</strong>：「予報（事前分布）」と「センサ（尤度）」をベイズの定理で掛け合わせ、ガウス分布の仮定のもとでいちばん確からしい状態を求めると、上の行列式になる。EnKF
+は、その中の共分散を 60 メンバーの散らばりで数えているだけです。</p>
 <h4
 id="変位は状態に入っていない-それで正しい">変位は「状態」に入っていない
 ― それで正しい</h4>
