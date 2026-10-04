@@ -1440,10 +1440,78 @@ K</strong>（作った条件と同じ）</td>
 <h3
 id="データ同化すると反り-ao-の誤差30600-秒の平均">データ同化すると（反り
 A−O の誤差、30〜600 秒の平均）</h3>
+<p><strong>この図でやったこと</strong>：ROM
+でデータ同化するときに、<strong>ヒータの入れ方を ROM
+にどう教えるか</strong>を3通り変えて比べました。 真値は
+OpenFOAM（温度）＋FrontISTR（変位）、センサは温度計 P2・P4 と変位計
+A・O、60 メンバー・30 秒ごとに補正、5 seed 平均です（
+<code>run/improve_heating_schedule.py</code> ）。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>線</th>
+<th>ヒータの入れ方の教え方</th>
+<th>ROM の中の発熱</th>
+<th>想定している場面</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>緑の破線：<strong>基準</strong></td>
+<td>何も教えない（プログラムの初期設定）</td>
+<td>0〜300 秒は <span class="math inline">\(15q\)</span> W、その後
+0</td>
+<td>―</td>
+</tr>
+<tr class="even">
+<td>赤：<strong>方法1</strong></td>
+<td><strong>ON/OFF の時刻を教える</strong></td>
+<td>ON のときだけ <span class="math inline">\(15q\)</span> W（ <span
+class="math inline">\(q\)</span> はデータ同化で推定）</td>
+<td>主軸・モータを「いつ回したか」が NC 装置から分かる</td>
+</tr>
+<tr class="odd">
+<td>青：<strong>方法2</strong></td>
+<td>何も教えず、<strong>発熱が時間で変わってよい</strong>ことにする</td>
+<td>いつも <span class="math inline">\(15q\)</span>
+W。ただし予報のたびに各メンバーの <span class="math inline">\(q\)</span>
+を少し揺らす（ <span class="math inline">\(q \leftarrow q + N(0,\
+0.4^2)\)</span> ）</td>
+<td>ON/OFF の時刻も分からない</td>
+</tr>
+</tbody>
+</table>
+<p>方法2 は、 <span class="math inline">\(q\)</span>
+を揺らしておくことで、「発熱が急に下がった（ヒータが切れた）」ことを、センサのずれからデータ同化で見つけられるようにしたものです。</p>
+<p><strong>図の見方</strong>：上段＝反り A−O
+の時刻歴（黒＝真値）、<strong>下段＝データ同化で推定した発熱量</strong>（黒＝本当の発熱。間欠加熱では
+15 W と 0 W を2回くりかえす）。列は左から 15 W、25 W、15 W 間欠加熱。 15
+W・25 W はヒータが元々 0〜300
+秒なので、3つの線はほぼ重なります。<strong>違いが出るのは右列（間欠加熱）です。</strong></p>
 <figure>
 <img src="img/improve_timeseries.png" alt="改善の試み：時刻歴" />
 <figcaption aria-hidden="true">改善の試み：時刻歴</figcaption>
 </figure>
+<p><strong>右列（間欠加熱）で読み取れること</strong></p>
+<ul>
+<li><strong>緑（基準）</strong>：150
+秒でヒータが切れたことを知らないので、推定した発熱は下がりきらず、反りも真値より遅れて下がる。300
+秒からの2回目の加熱は「起きないはず」の時間帯なので、反りの2回目の山がまったく出ない。</li>
+<li><strong>赤（方法1）</strong>：発熱の推定が真値の階段（15 W → 0 W →
+15 W → 0
+W）にほぼ一致し、<strong>反りも2回の山を両方とも追える</strong>。</li>
+<li><strong>青（方法2）</strong>：ON/OFF
+を教えていないのに、発熱の推定が 150 秒で下がり、300
+秒で上がる。<strong>2回目の山も追える</strong>。ただしヒータが切れた後も推定した発熱が
+3〜4 W 残る（発熱は 0 W
+より小さくできないよう切っているため、揺らした分が上側にだけ残る、と考えています。確かめてはいません）。</li>
+</ul>
 <table>
 <colgroup>
 <col style="width: 30%" />
