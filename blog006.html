@@ -2051,6 +2051,7 @@ T_{s,f}^{(m)}
 なので、</p>
 <p><span class="math display">\[
 P=
+\overbrace{
 \begin{bmatrix}
 0 &amp; \cdots &amp; 0 &amp; 1_{(7634)} &amp; 0 &amp; \cdots &amp;
 \cdots &amp; \cdots &amp; 0\\
@@ -2063,10 +2064,38 @@ P=
 0 &amp; 1_{(733)} &amp; 0 &amp; \cdots &amp; \cdots &amp; \cdots &amp;
 \cdots &amp; \cdots &amp; 0
 \end{bmatrix}
-\quad (5\times 20{,}696)
+}^{\text{20,696 columns = cells}}
+\left.\vphantom{\begin{bmatrix}0\\0\\0\\0\\0\end{bmatrix}}\right\rbrace\
+\text{5 rows = P0 to P4}
 \]</span></p>
-<p>（ <span class="math inline">\(1_{(7634)}\)</span> は 7634 番目の列に
-1 があるという意味）です。 <span
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">数</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>列</strong>（上の波かっこ）</td>
+<td style="text-align: right;">20,696</td>
+<td>OpenFOAM の固体の<strong>セル数</strong>。1列＝1セル</td>
+</tr>
+<tr class="even">
+<td><strong>行</strong>（右の波かっこ）</td>
+<td style="text-align: right;">5</td>
+<td><strong>代表点の数</strong>（P0〜P4）。1行＝「どのセルを取り出すか」</td>
+</tr>
+</tbody>
+</table>
+<p>（ <span class="math inline">\(1_{(7634)}\)</span> は 7634
+番目の列＝7634 番のセルに 1 があるという意味）です。 <span
 class="math inline">\(P\overline{\mathbf T}\)</span>
 は「平均温度場から、代表5点の値を取り出したもの」、 <span
 class="math inline">\(P\Phi\)</span>
@@ -2168,6 +2197,64 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a hr
 \underbrace{\mathrm{innov}}_{60\times4}
 \underbrace{K^{\mathsf T}}_{4\times7}.
 \]</span></p>
+<p><strong>innov（イノベーション）とは</strong>：カルマンフィルタの用語で、<strong>「実測と予想のずれ」</strong>のことです。
+「観測して初めて分かった、新しい情報」という意味でこう呼びます（§3-4
+段階1 の「ずれ」と同じもの）。</p>
+<p>メンバー <span class="math inline">\(m\)</span>
+について、4つのセンサのずれを縦に並べたものが</p>
+<p><span class="math display">\[
+\mathbf r^{(m)}=
+\begin{bmatrix} r_{T_{P2}}\\ r_{T_{P0}}\\ r_{u_{S1}}\\
+r_{u_{S2}}\end{bmatrix}^{(m)}
+=
+\underbrace{\begin{bmatrix} y_{T_{P2}}\\ y_{T_{P0}}\\ y_{u_{S1}}\\
+y_{u_{S2}}\end{bmatrix}}_{\text{measured}}
++
+\underbrace{\begin{bmatrix} \varepsilon_1\\ \varepsilon_2\\
+\varepsilon_3\\ \varepsilon_4\end{bmatrix}^{(m)}}_{\text{noise}}
+-
+\underbrace{\begin{bmatrix} \hat T_{P2}\\ \hat T_{P0}\\ \hat u_{S1}\\
+\hat u_{S2}\end{bmatrix}^{(m)}}_{\text{predicted}}
+\]</span></p>
+<p>です（実測 ＋ メンバーごとに足す観測ノイズ － そのメンバーの予想）。
+これを 60
+メンバー分、<strong>1行に1メンバー</strong>ずつ横向きにして積んだ 60 × 4
+の行列が <code>innov</code> です。</p>
+<p><span class="math display">\[
+\mathrm{innov}=
+\begin{bmatrix}
+\mathbf r^{(1)\mathsf T}\\ \mathbf r^{(2)\mathsf T}\\ \vdots\\ \mathbf
+r^{(60)\mathsf T}
+\end{bmatrix}
+=
+\begin{bmatrix}
+r_{T_{P2}}^{(1)} &amp; r_{T_{P0}}^{(1)} &amp; r_{u_{S1}}^{(1)} &amp;
+r_{u_{S2}}^{(1)}\\
+r_{T_{P2}}^{(2)} &amp; r_{T_{P0}}^{(2)} &amp; r_{u_{S1}}^{(2)} &amp;
+r_{u_{S2}}^{(2)}\\
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots\\
+r_{T_{P2}}^{(60)} &amp; r_{T_{P0}}^{(60)} &amp; r_{u_{S1}}^{(60)} &amp;
+r_{u_{S2}}^{(60)}
+\end{bmatrix}
+\quad (60\times4)
+\]</span></p>
+<p>列は左から「温度計 P2・温度計 P0・変位計 S1・変位計 S2」のずれです。
+1回目（ <span class="math inline">\(t=30\)</span> 秒）の 60
+メンバー平均は、ノイズの平均がほぼ 0 になるので、§3-4 段階1
+の表と同じ</p>
+<p><span class="math display">\[
+\overline{\mathbf r}\approx
+\begin{bmatrix}-4.69\ \mathrm{K} &amp; -4.63\ \mathrm{K} &amp; +0.66\
+\mu\mathrm{m} &amp; -5.62\ \mu\mathrm{m}\end{bmatrix}
+\]</span></p>
+<p>になります（観測ノイズを入れない場合の値）。</p>
+<p><code>innov</code> に <span class="math inline">\(K^{\mathsf
+T}\)</span> （4 × 7）を右から掛けると、60 × 7
+の「各メンバーの7つの直す量」になります。 メンバー <span
+class="math inline">\(m\)</span> の行だけを見ると <span
+class="math inline">\(\mathbf r^{(m)\mathsf T}K^{\mathsf T}=(K\,\mathbf
+r^{(m)})^{\mathsf T}\)</span> で、§3-4 の「ずれ ×
+換算表」と同じ計算です。</p>
 <p><strong>最後の行で、温度の5列だけでなく、qの列とhの列も書き換えます。</strong>
 変位は観測成分であり、独立した変位状態を更新するわけではありません。</p>
 <h4 id="qhの補正で実際に何をしているか">④
