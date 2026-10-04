@@ -44,8 +44,8 @@ def main():
     fig=plt.figure(figsize=(16,8.6))
     gs=fig.add_gridspec(2,2,height_ratios=[1.35,1],hspace=0.30,wspace=0.20)
     # 上段：温度の時刻歴
-    for j,(R,lab,sub) in enumerate([(Rt,"ヒータの ON/OFF を正しく与えた ROM","0〜150 秒と 300〜450 秒に 15 W（実際どおり）"),
-                                     (Rf,"0〜300 秒に一定と決め打ちしたままの ROM","プログラムの既定値のまま")]):
+    for j,(R,lab,sub) in enumerate([(Rt,"【条件を合わせた ROM】→ 合う","ON/OFF を OpenFOAM と同じ 0〜150 秒・300〜450 秒に"),
+                                     (Rf,"【比較用：わざと条件をずらした ROM】→ 外れる","ON/OFF を与えず 0〜300 秒ずっと ON のまま")]):
         ax=fig.add_subplot(gs[0,j])
         for k in range(600+1):
             pass
@@ -61,13 +61,13 @@ def main():
         style=[Line2D([0],[0],color="#555",lw=8,alpha=.28,label="OpenFOAM（太い薄い線）"),
                Line2D([0],[0],color="#555",lw=1.8,ls="--",label="ROM（細い破線）")]
         ax.set_ylim(19,27); ax.set_ylabel("温度 [℃]"); ax.grid(alpha=.3)
-        ax.set_title(f"{lab}\n{sub}",fontsize=12)
+        ax.set_title(f"{lab}\n{sub}",fontsize=13,color=("#1F9D62" if j==0 else "#C0392B"),weight="bold")
         ax.tick_params(labelbottom=False)
         if j==0:
             l1=ax.legend(fontsize=9,ncol=3,loc="upper left"); ax.add_artist(l1)
         ax.legend(handles=style,fontsize=10,loc="lower right",framealpha=.95)
     # 下段：誤差
-    for j,(e,lab) in enumerate([(et,"正しく与えた場合"),(ef,"決め打ちのまま")]):
+    for j,(e,lab) in enumerate([(et,"差（条件を合わせた ROM）"),(ef,"差（わざと条件をずらした ROM）")]):
         ax=fig.add_subplot(gs[1,j])
         ax.axhspan(-SIG_T,SIG_T,color="#F6C85F",alpha=.35,zorder=0,label="温度計のノイズ ±0.3 K")
         for i in range(5): ax.plot(t,e[:,i],"-",color=COLS[i],lw=1.8)
