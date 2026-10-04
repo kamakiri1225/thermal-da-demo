@@ -906,22 +906,174 @@ class="math inline">\(w_{S2}=D_{S2}U_{rP}^{-1}\)</span> （µm/K）</td>
 の行（§7-0）に変わり、変位計の場所を変えれば3・4行目が変わります。
 <strong>センサが4つなら4行だけ計算し、全セル（20,696
 行）・全節点（15,120 行）は計算しません。</strong></p>
-<p><strong>③ 直すのは7つだけ</strong></p>
+<p><strong>③
+直すのは7つだけ（温度計2本と変位計2本のずれを使う）</strong></p>
+<p>データ同化の補正式を、<strong>4つのセンサ（温度2本・変位2本）を全部書いた形</strong>で示します。</p>
 <p><span class="math display">\[
-z^{a(i)} = z^{f(i)} + K\big(y + \varepsilon^{(i)} - \hat
-y^{(i)}\big),\qquad z = (T_0,\ T_1,\ T_2,\ T_3,\ T_4,\ q,\ h)
+\underbrace{\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\
+h\end{bmatrix}^{a}}_{\text{after}\ (7\times1)}
+=
+\underbrace{\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\
+h\end{bmatrix}^{f}}_{\text{before}\ (7\times1)}
++
+\underbrace{\begin{bmatrix}
+K_{T_0,P2} &amp; K_{T_0,P0} &amp; K_{T_0,S1} &amp; K_{T_0,S2}\\
+K_{T_1,P2} &amp; K_{T_1,P0} &amp; K_{T_1,S1} &amp; K_{T_1,S2}\\
+K_{T_2,P2} &amp; K_{T_2,P0} &amp; K_{T_2,S1} &amp; K_{T_2,S2}\\
+K_{T_3,P2} &amp; K_{T_3,P0} &amp; K_{T_3,S1} &amp; K_{T_3,S2}\\
+K_{T_4,P2} &amp; K_{T_4,P0} &amp; K_{T_4,S1} &amp; K_{T_4,S2}\\
+K_{q,P2} &amp; K_{q,P0} &amp; K_{q,S1} &amp; K_{q,S2}\\
+K_{h,P2} &amp; K_{h,P0} &amp; K_{h,S1} &amp; K_{h,S2}
+\end{bmatrix}}_{K\ (7\times4)}
+\underbrace{\begin{bmatrix}
+y_{T_{P2}}-\hat T_{P2}\\
+y_{T_{P0}}-\hat T_{P0}\\
+y_{u_{S1}}-\hat u_{S1}\\
+y_{u_{S2}}-\hat u_{S2}
+\end{bmatrix}}_{\text{misfit}\ (4\times1)}
 \]</span></p>
-<p><span class="math inline">\(z^{f(i)}\)</span> は直す前、 <span
-class="math inline">\(z^{a(i)}\)</span> は直した後、 <span
-class="math inline">\(y\)</span> は実測、 <span
-class="math inline">\(\varepsilon^{(i)}\)</span>
-はメンバーごとに足す観測ノイズです。 <span
-class="math inline">\(K\)</span> は「センサのずれ →
-7つの直す量」の換算表で、7行 × センサの数の列です（§3-4）。
-<strong>左辺が7つしかないので、直すのは5点温度と <span
+<table>
+<thead>
+<tr class="header">
+<th>右端のずれ（4×1）</th>
+<th>センサ</th>
+<th>単位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1行目</td>
+<td><strong>温度計 P2</strong> の実測 − 予想</td>
+<td>K</td>
+</tr>
+<tr class="even">
+<td>2行目</td>
+<td><strong>温度計 P0</strong> の実測 − 予想</td>
+<td>K</td>
+</tr>
+<tr class="odd">
+<td>3行目</td>
+<td><strong>変位計 S1</strong>（上面、 <span
+class="math inline">\(U_x\)</span> ）の実測 − 予想</td>
+<td>µm</td>
+</tr>
+<tr class="even">
+<td>4行目</td>
+<td><strong>変位計 S2</strong>（上面、 <span
+class="math inline">\(U_z\)</span> ）の実測 − 予想</td>
+<td>µm</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(K\)</span> の列も、左から「温度計
+P2・温度計 P0・<strong>変位計 S1・変位計
+S2</strong>」に対応します。<strong>変位は、右端のずれの3・4行目と、
+<span class="math inline">\(K\)</span>
+の3・4列目として入っています。</strong>
+左辺は7つしかないので、直すのは5点温度と <span
 class="math inline">\(q\)</span> ・ <span
-class="math inline">\(h\)</span> だけです。</strong>
-全セルの温度や変位は、直した5点温度から ② の式で計算し直します。</p>
+class="math inline">\(h\)</span>
+だけです。全セルの温度や変位は、直した5点温度から ②
+の式で計算し直します。</p>
+<p><strong>1回目（ <span class="math inline">\(t=30\)</span>
+秒）の数値を入れると</strong>（60
+メンバーの平均で計算。観測ノイズなし）</p>
+<p><span class="math display">\[
+\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\ h\end{bmatrix}^{a}
+=
+\begin{bmatrix}298.887\\ 297.770\\ 299.500\\ 298.098\\ 298.026\\
+1.1393\\ 0.0203\end{bmatrix}
++
+\begin{bmatrix}
+0.2654 &amp; 0.6232 &amp; -0.1104 &amp; 0.0702\\
+1.5794 &amp; 0.5256 &amp; 2.1068 &amp; -0.7433\\
+0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\
+-0.8751 &amp; 1.3451 &amp; -0.5407 &amp; 0.4394\\
+-0.4006 &amp; -0.9453 &amp; -1.4073 &amp; 1.7919\\
+0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\
+-0.0020 &amp; 0.0012 &amp; -0.0006 &amp; -0.0001
+\end{bmatrix}
+\begin{bmatrix}-4.690\\ -4.632\\ +0.659\\ -5.622\end{bmatrix}
+=
+\begin{bmatrix}294.288\\ 293.495\\ 294.847\\ 293.145\\ 293.282\\
+0.8738\\ 0.0243\end{bmatrix}
+\]</span></p>
+<p>（真値は <span class="math inline">\(T\)</span> ＝ 294.26, 293.32,
+294.81, 293.47, 293.18 K、 <span class="math inline">\(q\)</span> ＝ 1、
+<span class="math inline">\(h\)</span> ＝ 0.0154）</p>
+<h4 id="q発熱と-h放熱はどうやって推定されるのか">q（発熱）と
+h（放熱）は、どうやって推定されるのか</h4>
+<p><strong>q の行だけを取り出すと、こういう計算です。</strong></p>
+<p><span class="math display">\[
+\begin{aligned}
+\Delta q &amp;= K_{q,P2}\,r_{P2} + K_{q,P0}\,r_{P0} + K_{q,S1}\,r_{S1} +
+K_{q,S2}\,r_{S2}\\
+&amp;= \underbrace{0.3675\,(-4.690)}_{\text{T at P2}} +
+\underbrace{(-0.5039)(-4.632)}_{\text{T at P0}}
++ \underbrace{(-0.2011)(+0.659)}_{\text{u at S1}} +
+\underbrace{0.1322\,(-5.622)}_{\text{u at S2}}\\
+&amp;= -1.724 + 2.334 - 0.133 - 0.743 = -0.266
+\end{aligned}
+\]</span></p>
+<p>発熱量に直すと <span class="math inline">\(\Delta Q = 15\,\Delta q =
+-3.98\)</span> W で、<strong>17.09 W → 13.11 W</strong>（正解 15 W
+の方向）に動きます。</p>
+<p><strong>なぜ、温度や変位のずれから q が直るのか。</strong> 鍵は <span
+class="math inline">\(K\)</span> の q の行がどう作られるかです。</p>
+<p><span class="math display">\[
+K_{q,:} = \mathrm{Cov}\big(q,\ \hat y\big)\,\big(C_{yy}+R\big)^{-1},
+\qquad
+\mathrm{Cov}\big(q,\ \hat y\big) = \begin{bmatrix}0.312 &amp; 0.189
+&amp; -0.117 &amp; 0.297\end{bmatrix}
+\]</span></p>
+<p><span class="math inline">\(\mathrm{Cov}(q,\hat y)\)</span> は「
+<span class="math inline">\(q\)</span>
+が大きいメンバーほど、センサの予想が大きいか」を 60
+メンバーで数えたものです。 これが 0
+でないのは、次のつながりがあるからです。</p>
+<p><span class="math display">\[
+q\ \xrightarrow{\ \text{ROM 30 s}\ }\ T_P\ \xrightarrow{\ H\ }\ \hat y
+\]</span></p>
+<p><strong><span class="math inline">\(q\)</span>
+が大きいメンバーはヒータ（P2）の発熱が大きいので、30
+秒後に温度が高くなり、温度計の予想も変位計の予想も大きくなる。</strong>
+実測が予想より小さければ「 <span class="math inline">\(q\)</span>
+が大きすぎた」と判断して下げます。</p>
+<figure>
+<img src="img/explain_q_h_update.png" alt="q と h の推定のしくみ" />
+<figcaption aria-hidden="true">q と h の推定のしくみ</figcaption>
+</figure>
+<p><em>1点＝1メンバー。黒丸＝60 メンバーの平均、点線＝実測、赤線の傾き＝
+<span
+class="math inline">\(\mathrm{Cov}/(\mathrm{Var}+\sigma^2)\)</span>
+、赤い星＝直した後。 上：Q
+と予想は右上がりの関係があり、実測側へ引き寄せられて Q が下がる。下：h
+と予想の関係は弱く、ほとんど動かない。
+（図はセンサ1本だけで直した場合。実際は4本同時なので、上の式のように4本分が足し合わされる。）</em></p>
+<p>センサ1本だけなら、 <span class="math inline">\(K\)</span>
+は割り算になります（温度計 P2 の例）。</p>
+<p><span class="math display">\[
+K_{q,P2} = \frac{\mathrm{Cov}(q,\ \hat T_{P2})}{\mathrm{Var}(\hat
+T_{P2})+0.3^2} = \frac{0.312}{4.825+0.09} = 0.0635\ \mathrm{K}^{-1},
+\qquad
+\Delta Q = 15 \times 0.0635 \times (-4.690) = -4.47\ \mathrm{W}
+\]</span></p>
+<p>（図の左上：17.1 W → 12.6 W）</p>
+<p><strong>h の行</strong>も同じ計算ですが、係数がほとんど 0 です。</p>
+<p><span class="math display">\[
+\Delta h = (-0.0020)(-4.690) + (0.0012)(-4.632) + (-0.0006)(+0.659) +
+(-0.0001)(-5.622) = +0.0040
+\]</span></p>
+<p>h は 0.0203 → 0.0243 W/K と、正解 0.0154
+から<strong>逆に離れました</strong>。
+理由は物理的に説明できます。空気への放熱は <span
+class="math inline">\(h\,(T-T_{\mathrm{air}}) \approx 0.02 \times 5 =
+0.1\)</span> W で、ヒータの発熱 15 W の約 1/150 しかありません。
+<strong>h
+が少し違っても温度も変位もほとんど変わらないので、センサの予想と h
+の連動（共分散）がほとんど見えず、観測から h
+は決まりません</strong>（600 秒では当たらない。<a
+href="blog_003_ensemble_kalman_filter.md">blog_003 §4-0-b</a>）。</p>
 <h3 id="センサの読みを予想する-何をしているのか">3-3. ②
 センサの読みを予想する ― 何をしているのか</h3>
 <p><strong>やっていることは「5点の温度のずれに、センサごとの重みを掛けて足す」だけです。</strong></p>
@@ -1564,31 +1716,251 @@ K = C_{zy}\,\big(C_{yy}+R\big)^{-1}
 <p>ここでは<strong>変位計 S2 の列</strong>（ <span
 class="math inline">\(C_{zy}\)</span>
 の4列目）を、1回目の実際の数値で作ってみます。</p>
-<p><strong>ステップ1：60
-メンバーの「平均からのずれ」を並べる</strong></p>
-<p>メンバー <span class="math inline">\(i\)</span> の状態から 60
-人の平均を引いたもの <span class="math inline">\(z_i-\bar z\)</span>
-を、1行ずつ並べた 60 × 7 の行列です。</p>
+<p><strong>ステップ1：60 メンバーの平均を出す</strong></p>
+<p>ここでいう「平均」は、<strong>同じ時刻（ <span
+class="math inline">\(t=30\)</span> 秒）の予報を 60
+メンバーで平均したもの</strong>です。 §3-2 ② や §7-0 に出てくる <span
+class="math inline">\(\bar T_P\)</span> （OpenFOAM
+の温度場を時間で平均したもの。POD
+の平均）とは<strong>別物</strong>なので、ここでは記号を <span
+class="math inline">\(\langle\ \rangle\)</span> にします。</p>
 <p><span class="math display">\[
-Z&#39; =
-\begin{bmatrix}
-z_1-\bar z\\ z_2-\bar z\\ \vdots\\ z_{60}-\bar z
-\end{bmatrix}
-=
-\begin{bmatrix}
--1.551 &amp; -2.515 &amp; -1.336 &amp; -1.546 &amp; -4.109 &amp; 0.553
-&amp; -0.011\\
-1.195 &amp; 3.954 &amp; 1.616 &amp; 0.183 &amp; -1.487 &amp; 0.391 &amp;
--0.001\\
-\vdots &amp; &amp; &amp; &amp; &amp; &amp; \vdots
-\end{bmatrix}
+\langle z_j\rangle = \frac{1}{N}\sum_{i=1}^{N} z_j^{(i)},\qquad N=60
 \]</span></p>
-<p>列は左から <span class="math inline">\(T_0, T_1, T_2, T_3, T_4, q,
-h\)</span> です。左の5列（温度）だけを取り出したものを <span
-class="math inline">\(T&#39;\)</span> （60 × 5）とします。</p>
-<p><strong>ステップ2：状態と5点温度の共分散を作る</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(i\)</span></td>
+<td>メンバーの番号（1〜60）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(j\)</span></td>
+<td>状態の成分の番号（ <span class="math inline">\(T_0, T_1, T_2, T_3,
+T_4, q, h\)</span> の7つ）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(z_j^{(i)}\)</span></td>
+<td>メンバー <span class="math inline">\(i\)</span> の、成分 <span
+class="math inline">\(j\)</span> の値（ <span
+class="math inline">\(t=30\)</span> 秒の予報）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\langle z_j\rangle\)</span></td>
+<td>成分 <span class="math inline">\(j\)</span> の、60
+メンバーの平均</td>
+</tr>
+</tbody>
+</table>
+<p>1回目の値を並べると</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_0\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_1\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_2\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_3\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_4\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(q\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(h\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>メンバー1 <span class="math inline">\(z^{(1)}\)</span></td>
+<td style="text-align: right;">297.366</td>
+<td style="text-align: right;">295.304</td>
+<td style="text-align: right;">298.191</td>
+<td style="text-align: right;">296.583</td>
+<td style="text-align: right;">293.997</td>
+<td style="text-align: right;">1.681</td>
+<td style="text-align: right;">0.0099</td>
+</tr>
+<tr class="even">
+<td>メンバー2 <span class="math inline">\(z^{(2)}\)</span></td>
+<td style="text-align: right;">300.059</td>
+<td style="text-align: right;">301.646</td>
+<td style="text-align: right;">301.084</td>
+<td style="text-align: right;">298.278</td>
+<td style="text-align: right;">296.568</td>
+<td style="text-align: right;">1.522</td>
+<td style="text-align: right;">0.0194</td>
+</tr>
+<tr class="odd">
+<td>⋮</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td>メンバー60 <span class="math inline">\(z^{(60)}\)</span></td>
+<td style="text-align: right;">300.738</td>
+<td style="text-align: right;">302.543</td>
+<td style="text-align: right;">301.674</td>
+<td style="text-align: right;">299.859</td>
+<td style="text-align: right;">302.545</td>
+<td style="text-align: right;">1.591</td>
+<td style="text-align: right;">0.0010</td>
+</tr>
+<tr class="odd">
+<td><strong>60 人の平均 <span class="math inline">\(\langle
+z\rangle\)</span></strong></td>
+<td style="text-align: right;"><strong>298.887</strong></td>
+<td style="text-align: right;"><strong>297.770</strong></td>
+<td style="text-align: right;"><strong>299.500</strong></td>
+<td style="text-align: right;"><strong>298.098</strong></td>
+<td style="text-align: right;"><strong>298.026</strong></td>
+<td style="text-align: right;"><strong>1.139</strong></td>
+<td style="text-align: right;"><strong>0.0202</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ステップ2：平均からのずれを出す</strong></p>
 <p><span class="math display">\[
-\mathrm{Cov}(z,\ T_P) = \frac{1}{60-1}\,Z&#39;^{\mathsf T}\,T&#39;
+z_j&#39;^{(i)} = 1.02 \times \big(z_j^{(i)} - \langle z_j\rangle\big)
+\]</span></p>
+<p>（1.02
+倍は、メンバーのばらつきが小さくなりすぎないように少し広げる処理＝乗法インフレーション）</p>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_0&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_1&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_2&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_3&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(T_4&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(q&#39;\)</span></th>
+<th style="text-align: right;"><span
+class="math inline">\(h&#39;\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>メンバー1</td>
+<td style="text-align: right;">−1.551</td>
+<td style="text-align: right;">−2.515</td>
+<td style="text-align: right;">−1.336</td>
+<td style="text-align: right;">−1.546</td>
+<td style="text-align: right;">−4.109</td>
+<td style="text-align: right;">+0.553</td>
+<td style="text-align: right;">−0.011</td>
+</tr>
+<tr class="even">
+<td>メンバー2</td>
+<td style="text-align: right;">+1.195</td>
+<td style="text-align: right;">+3.954</td>
+<td style="text-align: right;">+1.616</td>
+<td style="text-align: right;">+0.183</td>
+<td style="text-align: right;">−1.487</td>
+<td style="text-align: right;">+0.391</td>
+<td style="text-align: right;">−0.001</td>
+</tr>
+<tr class="odd">
+<td>⋮</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td>メンバー60</td>
+<td style="text-align: right;">+1.888</td>
+<td style="text-align: right;">+4.869</td>
+<td style="text-align: right;">+2.217</td>
+<td style="text-align: right;">+1.796</td>
+<td style="text-align: right;">+4.610</td>
+<td style="text-align: right;">+0.461</td>
+<td style="text-align: right;">−0.020</td>
+</tr>
+</tbody>
+</table>
+<p>これを 1行1メンバーで積んだ 60 × 7 の行列が <span
+class="math inline">\(Z&#39;\)</span> 、そのうち温度の5列（ <span
+class="math inline">\(T_0&#39;\sim T_4&#39;\)</span> ）だけが <span
+class="math inline">\(T&#39;\)</span> （60 × 5）です。</p>
+<p><strong>ステップ3：共分散を「ずれの積の平均」として計算する</strong></p>
+<p>成分 <span class="math inline">\(j\)</span> と、代表点 <span
+class="math inline">\(k\)</span> の温度との共分散は</p>
+<p><span class="math display">\[
+\mathrm{Cov}\big(z_j,\ T_k\big) = \frac{1}{N-1}\sum_{i=1}^{N}
+z_j&#39;^{(i)}\ T_k&#39;^{(i)}
+= \frac{1}{N-1}\sum_{i=1}^{N} \big(z_j^{(i)}-\langle
+z_j\rangle\big)\big(T_k^{(i)}-\langle T_k\rangle\big)\times 1.02^2
+\]</span></p>
+<p>です。<strong>「メンバーごとに、2つのずれを掛け、60 人分足して 59
+で割る」</strong>だけです（ <span class="math inline">\(N-1\)</span>
+で割るのは、標本から分散を求めるときの決まり）。</p>
+<p>例として、 <strong><span class="math inline">\(q\)</span> と P4
+の温度の共分散</strong>（下の行列の6行目・5列目）を書き下します。</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathrm{Cov}(q,\ T_4)
+&amp;= \frac{1}{59}\Big[\underbrace{(+0.553)(-4.109)}_{\text{member 1}}
++ \underbrace{(+0.391)(-1.487)}_{\text{member 2}} + \cdots +
+\underbrace{(+0.461)(+4.610)}_{\text{member 60}}\Big]\\
+&amp;= \frac{1}{59}\Big[-2.270 - 0.581 + \cdots + 2.124\Big]
+= \frac{31.117}{59} = 0.527
+\end{aligned}
+\]</span></p>
+<p>正なので「 <span class="math inline">\(q\)</span>
+が平均より大きいメンバーほど、P4
+の温度も平均より高い」傾向がある、という意味です。 同じように、P4 と P4
+の組み合わせ（＝P4 の分散）は <span
+class="math inline">\(\frac{1}{59}[(-4.109)^2+(-1.487)^2+\cdots+(4.610)^2]
+= 745.27/59 = 12.632\)</span> です。</p>
+<p>7 × 5 の全部の組み合わせをまとめて計算するのが、行列の掛け算 <span
+class="math inline">\(Z&#39;^{\mathsf T}T&#39;\)</span> です（ <span
+class="math inline">\((j,k)\)</span>
+成分が、ちょうど上の和になります）。</p>
+<p><span class="math display">\[
+\mathrm{Cov}(z,\ T_P) = \frac{1}{N-1}\,Z&#39;^{\mathsf T}\,T&#39;
 =
 \begin{bmatrix}
 4.767 &amp; 3.123 &amp; 4.739 &amp; 5.112 &amp; 3.089\\
@@ -1603,11 +1975,7 @@ class="math inline">\(T&#39;\)</span> （60 × 5）とします。</p>
 <p>（7 × 5。行が <span class="math inline">\(T_0,\dots,T_4,\ q,\
 h\)</span> 、列が <span class="math inline">\(T_0,\dots,T_4\)</span>
 ）</p>
-<p>たとえば5行目・5列目の 12.632 は「P4
-の温度のばらつき」、6行目・5列目の 0.527 は「発熱の倍率 <span
-class="math inline">\(q\)</span> が大きいメンバーほど P4
-が高い」という連動の強さです。</p>
-<p><strong>ステップ3：S2 の重み <span class="math inline">\(w\)</span>
+<p><strong>ステップ4：S2 の重み <span class="math inline">\(w\)</span>
 を掛ける</strong></p>
 <p>S2 の読みの予想は <span class="math inline">\(\hat u_{S2}=\bar
 u_{S2}+w^{\mathsf T}(T_P-\bar T_P)\)</span> なので、状態と S2
@@ -1641,7 +2009,7 @@ C_{zy}^{(S2)} = \mathrm{Cov}(z,\ T_P)\;w
 の予想を直接計算して、P4 との共分散 <span
 class="math inline">\(\frac{1}{59}\sum_i (T_{4,i}-\bar T_4)(\hat
 u_{S2,i}-\bar u)\)</span> を取っても 12.351 で一致します。</em></p>
-<p><strong>ステップ4：割り算にあたる <span
+<p><strong>ステップ5：割り算にあたる <span
 class="math inline">\((C_{yy}+R)^{-1}\)</span> を掛ける</strong></p>
 <p>センサが S2 だけなら、 <span
 class="math inline">\((C_{yy}+R)^{-1}\)</span> は「S2
@@ -2248,6 +2616,64 @@ r_{u_{S2}}^{(60)}
 \mu\mathrm{m} &amp; -5.62\ \mu\mathrm{m}\end{bmatrix}
 \]</span></p>
 <p>になります（観測ノイズを入れない場合の値）。</p>
+<p><strong>メンバー1の具体的な数式</strong>（1回目 <span
+class="math inline">\(t=30\)</span> 秒。実測は真値、観測ノイズ <span
+class="math inline">\(\varepsilon\)</span>
+は乱数の一例。予想と状態は、共分散を 1.02 倍に広げる処理の後の値）</p>
+<p><span class="math display">\[
+\mathbf r^{(1)}=
+\underbrace{\begin{bmatrix}294.810\\ 294.255\\ -1.652\\
+-0.443\end{bmatrix}}_{\text{measured}}
++
+\underbrace{\begin{bmatrix}+0.104\\ +0.246\\ +0.099\\
+-0.391\end{bmatrix}}_{\varepsilon^{(1)}}
+-
+\underbrace{\begin{bmatrix}298.164\\ 297.336\\ -3.601\\
++0.959\end{bmatrix}}_{\hat y^{(1)}}
+=
+\begin{bmatrix}-3.251\\ -2.834\\ +2.048\\ -1.794\end{bmatrix}
+\begin{matrix}\leftarrow\ \text{T at P2 [K]}\\ \leftarrow\ \text{T at P0
+[K]}\\ \leftarrow\ \text{u at S1 [}\mu\text{m]}\\ \leftarrow\ \text{u at
+S2 [}\mu\text{m]}\end{matrix}
+\]</span></p>
+<p>これに換算表 <span class="math inline">\(K\)</span> （7 × 4、上の ③
+と同じ）を掛けると、メンバー1の7つの直す量です。</p>
+<p><span class="math display">\[
+\Delta z^{(1)} = K\,\mathbf r^{(1)}
+=
+\begin{bmatrix}
+0.2654 &amp; 0.6232 &amp; -0.1104 &amp; 0.0702\\
+1.5794 &amp; 0.5256 &amp; 2.1068 &amp; -0.7433\\
+0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\
+-0.8751 &amp; 1.3451 &amp; -0.5407 &amp; 0.4394\\
+-0.4006 &amp; -0.9453 &amp; -1.4073 &amp; 1.7919\\
+0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\
+-0.0020 &amp; 0.0012 &amp; -0.0006 &amp; -0.0001
+\end{bmatrix}
+\begin{bmatrix}-3.251\\ -2.834\\ +2.048\\ -1.794\end{bmatrix}
+=
+\begin{bmatrix}-2.981\\ -0.976\\ -3.126\\ -2.864\\ -2.115\\ -0.415\\
++0.002\end{bmatrix}
+\]</span></p>
+<p><span class="math display">\[
+z^{(1)a} = z^{(1)f} + \Delta z^{(1)}
+=
+\begin{bmatrix}297.336\\ 295.255\\ 298.164\\ 296.553\\ 293.916\\ 1.692\\
+0.0097\end{bmatrix}
++
+\begin{bmatrix}-2.981\\ -0.976\\ -3.126\\ -2.864\\ -2.115\\ -0.415\\
++0.002\end{bmatrix}
+=
+\begin{bmatrix}294.355\\ 294.279\\ 295.039\\ 293.689\\ 291.802\\ 1.276\\
+0.0118\end{bmatrix}
+\]</span></p>
+<p>メンバー1は発熱 <span
+class="math inline">\(Q=15\times1.692=25.4\)</span> W
+という「発熱が大きすぎる」仮説でしたが、補正で <span
+class="math inline">\(15\times1.276=19.1\)</span> W まで下がりました。
+これを 60 メンバー全員について行うのが <code>innov @ gain_T</code> （
+<code>gain_T</code> ＝ <span class="math inline">\(K^{\mathsf
+T}\)</span> ）の1行です。</p>
 <p><code>innov</code> に <span class="math inline">\(K^{\mathsf
 T}\)</span> （4 × 7）を右から掛けると、60 × 7
 の「各メンバーの7つの直す量」になります。 メンバー <span
