@@ -321,7 +321,7 @@ $$T_p=\frac{\sum_{c\in\mathcal N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{
 \qquad w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}$$
 
 **実装はここにあります**：
-[`102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py`](../../102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py)
+`102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py`（別サンプル。リポジトリには未公開）
 
 | 関数 | 役割 |
 |---|---|

@@ -63,6 +63,34 @@ h1{font-size:30px;border-bottom:3px solid #2E75D4;padding-bottom:10px}
 """
 
 
+REPO_BLOB = "https://github.com/kamakiri1225/thermal-da-demo/blob/main/"
+DOCS_IN_REPO = "sample/106_0_pod_selected_rom/docs/"
+
+
+def fix_links(html: Path) -> None:
+    """Markdown 用の相対リンクを、公開ページで切れないリンクに書き換える.
+
+    - blog_00N_*.md(#…)  → blog00N.html(#…)（サイト内の記事）
+    - それ以外の相対パス（../run/*.py、21_*.md など）→ GitHub 上のファイル
+    """
+    import posixpath
+    t = html.read_text(encoding="utf-8")
+
+    def repl(m):
+        href = m.group(1)
+        if re.match(r"^(https?:|mailto:|#|img/|pdf/)", href):
+            return m.group(0)
+        path, _, frag = href.partition("#")
+        mb = re.match(r"^blog_(00[1-8])_[^/]*\.md$", path)
+        if mb:
+            return f'href="blog{mb.group(1).replace("00", "00", 1)}.html' + (f"#{frag}" if frag else "") + '"'
+        repo_path = posixpath.normpath(posixpath.join(DOCS_IN_REPO, path))
+        return f'href="{REPO_BLOB}{repo_path}' + (f"#{frag}" if frag else "") + '"'
+
+    t = re.sub(r'href="([^"]+)"', repl, t)
+    html.write_text(t, encoding="utf-8")
+
+
 def build():
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -77,11 +105,12 @@ def build():
     for md in mds:
         stem = md.name[:8]
         html = OUT / f"{stem.replace('_','')}.html"
-        subprocess.run(["pandoc", str(md), "--standalone", f"--mathjax={MJ}", "--toc",
+        subprocess.run(["pandoc", str(md), "-f", "markdown+gfm_auto_identifiers", "--standalone", f"--mathjax={MJ}", "--toc",
                         "--include-in-header", str(hdr),
                         "--metadata", f"title={TITLES.get(stem, stem)}",
                         "-o", str(html)], check=True)
         used_imgs |= set(re.findall(r'img/[A-Za-z0-9_\-]+\.(?:png|gif|jpg)', md.read_text(encoding="utf-8")))
+        fix_links(html)
         print("  built", html.name)
 
     for rel in sorted(used_imgs):
