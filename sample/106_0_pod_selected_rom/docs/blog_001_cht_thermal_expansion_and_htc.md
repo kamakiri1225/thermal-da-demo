@@ -1,5 +1,8 @@
 # blog_001：OpenFOAM＋FrontISTR で「熱流体固体連成 → 熱膨張」をやってみる ― さらに熱伝達率の分布まで出す
 
+> **2026-10-05の読み直し：条件の区別**
+> 本記事はOpenFOAMのCHTとFrontISTRの熱弾性解析。データ同化そのものではなく、後続実験の基準データを作る過程を説明します。工作機械は応用先で、検証対象は中空円筒です。
+
 このブログシリーズは、106 でやった一連の研究（熱流体固体連成・データ同化・ROM）を、
 **手を動かしながら少しずつ理解していく**ためのものです。第1回は土台となる
 
@@ -44,7 +47,7 @@ flowchart LR
 技術の話に入る前に、**この研究が何の役に立つのか**を文献で押さえておきます。
 主張には**無料で読める出典**を付けます（有料しか根拠が無いものは、そう明記します）。
 
-### 0-1. 熱変位は加工誤差の最大の原因
+### 0-1. 熱変位は工作機械の加工誤差の大きな要因
 
 **Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G. (2024)**
 "Machine Tool Thermal Error Measurement and Prediction via Wireless Microscope",
@@ -53,33 +56,18 @@ flowchart LR
 
 > "Thermal errors can contribute **up to 75 percent** of the overall machining errors of a machined part."
 
+「最大75%」は文献が述べる上限であり、すべての機械・運転条件で75%という意味ではありません。本研究は工作機械そのものではなく、応用を想定した中空円筒の数値検証です。
+
 同じ数字は **Bünger, A. et al. (2023)** arXiv:2306.12736（📄 <https://arxiv.org/abs/2306.12736>）でも
 「Mayr et al., 2012 によれば熱誤差は最終製品の製造誤差の **75 %** を占める」と引用されています。
 
-### 0-2. 対策は「回避」と「補償」の2つ
+### 0-2. 対策は「回避」と「補償」に分けて考える
 
-同じく Li et al. (2024) より:
+Liら（2024）は、熱誤差への対策を、温度変化や変形を抑える回避と、推定した熱誤差に応じて位置指令を修正する補償に分けています（[NIST公開論文](https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076)）。
 
-> "In general, there are two methods for thermal error reduction:
-> **thermal error avoidance** and **thermal error compensation**."
+**回避**には低膨張材料、構造設計、潤滑・冷却の工夫が含まれます。**補償**は温度・変位の測定などから熱誤差をモデル化し、指令位置へ補正量を加える方法です。回帰、有限要素モデル、ニューラルネットワークなどが使われます。コスト面の利点は文献で議論されていますが、用途ごとに回避と補償を組み合わせるため、補償が常に唯一の主役という意味ではありません。
 
-> "**Thermal error avoidance is typically a more costly solution than thermal error compensation**
-> and is more sensitive to modeling errors and unknown disturbances."
-
-**回避**＝低膨張材料・潤滑や冷却の最適化で、機械を温度変化に鈍感にする。
-**補償**＝温度から変形を予測し、その分だけ指令位置をずらす。
-**コスト面から補償が実務の主役**、というのが文献の立場です。
-
-補償が何をしているかも、同論文が明快に書いています:
-
-> "thermal error compensation is normally based on a **predictive model established by the thermal
-> error measurement** of a machine tool."
-
-> "employ a **predictive error model, which are inverted to determine compensation amounts**.
-> Common thermal error models include **least-square regression, finite element, neural network,
-> gray system**, etc."
-
-つまり「**多点の温度と刃先変位を実測 → 関係をモデル化 → モデルを逆に使って補正量を出す**」。
+本シリーズでは、観測によって物理モデルの状態・パラメータを修正するデータ同化を扱います。推定変位をCNCへ送って実機加工誤差を補償する実験は、まだ行っていません。
 
 ### 0-3. メーカー各社の実装
 
@@ -116,9 +104,8 @@ flowchart LR
 
 理由は3つあります。
 
-1. **効くのは温度そのものではなく勾配**。柱の上下にわずかな温度差があるだけで曲げが生じ、
-   主軸先端では**てこで拡大**される。「平均温度が合っている」ことは何の保証にもならない。
-2. **熱伝達率を直接測る計測器が存在しない**。
+1. **熱変位は温度上昇の空間分布と拘束条件で決まる**。一様な温度上昇でも伸びは生じ、非一様な温度分布では反りも生じます。平均温度や数点の温度が合うだけでは、熱変位の一致は保証されません。同じ熱弾性モデルで全温度場が完全に一致すれば、そのモデルが計算する変位も一致します。
+2. **熱伝達率は通常、熱流束・壁面温度・基準流体温度から診断・同定する量**です。どの面、どの基準温度、どの時間平均を使うかで値が変わります。「直接測れないから求められない」という意味ではありません。
    - 📄 <https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/>（2025、無料）
      … CHTCを直接測る専用計測器が無く、熱流束センサや赤外サーモグラフィでも測れない
    - 📄 <https://www.mdpi.com/2075-1702/9/9/184>（*Machines* 2021、オープンアクセス）

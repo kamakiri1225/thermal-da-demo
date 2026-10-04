@@ -92,10 +92,9 @@ def fix_links(html: Path) -> None:
 
 
 def build():
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    (OUT / "img").mkdir(parents=True)
-    (OUT / "pdf").mkdir(parents=True)
+    # 他の作業で追加されたHTMLや素材を消さず、生成対象だけ更新する。
+    (OUT / "img").mkdir(parents=True, exist_ok=True)
+    (OUT / "pdf").mkdir(parents=True, exist_ok=True)
 
     hdr = OUT / "_header.html"
     hdr.write_text(CSS, encoding="utf-8")
@@ -112,6 +111,29 @@ def build():
         used_imgs |= set(re.findall(r'img/[A-Za-z0-9_\-]+\.(?:png|gif|jpg)', md.read_text(encoding="utf-8")))
         fix_links(html)
         print("  built", html.name)
+
+    # Markdown向けのブログリンクを、生成したHTML向けに読み替える。
+    from bs4 import BeautifulSoup
+    page_by_md = {p.name: f"{p.name[:8].replace('_', '')}.html" for p in mds}
+    for page in sorted(OUT.glob("blog00[1-8].html")):
+        soup = BeautifulSoup(page.read_text(encoding="utf-8"), "html.parser")
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if href.startswith(("https:", "http:", "mailto:", "#")):
+                continue
+            dest, sep, fragment = href.partition("#")
+            if Path(dest).name in page_by_md:
+                target = page_by_md[Path(dest).name]
+                if fragment:
+                    target_soup = BeautifulSoup((OUT / target).read_text(encoding="utf-8"), "html.parser")
+                    if not target_soup.find(id=fragment):
+                        short = re.sub(r"^\d+(?:-\d+)*-", "", fragment)
+                        if target_soup.find(id=short):
+                            fragment = short
+                a["href"] = target + ("#" + fragment if sep else "")
+            elif dest.endswith(".md") and (DOCS / dest).exists():
+                a["href"] = "../docs/" + dest + ("#" + fragment if sep else "")
+        page.write_text(str(soup), encoding="utf-8")
 
     for rel in sorted(used_imgs):
         src = DOCS / rel
