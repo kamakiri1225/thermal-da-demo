@@ -34,10 +34,10 @@
 | 5 | ROM の構築 | C・K を OpenFOAM に合わせて校正（残差 0.014 K）、600 秒を 31 ms | [blog_004 §6](../docs/blog_004_pod_selected_rom.md) | 実施済み |
 | 6 | ROM の適用範囲 | 発熱量・加熱のしかたが変わっても使える（ON/OFF を与える条件）。熱源の位置が変わると作り直し | [blog_007](../docs/blog_007_rom_applicability.md) | 実施済み |
 | 7 | 温度を測っても変位が合わないことがある | 温度2点のみだと反りの誤差 0.756 µm（変位を足すと 0.135 µm）。同じ場所なら温度計は温度場、変位計は反りに強い | [blog_001 §0-4](../docs/blog_001_cht_thermal_expansion_and_htc.md)、[blog_008 §4](../docs/blog_008_novelty_displacement_assimilation.md) | 実施済み |
-| 8 | **温度1点＋変位2点**でもデータ同化でき、精度が上がる | 温度1点 0.617 K → 温度2点 0.197 K → 温度2点＋変位2点 0.159 K。変位2点のみ（温度0点）でも 0.21 K | [blog_003 §6-1](../docs/blog_003_ensemble_kalman_filter.md)、[blog_004 §7-4c](../docs/blog_004_pod_selected_rom.md)、[blog_006](../docs/blog_006_temp2_disp2_step_by_step.md) | **温度1点＋変位2点の組み合わせは未実施** |
+| 8 | **温度1点＋変位2点**でもデータ同化でき、精度が上がる | 温度1点→＋変位2点で、温度場 0.65→0.15 K、反り 0.92→0.10 µm（15 W、実ソルバ真値）。25 W・間欠加熱でも同じ傾向で、温度2点より良い | [blog_008 §0-8](../docs/blog_008_novelty_displacement_assimilation.md) | **実施済み（2026-10-05）** |
 | 9 | 推定したいもので最適な温度センサ位置が変わる | 〇〇＝推定したい量（反り A−O、温度場全体、発熱量など）、△△＝センサの読み。熱感度 $W$ と温度のばらつきから「測った後に残る推定誤差 $\sigma$ 」を計算し、置き場所を選ぶ（予測順位と実際の順位の相関 0.98）。発熱感度 dT/dQ では選ばない | [blog_005 §1・§4-6](../docs/blog_005_optimal_sensor_placement.md)、[blog_008 §7](../docs/blog_008_novelty_displacement_assimilation.md) | 実施済み（反り A−O を対象） |
 
-**未実施の項目**：8 の「温度1点＋変位2点」。既存の計算は「温度1点」「温度2点」「温度2点＋変位2点」「変位2点のみ」です。
+**9項目すべてについて、結果と解説がそろいました。** 全体のまとめは [blog_008 §0](../docs/blog_008_novelty_displacement_assimilation.md) にあります。
 
 ---
 
