@@ -824,28 +824,88 @@ FrontISTR は呼びません。</p>
 <p><strong>② と ③ は、数式で書くとこうなります</strong>（ <span
 class="math inline">\(i\)</span> ＝メンバーの番号 1〜60、 <span
 class="math inline">\(m\)</span> ＝センサの番号）。</p>
-<p><strong>② センサの場所の分だけ計算する</strong></p>
-<p>gappy-POD で全セルを復元すると、こういう式になります（20,696
-行）。</p>
+<p><strong>② センサの場所の分だけ計算する（温度も変位も）</strong></p>
+<p>データ同化に使っているセンサは<strong>温度計2本と変位計2本</strong>です。どちらも、メンバー
+<span class="math inline">\(i\)</span> の5点温度 <span
+class="math inline">\(T_P^{(i)}\)</span> から計算します。</p>
+<p>全体を復元するとすれば、温度も変位も次の形になります。</p>
 <p><span class="math display">\[
-T^{(i)}_{\mathrm{all}} = \bar T + U_r\,U_{rP}^{-1}\big(T_P^{(i)} - \bar
-T_P\big)
+\underbrace{T^{(i)}_{\mathrm{all}}}_{20{,}696\times1} = \bar T +
+U_r\,U_{rP}^{-1}\big(T_P^{(i)} - \bar T_P\big),
+\qquad
+\underbrace{u^{(i)}_{\mathrm{all}}}_{15{,}120\times1} = \bar u +
+D\,U_{rP}^{-1}\big(T_P^{(i)} - \bar T_P\big)
 \]</span></p>
-<p>ただし必要なのは<strong>センサの行だけ</strong>なので、その行だけを取り出して計算します。</p>
+<p>左が温度（gappy-POD）、右が変位です。 <span
+class="math inline">\(U_r\)</span> は温度の型（20,696 × 5）、 <span
+class="math inline">\(D\)</span> は「型1本あたりの変位」（15,120 ×
+5、FrontISTR を6回解いて作る）です。 どちらも「5点温度のずれ →
+型の強さ（ <span class="math inline">\(U_{rP}^{-1}\)</span> ）→
+温度または変位」という同じ流れです。</p>
+<p>ただし必要なのは<strong>センサの行だけ</strong>なので、その4行だけを取り出して計算します。§3-3
+の例（温度計 P2・P0 ＋ 変位計 S1・S2）で書くと</p>
 <p><span class="math display">\[
-\hat y_m^{(i)} = \bar y_m + h_m^{\mathsf T}\big(T_P^{(i)} - \bar
-T_P\big)
+\underbrace{\begin{bmatrix}\hat T_{P2}\\ \hat T_{P0}\\ \hat u_{S1}\\
+\hat u_{S2}\end{bmatrix}^{(i)}}_{\hat y^{(i)}\ (4\times1)}
+=
+\underbrace{\begin{bmatrix}296.938\\ 296.659\\ -1.738\\
+2.505\end{bmatrix}}_{\bar y\ (4\times1)}
++
+\underbrace{\begin{bmatrix}
+0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
+-0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290\\
+-0.169 &amp; 0.595 &amp; -0.309 &amp; 0.427 &amp; 0.666
+\end{bmatrix}}_{H\ (4\times5)}
+\underbrace{\begin{bmatrix}T_0-296.659\\ T_1-295.698\\ T_2-296.938\\
+T_3-296.146\\ T_4-295.361\end{bmatrix}^{(i)}}_{T_P^{(i)}-\bar T_P\
+(5\times1)}
 \]</span></p>
-<p><span class="math inline">\(T_P^{(i)}\)</span> はメンバー <span
-class="math inline">\(i\)</span> の5点温度、 <span
-class="math inline">\(\bar T_P\)</span> はその平均、 <span
-class="math inline">\(\bar y_m\)</span>
-は平均温度のときのセンサの値です。 <span
-class="math inline">\(h_m\)</span> はセンサ <span
-class="math inline">\(m\)</span> の重み（5つの数字）で、温度計なら
-gappy-POD の1行、変位計なら熱感度の1行です（§3-3）。
-<strong>センサが4つなら4行だけ計算し、残りの 20,692
-行は計算しません。</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(H\)</span> の行</th>
+<th>センサ</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1行目</td>
+<td>温度計 P2（代表点）</td>
+<td>P2 だけ 1（gappy-POD の行が単位ベクトルになる、§7-0）</td>
+</tr>
+<tr class="even">
+<td>2行目</td>
+<td>温度計 P0（代表点）</td>
+<td>P0 だけ 1</td>
+</tr>
+<tr class="odd">
+<td>3行目</td>
+<td><strong>変位計 S1</strong>（上面、 <span
+class="math inline">\(U_x\)</span> ）</td>
+<td>熱感度の行 <span
+class="math inline">\(w_{S1}=D_{S1}U_{rP}^{-1}\)</span> （µm/K）</td>
+</tr>
+<tr class="even">
+<td>4行目</td>
+<td><strong>変位計 S2</strong>（上面、 <span
+class="math inline">\(U_z\)</span> ）</td>
+<td>熱感度の行 <span
+class="math inline">\(w_{S2}=D_{S2}U_{rP}^{-1}\)</span> （µm/K）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>温度計の行も変位計の行も、同じ「5つの数字」の行として並んでいるだけです。</strong>
+温度計を代表点以外に置けば1・2行目が gappy-POD
+の行（§7-0）に変わり、変位計の場所を変えれば3・4行目が変わります。
+<strong>センサが4つなら4行だけ計算し、全セル（20,696
+行）・全節点（15,120 行）は計算しません。</strong></p>
 <p><strong>③ 直すのは7つだけ</strong></p>
 <p><span class="math display">\[
 z^{a(i)} = z^{f(i)} + K\big(y + \varepsilon^{(i)} - \hat
