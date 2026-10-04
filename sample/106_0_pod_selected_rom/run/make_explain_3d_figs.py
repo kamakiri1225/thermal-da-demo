@@ -248,7 +248,22 @@ def fig_q_h_scatter():
     Z[:,:5]=rg.integrate_ensemble(Z[:,:5],C,Km,Z[:,6],Z[:,5],heat,0,30,2.0)
     T=np.full(5,rg.T_AIR_K); _,tr=rg.integrate_single(T,C,Km,h,1.0,heat,0,30,2.0); Tt=tr[-1]
     sens=[("温度計 P2 の予想 [K]",Z[:,2],Tt[2],0.3),("変位計 S2 の予想 [µm]",u0+(Z[:,:5]-mp)@w,u0+w@(Tt-mp),0.3)]
-    fig,axs=plt.subplots(2,2,figsize=(15,10.5))
+    fig=plt.figure(figsize=(15,12.2))
+    gs=fig.add_gridspec(3,2,height_ratios=[0.38,1,1],hspace=0.55)
+    axs=np.array([[fig.add_subplot(gs[1,0]),fig.add_subplot(gs[1,1])],[fig.add_subplot(gs[2,0]),fig.add_subplot(gs[2,1])]])
+    # ---- いつの話か：時間軸 ----
+    at=fig.add_subplot(gs[0,:]); at.set_xlim(-20,620); at.set_ylim(-1.6,1.9); at.axis("off")
+    at.fill_between([0,300],-0.25,0.25,color="#FDEBD0")
+    at.text(150,0.45,"ヒータ ON（0〜300 秒）",ha="center",fontsize=11,color="#a0522d")
+    at.plot([0,600],[0,0],color=GRAY,lw=2.5)
+    for tt in range(60,601,30): at.plot([tt,tt],[-0.3,0.3],color="#d9a3a3",lw=2)
+    at.plot([30,30],[-0.45,0.45],color=RED,lw=5)
+    for tt,lb in [(0,"0"),(30,"30"),(300,"300"),(600,"600 秒")]: at.text(tt,-0.55,lb,ha="center",va="top",fontsize=11.5)
+    at.annotate("① ROM で 0→30 秒を予報（補正はまだ）",xy=(15,-0.05),xytext=(60,-1.25),fontsize=12,color=BLUE,
+                arrowprops=dict(arrowstyle="->",color=BLUE,lw=1.8))
+    at.annotate("② この図 ＝ t = 30 秒、1回目の補正の直前の 60 メンバーの予報",xy=(30,0.45),xytext=(60,1.35),
+                fontsize=13.5,color=RED,weight="bold",arrowprops=dict(arrowstyle="->",color=RED,lw=2))
+    at.text(470,-1.25,"薄い赤線＝その後の補正（30 秒ごと、全20回）",ha="center",fontsize=11,color="#b06060")
     for col,(lab,yp,yo,sig) in enumerate(sens):
         for row,(par,scale,ylab,true) in enumerate([(Z[:,5],15,"発熱量 Q = 15q [W]",15.0),(Z[:,6],1,"放熱 h [W/K]",h)]):
             ax=axs[row,col]; v=par*scale
@@ -265,10 +280,10 @@ def fig_q_h_scatter():
             r=np.corrcoef(v,yp)[0,1]
             ax.set_title(f"{ylab.split(' ')[0]} と {lab.split('の')[0]}：相関 {r:+.2f}\n平均 {v.mean():.3g} → {new:.3g}（このセンサ1本だけで直した場合）",fontsize=14)
             if row==0 and col==0: ax.legend(fontsize=11.5,loc="upper left")
-    fig.suptitle("q（発熱）と h（放熱）は、なぜセンサのずれから直されるのか（1回目 t=30 秒、60 メンバー）",fontsize=17,weight="bold")
-    fig.text(0.5,0.008,"上：Q が大きいメンバーほど予想も大きい（右上がり）→ 実測が予想より小さいので Q が下げられる。\n"
+    fig.suptitle("q（発熱）と h（放熱）は、なぜセンサのずれから直されるのか（1回目 t = 30 秒の補正）",fontsize=17,weight="bold")
+    fig.text(0.5,0.006,"上：Q が大きいメンバーほど予想も大きい（右上がり）→ 実測が予想より小さいので Q が下げられる。\n"
              "下：h と予想の関係が弱い → h はほとんど直らない（放熱 約 0.1 W は発熱 15 W の約 1/150）",ha="center",fontsize=13,color=NAVY)
-    fig.tight_layout(rect=(0,0.05,1,0.94)); fig.savefig(os.path.join(IMG,"explain_q_h_update.png"),dpi=125,facecolor="white"); plt.close(fig)
+    fig.subplots_adjust(left=0.07,right=0.98,top=0.93,bottom=0.11); fig.savefig(os.path.join(IMG,"explain_q_h_update.png"),dpi=125,facecolor="white"); plt.close(fig)
     print("wrote explain_q_h_update.png")
 
 
