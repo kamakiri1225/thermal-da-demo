@@ -761,12 +761,175 @@ T})\,\varphi=\lambda\,\varphi\ }\]</span></p>
 <li>固有値 <span class="math inline">\(\lambda_k=\sigma_k^2\)</span> ＝
 その型の <strong>エネルギー</strong>（大きいほど支配的）</li>
 </ul>
+<h4
+id="固有値エネルギーとはどういう意味か">「固有値＝エネルギー」とはどういう意味か</h4>
+<p><strong>ここでいう「エネルギー」は物理のエネルギー（J）ではなく、「温度の揺れの2乗の合計」</strong>のことです。</p>
+<p>固有値 <span class="math inline">\(\lambda_k\)</span>
+は、上で最大化した量そのものです。固有値問題の両辺に左から <span
+class="math inline">\(\varphi_k^{\mathsf T}\)</span> を掛けると</p>
+<p><span class="math display">\[
+\lambda_k = \varphi_k^{\mathsf T}\,(XX^{\mathsf T})\,\varphi_k =
+\sum_{t=1}^{m}\big(\varphi_k^{\mathsf T}x_t\big)^2
+\]</span></p>
+<p>（ <span class="math inline">\(x_t\)</span> は <span
+class="math inline">\(X\)</span> の <span
+class="math inline">\(t\)</span> 列目＝時刻 <span
+class="math inline">\(t\)</span> の「平均を引いた温度場」）になります。
+<span class="math inline">\(\varphi_k^{\mathsf T}x_t\)</span> は「時刻
+<span class="math inline">\(t\)</span> の写真を型 <span
+class="math inline">\(\varphi_k\)</span>
+に重ねたときの長さ（その型がどれだけ含まれているか）」なので、</p>
+<blockquote>
+<p><strong><span class="math inline">\(\lambda_k\)</span>
+＝「全時刻の写真が、型 <span class="math inline">\(k\)</span>
+をどれだけ含んでいるか」の2乗の合計</strong></p>
+</blockquote>
+<p>です。そして、全部の型の <span
+class="math inline">\(\lambda_k\)</span>
+を足すと、温度の揺れ全体の2乗の合計に一致します。</p>
+<p><span class="math display">\[
+\sum_{k}\lambda_k = \sum_{i=1}^{N}\sum_{t=1}^{m} X_{it}^2
+\]</span></p>
+<p>（右辺は、全セル・全時刻の「平均からの揺れ」の2乗の合計）</p>
+<p>だから <span class="math inline">\(\lambda_k/\sum\lambda\)</span>
+が「<strong>その型で、揺れ全体の何割を説明できるか</strong>」（寄与率）になります。本ケースの「2つの型で
+99.89 %」はこの割合です。</p>
+<p><strong>下の3点×4時刻の例（§2-3）で確かめると</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>揺れ全体の2乗の合計 <span class="math inline">\(\sum_i\sum_t
+X_{it}^2\)</span></td>
+<td style="text-align: right;">20.564</td>
+</tr>
+<tr class="even">
+<td>型1の <span
+class="math inline">\(\lambda_1=\sigma_1^2=4.161^2\)</span></td>
+<td style="text-align: right;">17.316（84.20 %）</td>
+</tr>
+<tr class="odd">
+<td>型2の <span
+class="math inline">\(\lambda_2=\sigma_2^2=1.802^2\)</span></td>
+<td style="text-align: right;">3.247（15.79 %）</td>
+</tr>
+<tr class="even">
+<td>型3の <span
+class="math inline">\(\lambda_3=\sigma_3^2=0.036^2\)</span></td>
+<td style="text-align: right;">0.001（0.01 %）</td>
+</tr>
+<tr class="odd">
+<td>合計</td>
+<td style="text-align: right;">20.564（＝揺れ全体と一致）</td>
+</tr>
+</tbody>
+</table>
+<p>型1 <span class="math inline">\(\varphi_1=(0.566,\ 0.608,\
+0.557)\)</span> に4枚の写真を重ねた長さは <span
+class="math inline">\((-3.025,\ -0.584,\ 2.613,\ 0.997)\)</span>
+で、その2乗の合計がちょうど <span
+class="math inline">\(17.316=\lambda_1\)</span> です。</p>
+<p>（ <span class="math inline">\(\sigma_k\)</span> は次の §2-3
+で出てくる「特異値」です。 <span
+class="math inline">\(\lambda_k=\sigma_k^2\)</span>
+になる理由もそこで示します。）</p>
 <h3 id="2-3-svd-との同値実際の計算法">2-3. SVD
 との同値（実際の計算法）</h3>
+<h4 id="特異値分解svdとは">特異値分解（SVD）とは</h4>
+<p><strong>どんな行列も、「空間の型」×「大きさ」×「時間の動き」の3つの行列の積に分けられる</strong>、というのが特異値分解（Singular
+Value Decomposition）です。</p>
+<p><span class="math display">\[
+\underbrace{X}_{N\times m} = \underbrace{U}_{N\times
+r}\;\underbrace{\Sigma}_{r\times r}\;\underbrace{V^{\mathsf T}}_{r\times
+m}
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>行列</th>
+<th>中身</th>
+<th>性質</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(U\)</span></td>
+<td>列 <span class="math inline">\(u_1,u_2,\dots\)</span>
+が<strong>空間の型</strong>（1列＝全セル分の重み）</td>
+<td>列どうしが直交し、長さ 1（ <span class="math inline">\(U^{\mathsf
+T}U=I\)</span> ）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Sigma\)</span></td>
+<td>対角に<strong>特異値</strong> <span
+class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\ge0\)</span>
+（各型の大きさ）</td>
+<td>対角以外は 0。大きい順に並ぶ</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(V\)</span></td>
+<td>列 <span class="math inline">\(v_1,v_2,\dots\)</span>
+が<strong>時間の動き</strong>（1列＝全時刻分の係数）</td>
+<td>列どうしが直交し、長さ 1（ <span class="math inline">\(V^{\mathsf
+T}V=I\)</span> ）</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(r\)</span> は <span
+class="math inline">\(N\)</span> と <span
+class="math inline">\(m\)</span> の小さい方以下の数（本ケースは <span
+class="math inline">\(m=121\)</span> ）です。
+「直交」とは、2つの列の内積が 0 ＝
+型どうしが重なりを持たない、という意味です。
+具体的な数値（3点×4時刻）は、この節の後半「数字で最後まで追う」にあります。</p>
+<h4
+id="なぜ-svd-の-u-が-pod-のモードになり-lambda_ksigma_k2-になるのか">なぜ
+SVD の <span class="math inline">\(U\)</span> が POD のモードになり、
+<span class="math inline">\(\lambda_k=\sigma_k^2\)</span>
+になるのか</h4>
 <p><span class="math inline">\(X\)</span> を特異値分解 <span
-class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> すると</p>
+class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> して、§2-2
+の固有値問題に出てきた <span class="math inline">\(XX^{\mathsf
+T}\)</span> を計算すると</p>
 <p><span class="math display">\[XX^{\mathsf T}=U\Sigma V^{\mathsf
-T}V\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.\]</span></p>
+T}\,(U\Sigma V^{\mathsf T})^{\mathsf T}=U\Sigma \underbrace{V^{\mathsf
+T}V}_{I}\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.\]</span></p>
+<p>（ <span class="math inline">\(V\)</span> の列が直交なので <span
+class="math inline">\(V^{\mathsf T}V=I\)</span> ）。両辺に右から <span
+class="math inline">\(U\)</span> を掛けると、 <span
+class="math inline">\(U^{\mathsf T}U=I\)</span> なので</p>
+<p><span class="math display">\[
+XX^{\mathsf T}\,U = U\,\Sigma^2
+\quad\Longleftrightarrow\quad
+XX^{\mathsf T}\,u_k = \sigma_k^2\,u_k\qquad(k=1,2,\dots)
+\]</span></p>
+<p>これは §2-2 の固有値問題 <span class="math inline">\((XX^{\mathsf
+T})\varphi=\lambda\varphi\)</span> そのものです。つまり</p>
+<ul>
+<li><span class="math inline">\(U\)</span> の <span
+class="math inline">\(k\)</span> 列目 <span
+class="math inline">\(u_k\)</span> ＝ 固有ベクトル <span
+class="math inline">\(\varphi_k\)</span> ＝ <strong>POD
+モード</strong></li>
+<li><span class="math inline">\(\sigma_k^2\)</span> ＝ 固有値 <span
+class="math inline">\(\lambda_k\)</span> ＝
+<strong>その型のエネルギー</strong></li>
+</ul>
+<p><strong>3点×4時刻の例で確かめると</strong>： <span
+class="math inline">\(XX^{\mathsf T}u_1=(9.798,\ 10.526,\
+9.646)\)</span> 、 <span
+class="math inline">\(\sigma_1^2u_1=17.316\times(0.566,\ 0.608,\
+0.557)=(9.798,\ 10.526,\ 9.646)\)</span> で一致します。</p>
 <p>つまり <strong><span class="math inline">\(U\)</span>
 の各列がそのまま <span class="math inline">\(XX^{\mathsf T}\)</span>
 の固有ベクトル＝PODモード</strong>、 <span
@@ -837,6 +1000,74 @@ T}\]</span></p>
 class="math inline">\(u_k\)</span></strong> × <strong>時間の動き <span
 class="math inline">\(v_k\)</span></strong> × <strong>大きさ <span
 class="math inline">\(\sigma_k\)</span></strong>」の1セット。</p>
+<p><strong><span class="math inline">\(u_k\)</span> と <span
+class="math inline">\(v_k\)</span>
+は行列ではなく、縦ベクトルです。</strong> <span
+class="math inline">\(\sigma_k\)</span> はただの数です。</p>
+<p><span class="math display">\[
+\underbrace{\sigma_k}_{\text{scalar}}\;
+\underbrace{u_k}_{N\times1}\;
+\underbrace{v_k^{\mathsf T}}_{1\times m}
+=\underbrace{\sigma_k\,u_kv_k^{\mathsf T}}_{N\times m}
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>何か</th>
+<th>大きさ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma_k\)</span></td>
+<td>数（スカラー）＝型 <span class="math inline">\(k\)</span>
+の大きさ</td>
+<td>1 個</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(u_k\)</span></td>
+<td>縦ベクトル＝全セル分の重み（温度分布の型）</td>
+<td><span class="math inline">\(N\times1\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(v_k^{\mathsf T}\)</span></td>
+<td>縦ベクトル <span class="math inline">\(v_k\)</span>
+を横に倒した<strong>横ベクトル</strong>＝全時刻分の係数</td>
+<td><span class="math inline">\(1\times m\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(u_kv_k^{\mathsf T}\)</span></td>
+<td>縦 ×
+横の掛け算（外積）。<strong>ここで初めて行列になる</strong></td>
+<td><span class="math inline">\(N\times m\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>たとえば後半の3点×4時刻の例の第1項は、3×1 の縦ベクトルと 1×4
+の横ベクトルを掛けて、3×4 の行列になります。</p>
+<p><span class="math display">\[
+\underbrace{4.161}_{\sigma_1}
+\underbrace{\begin{pmatrix}0.566\\ 0.608\\ 0.557\end{pmatrix}}_{u_1\
+(3\times1)}
+\underbrace{\begin{pmatrix}-0.727&amp;-0.140&amp;0.628&amp;0.240\end{pmatrix}}_{v_1^{\mathsf
+T}\ (1\times4)}
+=\underbrace{\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
+-1.839&amp;-0.355&amp;1.589&amp;0.606\\
+-1.685&amp;-0.326&amp;1.456&amp;0.555\end{pmatrix}}_{3\times4}
+\]</span></p>
+<p>（1行1列目は <span
+class="math inline">\(4.161\times0.566\times(-0.727)=-1.712\)</span>
+。行列の <span class="math inline">\((i,t)\)</span> 成分は「 <span
+class="math inline">\(\sigma_1\times\)</span> セル <span
+class="math inline">\(i\)</span> の重み <span
+class="math inline">\(\times\)</span> 時刻 <span
+class="math inline">\(t\)</span> の係数」）</p>
 <p><strong>行列の形で書くと</strong>こうなっています（ <span
 class="math inline">\(N\)</span> ＝セル数、 <span
 class="math inline">\(m\)</span> ＝時刻数、 <span
@@ -846,8 +1077,10 @@ m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\
 \underbrace{V^{\mathsf T}}_{r\times m}
 =\begin{pmatrix}|&amp;|&amp;&amp;|\\ u_1&amp;u_2&amp;\cdots&amp;u_r\\
 |&amp;|&amp;&amp;|\end{pmatrix}
-\begin{pmatrix}\sigma_1&amp;&amp;&amp;\\ &amp;\sigma_2&amp;&amp;\\
-&amp;&amp;\ddots&amp;\\ &amp;&amp;&amp;\sigma_r\end{pmatrix}
+\begin{pmatrix}\sigma_1&amp;0&amp;\cdots&amp;0\\
+0&amp;\sigma_2&amp;\cdots&amp;0\\
+\vdots&amp;\vdots&amp;\ddots&amp;\vdots\\
+0&amp;0&amp;\cdots&amp;\sigma_r\end{pmatrix}
 \begin{pmatrix}-\ v_1^{\mathsf T}\ -\\ -\ v_2^{\mathsf T}\ -\\ \vdots\\
 -\ v_r^{\mathsf T}\ -\end{pmatrix}\]</span></p>
 <ul>
@@ -863,6 +1096,11 @@ class="math inline">\(m\)</span> ）＝ 全時刻ぶんの係数 ＝
 は<strong>縦×横の外積</strong>なので、 <span
 class="math inline">\(X\)</span> と同じ <span
 class="math inline">\(N\times m\)</span> の行列になる</li>
+<li><span class="math inline">\(\Sigma\)</span>
+は<strong>対角以外がすべて 0</strong> の行列（対角行列）。だから「型
+<span class="math inline">\(k\)</span> の大きさ <span
+class="math inline">\(\sigma_k\)</span>
+」が、ほかの型と混ざらずに1つずつ掛かる</li>
 </ul>
 <p>しかも <span
 class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
@@ -892,8 +1130,8 @@ class="math display">\[\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
 class="math display">\[U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
 0.608&amp;0.269&amp;-0.747\\
 0.557&amp;-0.815&amp;0.159\end{pmatrix},\quad
-\Sigma=\begin{pmatrix}4.161&amp;&amp;\\ &amp;1.802&amp;\\
-&amp;&amp;0.036\end{pmatrix},\quad
+\Sigma=\begin{pmatrix}4.161&amp;0&amp;0\\ 0&amp;1.802&amp;0\\
+0&amp;0&amp;0.036\end{pmatrix},\quad
 V^{\mathsf T}=\begin{pmatrix}-0.727&amp;-0.140&amp;0.628&amp;0.240\\
 0.020&amp;0.380&amp;0.422&amp;-0.823\\
 0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}\]</span></p>
