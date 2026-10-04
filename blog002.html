@@ -449,7 +449,7 @@ OI では <strong>これを事前に決め打ちして固定</strong>します�
 K=BH^{\mathsf T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
 <ul>
 <li><span class="math inline">\(x^a\)</span>
-：<strong>同化後</strong>（analysis）の温度。これが答え。</li>
+：<strong>データ同化後</strong>（analysis）の温度。これが答え。</li>
 <li><span class="math inline">\(H\)</span>
 ：<strong>観測演算子</strong>。「状態のどこを測ったか」を表す行列。点1だけ測ったので
 <span class="math inline">\(H=(1,\ 0,\ 0)\)</span> 。</li>
@@ -555,7 +555,7 @@ R=0.09\)</span> ）:</p>
 <tr class="header">
 <th>点</th>
 <th>予報 <span class="math inline">\(x^b\)</span></th>
-<th><strong>同化後 <span class="math inline">\(x^a\)</span>
+<th><strong>データ同化後 <span class="math inline">\(x^a\)</span>
 </strong></th>
 <th>真値</th>
 <th>効果</th>
@@ -898,12 +898,12 @@ class="math inline">\(Q\)</span> の同定に効きます。</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>温度を同化</strong></td>
+<td><strong>温度をデータ同化</strong></td>
 <td><span class="math inline">\(H\)</span> が温度成分を取り出す（ <span
 class="math inline">\(H=(1,0,0)\)</span> ）。</td>
 </tr>
 <tr class="even">
-<td><strong>変位を同化</strong></td>
+<td><strong>変位をデータ同化</strong></td>
 <td><span class="math inline">\(H\)</span> が <strong>温度→変位の感度
 <span class="math inline">\(w\)</span></strong> になる（ <span
 class="math inline">\(H_u=(w_1,w_2,0)\)</span> ）。</td>
@@ -1015,10 +1015,10 @@ aria-hidden="true">OIの観測点の位置：温度P2＋高W/低W変位＋A/O</f
 <p><em>黒＝温度センサ
 P2（ヒータ側・中央高さ）、赤＝<strong>高W変位2点（上端の自由端）</strong>、青＝<strong>低W変位2点（底面近くの拘束側）</strong>、緑＝A/O（上面）。
 第4節の「上端ほど高感度・底面は低感度」という分布どおりの配置になっています。</em></p>
-<p>比較する4構成のうち、<strong>下の1つはデータ同化なし</strong>、<strong>上の3つはすべて温度P2で同化</strong>します:</p>
+<p>比較する4構成のうち、<strong>下の1つはデータ同化なし</strong>、<strong>上の3つはすべて温度P2でデータ同化</strong>します:</p>
 <ul>
-<li><strong>データ同化なし（自由予測）</strong>：観測補正を一切せず、間違った初期推定のままモデルを進めるだけ。<strong>同化の効果を測るための基準線</strong>。</li>
-<li><strong>温度のみ</strong>：温度P2の1点だけで同化（変位は足さない）。</li>
+<li><strong>データ同化なし（自由予測）</strong>：観測補正を一切せず、間違った初期推定のままモデルを進めるだけ。<strong>データ同化の効果を測るための基準線</strong>。</li>
+<li><strong>温度のみ</strong>：温度P2の1点だけでデータ同化（変位は足さない）。</li>
 <li><strong>＋低W変位2点</strong>：温度P2 ＋ 低感度の変位2点。</li>
 <li><strong>＋高W変位2点</strong>：温度P2 ＋ 高感度の変位2点。</li>
 </ul>
@@ -1049,8 +1049,8 @@ alt="OIの温度・変位の時系列（実値）" />
 aria-hidden="true">OIの温度・変位の時系列（実値）</figcaption>
 </figure>
 <p><em>赤（データ同化なし）は加熱で真値からどんどん離れ、P1温度は真値25°Cに対し31°Cまで暴走。
-温度P2で同化する（灰）と真値へ引き戻され、<strong>高W変位2点を足す（青）と未観測点P1でも真値に最も寄り、変位も真値に追従</strong>します。
-「観測していない場所」まで直るのが、感度の高い点で同化することの効果です。</em></p>
+温度P2でデータ同化する（灰）と真値へ引き戻され、<strong>高W変位2点を足す（青）と未観測点P1でも真値に最も寄り、変位も真値に追従</strong>します。
+「観測していない場所」まで直るのが、感度の高い点でデータ同化することの効果です。</em></p>
 <p>次に、同じ結果を<strong>誤差（RMSE）と変位差</strong>でまとめたのが下の図です。</p>
 <figure>
 <img src="img/blog_oi_disp_selection.png"
@@ -1064,7 +1064,7 @@ class="math inline">\(B\)</span> ・ROM）。
 <strong>左＝温度の推定誤差</strong>（全5点RMSE）、<strong>右＝変位差
 <span class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
 の時刻歴</strong>（黒＝真値）。
-<strong>赤（データ同化なし）は補正されないので真値から最も外れたまま</strong>。温度P2で同化すると灰へ改善し、
+<strong>赤（データ同化なし）は補正されないので真値から最も外れたまま</strong>。温度P2でデータ同化すると灰へ改善し、
 <strong>高W（青）は温度も変位も真値に最も近い</strong>。低W（橙）・温度のみ（灰）は温度がなかなか下がらず、
 <strong>変位に至っては真値から大きく外れる</strong>（変位は <span
 class="math inline">\(W\)</span>
@@ -1101,11 +1101,12 @@ class="math inline">\(W\)</span>
 <tr class="even">
 <td><strong>温度＋変位2点（高W）</strong></td>
 <td><strong>温度P2＋変位</strong></td>
-<td><strong>0.86 K（同化なしの約6倍改善）</strong></td>
+<td><strong>0.86 K（データ同化なしの約6倍改善）</strong></td>
 </tr>
 </tbody>
 </table>
-<p>→ <strong>測る場所が悪いと、同化してもほとんど直らない</strong>。OI
+<p>→
+<strong>測る場所が悪いと、データ同化してもほとんど直らない</strong>。OI
 でも、第4節の<strong>感度分布で高W点を選ぶ</strong>ことがそのまま効きます。
 （感度 <span class="math inline">\(W\)</span>
 自体は105のFrontISTR計算由来。再現は
@@ -1132,7 +1133,7 @@ aria-hidden="true">σQ/σTスタディの観測点・評価点の位置（3D）<
 <p><em>円筒上の観測点・評価点。<strong>赤＝T1=hot／T2=cold（観測に使う温度2点、中央高さ）</strong>、<strong>緑＝A/O（観測に使う上面変位）</strong>。
 <strong>橙＝T3/T4（観測に使わない未観測の温度点）</strong>、<strong>青＝C/D（観測に使わない未観測の変位、中高さ
 z=75 mm）</strong>。
-C−D差は「同化に使っていない別の変位差」で、<strong>同化がその未観測点まで当たるか（汎化）</strong>を見る評価量です。
+C−D差は「データ同化に使っていない別の変位差」で、<strong>データ同化がその未観測点まで当たるか（汎化）</strong>を見る評価量です。
 （A/Oは実際には上面の +X/−X 節点列の平均。側面投影版は <a
 href="18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a> の
 <code>oi_evaluation_locations.png</code> 参照。）</em></p>

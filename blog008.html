@@ -254,9 +254,9 @@ id="toc-なぜやるか-ここまでの比較の弱点">7-2. なぜやるか ―
 土俵をそろえる</a></li>
 <li><a href="#比べる6つの決め方" id="toc-比べる6つの決め方">7-4.
 比べる6つの決め方</a></li>
-<li><a href="#どこが選ばれたか-同化を回す前に場所を見る"
-id="toc-どこが選ばれたか-同化を回す前に場所を見る">7-5. どこが選ばれたか
-― 同化を回す前に、場所を見る</a></li>
+<li><a href="#どこが選ばれたか-データ同化を回す前に場所を見る"
+id="toc-どこが選ばれたか-データ同化を回す前に場所を見る">7-5.
+どこが選ばれたか ― データ同化を回す前に、場所を見る</a></li>
 <li><a href="#同じ試験にかけた結果" id="toc-同じ試験にかけた結果">7-6.
 同じ試験にかけた結果</a></li>
 <li><a href="#分かったこと-3" id="toc-分かったこと-3">7-7.
@@ -308,7 +308,7 @@ id="blog_008本研究の主張-温度だけでなく変位もデータ同化の�
 <blockquote>
 <p><strong>この記事は、本研究の「主張」と「先行研究との関係」をまとめた記事です。</strong>
 計算の中身は <a
-href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>（同化の手順）、
+href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>（データ同化の手順）、
 <a href="blog_007_rom_applicability.md">blog_007</a>（ROM
 の適用範囲）にあります。
 <strong>工作機械の研究全体の中でどこに位置するか</strong>は §8
@@ -332,7 +332,7 @@ href="blog_006_temp2_disp2_step_by_step.md">blog_006</a>（同化の手順）、
 <tbody>
 <tr class="odd">
 <td><a href="blog_006_temp2_disp2_step_by_step.md">blog_006</a></td>
-<td><strong>同化の手順</strong>。温度2点＋変位2点をどう使い、なぜ発熱量が直るか</td>
+<td><strong>データ同化の手順</strong>。温度2点＋変位2点をどう使い、なぜ発熱量が直るか</td>
 <td>ROM の双子実験</td>
 </tr>
 <tr class="even">
@@ -402,7 +402,7 @@ OpenFOAM＋FrontISTR</strong>。いずれも実機ではありません</td>
 <td>温度 0.30 K、変位 0.30 µm</td>
 </tr>
 <tr class="odd">
-<td><strong>同化の設定</strong></td>
+<td><strong>データ同化の設定</strong></td>
 <td>EnKF・60メンバー・30 秒ごと20回・seed 20260913〜17 の5回平均</td>
 </tr>
 <tr class="even">
@@ -426,7 +426,7 @@ class="math inline">\(U_z(O)\)</span></td>
 2.
 <strong>温度と変位を同時に観測としてデータ同化に入れ、温度場・発熱量まで推定した例は、調べた範囲では見当たらない。</strong>
 3.
-手法そのもの（EnKF、POD、変位の同化）は既知。新しいのは<strong>組み合わせ方と、工作機械の熱変形に適用した点</strong>。
+手法そのもの（EnKF、POD、変位のデータ同化）は既知。新しいのは<strong>組み合わせ方と、工作機械の熱変形に適用した点</strong>。
 4.
 <strong>同じ場所なら、温度計と変位計はほぼ互角</strong>だった（§4）。変位計の価値は「情報量が多いこと」ではなく、<strong>温度計を置けない場所に置けること</strong>。
 5.
@@ -509,7 +509,7 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 <hr />
 <h2 id="主張したいこと">1. 主張したいこと</h2>
 <blockquote>
-<p><strong>熱変形を推定したいとき、観測は温度だけでなく、変位も同化に入れたほうがよい。</strong>
+<p><strong>熱変形を推定したいとき、観測は温度だけでなく、変位もデータ同化に入れたほうがよい。</strong>
 変位計は5点すべての温度に触れるので、温度計のない点の温度まで直り、結果として温度場も発熱量も熱変形も良くなる。
 そして<strong>変位計は、知りたい場所に置く必要がない</strong>。別の場所で測って、測っていない場所の変形を当てられる。</p>
 </blockquote>
@@ -712,7 +712,7 @@ Zurich (2024)</h3>
 <td>POD/Q-DEIM の ROM</td>
 </tr>
 <tr class="even">
-<td>同化</td>
+<td>データ同化</td>
 <td>カルマンフィルタ</td>
 <td>EnKF</td>
 </tr>
@@ -747,8 +747,8 @@ Zurich (2024)</h3>
 <li>工作機械の分野では
 <strong>「温度を測って変位を出す」が標準</strong>です。</li>
 <li>変位を測る方法（直接法）もありますが、<strong>変位をそのまま補正に使うもので、温度場の推定には戻していません</strong>。</li>
-<li><strong>温度と変位を同時に観測として同化に入れた例は見つかりませんでした。</strong></li>
-<li>変位を観測に使う同化自体は、別分野（流体、き裂）にあります。<strong>手法として新しいわけではありません。</strong></li>
+<li><strong>温度と変位を同時に観測としてデータ同化に入れた例は見つかりませんでした。</strong></li>
+<li>変位を観測に使うデータ同化自体は、別分野（流体、き裂）にあります。<strong>手法として新しいわけではありません。</strong></li>
 </ol>
 <hr />
 <h2 id="検証1同じ場所なら温度計と変位計のどちらが良いか">4.
@@ -805,7 +805,7 @@ class="math inline">\(U_z\)</span></strong></td>
 −1.6, 98.8) と (−26.6, −1.6, 98.8) mm
 に置きます（代表5点ではないセルですが、<a
 href="blog_007_rom_applicability.md">blog_007 §10</a>
-のとおり同化できます）。</li>
+のとおりデータ同化できます）。</li>
 <li><strong>評価しているのも同じ A・O</strong>
 なので、この節の結果は循環を含みます。循環を断った試験は §5 です。</li>
 </ul>
@@ -1254,7 +1254,7 @@ id="採点し直すと良い場所が変わる">採点し直すと、良い場�
 </blockquote>
 <p><strong>ここまで測定値は一切使っていません。</strong> FrontISTR
 の計算と ROM の計算だけで、机上で場所が決まります。
-本当に当たるかは、このあと同化を回して確かめます。</p>
+本当に当たるかは、このあとデータ同化を回して確かめます。</p>
 <h3 id="結果-1">5-3. 結果</h3>
 <p>まず、<strong>どこを測って、温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
@@ -1417,8 +1417,8 @@ class="math inline">\(t=150\)</span> 秒では</p>
 <li><strong>置き場所で大きく変わります。</strong> 底面近く（0.559
 µm）は、変位なし（0.756
 µm）から少ししか改善しません。底面は固定されていてほとんど動かないためです。</li>
-<li>選定は<strong>同化を回す前</strong>に、FrontISTR の熱感度と ROM
-で作った温度のばらつきだけで計算しています（<a
+<li>選定は<strong>データ同化を回す前</strong>に、FrontISTR の熱感度と
+ROM で作った温度のばらつきだけで計算しています（<a
 href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 と同じ方法）。</li>
 </ol>
@@ -1441,8 +1441,8 @@ href="blog_005_optimal_sensor_placement.md">blog_005 §4-6</a>
 µm）より正確</strong>。測る場所を選べば、知りたい場所を測らないほうが良い結果になった。
 - 置き場所で大きく変わる。底面近く（0.559 µm）は、変位なし（0.756
 µm）から少ししか改善しない。 -
-置き場所は<strong>同化を回す前</strong>に、FrontISTR の熱感度と ROM
-の温度のばらつきだけで決められる。</p>
+置き場所は<strong>データ同化を回す前</strong>に、FrontISTR の熱感度と
+ROM の温度のばらつきだけで決められる。</p>
 </blockquote>
 <hr />
 <h2 id="検証3真値を-openfoamfrontistr-にしても同じか">6. 【検証3】真値を
@@ -1452,21 +1452,21 @@ OpenFOAM＋FrontISTR にしても同じか</h2>
 の双子実験だった。<strong>モデル誤差がある条件</strong>でも同じ結論になるか</p>
 <p><strong>条件</strong>：温度の真値＝OpenFOAM
 の固体温度場、変位の真値＝その温度を各時刻 FrontISTR
-に入れて計算した全節点の変位。 同化モデルは ROM のまま。A・O
+に入れて計算した全節点の変位。 データ同化モデルは ROM のまま。A・O
 は一度も観測しない。15 W・25 W・間欠加熱の3条件 × 5 seed</p>
 </blockquote>
 <h3 id="やったこと">6-1. やったこと</h3>
 <p><a
 href="#5-検証2別の場所の変位で測っていない-aoを当てられるか">§5</a>
 の結果は真値も ROM の双子実験でした。
-同化に使うのと同じモデルで正解を作っているので、<strong>都合が良すぎます</strong>。
+データ同化に使うのと同じモデルで正解を作っているので、<strong>都合が良すぎます</strong>。
 そこで<strong>真値を OpenFOAM＋FrontISTR
 にして</strong>、同じ試験をやり直しました（<code>run/holdout_AO_realsolver.py</code>）。</p>
 <ul>
 <li>温度の真値＝OpenFOAM の固体温度場</li>
 <li><strong>変位の真値＝その温度場を各時刻 FrontISTR
 に入れて計算した全節点の変位</strong>（21 時刻 × 3 条件）</li>
-<li>同化モデルは ROM のまま。A・O は一度も観測しない</li>
+<li>データ同化モデルは ROM のまま。A・O は一度も観測しない</li>
 </ul>
 <h3 id="結果-2">6-2. 結果</h3>
 <p>3条件それぞれで、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
@@ -1687,8 +1687,8 @@ class="math inline">\(B\)</span>
 </tr>
 <tr class="even">
 <td>試験</td>
-<td>A・O を<strong>一度も観測しない</strong> holdout。同化は EnKF・60
-メンバー・30 秒ごと</td>
+<td>A・O を<strong>一度も観測しない</strong> holdout。データ同化は
+EnKF・60 メンバー・30 秒ごと</td>
 </tr>
 <tr class="odd">
 <td>真値</td>
@@ -1764,9 +1764,9 @@ class="math inline">\(w\)</span> で目的を指定しているため）。</p>
 これが正しいなら、A最適と本研究は同じ答えになるはずです。
 違う答えになるなら、「目的を指定すること」に意味があることになります。</p>
 </blockquote>
-<h3 id="どこが選ばれたか-同化を回す前に場所を見る">7-5. どこが選ばれたか
-― 同化を回す前に、場所を見る</h3>
-<p>同化を回す前に、<strong>選ばれた場所そのもの</strong>を見ます。選定はすべて机上の計算だけで終わっています。</p>
+<h3 id="どこが選ばれたか-データ同化を回す前に場所を見る">7-5.
+どこが選ばれたか ― データ同化を回す前に、場所を見る</h3>
+<p>データ同化を回す前に、<strong>選ばれた場所そのもの</strong>を見ます。選定はすべて机上の計算だけで終わっています。</p>
 <figure>
 <img src="img/placement_method_points.png" alt="どこが選ばれたか" />
 <figcaption aria-hidden="true">どこが選ばれたか</figcaption>
@@ -1848,7 +1848,7 @@ class="math inline">\(\sigma\)</span></th>
 href="#ステップ4採点をやり直して2点目を選ぶ">§5-2 のステップ4</a> で
 「2位をそのまま選んではいけない」と書いたのは、まさにこれです。</p>
 <p><strong>(2) 式は「A・O
-を直接測るのは最善ではない」と、同化を回す前に言っています。</strong>
+を直接測るのは最善ではない」と、データ同化を回す前に言っています。</strong>
 A・O 自身を測る構成の予測は 0.319 µm で、目的指向の 0.256 µm
 より大きい。 <a
 href="#5-検証2別の場所の変位で測っていない-aoを当てられるか">§5</a>
@@ -2134,7 +2134,7 @@ href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
 </tbody>
 </table>
 <p><strong>知りたい場所を直接測るより正確</strong>という結果です（§5）。
-しかも置き場所は、<strong>同化を回す前に机上計算だけで決められます</strong>（全
+しかも置き場所は、<strong>データ同化を回す前に机上計算だけで決められます</strong>（全
 15,120 候補から選定）。</p>
 <p><strong>なぜ新しいか</strong>：④は「測れる場所を測って、そこを補正する」。
 本研究は「<strong>測れる場所を測って、測れない場所を当てる</strong>」。さらに<strong>その場所を設計できる</strong>。</p>
@@ -2148,7 +2148,7 @@ href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
 <h3 id="切り口c運転条件が変わっても使える①への差別化">8-4.
 切り口C：運転条件が変わっても使える（①への差別化）</h3>
 <blockquote>
-<p><strong>回帰モデルは学習した条件を外れると外れる。物理モデル＋同化は外挿できる。</strong></p>
+<p><strong>回帰モデルは学習した条件を外れると外れる。物理モデル＋データ同化は外挿できる。</strong></p>
 </blockquote>
 <p>真値は OpenFOAM＋FrontISTR（<a
 href="blog_007_rom_applicability.md">blog_007</a>、<a
@@ -2158,7 +2158,7 @@ href="21_advantage_verification.md">21_advantage_verification.md</a>）。</p>
 <tr class="header">
 <th>条件</th>
 <th style="text-align: right;">回帰式</th>
-<th style="text-align: right;">同化（温度2点＋変位2点）</th>
+<th style="text-align: right;">データ同化（温度2点＋変位2点）</th>
 </tr>
 </thead>
 <tbody>
@@ -2281,7 +2281,7 @@ holdout
 <td>網羅的な文献調査をしていない</td>
 </tr>
 <tr class="even">
-<td>「EnKF／POD／変位の同化が新しい」</td>
+<td>「EnKF／POD／変位のデータ同化が新しい」</td>
 <td>いずれも既知の手法</td>
 </tr>
 <tr class="odd">
@@ -2332,7 +2332,7 @@ href="blog_007_rom_applicability.md">blog_007</a>）</td>
 </tr>
 <tr class="odd">
 <td><strong>本研究の主張</strong></td>
-<td><strong>変位も観測として同化に入れる</strong>。変位計は5点すべての温度に触れるので、温度計のない点の温度まで直る。しかも<strong>知りたい場所に置く必要がない</strong></td>
+<td><strong>変位も観測としてデータ同化に入れる</strong>。変位計は5点すべての温度に触れるので、温度計のない点の温度まで直る。しかも<strong>知りたい場所に置く必要がない</strong></td>
 </tr>
 <tr class="even">
 <td>結果</td>

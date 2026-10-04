@@ -432,8 +432,8 @@ class="math inline">\(n\)</span> は状態数、 <span
 class="math inline">\(p\)</span> は観測数です。 <span
 class="math inline">\(m\)</span> はメンバー番号、 <span
 class="math inline">\(f\)</span> は予報、 <span
-class="math inline">\(a\)</span> は同化後を表します。観測摂動は <span
-class="math inline">\(\epsilon^{(m)}\sim\mathcal N(0,R)\)</span>
+class="math inline">\(a\)</span> はデータ同化後を表します。観測摂動は
+<span class="math inline">\(\epsilon^{(m)}\sim\mathcal N(0,R)\)</span>
 、すなわち平均0・共分散Rの正規乱数です。</p>
 <p>プログラムでは<strong>行にメンバー、列に状態</strong>を並べます。</p>
 <p><span class="math display">\[
@@ -637,7 +637,7 @@ class="math inline">\(30-29=1\)</span> 。平均の更新は</p>
 <tr class="header">
 <th>点</th>
 <th>予報平均</th>
-<th><strong>同化後平均</strong></th>
+<th><strong>データ同化後平均</strong></th>
 <th>真値</th>
 </tr>
 </thead>
@@ -900,7 +900,7 @@ class="math inline">\(Q\)</span>
 </thead>
 <tbody>
 <tr class="odd">
-<td>同化なし</td>
+<td>データ同化なし</td>
 <td>16.45（初期値のまま）</td>
 </tr>
 <tr class="even">
@@ -996,11 +996,12 @@ class="math inline">\(Q\)</span> の情報は増えませんし、
 <p>しかも <span class="math inline">\(h\)</span> のばらつきは 0.0108 →
 0.0135 と<strong>むしろ広がっています</strong>。
 観測から情報が入っていない証拠です。</p>
-<h4 id="原因は同化ではなく可同定性">原因は同化ではなく「可同定性」</h4>
-<p>同化の設定を疑う前に、そもそも<strong><span
+<h4
+id="原因はデータ同化ではなく可同定性">原因はデータ同化ではなく「可同定性」</h4>
+<p>データ同化の設定を疑う前に、そもそも<strong><span
 class="math inline">\(h\)</span>
-が観測に現れているのか</strong>を確かめました。 同化を一切かけず、 <span
-class="math inline">\(h\)</span> だけを 40%
+が観測に現れているのか</strong>を確かめました。 データ同化を一切かけず、
+<span class="math inline">\(h\)</span> だけを 40%
 変えて600秒まで前進させ、応答の差を測ります:</p>
 <table>
 <thead>
@@ -1284,7 +1285,7 @@ class="math inline">\(h\)</span>
 は温度応答が小さく、観測ノイズに埋もれる」という問題で、
 <strong>手法の限界として正直に押さえておくべき点</strong>です。</p>
 <p><strong>ここから下の2図は別の実験です。</strong>
-106のROM・60メンバー・温度P2のみの同化で、変位観測は使いません。真値も同じROM、seed=20260913、30秒ごと20更新。
+106のROM・60メンバー・温度P2のみのデータ同化で、変位観測は使いません。真値も同じROM、seed=20260913、30秒ごと20更新。
 <code>results/da_summary.yaml</code>では最終Q=17.08 W（真値15
 W）、h=0.02511 W/K（真値0.01535 W/K）です。104の14.93
 Wを示した図ではありません。</p>
@@ -1292,12 +1293,12 @@ Wを示した図ではありません。</p>
 <img src="img/da_qh.png" alt="EnKFによるQ・hの推定" />
 <figcaption aria-hidden="true">EnKFによるQ・hの推定</figcaption>
 </figure>
-<p><em>温度P2のみを同化したROMのQ/h履歴。Qにもhにも誤差が残っている。hは壁面熱伝達率ではなくROMの放熱コンダクタンス。</em></p>
+<p><em>温度P2のみをデータ同化したROMのQ/h履歴。Qにもhにも誤差が残っている。hは壁面熱伝達率ではなくROMの放熱コンダクタンス。</em></p>
 <figure>
 <img src="img/da_rmse.png" alt="温度RMSEの収束" />
 <figcaption aria-hidden="true">温度RMSEの収束</figcaption>
 </figure>
-<p><em>同化を重ねるごとに全点温度RMSEが下がる。</em></p>
+<p><em>データ同化を重ねるごとに全点温度RMSEが下がる。</em></p>
 <hr />
 <h2 id="その代わりのコスト">5. その代わりのコスト</h2>
 <p>EnKF の弱点は <strong>重さ</strong>です。共分散を作るために
@@ -1451,16 +1452,17 @@ alt="観測構成の段階比較" />
 そして同じ変位2点でも、<strong>熱感度 <span
 class="math inline">\(W\)</span>
 の高い点に置いた方が効く</strong>（低Wだと効きが半減）。</em></p>
-<p>時系列でも見てみます（<strong>同化に使った点と未観測点を分けて</strong>）:</p>
+<p>時系列でも見てみます（<strong>データ同化に使った点と未観測点を分けて</strong>）:</p>
 <figure>
 <img src="img/opencae_progression_timeseries.png"
 alt="段階比較の時系列" />
 <figcaption aria-hidden="true">段階比較の時系列</figcaption>
 </figure>
-<p><em>左＝同化に使った P2：どの構成でも真値に合う。中＝<strong>未観測の
+<p><em>左＝データ同化に使った
+P2：どの構成でも真値に合う。中＝<strong>未観測の
 P0</strong>：温度1点（灰）は加熱期にずれる。
 右＝<strong>未観測の変位差</strong>
-Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ。同化に使った点だけの評価では不十分で、<strong>未観測の量で比べるのが公平</strong>です。</em></p>
+Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ。データ同化に使った点だけの評価では不十分で、<strong>未観測の量で比べるのが公平</strong>です。</em></p>
 <table>
 <thead>
 <tr class="header">
@@ -1495,10 +1497,10 @@ Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ
 <h3 id="いつ観測するかで-q-と-h-の推定が変わる">6-2.
 「いつ観測するか」で <span class="math inline">\(Q\)</span> と <span
 class="math inline">\(h\)</span> の推定が変わる</h3>
-<p>観測の効き目は<strong>場所だけでなく時間</strong>にもあります。同じ温度2点で、同化する時間窓だけを変えると:</p>
+<p>観測の効き目は<strong>場所だけでなく時間</strong>にもあります。同じ温度2点で、データ同化する時間窓だけを変えると:</p>
 <figure>
-<img src="img/qh_time_window.png" alt="同化時間窓の比較" />
-<figcaption aria-hidden="true">同化時間窓の比較</figcaption>
+<img src="img/qh_time_window.png" alt="データ同化時間窓の比較" />
+<figcaption aria-hidden="true">データ同化時間窓の比較</figcaption>
 </figure>
 <p><em>直接感度 <span class="math inline">\(\partial T/\partial
 Q\)</span> は加熱期に大きく、 <span class="math inline">\(\partial

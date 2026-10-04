@@ -439,7 +439,7 @@ ROM</strong> を作れるか。その5点から<strong>全 20,696
 で作った模擬データ（双子実験）。<strong>実機の測定ではありません</strong></td>
 </tr>
 <tr class="odd">
-<td><strong>同化の設定</strong></td>
+<td><strong>データ同化の設定</strong></td>
 <td>EnKF、60メンバー、30 秒ごと20回、偏差膨張 1.02、seed 20260913〜17
 の5回</td>
 </tr>
@@ -495,7 +495,7 @@ id="読む前に入力から最終結果まで">読む前に：入力から最�
 <td><code>run/build_calibrate_rom.py</code></td>
 </tr>
 <tr class="even">
-<td>予報・同化</td>
+<td>予報・データ同化</td>
 <td>各員の5温度・発熱倍率・放熱係数 → 更新状態</td>
 <td><code>dacore/rom_general.py</code>、<code>dacore/enkf.py</code></td>
 </tr>
@@ -513,7 +513,7 @@ id="読む前に入力から最終結果まで">読む前に：入力から最�
 </table>
 <p><strong>5代表点は実際のセンサ5個を意味しません。</strong>
 代表点はROMの状態、観測点はその状態を補正するための測定位置です。
-同化する観測の数と位置は別に選びます。また、このROMはPODで熱方程式を直接射影したものではなく、POD/Q-DEIMで選んだ点に<strong>集中定数モデルを校正</strong>したものです。</p>
+データ同化する観測の数と位置は別に選びます。また、このROMはPODで熱方程式を直接射影したものではなく、POD/Q-DEIMで選んだ点に<strong>集中定数モデルを校正</strong>したものです。</p>
 <p>理論を追う順は <strong>§2のPOD → §3の手計算 → §4の点選択 →
 §5の全場復元 → §6の時間発展 → §7の変位</strong>。
 §2-5のクリロフ法は補足です。主筋を先に読む場合は§3へ進み、後から戻れます。式展開は省略せず残しています。</p>
@@ -2628,8 +2628,8 @@ class="math inline">\(\varphi_{k,i}\)</span> を使う）</li>
 <h4
 id="選択行列から復元式まで省略せずに書く">選択行列から復元式まで省略せずに書く</h4>
 <p><span class="math inline">\(T_r\)</span>
-は同化後の5代表点温度（全5点の直接測定値ではありません）。全場を <span
-class="math inline">\(T_{\rm full}\approx\bar u+\Phi a\)</span>
+はデータ同化後の5代表点温度（全5点の直接測定値ではありません）。全場を
+<span class="math inline">\(T_{\rm full}\approx\bar u+\Phi a\)</span>
 と表すと、</p>
 <p><span class="math display">\[
 T_r=P T_{\rm full}\approx P\bar u+P\Phi a.
@@ -3075,11 +3075,11 @@ class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
 </blockquote>
 <p>各列 <span class="math inline">\(D[:,k]\)</span> が「モード <span
 class="math inline">\(\varphi_k\)</span>
-が1単位混ざったときの上面A/Oの変位」で、 <strong>同化を始める前に
+が1単位混ざったときの上面A/Oの変位」で、 <strong>データ同化を始める前に
 FrontISTR を <span class="math inline">\(1+5=6\)</span>
 回だけ呼んで作ってあります</strong>（§7-2）。</p>
 <blockquote>
-<p><strong>重要：同化のループ中に FrontISTR
+<p><strong>重要：データ同化のループ中に FrontISTR
 は一度も呼びません。</strong> 呼ぶのは事前の6回だけ。あとは <span
 class="math inline">\(2\times5\)</span>
 の行列を掛けるだけなので一瞬です。</p>
@@ -3249,7 +3249,7 @@ alt="FrontISTR真値の変位時系列" />
 。<strong>A（ヒータ側）が先に伸び</strong>、O（反対側）は遅れて追う。
 A−O差（緑）＝反りは加熱中に増えてピーク約2.8µm、ヒータOFF後は温度が均されて差が消える。
 <strong>底面(z=0)は固定なので変位ゼロ</strong>、動くのは上ほど大きい。</em></p>
-<p>同化の精度を確認するときは、同じ量に
+<p>データ同化の精度を確認するときは、同じ量に
 <strong>ROM真値温度をFrontISTRの変位写像へ通した参照値を黒太線</strong>で重ねます。次の図は
 真値（黒）と、温度だけ／温度＋変位を観測したデータ同化後の推定値（色線）を同じ
 <span class="math inline">\(U_z(A)-U_z(O)\)</span>
@@ -3263,7 +3263,7 @@ aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差<
 </figure>
 <p><em>黒太線はROM真値から同じ変位写像で計算した参照値。独立したOpenFOAM温度履歴を毎時刻FrontISTRで解析した真値ではありません。
 これは変位を状態変数として直接積分した結果ではなく、
-同化後温度をgappy-PODで全場へ戻し、その温度をFrontISTRの熱弾性写像へ通して得た推定値です。</em></p>
+データ同化後温度をgappy-PODで全場へ戻し、その温度をFrontISTRの熱弾性写像へ通して得た推定値です。</em></p>
 <blockquote>
 <p><strong>⚠️
 この図の赤線は、成果として示せるものではありません。</strong>
@@ -3294,7 +3294,7 @@ class="math inline">\(U_z(O)\)</span> も見ると:</p>
 alt="個別のUz(A)/Uz(O)と差の比較" />
 <figcaption aria-hidden="true">個別のUz(A)/Uz(O)と差の比較</figcaption>
 </figure>
-<p><em>「差」には罠があります。<strong>同化なし（灰）は個別には10µm級で大外れなのに、差のRMSEは0.30µmと最小級</strong>
+<p><em>「差」には罠があります。<strong>データ同化なし（灰）は個別には10µm級で大外れなのに、差のRMSEは0.30µmと最小級</strong>
 （A・Oが同じ方向に外れて相殺されるため）。個別で見ると、<strong>温度1点は「センサに近い側」しか合いません</strong>
 （P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。
 赤（0.16µm）は A・O を観測に使っているので、合って当然です。 →
@@ -3377,7 +3377,7 @@ id="結果知りたい量上面の反り真値の振幅-2.735-µm">結果（知�
 </thead>
 <tbody>
 <tr class="odd">
-<td>同化なし</td>
+<td>データ同化なし</td>
 <td>0.238 µm ※</td>
 <td>5.614 µm</td>
 <td>5.376 µm</td>
@@ -3470,10 +3470,11 @@ class="math inline">\(U_z(A)\)</span> は 0.160 µm
 class="math inline">\(U_z(A)\)</span> と <span
 class="math inline">\(U_z(O)\)</span>
 の<strong>差</strong>を当てるには、変位観測が必要です。</p>
-<p><strong>③ ※ 同化なしの 0.238 µm に騙されないこと</strong></p>
-<p>同化なしは個別に <strong>5.6 µm も外れている</strong>のに、A と O
-が同じ方向に外れるため <strong>差では相殺</strong>されて小さく見えます。
-<span class="math inline">\(U_z(A)\)</span> ・ <span
+<p><strong>③ ※ データ同化なしの 0.238 µm に騙されないこと</strong></p>
+<p>データ同化なしは個別に <strong>5.6 µm も外れている</strong>のに、A と
+O が同じ方向に外れるため
+<strong>差では相殺</strong>されて小さく見えます。 <span
+class="math inline">\(U_z(A)\)</span> ・ <span
 class="math inline">\(U_z(O)\)</span>
 の個別グラフ（図の左・中）を見れば、
 灰色の線が真値から大きく離れているのが分かります。</p>
@@ -3499,7 +3500,7 @@ class="math inline">\(U_z(O)\)</span>
 <td><strong>使っていない</strong>（観測は温度P2・P0と変位B/C）</td>
 </tr>
 <tr class="even">
-<td>真値を同化に渡したか</td>
+<td>真値をデータ同化に渡したか</td>
 <td>渡していない（ノイズ付きの4つだけ）</td>
 </tr>
 <tr class="odd">
@@ -3509,7 +3510,7 @@ class="math inline">\(U_z(O)\)</span>
 </tbody>
 </table>
 <h4 id="なぜ当たるのか">なぜ当たるのか</h4>
-<p>同化が直しているのは変位ではなく<strong>温度場</strong>だからです（§7-0）。</p>
+<p>データ同化が直しているのは変位ではなく<strong>温度場</strong>だからです（§7-0）。</p>
 <pre><code>B/C の変位残差 → 共分散 Cov(T,u) → 温度5点とQを修正
                                     ↓
                       温度場が正しくなる
@@ -3609,13 +3610,14 @@ href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/">PMC12223237</a>（<str
 <h4 id="手続き再現用">手続き（再現用）</h4>
 <ol type="1">
 <li><strong>評価点</strong>を決める：A, O（上面 z=100.5 mm）―
-同化に一切使わない</li>
+データ同化に一切使わない</li>
 <li><strong>観測点</strong>を決める：温度 P2・P0 ＋ 変位 B・C（中高さ
 z=75.4 mm）</li>
 <li>でたらめな初期温度・誤った <span class="math inline">\(Q,h\)</span>
 から60メンバー</li>
 <li>30秒ごとに前進 → 2. の4つだけ観測して状態を更新（20回）</li>
-<li>同化後の温度場から<strong>評価点 A/O</strong> の変位を計算</li>
+<li>データ同化後の温度場から<strong>評価点 A/O</strong>
+の変位を計算</li>
 <li>A/O の真値と比べる</li>
 </ol>
 <p>再現:
@@ -3651,7 +3653,7 @@ z=75.4 mm）</li>
 </thead>
 <tbody>
 <tr class="odd">
-<td>① 同化なし</td>
+<td>① データ同化なし</td>
 <td>0</td>
 <td>0</td>
 <td>4.596 K</td>
@@ -3771,7 +3773,7 @@ class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
 </ol>
 <h4 id="の反りの誤差-0.238-µmに注意">※ ①の「反りの誤差 0.238
 µm」に注意</h4>
-<p>同化なしは個別には 5.6 µm も外れているのに、A と O
+<p>データ同化なしは個別には 5.6 µm も外れているのに、A と O
 が同じ方向に外れるため
 <strong>差では相殺</strong>されて小さく見えているだけです（§7-4b）。</p>
 <p>再現:
@@ -3790,8 +3792,13 @@ class="math inline">\(x,y\)</span> 方向</strong>と
 <p>観測に使うのは今までどおり <strong>「温度2点 ＋ 上面A/O の <span
 class="math inline">\(U_z\)</span> だけ」</strong>。 <span
 class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
-点は一度も同化に使いません。</p>
+点は一度もデータ同化に使いません。</p>
 <table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th>点</th>
@@ -3815,22 +3822,22 @@ class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
 <tr class="odd">
 <td><strong>B</strong></td>
 <td><strong>(+28.7, 0, 75.4) mm</strong></td>
-<td><strong>評価点。同化に一切使わない</strong></td>
+<td><strong>評価点。データ同化に一切使わない</strong></td>
 </tr>
 <tr class="even">
 <td><strong>C</strong></td>
 <td><strong>(−28.7, 0, 75.4) mm</strong></td>
-<td><strong>評価点。同化に一切使わない</strong></td>
+<td><strong>評価点。データ同化に一切使わない</strong></td>
 </tr>
 </tbody>
 </table>
 <figure>
-<img src="img/xyz_disp_da.png" alt="xyz全成分の同化結果" />
-<figcaption aria-hidden="true">xyz全成分の同化結果</figcaption>
+<img src="img/xyz_disp_da.png" alt="xyz全成分のデータ同化結果" />
+<figcaption aria-hidden="true">xyz全成分のデータ同化結果</figcaption>
 </figure>
 <p><em>行が成分（上から <span class="math inline">\(U_x,U_y,U_z\)</span>
 ）、列が点（A・O＝観測、B・C＝未観測）。
-灰点線＝同化なし、赤破線＝同化後、太い灰実線＝真値。</em></p>
+灰点線＝データ同化なし、赤破線＝データ同化後、太い灰実線＝真値。</em></p>
 <p>5 seed平均、<strong>初回サイクル（ <span
 class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–300 s
 の MAE</strong>:</p>
@@ -3850,8 +3857,8 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 <th>区分</th>
 <th>成分</th>
 <th>真値振幅 [µm]</th>
-<th>同化なし [µm]</th>
-<th><strong>同化後 [µm]</strong></th>
+<th>データ同化なし [µm]</th>
+<th><strong>データ同化後 [µm]</strong></th>
 <th>改善</th>
 </tr>
 </thead>
@@ -3947,7 +3954,7 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 class="math inline">\(u=W(T-T_\mathrm{ref})\)</span> で決まり、 <span
 class="math inline">\(W=K_s^{-1}H_T\)</span>
 は<strong>3成分すべてを含む行列</strong>です。
-つまり<strong>同化が直しているのは変位ではなく温度場</strong>であって、
+つまり<strong>データ同化が直しているのは変位ではなく温度場</strong>であって、
 温度場が正しくなれば <span class="math inline">\(W\)</span> を通じて
 <strong><span class="math inline">\(x\)</span> も <span
 class="math inline">\(y\)</span> も <span
@@ -3962,7 +3969,7 @@ class="math inline">\(U_x\)</span> で観測点80倍・評価点126倍。
 §5-4（未観測セルの温度復元）と同じ主張を、変位の側から確かめたことになります。</p>
 <p><strong>③ <span class="math inline">\(U_y\)</span>
 だけは変わらない（0.023 → 0.027 µm）。</strong>
-これは失敗ではなく、<strong>同化なしの時点ですでに振幅0.77
+これは失敗ではなく、<strong>データ同化なしの時点ですでに振幅0.77
 µmに対し誤差0.023 µm（3%）</strong> で、 直す余地がなかったためです。
 A・O・B・C はすべて <span class="math inline">\(y=0\)</span>
 の<strong>対称面上</strong>にあり、非対称加熱が生む周方向変位が
@@ -3992,7 +3999,7 @@ alt="未観測の温度3点・変位3点の時系列" />
 <figcaption
 aria-hidden="true">未観測の温度3点・変位3点の時系列</figcaption>
 </figure>
-<p><em>同化なし（灰）は6点すべてで大外れ。同化した構成は<strong>観測していない場所でも</strong>真値に沿い、
+<p><em>データ同化なし（灰）は6点すべてで大外れ。データ同化した構成は<strong>観測していない場所でも</strong>真値に沿い、
 温度＋変位（赤）が最も近い（特に底面側の温度と z=75mm
 反対側の変位の立ち上がり）。
 <strong>少数の観測が、観測していない場所まで直す</strong>――これがデータ同化＋POD復元の価値です。</em></p>
@@ -4054,7 +4061,7 @@ class="math inline">\(C_{yy}\)</span> を59で割って計算する。</li>
 class="math display">\[T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},\]</span></p>
 <p><span
 class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.\]</span></p>
-<p>ここでfは偏差膨張後の予報、aは同化後、dは「観測＋メンバー別の観測摂動−予報観測」です。
+<p>ここでfは偏差膨張後の予報、aはデータ同化後、dは「観測＋メンバー別の観測摂動−予報観測」です。
 <strong>各式の最後の2項が、変位観測から温度や発熱倍率へ入る補正</strong>です。補正したqを15倍するとQ
 [W]になります。</p>
 <p>S1/S2試験の最初の更新（seed=20260913、30秒）を実数で再計算すると、変位S1/S2の残差による平均Qへの寄与は
@@ -4179,10 +4186,10 @@ id="この表のrmseは何を計算した値か">この表の「RMSE」は何を
 class="math inline">\(m=1,\ldots,60\)</span>
 がEnKFメンバーです。<strong>5 seed
 は再試行の数であり、60メンバーとは別物</strong>です。</p>
-<p>まず各時刻の同化後アンサンブルから、点ごとの推定温度を出します:</p>
+<p>まず各時刻のデータ同化後アンサンブルから、点ごとの推定温度を出します:</p>
 <p><span class="math display">\[\hat
 T_{s,i}(t_k)=\frac{1}{60}\sum_{m=1}^{60}T^a_{s,m,i}(t_k)\]</span></p>
-<p>（同化なしの場合は、同じ初期アンサンブルを更新せずに時間発展させた平均を使います）</p>
+<p>（データ同化なしの場合は、同じ初期アンサンブルを更新せずに時間発展させた平均を使います）</p>
 <p>次に、観測点だけでなく<strong>全5点（未観測点を含む）</strong>で真値との差を取ります:</p>
 <p><span class="math display">\[e_{s,i,k}=\hat
 T_{s,i}(t_k)-T_i^{\mathrm{true}}(t_k),\qquad
@@ -4193,7 +4200,7 @@ r_{s,k}=\sqrt{\frac{1}{5}\sum_{i=0}^{4}e_{s,i,k}^2}\]</span></p>
 [\mathrm K],
 \qquad t_k=30k\ \mathrm{s}\]</span></p>
 <p>集計は <strong>30, 60, …,
-300秒の10回の同化後</strong>です。0秒は初期誤差が全構成で共通なので除外しています。</p>
+300秒の10回のデータ同化後</strong>です。0秒は初期誤差が全構成で共通なので除外しています。</p>
 <blockquote>
 <p><strong>これは何ではないか</strong>
 全20,696セルの温度RMSEでもなく、メンバーの標準偏差でもなく、最終300秒だけの誤差でもありません。
@@ -4235,14 +4242,14 @@ class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>同化なし（free run）</strong></td>
+<td><strong>データ同化なし（free run）</strong></td>
 <td>4.585 K</td>
 <td>でたらめのまま。<strong>データ同化なしでは推定できない</strong></td>
 </tr>
 <tr class="even">
 <td>温度1点（P4・反対側の底面）</td>
 <td>1.036 K</td>
-<td>同化すれば桁違いに改善</td>
+<td>データ同化すれば桁違いに改善</td>
 </tr>
 <tr class="odd">
 <td>温度1点（P2・ヒータ側）</td>
@@ -4263,10 +4270,11 @@ class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 </table>
 <blockquote>
 <p><strong>温度2点の P2＋P0 は、2本とも A 側にあります。</strong>
-温度だけで同化する別の比較（blog_005 §4-6、ROM 真値・5 seed）では、 A
-側と O 側に1本ずつ置いた P2＋P4 のほうが温度場の誤差が小さく（0.15〜0.16
-K 対 0.33〜0.53 K。P2＋P0 は乱数の割り当てで大きく変わる）、5 seed
-すべてで良い結果でした。 この表の本番計算を P2＋P4
+温度だけでデータ同化する別の比較（blog_005 §4-6、ROM 真値・5
+seed）では、 A 側と O 側に1本ずつ置いた P2＋P4
+のほうが温度場の誤差が小さく（0.15〜0.16 K 対 0.33〜0.53 K。P2＋P0
+は乱数の割り当てで大きく変わる）、5 seed すべてで良い結果でした。
+この表の本番計算を P2＋P4
 で回し直す試験は<strong>していません</strong>。</p>
 </blockquote>
 <h2 id="まだ分かっていないこと-代表点選択の未解決問題">8.
@@ -4275,7 +4283,7 @@ K 対 0.33〜0.53 K。P2＋P0 は乱数の割り当てで大きく変わる）�
 <strong>代表点の選び方には、実はまだ分かっていないことが残っています</strong>。正直に書いておきます。</p>
 <ol type="1">
 <li><p><strong>何点必要か（ <span class="math inline">\(r\)</span>
-の決め方）が「同化」目線では未解明</strong>。
+の決め方）が「データ同化」目線では未解明</strong>。
 本記事はエネルギー基準（2モードで99.9％→5点）で決めましたが、これは<strong>場の復元</strong>の基準です。
 「<strong>データ同化の性能</strong>にとって最適な点数」は別問題で、センサ数を1〜5点と変えたときの
 精度カーブの系統検証はこれからです。</p></li>

@@ -352,12 +352,13 @@ id="toc-まとめ-対象別最適観測の設計表">5. まとめ ―
 id="toc-追加検証で分かったこと何を優位性として主張するか">6.
 追加検証で分かったこと：何を優位性として主張するか</a>
 <ul>
-<li><a href="#単回のδが大きくても逐次同化の最終誤差は小さくならない"
-id="toc-単回のδが大きくても逐次同化の最終誤差は小さくならない">6-1.
-単回のΔが大きくても逐次同化の最終誤差は小さくならない</a></li>
-<li><a href="#推定対象別の候補表を同化性能の証明と混同しない"
-id="toc-推定対象別の候補表を同化性能の証明と混同しない">6-2.
-推定対象別の候補表を、同化性能の証明と混同しない</a></li>
+<li><a
+href="#単回のδが大きくても逐次データ同化の最終誤差は小さくならない"
+id="toc-単回のδが大きくても逐次データ同化の最終誤差は小さくならない">6-1.
+単回のΔが大きくても逐次データ同化の最終誤差は小さくならない</a></li>
+<li><a href="#推定対象別の候補表をデータ同化性能の証明と混同しない"
+id="toc-推定対象別の候補表をデータ同化性能の証明と混同しない">6-2.
+推定対象別の候補表を、データ同化性能の証明と混同しない</a></li>
 <li><a href="#本研究の現在の強みと次の検証"
 id="toc-本研究の現在の強みと次の検証">6-3.
 本研究の現在の強みと次の検証</a></li>
@@ -406,7 +407,7 @@ id="blog_005推定したい量で最適なセンサは変わる-単回の観測�
 <td>温度 0.30 K、変位 0.30 µm</td>
 </tr>
 <tr class="even">
-<td><strong>同化の設定</strong></td>
+<td><strong>データ同化の設定</strong></td>
 <td>EnKF または OI、60メンバー、30 秒ごと20回、seed 20260913〜17
 の5回平均</td>
 </tr>
@@ -1287,10 +1288,12 @@ class="math inline">\(Q\)</span>
 class="math inline">\(h\)</span>
 の情報は<strong>後半</strong>にある</li>
 </ul>
-<p>実験でも、同じ温度2点で<strong>同化する時間窓だけ</strong>変えると:</p>
+<p>実験でも、同じ温度2点で<strong>データ同化する時間窓だけ</strong>変えると:</p>
 <figure>
-<img src="img/qh_time_window.png" alt="同化時間窓を変えたQ/h推定" />
-<figcaption aria-hidden="true">同化時間窓を変えたQ/h推定</figcaption>
+<img src="img/qh_time_window.png"
+alt="データ同化時間窓を変えたQ/h推定" />
+<figcaption
+aria-hidden="true">データ同化時間窓を変えたQ/h推定</figcaption>
 </figure>
 <p><em><span class="math inline">\(Q\)</span> ：加熱期のみ0.57 W ≈
 全期間0.58 W、<strong>冷却期のみだと4.23 W（7倍悪化）</strong>＝ <span
@@ -1431,7 +1434,7 @@ class="math inline">\(\partial u/\partial T_i\)</span></td>
 「本研究の注目量は熱変形なので、基準Bの熱感度 <span
 class="math inline">\(W\)</span> が本来の指標です」と書いていました。
 <strong>これは誤りでした。</strong>
-5点それぞれを唯一の温度センサにして同化し、 温度RMSE
+5点それぞれを唯一の温度センサにしてデータ同化し、 温度RMSE
 との相関を測ったところ（<code>run/why_lowW_wins_check.py</code>）、</p>
 <table>
 <thead>
@@ -1535,7 +1538,7 @@ class="math inline">\(\partial T_i/\partial q\)</span>
 <p>「熱変形を推定したいのだから熱感度 <span
 class="math inline">\(W\)</span>
 の高い点を選べばよい」と考えたくなります。
-本当にそうか、<strong>4つの選び方で温度センサ1点だけを同化</strong>して比べました
+本当にそうか、<strong>4つの選び方で温度センサ1点だけをデータ同化</strong>して比べました
 （<code>run/sensitivity_criterion_compare.py</code>、EnKF・5
 seed平均）:</p>
 <figure>
@@ -1606,7 +1609,7 @@ class="math inline">\(\mathrm{Var}(y)\)</span>
 <p><strong>結論</strong>：センサ選びは「<strong>感度が高い点を選ぶ</strong>」では決まりません。
 感度は <span class="math inline">\(\mathrm{Cov}\)</span>
 を作る材料の一つにすぎず、
-<strong>対象との共分散も考える必要があります</strong>。Δは単回更新の指標であり、逐次同化後の誤差最小を保証しません。
+<strong>対象との共分散も考える必要があります</strong>。Δは単回更新の指標であり、逐次データ同化後の誤差最小を保証しません。
 これは §2
 で示した「推定対象が変われば最適な観測も変わる」と同じ話です。</p>
 </blockquote>
@@ -1648,7 +1651,7 @@ alt="温度1点→2点→＋変位の段階比較" />
 alt="未観測の温度3点・変位3点" />
 <figcaption aria-hidden="true">未観測の温度3点・変位3点</figcaption>
 </figure>
-<p>同化が全場を直せる理由（少数点→PODで全場復元）はアニメで一目です:</p>
+<p>データ同化が全場を直せる理由（少数点→PODで全場復元）はアニメで一目です:</p>
 <figure>
 <img src="img/blog_temp_recon_anim.gif" alt="5点から全温度場を復元" />
 <figcaption aria-hidden="true">5点から全温度場を復元</figcaption>
@@ -1667,7 +1670,7 @@ class="math inline">\(W\)</span>
 の大きい点の温度を、全部ずれなく推定できるようにする必要がある。 3.
 そのためには、<strong>熱感度 <span class="math inline">\(W\)</span>
 と「温度のばらつき方（共分散 <span class="math inline">\(B\)</span>
-）」を組み合わせて場所を選ぶ</strong>。こうすると同化を回す前に、良い組み合わせの順位を当てられた（順位相関
+）」を組み合わせて場所を選ぶ</strong>。こうするとデータ同化を回す前に、良い組み合わせの順位を当てられた（順位相関
 0.98）。 4.
 選んだ配置は、発熱量・放熱・初期温度が前提から外れても良いままだった。<strong>熱源の位置を間違えると、最良の組み合わせは当たらない。</strong></p>
 <p>ここでの「熱感度」は、FrontISTR で計算した行列 <span
@@ -1688,7 +1691,8 @@ class="math inline">\(W\)</span> （温度 → 変位）のことです。</p>
 <li>EnKF、60メンバー、30 秒ごとに 20 回更新、温度ノイズ 0.30 K。</li>
 <li>seed は 20260913〜17 の 5 回。誤差は加熱期 30〜300 秒の平均。</li>
 <li>観測は温度だけで、変位は観測していない。</li>
-<li>真値も同化モデルも同じ ROM（双子実験）。<strong>OpenFOAM＋FrontISTR
+<li>真値もデータ同化モデルも同じ
+ROM（双子実験）。<strong>OpenFOAM＋FrontISTR
 を真値にした試験はしていない。</strong></li>
 <li>スクリプト：<code>run/sensor_pair_goal_oriented.py</code>、結果：<code>results/sensor_pair_goal_oriented.json</code></li>
 </ul>
@@ -1710,7 +1714,7 @@ class="math inline">\(T\)</span> は基準からの温度差 [K]）。</p>
 U_z(A)-U_z(O)\approx
 0.47\,T_0-0.65\,T_1+0.60\,T_2+0.04\,T_3-0.46\,T_4\quad[\mu\mathrm m]
 \]</span></p>
-<p>温度センサを1本だけ置き、場所を変えて同化しました。</p>
+<p>温度センサを1本だけ置き、場所を変えてデータ同化しました。</p>
 <table>
 <thead>
 <tr class="header">
@@ -1975,11 +1979,12 @@ P0＋P2 の値は並べ方Aのものです。並べ方Bでは、P2＋P4
 との差は約3倍になります。どちらの並べ方でも P2＋P4
 のほうが良い結果です。</p>
 <p>なお、本番の比較計算（blog_004 §7-6）で使った温度2点 P2＋P0
-は、2本とも A 側にある組み合わせでした。温度だけで同化する場合、P2＋P4
+は、2本とも A
+側にある組み合わせでした。温度だけでデータ同化する場合、P2＋P4
 の約2倍の誤差になります。</p>
 <h4 id="なぜか-反りのずれ-w-推定した温度のずれ">④ なぜか ― 反りのずれ ＝
 <span class="math inline">\(W\)</span> ×「推定した温度のずれ」</h4>
-<p>ここでいう「温度のずれ」は、<strong>同化で推定した温度が真値からどれだけずれているか</strong>のことです。</p>
+<p>ここでいう「温度のずれ」は、<strong>データ同化で推定した温度が真値からどれだけずれているか</strong>のことです。</p>
 <p><strong>推定した温度が 1 K
 ずれると、反りはどれだけずれるか。</strong> 反りは5点の温度に熱感度
 <span class="math inline">\(W\)</span> を掛けて足したものなので、答えは
@@ -2036,7 +2041,7 @@ alt="W と測った後に残る温度のずれ" />
 </figure>
 <p><em>左：熱感度 <span class="math inline">\(W\)</span> 。P0・P2
 は＋（A 側）、P1・P4 は−（O 側）。右：150
-秒で1回同化した後の、推定温度のずれの大きさ（標準偏差）。</em></p>
+秒で1回データ同化した後の、推定温度のずれの大きさ（標準偏差）。</em></p>
 <table>
 <colgroup>
 <col style="width: 11%" />
@@ -2121,7 +2126,7 @@ class="math inline">\(W\)</span>
 が高い点に1本置くだけでは、他の <span class="math inline">\(W\)</span>
 の大きい点の温度がずれたまま残るので、反りは当たらない。</p>
 </blockquote>
-<p>（この表は1回だけ同化した場合の値です。20回続けた場合の値ではありません。）</p>
+<p>（この表は1回だけデータ同化した場合の値です。20回続けた場合の値ではありません。）</p>
 <h4 id="どうやって選ぶか-w-共分散-b">⑤ どうやって選ぶか ― <span
 class="math inline">\(W\)</span> ＋ 共分散 <span
 class="math inline">\(B\)</span></h4>
@@ -2150,8 +2155,9 @@ class="math inline">\(R\)</span> ：センサのノイズ（0.30 K）。</li>
 が一番小さい組み合わせを選びます。</p>
 <figure>
 <img src="img/sensor_pair_pred_vs_actual.png"
-alt="同化前の予測と実際の結果" />
-<figcaption aria-hidden="true">同化前の予測と実際の結果</figcaption>
+alt="データ同化前の予測と実際の結果" />
+<figcaption
+aria-hidden="true">データ同化前の予測と実際の結果</figcaption>
 </figure>
 <table>
 <colgroup>
@@ -2163,8 +2169,8 @@ alt="同化前の予測と実際の結果" />
 <tr class="header">
 <th>組み合わせ</th>
 <th style="text-align: right;">予測 <span
-class="math inline">\(\sigma_S\)</span> （同化前の計算）</th>
-<th style="text-align: right;">実際の反りの誤差（同化後）</th>
+class="math inline">\(\sigma_S\)</span> （データ同化前の計算）</th>
+<th style="text-align: right;">実際の反りの誤差（データ同化後）</th>
 </tr>
 </thead>
 <tbody>
@@ -2227,7 +2233,7 @@ class="math inline">\(\sigma_S\)</span> （同化前の計算）</th>
 </ul>
 <p>つまり、<strong>熱源の位置と、発熱量・放熱のだいたいの範囲</strong>が分かっていれば、測る前に場所を選べます。</p>
 <h4 id="前提が外れたら">⑦ 前提が外れたら？</h4>
-<p>場所の選び方は前提どおりのまま変えず、<strong>真値だけを前提から外して</strong>同化しました。</p>
+<p>場所の選び方は前提どおりのまま変えず、<strong>真値だけを前提から外して</strong>データ同化しました。</p>
 <figure>
 <img src="img/sensor_pair_robustness.png"
 alt="前提から外れた真値での順位" />
@@ -2334,7 +2340,7 @@ class="math inline">\(W\)</span>
 <td><span class="math inline">\(W\)</span> と共分散 <span
 class="math inline">\(B\)</span> から、測った後に残る反りの分からなさ
 <span class="math inline">\(\sigma_S\)</span>
-を計算し、最小の組み合わせを選ぶ。最後は同化で確かめる</td>
+を計算し、最小の組み合わせを選ぶ。最後はデータ同化で確かめる</td>
 </tr>
 <tr class="even">
 <td>測る前に選べるか</td>
@@ -2418,8 +2424,9 @@ href="https://kamakiri1225.github.io/thermal-da-demo/posters.html">発表ポス�
 <hr />
 <h2 id="追加検証で分かったこと何を優位性として主張するか">6.
 追加検証で分かったこと：何を優位性として主張するか</h2>
-<h3 id="単回のδが大きくても逐次同化の最終誤差は小さくならない">6-1.
-単回のΔが大きくても逐次同化の最終誤差は小さくならない</h3>
+<h3
+id="単回のδが大きくても逐次データ同化の最終誤差は小さくならない">6-1.
+単回のΔが大きくても逐次データ同化の最終誤差は小さくならない</h3>
 <figure>
 <img src="img/review_delta_vs_final_error.png"
 alt="単回分散減少と逐次推定誤差を分けた比較" />
@@ -2429,8 +2436,8 @@ aria-hidden="true">単回分散減少と逐次推定誤差を分けた比較</fi
 <p><em><code>run/verify_delta_predicts_da.py</code>
 の候補比較。1回目の分散減少との相関は0.987。一方、20回の逐次更新後の加熱期MAEとは順位が一致しない。図中のΔは最初の予報分布で計算した量であり、全時間窓を最適化した指標ではない。</em></p>
 <p>この結果は§1の式を否定しません。式が表す「その時刻の事前分散の減少」と、評価したい「時間履歴の真値からの誤差」が異なるからです。配置設計には、直接感度の時間履歴から作る累積情報を候補とし、実際のEnKFのRMSEで裏付ける必要があります。</p>
-<h3 id="推定対象別の候補表を同化性能の証明と混同しない">6-2.
-推定対象別の候補表を、同化性能の証明と混同しない</h3>
+<h3 id="推定対象別の候補表をデータ同化性能の証明と混同しない">6-2.
+推定対象別の候補表を、データ同化性能の証明と混同しない</h3>
 <figure>
 <img src="img/target_dependent_sensors.png"
 alt="対象別の単回観測価値" />
@@ -2438,7 +2445,7 @@ alt="対象別の単回観測価値" />
 </figure>
 <p><em>4000本の事前サンプル、seed=20260930、評価時刻150秒、温度ノイズ0.30
 K、変位ノイズ0.30 µm。<code>run/target_dependent_sensor_check.py</code>
-は同化を実行せず、対象と候補のΔを比較する。図の「全温度場」はコードでは5点平均温度であり、全セルの誤差を表す量ではない。</em></p>
+はデータ同化を実行せず、対象と候補のΔを比較する。図の「全温度場」はコードでは5点平均温度であり、全セルの誤差を表す量ではない。</em></p>
 <table>
 <colgroup>
 <col style="width: 23%" />
@@ -2490,7 +2497,7 @@ K、変位ノイズ0.30 µm。<code>run/target_dependent_sensor_check.py</code>
 <p>この表は「対象により有効な候補が異なり得る」例です。逐次EnKFでP2/P3が最良になること、モデル作成に使っていない条件でも順位が保たれることは別に試験します。</p>
 <h3 id="本研究の現在の強みと次の検証">6-3.
 本研究の現在の強みと次の検証</h3>
-<p>現在の強みは、<strong>公開ソルバによる熱流体・熱弾性解析から同化・全場復元までを接続し、観測外の相対変位も評価したこと</strong>です。温度P2/P0に高W変位S1/S2を加えた別試験では、観測に使わないC−Dの加熱期RMSEが0.792から0.158
+<p>現在の強みは、<strong>公開ソルバによる熱流体・熱弾性解析からデータ同化・全場復元までを接続し、観測外の相対変位も評価したこと</strong>です。温度P2/P0に高W変位S1/S2を加えた別試験では、観測に使わないC−Dの加熱期RMSEが0.792から0.158
 µmへ約80%低下しました。</p>
 <figure>
 <img src="img/holdout_support_displacement.png"
