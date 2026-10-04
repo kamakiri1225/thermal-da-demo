@@ -254,9 +254,32 @@ id="toc-この記事で確かめること">この記事で確かめること</a>
 どこに何を付けたか</a></li>
 <li><a href="#センサが読む値" id="toc-センサが読む値">2.
 センサが読む値</a></li>
-<li><a href="#同化で毎回やること全体像"
-id="toc-同化で毎回やること全体像">3.
-同化で毎回やること（全体像）</a></li>
+<li><a href="#同化で毎回やること-流れタイミングなぜそれでよいか"
+id="toc-同化で毎回やること-流れタイミングなぜそれでよいか">3.
+同化で毎回やること ― 流れ・タイミング・なぜそれでよいか</a>
+<ul>
+<li><a href="#時間の流れ" id="toc-時間の流れ">3-1. 時間の流れ</a></li>
+<li><a href="#サイクルの4ステップ例-t0-to-30-秒1回目の補正"
+id="toc-サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
+1サイクルの4ステップ（例： <span class="math inline">\(t=0 \to
+30\)</span> 秒、1回目の補正）</a></li>
+<li><a href="#b-センサの読みを予想する-何をしているのか"
+id="toc-b-センサの読みを予想する-何をしているのか">3-3. (b)
+センサの読みを予想する ― 何をしているのか</a></li>
+<li><a
+href="#c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか"
+id="toc-c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+(c) 補正 ― 代表点以外のセンサのずれを、どうやって ROM
+の5点に反映させるのか</a></li>
+<li><a href="#理論なぜ5点を直すだけで全体が直るのか"
+id="toc-理論なぜ5点を直すだけで全体が直るのか">3-5.
+理論：なぜ5点を直すだけで全体が直るのか</a></li>
+<li><a href="#なぜループの中で全セルを復元しなくてよいのか"
+id="toc-なぜループの中で全セルを復元しなくてよいのか">3-6.
+なぜループの中で全セルを復元しなくてよいのか</a></li>
+<li><a href="#成り立つ条件" id="toc-成り立つ条件">3-7.
+成り立つ条件</a></li>
+</ul></li>
 <li><a href="#記号" id="toc-記号">4. 記号</a></li>
 <li><a href="#ステップ1状態-分からないものを7つ並べる"
 id="toc-ステップ1状態-分からないものを7つ並べる">5. ステップ1：状態 ―
@@ -636,23 +659,633 @@ class="math inline">\(U_z\)</span> ）</td>
 と後述の変位の写像で作っています。OpenFOAM＋FrontISTR
 で直接作った上の値との差は、温度場で 0.001 K、反りで 0.001 µm
 でした。）</p>
-<h2 id="同化で毎回やること全体像">3. 同化で毎回やること（全体像）</h2>
-<p>30 秒ごとに、次の4つを 20 回（600 秒まで）繰り返します。</p>
-<ol type="1">
-<li><strong>予測する</strong>：「発熱量は何 W
-か」「温度はいくつか」を少しずつ変えた 60 通りの計算で、次の 30
-秒を予測する。</li>
-<li><strong>読む</strong>：温度2点と変位2点の、4つの値を読む。</li>
-<li><strong>比べる</strong>：60
-通りそれぞれについて「この計算なら、センサはこう読むはず」という値を作り、測った値と比べる。</li>
-<li><strong>直す</strong>：ずれの大きさに応じて、5点の温度・発熱量・放熱を補正する。</li>
-</ol>
+<h2 id="同化で毎回やること-流れタイミングなぜそれでよいか">3.
+同化で毎回やること ― 流れ・タイミング・なぜそれでよいか</h2>
+<blockquote>
+<p><strong>この節で知りたいこと</strong> 1.
+ROM・gappy-POD・データ同化は、<strong>どの順番で、いつ</strong>動いているのか
+2. センサは ROM
+の代表5点以外にも置ける。では、<strong>代表点以外のセンサのずれを、どうやって
+ROM（5点）に反映させているのか</strong> 3.
+なぜ5点を直すだけで、全体の温度も変位も直るのか</p>
+<p><strong>答え</strong> 1. 30 秒ごとに「ROM で予報 → センサの読みを予想
+→ ずれを5点温度・ <span class="math inline">\(Q\)</span> ・ <span
+class="math inline">\(h\)</span> の直す量に換算して直す →
+直した値から次の予報」を 20 回くりかえす 2.
+<strong>換算表（カルマンゲイン <span class="math inline">\(K\)</span>
+）</strong>が「このセンサが 1 µm ずれたら、P4 を何 K
+直すか」を教える。直した5点温度が次の ROM の初期値になる 3.
+代表点以外の温度も変位も「5点温度に重みを掛けて足したもの」だから</p>
+</blockquote>
+<h3 id="時間の流れ">3-1. 時間の流れ</h3>
+<figure>
+<img src="img/da_cycle_timeline.png" alt="データ同化の1サイクル" />
+<figcaption aria-hidden="true">データ同化の1サイクル</figcaption>
+</figure>
+<p><em>①600 秒の時間軸。赤線が補正のタイミング（30 秒ごと、20
+回）／②1サイクルの中身／③EnKF が直すものと、計算で出すもの。</em></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ROM の時間刻み</td>
+<td><strong>2 秒</strong>（4次のルンゲ・クッタ）</td>
+</tr>
+<tr class="even">
+<td>観測・補正のタイミング</td>
+<td><strong>30 秒ごと</strong>（ <span class="math inline">\(t=30, 60,
+90, \dots, 600\)</span> 秒の <strong>20 回</strong>）</td>
+</tr>
+<tr class="odd">
+<td>1回の予報</td>
+<td>2 秒 × 15 ステップで 30 秒進める</td>
+</tr>
+<tr class="even">
+<td>ヒータ</td>
+<td>0〜300 秒 ON（15 W）</td>
+</tr>
+<tr class="odd">
+<td>メンバー数</td>
+<td>60（「発熱量や温度が少しずつ違う」計算を 60 通り同時に回す）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>予報している 30
+秒の間は、センサを使いません。補正する瞬間は、時間を進めません。</strong>
+この2つが交互に来ます。</p>
+<h3 id="サイクルの4ステップ例-t0-to-30-秒1回目の補正">3-2.
+1サイクルの4ステップ（例： <span class="math inline">\(t=0 \to
+30\)</span> 秒、1回目の補正）</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>何をするか</th>
+<th>例（1回目）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>(a) 予報</strong></td>
+<td>60 メンバーそれぞれを ROM で 30
+秒進める。計算するのは<strong>代表5点の温度だけ</strong></td>
+<td>60 メンバーの平均で P4 ＝ 298.03 K（真値 293.18 K）</td>
+</tr>
+<tr class="even">
+<td><strong>(b) 読みを予想</strong></td>
+<td>各メンバーについて「<strong>このメンバーの温度が正しいなら、センサは何を示すはずか</strong>」を計算する</td>
+<td>変位計2（代表点以外）の予想の平均 ＝ 5.178 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>(c) 補正</strong></td>
+<td>予想と実測の<strong>ずれ</strong>を、5点温度・ <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span>
+の<strong>直す量に換算</strong>して直す</td>
+<td>実測 −0.443 µm、ずれ −5.62 µm → <strong>P4 を −10.07 K
+直す</strong></td>
+</tr>
+<tr class="even">
+<td><strong>(d) 次へ</strong></td>
+<td>直した5点温度・ <span class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> が、<strong>次の ROM
+の初期値</strong>になる（ <span class="math inline">\(30 \to 60\)</span>
+秒）</td>
+<td>―</td>
+</tr>
+</tbody>
+</table>
+<p>例の数値は、温度計2本（P2・P0）＋<strong>代表点以外の変位計2本</strong>（<a
+href="blog_008_novelty_displacement_assimilation.md">blog_008 §5</a>
+で選んだ上面の2点）で同化したときの、seed 20260913 の1回目です。 真値は
+ROM の双子実験です。</p>
+<h4 id="rom-gappy-pod-で復元-補正-romという理解との対応">「ROM →
+gappy-POD で復元 → 補正 → ROM」という理解との対応</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>よくある理解</th>
+<th>実際にやっていること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ROM で計算（代表5点）</td>
+<td><strong>そのとおり</strong>（(a)）</td>
+</tr>
+<tr class="even">
+<td>gappy-POD で復元</td>
+<td><strong>センサの場所の分だけ</strong>計算する。全 20,696
+セルは復元しない（(b)）</td>
+</tr>
+<tr class="odd">
+<td>データ同化で補正（代表5点も補正される）</td>
+<td><strong>そのとおり</strong>。直すのは5点温度と <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> の <strong>7つだけ</strong>（(c)）</td>
+</tr>
+<tr class="even">
+<td>ROM で計算 → 繰り返し</td>
+<td><strong>そのとおり</strong>。直した値から次の 30
+秒を予報する（(d)→(a)）</td>
+</tr>
+</tbody>
+</table>
+<p>全セルの温度・全節点の変位は、<strong>評価のときだけ</strong>、直した5点温度から計算します。ループの中で
+FrontISTR は呼びません。</p>
+<h3 id="b-センサの読みを予想する-何をしているのか">3-3. (b)
+センサの読みを予想する ― 何をしているのか</h3>
+<p><strong>やっていることは「5点の温度のずれに、センサごとの重みを掛けて足す」だけです。</strong></p>
+<p>例として、メンバー1の <span class="math inline">\(t=30\)</span>
+秒の予報から、<strong>変位計1（代表点ではない上面の点、 <span
+class="math inline">\(U_x\)</span> ）</strong>の読みを予想します。</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① メンバー1の予報温度 [K]</td>
+<td style="text-align: right;">297.366</td>
+<td style="text-align: right;">295.304</td>
+<td style="text-align: right;">298.191</td>
+<td style="text-align: right;">296.583</td>
+<td style="text-align: right;">293.997</td>
+</tr>
+<tr class="even">
+<td>② 平均の温度 [K]（事前に決まっている）</td>
+<td style="text-align: right;">296.659</td>
+<td style="text-align: right;">295.698</td>
+<td style="text-align: right;">296.938</td>
+<td style="text-align: right;">296.146</td>
+<td style="text-align: right;">295.361</td>
+</tr>
+<tr class="odd">
+<td>③ ずれ ＝ ① − ② [K]</td>
+<td style="text-align: right;">+0.707</td>
+<td style="text-align: right;">−0.394</td>
+<td style="text-align: right;">+1.253</td>
+<td style="text-align: right;">+0.437</td>
+<td style="text-align: right;">−1.364</td>
+</tr>
+<tr class="even">
+<td>④ 変位計1の重み [µm/K]（事前に計算）</td>
+<td style="text-align: right;">−0.532</td>
+<td style="text-align: right;">+0.596</td>
+<td style="text-align: right;">−0.763</td>
+<td style="text-align: right;">+0.286</td>
+<td style="text-align: right;">+0.290</td>
+</tr>
+<tr class="odd">
+<td>⑤ ③ × ④ [µm]</td>
+<td style="text-align: right;">−0.376</td>
+<td style="text-align: right;">−0.235</td>
+<td style="text-align: right;">−0.956</td>
+<td style="text-align: right;">+0.125</td>
+<td style="text-align: right;">−0.396</td>
+</tr>
+</tbody>
+</table>
+<p>⑤を足すと −1.837 µm。これに「平均の温度のときの変位」 −1.738 µm
+を足して</p>
+<p><strong>予想される読み ＝ −1.738 ＋ (−1.837) ＝ −3.58 µm</strong></p>
+<p><strong>「このメンバーの温度が正しいなら、変位計1は −3.58 µm
+を示すはず」</strong>という意味です。 これを 60
+メンバー全部で計算します。5つ掛けて足すだけなので一瞬です（この「掛けて足す」を<strong>内積</strong>と呼んでいました）。</p>
+<p><strong>重み（④）はどこから来るか</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>重み</th>
+<th>作り方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>代表点の温度計（例：P2）</td>
+<td><span class="math inline">\((0,\ 0,\ 1,\ 0,\ 0)\)</span></td>
+<td>自分の点だけ 1</td>
+</tr>
+<tr class="even">
+<td><strong>代表点以外の温度計</strong></td>
+<td>例：A の近くのセル (26.6, −1.6, 98.8) mm は <span
+class="math inline">\((-0.007,\ -0.016,\ -0.001,\ 0.993,\
+0.040)\)</span></td>
+<td><strong>gappy-POD</strong> の、そのセルの1行（<a
+href="blog_004_pod_selected_rom.md">blog_004</a>）</td>
+</tr>
+<tr class="odd">
+<td><strong>代表点以外の変位計</strong></td>
+<td>例：変位計1は上の表の④</td>
+<td><strong>FrontISTR の熱感度 <span class="math inline">\(W\)</span> と
+POD</strong>（§7-7）</td>
+</tr>
+</tbody>
+</table>
+<p>どれも<strong>事前に一度だけ計算</strong>しておく5つの数字です。代表点の温度計は「1か所だけ
+1」という特別な場合にすぎません。
+だから、<strong>センサを代表点以外に置いても、扱いはまったく同じ</strong>です。</p>
+<h3
+id="c-補正-代表点以外のセンサのずれをどうやって-rom-の5点に反映させるのか">3-4.
+(c) 補正 ― 代表点以外のセンサのずれを、どうやって ROM
+の5点に反映させるのか</h3>
+<p>ここがいちばん大事なところです。4段階で説明します。数値は §3-2
+と同じ1回目（ <span class="math inline">\(t=30\)</span> 秒）です。</p>
+<h4
+id="段階1センサごとにずれを出す">段階1：センサごとに「ずれ」を出す</h4>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>置き場所</th>
+<th style="text-align: right;">実測（真値）</th>
+<th style="text-align: right;">予想（60 メンバー平均）</th>
+<th style="text-align: right;"><strong>ずれ</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計 P2</td>
+<td>代表点</td>
+<td style="text-align: right;">294.81 K</td>
+<td style="text-align: right;">299.50 K</td>
+<td style="text-align: right;"><strong>−4.69 K</strong></td>
+</tr>
+<tr class="even">
+<td>温度計 P0</td>
+<td>代表点</td>
+<td style="text-align: right;">294.26 K</td>
+<td style="text-align: right;">298.89 K</td>
+<td style="text-align: right;"><strong>−4.63 K</strong></td>
+</tr>
+<tr class="odd">
+<td>変位計1（ <span class="math inline">\(U_x\)</span> ）</td>
+<td><strong>代表点以外</strong>（上面 −y 寄り）</td>
+<td style="text-align: right;">−1.652 µm</td>
+<td style="text-align: right;">−2.312 µm</td>
+<td style="text-align: right;"><strong>+0.66 µm</strong></td>
+</tr>
+<tr class="even">
+<td>変位計2（ <span class="math inline">\(U_z\)</span> ）</td>
+<td><strong>代表点以外</strong>（上面・ヒータの反対側）</td>
+<td style="text-align: right;">−0.443 µm</td>
+<td style="text-align: right;">5.178 µm</td>
+<td style="text-align: right;"><strong>−5.62 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>最初の予報は全体に温度が高すぎる（平均 17 W で計算しているが真値は 15
+W、初期温度も高め）ので、ずれが大きく出ています。</p>
+<h4 id="段階2ずれ-直す量の換算表を作るカルマンゲイン-k">段階2：「ずれ →
+直す量」の換算表を作る（カルマンゲイン <span
+class="math inline">\(K\)</span> ）</h4>
+<p><strong>ずれは「センサの場所・センサの単位」の量</strong>です。直したいのは「代表5点の温度と
+<span class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> 」です。
+この2つをつなぐ<strong>換算表</strong>がカルマンゲイン <span
+class="math inline">\(K\)</span> です。1回目の実際の値はこうでした。</p>
+<table>
+<thead>
+<tr class="header">
+<th>直すもの ＼ センサ</th>
+<th style="text-align: right;">温度計 P2</th>
+<th style="text-align: right;">温度計 P0</th>
+<th style="text-align: right;">変位計1</th>
+<th style="text-align: right;"><strong>変位計2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0 の温度 [K]</td>
+<td style="text-align: right;">+0.265</td>
+<td style="text-align: right;">+0.623</td>
+<td style="text-align: right;">−0.110</td>
+<td style="text-align: right;">+0.070</td>
+</tr>
+<tr class="even">
+<td>P1 の温度 [K]</td>
+<td style="text-align: right;">+1.579</td>
+<td style="text-align: right;">+0.526</td>
+<td style="text-align: right;">+2.107</td>
+<td style="text-align: right;">−0.743</td>
+</tr>
+<tr class="odd">
+<td>P2 の温度 [K]</td>
+<td style="text-align: right;">+0.659</td>
+<td style="text-align: right;">+0.265</td>
+<td style="text-align: right;">−0.068</td>
+<td style="text-align: right;">+0.051</td>
+</tr>
+<tr class="even">
+<td>P3 の温度 [K]</td>
+<td style="text-align: right;">−0.875</td>
+<td style="text-align: right;">+1.345</td>
+<td style="text-align: right;">−0.541</td>
+<td style="text-align: right;">+0.439</td>
+</tr>
+<tr class="odd">
+<td><strong>P4 の温度 [K]</strong></td>
+<td style="text-align: right;">−0.401</td>
+<td style="text-align: right;">−0.945</td>
+<td style="text-align: right;">−1.407</td>
+<td style="text-align: right;"><strong>+1.792</strong></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span> （発熱の倍率）</td>
+<td style="text-align: right;">+0.368</td>
+<td style="text-align: right;">−0.504</td>
+<td style="text-align: right;">−0.201</td>
+<td style="text-align: right;"><strong>+0.132</strong></td>
+</tr>
+</tbody>
+</table>
+<p><em>単位は「センサが 1 K（温度計）または 1
+µm（変位計）ずれたときに、その行を何だけ直すか」。</em></p>
+<p><strong>読み方</strong>：変位計2の列を見ると、「変位計2が 1 µm
+ずれたら、<strong>P4 を 1.792 K</strong>、P3 を 0.439 K、 <span
+class="math inline">\(q\)</span> を 0.132 直す」。
+変位計2はヒータの反対側の上面にあるので、反対側の P4
+と強く結びついています。</p>
+<h4
+id="段階3掛け算して直す量を出す">段階3：掛け算して、直す量を出す</h4>
+<p>段階1のずれ × 段階2の換算表 です。</p>
+<table>
+<thead>
+<tr class="header">
+<th>直すもの</th>
+<th style="text-align: right;">温度計2本から</th>
+<th style="text-align: right;">変位計1から</th>
+<th style="text-align: right;"><strong>変位計2から</strong></th>
+<th style="text-align: right;">合計</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0 の温度</td>
+<td style="text-align: right;">−4.13 K</td>
+<td style="text-align: right;">−0.07 K</td>
+<td style="text-align: right;">−0.39 K</td>
+<td style="text-align: right;">−4.60 K</td>
+</tr>
+<tr class="even">
+<td>P1 の温度</td>
+<td style="text-align: right;">−9.84 K</td>
+<td style="text-align: right;">+1.39 K</td>
+<td style="text-align: right;">+4.18 K</td>
+<td style="text-align: right;">−4.27 K</td>
+</tr>
+<tr class="odd">
+<td>P2 の温度</td>
+<td style="text-align: right;">−4.32 K</td>
+<td style="text-align: right;">−0.05 K</td>
+<td style="text-align: right;">−0.29 K</td>
+<td style="text-align: right;">−4.66 K</td>
+</tr>
+<tr class="even">
+<td>P3 の温度</td>
+<td style="text-align: right;">−2.13 K</td>
+<td style="text-align: right;">−0.36 K</td>
+<td style="text-align: right;">−2.47 K</td>
+<td style="text-align: right;">−4.95 K</td>
+</tr>
+<tr class="odd">
+<td><strong>P4 の温度</strong></td>
+<td style="text-align: right;">+6.26 K</td>
+<td style="text-align: right;">−0.93 K</td>
+<td style="text-align: right;"><strong>−10.07 K</strong></td>
+<td style="text-align: right;">−4.75 K</td>
+</tr>
+<tr class="even">
+<td>発熱量 <span class="math inline">\(Q\)</span></td>
+<td style="text-align: right;">+9.16 W</td>
+<td style="text-align: right;">−1.99 W</td>
+<td style="text-align: right;"><strong>−11.15 W</strong></td>
+<td style="text-align: right;">−3.98 W</td>
+</tr>
+</tbody>
+</table>
+<p><strong>代表点ではない変位計2の「−5.62 µm のずれ」が、ROM
+の状態である P4 を −10.07 K、発熱量を −11.15 W 直しています。</strong>
+温度計2本だけだと P4 は逆に +6.26 K
+動いてしまいますが、変位計2がそれを打ち消して、5点すべてが −4.3〜−5.0 K
+とそろって下がりました（直す前の予報と真値との差は −4.45〜−4.85 K
+でした）。</p>
+<p><em>上の数値は 60
+メンバーの平均で見たものです。実際には各メンバーに、観測ノイズと同じ大きさの乱数を足した観測を与えて、メンバーごとに直します（摂動観測）。</em></p>
+<h4 id="段階4直した値が次の-rom-の初期値になる">段階4：直した値が、次の
+ROM の初期値になる</h4>
+<p>直した5点温度と <span class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> で、次の 30 秒（ <span
+class="math inline">\(30 \to 60\)</span> 秒）を ROM で予報します。
+<strong>これが「代表点以外のセンサの情報が ROM
+に入る」瞬間です。</strong> ROM
+の式は何も変えていません。変わるのは初期値（5点温度）と、パラメータ（
+<span class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> ）だけです。</p>
+<h4 id="換算表-k-はどうやって作るのか">換算表 <span
+class="math inline">\(K\)</span> はどうやって作るのか</h4>
+<p><span class="math display">\[
+K = C_{zy}\,\big(C_{yy}+R\big)^{-1}
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>意味</th>
+<th>60 メンバーから数える</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(C_{zy}\)</span></td>
+<td>「状態7つ」と「センサの予想」が、メンバーをまたいで<strong>一緒にどう動くか</strong></td>
+<td>例：変位計2の予想が大きいメンバーほど、P4 が高い</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(C_{yy}\)</span></td>
+<td>センサの予想どうしが一緒にどう動くか、と、予想のばらつき</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R\)</span></td>
+<td>センサのノイズ（温度 0.3 K、変位 0.3 µm）</td>
+<td>仕様</td>
+</tr>
+</tbody>
+</table>
+<p>センサの予想は「5点温度に重みを掛けて足したもの」なので、 <span
+class="math inline">\(C_{zy}\)</span> は</p>
+<p><span class="math display">\[
+C_{zy} = \mathrm{Cov}\,(z,\ T_5)\;w
+\]</span></p>
+<p>になります（ <span class="math inline">\(w\)</span>
+はそのセンサの重み）。
+<strong>重みの大きい点ほど強く直され、さらに「5点の温度どうし」「温度と
+<span class="math inline">\(q\)</span>
+」の連動を通じて、ほかの点や発熱量にも配られる</strong>、という仕組みです。
+センサが代表点にあるかどうかは関係ありません。<strong>重み <span
+class="math inline">\(w\)</span>
+さえ分かれば、どこのセンサでも換算表が作れます。</strong></p>
+<h3 id="理論なぜ5点を直すだけで全体が直るのか">3-5.
+理論：なぜ5点を直すだけで全体が直るのか</h3>
+<p>代表点以外の温度や変位は、すべて「5点温度に重みを掛けて足したもの＋定数」です。
+重みを並べた行列を <span class="math inline">\(L\)</span> 、定数を <span
+class="math inline">\(c\)</span> とすると、直した後の値は</p>
+<p><span class="math display">\[
+L\,T_5^{a} + c = \big(L\,T_5^{f} + c\big) + L\,\big(T_5^{a}-T_5^{f}\big)
+\]</span></p>
+<p>です（ <span class="math inline">\(f\)</span> ＝予報、 <span
+class="math inline">\(a\)</span>
+＝直した後）。左辺は「直した5点温度から計算し直した値」、右辺は「予報の値＋5点の直す量を重みで写したもの」で、<strong>同じもの</strong>です。</p>
+<p><strong>つまり、5点を直せば、全セルの温度も全節点の変位も、同じ補正を受けたことになります。</strong>
+別々に直す必要はなく、互いに矛盾もしません（どれも同じ5点温度から出ているため）。</p>
+<h3 id="なぜループの中で全セルを復元しなくてよいのか">3-6.
+なぜループの中で全セルを復元しなくてよいのか</h3>
+<p>補正の式（ <span class="math inline">\(K\)</span>
+）に出てくるのは<strong>センサの場所の予想だけ</strong>です。全セルの値は式に出てきません。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>ループの中で必要か</th>
+<th>計算</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>センサの場所（2〜4 か所）の予想</td>
+<td><strong>必要</strong></td>
+<td>5つ掛けて足すだけ</td>
+</tr>
+<tr class="even">
+<td>全 20,696 セルの温度</td>
+<td>不要（評価用）</td>
+<td>20,696 × 5 の行列の掛け算</td>
+</tr>
+<tr class="odd">
+<td>全 5,040 節点 × 3 方向の変位</td>
+<td>不要（評価用）</td>
+<td>15,120 × 5 の行列の掛け算</td>
+</tr>
+<tr class="even">
+<td>FrontISTR</td>
+<td><strong>不要</strong></td>
+<td>重みは事前に計算済み</td>
+</tr>
+</tbody>
+</table>
+<p>だから 60 メンバー × 20 回でも、1回の同化が数十秒で終わります。</p>
+<h3 id="成り立つ条件">3-7. 成り立つ条件</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>外れるとどうなるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場が POD の5モードで表せる</td>
+<td>熱源の位置・形が変わると表せない → ROM と gappy-POD
+の作り直しが必要（<a
+href="blog_007_rom_applicability.md">blog_007</a>）</td>
+</tr>
+<tr class="even">
+<td>線形熱弾性（重みが温度に依らない）</td>
+<td>大変形や、材料の性質の温度依存が強いと、「掛けて足す」が成り立たない</td>
+</tr>
+<tr class="odd">
+<td>ROM の予報がそれなりに合う</td>
+<td>加熱のしかた（ON/OFF）が違うと合わない（blog_007 §7）</td>
+</tr>
+<tr class="even">
+<td>ノイズ <span class="math inline">\(R\)</span> を正しく与える</td>
+<td>ここが違うと換算表 <span class="math inline">\(K\)</span>
+の強さが変わる</td>
+</tr>
+</tbody>
+</table>
 <figure>
 <img src="img/obs_pipeline.png" alt="観測の作り方と使い方" />
 <figcaption aria-hidden="true">観測の作り方と使い方</figcaption>
 </figure>
-<p><em>①観測データの作り方（双子実験）／②予報観測 <span
+<p><em>参考：①観測データの作り方（双子実験）／②予報観測 <span
 class="math inline">\(Y_f\)</span> の作り方／③EnKF の更新式。</em></p>
+<blockquote>
+<p><strong>この節で分かったこと</strong> - 30 秒ごとに「ROM で予報 →
+センサの読みを予想 → ずれを直す量に換算して直す →
+直した値から次の予報」を 20 回くりかえしている。 -
+センサの読みの予想は「5点の温度のずれに、センサごとの重みを掛けて足す」だけ。代表点以外の温度計（重み＝gappy-POD
+の1行）も変位計（重み＝熱感度）も同じ扱い。 -
+<strong>代表点以外のセンサのずれは、換算表 <span
+class="math inline">\(K\)</span> を通じて5点温度・ <span
+class="math inline">\(q\)</span> ・ <span
+class="math inline">\(h\)</span> の直す量に変わり、次の ROM
+の初期値として反映される。</strong>
+1回目の例では、ヒータ反対側の変位計の −5.62 µm のずれが、P4 を −10.07
+K、発熱量を −11.15 W 直した。 -
+5点を直せば、全セルの温度も全節点の変位もそろって直る（重みを掛けて足すだけの関係だから）。</p>
+</blockquote>
 <p>以下、これを数式で1つずつ書きます。</p>
 <hr />
 <h2 id="記号">4. 記号</h2>
