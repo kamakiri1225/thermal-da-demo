@@ -1345,20 +1345,25 @@ ETKF、近くの観測だけを使う LETKF、同じ観測を何回かに分け�
 <p><strong>それぞれの得意・不得意</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>手法</th>
+<th>何をするものか</th>
 <th>得意なこと</th>
 <th>不得意なこと</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>OI</strong></td>
+<td><strong>OI</strong><br>Optimal Interpolation<br>（最適内挿）</td>
+<td>予報の分散（共分散） <span class="math inline">\(B\)</span>
+を<strong>事前に決めておき</strong>、毎回その <span
+class="math inline">\(B\)</span> を使って、観測とのずれを各点に配る</td>
 <td>・計算がとても軽い<br>・式が1本で、手計算できるほど単純<br>・実装が簡単</td>
 <td>・ <span class="math inline">\(B\)</span>
 を固定するので、時間とともに変わる不確かさを表せない<br>・発熱量などのパラメータを当てにくい（今回
@@ -1366,7 +1371,13 @@ ETKF、近くの観測だけを使う LETKF、同じ観測を何回かに分け�
 の決め方に経験が要る</td>
 </tr>
 <tr class="even">
-<td><strong>3D-Var</strong></td>
+<td><strong>3D-Var</strong><br>3-Dimensional
+Variational<br>（3次元変分法）</td>
+<td><span class="math inline">\(B\)</span>
+を事前に決めたうえで、ある1時刻について「予報からの離れ＋観測からの離れ」の評価関数
+<span class="math inline">\(J\)</span>
+が最小になる状態を、<strong>反復計算で探す</strong>（観測が線形なら OI
+と同じ答え）</td>
 <td>・大量の観測を一度に扱える<br>・非線形の観測演算子も使える<br>・
 <span class="math inline">\(B\)</span>
 固定なので安定して動く（気象の現業で実績）</td>
@@ -1374,12 +1385,19 @@ ETKF、近くの観測だけを使う LETKF、同じ観測を何回かに分け�
 固定なので、その時の状況に応じた誤差の形を表せない<br>・1時刻ずつで、時間方向のつながりを使わない<br>・観測演算子の随伴（微分）が必要</td>
 </tr>
 <tr class="odd">
-<td><strong>4D-Var</strong></td>
+<td><strong>4D-Var</strong><br>4-Dimensional
+Variational<br>（4次元変分法）</td>
+<td>時間窓の中の<strong>全時刻の観測に合うように</strong>、窓の始めの状態（初期値）を、<strong>モデルの方程式を通して</strong>探す。勾配は随伴モデルで計算する</td>
 <td>・時間窓の中の観測を、モデルの方程式と矛盾なく使える<br>・少ない観測から初期値やパラメータを推定しやすい<br>・精度が高い（気象の現業の主力）</td>
 <td>・モデルの接線形・随伴コードの開発がとても大変<br>・計算が重い<br>・窓が長いと非線形が効いて最小化が難しい<br>・補正後の不確かさ（共分散）が直接は出ない</td>
 </tr>
 <tr class="even">
-<td><strong>KF</strong></td>
+<td><strong>KF</strong><br>Kalman Filter<br>（カルマンフィルタ）</td>
+<td><strong>物理方程式（線形のモデル <span
+class="math inline">\(M\)</span> ）を使って、状態と一緒に予報の分散
+<span class="math inline">\(P\)</span> も逐次計算</strong>し（ <span
+class="math inline">\(P^f=MP^aM^{\mathsf T}+Q\)</span>
+）、観測が来るたびに補正する</td>
 <td>・線形・ガウスなら<strong>厳密に最適</strong><br>・不確かさ <span
 class="math inline">\(P\)</span> も正しく出る<br>・理論が明快</td>
 <td>・<strong>非線形のモデルに使えない</strong><br>・状態の数 <span
@@ -1388,21 +1406,28 @@ class="math inline">\(n\times n\)</span> の行列が重い（20,000 セルで�
 億要素）</td>
 </tr>
 <tr class="odd">
-<td><strong>EKF</strong></td>
+<td><strong>EKF</strong><br>Extended Kalman
+Filter<br>（拡張カルマンフィルタ）</td>
+<td>非線形のモデルを、<strong>毎回その場で線形化（ヤコビアン）</strong>して、KF
+と同じように分散を逐次計算する</td>
 <td>・弱い非線形なら、KF
 と同じ感覚で使える<br>・状態が少なければ軽い</td>
 <td>・ヤコビアン（微分）を毎回作る手間<br>・非線形が強いと、線形化の誤差で発散することがある<br>・状態が多いと
 KF と同じく重い</td>
 </tr>
 <tr class="even">
-<td><strong>EnKF</strong></td>
+<td><strong>EnKF</strong><br>Ensemble Kalman
+Filter<br>（アンサンブルカルマンフィルタ）</td>
+<td>少しずつ違う<strong>複数のメンバー（分身）を同時に予報</strong>し、その<strong>散らばりから分散を作る</strong>。補正の式は
+KF と同じ</td>
 <td>・<strong>非線形モデルをそのまま使える</strong>（中身を知らない「箱」でもよい）<br>・<strong>微分が要らない</strong><br>・共分散がその時の状況に応じて毎回変わる<br>・パラメータも状態に入れて同時に推定できる<br>・メンバーは並列に計算しやすい<br>・高次元でも数十〜百メンバーで動く</td>
 <td>・メンバーが少ないと<strong>見せかけの相関</strong>（関係ない点どうしが連動して見える）が出る
 →
 局所化・インフレーションで抑える<br>・補正はガウス仮定なので、分布が大きく歪む・山が複数ある場合に弱い<br>・メンバー数だけモデル計算が要る（重いモデルでは工夫が必要）</td>
 </tr>
 <tr class="odd">
-<td><strong>PF</strong></td>
+<td><strong>PF</strong><br>Particle Filter<br>（粒子フィルタ）</td>
+<td>たくさんの粒子を予報し、観測との合い具合で<strong>重み</strong>をつける。重みの小さい粒子を捨てて大きい粒子を増やす（リサンプリング）。分散は使わない</td>
 <td>・<strong>ガウスでない分布、山が複数ある分布でもよい</strong><br>・強い非線形にも強い<br>・粒子を増やせばベイズの事後分布そのものに近づく</td>
 <td>・<strong>次元の呪い</strong>：状態が多いと、ほとんどの粒子の重みが
 0
