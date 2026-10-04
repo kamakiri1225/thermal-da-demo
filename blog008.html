@@ -184,6 +184,28 @@
 <ul>
 <li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
 <li><a href="#この記事の構成" id="toc-この記事の構成">この記事の構成</a></li>
+<li><a href="#0-研究全体のまとめ--発表の流れに沿って" id="toc-0-研究全体のまとめ--発表の流れに沿って">0. 研究全体のまとめ ―
+発表の流れに沿って</a>
+<ul>
+<li><a href="#0-1-openfoam-と-frontistr-の連携で正解データを作る" id="toc-0-1-openfoam-と-frontistr-の連携で正解データを作る">0-1.
+OpenFOAM と FrontISTR の連携で、正解データを作る</a></li>
+<li><a href="#0-2-データ同化を行った--oi-と-enkf" id="toc-0-2-データ同化を行った--oi-と-enkf">0-2. データ同化を行った ― OI
+と EnKF</a></li>
+<li><a href="#0-3-pod-でモード分解" id="toc-0-3-pod-でモード分解">0-3.
+POD でモード分解</a></li>
+<li><a href="#0-4-q-deim-で代表点5点を決める" id="toc-0-4-q-deim-で代表点5点を決める">0-4. Q-DEIM
+で代表点5点を決める</a></li>
+<li><a href="#0-5-rom-の構築パラメータの決定" id="toc-0-5-rom-の構築パラメータの決定">0-5. ROM
+の構築（パラメータの決定）</a></li>
+<li><a href="#0-6-rom-の適用範囲" id="toc-0-6-rom-の適用範囲">0-6. ROM
+の適用範囲</a></li>
+<li><a href="#0-7-温度を測っても変位が合わないことがある" id="toc-0-7-温度を測っても変位が合わないことがある">0-7.
+温度を測っても、変位が合わないことがある</a></li>
+<li><a href="#0-8-温度1点変位2点でもデータ同化でき精度が上がる" id="toc-0-8-温度1点変位2点でもデータ同化でき精度が上がる">0-8.
+温度1点＋変位2点でもデータ同化でき、精度が上がる</a></li>
+<li><a href="#0-9-何を推定したいかで適切なセンサ位置は変わる" id="toc-0-9-何を推定したいかで適切なセンサ位置は変わる">0-9.
+何を推定したいかで、適切なセンサ位置は変わる</a></li>
+</ul></li>
 <li><a href="#1-主張したいこと" id="toc-1-主張したいこと">1.
 主張したいこと</a></li>
 <li><a href="#2-主張を支える計算--どこに何があるか" id="toc-2-主張を支える計算--どこに何があるか">2. 主張を支える計算 ―
@@ -428,51 +450,57 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 </thead>
 <tbody>
 <tr class="odd">
+<td><strong>0. 研究全体のまとめ</strong></td>
+<td>発表の流れ（9項目）に沿った全体のまとめ</td>
+<td>正解データ → データ同化 → ROM → 変位を使う意味 →
+センサ位置の選び方</td>
+</tr>
+<tr class="even">
 <td><strong>1. 主張したいこと</strong></td>
 <td>一言でいうと何を言いたいのか</td>
 <td>記事全体の結論</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>2. 主張を支える計算</strong></td>
 <td>どの数値がどの記事にあるかの一覧</td>
 <td>根拠の所在</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>3. 先行研究の調査</strong></td>
 <td>英語5回・日本語1回の検索結果と、いちばん近い研究</td>
 <td><strong>温度と変位を同時に観測に入れた例は見当たらない</strong></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>4.【検証1】</strong></td>
 <td>同じ場所に温度計か変位計か（本数・場所をそろえる）</td>
 <td><strong>温度場RMSEは近いが、反りの誤差には差がある</strong>。温度場と反りで評価を分ける。設置可能性は実機で未検証</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>5.【検証2】</strong></td>
 <td>A・O を一度も測らず、別の場所の変位2点で当てる</td>
 <td><strong>0.076 µm。直接測る（0.135 µm）より正確</strong></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>6.【検証3】</strong></td>
 <td>検証2 を、真値を OpenFOAM＋FrontISTR にしてやり直す</td>
 <td><strong>3条件とも同じ結論</strong>（0.07〜0.08 µm）</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>7.【検証4】</strong></td>
 <td>置き場所の決め方を、既存の配置法と比べる</td>
 <td><strong>目的指向が3条件とも最小</strong>。ただし差は 15〜20 %</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>8. 位置づけ</strong></td>
 <td>工作機械の研究4流派と、本研究の切り口A・B・C</td>
 <td>どこが空いていて、どこに入るのか</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>9. 主張の書き方</strong></td>
 <td>言ってよいこと／言ってはいけないこと</td>
 <td>発表で使う言い方</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>10. 発表での位置づけ</strong></td>
 <td>章ごとに何を言うか</td>
 <td>スライドの骨子</td>
@@ -481,6 +509,300 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 </table>
 <p><strong>検証の節（4〜7）はすべて同じ並びです。</strong>
 「この節で知りたいこと・条件」→「やったこと」→「結果」→「分かったこと」。</p>
+<hr/>
+<h2 id="0-研究全体のまとめ--発表の流れに沿って">0. 研究全体のまとめ ―
+発表の流れに沿って</h2>
+<p>オープンCAE学会で話す流れ（9項目）に沿って、研究全体を1か所にまとめます。各項目は「何をしたか
+→ 結果 → 分かったこと」の順で、詳しい説明の記事にリンクしています。 §1
+以降は、このうち <strong>0-7〜0-9</strong>
+を深く掘り下げた検証です。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>項目</th>
+<th>ひとことで</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0-1</td>
+<td>OpenFOAM と FrontISTR の連携で正解データを作る</td>
+<td>温度場 → 熱変形を計算し、データ同化の「正解」にする</td>
+<td><a href="blog001.html">blog_001</a></td>
+</tr>
+<tr class="even">
+<td>0-2</td>
+<td>データ同化（OI と EnKF）</td>
+<td>OI は発熱量が当たりにくい。EnKF
+は当たるが、実ソルバだと計算が重い</td>
+<td><a href="blog002.html">blog_002</a>、<a href="blog003.html">blog_003</a></td>
+</tr>
+<tr class="odd">
+<td>0-3</td>
+<td>POD でモード分解</td>
+<td>温度場は2つの型で 99.9 % 表せる</td>
+<td><a href="blog004.html">blog_004 §2・§5</a></td>
+</tr>
+<tr class="even">
+<td>0-4</td>
+<td>Q-DEIM で代表5点を決める</td>
+<td>型の強さを決めるのに都合のよい5点を自動で選ぶ</td>
+<td><a href="blog004.html">blog_004 §4</a></td>
+</tr>
+<tr class="odd">
+<td>0-5</td>
+<td>ROM の構築</td>
+<td>5点の熱回路の係数を OpenFOAM に合わせて決める。600 秒が約 31 ms</td>
+<td><a href="blog004.html">blog_004 §6</a></td>
+</tr>
+<tr class="even">
+<td>0-6</td>
+<td>ROM の適用範囲</td>
+<td>発熱量や加熱のしかた（間欠運転）が変わっても使える。熱源の位置が変わると作り直し</td>
+<td><a href="blog007.html">blog_007</a></td>
+</tr>
+<tr class="odd">
+<td>0-7</td>
+<td>温度を測っても変位が合わないことがある</td>
+<td>温度1点だけでは、反りが 0.9〜1.7 µm 外れる</td>
+<td>本節、<a href="#4-検証1同じ場所なら温度計と変位計のどちらが良いか">§4</a></td>
+</tr>
+<tr class="even">
+<td>0-8</td>
+<td><strong>温度1点＋変位2点でもデータ同化でき、精度が上がる</strong></td>
+<td>温度2点より、温度1点＋変位2点のほうが温度も反りも良い</td>
+<td>本節</td>
+</tr>
+<tr class="odd">
+<td>0-9</td>
+<td>何を推定したいかで、適切なセンサ位置は変わる</td>
+<td>推定したい量のあいまいさ σ を、熱感度 <span class="math inline">\(W\)</span> とばらつきから測る前に計算して選ぶ</td>
+<td><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5・§7</a>、<a href="blog005.html">blog_005</a></td>
+</tr>
+</tbody>
+</table>
+<p>真値はすべて計算（ROM の双子実験、または
+OpenFOAM＋FrontISTR）で、<strong>実機の測定ではありません</strong>。</p>
+<h3 id="0-1-openfoam-と-frontistr-の連携で正解データを作る">0-1.
+OpenFOAM と FrontISTR の連携で、正解データを作る</h3>
+<p><strong>何をしたか</strong>：片側にヒータ（15
+W）を付けた中空円筒を、OpenFOAM
+で空気と固体を連成して解き（CHT）、固体の温度場を求めました。その温度を
+FEM の節点に写して FrontISTR に入れ、熱変形を計算しました。</p>
+<figure>
+<img alt="CHT から熱変形へ" src="img/cht_to_fem_anim.gif"/>
+<figcaption aria-hidden="true">CHT から熱変形へ</figcaption>
+</figure>
+<p><em>左：OpenFOAM の温度場、右：FrontISTR
+の熱変形（誇張表示）。</em></p>
+<p><strong>分かったこと</strong>：この温度と変形を「正解」とし、そこから取り出したセンサの読み（＋ノイズ）だけで、どこまで推定できるかを以降で調べます。</p>
+<h3 id="0-2-データ同化を行った--oi-と-enkf">0-2. データ同化を行った ― OI
+と EnKF</h3>
+<p><strong>何をしたか</strong>：センサの読みで計算を直す方法として、OI（最適内挿）と
+EnKF（アンサンブルカルマンフィルタ）を実ソルバで試しました。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>手法</th>
+<th>結果</th>
+<th>問題</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>OI</td>
+<td>温度場は 0.09 K まで合う</td>
+<td>予報の共分散を固定するので、<strong>発熱量が 8.9 W
+止まり</strong>（正解 15 W）</td>
+</tr>
+<tr class="even">
+<td>EnKF</td>
+<td>発熱量も当たる</td>
+<td>メンバー（50〜200
+個）ごとに実ソルバを回すので、<strong>1回のデータ同化に数時間〜数日</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>分かったこと</strong>：EnKF
+を使うには、予報モデルを軽くする必要がある（→ 0-3〜0-5）。</p>
+<h3 id="0-3-pod-でモード分解">0-3. POD でモード分解</h3>
+<p><strong>何をしたか</strong>：OpenFOAM の温度場（20,696 セル × 121
+時刻）を特異値分解し、場を「型 × 時間の係数」の足し算に分けました。</p>
+<figure>
+<img alt="POD のモード" src="img/pod_modes.png"/>
+<figcaption aria-hidden="true">POD のモード</figcaption>
+</figure>
+<p><strong>分かったこと</strong>：<strong>2つの型で 99.9
+%</strong>。1つ目は全体が温まる型、2つ目はヒータ側と反対側の温度差の型（反りを決める）。安全をみて5つの型を使います。</p>
+<h3 id="0-4-q-deim-で代表点5点を決める">0-4. Q-DEIM
+で代表点5点を決める</h3>
+<p><strong>何をしたか</strong>：5つの型の強さを決めるのに都合のよい5点を、型の行列の
+QR 分解（列ピボット）で自動的に選びました。</p>
+<figure>
+<img alt="Q-DEIM で選んだ代表点" src="img/qdeim_points.png"/>
+<figcaption aria-hidden="true">Q-DEIM で選んだ代表点</figcaption>
+</figure>
+<p><strong>分かったこと</strong>：5点の温度が分かれば、gappy-POD で全
+20,696 セルの温度を復元できます。</p>
+<h3 id="0-5-rom-の構築パラメータの決定">0-5. ROM
+の構築（パラメータの決定）</h3>
+<p><strong>何をしたか</strong>：代表5点を熱容量 <span class="math inline">\(C\)</span> と熱の通りやすさ <span class="math inline">\(K\)</span> でつないだ熱回路（ROM）を作り、係数を
+OpenFOAM の温度に合うよう最小二乗で決めました。</p>
+<figure>
+<img alt="ROM の校正" src="img/rom_calib_fit.png"/>
+<figcaption aria-hidden="true">ROM の校正</figcaption>
+</figure>
+<p><strong>分かったこと</strong>：校正の残差 0.014 K。<strong>600
+秒の計算が約 31 ms</strong>（OpenFOAM
+なら分〜時間のオーダー）。発熱は代表点 P2 の1点に入れる近似です（<a href="blog004.html">blog_004 §6-1b</a>）。</p>
+<h3 id="0-6-rom-の適用範囲">0-6. ROM の適用範囲</h3>
+<p><strong>何をしたか</strong>：ROM を作るのに使っていない条件（25
+W、間欠運転）で、データ同化なしの ROM と OpenFOAM を比べました。</p>
+<figure>
+<img alt="ROM 単体と OpenFOAM" src="img/rom_alone_intermittent.png"/>
+<figcaption aria-hidden="true">ROM 単体と OpenFOAM</figcaption>
+</figure>
+<p><em>左：ヒータの ON/OFF を OpenFOAM と同じに与えた ROM（細い破線）と
+OpenFOAM（太い薄い線）。右：比較のため、ON/OFF を与えなかった
+ROM。</em></p>
+<p><strong>分かったこと</strong></p>
+<ul>
+<li><strong>同じ 15 W で間欠運転にしても、ON/OFF を与えれば ROM
+はそのまま使える</strong>（最大 0.038 K、温度計のノイズ 0.3 K の約
+1/8）。</li>
+<li>25 W でも最大 0.11 K。</li>
+<li><strong>熱源の位置や形が変わると作り直しが必要</strong>（発熱を P2
+の1点に入れ、係数をその条件で決めているため）。</li>
+</ul>
+<h3 id="0-7-温度を測っても変位が合わないことがある">0-7.
+温度を測っても、変位が合わないことがある</h3>
+<p><strong>何をしたか</strong>：従来は「温度を測って、変位は計算で出す」のが普通です。温度計1本（P2）だけでデータ同化して、観測していない反り
+A−O がどれだけ合うかを見ました（真値＝OpenFOAM＋FrontISTR）。</p>
+<p><strong>結果</strong>（下の 0-8 の図の灰色）</p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">温度1点だけのときの反り A−O の誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td style="text-align: right;">0.92 µm</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">1.70 µm</td>
+</tr>
+<tr class="odd">
+<td>15 W 間欠加熱</td>
+<td style="text-align: right;">0.64 µm</td>
+</tr>
+</tbody>
+</table>
+<p>反りの大きさは最大 2.7 µm（25 W では約 4.6
+µm）なので、<strong>温度1点では反りが大きく外れます</strong>。温度計のある
+P2 は合っていても、反対側の温度が分からないためです。</p>
+<h3 id="0-8-温度1点変位2点でもデータ同化でき精度が上がる">0-8.
+温度1点＋変位2点でもデータ同化でき、精度が上がる</h3>
+<p><strong>何をしたか</strong>：温度計1本（P2）に、上面の変位計2本（S1・S2。§5
+で選んだ点）を足してデータ同化しました。比較として、温度計2本（P2・P4）の場合も回しました。真値は
+OpenFOAM＋FrontISTR、5 seed 平均、加熱期 30〜300 秒（
+<code>run/temp1_disp2.py</code> ）。</p>
+<figure>
+<img alt="温度1点＋変位2点" src="img/temp1_disp2.png"/>
+<figcaption aria-hidden="true">温度1点＋変位2点</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測</th>
+<th>温度場（15 W／25 W／間欠）</th>
+<th>反り A−O（15 W／25 W／間欠）</th>
+<th>発熱量 300 秒時点（正解 15／25／15 W）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度1点</td>
+<td>0.65／1.18／0.58 K</td>
+<td>0.92／1.70／0.64 µm</td>
+<td>13.2／22.1／15.3 W</td>
+</tr>
+<tr class="even">
+<td><strong>温度1点＋変位2点</strong></td>
+<td><strong>0.15／0.16／0.14 K</strong></td>
+<td><strong>0.10／0.13／0.08 µm</strong></td>
+<td><strong>14.8／24.8／14.5 W</strong></td>
+</tr>
+<tr class="odd">
+<td>温度2点</td>
+<td>0.16／0.18／0.15 K</td>
+<td>0.23／0.28／0.20 µm</td>
+<td>14.7／24.7／14.6 W</td>
+</tr>
+<tr class="even">
+<td>温度2点＋変位2点</td>
+<td>0.08／0.12／0.08 K</td>
+<td>0.11／0.11／0.10 µm</td>
+<td>15.4／25.4／15.2 W</td>
+</tr>
+</tbody>
+</table>
+<p>（間欠加熱は、ヒータの ON/OFF を ROM に与えた場合）</p>
+<p><strong>分かったこと</strong></p>
+<ul>
+<li><strong>温度1点に変位2点を足すと、温度場の誤差は約
+1/4〜1/7、反りの誤差は約 1/8〜1/13 になった</strong>（3条件とも）。</li>
+<li><strong>温度1点＋変位2点は、温度2点よりも、温度場・反りともに良かった</strong>（センサの合計本数は
+3 本 対 2 本なので、本数をそろえた比較ではない）。</li>
+<li>変位計1本の読みは、5点すべての温度に重みを掛けて足したものなので、温度計のない反対側の温度まで直るためです（<a href="blog006.html">blog_006 §3</a>）。</li>
+</ul>
+<h3 id="0-9-何を推定したいかで適切なセンサ位置は変わる">0-9.
+何を推定したいかで、適切なセンサ位置は変わる</h3>
+<p><strong>問い</strong>：「〇〇に対する△△の感度」から、測る前にセンサ位置を決められないか。</p>
+<p><strong>この研究での答え</strong>：〇〇＝<strong>推定したい量</strong>（反り
+A−O、温度場全体、発熱量など）、△△＝<strong>センサの読み</strong>です。
+推定したい量とセンサの読みは、どちらも「5点の温度に、FrontISTR の熱感度
+<span class="math inline">\(W\)</span> （温度 1 K あたり何 µm 動くか）や
+POD の重みを掛けて足したもの」で書けます。
+そこで、<strong>そのセンサを測ったとしたら、推定したい量のあいまいさ σ
+がどこまで小さくなるか</strong>を、熱感度と ROM
+で作った温度のばらつきから計算します（測定値は使わない）。</p>
+<figure>
+<img alt="σ の意味" src="img/explain_sigma_meaning.png"/>
+<figcaption aria-hidden="true">σ の意味</figcaption>
+</figure>
+<p><strong>分かったこと</strong></p>
+<ul>
+<li>反り A−O を狙うと、選ばれる変位計の位置は上面（S1・S2）。A・O
+を直接測るより正確だった（§5・§6）。</li>
+<li><strong>温度場全体を狙う配置（A最適）と、反りを狙う配置（目的指向）は別の場所</strong>になり、反りの誤差は目的指向のほうが小さかった（§7）。</li>
+<li>「よく動く点に置く」だけでは、2点が近くに固まって失敗した（§7）。</li>
+<li>温度センサについても、反りを当てたいなら「ヒータ側と反対側に分けて置く」が良かった（<a href="blog005.html">blog_005 §4-6</a>）。</li>
+<li><strong>推定したい量が変わると、選ばれる位置が変わる</strong>。ただし試したのは主に反り
+A−O で、ほかの量では限られた比較のみです。</li>
+</ul>
 <hr/>
 <h2 id="1-主張したいこと">1. 主張したいこと</h2>
 <blockquote>
