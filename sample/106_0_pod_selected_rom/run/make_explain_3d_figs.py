@@ -10,6 +10,7 @@ matplotlib のグラフと組み合わせる。3D 側の文字は記号（P0, S1
   explain_correction_by_sensor.png … blog_006 §3-4：各センサのずれが、代表5点をどれだけ直したか
   explain_after_correction.png   … blog_006 §3-4 段階4：補正の前後と、そこから計算した次の 30 秒
   explain_q_h_update.png         … blog_006 §3-2 ③：q（発熱）と h（放熱）がセンサのずれから直される仕組み
+  explain_sigma_meaning.png      … blog_008 §5-2：置き場所の採点に使う σ の意味
 
 数値は blog_006 と同じ計算（seed 20260913、t=30 秒の1回目の補正、真値＝ROM の双子実験）。
 再現: OMP_NUM_THREADS=4 python3 run/make_explain_3d_figs.py
@@ -271,5 +272,46 @@ def fig_q_h_scatter():
     print("wrote explain_q_h_update.png")
 
 
+def fig_sigma_meaning():
+    """blog_008 §5-2：置き場所の採点に使う σ の意味（測る前のばらつきが、測ると何 µm まで縮むか）"""
+    d=np.load(os.path.join(RES,"rom_calibrated_pod.npz"))
+    C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],5); heat=int(d["heat_node"])
+    U,mean,pod,Cc=load(); UPp=np.linalg.pinv(U[pod])
+    op=np.load(os.path.join(RES,"dispop_allnodes.npz")); Dall=op["D"]; co=op["coords"]
+    Wall=np.einsum("nck,kj->ncj",Dall,UPp)
+    near=lambda x:int(np.linalg.norm(co-np.array(x),axis=1).argmin())
+    wAO=Wall[near((0.028,0,0.1005)),2]-Wall[near((-0.028,0,0.1005)),2]
+    w1=Wall[near((0.0097,-0.0362,0.1005)),0]; w2=Wall[near((-0.0346,0.0144,0.1005)),2]
+    rng=np.random.default_rng(20260930); N=4000                    # 置き場所の採点と同じ事前のばらつき
+    Tp=rng.uniform(rg.T_AIR_K-3,rg.T_AIR_K+12,(N,5)); qp=rng.uniform(0.3,1.8,N); hp=np.clip(rng.normal(0.02,0.01,N),1e-3,0.1)
+    Tp=rg.integrate_ensemble(Tp,C,Km,hp,qp,heat,0.0,150.0,2.0)       # t=150 秒の例
+    B=np.cov(Tp.T); warp=(Tp-Tp.mean(0))@wAO
+    Ht=np.eye(5)[[2,0]]
+    def sig(ws,temps=True):
+        rows=([Ht] if temps else [])+[w[None,:] for w in ws]
+        if not rows: return float(np.sqrt(wAO@B@wAO))
+        H=np.vstack(rows); R=np.eye(H.shape[0])*0.09
+        P=B-B@H.T@np.linalg.inv(H@B@H.T+R)@H@B; return float(np.sqrt(wAO@P@wAO))
+    cases=[("測る前（センサなし）",sig([],False),GRAY),("温度計 P2・P0 を測った後",sig([]),ORANGE),
+           ("＋変位計 S1",sig([w1]),BLUE),("＋変位計 S2（選定2点）",sig([w1,w2]),RED)]
+    fig,axs=plt.subplots(1,2,figsize=(16,6.2),gridspec_kw=dict(width_ratios=[1.45,1]))
+    ax=axs[0]; x=np.linspace(-4.5,4.5,600)
+    ax.hist(warp,bins=60,density=True,color="#d5dbe1",label="4000 通りの ROM 計算の反り（測る前）")
+    for nm,sg,c in cases:
+        ax.plot(x,np.exp(-x**2/(2*sg**2))/(sg*np.sqrt(2*np.pi)),color=c,lw=2.8,label=f"{nm}：σ = {sg:.2f} µm")
+    ax.set_xlabel("反り A−O の、推定のずれ [µm]（0 が真ん中）"); ax.set_ylabel("起こりやすさ（確率密度）")
+    ax.set_title("測るほど、反りの「分からなさ」の幅が狭くなる（t = 150 秒）",fontsize=15); ax.legend(fontsize=11.5,loc="upper left")
+    ax.grid(alpha=.3)
+    ax=axs[1]; v=[c[1] for c in cases]
+    ax.barh(range(4),v,color=[c[2] for c in cases]); ax.invert_yaxis()
+    ax.set_yticks(range(4)); ax.set_yticklabels([c[0] for c in cases],fontsize=12.5)
+    for i,y in enumerate(v): ax.text(y+0.02,i,f"±{y:.2f} µm",va="center",fontsize=13)
+    ax.set_xlabel("σ [µm]（小さいほど、反りがはっきり分かる）"); ax.set_xlim(0,max(v)*1.3); ax.grid(axis="x",alpha=.3)
+    ax.set_title("置き場所の「採点」＝ この σ",fontsize=15)
+    fig.suptitle("σ ＝ そのセンサを測ったとしたら、反り A−O の推定がまだ ±何 µm 外れうるか（測る前に計算できる）",fontsize=16,weight="bold")
+    fig.tight_layout(rect=(0,0,1,0.93)); fig.savefig(os.path.join(IMG,"explain_sigma_meaning.png"),dpi=130,facecolor="white"); plt.close(fig)
+    print("wrote explain_sigma_meaning.png", [round(c[1],3) for c in cases])
+
+
 if __name__=="__main__":
-    fig_free_weights(); fig_weighted_sum(); fig_correction(); fig_after_correction(); fig_q_h_scatter()
+    fig_free_weights(); fig_weighted_sum(); fig_correction(); fig_after_correction(); fig_q_h_scatter(); fig_sigma_meaning()

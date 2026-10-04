@@ -171,11 +171,85 @@ $$\boxed{\ (XX^{\mathsf T})\,\varphi=\lambda\,\varphi\ }$$
 - 固有ベクトル $\varphi_k$ ＝ **PODモード（場の型）**
 - 固有値 $\lambda_k=\sigma_k^2$ ＝ その型の **エネルギー**（大きいほど支配的）
 
+#### 「固有値＝エネルギー」とはどういう意味か
+
+**ここでいう「エネルギー」は物理のエネルギー（J）ではなく、「温度の揺れの2乗の合計」**のことです。
+
+固有値 $\lambda_k$ は、上で最大化した量そのものです。固有値問題の両辺に左から $\varphi_k^{\mathsf T}$ を掛けると
+
+$$
+\lambda_k = \varphi_k^{\mathsf T}\,(XX^{\mathsf T})\,\varphi_k = \sum_{t=1}^{m}\big(\varphi_k^{\mathsf T}x_t\big)^2
+$$
+
+（ $x_t$ は $X$ の $t$ 列目＝時刻 $t$ の「平均を引いた温度場」）になります。
+$\varphi_k^{\mathsf T}x_t$ は「時刻 $t$ の写真を型 $\varphi_k$ に重ねたときの長さ（その型がどれだけ含まれているか）」なので、
+
+> **$\lambda_k$ ＝「全時刻の写真が、型 $k$ をどれだけ含んでいるか」の2乗の合計**
+
+です。そして、全部の型の $\lambda_k$ を足すと、温度の揺れ全体の2乗の合計に一致します。
+
+$$
+\sum_{k}\lambda_k = \sum_{i=1}^{N}\sum_{t=1}^{m} X_{it}^2
+$$
+
+（右辺は、全セル・全時刻の「平均からの揺れ」の2乗の合計）
+
+だから $\lambda_k/\sum\lambda$ が「**その型で、揺れ全体の何割を説明できるか**」（寄与率）になります。本ケースの「2つの型で 99.89 %」はこの割合です。
+
+**下の3点×4時刻の例（§2-3）で確かめると**
+
+| | 値 |
+|---|---:|
+| 揺れ全体の2乗の合計 $\sum_i\sum_t X_{it}^2$ | 20.564 |
+| 型1の $\lambda_1=\sigma_1^2=4.161^2$ | 17.316（84.20 %） |
+| 型2の $\lambda_2=\sigma_2^2=1.802^2$ | 3.247（15.79 %） |
+| 型3の $\lambda_3=\sigma_3^2=0.036^2$ | 0.001（0.01 %） |
+| 合計 | 20.564（＝揺れ全体と一致） |
+
+型1 $\varphi_1=(0.566,\ 0.608,\ 0.557)$ に4枚の写真を重ねた長さは $(-3.025,\ -0.584,\ 2.613,\ 0.997)$ で、その2乗の合計がちょうど $17.316=\lambda_1$ です。
+
+（ $\sigma_k$ は次の §2-3 で出てくる「特異値」です。 $\lambda_k=\sigma_k^2$ になる理由もそこで示します。）
+
 ### 2-3. SVD との同値（実際の計算法）
 
-$X$ を特異値分解 $X=U\Sigma V^{\mathsf T}$ すると
+#### 特異値分解（SVD）とは
 
-$$XX^{\mathsf T}=U\Sigma V^{\mathsf T}V\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.$$
+**どんな行列も、「空間の型」×「大きさ」×「時間の動き」の3つの行列の積に分けられる**、というのが特異値分解（Singular Value Decomposition）です。
+
+$$
+\underbrace{X}_{N\times m} = \underbrace{U}_{N\times r}\;\underbrace{\Sigma}_{r\times r}\;\underbrace{V^{\mathsf T}}_{r\times m}
+$$
+
+| 行列 | 中身 | 性質 |
+|---|---|---|
+| $U$ | 列 $u_1,u_2,\dots$ が**空間の型**（1列＝全セル分の重み） | 列どうしが直交し、長さ 1（ $U^{\mathsf T}U=I$ ） |
+| $\Sigma$ | 対角に**特異値** $\sigma_1\ge\sigma_2\ge\cdots\ge0$ （各型の大きさ） | 対角以外は 0。大きい順に並ぶ |
+| $V$ | 列 $v_1,v_2,\dots$ が**時間の動き**（1列＝全時刻分の係数） | 列どうしが直交し、長さ 1（ $V^{\mathsf T}V=I$ ） |
+
+$r$ は $N$ と $m$ の小さい方以下の数（本ケースは $m=121$ ）です。
+「直交」とは、2つの列の内積が 0 ＝ 型どうしが重なりを持たない、という意味です。
+具体的な数値（3点×4時刻）は、この節の後半「数字で最後まで追う」にあります。
+
+#### なぜ SVD の $U$ が POD のモードになり、 $\lambda_k=\sigma_k^2$ になるのか
+
+$X$ を特異値分解 $X=U\Sigma V^{\mathsf T}$ して、§2-2 の固有値問題に出てきた $XX^{\mathsf T}$ を計算すると
+
+$$XX^{\mathsf T}=U\Sigma V^{\mathsf T}\,(U\Sigma V^{\mathsf T})^{\mathsf T}=U\Sigma \underbrace{V^{\mathsf T}V}_{I}\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.$$
+
+（ $V$ の列が直交なので $V^{\mathsf T}V=I$ ）。両辺に右から $U$ を掛けると、 $U^{\mathsf T}U=I$ なので
+
+$$
+XX^{\mathsf T}\,U = U\,\Sigma^2
+\quad\Longleftrightarrow\quad
+XX^{\mathsf T}\,u_k = \sigma_k^2\,u_k\qquad(k=1,2,\dots)
+$$
+
+これは §2-2 の固有値問題 $(XX^{\mathsf T})\varphi=\lambda\varphi$ そのものです。つまり
+
+- $U$ の $k$ 列目 $u_k$ ＝ 固有ベクトル $\varphi_k$ ＝ **POD モード**
+- $\sigma_k^2$ ＝ 固有値 $\lambda_k$ ＝ **その型のエネルギー**
+
+**3点×4時刻の例で確かめると**： $XX^{\mathsf T}u_1=(9.798,\ 10.526,\ 9.646)$ 、 $\sigma_1^2u_1=17.316\times(0.566,\ 0.608,\ 0.557)=(9.798,\ 10.526,\ 9.646)$ で一致します。
 
 つまり **$U$ の各列がそのまま $XX^{\mathsf T}$ の固有ベクトル＝PODモード**、 $\sigma_k^2$ が固有値。
 巨大な $XX^{\mathsf T}$ （ $N\times N$ ）を作らず、**SVD一発でPODが得られます**。
@@ -210,16 +284,44 @@ $$X=\sigma_1\,u_1v_1^{\mathsf T}+\sigma_2\,u_2v_2^{\mathsf T}+\cdots+\sigma_r\,u
 
 各項が「**空間の型 $u_k$** × **時間の動き $v_k$** × **大きさ $\sigma_k$**」の1セット。
 
+**$u_k$ と $v_k$ は行列ではなく、縦ベクトルです。** $\sigma_k$ はただの数です。
+
+$$
+\underbrace{\sigma_k}_{\text{scalar}}\;
+\underbrace{u_k}_{N\times1}\;
+\underbrace{v_k^{\mathsf T}}_{1\times m}
+=\underbrace{\sigma_k\,u_kv_k^{\mathsf T}}_{N\times m}
+$$
+
+| 記号 | 何か | 大きさ |
+|---|---|---|
+| $\sigma_k$ | 数（スカラー）＝型 $k$ の大きさ | 1 個 |
+| $u_k$ | 縦ベクトル＝全セル分の重み（温度分布の型） | $N\times1$ |
+| $v_k^{\mathsf T}$ | 縦ベクトル $v_k$ を横に倒した**横ベクトル**＝全時刻分の係数 | $1\times m$ |
+| $u_kv_k^{\mathsf T}$ | 縦 × 横の掛け算（外積）。**ここで初めて行列になる** | $N\times m$ |
+
+たとえば後半の3点×4時刻の例の第1項は、3×1 の縦ベクトルと 1×4 の横ベクトルを掛けて、3×4 の行列になります。
+
+$$
+\underbrace{4.161}_{\sigma_1}
+\underbrace{\begin{pmatrix}0.566\\ 0.608\\ 0.557\end{pmatrix}}_{u_1\ (3\times1)}
+\underbrace{\begin{pmatrix}-0.727&-0.140&0.628&0.240\end{pmatrix}}_{v_1^{\mathsf T}\ (1\times4)}
+=\underbrace{\begin{pmatrix}-1.712&-0.331&1.478&0.564\\ -1.839&-0.355&1.589&0.606\\ -1.685&-0.326&1.456&0.555\end{pmatrix}}_{3\times4}
+$$
+
+（1行1列目は $4.161\times0.566\times(-0.727)=-1.712$ 。行列の $(i,t)$ 成分は「 $\sigma_1\times$ セル $i$ の重み $\times$ 時刻 $t$ の係数」）
+
 **行列の形で書くと**こうなっています（ $N$ ＝セル数、 $m$ ＝時刻数、 $r$ ＝モード数）:
 
 $$\underbrace{X}_{N\times m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\ \underbrace{V^{\mathsf T}}_{r\times m}
 =\begin{pmatrix}|&|&&|\\ u_1&u_2&\cdots&u_r\\ |&|&&|\end{pmatrix}
-\begin{pmatrix}\sigma_1&&&\\ &\sigma_2&&\\ &&\ddots&\\ &&&\sigma_r\end{pmatrix}
+\begin{pmatrix}\sigma_1&0&\cdots&0\\ 0&\sigma_2&\cdots&0\\ \vdots&\vdots&\ddots&\vdots\\ 0&0&\cdots&\sigma_r\end{pmatrix}
 \begin{pmatrix}-\ v_1^{\mathsf T}\ -\\ -\ v_2^{\mathsf T}\ -\\ \vdots\\ -\ v_r^{\mathsf T}\ -\end{pmatrix}$$
 
 - $u_k$ は**縦ベクトル**（長さ $N$ ）＝ 全セルぶんの重み ＝ **1枚の温度分布の絵**
 - $v_k$ は**縦ベクトル**（長さ $m$ ）＝ 全時刻ぶんの係数 ＝ **その絵の濃さの時間変化**
 - $\sigma_k u_k v_k^{\mathsf T}$ は**縦×横の外積**なので、 $X$ と同じ $N\times m$ の行列になる
+- $\Sigma$ は**対角以外がすべて 0** の行列（対角行列）。だから「型 $k$ の大きさ $\sigma_k$ 」が、ほかの型と混ざらずに1つずつ掛かる
 
 
 しかも $\sigma_1\ge\sigma_2\ge\cdots$ と**大きい順に並ぶ**ので、頭からいくつか取れば良い近似になります。
@@ -240,7 +342,7 @@ $$\begin{pmatrix}22.182&23.867&25.742&23.664\\ 21.615&23.307&25.239&23.667\\ 20.
 これを `np.linalg.svd` にかけると、次の3つが返ります:
 
 $$U=\begin{pmatrix}0.566&0.513&0.646\\ 0.608&0.269&-0.747\\ 0.557&-0.815&0.159\end{pmatrix},\quad
-\Sigma=\begin{pmatrix}4.161&&\\ &1.802&\\ &&0.036\end{pmatrix},\quad
+\Sigma=\begin{pmatrix}4.161&0&0\\ 0&1.802&0\\ 0&0&0.036\end{pmatrix},\quad
 V^{\mathsf T}=\begin{pmatrix}-0.727&-0.140&0.628&0.240\\ 0.020&0.380&0.422&-0.823\\ 0.470&-0.765&0.421&-0.126\end{pmatrix}$$
 
 **ここからが本題です。** 各項 $\sigma_k u_kv_k^{\mathsf T}$ を実際に計算すると、
