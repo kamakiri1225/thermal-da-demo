@@ -1479,53 +1479,268 @@ K = C_{zy}\,\big(C_{yy}+R\big)^{-1}
 <tr class="header">
 <th>記号</th>
 <th>意味</th>
-<th>60 メンバーから数える</th>
+<th>大きさ（センサ4本のとき）</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(C_{zy}\)</span></td>
-<td>「状態7つ」と「センサの予想」が、メンバーをまたいで<strong>一緒にどう動くか</strong></td>
-<td>例：変位計2の予想が大きいメンバーほど、P4 が高い</td>
+<td>「状態7つ」と「センサの予想」が、60
+メンバーの間で<strong>一緒にどう動くか</strong>（共分散）</td>
+<td>7 × 4</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(C_{yy}\)</span></td>
-<td>センサの予想どうしが一緒にどう動くか、と、予想のばらつき</td>
-<td></td>
+<td>センサの予想どうしの共分散</td>
+<td>4 × 4</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(R\)</span></td>
-<td>センサのノイズ（温度 0.3 K、変位 0.3 µm）</td>
-<td>仕様</td>
+<td>センサのノイズ（対角に 0.3² ）</td>
+<td>4 × 4</td>
 </tr>
 </tbody>
 </table>
-<p>センサの予想は「5点温度に重みを掛けて足したもの」なので、 <span
-class="math inline">\(C_{zy}\)</span> は</p>
+<p>ここでは<strong>変位計 S2 の列</strong>（ <span
+class="math inline">\(C_{zy}\)</span>
+の4列目）を、1回目の実際の数値で作ってみます。</p>
+<p><strong>ステップ1：60
+メンバーの「平均からのずれ」を並べる</strong></p>
+<p>メンバー <span class="math inline">\(i\)</span> の状態から 60
+人の平均を引いたもの <span class="math inline">\(z_i-\bar z\)</span>
+を、1行ずつ並べた 60 × 7 の行列です。</p>
 <p><span class="math display">\[
-C_{zy} = \mathrm{Cov}\,(z,\ T_5)\;w
+Z&#39; =
+\begin{bmatrix}
+z_1-\bar z\\ z_2-\bar z\\ \vdots\\ z_{60}-\bar z
+\end{bmatrix}
+=
+\begin{bmatrix}
+-1.551 &amp; -2.515 &amp; -1.336 &amp; -1.546 &amp; -4.109 &amp; 0.553
+&amp; -0.011\\
+1.195 &amp; 3.954 &amp; 1.616 &amp; 0.183 &amp; -1.487 &amp; 0.391 &amp;
+-0.001\\
+\vdots &amp; &amp; &amp; &amp; &amp; &amp; \vdots
+\end{bmatrix}
 \]</span></p>
-<p>になります（ <span class="math inline">\(w\)</span>
-はそのセンサの重み）。
-<strong>重みの大きい点ほど強く直され、さらに「5点の温度どうし」「温度と
-<span class="math inline">\(q\)</span>
-」の連動を通じて、ほかの点や発熱量にも配られる</strong>、という仕組みです。
-センサが代表点にあるかどうかは関係ありません。<strong>重み <span
-class="math inline">\(w\)</span>
-さえ分かれば、どこのセンサでも換算表が作れます。</strong></p>
+<p>列は左から <span class="math inline">\(T_0, T_1, T_2, T_3, T_4, q,
+h\)</span> です。左の5列（温度）だけを取り出したものを <span
+class="math inline">\(T&#39;\)</span> （60 × 5）とします。</p>
+<p><strong>ステップ2：状態と5点温度の共分散を作る</strong></p>
+<p><span class="math display">\[
+\mathrm{Cov}(z,\ T_P) = \frac{1}{60-1}\,Z&#39;^{\mathsf T}\,T&#39;
+=
+\begin{bmatrix}
+4.767 &amp; 3.123 &amp; 4.739 &amp; 5.112 &amp; 3.089\\
+3.123 &amp; 9.784 &amp; 3.452 &amp; 2.700 &amp; 6.160\\
+4.739 &amp; 3.452 &amp; 4.825 &amp; 4.814 &amp; 3.274\\
+5.112 &amp; 2.700 &amp; 4.814 &amp; 6.572 &amp; 4.226\\
+3.089 &amp; 6.160 &amp; 3.274 &amp; 4.226 &amp; 12.632\\
+0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\
+-0.003 &amp; -0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
+\end{bmatrix}
+\]</span></p>
+<p>（7 × 5。行が <span class="math inline">\(T_0,\dots,T_4,\ q,\
+h\)</span> 、列が <span class="math inline">\(T_0,\dots,T_4\)</span>
+）</p>
+<p>たとえば5行目・5列目の 12.632 は「P4
+の温度のばらつき」、6行目・5列目の 0.527 は「発熱の倍率 <span
+class="math inline">\(q\)</span> が大きいメンバーほど P4
+が高い」という連動の強さです。</p>
+<p><strong>ステップ3：S2 の重み <span class="math inline">\(w\)</span>
+を掛ける</strong></p>
+<p>S2 の読みの予想は <span class="math inline">\(\hat u_{S2}=\bar
+u_{S2}+w^{\mathsf T}(T_P-\bar T_P)\)</span> なので、状態と S2
+の予想の共分散は、上の行列に <span class="math inline">\(w\)</span>
+を掛けたものになります。</p>
+<p><span class="math display">\[
+C_{zy}^{(S2)} = \mathrm{Cov}(z,\ T_P)\;w
+=
+\begin{bmatrix}
+4.767 &amp; 3.123 &amp; 4.739 &amp; 5.112 &amp; 3.089\\
+3.123 &amp; 9.784 &amp; 3.452 &amp; 2.700 &amp; 6.160\\
+4.739 &amp; 3.452 &amp; 4.825 &amp; 4.814 &amp; 3.274\\
+5.112 &amp; 2.700 &amp; 4.814 &amp; 6.572 &amp; 4.226\\
+3.089 &amp; 6.160 &amp; 3.274 &amp; 4.226 &amp; 12.632\\
+0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\
+-0.003 &amp; -0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
+\end{bmatrix}
+\begin{bmatrix}-0.169\\ 0.595\\ -0.309\\ 0.427\\ 0.666\end{bmatrix}
+=
+\begin{bmatrix}3.829\\ 9.485\\ 3.999\\ 4.875\\ 12.351\\ 0.297\\
+-0.008\end{bmatrix}
+\]</span></p>
+<p>P4 の行（5行目）を書き下すと</p>
+<p><span class="math display">\[
+3.089(-0.169) + 6.160(0.595) + 3.274(-0.309) + 4.226(0.427) +
+12.632(0.666)
+= -0.52 + 3.67 - 1.01 + 1.80 + 8.41 = 12.35
+\]</span></p>
+<p>S2 の重みが大きいのは P4（0.666）なので、P4
+の行がいちばん大きくなります。 <em>検算：各メンバーの S2
+の予想を直接計算して、P4 との共分散 <span
+class="math inline">\(\frac{1}{59}\sum_i (T_{4,i}-\bar T_4)(\hat
+u_{S2,i}-\bar u)\)</span> を取っても 12.351 で一致します。</em></p>
+<p><strong>ステップ4：割り算にあたる <span
+class="math inline">\((C_{yy}+R)^{-1}\)</span> を掛ける</strong></p>
+<p>センサが S2 だけなら、 <span
+class="math inline">\((C_{yy}+R)^{-1}\)</span> は「S2
+の予想のばらつき＋ノイズ」で割るだけです。</p>
+<p><span class="math display">\[
+K_{P4,S2} = \frac{12.351}{14.069 + 0.3^2} = 0.87\
+\mathrm{K}/\mu\mathrm{m}
+\]</span></p>
+<p>（14.069 は S2 の予想の分散 <span class="math inline">\(w^{\mathsf
+T}\mathrm{Cov}(T_P,T_P)\,w\)</span> ）</p>
+<p>実際は4本のセンサを同時に使うので、 <span
+class="math inline">\((C_{yy}+R)^{-1}\)</span> は 4 × 4
+の逆行列になり、ほかのセンサとの重なりを差し引いた分も入ります。その結果が
+§3-4 段階2 の表の <strong>1.792 K/µm</strong> です。</p>
+<p><strong>まとめ</strong>：センサが代表点にあるかどうかは、 <span
+class="math inline">\(w\)</span> （5つの数字）が違うだけです。 <span
+class="math inline">\(w\)</span> さえ分かれば、 <span
+class="math inline">\(\mathrm{Cov}(z,T_P)\,w\)</span>
+で換算表の列が作れます。</p>
 <h3 id="理論なぜ5点を直すだけで全体が直るのか">3-5.
 理論：なぜ5点を直すだけで全体が直るのか</h3>
-<p>代表点以外の温度や変位は、すべて「5点温度に重みを掛けて足したもの＋定数」です。
-重みを並べた行列を <span class="math inline">\(L\)</span> 、定数を <span
-class="math inline">\(c\)</span> とすると、直した後の値は</p>
+<p>小さな例で、行列の成分を全部書いて確かめます。
+読み取る量を3つ選びます：<strong>代表点以外の温度計
+F1・F2</strong>（§7-0）と、<strong>代表点以外の変位計
+S1</strong>（§3-3）です。</p>
+<h4
+id="ステップ13つの量を5点温度の式で縦に並べる">ステップ1：3つの量を「5点温度の式」で縦に並べる</h4>
 <p><span class="math display">\[
-L\,T_5^{a} + c = \big(L\,T_5^{f} + c\big) + L\,\big(T_5^{a}-T_5^{f}\big)
+\underbrace{\begin{bmatrix} T_{F1}\\ T_{F2}\\ u_{S1}\end{bmatrix}}_{y\
+(3\times1)}
+=
+\underbrace{\begin{bmatrix}296.167\\ 295.390\\ -1.738\end{bmatrix}}_{c\
+(3\times1)}
++
+\underbrace{\begin{bmatrix}
+0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\
+-0.058 &amp; 0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\
+-0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290
+\end{bmatrix}}_{L\ (3\times5)}
+\underbrace{\begin{bmatrix}T_0-296.659\\ T_1-295.698\\ T_2-296.938\\
+T_3-296.146\\ T_4-295.361\end{bmatrix}}_{T_P-\bar T_P\ (5\times1)}
 \]</span></p>
-<p>です（ <span class="math inline">\(f\)</span> ＝予報、 <span
-class="math inline">\(a\)</span>
-＝直した後）。左辺は「直した5点温度から計算し直した値」、右辺は「予報の値＋5点の直す量を重みで写したもの」で、<strong>同じもの</strong>です。</p>
-<p><strong>つまり、5点を直せば、全セルの温度も全節点の変位も、同じ補正を受けたことになります。</strong>
-別々に直す必要はなく、互いに矛盾もしません（どれも同じ5点温度から出ているため）。</p>
+<table>
+<thead>
+<tr class="header">
+<th>行列</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(c\)</span></td>
+<td>5点が平均温度のときの値（F1・F2 は K、S1 は µm）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(L\)</span> の1行目・2行目</td>
+<td>F1・F2 の gappy-POD の行（§7-0 の重み <span
+class="math inline">\(g\)</span> ）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(L\)</span> の3行目</td>
+<td>S1 の熱感度の行（§3-3 の重み <span class="math inline">\(w\)</span>
+）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_P-\bar T_P\)</span></td>
+<td>5点の温度の、平均からのずれ</td>
+</tr>
+</tbody>
+</table>
+<p>全セル（20,696）の温度なら <span class="math inline">\(L\)</span> が
+20,696 × 5、全節点の変位なら 15,120 × 5
+になるだけで、<strong>形は同じ</strong>です。</p>
+<h4
+id="ステップ2補正で5点の温度がどれだけ変わったか">ステップ2：補正で、5点の温度がどれだけ変わったか</h4>
+<p>1回目（ <span class="math inline">\(t=30\)</span> 秒、60
+メンバーの平均。§3-4 段階4 の表）の補正前 <span
+class="math inline">\(T_P^{f}\)</span> と補正後 <span
+class="math inline">\(T_P^{a}\)</span> の差です。</p>
+<p><span class="math display">\[
+\Delta T_P = T_P^{a}-T_P^{f}
+=\begin{bmatrix}294.27\\ 293.32\\ 294.83\\ 293.14\\ 293.41\end{bmatrix}
+-\begin{bmatrix}298.89\\ 297.77\\ 299.50\\ 298.10\\ 298.03\end{bmatrix}
+=\begin{bmatrix}-4.62\\ -4.45\\ -4.67\\ -4.96\\ -4.62\end{bmatrix}
+\]</span></p>
+<h4
+id="ステップ3補正後の5点温度から3つの量を計算し直す">ステップ3：補正後の5点温度から、3つの量を計算し直す</h4>
+<p>ステップ1の式に <span class="math inline">\(T_P^{a}=T_P^{f}+\Delta
+T_P\)</span>
+を入れると、行列の掛け算は足し算に分けられる（分配法則）ので</p>
+<p><span class="math display">\[
+y^{a} = c + L\big(T_P^{f}+\Delta T_P-\bar T_P\big)
+= \underbrace{c + L\big(T_P^{f}-\bar T_P\big)}_{y^{f}} + L\,\Delta T_P
+\]</span></p>
+<p>になります（ <span class="math inline">\(y^{f}\)</span>
+は予報の5点温度から計算した値）。最後の項 <span
+class="math inline">\(L\,\Delta T_P\)</span>
+を、成分を全部書いて計算します。</p>
+<p><span class="math display">\[
+L\,\Delta T_P=
+\begin{bmatrix}
+0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\
+-0.058 &amp; 0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\
+-0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290
+\end{bmatrix}
+\begin{bmatrix}-4.62\\ -4.45\\ -4.67\\ -4.96\\ -4.62\end{bmatrix}
+=\begin{bmatrix}-4.99\\ -4.54\\ +0.61\end{bmatrix}
+\]</span></p>
+<p>1行目（F1）を書き下すと</p>
+<p><span class="math display">\[
+0.026(-4.62) + (-0.020)(-4.45) + 0.000(-4.67) + 0.972(-4.96) +
+0.030(-4.62)
+= -0.12 + 0.09 + 0.00 - 4.82 - 0.14 = -4.99\ \mathrm{K}
+\]</span></p>
+<p>です。F1 はほぼ P3 に乗っているので（重み 0.972）、P3 の補正 −4.96 K
+がほぼそのまま F1 に効いています。</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">予報から計算 <span
+class="math inline">\(y^{f}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(+\ L\,\Delta
+T_P\)</span></th>
+<th style="text-align: right;">＝ 補正後の5点から計算 <span
+class="math inline">\(y^{a}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>F1 の温度</td>
+<td style="text-align: right;">298.162 K</td>
+<td style="text-align: right;">−4.99 K</td>
+<td style="text-align: right;"><strong>293.174 K</strong></td>
+</tr>
+<tr class="even">
+<td>F2 の温度</td>
+<td style="text-align: right;">297.897 K</td>
+<td style="text-align: right;">−4.54 K</td>
+<td style="text-align: right;"><strong>293.360 K</strong></td>
+</tr>
+<tr class="odd">
+<td>S1 の変位</td>
+<td style="text-align: right;">−2.312 µm</td>
+<td style="text-align: right;">+0.61 µm</td>
+<td style="text-align: right;"><strong>−1.701 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>3つとも、同じ5つの数字 <span class="math inline">\(\Delta
+T_P\)</span> から補正が決まっています。</strong>
+全セル・全節点でも同じで、 <span class="math inline">\(L\)</span>
+の行が増えるだけです。だから、5点を直せば全体がそろって直り、互いに矛盾もしません。</p>
 <h3 id="なぜループの中で全セルを復元しなくてよいのか">3-6.
 なぜループの中で全セルを復元しなくてよいのか</h3>
 <p>補正の式（ <span class="math inline">\(K\)</span>
@@ -1732,6 +1947,123 @@ T_{s,f}^{(m)}
 <p>で求めます。上付き <span class="math inline">\(+\)</span>
 は擬似逆行列、 <span class="math inline">\(f\)</span>
 は補正前を表します。</p>
+<p><strong>この式の行列を、中身まで書きます。</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>大きさ</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\overline{\mathbf T}\)</span></td>
+<td>20,696 × 1</td>
+<td>全セルの時間平均温度</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Phi\)</span></td>
+<td>20,696 × 5</td>
+<td>POD の型（1列＝1つの型、各列の長さは 1）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P\)</span></td>
+<td>5 × 20,696</td>
+<td><strong>代表5点の行だけを取り出す行列</strong></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(P\Phi\)</span></td>
+<td>5 × 5</td>
+<td>型の、代表5点の値（ <span class="math inline">\(U_{rP}\)</span>
+と同じもの）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Phi_{s,:}\)</span></td>
+<td>1 × 5</td>
+<td>型の、観測セル <span class="math inline">\(s\)</span> の値</td>
+</tr>
+</tbody>
+</table>
+<p><strong><span class="math inline">\(P\)</span>
+は「取り出し行列」です。</strong> 各行に 1 が1つだけあり、残りはすべて 0
+です。 代表5点はセル番号（0 から数える）7634、7924、7765、859、733
+なので、</p>
+<p><span class="math display">\[
+P=
+\begin{bmatrix}
+0 &amp; \cdots &amp; 0 &amp; 1_{(7634)} &amp; 0 &amp; \cdots &amp;
+\cdots &amp; \cdots &amp; 0\\
+0 &amp; \cdots &amp; \cdots &amp; \cdots &amp; \cdots &amp; 1_{(7924)}
+&amp; 0 &amp; \cdots &amp; 0\\
+0 &amp; \cdots &amp; \cdots &amp; 1_{(7765)} &amp; 0 &amp; \cdots &amp;
+\cdots &amp; \cdots &amp; 0\\
+0 &amp; \cdots &amp; 1_{(859)} &amp; 0 &amp; \cdots &amp; \cdots &amp;
+\cdots &amp; \cdots &amp; 0\\
+0 &amp; 1_{(733)} &amp; 0 &amp; \cdots &amp; \cdots &amp; \cdots &amp;
+\cdots &amp; \cdots &amp; 0
+\end{bmatrix}
+\quad (5\times 20{,}696)
+\]</span></p>
+<p>（ <span class="math inline">\(1_{(7634)}\)</span> は 7634 番目の列に
+1 があるという意味）です。 <span
+class="math inline">\(P\overline{\mathbf T}\)</span>
+は「平均温度場から、代表5点の値を取り出したもの」、 <span
+class="math inline">\(P\Phi\)</span>
+は「型から、代表5点の行を取り出したもの」です。 実際の計算では <span
+class="math inline">\(P\)</span> を作らず、 <code>mean[pod]</code> 、
+<code>U[pod, :]</code> と行番号で取り出しています。</p>
+<p><span class="math inline">\(P\Phi\)</span> は 5 × 5
+の正方行列で、逆行列を持ちます（このとき擬似逆行列 <span
+class="math inline">\((P\Phi)^{+}\)</span> は普通の逆行列と同じ）。</p>
+<p><span class="math display">\[
+P\Phi=
+\begin{bmatrix}
+-0.00583 &amp; -0.01077 &amp; -0.00111 &amp; -0.03423 &amp; 0.00611\\
+-0.00743 &amp; 0.00404 &amp; 0.00157 &amp; -0.00809 &amp; -0.02406\\
+-0.00471 &amp; -0.01457 &amp; 0.01089 &amp; 0.00267 &amp; -0.00430\\
+-0.00734 &amp; -0.00301 &amp; -0.01475 &amp; 0.00474 &amp; -0.00680\\
+-0.00767 &amp; 0.00899 &amp; 0.00768 &amp; -0.00065 &amp; 0.00901
+\end{bmatrix},
+\quad
+(P\Phi)^{+}=
+\begin{bmatrix}
+-6.07 &amp; -5.79 &amp; -23.65 &amp; -48.48 &amp; -59.24\\
+-9.37 &amp; 17.62 &amp; -38.45 &amp; -12.46 &amp; 25.62\\
+-6.28 &amp; 10.84 &amp; 25.54 &amp; -39.01 &amp; 15.94\\
+-23.63 &amp; -10.71 &amp; 14.85 &amp; 14.41 &amp; 5.41\\
+7.84 &amp; -32.51 &amp; -2.49 &amp; 5.48 &amp; 21.81
+\end{bmatrix}
+\]</span></p>
+<p><strong>例：観測セル <span class="math inline">\(s\)</span>
+＝F1（セル 15481、(35.1, −0.8, 94.6) mm）、メンバー1、 <span
+class="math inline">\(t=30\)</span> 秒の予報</strong></p>
+<p>① 5点温度のずれから、型の強さを出す（5 × 5 と 5 × 1 の掛け算）</p>
+<p><span class="math display">\[
+(P\Phi)^{+}\big(\mathbf T_r - P\overline{\mathbf T}\big)
+=(P\Phi)^{+}
+\begin{bmatrix}+0.707\\ -0.394\\ +1.253\\ +0.437\\ -1.364\end{bmatrix}
+=\begin{bmatrix}28.0\\ -102.1\\ -15.5\\ 5.0\\ -12.1\end{bmatrix}
+\]</span></p>
+<p>（§7-3 の型の強さ <span class="math inline">\(a\)</span>
+と同じ値）</p>
+<p>② 型の強さに、F1 での型の値を掛けて足す（1 × 5 と 5 × 1
+の掛け算）</p>
+<p><span class="math display">\[
+\Phi_{s,:}\,a=
+\begin{bmatrix}-0.00737 &amp; -0.00302 &amp; -0.01417 &amp; 0.00385
+&amp; -0.00569\end{bmatrix}
+\begin{bmatrix}28.0\\ -102.1\\ -15.5\\ 5.0\\ -12.1\end{bmatrix}
+= +0.411\ \mathrm{K}
+\]</span></p>
+<p>③ 平均に足す</p>
+<p><span class="math display">\[
+T_{s,f} = \overline T_s + 0.411 = 296.167 + 0.411 = 296.58\ \mathrm{K}
+\]</span></p>
+<p>①と②をまとめた <span
+class="math inline">\(\Phi_{s,:}(P\Phi)^{+}\)</span> が、§7-0 の重み
+<span class="math inline">\(g=(0.026,\ -0.020,\ 0.000,\ 0.972,\
+0.030)\)</span> です。</p>
 <p><code>obs_points_not_limited_to_rom.py</code>
 の代表点外の観測予報は、実際に次の式です。</p>
 <div class="sourceCode" id="cb1"><pre
