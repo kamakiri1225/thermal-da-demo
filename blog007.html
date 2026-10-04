@@ -274,8 +274,10 @@ id="toc-2-まず押さえる--rom-そのものとデータ同化は別の話">2.
 <li><a href="#問い-a-の答え先に書きます"
 id="toc-問い-a-の答え先に書きます">問い A
 の答え（先に書きます）</a></li>
-<li><a href="#グラフで確かめるデータ同化なし"
-id="toc-グラフで確かめるデータ同化なし">グラフで確かめる（データ同化なし）</a></li>
+<li><a
+href="#グラフで確かめる--rom-を-openfoam-と同じ条件にすれば合うデータ同化なし"
+id="toc-グラフで確かめる--rom-を-openfoam-と同じ条件にすれば合うデータ同化なし">グラフで確かめる
+― ROM を OpenFOAM と同じ条件にすれば合う（データ同化なし）</a></li>
 <li><a
 href="#間欠加熱で合わなかった原因--ヒータの-onoff-を0300-秒と決め打ちしていた"
 id="toc-間欠加熱で合わなかった原因--ヒータの-onoff-を0300-秒と決め打ちしていた">間欠加熱で合わなかった原因
@@ -692,11 +694,48 @@ class="math inline">\(P_i(t)\)</span>
 を何回繰り返しても、途中で大きさを変えても構いません。</li>
 </ul>
 <h3
-id="グラフで確かめるデータ同化なし">グラフで確かめる（データ同化なし）</h3>
+id="グラフで確かめる--rom-を-openfoam-と同じ条件にすれば合うデータ同化なし">グラフで確かめる
+― ROM を OpenFOAM と同じ条件にすれば合う（データ同化なし）</h3>
 <p>OpenFOAM で新しく計算した間欠加熱（0〜150 秒と 300〜450 秒に 15
 W）と、ROM を直接比べます。
 <strong>データ同化は一切していません。</strong> 発熱量と ON/OFF
 を与えて、ROM を 0→600 秒まで一気に計算しただけです。</p>
+<p><strong>この図では、ROM を2通りに計算して並べています。</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>ROM に与えたヒータの ON/OFF</th>
+<th>OpenFOAM と同じ条件か</th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>左</strong></td>
+<td>0〜150 秒・300〜450 秒に 15 W</td>
+<td><strong>同じ</strong></td>
+<td><strong>合う</strong>（最大 0.038 K）</td>
+</tr>
+<tr class="even">
+<td>右</td>
+<td>0〜300 秒ずっと 15 W（プログラムの初期設定のまま）</td>
+<td><strong>違う</strong>（わざと）</td>
+<td>150 秒以降で外れる（最大 3.8 K）</td>
+</tr>
+</tbody>
+</table>
+<p>右は、<strong>条件が食い違うと何が起きるかを見せるため、わざと</strong>ずらしたものです。
+以前「ROM
+は間欠加熱では合わない」と書いていたのは、この右の状態のまま計算していたためでした（原因はすぐ下の「間欠加熱で合わなかった原因」）。
+<strong>左のように OpenFOAM と条件を合わせれば、ROM
+は間欠加熱でも合います。</strong></p>
 <figure>
 <img src="img/rom_alone_intermittent.png"
 alt="ROM 単体と OpenFOAM の比較（間欠加熱）" />
@@ -730,14 +769,15 @@ ROM</strong>：破線が太い線の上にぴったり乗っている＝合っ�
 </tbody>
 </table>
 <ul>
-<li><strong>左</strong>：5点とも、線（ROM）が点（OpenFOAM）にぴったり重なっています。150
+<li><strong>左（条件を合わせた
+ROM）</strong>：5点とも、細い破線（ROM）が太い薄い線（OpenFOAM）の真ん中にぴったり乗っています。150
 秒でヒータを切って温度が下がり、300
 秒で入れ直して上がる動きを、<strong>そのまま再現しています</strong>。誤差は最大
 0.038 K で、温度計のノイズ（±0.3 K
 の帯）の中に完全に収まります。この値は、ROM の係数を決めるのに使った 15
 W・0〜300 秒の計算と<strong>まったく同じ精度</strong>です。</li>
-<li><strong>右</strong>：150
-秒以降、ROM（線）だけが上がり続けて、OpenFOAM（点）から離れていきます。ROM
+<li><strong>右（条件をわざとずらした ROM）</strong>：150
+秒以降、ROM（細い破線）だけが上がり続けて、OpenFOAM（太い薄い線）から離れていきます。ROM
 の中では「まだヒータが入っている」ことになっているからです。300
 秒で今度は ROM が切れるので、逆に下回ります。</li>
 </ul>
