@@ -38,11 +38,11 @@ def main():
         # 上段：温度の時刻歴
         ax=axs[0,j]
         for i in range(5):
-            ax.plot(t,T5[:,i]-273.15,"o",color=cols[i],ms=4)
-            ax.plot(t,R[:,i]-273.15,"-",color=cols[i],lw=1.8,label=f"P{i}")
+            ax.plot(t,T5[:,i]-273.15,"-",color=cols[i],lw=8,alpha=.28,solid_capstyle="round")   # OpenFOAM
+            ax.plot(t,R[:,i]-273.15,"--",color=cols[i],lw=1.8,label=f"P{i}")                    # ROM
         if case=="intermittent":
             W=run(lambda tt:(tt<300.0)); ew=W-T5; out[case]["fixed_schedule_max_err_K"]=float(np.abs(ew).max())
-            ax.plot(t,W[:,2]-273.15,"--",color="k",lw=1.5,label="P2：0〜300 s 一定と仮定")
+            ax.plot(t,W[:,2]-273.15,":",color="k",lw=1.8,label="参考：P2 を 0〜300 s 一定と仮定した ROM")
         ax.set_title(lab,fontsize=12); ax.grid(alpha=.3)
         ax.tick_params(labelbottom=False)
         # 下段：誤差（ROM − OpenFOAM）とノイズの幅
@@ -56,8 +56,16 @@ def main():
                 transform=ax.transAxes,ha="right",va="bottom",fontsize=10.5,bbox=dict(fc="white",ec="#bbb"))
         if j==0: ax.legend(fontsize=10,loc="upper left")
     axs[0,0].set_ylabel("温度 [℃]"); axs[1,0].set_ylabel("ROM − OpenFOAM [K]")
-    axs[0,0].legend(fontsize=9,ncol=2,loc="upper left"); axs[0,2].legend(fontsize=9,loc="upper left")
-    fig.suptitle("上：ROM 単体の予測（線）と OpenFOAM（点）／下：その差。同化なし、発熱量と ON/OFF を正しく与えて 0→600 s",fontsize=12.5)
+    from matplotlib.lines import Line2D
+    style=[Line2D([0],[0],color="#555",lw=8,alpha=.28,label="OpenFOAM（太い薄い線）"),
+           Line2D([0],[0],color="#555",lw=1.8,ls="--",label="ROM（細い破線）")]
+    ref=Line2D([0],[0],color="k",lw=1.8,ls=":",label="参考：P2 を 0〜300 s 一定と仮定した ROM")
+    for k,ax in enumerate(axs[0]):
+        if k==0:
+            h_,l_=ax.get_legend_handles_labels()
+            ax.add_artist(ax.legend(h_[:5],l_[:5],fontsize=9,ncol=2,loc="upper left"))   # 色＝点（全列共通）
+        ax.legend(handles=style+([ref] if k==2 else []),fontsize=9.5,loc="lower right",framealpha=.95)
+    fig.suptitle("上：OpenFOAM（太い薄い線）と ROM 単体の予測（細い破線）／下：その差。データ同化なし、発熱量と ON/OFF を OpenFOAM と同じに与えて 0→600 s",fontsize=12.5)
     fig.tight_layout(rect=(0,0,1,0.95)); fig.savefig(os.path.join(IMG,"rom_applicability.png"),dpi=150); plt.close(fig)
     json.dump(out,open(os.path.join(RES,"rom_applicability.json"),"w"),ensure_ascii=False,indent=1); print(out)
 
