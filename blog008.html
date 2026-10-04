@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_008：温度だけでなく変位も同化に使う ― 本研究の主張</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_008：温度だけでなく変位も同化に使う ― 本研究の主張</title>
+<style>
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -162,17 +163,14 @@
       vertical-align: middle;
     }
   </style>
-  
-  <style>
+<style>
    html body { max-width: 1120px !important; }
    body { padding: 0 24px; }
    img { max-width: 100%; height: auto; }
    table { font-size: 0.95em; }
   </style>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-  type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -181,51 +179,40 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a
-href="#blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う"
-id="toc-blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
+<li><a href="#blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う" id="toc-blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
 ―「温度だけでなく変位もデータ同化の観測に使う」</a>
 <ul>
-<li><a href="#この記事で確かめること"
-id="toc-この記事で確かめること">この記事で確かめること</a></li>
-<li><a href="#この記事の構成"
-id="toc-この記事の構成">この記事の構成</a></li>
+<li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
+<li><a href="#この記事の構成" id="toc-この記事の構成">この記事の構成</a></li>
 <li><a href="#1-主張したいこと" id="toc-1-主張したいこと">1.
 主張したいこと</a></li>
-<li><a href="#2-主張を支える計算--どこに何があるか"
-id="toc-2-主張を支える計算--どこに何があるか">2. 主張を支える計算 ―
+<li><a href="#2-主張を支える計算--どこに何があるか" id="toc-2-主張を支える計算--どこに何があるか">2. 主張を支える計算 ―
 どこに何があるか</a></li>
 <li><a href="#3-先行研究の調査" id="toc-3-先行研究の調査">3.
 先行研究の調査</a>
 <ul>
-<li><a href="#3-1-見つかった近い研究"
-id="toc-3-1-見つかった近い研究">3-1. 見つかった近い研究</a></li>
-<li><a href="#3-2-いちばん近いのは-eth-zurich-2024"
-id="toc-3-2-いちばん近いのは-eth-zurich-2024">3-2. いちばん近いのは ETH
+<li><a href="#3-1-見つかった近い研究" id="toc-3-1-見つかった近い研究">3-1. 見つかった近い研究</a></li>
+<li><a href="#3-2-いちばん近いのは-eth-zurich-2024" id="toc-3-2-いちばん近いのは-eth-zurich-2024">3-2. いちばん近いのは ETH
 Zurich (2024)</a></li>
 <li><a href="#3-3-分かったこと" id="toc-3-3-分かったこと">3-3.
 分かったこと</a></li>
+<li><a href="#3-4-2026-10-05の補足変位から温度を求める先行研究もある" id="toc-3-4-2026-10-05の補足変位から温度を求める先行研究もある">3-4.
+2026-10-05の補足：変位から温度を求める先行研究もある</a></li>
 </ul></li>
-<li><a href="#4-検証1同じ場所なら温度計と変位計のどちらが良いか"
-id="toc-4-検証1同じ場所なら温度計と変位計のどちらが良いか">4.
+<li><a href="#4-検証1同じ場所なら温度計と変位計のどちらが良いか" id="toc-4-検証1同じ場所なら温度計と変位計のどちらが良いか">4.
 【検証1】同じ場所なら、温度計と変位計のどちらが良いか</a>
 <ul>
-<li><a href="#4-1-どこに何を置いたか"
-id="toc-4-1-どこに何を置いたか">4-1. どこに何を置いたか</a></li>
+<li><a href="#4-1-どこに何を置いたか" id="toc-4-1-どこに何を置いたか">4-1. どこに何を置いたか</a></li>
 <li><a href="#4-2-結果" id="toc-4-2-結果">4-2. 結果</a></li>
-<li><a href="#4-3-分かったこと主張の修正"
-id="toc-4-3-分かったこと主張の修正">4-3.
+<li><a href="#4-3-分かったこと主張の修正" id="toc-4-3-分かったこと主張の修正">4-3.
 分かったこと（主張の修正）</a></li>
 </ul></li>
-<li><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか"
-id="toc-5-検証2別の場所の変位で測っていない-ao-を当てられるか">5.
+<li><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか" id="toc-5-検証2別の場所の変位で測っていない-ao-を当てられるか">5.
 【検証2】別の場所の変位で、測っていない A・O を当てられるか</a>
 <ul>
-<li><a href="#5-1-どこを測ってどこを評価したか"
-id="toc-5-1-どこを測ってどこを評価したか">5-1.
+<li><a href="#5-1-どこを測ってどこを評価したか" id="toc-5-1-どこを測ってどこを評価したか">5-1.
 どこを測って、どこを評価したか</a></li>
-<li><a href="#5-2-変位の候補はどう選んだか--実際にやった作業"
-id="toc-5-2-変位の候補はどう選んだか--実際にやった作業">5-2.
+<li><a href="#5-2-変位の候補はどう選んだか--実際にやった作業" id="toc-5-2-変位の候補はどう選んだか--実際にやった作業">5-2.
 変位の候補はどう選んだか ― 実際にやった作業</a></li>
 <li><a href="#5-3-結果" id="toc-5-3-結果">5-3. 結果</a></li>
 <li><a href="#5-4-分かったこと" id="toc-5-4-分かったこと">5-4.
@@ -233,8 +220,7 @@ id="toc-5-2-変位の候補はどう選んだか--実際にやった作業">5-2.
 <li><a href="#5-5-注意未確認" id="toc-5-5-注意未確認">5-5.
 注意（未確認）</a></li>
 </ul></li>
-<li><a href="#6-検証3真値を-openfoamfrontistr-にしても同じか"
-id="toc-6-検証3真値を-openfoamfrontistr-にしても同じか">6.
+<li><a href="#6-検証3真値を-openfoamfrontistr-にしても同じか" id="toc-6-検証3真値を-openfoamfrontistr-にしても同じか">6.
 【検証3】真値を OpenFOAM＋FrontISTR にしても同じか</a>
 <ul>
 <li><a href="#6-1-やったこと" id="toc-6-1-やったこと">6-1.
@@ -243,59 +229,46 @@ id="toc-6-検証3真値を-openfoamfrontistr-にしても同じか">6.
 <li><a href="#6-3-分かったこと" id="toc-6-3-分かったこと">6-3.
 分かったこと</a></li>
 </ul></li>
-<li><a href="#7-検証4配置の決め方は既存の方法より良いか"
-id="toc-7-検証4配置の決め方は既存の方法より良いか">7.
+<li><a href="#7-検証4配置の決め方は既存の方法より良いか" id="toc-7-検証4配置の決め方は既存の方法より良いか">7.
 【検証4】配置の決め方は、既存の方法より良いか</a>
 <ul>
-<li><a href="#7-1-この節は何をしたか"
-id="toc-7-1-この節は何をしたか">7-1. この節は何をしたか</a></li>
-<li><a href="#7-2-なぜやるか--ここまでの比較の弱点"
-id="toc-7-2-なぜやるか--ここまでの比較の弱点">7-2. なぜやるか ―
+<li><a href="#7-1-この節は何をしたか" id="toc-7-1-この節は何をしたか">7-1. この節は何をしたか</a></li>
+<li><a href="#7-2-なぜやるか--ここまでの比較の弱点" id="toc-7-2-なぜやるか--ここまでの比較の弱点">7-2. なぜやるか ―
 ここまでの比較の弱点</a></li>
 <li><a href="#7-3-土俵をそろえる" id="toc-7-3-土俵をそろえる">7-3.
 土俵をそろえる</a></li>
 <li><a href="#7-4-比べる6つの決め方" id="toc-7-4-比べる6つの決め方">7-4.
 比べる6つの決め方</a></li>
-<li><a href="#7-5-どこが選ばれたか--データ同化を回す前に場所を見る"
-id="toc-7-5-どこが選ばれたか--データ同化を回す前に場所を見る">7-5.
+<li><a href="#7-5-どこが選ばれたか--データ同化を回す前に場所を見る" id="toc-7-5-どこが選ばれたか--データ同化を回す前に場所を見る">7-5.
 どこが選ばれたか ― データ同化を回す前に、場所を見る</a></li>
-<li><a href="#7-6-同じ試験にかけた結果"
-id="toc-7-6-同じ試験にかけた結果">7-6. 同じ試験にかけた結果</a></li>
+<li><a href="#7-6-同じ試験にかけた結果" id="toc-7-6-同じ試験にかけた結果">7-6. 同じ試験にかけた結果</a></li>
 <li><a href="#7-7-分かったこと" id="toc-7-7-分かったこと">7-7.
 分かったこと</a></li>
-<li><a href="#7-8-言えること言えないこと"
-id="toc-7-8-言えること言えないこと">7-8.
+<li><a href="#7-8-言えること言えないこと" id="toc-7-8-言えること言えないこと">7-8.
 言えること・言えないこと</a></li>
 </ul></li>
-<li><a href="#8-工作機械の研究全体の中での位置づけ"
-id="toc-8-工作機械の研究全体の中での位置づけ">8.
+<li><a href="#8-工作機械の研究全体の中での位置づけ" id="toc-8-工作機械の研究全体の中での位置づけ">8.
 工作機械の研究全体の中での位置づけ</a>
 <ul>
 <li><a href="#8-1-既存の4つの流派" id="toc-8-1-既存の4つの流派">8-1.
 既存の4つの流派</a></li>
-<li><a href="#8-2-切り口a変位は結果ではなく情報源である"
-id="toc-8-2-切り口a変位は結果ではなく情報源である">8-2.
+<li><a href="#8-2-切り口a変位は結果ではなく情報源である" id="toc-8-2-切り口a変位は結果ではなく情報源である">8-2.
 切り口A：変位は「結果」ではなく「情報源」である</a></li>
-<li><a href="#8-3-切り口b測れない場所を測れる場所から当てる設計論目玉"
-id="toc-8-3-切り口b測れない場所を測れる場所から当てる設計論目玉">8-3.
+<li><a href="#8-3-切り口b測れない場所を測れる場所から当てる設計論目玉" id="toc-8-3-切り口b測れない場所を測れる場所から当てる設計論目玉">8-3.
 切り口B：測れない場所を、測れる場所から当てる設計論（目玉）</a></li>
-<li><a href="#8-4-切り口c運転条件が変わっても使える①への差別化"
-id="toc-8-4-切り口c運転条件が変わっても使える①への差別化">8-4.
+<li><a href="#8-4-切り口c運転条件が変わっても使える①への差別化" id="toc-8-4-切り口c運転条件が変わっても使える①への差別化">8-4.
 切り口C：運転条件が変わっても使える（①への差別化）</a></li>
 <li><a href="#8-5-組み立て方の提案" id="toc-8-5-組み立て方の提案">8-5.
 組み立て方の提案</a></li>
-<li><a href="#8-6-今の弱点と埋める手段"
-id="toc-8-6-今の弱点と埋める手段">8-6. 今の弱点と、埋める手段</a></li>
+<li><a href="#8-6-今の弱点と埋める手段" id="toc-8-6-今の弱点と埋める手段">8-6. 今の弱点と、埋める手段</a></li>
 </ul></li>
 <li><a href="#9-主張の書き方" id="toc-9-主張の書き方">9.
 主張の書き方</a>
 <ul>
 <li><a href="#9-1-言ってよいこと" id="toc-9-1-言ってよいこと">9-1.
 言ってよいこと</a></li>
-<li><a href="#9-2-言ってはいけないこと"
-id="toc-9-2-言ってはいけないこと">9-2. 言ってはいけないこと</a></li>
-<li><a href="#9-3-主張を強くするには未実施"
-id="toc-9-3-主張を強くするには未実施">9-3.
+<li><a href="#9-2-言ってはいけないこと" id="toc-9-2-言ってはいけないこと">9-2. 言ってはいけないこと</a></li>
+<li><a href="#9-3-主張を強くするには未実施" id="toc-9-3-主張を強くするには未実施">9-3.
 主張を強くするには（未実施）</a></li>
 </ul></li>
 <li><a href="#10-発表での位置づけ案" id="toc-10-発表での位置づけ案">10.
@@ -303,16 +276,18 @@ id="toc-9-3-主張を強くするには未実施">9-3.
 </ul></li>
 </ul>
 </nav>
-<h1
-id="blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
+<h1 id="blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
 ―「温度だけでなく変位もデータ同化の観測に使う」</h1>
-<p>更新日：2026-10-03</p>
+<blockquote>
+<p><strong>2026-10-05の読み直し：条件の区別</strong>
+研究対象は中空円筒の数値実験。工作機械への応用は将来の位置付けです。ROM双子実験と実ソルバ真値を区別し、温度場の精度と未観測変位の精度を別々に評価します。文献検索で見つからないことは新規性の証明ではありません。</p>
+</blockquote>
+<p>更新日：2026-10-05（条件・評価量・文献確認範囲を再整理）</p>
 <p>これまでの記事で、温度2点に変位2点を足すと推定が良くなることを示してきました。
 この記事は、<strong>それが研究の主張として成り立つのか</strong>を、先行研究を調べたうえで整理したものです。</p>
 <blockquote>
 <p><strong>この記事は、本研究の「主張」と「先行研究との関係」をまとめた記事です。</strong>
-計算の中身は <a
-href="blog006.html">blog_006</a>（データ同化の手順）、
+計算の中身は <a href="blog006.html">blog_006</a>（データ同化の手順）、
 <a href="blog007.html">blog_007</a>（ROM
 の適用範囲）にあります。
 <strong>工作機械の研究全体の中でどこに位置するか</strong>は §8
@@ -322,9 +297,9 @@ href="blog006.html">blog_006</a>（データ同化の手順）、
 <p><strong>blog_006〜008 の役割分担</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -345,10 +320,9 @@ href="blog006.html">blog_006</a>（データ同化の手順）、
 <td><strong>OpenFOAM＋FrontISTR</strong></td>
 </tr>
 <tr class="odd">
-<td><a
-href="blog008.html">blog_008</a></td>
+<td><a href="blog008.html">blog_008</a></td>
 <td><strong>主張と先行研究</strong>。研究としてどこが新しいか</td>
-<td>ROM（§4・§5）と<br><strong>OpenFOAM＋FrontISTR</strong>（§6・§7）</td>
+<td>ROM（§4・§5）と<br/><strong>OpenFOAM＋FrontISTR</strong>（§6・§7）</td>
 </tr>
 </tbody>
 </table>
@@ -357,8 +331,8 @@ href="blog008.html">blog_008</a></td>
 <h2 id="この記事で確かめること">この記事で確かめること</h2>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -380,7 +354,7 @@ href="blog008.html">blog_008</a></td>
 <td>評価点 A・O
 を<strong>一度も観測せず</strong>、別の場所の変位2点だけで A・O
 の変形を当てられるか（<a href="blog004.html">blog_004
-§7-4</a> の循環を断つ）</td>
+§7-4</a> の未観測点で独立に評価する）</td>
 </tr>
 <tr class="even">
 <td><strong>検証3（§6）</strong></td>
@@ -411,10 +385,7 @@ OpenFOAM＋FrontISTR</strong>。いずれも実機ではありません</td>
 </tr>
 <tr class="even">
 <td><strong>評価</strong></td>
-<td>加熱期 30〜300 秒の平均。全 20,696 セルの温度、反り <span
-class="math inline">\(U_z(A)-U_z(O)\)</span> 、個別の <span
-class="math inline">\(U_z(A)\)</span> ・ <span
-class="math inline">\(U_z(O)\)</span></td>
+<td>加熱期 30〜300 秒の平均。全 20,696 セルの温度、反り <span class="math inline">\(U_z(A)-U_z(O)\)</span> 、個別の <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span></td>
 </tr>
 <tr class="odd">
 <td><strong>文献調査の範囲</strong></td>
@@ -423,16 +394,16 @@ class="math inline">\(U_z(O)\)</span></td>
 </tr>
 </tbody>
 </table>
-<hr />
+<hr/>
 <blockquote>
 <p><strong>この記事の結論</strong> 1.
 工作機械の熱変形補正では、<strong>温度を観測して変位を推定する</strong>か、<strong>変位を直接測って補正する</strong>かのどちらかが一般的。
 2.
 <strong>温度と変位を同時に観測としてデータ同化に入れ、温度場・発熱量まで推定した例は、調べた範囲では見当たらない。</strong>
 3.
-手法そのもの（EnKF、POD、変位のデータ同化）は既知。新しいのは<strong>組み合わせ方と、工作機械の熱変形に適用した点</strong>。
+手法そのもの（EnKF、POD、変位のデータ同化）は既知。本研究の貢献候補は<strong>オープンソースでの一貫実装、未観測変位の評価、推定対象に合わせた配置の検証</strong>。対象は工作機械を想定した中空円筒であり、工作機械実機への適用を実証したものではない。
 4.
-<strong>同じ場所なら、温度計と変位計はほぼ互角</strong>だった（§4）。変位計の価値は「情報量が多いこと」ではなく、<strong>温度計を置けない場所に置けること</strong>。
+<strong>今回の同じ位置・同じ本数の比較では、温度場RMSEは近い値</strong>だった（§4）。反りの推定では差があり、温度計と変位計が同じ情報を持つという結論ではない。計測可能位置が異なる利点は実務上の仮説で、実機の設置可能性は未検証。
 5.
 <strong>別の場所で変位を測れば、一度も測っていない場所の変形を、直接測るより正確に当てられた</strong>（0.076
 µm 対 0.135 µm、§5）。 6. 真値を <strong>OpenFOAM＋FrontISTR</strong>
@@ -440,13 +411,13 @@ class="math inline">\(U_z(O)\)</span></td>
 置き場所の決め方は、<strong>既存の配置法より良かった</strong>（0.075 対
 A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="この記事の構成">この記事の構成</h2>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -474,7 +445,7 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 <tr class="even">
 <td><strong>4.【検証1】</strong></td>
 <td>同じ場所に温度計か変位計か（本数・場所をそろえる）</td>
-<td><strong>同じ場所ならほぼ互角</strong>。変位計の価値は「置けること」</td>
+<td><strong>温度場RMSEは近いが、反りの誤差には差がある</strong>。温度場と反りで評価を分ける。設置可能性は実機で未検証</td>
 </tr>
 <tr class="odd">
 <td><strong>5.【検証2】</strong></td>
@@ -510,23 +481,24 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 </table>
 <p><strong>検証の節（4〜7）はすべて同じ並びです。</strong>
 「この節で知りたいこと・条件」→「やったこと」→「結果」→「分かったこと」。</p>
-<hr />
+<hr/>
 <h2 id="1-主張したいこと">1. 主張したいこと</h2>
 <blockquote>
-<p><strong>熱変形を推定したいとき、観測は温度だけでなく、変位もデータ同化に入れたほうがよい。</strong>
-変位計は5点すべての温度に触れるので、温度計のない点の温度まで直り、結果として温度場も発熱量も熱変形も良くなる。
+<p><strong>今回比較した中空円筒の条件では、適切に選んだ変位観測を温度観測に加えると、未観測の熱変位推定が改善しました。</strong>
+全対象・全配置で併用が最良という主張ではありません。
+変位観測と温度状態の共分散により、温度計のない点も更新できます。ただし、更新が必ず改善を意味するわけではなく、発熱量の同定には主に温度観測が寄与した試験もあります。
 そして<strong>変位計は、知りたい場所に置く必要がない</strong>。別の場所で測って、測っていない場所の変形を当てられる。</p>
 </blockquote>
 <p>この主張を支える計算結果と、先行研究との関係を以下にまとめます。</p>
-<hr />
+<hr/>
 <h2 id="2-主張を支える計算--どこに何があるか">2. 主張を支える計算 ―
 どこに何があるか</h2>
 <p>この記事は<strong>主張と位置づけ</strong>を扱います。計算の中身はそれぞれの記事にあるので、ここでは一覧だけ示します。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -558,18 +530,15 @@ K</td>
 </tr>
 <tr class="even">
 <td><strong>変位を足すと温度も発熱量も当たる</strong></td>
-<td>温度場 0.503 → <strong>0.160 K</strong>、 <span
-class="math inline">\(Q\)</span> 14.05 → <strong>14.89 W</strong>（真値
+<td>温度場 0.503 → <strong>0.160 K</strong>、 <span class="math inline">\(Q\)</span> 14.05 → <strong>14.89 W</strong>（真値
 15 W）</td>
-<td><a href="blog004.html">blog_004 §7-6</a>、<a
-href="blog006.html">blog_006 §15</a></td>
+<td><a href="blog004.html">blog_004 §7-6</a>、<a href="blog006.html">blog_006 §15</a></td>
 </tr>
 <tr class="odd">
 <td><strong>係数を決めていない条件でも成立</strong>（実ソルバ真値）</td>
 <td>25 W で反り 0.74 → <strong>0.09 µm</strong>、発熱量 <strong>24.91
 W</strong>（真値 25 W）</td>
-<td><a href="blog007.html">blog_007</a>、<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">21</a></td>
+<td><a href="blog007.html">blog_007</a>、<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">21</a></td>
 </tr>
 <tr class="even">
 <td><strong>ROM は条件が変わっても使える</strong></td>
@@ -587,9 +556,9 @@ W）</td>
 <p>この記事で<strong>新しく行った検証</strong>は4つです。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -621,17 +590,17 @@ W）</td>
 </tr>
 </tbody>
 </table>
-<hr />
+<hr/>
 <h2 id="3-先行研究の調査">3. 先行研究の調査</h2>
 <p>2026-10-03
 に、英語5回・日本語1回の検索を行いました。<strong>網羅的な調査ではありません。</strong></p>
 <h3 id="3-1-見つかった近い研究">3-1. 見つかった近い研究</h3>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -643,8 +612,7 @@ W）</td>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a
-href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
+<td><a href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
 Zurich (2024)</a></td>
 <td>カルマンフィルタ＋低次元化FEM</td>
 <td><strong>温度のみ</strong>（5軸機で25本中13本）</td>
@@ -658,23 +626,20 @@ al. (2024) CIRP JMST</a></td>
 <td>出力</td>
 </tr>
 <tr class="odd">
-<td><a
-href="https://tekniker.es/es/methodology-for-the-design-of-a-thermal-distortion-compensation-for-large-machine-tools-based-in-state-space-representation-with-Kalman-filter">Tekniker</a></td>
+<td><a href="https://tekniker.es/es/methodology-for-the-design-of-a-thermal-distortion-compensation-for-large-machine-tools-based-in-state-space-representation-with-Kalman-filter">Tekniker</a></td>
 <td>状態空間＋カルマンフィルタ</td>
 <td>主軸回転数・温度</td>
 <td>出力</td>
 </tr>
 <tr class="even">
-<td><a
-href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
+<td><a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
 の整理</a></td>
 <td>直接法／間接法の分類</td>
 <td>温度（間接法）<strong>または</strong>変位（直接法）</td>
 <td>直接法は変位を測って直接補正。状態推定はしない</td>
 </tr>
 <tr class="odd">
-<td><a
-href="https://openbooks.itmo.ru/en/article/18553/USING_THE_EXTENDED_KALMAN_FILTER_IN_NONSTATIONARY_THERMAL_MEASUREMENT_WHEN_SOLVING_INVERSE_HEAT_TRANSFER_PROBLEMS.html">逆熱伝導問題（EKF）</a></td>
+<td><a href="https://openbooks.itmo.ru/en/article/18553/USING_THE_EXTENDED_KALMAN_FILTER_IN_NONSTATIONARY_THERMAL_MEASUREMENT_WHEN_SOLVING_INVERSE_HEAT_TRANSFER_PROBLEMS.html">逆熱伝導問題（EKF）</a></td>
 <td>拡張カルマンフィルタ</td>
 <td>温度のみ</td>
 <td>―</td>
@@ -698,9 +663,9 @@ Assimilation</a></td>
 Zurich (2024)</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -737,7 +702,7 @@ Zurich (2024)</h3>
 </tr>
 <tr class="even">
 <td>実装</td>
-<td>非公開</td>
+<td>本調査では公開コードを未確認</td>
 <td><strong>オープンソースで公開</strong></td>
 </tr>
 </tbody>
@@ -748,13 +713,18 @@ Zurich (2024)</h3>
 は<strong>実機</strong>で検証しており、本研究は計算で作った真値だけです。ここは明確に劣ります。</p>
 <h3 id="3-3-分かったこと">3-3. 分かったこと</h3>
 <ol type="1">
-<li>工作機械の分野では
-<strong>「温度を測って変位を出す」が標準</strong>です。</li>
-<li>変位を測る方法（直接法）もありますが、<strong>変位をそのまま補正に使うもので、温度場の推定には戻していません</strong>。</li>
+<li>今回調べた工作機械の研究例では、<strong>温度観測から熱変位を予測する構成</strong>が多く見られました。すべての先行研究を分類し尽くしたという意味ではありません。</li>
+<li>変位を測る方法（直接法）もありますが、表に挙げた直接補償例は変位を補正に使います。一方、変位から温度場を逆推定する先行研究もあるため、すべての変位計測法について「温度推定には戻さない」と一般化できません（§3-4）。</li>
 <li><strong>温度と変位を同時に観測としてデータ同化に入れた例は見つかりませんでした。</strong></li>
 <li>変位を観測に使うデータ同化自体は、別分野（流体、き裂）にあります。<strong>手法として新しいわけではありません。</strong></li>
 </ol>
-<hr />
+<hr/>
+<h3 id="3-4-2026-10-05の補足変位から温度を求める先行研究もある">3-4.
+2026-10-05の補足：変位から温度を求める先行研究もある</h3>
+<p>Ansariら（2025）は、有限要素モデルと随伴法を使い、変位・ひずみ観測から構造の温度場を逆推定しています。今回確認したのは<a href="https://portal.fis.tum.de/en/publications/adjoint-based-recovery-of-thermal-fields-from-displacement-or-str/">著者所属機関の論文要旨</a>と書誌情報（<a href="https://doi.org/10.1016/j.cma.2025.117818">DOI</a>）で、全文の式・実装まで精査したわけではありません。</p>
+<p>したがって、<strong>「変位観測から温度場へ情報を戻す」こと自体には先行研究があります。</strong>
+ただし、これが今回と同じ温度＋変位の逐次EnKF、Q/h同時推定、ROM、未観測変位の配置設計をすべて備える手法かどうかは、要旨だけでは判定できません。検索で同じ組合せを見つけられなかったことを、新規性の証明として使いません。</p>
+<p>本研究の主張は、中空円筒に対するオープンソース実装と、観測配置ごとの未観測変位の改善を具体的な条件・比較結果で示したことに置きます。工作機械への応用可能性は議論しますが、実機での優位性は今後の検証です。</p>
 <h2 id="4-検証1同じ場所なら温度計と変位計のどちらが良いか">4.
 【検証1】同じ場所なら、温度計と変位計のどちらが良いか</h2>
 <blockquote>
@@ -768,9 +738,9 @@ Zurich (2024)</h3>
 <h3 id="4-1-どこに何を置いたか">4-1. どこに何を置いたか</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -793,8 +763,7 @@ Zurich (2024)</h3>
 <tr class="odd">
 <td><strong>A</strong></td>
 <td>(28.7, 0, 100.5) 上面・ヒータ側</td>
-<td>構成により <strong>温度</strong> または <strong>変位 <span
-class="math inline">\(U_z\)</span></strong></td>
+<td>構成により <strong>温度</strong> または <strong>変位 <span class="math inline">\(U_z\)</span></strong></td>
 </tr>
 <tr class="even">
 <td><strong>O</strong></td>
@@ -807,18 +776,18 @@ class="math inline">\(U_z\)</span></strong></td>
 <li><strong>変位計</strong>は A・O の FEM 節点そのものに置きます。</li>
 <li><strong>温度計</strong>は A・O にいちばん近い OpenFOAM セル、(26.6,
 −1.6, 98.8) と (−26.6, −1.6, 98.8) mm
-に置きます（代表5点ではないセルですが、<a
-href="blog007.html">blog_007 §10</a>
+に置きます（代表5点ではないセルですが、<a href="blog007.html">blog_007 §10</a>
 のとおりデータ同化できます）。</li>
 <li><strong>評価しているのも同じ A・O</strong>
-なので、この節の結果は循環を含みます。循環を断った試験は §5 です。</li>
+なので、この節の結果は循環を含みます。循環を断った試験は
+§5です。なお「直接測るより正確」は、A/Oにノイズ付き観測を与えて同化した比較ケースより誤差が小さかった、という意味です。計測器の精度を上回ると一般化した結論ではありません。</li>
 </ul>
 <p>4つの構成は次のとおりです。</p>
 <table>
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 30%" />
-<col style="width: 40%" />
+<col style="width: 30%"/>
+<col style="width: 30%"/>
+<col style="width: 40%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -840,8 +809,7 @@ href="blog007.html">blog_007 §10</a>
 </tr>
 <tr class="odd">
 <td>＋A/O に変位計2本（本番）</td>
-<td>温度 P2・P0 ＋ <strong>変位 A・O の <span
-class="math inline">\(U_z\)</span></strong></td>
+<td>温度 P2・P0 ＋ <strong>変位 A・O の <span class="math inline">\(U_z\)</span></strong></td>
 <td style="text-align: right;">4</td>
 </tr>
 <tr class="even">
@@ -854,7 +822,7 @@ class="math inline">\(U_z\)</span></strong></td>
 <h3 id="4-2-結果">4-2. 結果</h3>
 <p>まず、<strong>どこを測って、温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
-<img src="img/ver1_detail.png" alt="検証1の詳細" />
+<img alt="検証1の詳細" src="img/ver1_detail.png"/>
 <figcaption aria-hidden="true">検証1の詳細</figcaption>
 </figure>
 <p><em>左＝観測点と評価点（上面を真上から見た図）／中＝<strong>温度</strong>：温度計を置いていない代表点
@@ -867,17 +835,16 @@ P4 の時刻歴／ 右＝<strong>変位</strong>：反り A−O
 </ul>
 <p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
-<img src="img/disp_vs_temp_same_place.png"
-alt="同じ場所で温度か変位か" />
+<img alt="同じ場所で温度か変位か" src="img/disp_vs_temp_same_place.png"/>
 <figcaption aria-hidden="true">同じ場所で温度か変位か</figcaption>
 </figure>
 <table>
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 21%" />
-<col style="width: 21%" />
-<col style="width: 21%" />
-<col style="width: 21%" />
+<col style="width: 15%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -961,7 +928,7 @@ alt="同じ場所で温度か変位か" />
 </blockquote>
 <blockquote>
 <p><strong>この節で分かったこと</strong> -
-<strong>同じ場所なら、温度計と変位計はほぼ互角</strong>。温度場全体では温度計がわずかに良い（0.132
+<strong>今回の同じ位置・同じ本数の比較では、温度場RMSEは近い値</strong>。温度場全体では温度計がわずかに良い（0.132
 対 0.145 K、差は seed のばらつき内）。 -
 <strong>反りを当てるなら変位計が良い</strong>（0.135 対 0.201 µm、5 seed
 中4回）。知りたい量を直接測っているため。 -
@@ -969,7 +936,7 @@ alt="同じ場所で温度か変位か" />
 -
 変位計の価値は、<strong>温度計を置けない場所に置けること</strong>にある（加工中の工具先端に熱電対は入れられない）。</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="5-検証2別の場所の変位で測っていない-ao-を当てられるか">5.
 【検証2】別の場所の変位で、測っていない A・O を当てられるか</h2>
 <blockquote>
@@ -981,23 +948,24 @@ alt="同じ場所で温度か変位か" />
 の双子実験、EnKF・5 seed・加熱期 30〜300 秒</p>
 </blockquote>
 <p><a href="blog004.html">blog_004 §7-4</a>
-の構成は、評価している A・O をそのまま観測に使っていました（循環）。
+の構成は、評価している A・O
+をそのまま観測に使っていました（観測点での適合評価）。
 そこで、<strong>A・O を一度も観測せず</strong>、別の場所の変位2点だけで
 A・O
 を当てられるかを調べました（<code>run/disp_elsewhere_predict_AO.py</code>）。</p>
 <h3 id="5-1-どこを測ってどこを評価したか">5-1.
 どこを測って、どこを評価したか</h3>
 <figure>
-<img src="img/blog008_obs_points.png" alt="観測点と評価点" />
+<img alt="観測点と評価点" src="img/blog008_obs_points.png"/>
 <figcaption aria-hidden="true">観測点と評価点</figcaption>
 </figure>
 <p><em>赤＝温度センサ（P2・P0）／緑＝選定した変位2点（矢印＝測る方向）／橙＝B・C／黒＝評価点
 A・O。 <strong>A・O は一度も観測していません。</strong></em></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1039,8 +1007,7 @@ A・O。 <strong>A・O は一度も観測していません。</strong></em></p>
 <h3 id="5-2-変位の候補はどう選んだか--実際にやった作業">5-2.
 変位の候補はどう選んだか ― 実際にやった作業</h3>
 <p>やったことは<strong>総当たり</strong>です。難しいことはしていません。</p>
-<h4
-id="ステップ1候補を全部リストアップする15120-通り">ステップ1：候補を全部リストアップする（15,120
+<h4 id="ステップ1候補を全部リストアップする15120-通り">ステップ1：候補を全部リストアップする（15,120
 通り）</h4>
 <p>FrontISTR
 を<strong>6回だけ</strong>回しました（平均の温度場で1回、POD
@@ -1054,16 +1021,14 @@ FEM 計算は要りません。</p>
 <p>A・O から 12 mm 以内の節点は「A・O
 を測ったのと同じ」になるので候補から外し、<strong>14,754
 通り</strong>が残りました。</p>
-<h4
-id="ステップ2候補を1つずつ採点する">ステップ2：候補を1つずつ採点する</h4>
+<h4 id="ステップ2候補を1つずつ採点する">ステップ2：候補を1つずつ採点する</h4>
 <p>候補を1つ取り出して、こう問います。</p>
 <blockquote>
 <p><strong>「ここに変位計を1本置いたら、反り A−O
 はどれくらい『はっきり』するか」</strong></p>
 </blockquote>
 <p>この「はっきり度」を数値で出します。単位は µm
-で、<strong>小さいほど良い</strong>です。この記事では <span
-class="math inline">\(\sigma\)</span> と書きます。</p>
+で、<strong>小さいほど良い</strong>です。この記事では <span class="math inline">\(\sigma\)</span> と書きます。</p>
 <p><strong><span class="math inline">\(\sigma\)</span>
 とは何か（「測った後に残る推定誤差」の意味）</strong></p>
 <p>発熱量や初期温度が分からないので、測る前は反り A−O
@@ -1076,7 +1041,7 @@ class="math inline">\(\sigma\)</span> と書きます。</p>
 は「そのセンサを測ったとしたら、幅がどこまで狭くなるか」</strong>、つまり「測った後でも、反りの推定がまだ
 ±何 µm 外れうるか」です。</p>
 <figure>
-<img src="img/explain_sigma_meaning.png" alt="σ の意味" />
+<img alt="σ の意味" src="img/explain_sigma_meaning.png"/>
 <figcaption aria-hidden="true">σ の意味</figcaption>
 </figure>
 <p><em>左：灰色＝4,000 通りの ROM
@@ -1086,9 +1051,7 @@ class="math inline">\(\sigma\)</span> と書きます。</p>
 <thead>
 <tr class="header">
 <th>測るもの</th>
-<th style="text-align: right;"><span
-class="math inline">\(\sigma\)</span> （ <span
-class="math inline">\(t=150\)</span> 秒）</th>
+<th style="text-align: right;"><span class="math inline">\(\sigma\)</span> （ <span class="math inline">\(t=150\)</span> 秒）</th>
 <th>意味</th>
 </tr>
 </thead>
@@ -1117,17 +1080,15 @@ class="math inline">\(t=150\)</span> 秒）</th>
 </table>
 <p>ポイントは、<strong><span class="math inline">\(\sigma\)</span>
 は実測値がなくても計算できる</strong>ことです。
-「どこを測ると幅がどれだけ狭くなるか」は、熱感度 <span
-class="math inline">\(W\)</span> と 4,000
+「どこを測ると幅がどれだけ狭くなるか」は、熱感度 <span class="math inline">\(W\)</span> と 4,000
 通りの散らばりだけで決まり、実際に何 µm
-と読んだかには依存しないためです（下の式の中に測定値 <span
-class="math inline">\(y\)</span> が入っていない）。
+と読んだかには依存しないためです（下の式の中に測定値 <span class="math inline">\(y\)</span> が入っていない）。
 だから、<strong>センサを付ける前に</strong>候補を採点できます。下の表の
 1.186 µm などは、加熱期 30〜300 秒で平均した値です。</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1152,9 +1113,9 @@ class="math inline">\(y\)</span> が入っていない）。
 <p>採点に使うのは次の2つだけで、<strong>測定値は使いません</strong>。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1184,11 +1145,7 @@ class="math inline">\(y\)</span> が入っていない）。
 T}\Big(B-BH_S^{\mathsf T}(H_SBH_S^{\mathsf
 T}+R)^{-1}H_SB\Big)w\]</span></p>
 <p><span class="math inline">\(w\)</span> ＝反り A−O
-に対する5点温度の熱感度 (0.47, −0.65, 0.60, 0.04, −0.46) µm/K、 <span
-class="math inline">\(B\)</span> ＝5点の温度のばらつき（共分散）、 <span
-class="math inline">\(H_S\)</span> ＝候補 <span
-class="math inline">\(S\)</span> を測る演算子、 <span
-class="math inline">\(R\)</span> ＝センサのノイズ（0.3 µm）。
+に対する5点温度の熱感度 (0.47, −0.65, 0.60, 0.04, −0.46) µm/K、 <span class="math inline">\(B\)</span> ＝5点の温度のばらつき（共分散）、 <span class="math inline">\(H_S\)</span> ＝候補 <span class="math inline">\(S\)</span> を測る演算子、 <span class="math inline">\(R\)</span> ＝センサのノイズ（0.3 µm）。
 括弧の中はカルマンフィルタの更新式そのもので、「測った後に残る温度のあいまいさ」です。
 それを <span class="math inline">\(w\)</span>
 ではさむと「残る<strong>反りの</strong>あいまいさ」になります。</p>
@@ -1200,27 +1157,23 @@ class="math inline">\(R\)</span> ＝センサのノイズ（0.3 µm）。
 <tr class="header">
 <th>順位</th>
 <th>候補</th>
-<th style="text-align: right;"><span
-class="math inline">\(\sigma\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\sigma\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>1位</strong></td>
-<td><strong>(9.7, −36.2, 100.5) mm の <span
-class="math inline">\(U_x\)</span></strong></td>
+<td><strong>(9.7, −36.2, 100.5) mm の <span class="math inline">\(U_x\)</span></strong></td>
 <td style="text-align: right;"><strong>0.347 µm</strong></td>
 </tr>
 <tr class="even">
 <td>2位</td>
-<td>(9.7, <strong>+36.2</strong>, 100.5) mm の <span
-class="math inline">\(U_x\)</span></td>
+<td>(9.7, <strong>+36.2</strong>, 100.5) mm の <span class="math inline">\(U_x\)</span></td>
 <td style="text-align: right;">0.347 µm</td>
 </tr>
 <tr class="odd">
 <td>3位</td>
-<td>(14.4, −34.6, 100.5) mm の <span
-class="math inline">\(U_x\)</span></td>
+<td>(14.4, −34.6, 100.5) mm の <span class="math inline">\(U_x\)</span></td>
 <td style="text-align: right;">0.347 µm</td>
 </tr>
 <tr class="even">
@@ -1237,8 +1190,7 @@ class="math inline">\(U_x\)</span></td>
 </table>
 <p>1位を採用します。これで 1.186 → <strong>0.347
 µm</strong>。1本測るだけで3分の1以下になりました。</p>
-<h4
-id="ステップ4採点をやり直して2点目を選ぶ">ステップ4：<strong>採点をやり直して</strong>、2点目を選ぶ</h4>
+<h4 id="ステップ4採点をやり直して2点目を選ぶ">ステップ4：<strong>採点をやり直して</strong>、2点目を選ぶ</h4>
 <p>ここが肝心です。<strong>2位をそのまま選んではいけません。</strong></p>
 <p>2位は (9.7, <strong>+36.2</strong>, 100.5) で、1位とは y
 の符号が違うだけの<strong>ほぼ同じ場所</strong>です。
@@ -1250,21 +1202,18 @@ id="ステップ4採点をやり直して2点目を選ぶ">ステップ4：<stro
 <tr class="header">
 <th>順位</th>
 <th>候補</th>
-<th style="text-align: right;"><span
-class="math inline">\(\sigma\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\sigma\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>1位</strong></td>
-<td><strong>(−34.6, 14.4, 100.5) mm の <span
-class="math inline">\(U_z\)</span></strong></td>
+<td><strong>(−34.6, 14.4, 100.5) mm の <span class="math inline">\(U_z\)</span></strong></td>
 <td style="text-align: right;"><strong>0.256 µm</strong></td>
 </tr>
 <tr class="even">
 <td>2位</td>
-<td>(−36.2, 9.7, 100.5) mm の <span
-class="math inline">\(U_z\)</span></td>
+<td>(−36.2, 9.7, 100.5) mm の <span class="math inline">\(U_z\)</span></td>
 <td style="text-align: right;">0.256 µm</td>
 </tr>
 <tr class="odd">
@@ -1275,10 +1224,9 @@ class="math inline">\(U_z\)</span></td>
 </tbody>
 </table>
 <p>0.347 → <strong>0.256 µm</strong>。これで2点決まりました。</p>
-<h4
-id="採点し直すと良い場所が変わる">採点し直すと、良い場所が変わる</h4>
+<h4 id="採点し直すと良い場所が変わる">採点し直すと、良い場所が変わる</h4>
 <figure>
-<img src="img/disp_selection_steps.png" alt="変位2点の選び方" />
+<img alt="変位2点の選び方" src="img/disp_selection_steps.png"/>
 <figcaption aria-hidden="true">変位2点の選び方</figcaption>
 </figure>
 <p><em>左＝1点目を選ぶときの採点（色が薄いほど良い）、中＝1点目を測った前提で採点し直したとき、右＝
@@ -1286,9 +1234,9 @@ id="採点し直すと良い場所が変わる">採点し直すと、良い場�
 <p>左と中を見比べてください。<strong>良い場所（薄い色）が移動しています。</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1322,7 +1270,7 @@ id="採点し直すと良い場所が変わる">採点し直すと、良い場�
 <h3 id="5-3-結果">5-3. 結果</h3>
 <p>まず、<strong>どこを測って、温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
-<img src="img/ver2_detail.png" alt="検証2の詳細" />
+<img alt="検証2の詳細" src="img/ver2_detail.png"/>
 <figcaption aria-hidden="true">検証2の詳細</figcaption>
 </figure>
 <p><em>左＝観測点と評価点／中＝<strong>温度</strong>：温度計を置いていない
@@ -1337,17 +1285,16 @@ P4／右＝<strong>変位</strong>：一度も観測していない反り A−O�
 </ul>
 <p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
-<img src="img/disp_elsewhere_predict_AO.png"
-alt="別の場所で測って A・O を当てる" />
+<img alt="別の場所で測って A・O を当てる" src="img/disp_elsewhere_predict_AO.png"/>
 <figcaption aria-hidden="true">別の場所で測って A・O
 を当てる</figcaption>
 </figure>
 <table>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 26%" />
-<col style="width: 26%" />
-<col style="width: 26%" />
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1367,7 +1314,7 @@ Uz(A)</strong></th>
 <td style="text-align: right;">0.528 K</td>
 </tr>
 <tr class="even">
-<td>A・O 自身を観測（<strong>循環</strong>・参考）</td>
+<td>A・O 自身を観測（<strong>観測点での適合評価</strong>・参考）</td>
 <td style="text-align: right;">0.135 µm</td>
 <td style="text-align: right;">0.138 µm</td>
 <td style="text-align: right;">0.145 K</td>
@@ -1380,9 +1327,7 @@ Uz(A)</strong></th>
 <td style="text-align: right;">0.175 K</td>
 </tr>
 <tr class="even">
-<td><strong>選定2点</strong>（(9.7, −36.2, 100.5) の <span
-class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span
-class="math inline">\(U_z\)</span> ）</td>
+<td><strong>選定2点</strong>（(9.7, −36.2, 100.5) の <span class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span class="math inline">\(U_z\)</span> ）</td>
 <td style="text-align: right;"><strong>0.076 µm</strong></td>
 <td style="text-align: right;"><strong>0.103 µm</strong></td>
 <td style="text-align: right;"><strong>0.126 K</strong></td>
@@ -1404,10 +1349,8 @@ class="math inline">\(U_z\)</span> ）</td>
 </table>
 <h3 id="5-4-分かったこと">5-4. 分かったこと</h3>
 <figure>
-<img src="img/blog008_3d_anim.gif"
-alt="温度分布と熱変形の3Dアニメーション" />
-<figcaption
-aria-hidden="true">温度分布と熱変形の3Dアニメーション</figcaption>
+<img alt="温度分布と熱変形の3Dアニメーション" src="img/blog008_3d_anim.gif"/>
+<figcaption aria-hidden="true">温度分布と熱変形の3Dアニメーション</figcaption>
 </figure>
 <p><em>左＝真値、中＝温度2点だけ、右＝温度2点＋変位2点（A・O
 は一度も測らない）。
@@ -1435,8 +1378,7 @@ aria-hidden="true">温度分布と熱変形の3Dアニメーション</figcaptio
 </tbody>
 </table>
 <p>（seed 20260913）</p>
-<p>形と色で、何が起きているか一目で分かります。例えば <span
-class="math inline">\(t=150\)</span> 秒では</p>
+<p>形と色で、何が起きているか一目で分かります。例えば <span class="math inline">\(t=150\)</span> 秒では</p>
 <table>
 <thead>
 <tr class="header">
@@ -1482,8 +1424,7 @@ class="math inline">\(t=150\)</span> 秒では</p>
 µm）は、変位なし（0.756
 µm）から少ししか改善しません。底面は固定されていてほとんど動かないためです。</li>
 <li>選定は<strong>データ同化を回す前</strong>に、FrontISTR の熱感度と
-ROM で作った温度のばらつきだけで計算しています（<a
-href="blog005.html">blog_005 §4-6</a>
+ROM で作った温度のばらつきだけで計算しています（<a href="blog005.html">blog_005 §4-6</a>
 と同じ方法）。</li>
 </ol>
 <blockquote>
@@ -1508,7 +1449,7 @@ href="blog005.html">blog_005 §4-6</a>
 置き場所は<strong>データ同化を回す前</strong>に、FrontISTR の熱感度と
 ROM の温度のばらつきだけで決められる。</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="6-検証3真値を-openfoamfrontistr-にしても同じか">6.
 【検証3】真値を OpenFOAM＋FrontISTR にしても同じか</h2>
 <blockquote>
@@ -1520,8 +1461,7 @@ ROM の温度のばらつきだけで決められる。</p>
 は一度も観測しない。15 W・25 W・間欠加熱の3条件 × 5 seed</p>
 </blockquote>
 <h3 id="6-1-やったこと">6-1. やったこと</h3>
-<p><a
-href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
+<p><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
 の結果は真値も ROM の双子実験でした。
 データ同化に使うのと同じモデルで正解を作っているので、<strong>都合が良すぎます</strong>。
 そこで<strong>真値を OpenFOAM＋FrontISTR
@@ -1535,7 +1475,7 @@ href="#5-検証2別の場所の変位で測っていない-ao-を当てられる
 <h3 id="6-2-結果">6-2. 結果</h3>
 <p>3条件それぞれで、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
-<img src="img/ver3_detail.png" alt="検証3の詳細" />
+<img alt="検証3の詳細" src="img/ver3_detail.png"/>
 <figcaption aria-hidden="true">検証3の詳細</figcaption>
 </figure>
 <p><em>上段＝<strong>温度</strong>（温度計を置いていない
@@ -1553,14 +1493,19 @@ P4）／下段＝<strong>変位</strong>（一度も観測していない反り 
 </ul>
 <p>誤差を加熱期で平均すると次のようになります。</p>
 <figure>
-<img src="img/holdout_AO_realsolver.png"
-alt="実ソルバ真値での holdout" />
+<img alt="実ソルバ真値での holdout" src="img/holdout_AO_realsolver.png"/>
 <figcaption aria-hidden="true">実ソルバ真値での holdout</figcaption>
 </figure>
 <p><em>黒＝真値（OpenFOAM＋FrontISTR）、灰＝変位なし、橙＝B・C、緑＝選定2点。5
 seed 平均。</em></p>
 <p><strong>反り A−O の誤差 [µm]</strong>（加熱期 30〜300 秒の平均）</p>
 <table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+</colgroup>
 <thead>
 <tr class="header">
 <th>変位2点をどこに置くか</th>
@@ -1577,7 +1522,7 @@ seed 平均。</em></p>
 <td style="text-align: right;">0.630</td>
 </tr>
 <tr class="even">
-<td>A・O 自身を観測（<strong>循環</strong>・参考）</td>
+<td>A・O 自身を観測（<strong>観測点での適合評価</strong>・参考）</td>
 <td style="text-align: right;">0.137</td>
 <td style="text-align: right;">0.153</td>
 <td style="text-align: right;">0.100</td>
@@ -1627,7 +1572,7 @@ seed 平均。</em></p>
 倍</strong>改善した。 - 置き場所が悪いと 25 W で 1.096 µm ＝
 ほとんど改善しない。<strong>置き場所の設計に意味がある。</strong></p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="7-検証4配置の決め方は既存の方法より良いか">7.
 【検証4】配置の決め方は、既存の方法より良いか</h2>
 <blockquote>
@@ -1642,8 +1587,8 @@ seed（<code>run/placement_method_comparison.py</code>）</p>
 <p>変位計を<strong>どこに置くか決める方法</strong>を6通り用意し、<strong>決め方だけを変えて、ほかの条件は全部そろえて</strong>比べました。</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <tbody>
 <tr class="odd">
@@ -1677,8 +1622,7 @@ seed（<code>run/placement_method_comparison.py</code>）</p>
 </table>
 <h3 id="7-2-なぜやるか--ここまでの比較の弱点">7-2. なぜやるか ―
 ここまでの比較の弱点</h3>
-<p><a
-href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
+<p><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
 で比べたのは、この4つでした。</p>
 <table>
 <thead>
@@ -1723,8 +1667,8 @@ href="#5-検証2別の場所の変位で測っていない-ao-を当てられる
 <p>比べるときに変えてよいのは「選び方」だけです。それ以外は全部そろえます。</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1741,8 +1685,7 @@ href="#5-検証2別の場所の変位で測っていない-ao-を当てられる
 <tr class="even">
 <td>使う情報</td>
 <td>FrontISTR の熱感度 <span class="math inline">\(W\)</span> と、ROM を
-4,000 通り回して作った温度のばらつき <span
-class="math inline">\(B\)</span>
+4,000 通り回して作った温度のばらつき <span class="math inline">\(B\)</span>
 だけ。<strong>測定値は使わない</strong></td>
 </tr>
 <tr class="odd">
@@ -1769,9 +1712,9 @@ W／間欠加熱の3条件</td>
 <p><strong>「何を小さくしようとしているか」で分類</strong>すると、次の6つになります。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1815,15 +1758,13 @@ T}(\cdots)w\)</span></td>
 </tbody>
 </table>
 <p>A最適・D最適は実験計画法の教科書に出てくる基準です。Q-DEIM は ROM
-の分野で標準的な点の選び方で、 <a
-href="blog004.html">blog_004 §4</a> で ROM
+の分野で標準的な点の選び方で、 <a href="blog004.html">blog_004 §4</a> で ROM
 の代表5点を選んだのと同じ方法です。</p>
 <blockquote>
 <p><strong>比較の軸はここです。</strong> A最適・D最適・Q-DEIM
 は「<strong>温度場を</strong>いちばん良く知る配置」を選びます。
 本研究だけが「<strong>反り A−O
-を</strong>いちばん良く知る配置」を選びます（ <span
-class="math inline">\(w\)</span> で目的を指定しているため）。</p>
+を</strong>いちばん良く知る配置」を選びます（ <span class="math inline">\(w\)</span> で目的を指定しているため）。</p>
 <p><strong>温度場を良く知れば、反りも良く分かるはずだ</strong> ―
 これが正しいなら、A最適と本研究は同じ答えになるはずです。
 違う答えになるなら、「目的を指定すること」に意味があることになります。</p>
@@ -1832,20 +1773,19 @@ class="math inline">\(w\)</span> で目的を指定しているため）。</p>
 どこが選ばれたか ― データ同化を回す前に、場所を見る</h3>
 <p>データ同化を回す前に、<strong>選ばれた場所そのもの</strong>を見ます。選定はすべて机上の計算だけで終わっています。</p>
 <figure>
-<img src="img/placement_method_points.png" alt="どこが選ばれたか" />
+<img alt="どこが選ばれたか" src="img/placement_method_points.png"/>
 <figcaption aria-hidden="true">どこが選ばれたか</figcaption>
 </figure>
 <p><em>上面（z=100.5
-mm）を真上から見た図。□＝選ばれた変位計、矢印＝測る方向（ <span
-class="math inline">\(U_z\)</span> は紙面に垂直なので矢印なし）、
+mm）を真上から見た図。□＝選ばれた変位計、矢印＝測る方向（ <span class="math inline">\(U_z\)</span> は紙面に垂直なので矢印なし）、
 ●＝評価点 A・O（測らない）、赤い弧＝ヒータ側。</em></p>
 <table>
 <colgroup>
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 17%" />
-<col style="width: 23%" />
-<col style="width: 23%" />
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1853,8 +1793,7 @@ class="math inline">\(U_z\)</span> は紙面に垂直なので矢印なし）、
 <th>1点目</th>
 <th>2点目</th>
 <th style="text-align: right;"><strong>2点の間隔</strong></th>
-<th style="text-align: right;">測る前の予測 <span
-class="math inline">\(\sigma\)</span></th>
+<th style="text-align: right;">測る前の予測 <span class="math inline">\(\sigma\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -1908,21 +1847,19 @@ class="math inline">\(\sigma\)</span></th>
 しか離れていません。</strong>
 左上のパネルで、2つの□がほとんど重なっているのが見えます。
 「よく動く点」は上面の特定の向きに<strong>固まって存在する</strong>ので、単純に上位2つを採ると
-<strong>ほとんど同じ場所を2回測る</strong>ことになります。 <a
-href="#ステップ4採点をやり直して2点目を選ぶ">§5-2 のステップ4</a> で
+<strong>ほとんど同じ場所を2回測る</strong>ことになります。 <a href="#ステップ4採点をやり直して2点目を選ぶ">§5-2 のステップ4</a> で
 「2位をそのまま選んではいけない」と書いたのは、まさにこれです。</p>
 <p><strong>(2) 式は「A・O
 を直接測るのは最善ではない」と、データ同化を回す前に言っています。</strong>
 A・O 自身を測る構成の予測は 0.319 µm で、目的指向の 0.256 µm
-より大きい。 <a
-href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
+より大きい。 <a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5</a>
 の「直接測るより正確」という結果は、
 <strong>測定の前に式が予言していた</strong>ことになります。</p>
 <h3 id="7-6-同じ試験にかけた結果">7-6. 同じ試験にかけた結果</h3>
 <p>選ばれた2点それぞれで、A・O を一度も観測しない holdout を回します。
 まず、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
-<img src="img/ver4_detail.png" alt="検証4の詳細" />
+<img alt="検証4の詳細" src="img/ver4_detail.png"/>
 <figcaption aria-hidden="true">検証4の詳細</figcaption>
 </figure>
 <p><em>左＝観測点（緑は目的指向が選んだ2点。他の決め方は別の場所）／中＝<strong>温度</strong>（P4）／右＝<strong>変位</strong>（反り
@@ -1933,8 +1870,7 @@ A−O）。 真値＝OpenFOAM＋FrontISTR、15 W。</em></p>
 <li><strong>右</strong>：反りでは差がはっきり出ます。目的指向（赤）が真値にいちばん近く、A最適（緑）がそれに続きます。</li>
 </ul>
 <figure>
-<img src="img/placement_method_comparison.png"
-alt="配置の選び方の比較" />
+<img alt="配置の選び方の比較" src="img/placement_method_comparison.png"/>
 <figcaption aria-hidden="true">配置の選び方の比較</figcaption>
 </figure>
 <p><strong>観測していない反り A−O の誤差 [µm]</strong>（加熱期 30〜300
@@ -2029,12 +1965,12 @@ D最適は自分の指標（logdet
 の順位は、実際の順位をほぼ当てました。</strong></p>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2077,8 +2013,8 @@ D最適は自分の指標（logdet
 <h3 id="7-8-言えること言えないこと">7-8. 言えること・言えないこと</h3>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2106,16 +2042,16 @@ A−O）・変位2点の場合、目的指向が3条件とも最小だった</td
 </tr>
 </tbody>
 </table>
-<hr />
+<hr/>
 <h2 id="8-工作機械の研究全体の中での位置づけ">8.
 工作機械の研究全体の中での位置づけ</h2>
 <p>ここまでの検証をふまえ、<strong>工作機械の熱変形研究のどこに本研究が入るか</strong>を整理します。</p>
 <h3 id="8-1-既存の4つの流派">8-1. 既存の4つの流派</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2137,15 +2073,13 @@ A−O）・変位2点の場合、目的指向が3条件とも最小だった</td
 </tr>
 <tr class="odd">
 <td><strong>③ 低次元化＋状態推定</strong></td>
-<td>ROM＋カルマンフィルタで温度場を推定（<a
-href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
+<td>ROM＋カルマンフィルタで温度場を推定（<a href="https://www.research-collection.ethz.ch/entities/publication/a1ddda1a-3cd6-41ad-8590-be31b19896fb">ETH
 2024</a> など）</td>
 <td><strong>観測は温度のみ。変位は出力</strong></td>
 </tr>
 <tr class="even">
 <td><strong>④ 直接測定による補償</strong></td>
-<td>変位計で TCP を測って直接補正（<a
-href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
+<td>変位計で TCP を測って直接補正（<a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
 の整理</a> の「直接法」）</td>
 <td>加工中は測れない。状態推定には戻さない</td>
 </tr>
@@ -2214,9 +2148,7 @@ href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST
 <blockquote>
 <p><strong>回帰モデルは学習した条件を外れると外れる。物理モデル＋データ同化は外挿できる。</strong></p>
 </blockquote>
-<p>真値は OpenFOAM＋FrontISTR（<a
-href="blog007.html">blog_007</a>、<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">21_advantage_verification.md</a>）。</p>
+<p>真値は OpenFOAM＋FrontISTR（<a href="blog007.html">blog_007</a>、<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/21_advantage_verification.md">21_advantage_verification.md</a>）。</p>
 <table>
 <thead>
 <tr class="header">
@@ -2252,8 +2184,8 @@ href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod
 を裏づけ</strong>にするのが強いと考えます。</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2281,9 +2213,9 @@ href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod
 <h3 id="8-6-今の弱点と埋める手段">8-6. 今の弱点と、埋める手段</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2315,7 +2247,7 @@ href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod
 配置の決め方も既存法と比べました（§7）。 <strong>実ソルバを真値にした
 holdout
 試験は実施済み</strong>で（§6）、3条件とも同じ結論でした。残るのは実機検証と文献調査です。</p>
-<hr />
+<hr/>
 <h2 id="9-主張の書き方">9. 主張の書き方</h2>
 <h3 id="9-1-言ってよいこと">9-1. 言ってよいこと</h3>
 <blockquote>
@@ -2330,8 +2262,8 @@ holdout
 <h3 id="9-2-言ってはいけないこと">9-2. 言ってはいけないこと</h3>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2349,8 +2281,8 @@ holdout
 <td>いずれも既知の手法</td>
 </tr>
 <tr class="odd">
-<td>「変位計は温度計より情報量が多い」</td>
-<td>同じ場所では互角だった（§4）</td>
+<td>「変位計は常に温度計より情報量が多い」</td>
+<td>今回の温度場RMSEは近いが、反りの誤差には差がある。情報は推定対象・ノイズ・配置に依存（§4）</td>
 </tr>
 <tr class="even">
 <td>「実機で有効」</td>
@@ -2358,8 +2290,7 @@ holdout
 </tr>
 <tr class="odd">
 <td>「どんな機械でも有効」</td>
-<td>熱源の位置が変わると配置も変わる（<a
-href="blog007.html">blog_007</a>）</td>
+<td>熱源の位置が変わると配置も変わる（<a href="blog007.html">blog_007</a>）</td>
 </tr>
 </tbody>
 </table>
@@ -2373,12 +2304,12 @@ href="blog007.html">blog_007</a>）</td>
 <li><strong>実機での検証</strong>：<code>IoT/thermal_expansion_experiment/</code>
 に計画があるが、未実施。</li>
 </ol>
-<hr />
+<hr/>
 <h2 id="10-発表での位置づけ案">10. 発表での位置づけ（案）</h2>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">

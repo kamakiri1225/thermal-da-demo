@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_001：OpenFOAM＋FrontISTR で熱流体固体連成→熱膨張</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_001：OpenFOAM＋FrontISTR で熱流体固体連成→熱膨張</title>
+<style>
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -226,17 +227,14 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
-  
-  <style>
+<style>
    html body { max-width: 1120px !important; }
    body { padding: 0 24px; }
    img { max-width: 100%; height: auto; }
    table { font-size: 0.95em; }
   </style>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-  type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -245,104 +243,78 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a
-href="#blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す"
-id="toc-blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す">blog_001：OpenFOAM＋FrontISTR
+<li><a href="#blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す" id="toc-blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す">blog_001：OpenFOAM＋FrontISTR
 で「熱流体固体連成 → 熱膨張」をやってみる ―
 さらに熱伝達率の分布まで出す</a>
 <ul>
-<li><a href="#この記事と-enkf-の関係"
-id="toc-この記事と-enkf-の関係">この記事と EnKF の関係</a></li>
-<li><a href="#0-背景--なぜ熱変形を推定したいのか"
-id="toc-0-背景--なぜ熱変形を推定したいのか">0. 背景 ―
+<li><a href="#この記事と-enkf-の関係" id="toc-この記事と-enkf-の関係">この記事と EnKF の関係</a></li>
+<li><a href="#0-背景--なぜ熱変形を推定したいのか" id="toc-0-背景--なぜ熱変形を推定したいのか">0. 背景 ―
 なぜ熱変形を推定したいのか</a>
 <ul>
-<li><a href="#0-1-熱変位は加工誤差の最大の原因"
-id="toc-0-1-熱変位は加工誤差の最大の原因">0-1.
-熱変位は加工誤差の最大の原因</a></li>
-<li><a href="#0-2-対策は回避と補償の2つ"
-id="toc-0-2-対策は回避と補償の2つ">0-2.
-対策は「回避」と「補償」の2つ</a></li>
-<li><a href="#0-3-メーカー各社の実装"
-id="toc-0-3-メーカー各社の実装">0-3. メーカー各社の実装</a></li>
-<li><a href="#0-4-しかし温度が合っても変形が合うとは限らない"
-id="toc-0-4-しかし温度が合っても変形が合うとは限らない">0-4.
+<li><a href="#0-1-熱変位は工作機械の加工誤差の大きな要因" id="toc-0-1-熱変位は工作機械の加工誤差の大きな要因">0-1.
+熱変位は工作機械の加工誤差の大きな要因</a></li>
+<li><a href="#0-2-対策は回避と補償に分けて考える" id="toc-0-2-対策は回避と補償に分けて考える">0-2.
+対策は「回避」と「補償」に分けて考える</a></li>
+<li><a href="#0-3-メーカー各社の実装" id="toc-0-3-メーカー各社の実装">0-3. メーカー各社の実装</a></li>
+<li><a href="#0-4-しかし温度が合っても変形が合うとは限らない" id="toc-0-4-しかし温度が合っても変形が合うとは限らない">0-4.
 しかし「温度が合っても変形が合う」とは限らない</a></li>
-<li><a href="#0-5-計測の方法間接法と直接法"
-id="toc-0-5-計測の方法間接法と直接法">0-5.
+<li><a href="#0-5-計測の方法間接法と直接法" id="toc-0-5-計測の方法間接法と直接法">0-5.
 計測の方法（間接法と直接法）</a></li>
-<li><a href="#0-6-この分野の最新研究20232025"
-id="toc-0-6-この分野の最新研究20232025">0-6.
+<li><a href="#0-6-この分野の最新研究20232025" id="toc-0-6-この分野の最新研究20232025">0-6.
 この分野の最新研究（2023〜2025）</a></li>
 </ul></li>
-<li><a href="#手書きで追うための記号と単位"
-id="toc-手書きで追うための記号と単位">手書きで追うための記号と単位</a></li>
-<li><a href="#0-題材片側だけ温められる中空円筒"
-id="toc-0-題材片側だけ温められる中空円筒">0.
+<li><a href="#手書きで追うための記号と単位" id="toc-手書きで追うための記号と単位">手書きで追うための記号と単位</a></li>
+<li><a href="#0-題材片側だけ温められる中空円筒" id="toc-0-題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</a></li>
-<li><a href="#1-step-1openfoam-で熱流体固体連成cht"
-id="toc-1-step-1openfoam-で熱流体固体連成cht">1. STEP 1：OpenFOAM
+<li><a href="#1-step-1openfoam-で熱流体固体連成cht" id="toc-1-step-1openfoam-で熱流体固体連成cht">1. STEP 1：OpenFOAM
 で熱流体固体連成（CHT）</a>
 <ul>
-<li><a href="#1-1-共役熱伝達chtってなに"
-id="toc-1-1-共役熱伝達chtってなに">1-1.
+<li><a href="#1-1-共役熱伝達chtってなに" id="toc-1-1-共役熱伝達chtってなに">1-1.
 「共役熱伝達（CHT）」ってなに？</a></li>
-<li><a href="#1-2-2つの領域regionを用意する"
-id="toc-1-2-2つの領域regionを用意する">1-2.
+<li><a href="#1-2-2つの領域regionを用意する" id="toc-1-2-2つの領域regionを用意する">1-2.
 2つの領域（region）を用意する</a></li>
 <li><a href="#1-3-回すと何が出るか" id="toc-1-3-回すと何が出るか">1-3.
 回すと何が出るか</a></li>
 </ul></li>
-<li><a href="#2-step-2温度場を-frontistr-へ渡して熱膨張を出す"
-id="toc-2-step-2温度場を-frontistr-へ渡して熱膨張を出す">2. STEP
+<li><a href="#2-step-2温度場を-frontistr-へ渡して熱膨張を出す" id="toc-2-step-2温度場を-frontistr-へ渡して熱膨張を出す">2. STEP
 2：温度場を FrontISTR へ渡して熱膨張を出す</a>
 <ul>
-<li><a href="#2-1-なぜソルバを2つ使うのか"
-id="toc-2-1-なぜソルバを2つ使うのか">2-1.
+<li><a href="#2-1-なぜソルバを2つ使うのか" id="toc-2-1-なぜソルバを2つ使うのか">2-1.
 なぜソルバを2つ使うのか</a></li>
-<li><a href="#2-2-熱膨張のしくみ小学校の理科α"
-id="toc-2-2-熱膨張のしくみ小学校の理科α">2-2.
+<li><a href="#2-2-熱膨張のしくみ小学校の理科α" id="toc-2-2-熱膨張のしくみ小学校の理科α">2-2.
 熱膨張のしくみ（小学校の理科＋α）</a></li>
-<li><a href="#2-3-frontistr-に渡すもの返るもの"
-id="toc-2-3-frontistr-に渡すもの返るもの">2-3. FrontISTR
+<li><a href="#2-3-frontistr-に渡すもの返るもの" id="toc-2-3-frontistr-に渡すもの返るもの">2-3. FrontISTR
 に渡すもの・返るもの</a></li>
-<li><a href="#2-4-ここまでの一連の流れ"
-id="toc-2-4-ここまでの一連の流れ">2-4. ここまでの一連の流れ</a></li>
+<li><a href="#2-4-ここまでの一連の流れ" id="toc-2-4-ここまでの一連の流れ">2-4. ここまでの一連の流れ</a></li>
 </ul></li>
-<li><a href="#3-step-3熱伝達率-h-の分布と各面の値を算出する"
-id="toc-3-step-3熱伝達率-h-の分布と各面の値を算出する">3. STEP
+<li><a href="#3-step-3熱伝達率-h-の分布と各面の値を算出する" id="toc-3-step-3熱伝達率-h-の分布と各面の値を算出する">3. STEP
 3：熱伝達率 <span class="math inline">\(h\)</span>
 の分布と各面の値を算出する</a>
 <ul>
 <li><a href="#3-1-熱伝達率の定義" id="toc-3-1-熱伝達率の定義">3-1.
 熱伝達率の定義</a></li>
-<li><a href="#3-2-openfoam-から各面の-qprimeprime-と-t_w-を取り出す"
-id="toc-3-2-openfoam-から各面の-qprimeprime-と-t_w-を取り出す">3-2.
-OpenFOAM から各面の <span
-class="math inline">\(q^{\prime\prime}\)</span> と <span
-class="math inline">\(T_w\)</span> を取り出す</a></li>
-<li><a href="#3-3-面積平均と実効熱伝達率は別の量"
-id="toc-3-3-面積平均と実効熱伝達率は別の量">3-3.
+<li><a href="#3-2-openfoam-から各面の-qprimeprime-と-t_w-を取り出す" id="toc-3-2-openfoam-から各面の-qprimeprime-と-t_w-を取り出す">3-2.
+OpenFOAM から各面の <span class="math inline">\(q^{\prime\prime}\)</span> と <span class="math inline">\(T_w\)</span> を取り出す</a></li>
+<li><a href="#3-3-面積平均と実効熱伝達率は別の量" id="toc-3-3-面積平均と実効熱伝達率は別の量">3-3.
 面積平均と実効熱伝達率は別の量</a></li>
-<li><a href="#3-4-実際に-openfoam-で計算した各面の熱伝達率-t300-秒"
-id="toc-3-4-実際に-openfoam-で計算した各面の熱伝達率-t300-秒">3-4.
-実際に OpenFOAM で計算した各面の熱伝達率（ <span
-class="math inline">\(t=300\)</span> 秒）</a></li>
+<li><a href="#3-4-実際に-openfoam-で計算した各面の熱伝達率-t300-秒" id="toc-3-4-実際に-openfoam-で計算した各面の熱伝達率-t300-秒">3-4.
+実際に OpenFOAM で計算した各面の熱伝達率（ <span class="math inline">\(t=300\)</span> 秒）</a></li>
 </ul></li>
-<li><a href="#4-まとめ--第1回で押さえたこと"
-id="toc-4-まとめ--第1回で押さえたこと">4. まとめ ―
+<li><a href="#4-まとめ--第1回で押さえたこと" id="toc-4-まとめ--第1回で押さえたこと">4. まとめ ―
 第1回で押さえたこと</a>
 <ul>
-<li><a href="#参考このブログの元になった実装詳細"
-id="toc-参考このブログの元になった実装詳細">参考（このブログの元になった実装・詳細）</a></li>
+<li><a href="#参考このブログの元になった実装詳細" id="toc-参考このブログの元になった実装詳細">参考（このブログの元になった実装・詳細）</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </nav>
-<h1
-id="blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す">blog_001：OpenFOAM＋FrontISTR
+<h1 id="blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみる--さらに熱伝達率の分布まで出す">blog_001：OpenFOAM＋FrontISTR
 で「熱流体固体連成 → 熱膨張」をやってみる ―
 さらに熱伝達率の分布まで出す</h1>
+<blockquote>
+<p><strong>2026-10-05の読み直し：条件の区別</strong>
+本記事はOpenFOAMのCHTとFrontISTRの熱弾性解析。データ同化そのものではなく、後続実験の基準データを作る過程を説明します。工作機械は応用先で、検証対象は中空円筒です。</p>
+</blockquote>
 <p>このブログシリーズは、106
 でやった一連の研究（熱流体固体連成・データ同化・ROM）を、
 <strong>手を動かしながら少しずつ理解していく</strong>ためのものです。第1回は土台となる</p>
@@ -351,8 +323,7 @@ id="blog_001openfoamfrontistr-で熱流体固体連成--熱膨張をやってみ
 で熱流体固体連成（CHT）を解いて温度場を出す</strong></li>
 <li><strong>その温度場を FrontISTR
 に渡して熱膨張（変位）を出す</strong></li>
-<li><strong>CHT の結果から熱伝達率 <span
-class="math inline">\(h\)</span>
+<li><strong>CHT の結果から熱伝達率 <span class="math inline">\(h\)</span>
 の分布・各面の値を算出する</strong></li>
 </ol>
 <p>の3本立てです。数式は最小限にして、まず「何をしているか」の絵をつかむことを優先します。</p>
@@ -385,58 +356,31 @@ EnKF を詳しく 説明するための正解値（synthetic
 truth）になります。</strong> EnKF の予報・観測摂動・共分散・
 カルマンゲイン・更新式は、blog_002（OI）および EnKF
 解説記事で独立に導出します。</p>
-<hr />
+<hr/>
 <h2 id="0-背景--なぜ熱変形を推定したいのか">0. 背景 ―
 なぜ熱変形を推定したいのか</h2>
 <p>技術の話に入る前に、<strong>この研究が何の役に立つのか</strong>を文献で押さえておきます。
 主張には<strong>無料で読める出典</strong>を付けます（有料しか根拠が無いものは、そう明記します）。</p>
-<h3 id="0-1-熱変位は加工誤差の最大の原因">0-1.
-熱変位は加工誤差の最大の原因</h3>
+<h3 id="0-1-熱変位は工作機械の加工誤差の大きな要因">0-1.
+熱変位は工作機械の加工誤差の大きな要因</h3>
 <p><strong>Li, Z., Vogl, G. W., Kinzel, E. C., Santa, B., Landers, R. G.
 (2024)</strong> “Machine Tool Thermal Error Measurement and Prediction
 via Wireless Microscope”, <em>Manufacturing Letters</em>
-<strong>41</strong>, 1440–1451（オープンアクセス） 📄 全文無料: <a
-href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076"
-class="uri">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></p>
+<strong>41</strong>, 1440–1451（オープンアクセス） 📄 全文無料: <a class="uri" href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></p>
 <blockquote>
 <p>“Thermal errors can contribute <strong>up to 75 percent</strong> of
 the overall machining errors of a machined part.”</p>
 </blockquote>
+<p>「最大75%」は文献が述べる上限であり、すべての機械・運転条件で75%という意味ではありません。本研究は工作機械そのものではなく、応用を想定した中空円筒の数値検証です。</p>
 <p>同じ数字は <strong>Bünger, A. et al. (2023)</strong>
-arXiv:2306.12736（📄 <a href="https://arxiv.org/abs/2306.12736"
-class="uri">https://arxiv.org/abs/2306.12736</a>）でも 「Mayr et al.,
+arXiv:2306.12736（📄 <a class="uri" href="https://arxiv.org/abs/2306.12736">https://arxiv.org/abs/2306.12736</a>）でも 「Mayr et al.,
 2012 によれば熱誤差は最終製品の製造誤差の <strong>75 %</strong>
 を占める」と引用されています。</p>
-<h3 id="0-2-対策は回避と補償の2つ">0-2.
-対策は「回避」と「補償」の2つ</h3>
-<p>同じく Li et al. (2024) より:</p>
-<blockquote>
-<p>“In general, there are two methods for thermal error reduction:
-<strong>thermal error avoidance</strong> and <strong>thermal error
-compensation</strong>.”</p>
-</blockquote>
-<blockquote>
-<p>“<strong>Thermal error avoidance is typically a more costly solution
-than thermal error compensation</strong> and is more sensitive to
-modeling errors and unknown disturbances.”</p>
-</blockquote>
-<p><strong>回避</strong>＝低膨張材料・潤滑や冷却の最適化で、機械を温度変化に鈍感にする。
-<strong>補償</strong>＝温度から変形を予測し、その分だけ指令位置をずらす。
-<strong>コスト面から補償が実務の主役</strong>、というのが文献の立場です。</p>
-<p>補償が何をしているかも、同論文が明快に書いています:</p>
-<blockquote>
-<p>“thermal error compensation is normally based on a <strong>predictive
-model established by the thermal error measurement</strong> of a machine
-tool.”</p>
-</blockquote>
-<blockquote>
-<p>“employ a <strong>predictive error model, which are inverted to
-determine compensation amounts</strong>. Common thermal error models
-include <strong>least-square regression, finite element, neural network,
-gray system</strong>, etc.”</p>
-</blockquote>
-<p>つまり「<strong>多点の温度と刃先変位を実測 → 関係をモデル化 →
-モデルを逆に使って補正量を出す</strong>」。</p>
+<h3 id="0-2-対策は回避と補償に分けて考える">0-2.
+対策は「回避」と「補償」に分けて考える</h3>
+<p>Liら（2024）は、熱誤差への対策を、温度変化や変形を抑える回避と、推定した熱誤差に応じて位置指令を修正する補償に分けています（<a href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">NIST公開論文</a>）。</p>
+<p><strong>回避</strong>には低膨張材料、構造設計、潤滑・冷却の工夫が含まれます。<strong>補償</strong>は温度・変位の測定などから熱誤差をモデル化し、指令位置へ補正量を加える方法です。回帰、有限要素モデル、ニューラルネットワークなどが使われます。コスト面の利点は文献で議論されていますが、用途ごとに回避と補償を組み合わせるため、補償が常に唯一の主役という意味ではありません。</p>
+<p>本シリーズでは、観測によって物理モデルの状態・パラメータを修正するデータ同化を扱います。推定変位をCNCへ送って実機加工誤差を補償する実験は、まだ行っていません。</p>
 <h3 id="0-3-メーカー各社の実装">0-3. メーカー各社の実装</h3>
 <blockquote>
 <p>⚠️
@@ -444,11 +388,11 @@ gray system</strong>, etc.”</p>
 </blockquote>
 <table>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -462,7 +406,7 @@ gray system</strong>, etc.”</p>
 <tbody>
 <tr class="odd">
 <td>技術名</td>
-<td>サーモフレンドリーコンセプト<br>TAS-C / TAS-S</td>
+<td>サーモフレンドリーコンセプト<br/>TAS-C / TAS-S</td>
 <td>AI Thermal Shield</td>
 <td>Spindle Growth Sensor</td>
 <td>（個別技術の集合）</td>
@@ -497,9 +441,7 @@ gray system</strong>, etc.”</p>
 </tr>
 </tbody>
 </table>
-<p>🔗 <a href="https://www.okuma.co.jp/onlyone/thermo/">オークマ</a>／<a
-href="https://www.mazak.com/jp-ja/technology/accuracy/">マザック</a>／<a
-href="https://en.dmgmori.com/products/machines/milling/vertical-milling/nvx/nvx-5100">DMG
+<p>🔗 <a href="https://www.okuma.co.jp/onlyone/thermo/">オークマ</a>／<a href="https://www.mazak.com/jp-ja/technology/accuracy/">マザック</a>／<a href="https://en.dmgmori.com/products/machines/milling/vertical-milling/nvx/nvx-5100">DMG
 MORI</a>／<a href="https://www.makino.co.jp/ja-jp/">牧野</a></p>
 <p><strong>TAS</strong> ＝ Thermo Active
 Stabilizer（読み：ティー・エー・エス）。 <strong>-C</strong> は
@@ -515,8 +457,7 @@ Spindle（主軸熱変位制御）。</p>
 <h3 id="0-4-しかし温度が合っても変形が合うとは限らない">0-4.
 しかし「温度が合っても変形が合う」とは限らない</h3>
 <p>ここが本研究の動機です。<strong>Bünger et al. (2023)</strong>（📄
-無料 <a href="https://arxiv.org/abs/2306.12736"
-class="uri">https://arxiv.org/abs/2306.12736</a>）:</p>
+無料 <a class="uri" href="https://arxiv.org/abs/2306.12736">https://arxiv.org/abs/2306.12736</a>）:</p>
 <blockquote>
 <p>“the accuracy of the <strong>TCP prediction depends highly on the
 accuracy of the model parameters, such as heat exchange parameters, and
@@ -524,23 +465,18 @@ the initial temperature</strong>”</p>
 </blockquote>
 <p>理由は3つあります。</p>
 <ol type="1">
-<li><p><strong>効くのは温度そのものではなく勾配</strong>。柱の上下にわずかな温度差があるだけで曲げが生じ、
-主軸先端では<strong>てこで拡大</strong>される。「平均温度が合っている」ことは何の保証にもならない。</p></li>
-<li><p><strong>熱伝達率を直接測る計測器が存在しない</strong>。</p>
+<li><p><strong>熱変位は温度上昇の空間分布と拘束条件で決まる</strong>。一様な温度上昇でも伸びは生じ、非一様な温度分布では反りも生じます。平均温度や数点の温度が合うだけでは、熱変位の一致は保証されません。同じ熱弾性モデルで全温度場が完全に一致すれば、そのモデルが計算する変位も一致します。</p></li>
+<li><p><strong>熱伝達率は通常、熱流束・壁面温度・基準流体温度から診断・同定する量</strong>です。どの面、どの基準温度、どの時間平均を使うかで値が変わります。「直接測れないから求められない」という意味ではありません。</p>
 <ul>
-<li>📄 <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/"
-class="uri">https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/</a>（2025、無料）
+<li>📄 <a class="uri" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/">https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/</a>（2025、無料）
 …
 CHTCを直接測る専用計測器が無く、熱流束センサや赤外サーモグラフィでも測れない</li>
-<li>📄 <a href="https://www.mdpi.com/2075-1702/9/9/184"
-class="uri">https://www.mdpi.com/2075-1702/9/9/184</a>（<em>Machines</em>
+<li>📄 <a class="uri" href="https://www.mdpi.com/2075-1702/9/9/184">https://www.mdpi.com/2075-1702/9/9/184</a>（<em>Machines</em>
 2021、オープンアクセス） …
 FEMの精度は熱源・熱伝達係数・境界条件の定義に依存するが、汎用的な定義は困難</li>
 </ul></li>
 <li><p><strong>標準試験は実運転を模擬していない</strong>。<strong>ISO
-230-3:2020</strong>（📄 無料プレビューに Scope 全文: <a
-href="https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf"
-class="uri">https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf</a>）
+230-3:2020</strong>（📄 無料プレビューに Scope 全文: <a class="uri" href="https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf">https://cdn.standards.iteh.ai/samples/73291/b10e76761d1945c6b7648d2fea86b6a8/ISO-230-3-2020.pdf</a>）
 が規定するのは
 ETVE（環境温度変動）・主軸回転・直線軸・回転軸の4試験ですが、規格自身が:</p>
 <blockquote>
@@ -559,9 +495,9 @@ thermal behaviour</strong>… these tests are considered only as the
 計測の方法（間接法と直接法）</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -606,9 +542,9 @@ al. (2024)（上記、無料）は<strong>主軸にワイヤレス顕微鏡</st
 この分野の最新研究（2023〜2025）</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -620,44 +556,33 @@ al. (2024)（上記、無料）は<strong>主軸にワイヤレス顕微鏡</st
 <tbody>
 <tr class="odd">
 <td>Teshima et al. (2024) <em>CIRP JMST</em> <strong>55</strong>,
-403–410<br>🔗 <a href="https://doi.org/10.1016/j.cirpj.2024.10.015"
-class="uri">https://doi.org/10.1016/j.cirpj.2024.10.015</a></td>
+403–410<br/>🔗 <a class="uri" href="https://doi.org/10.1016/j.cirpj.2024.10.015">https://doi.org/10.1016/j.cirpj.2024.10.015</a></td>
 <td>温度→TCP変位の<strong>ROM</strong>を作り、回帰係数＝温度感度として<strong>センサ配置の指針</strong>を示す。「最適な点数と配置を決める方法が無かった」と問題提起</td>
 <td>❌</td>
 </tr>
 <tr class="even">
-<td>Ando et al. (ICTIMT2025)<br>🔗 <a
-href="https://doi.org/10.1007/978-3-032-01194-7_31"
-class="uri">https://doi.org/10.1007/978-3-032-01194-7_31</a></td>
+<td>Ando et al. (ICTIMT2025)<br/>🔗 <a class="uri" href="https://doi.org/10.1007/978-3-032-01194-7_31">https://doi.org/10.1007/978-3-032-01194-7_31</a></td>
 <td>上の続報。<strong>伝達関数行列</strong>と<strong>温度感度分布</strong>で配置を決める</td>
 <td>❌</td>
 </tr>
 <tr class="odd">
-<td>Bünger et al. (2023) arXiv:2306.12736<br>📄 <a
-href="https://arxiv.org/abs/2306.12736"
-class="uri">https://arxiv.org/abs/2306.12736</a></td>
+<td>Bünger et al. (2023) arXiv:2306.12736<br/>📄 <a class="uri" href="https://arxiv.org/abs/2306.12736">https://arxiv.org/abs/2306.12736</a></td>
 <td><strong>初期温度場</strong>をベイズ逆問題で推定し、<strong>事後分散</strong>を低ランク／テンソルトレイン近似で高速評価。「配置の評価は最適配置の前提」</td>
 <td>✅</td>
 </tr>
 <tr class="even">
 <td>Li et al. (2024) <em>Manufacturing Letters</em>
-<strong>41</strong><br>📄 <a
-href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076"
-class="uri">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></td>
+<strong>41</strong><br/>📄 <a class="uri" href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a></td>
 <td><strong>ワイヤレス顕微鏡</strong>で熱変位を直接測る新手法</td>
 <td>✅</td>
 </tr>
 <tr class="odd">
-<td>Coelho et al. (2025) arXiv:2510.03261<br>📄 <a
-href="https://arxiv.org/abs/2510.03261"
-class="uri">https://arxiv.org/abs/2510.03261</a></td>
+<td>Coelho et al. (2025) arXiv:2510.03261<br/>📄 <a class="uri" href="https://arxiv.org/abs/2510.03261">https://arxiv.org/abs/2510.03261</a></td>
 <td>誤差ではなく<strong>温度・熱流束の場そのもの</strong>をNNで予測。6アーキテクチャをベンチマーク</td>
 <td>✅</td>
 </tr>
 <tr class="even">
-<td>Peet (2019) <em>Proc. SPIE</em> <strong>11158</strong><br>🔗 <a
-href="https://doi.org/10.1117/12.2532755"
-class="uri">https://doi.org/10.1117/12.2532755</a></td>
+<td>Peet (2019) <em>Proc. SPIE</em> <strong>11158</strong><br/>🔗 <a class="uri" href="https://doi.org/10.1117/12.2532755">https://doi.org/10.1117/12.2532755</a></td>
 <td><strong>赤外線シグネチャ</strong>監視のため、気象データのみを入力にFEM熱収支＋<strong>カルマンフィルタ</strong>で表面温度分布を実時間推定</td>
 <td>❌</td>
 </tr>
@@ -670,13 +595,13 @@ Peet (2019)
 <p><strong>本シリーズの位置づけ</strong>：この3つの潮流（場の推定・配置設計・境界条件の推定）の交点にあり、
 さらに<strong>OSSだけで一気通貫に実装して公開</strong>している点が特徴です。
 先行研究との具体的な差分は blog_005 で扱います。</p>
-<hr />
+<hr/>
 <h2 id="手書きで追うための記号と単位">手書きで追うための記号と単位</h2>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -688,8 +613,7 @@ Peet (2019)
 <tbody>
 <tr class="odd">
 <td><span class="math inline">\(T(\boldsymbol x,t)\)</span></td>
-<td>位置 <span class="math inline">\(\boldsymbol x\)</span> 、時刻 <span
-class="math inline">\(t\)</span> の温度</td>
+<td>位置 <span class="math inline">\(\boldsymbol x\)</span> 、時刻 <span class="math inline">\(t\)</span> の温度</td>
 <td>K（表示は℃）</td>
 </tr>
 <tr class="even">
@@ -722,9 +646,7 @@ u,\varepsilon,\alpha\)</span></td>
 </tbody>
 </table>
 <p>本ケースでは周囲温度と熱ひずみ基準温度はともに293.15
-Kですが、<strong>役割は別</strong>です。以下の熱伝達率の式の <span
-class="math inline">\(T_{\rm ref}\)</span> は周囲基準温度 <span
-class="math inline">\(T_\infty\)</span> を指します。温度差は1 K＝1
+Kですが、<strong>役割は別</strong>です。以下の熱伝達率の式の <span class="math inline">\(T_{\rm ref}\)</span> は周囲基準温度 <span class="math inline">\(T_\infty\)</span> を指します。温度差は1 K＝1
 ℃であり、絶対温度は <span class="math inline">\(T[\mathrm
 K]=T[{}^\circ\mathrm C]+273.15\)</span> で換算します。</p>
 <p>手順は <strong>熱の流れを解く → 温度差から熱ひずみを作る →
@@ -733,10 +655,8 @@ K]=T[{}^\circ\mathrm C]+273.15\)</span> で換算します。</p>
 <h2 id="0-題材片側だけ温められる中空円筒">0.
 題材：片側だけ温められる中空円筒</h2>
 <figure>
-<img src="img/blog001_setup.png"
-alt="解析対象：片側ヒータ付き中空円筒" />
-<figcaption
-aria-hidden="true">解析対象：片側ヒータ付き中空円筒</figcaption>
+<img alt="解析対象：片側ヒータ付き中空円筒" src="img/blog001_setup.png"/>
+<figcaption aria-hidden="true">解析対象：片側ヒータ付き中空円筒</figcaption>
 </figure>
 <p><em>解析対象の全体像。左＝3D（赤い帯がヒータ：外周+X側、z=24.75〜75.75
 mm）。 中＝断面と寸法。右＝材料と加熱プロファイル（0〜300 sだけ15
@@ -783,7 +703,7 @@ Pa）</td>
 </tr>
 </tbody>
 </table>
-<hr />
+<hr/>
 <h2 id="1-step-1openfoam-で熱流体固体連成cht">1. STEP 1：OpenFOAM
 で熱流体固体連成（CHT）</h2>
 <h3 id="1-1-共役熱伝達chtってなに">1-1.
@@ -791,9 +711,7 @@ Pa）</td>
 <p>熱の伝わり方は3つ（伝導・対流・輻射）ありますが、ここで効くのは
 <strong>固体の中の伝導</strong> と
 <strong>固体まわりの空気の対流</strong>
-です。ふつうの伝熱解析は「固体の表面に熱伝達率 <span
-class="math inline">\(h\)</span> を与えて」空気を省略します。 でも <span
-class="math inline">\(h\)</span>
+です。ふつうの伝熱解析は「固体の表面に熱伝達率 <span class="math inline">\(h\)</span> を与えて」空気を省略します。 でも <span class="math inline">\(h\)</span>
 は本当は場所ごとに違い、事前には分かりません。</p>
 <p>そこで <strong>共役熱伝達（Conjugate Heat Transfer, CHT）</strong>
 では</p>
@@ -801,8 +719,7 @@ class="math inline">\(h\)</span>
 <p><strong>固体と流体（空気）を”一体で”解く</strong></p>
 </blockquote>
 <p>ことをします。固体の中は熱伝導、空気の中は流れ＋伝導を解き、<strong>境界（固体表面）で温度と熱流束を連続</strong>に
-つなぐ。こうすると固体壁に一定の表面熱伝達率 <span
-class="math inline">\(h\)</span>
+つなぐ。こうすると固体壁に一定の表面熱伝達率 <span class="math inline">\(h\)</span>
 を直接与えず、流体側の熱輸送を計算できます。ただし外部流体境界・物性・対流モデル・メッシュの仮定は残り、計算結果が実測の真値になるわけではありません。</p>
 <p>OpenFOAM でこれを解くソルバが
 <strong><code>chtMultiRegionFoam</code></strong>
@@ -821,8 +738,7 @@ class="math inline">\(h\)</span>
 <p>境界条件のキモは、<strong>固体と空気が接する面</strong>です。ここに
 <code>compressible::turbulentTemperatureCoupledBaffleMixed</code>
 のような <strong>“連成境界条件”</strong>
-を置くと、両側の温度・熱流束を自動でつないでくれます。 （＝ここで <span
-class="math inline">\(h\)</span>
+を置くと、両側の温度・熱流束を自動でつないでくれます。 （＝ここで <span class="math inline">\(h\)</span>
 を人間が与えない、というのがCHTの利点）</p>
 <h3 id="1-3-回すと何が出るか">1-3. 回すと何が出るか</h3>
 <p><code>chtMultiRegionFoam</code>
@@ -836,19 +752,17 @@ class="math inline">\(h\)</span>
 STEP で主役</strong>になります。
 片側加熱なので、ヒータ側（+X）が熱く、反対側（−X）がぬるい、という左右非対称の温度分布になります。</p>
 <figure>
-<img src="img/fullsolver_temperature_history.png"
-alt="CHTで計算した各点の温度の時刻歴" />
-<figcaption
-aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
+<img alt="CHTで計算した各点の温度の時刻歴" src="img/fullsolver_temperature_history.png"/>
+<figcaption aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
 </figure>
 <p><em>実ソルバ（<code>chtMultiRegionFoam</code>）で計算した温度の時間変化。0〜300秒の加熱でヒータ側（hot）がぐんぐん上がり、
 反対側（cold）はゆるやかに上がる。300秒でヒータOFFにすると冷却へ。左右で温度が違うのがポイント。</em></p>
 <p>温度「場」としても見ておきます（どこが熱いかが一目で分かります）:</p>
 <figure>
-<img src="img/blog001_temp_field300.png" alt="t=300sの温度場" />
+<img alt="t=300sの温度場" src="img/blog001_temp_field300.png"/>
 <figcaption aria-hidden="true">t=300sの温度場</figcaption>
 </figure>
-<hr />
+<hr/>
 <h2 id="2-step-2温度場を-frontistr-へ渡して熱膨張を出す">2. STEP
 2：温度場を FrontISTR へ渡して熱膨張を出す</h2>
 <h3 id="2-1-なぜソルバを2つ使うのか">2-1. なぜソルバを2つ使うのか</h3>
@@ -861,15 +775,12 @@ aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
 <pre><code>OpenFOAM(CHT) ──温度場 T(x)──▶ FrontISTR(熱弾性) ──▶ 変位 u(x)</code></pre>
 <h3 id="2-2-熱膨張のしくみ小学校の理科α">2-2.
 熱膨張のしくみ（小学校の理科＋α）</h3>
-<p>金属は温めると伸びます。伸び具合は <strong>線膨張係数 <span
-class="math inline">\(\alpha\)</span></strong> で決まり、温度が基準から
+<p>金属は温めると伸びます。伸び具合は <strong>線膨張係数 <span class="math inline">\(\alpha\)</span></strong> で決まり、温度が基準から
 <span class="math inline">\(\Delta T = T - T_\mathrm{ref}\)</span>
 だけ上がると、各方向に</p>
-<p><span
-class="math display">\[\varepsilon_\mathrm{thermal}=\alpha\,\Delta
+<p><span class="math display">\[\varepsilon_\mathrm{thermal}=\alpha\,\Delta
 T\]</span></p>
-<p>だけ伸びようとします（ <span
-class="math inline">\(\varepsilon\)</span>
+<p>だけ伸びようとします（ <span class="math inline">\(\varepsilon\)</span>
 はひずみ＝伸び率）。片側だけ熱いと、熱い側だけ伸びるので
 円筒が反ります。FrontISTR
 は各要素のこの「伸びたい量」を集め、<strong>要素どうしがつながっている拘束</strong>の
@@ -879,15 +790,11 @@ class="math inline">\(\varepsilon\)</span>
 に渡すもの・返るもの</h3>
 <ul>
 <li><strong>渡す</strong>：FEM 節点ごとの温度（OpenFOAM の
-<code>solid/T</code> を最寄り節点へ内挿）＋材料定数（ <span
-class="math inline">\(E,\nu,\alpha\)</span> ）＋基準温度 <span
-class="math inline">\(T_\mathrm{ref}\)</span>
+<code>solid/T</code> を最寄り節点へ内挿）＋材料定数（ <span class="math inline">\(E,\nu,\alpha\)</span> ）＋基準温度 <span class="math inline">\(T_\mathrm{ref}\)</span>
 ＋境界拘束（底面固定）。</li>
-<li><strong>返る</strong>：各節点の変位 <span
-class="math inline">\(u=(u_x,u_y,u_z)\)</span> 。</li>
+<li><strong>返る</strong>：各節点の変位 <span class="math inline">\(u=(u_x,u_y,u_z)\)</span> 。</li>
 </ul>
-<h4
-id="なぜ内挿が要るのか--2つのソルバは同じ点を見ていない">なぜ「内挿」が要るのか
+<h4 id="なぜ内挿が要るのか--2つのソルバは同じ点を見ていない">なぜ「内挿」が要るのか
 ― 2つのソルバは同じ点を見ていない</h4>
 <p>さらっと「内挿」と書きましたが、ここは<strong>連成で最初につまずく所</strong>なので図解します。</p>
 <p>問題はこうです。OpenFOAMが温度を持っているのは<strong>セルの中心</strong>（有限体積法だから）。
@@ -896,10 +803,8 @@ id="なぜ内挿が要るのか--2つのソルバは同じ点を見ていない"
 しかもメッシュも別物で、本ケースでは <strong>CFDセル20,696個 に対して
 FEM節点5,040個</strong>です。</p>
 <figure>
-<img src="img/blog001_mapping.png"
-alt="OpenFOAMからFrontISTRへの温度マッピング" />
-<figcaption
-aria-hidden="true">OpenFOAMからFrontISTRへの温度マッピング</figcaption>
+<img alt="OpenFOAMからFrontISTRへの温度マッピング" src="img/blog001_mapping.png"/>
+<figcaption aria-hidden="true">OpenFOAMからFrontISTRへの温度マッピング</figcaption>
 </figure>
 <p><em>z=50 mm断面で見た様子（t=300
 s）。<strong>A</strong>：色付きの点がCFDセル中心、黒丸がFEM節点。
@@ -918,8 +823,8 @@ N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{pc}},
 <code>102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py</code>（別サンプル。リポジトリには未公開）</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -939,28 +844,25 @@ N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{pc}},
 </tr>
 <tr class="odd">
 <td><code>interpolate_to_nodes()</code></td>
-<td><strong>各節点について最近傍 <span
-class="math inline">\(k=8\)</span>
+<td><strong>各節点について最近傍 <span class="math inline">\(k=8\)</span>
 個から逆距離加重</strong>（上の式）</td>
 </tr>
 </tbody>
 </table>
 <p>核心部分は10行ほどです:</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(n_nodes):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> np.linalg.norm(cell_centers <span class="op">-</span> node_coords[idx], axis<span class="op">=</span><span class="dv">1</span>)  <span class="co"># 全セルまでの距離</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    nearest <span class="op">=</span> np.argsort(d)[:k]                                   <span class="co"># 近い順にk個</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    dn <span class="op">=</span> d[nearest]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> dn[<span class="dv">0</span>] <span class="op">&lt;</span> <span class="fl">1e-9</span>:                    <span class="co"># 節点がセル中心と一致したら</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        result[idx] <span class="op">=</span> cell_temperatures[nearest[<span class="dv">0</span>]]               <span class="co"># その値をそのまま</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> dn                                                  <span class="co"># 重み＝距離の逆数</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    result[idx] <span class="op">=</span> np.<span class="bu">sum</span>(w <span class="op">*</span> cell_temperatures[nearest]) <span class="op">/</span> np.<span class="bu">sum</span>(w)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a aria-hidden="true" href="#cb4-1" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(n_nodes):</span>
+<span id="cb4-2"><a aria-hidden="true" href="#cb4-2" tabindex="-1"></a>    d <span class="op">=</span> np.linalg.norm(cell_centers <span class="op">-</span> node_coords[idx], axis<span class="op">=</span><span class="dv">1</span>)  <span class="co"># 全セルまでの距離</span></span>
+<span id="cb4-3"><a aria-hidden="true" href="#cb4-3" tabindex="-1"></a>    nearest <span class="op">=</span> np.argsort(d)[:k]                                   <span class="co"># 近い順にk個</span></span>
+<span id="cb4-4"><a aria-hidden="true" href="#cb4-4" tabindex="-1"></a>    dn <span class="op">=</span> d[nearest]</span>
+<span id="cb4-5"><a aria-hidden="true" href="#cb4-5" tabindex="-1"></a>    <span class="cf">if</span> dn[<span class="dv">0</span>] <span class="op">&lt;</span> <span class="fl">1e-9</span>:                    <span class="co"># 節点がセル中心と一致したら</span></span>
+<span id="cb4-6"><a aria-hidden="true" href="#cb4-6" tabindex="-1"></a>        result[idx] <span class="op">=</span> cell_temperatures[nearest[<span class="dv">0</span>]]               <span class="co"># その値をそのまま</span></span>
+<span id="cb4-7"><a aria-hidden="true" href="#cb4-7" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb4-8"><a aria-hidden="true" href="#cb4-8" tabindex="-1"></a>    w <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> dn                                                  <span class="co"># 重み＝距離の逆数</span></span>
+<span id="cb4-9"><a aria-hidden="true" href="#cb4-9" tabindex="-1"></a>    result[idx] <span class="op">=</span> np.<span class="bu">sum</span>(w <span class="op">*</span> cell_temperatures[nearest]) <span class="op">/</span> np.<span class="bu">sum</span>(w)</span></code></pre></div>
 <p><strong>事前に必要な操作</strong>：セル中心の座標ファイル
 <code>C</code> はOpenFOAMが自動では書かないので、
 先に出しておきます。</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-func</span> writeCellCentres <span class="at">-region</span> solid <span class="at">-time</span> 300</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a aria-hidden="true" href="#cb5-1" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-func</span> writeCellCentres <span class="at">-region</span> solid <span class="at">-time</span> 300</span></code></pre></div>
 <p><strong>注意点</strong></p>
 <ul>
 <li><strong>セル順序が命</strong>：<code>C</code> と <code>T</code>
@@ -974,18 +876,14 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="
 精度を上げるなら境界パッチ値も候補に含める方法がありますが、本研究では
 温度差が0.5 ℃程度の緩やかな場なので影響は小さいと判断しています。</li>
 </ul>
-<p>（POD復元した温度を同じ手順でFEMへ渡す話は <a
-href="blog004.html">blog_004 §7-1</a> にあります。）</p>
+<p>（POD復元した温度を同じ手順でFEMへ渡す話は <a href="blog004.html">blog_004 §7-1</a> にあります。）</p>
 <p>底面を固定し上面を自由にしているので、<strong>上面がいちばん動きます</strong>。ヒータ側の上面（A）と
 反対側の上面（O）で上向き変位 <span class="math inline">\(U_z\)</span>
-を比べると、片側加熱の「反り」が数値で見えます。 この 2 点の差 <span
-class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
+を比べると、片側加熱の「反り」が数値で見えます。 この 2 点の差 <span class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
 が、後のブログで「注目量（QoI）」として何度も出てきます。</p>
 <figure>
-<img src="img/fullsolver_displacement_difference.png"
-alt="熱膨張による変位（ヒータ側と反対側の差）" />
-<figcaption
-aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）</figcaption>
+<img alt="熱膨張による変位（ヒータ側と反対側の差）" src="img/fullsolver_displacement_difference.png"/>
+<figcaption aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）</figcaption>
 </figure>
 <p><em>FrontISTR
 で計算した熱変形。片側だけ熱いと上面がヒータ側へ「反り」、ヒータ側A
@@ -1001,25 +899,19 @@ aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）<
  上面A/Oの Uz、2点差 = 反りの大きさ</code></pre>
 <p>これで
 <strong>「温度→変形」の物理</strong>が一通りつながりました。</p>
-<hr />
+<hr/>
 <h2 id="3-step-3熱伝達率-h-の分布と各面の値を算出する">3. STEP
 3：熱伝達率 <span class="math inline">\(h\)</span>
 の分布と各面の値を算出する</h2>
 <p>CHTでは一定の壁面 <span class="math inline">\(h\)</span>
-を直接指定しないため、<strong>逆に結果から <span
-class="math inline">\(h\)</span>
+を直接指定しないため、<strong>逆に結果から <span class="math inline">\(h\)</span>
 を”逆算”して分布を見る</strong>ことができます。
-「どの面がどれだけ冷えているか」を1つの数字（ <span
-class="math inline">\(h\)</span> ）で見える化するわけです。</p>
+「どの面がどれだけ冷えているか」を1つの数字（ <span class="math inline">\(h\)</span> ）で見える化するわけです。</p>
 <h3 id="3-1-熱伝達率の定義">3-1. 熱伝達率の定義</h3>
-<p>ある壁面から空気へ逃げる熱流束（単位面積あたりの熱の流れ） <span
-class="math inline">\(q^{\prime\prime}\)</span> [W/m²] は、 壁の温度
-<span class="math inline">\(T_w\)</span> と周囲（基準）温度 <span
-class="math inline">\(T_\mathrm{ref}\)</span>
-の差に比例するとみなせて、その比例係数が熱伝達率 <span
-class="math inline">\(h\)</span> です。</p>
-<p><span
-class="math display">\[q^{\prime\prime}=h\,(T_w-T_\mathrm{ref})\quad\Longrightarrow\quad
+<p>ある壁面から空気へ逃げる熱流束（単位面積あたりの熱の流れ） <span class="math inline">\(q^{\prime\prime}\)</span> [W/m²] は、 壁の温度
+<span class="math inline">\(T_w\)</span> と周囲（基準）温度 <span class="math inline">\(T_\mathrm{ref}\)</span>
+の差に比例するとみなせて、その比例係数が熱伝達率 <span class="math inline">\(h\)</span> です。</p>
+<p><span class="math display">\[q^{\prime\prime}=h\,(T_w-T_\mathrm{ref})\quad\Longrightarrow\quad
 h=\frac{q^{\prime\prime}}{\,T_w-T_\mathrm{ref}\,}\ \
 [\mathrm{W/(m^2\,K)}].\]</span></p>
 <ul>
@@ -1031,36 +923,28 @@ h=\frac{q^{\prime\prime}}{\,T_w-T_\mathrm{ref}\,}\ \
 は大きい。</li>
 </ul>
 <h3 id="3-2-openfoam-から各面の-qprimeprime-と-t_w-を取り出す">3-2.
-OpenFOAM から各面の <span
-class="math inline">\(q^{\prime\prime}\)</span> と <span
-class="math inline">\(T_w\)</span> を取り出す</h3>
+OpenFOAM から各面の <span class="math inline">\(q^{\prime\prime}\)</span> と <span class="math inline">\(T_w\)</span> を取り出す</h3>
 <p>CHT を解いた後、<code>chtMultiRegionFoam</code> の結果に対して</p>
 <ul>
-<li><strong>壁面熱流束</strong> <span
-class="math inline">\(q^{\prime\prime}\)</span>
+<li><strong>壁面熱流束</strong> <span class="math inline">\(q^{\prime\prime}\)</span>
 ：<code>wallHeatFlux</code>
 関数（functionObject）または後処理ユーティリティで、
 固体表面の各面（face）ごとに出せる。</li>
 <li><strong>壁面温度</strong> <span class="math inline">\(T_w\)</span>
 ：<code>solid/T</code> の表面パッチ値（各面の温度）。</li>
-<li><strong>基準温度</strong> <span
-class="math inline">\(T_\mathrm{ref}\)</span> ：ここでは周囲空気の 20
+<li><strong>基準温度</strong> <span class="math inline">\(T_\mathrm{ref}\)</span> ：ここでは周囲空気の 20
 ℃（293.15 K）。</li>
 </ul>
 <p>これらは全部
 <strong>面（face）ごとに配列で得られる</strong>ので、面ごとに割り算すれば</p>
-<p><span
-class="math display">\[h_i=\frac{q^{\prime\prime}_i}{\,T_{w,i}-T_\mathrm{ref}\,}\qquad(i=\text{each
+<p><span class="math display">\[h_i=\frac{q^{\prime\prime}_i}{\,T_{w,i}-T_\mathrm{ref}\,}\qquad(i=\text{each
 face})\]</span></p>
 <p>で <strong>「 <span class="math inline">\(h\)</span>
-の面分布」</strong> が作れます。ParaView で <span
-class="math inline">\(h\)</span> をコンター表示すれば、
-ヒータ側・反対側・上面・底面でどう <span
-class="math inline">\(h\)</span> が違うかが色で見えます。</p>
+の面分布」</strong> が作れます。ParaView で <span class="math inline">\(h\)</span> をコンター表示すれば、
+ヒータ側・反対側・上面・底面でどう <span class="math inline">\(h\)</span> が違うかが色で見えます。</p>
 <h3 id="3-3-面積平均と実効熱伝達率は別の量">3-3.
 面積平均と実効熱伝達率は別の量</h3>
-<p>面集合を <span class="math inline">\(\mathcal G\)</span> とし、 <span
-class="math inline">\(\Delta T_i=T_{w,i}-T_\infty\)</span>
+<p>面集合を <span class="math inline">\(\mathcal G\)</span> とし、 <span class="math inline">\(\Delta T_i=T_{w,i}-T_\infty\)</span>
 と置きます。面積平均は</p>
 <p><span class="math display">\[
 \bar h_A=\frac{\sum_{i\in\mathcal G}h_iA_i}{\sum_{i\in\mathcal G}A_i}.
@@ -1079,42 +963,32 @@ h_{\rm eff}=\frac{\sum_iq_i^{\prime\prime}A_i}{\sum_i\Delta T_i A_i}
 \]</span></p>
 <p>したがって
 <strong>面積平均と実効値は一般には等しくありません</strong>。例えば同面積2面で
-<span class="math inline">\(h=(10,20)\)</span> 、 <span
-class="math inline">\(\Delta T=(1,3)\)</span>
-なら、面積平均15に対し実効値は <span
-class="math inline">\((10+60)/(1+3)=17.5\)</span> W/(m²
+<span class="math inline">\(h=(10,20)\)</span> 、 <span class="math inline">\(\Delta T=(1,3)\)</span>
+なら、面積平均15に対し実効値は <span class="math inline">\((10+60)/(1+3)=17.5\)</span> W/(m²
 K)です。次節は後者を集計します。</p>
 <p>熱流束の符号は「固体から空気へ」を正として揃えます。次節の絶対値による集計は熱流束の大きさを扱う方法で、入熱と放熱が混在する場合の正味熱量とは異なります。温度差がほぼ0の面では局所hの割り算は不安定になります。</p>
 <h3 id="3-4-実際に-openfoam-で計算した各面の熱伝達率-t300-秒">3-4.
-実際に OpenFOAM で計算した各面の熱伝達率（ <span
-class="math inline">\(t=300\)</span> 秒）</h3>
-<p>方法だけでなく、本当に計算してみます。加熱終了の <span
-class="math inline">\(t=300\)</span>
+実際に OpenFOAM で計算した各面の熱伝達率（ <span class="math inline">\(t=300\)</span> 秒）</h3>
+<p>方法だけでなく、本当に計算してみます。加熱終了の <span class="math inline">\(t=300\)</span>
 秒で、<code>chtMultiRegionFoam</code> の結果に</p>
 <pre><code>postProcess -region solid -func wallHeatFlux -time 300</code></pre>
 <p>をかけ、<strong>界面（<code>solid_to_fluid</code> パッチ、8558
 面）の各面で <span class="math inline">\(q^{\prime\prime}\)</span> と
-<span class="math inline">\(T_w\)</span> を取り出し</strong>、 <span
-class="math inline">\(T_\mathrm{ref}=20\)</span> ℃
+<span class="math inline">\(T_w\)</span> を取り出し</strong>、 <span class="math inline">\(T_\mathrm{ref}=20\)</span> ℃
 として面グループごとに実効熱伝達率</p>
 <p><span class="math display">\[h=\frac{\sum_i
 |q^{\prime\prime}_i|\,A_i}{\sum_i
 (T_{w,i}-T_\mathrm{ref})\,A_i}\]</span></p>
 <p>を集計しました（結果を図と表に）。</p>
 <figure>
-<img src="img/blog_htc_per_face.png"
-alt="OpenFOAMから算出した各面の熱伝達率" />
-<figcaption
-aria-hidden="true">OpenFOAMから算出した各面の熱伝達率</figcaption>
+<img alt="OpenFOAMから算出した各面の熱伝達率" src="img/blog_htc_per_face.png"/>
+<figcaption aria-hidden="true">OpenFOAMから算出した各面の熱伝達率</figcaption>
 </figure>
-<p><strong>どの面がどこか</strong>を3Dでも見てみます（界面を <span
-class="math inline">\(h\)</span>
+<p><strong>どの面がどこか</strong>を3Dでも見てみます（界面を <span class="math inline">\(h\)</span>
 で色分け）。ヒータ側(+X)と反対側(−X)から見た2枚です。</p>
 <figure>
-<img src="img/blog_htc_paraview.png"
-alt="熱伝達率を色分けした3D図（どの場所のhか）" />
-<figcaption
-aria-hidden="true">熱伝達率を色分けした3D図（どの場所のhか）</figcaption>
+<img alt="熱伝達率を色分けした3D図（どの場所のhか）" src="img/blog_htc_paraview.png"/>
+<figcaption aria-hidden="true">熱伝達率を色分けした3D図（どの場所のhか）</figcaption>
 </figure>
 <p><em>界面（<code>solid_to_fluid</code>
 パッチ）を熱伝達率で色分け。左＝ヒータ側(+X)から、右＝反対側(−X)から。
@@ -1134,9 +1008,9 @@ aria-hidden="true">熱伝達率を色分けした3D図（どの場所のhか）<
 が中空部の内壁、という境界パッチ定義に基づきます。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1191,29 +1065,22 @@ aria-hidden="true">熱伝達率を色分けした3D図（どの場所のhか）<
 </ul>
 <blockquote>
 <p>ポイント：CHT は <span class="math inline">\(h\)</span> を
-<strong>入力しない</strong>代わりに、結果から <span
-class="math inline">\(h\)</span> を
+<strong>入力しない</strong>代わりに、結果から <span class="math inline">\(h\)</span> を
 <strong>面ごとに診断</strong>できる。
 「どの面がどれだけ冷えているか」を1枚の図＋表で定量化できるのが強みです。
-（値は界面全体の面積重みつき実効値。局所には温度差ゼロ付近で <span
-class="math inline">\(h\)</span> が跳ねる面もあるため、
+（値は界面全体の面積重みつき実効値。局所には温度差ゼロ付近で <span class="math inline">\(h\)</span> が跳ねる面もあるため、
 グループごとの実効値で見るのが安全です。）</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="4-まとめ--第1回で押さえたこと">4. まとめ ―
 第1回で押さえたこと</h2>
 <ol type="1">
 <li><strong>CHT（<code>chtMultiRegionFoam</code>）</strong>
-は固体＋空気を一体で解き、 一定の壁面 <span
-class="math inline">\(h\)</span>
+は固体＋空気を一体で解き、 一定の壁面 <span class="math inline">\(h\)</span>
 を直接指定せず温度場を出す（流体条件等の仮定は残る）。</li>
-<li>その <strong>温度場を FrontISTR に渡す</strong>と、熱ひずみ <span
-class="math inline">\(\alpha\Delta T\)</span>
+<li>その <strong>温度場を FrontISTR に渡す</strong>と、熱ひずみ <span class="math inline">\(\alpha\Delta T\)</span>
 から熱膨張（変位）が出る。片側加熱で円筒は反る。</li>
-<li>CHT の結果から <strong>各面の <span
-class="math inline">\(q^{\prime\prime}\)</span> と <span
-class="math inline">\(T_w\)</span></strong> を取り出し、 <span
-class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
+<li>CHT の結果から <strong>各面の <span class="math inline">\(q^{\prime\prime}\)</span> と <span class="math inline">\(T_w\)</span></strong> を取り出し、 <span class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
 で <strong>熱伝達率の分布・面代表値</strong>を診断できる。</li>
 <li>ここで得た温度・変位の時系列が、後続の <strong>OI／EnKF
 双子実験の真値</strong>になる。本記事自体は EnKF
@@ -1224,16 +1091,14 @@ class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
 <strong>熱感度解析で”どこを測ると効くか”</strong>を見抜き、感度の高い点で
 OI を回します。行列の計算は
 <strong>節点数をうんと減らした具体例</strong>で、手で追えるようにやります。</p>
-<hr />
-<h3
-id="参考このブログの元になった実装詳細">参考（このブログの元になった実装・詳細）</h3>
+<hr/>
+<h3 id="参考このブログの元になった実装詳細">参考（このブログの元になった実装・詳細）</h3>
 <ul>
 <li>連成の実装と手順：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/docs/00_openfoam_frontistr_coupling_workflow.md</code></li>
 <li>実ソルバ・データ同化の全体：<code>blog_002_oi_data_assimilation.md</code>（OI）・<code>blog_003_ensemble_kalman_filter.md</code>（EnKF）</li>
 <li>材料定数：<code>../../102_1_frontistr_hollow_cylinder_thermal_expansion/config/material_properties_steel.yaml</code></li>
 </ul>
-<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
 を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>

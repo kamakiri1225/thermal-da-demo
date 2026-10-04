@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_004：POD で代表点を選ぶ ROM</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_004：POD で代表点を選ぶ ROM</title>
+<style>
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -226,17 +227,14 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
-  
-  <style>
+<style>
    html body { max-width: 1120px !important; }
    body { padding: 0 24px; }
    img { max-width: 100%; height: auto; }
    table { font-size: 0.95em; }
   </style>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-  type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -244,175 +242,125 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ"
-id="toc-blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
+<li><a href="#blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ" id="toc-blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</a>
 <ul>
-<li><a href="#この記事で確かめること"
-id="toc-この記事で確かめること">この記事で確かめること</a></li>
-<li><a href="#読む前に入力から最終結果まで"
-id="toc-読む前に入力から最終結果まで">読む前に：入力から最終結果まで</a></li>
-<li><a href="#1-なぜ-rom-が要るか--enkf-は実ソルバだと重すぎる"
-id="toc-1-なぜ-rom-が要るか--enkf-は実ソルバだと重すぎる">1. なぜ ROM
+<li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
+<li><a href="#読む前に入力から最終結果まで" id="toc-読む前に入力から最終結果まで">読む前に：入力から最終結果まで</a></li>
+<li><a href="#1-なぜ-rom-が要るか--enkf-は実ソルバだと重すぎる" id="toc-1-なぜ-rom-が要るか--enkf-は実ソルバだと重すぎる">1. なぜ ROM
 が要るか ― EnKF は実ソルバだと重すぎる</a>
 <ul>
-<li><a href="#1-1-大事な注意--romはcfdを本番ループでだけ置き換える"
-id="toc-1-1-大事な注意--romはcfdを本番ループでだけ置き換える">1-1.
+<li><a href="#1-1-大事な注意--romはcfdを本番ループでだけ置き換える" id="toc-1-1-大事な注意--romはcfdを本番ループでだけ置き換える">1-1.
 大事な注意 ― ROMはCFDを「本番ループ」でだけ置き換える</a></li>
 </ul></li>
-<li><a href="#記号の読み替えと行列サイズ"
-id="toc-記号の読み替えと行列サイズ">記号の読み替えと行列サイズ</a></li>
-<li><a href="#2-pod-の数式--なぜ-svd-で場の型が出るのか"
-id="toc-2-pod-の数式--なぜ-svd-で場の型が出るのか">2. POD の数式 ― なぜ
+<li><a href="#記号の読み替えと行列サイズ" id="toc-記号の読み替えと行列サイズ">記号の読み替えと行列サイズ</a></li>
+<li><a href="#2-pod-の数式--なぜ-svd-で場の型が出るのか" id="toc-2-pod-の数式--なぜ-svd-で場の型が出るのか">2. POD の数式 ― なぜ
 SVD で場の「型」が出るのか</a>
 <ul>
-<li><a href="#2-1-スナップショット行列--温度場の写真を横に並べる"
-id="toc-2-1-スナップショット行列--温度場の写真を横に並べる">2-1.
+<li><a href="#2-1-スナップショット行列--温度場の写真を横に並べる" id="toc-2-1-スナップショット行列--温度場の写真を横に並べる">2-1.
 スナップショット行列 ― 温度場の「写真」を横に並べる</a></li>
-<li><a href="#2-2-最良の型を求める変分問題--固有値問題"
-id="toc-2-2-最良の型を求める変分問題--固有値問題">2-2.
+<li><a href="#2-2-最良の型を求める変分問題--固有値問題" id="toc-2-2-最良の型を求める変分問題--固有値問題">2-2.
 「最良の型」を求める変分問題 → 固有値問題</a></li>
-<li><a href="#2-3-svd-との同値実際の計算法"
-id="toc-2-3-svd-との同値実際の計算法">2-3. SVD
+<li><a href="#2-3-svd-との同値実際の計算法" id="toc-2-3-svd-との同値実際の計算法">2-3. SVD
 との同値（実際の計算法）</a></li>
-<li><a href="#2-4-用語の整理--podsvd特異値分解の違い"
-id="toc-2-4-用語の整理--podsvd特異値分解の違い">2-4. 用語の整理 ―
+<li><a href="#2-4-用語の整理--podsvd特異値分解の違い" id="toc-2-4-用語の整理--podsvd特異値分解の違い">2-4. 用語の整理 ―
 POD・SVD・特異値分解の違い</a></li>
-<li><a href="#2-5-コラムpod以外のモデル縮約--クリロフ部分空間法との違い"
-id="toc-2-5-コラムpod以外のモデル縮約--クリロフ部分空間法との違い">2-5.
+<li><a href="#2-5-コラムpod以外のモデル縮約--クリロフ部分空間法との違い" id="toc-2-5-コラムpod以外のモデル縮約--クリロフ部分空間法との違い">2-5.
 コラム：POD以外のモデル縮約 ― クリロフ部分空間法との違い</a></li>
 </ul></li>
-<li><a href="#3-小さな行列で-pod-を手計算する3セル--4時刻文字式"
-id="toc-3-小さな行列で-pod-を手計算する3セル--4時刻文字式">3.
+<li><a href="#3-小さな行列で-pod-を手計算する3セル--4時刻文字式" id="toc-3-小さな行列で-pod-を手計算する3セル--4時刻文字式">3.
 小さな行列で POD を手計算する（3セル × 4時刻・文字式）</a>
 <ul>
-<li><a href="#3-1-相関行列-xxmathsf-t-を作る"
-id="toc-3-1-相関行列-xxmathsf-t-を作る">3-1. 相関行列 <span
-class="math inline">\(XX^{\mathsf T}\)</span> を作る</a></li>
-<li><a href="#3-2-固有値と-podモード文字式"
-id="toc-3-2-固有値と-podモード文字式">3-2. 固有値と
+<li><a href="#3-1-相関行列-xxmathsf-t-を作る" id="toc-3-1-相関行列-xxmathsf-t-を作る">3-1. 相関行列 <span class="math inline">\(XX^{\mathsf T}\)</span> を作る</a></li>
+<li><a href="#3-2-固有値と-podモード文字式" id="toc-3-2-固有値と-podモード文字式">3-2. 固有値と
 PODモード（文字式）</a></li>
 </ul></li>
-<li><a href="#4-q-deim--どの点を測れば場を復元できるか"
-id="toc-4-q-deim--どの点を測れば場を復元できるか">4. Q-DEIM ―
+<li><a href="#4-q-deim--どの点を測れば場を復元できるか" id="toc-4-q-deim--どの点を測れば場を復元できるか">4. Q-DEIM ―
 どの点を測れば場を復元できるか</a>
 <ul>
-<li><a href="#4-0-その前に--q-deim-と-gappy-pod-は別の道具です"
-id="toc-4-0-その前に--q-deim-と-gappy-pod-は別の道具です">4-0. その前に
+<li><a href="#4-0-その前に--q-deim-と-gappy-pod-は別の道具です" id="toc-4-0-その前に--q-deim-と-gappy-pod-は別の道具です">4-0. その前に
 ― Q-DEIM と gappy-POD は「別の道具」です</a></li>
-<li><a href="#4-1-まずなぜ点の選び方が問題になるか"
-id="toc-4-1-まずなぜ点の選び方が問題になるか">4-1.
+<li><a href="#4-1-まずなぜ点の選び方が問題になるか" id="toc-4-1-まずなぜ点の選び方が問題になるか">4-1.
 まず「なぜ点の選び方が問題になるか」</a></li>
-<li><a href="#4-2-q-deim-信号が大きく互いに独立な点を貪欲に選ぶ"
-id="toc-4-2-q-deim-信号が大きく互いに独立な点を貪欲に選ぶ">4-2. Q-DEIM
+<li><a href="#4-2-q-deim-信号が大きく互いに独立な点を貪欲に選ぶ" id="toc-4-2-q-deim-信号が大きく互いに独立な点を貪欲に選ぶ">4-2. Q-DEIM
 ＝「信号が大きく・互いに独立な点」を貪欲に選ぶ</a></li>
-<li><a href="#4-3-手計算1点で場が復元できることを確かめる文字式"
-id="toc-4-3-手計算1点で場が復元できることを確かめる文字式">4-3.
+<li><a href="#4-3-手計算1点で場が復元できることを確かめる文字式" id="toc-4-3-手計算1点で場が復元できることを確かめる文字式">4-3.
 手計算：1点で場が復元できることを確かめる（文字式）</a></li>
 <li><a href="#4-4-実際に選ばれた5点" id="toc-4-4-実際に選ばれた5点">4-4.
 実際に選ばれた5点</a></li>
 </ul></li>
-<li><a href="#5-実データの-pod-結果図で確認"
-id="toc-5-実データの-pod-結果図で確認">5. 実データの POD
+<li><a href="#5-実データの-pod-結果図で確認" id="toc-5-実データの-pod-結果図で確認">5. 実データの POD
 結果（図で確認）</a>
 <ul>
-<li><a href="#5-0-小例から実データへ--モードは空間の分布型"
-id="toc-5-0-小例から実データへ--モードは空間の分布型">5-0.
+<li><a href="#5-0-小例から実データへ--モードは空間の分布型" id="toc-5-0-小例から実データへ--モードは空間の分布型">5-0.
 小例から実データへ ― モードは「空間の分布（型）」</a></li>
-<li><a href="#5-1-各モードの分布を読む"
-id="toc-5-1-各モードの分布を読む">5-1. 各モードの分布を読む</a></li>
-<li><a href="#5-2-エネルギー--どのモードが何割を説明するか"
-id="toc-5-2-エネルギー--どのモードが何割を説明するか">5-2. エネルギー ―
+<li><a href="#5-1-各モードの分布を読む" id="toc-5-1-各モードの分布を読む">5-1. 各モードの分布を読む</a></li>
+<li><a href="#5-2-エネルギー--どのモードが何割を説明するか" id="toc-5-2-エネルギー--どのモードが何割を説明するか">5-2. エネルギー ―
 どのモードが何割を説明するか</a></li>
-<li><a href="#5-3-モードを足すほど真値に近づく"
-id="toc-5-3-モードを足すほど真値に近づく">5-3.
+<li><a href="#5-3-モードを足すほど真値に近づく" id="toc-5-3-モードを足すほど真値に近づく">5-3.
 モードを足すほど真値に近づく</a></li>
-<li><a
-href="#5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる"
-id="toc-5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる">5-4.
+<li><a href="#5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる" id="toc-5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる">5-4.
 5点から温度分布を復元する ― 遠いセルも「モード経由」で決まる</a></li>
 </ul></li>
-<li><a href="#6-選んだ5点で-rom-を組み校正する"
-id="toc-6-選んだ5点で-rom-を組み校正する">6. 選んだ5点で ROM
+<li><a href="#6-選んだ5点で-rom-を組み校正する" id="toc-6-選んだ5点で-rom-を組み校正する">6. 選んだ5点で ROM
 を組み、校正する</a>
 <ul>
-<li><a href="#6-1-一般化した集中定数モデル"
-id="toc-6-1-一般化した集中定数モデル">6-1.
+<li><a href="#6-1-一般化した集中定数モデル" id="toc-6-1-一般化した集中定数モデル">6-1.
 一般化した集中定数モデル</a></li>
-<li><a href="#6-1b-発熱は1点に入れている--これは近似です"
-id="toc-6-1b-発熱は1点に入れている--これは近似です">6-1b.
+<li><a href="#6-1b-発熱は1点に入れている--これは近似です" id="toc-6-1b-発熱は1点に入れている--これは近似です">6-1b.
 発熱は「1点」に入れている ― これは近似です</a></li>
-<li><a href="#6-2-係数-k_ij-はどう決める--幾何でなく校正最小二乗"
-id="toc-6-2-係数-k_ij-はどう決める--幾何でなく校正最小二乗">6-2. 係数
+<li><a href="#6-2-係数-k_ij-はどう決める--幾何でなく校正最小二乗" id="toc-6-2-係数-k_ij-はどう決める--幾何でなく校正最小二乗">6-2. 係数
 <span class="math inline">\(K_{ij}\)</span> はどう決める？ ―
 幾何でなく校正（最小二乗）</a></li>
 </ul></li>
-<li><a
-href="#7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す"
-id="toc-7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す">7.
+<li><a href="#7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す" id="toc-7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す">7.
 温度が求まったら ― 実形状にマッピングして FrontISTR で変位を出す</a>
 <ul>
-<li><a
-href="#7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る"
-id="toc-7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る">7-0.
+<li><a href="#7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る" id="toc-7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る">7-0.
 変位を「観測」として使う手続き ― 状態に入れずに観測演算子で作る</a></li>
-<li><a href="#7-1-温度を実形状femメッシュへマッピング--逆距離加重"
-id="toc-7-1-温度を実形状femメッシュへマッピング--逆距離加重">7-1.
+<li><a href="#7-1-温度を実形状femメッシュへマッピング--逆距離加重" id="toc-7-1-温度を実形状femメッシュへマッピング--逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</a></li>
-<li><a href="#7-2-熱ひずみ--節点荷重--つり合い熱弾性fem"
-id="toc-7-2-熱ひずみ--節点荷重--つり合い熱弾性fem">7-2. 熱ひずみ →
+<li><a href="#7-2-熱ひずみ--節点荷重--つり合い熱弾性fem" id="toc-7-2-熱ひずみ--節点荷重--つり合い熱弾性fem">7-2. 熱ひずみ →
 節点荷重 → つり合い（熱弾性FEM）</a></li>
-<li><a href="#7-3-変形アニメーション"
-id="toc-7-3-変形アニメーション">7-3. 変形アニメーション</a></li>
-<li><a href="#7-4-変位の時系列グラフ"
-id="toc-7-4-変位の時系列グラフ">7-4. 変位の時系列グラフ</a></li>
-<li><a href="#7-4b-重要知りたい場所を測らずに当てる--循環を断つ"
-id="toc-7-4b-重要知りたい場所を測らずに当てる--循環を断つ">7-4b.
-【重要】知りたい場所を測らずに当てる ― 循環を断つ</a></li>
-<li><a href="#7-4c-温度センサを1本も使わず変位計だけで温度場を直せるか"
-id="toc-7-4c-温度センサを1本も使わず変位計だけで温度場を直せるか">7-4c.
+<li><a href="#7-3-変形アニメーション" id="toc-7-3-変形アニメーション">7-3. 変形アニメーション</a></li>
+<li><a href="#7-4-変位の時系列グラフ" id="toc-7-4-変位の時系列グラフ">7-4. 変位の時系列グラフ</a></li>
+<li><a href="#7-4b-重要知りたい場所を測らずに当てる--未観測点で評価する" id="toc-7-4b-重要知りたい場所を測らずに当てる--未観測点で評価する">7-4b.
+【重要】知りたい場所を測らずに当てる ― 未観測点で評価する</a></li>
+<li><a href="#7-4c-温度センサを1本も使わず変位計だけで温度場を直せるか" id="toc-7-4c-温度センサを1本も使わず変位計だけで温度場を直せるか">7-4c.
 温度センサを1本も使わず、変位計だけで温度場を直せるか</a></li>
-<li><a
-href="#7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか"
-id="toc-7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか">7-5.
-<span class="math inline">\(x\)</span> ・ <span
-class="math inline">\(y\)</span> ・ <span
-class="math inline">\(z\)</span> の全成分を見る ―
+<li><a href="#7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか" id="toc-7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか">7-5.
+<span class="math inline">\(x\)</span> ・ <span class="math inline">\(y\)</span> ・ <span class="math inline">\(z\)</span> の全成分を見る ―
 観測していない方向・評価点はどうなるか</a></li>
 </ul></li>
-<li><a href="#7-6-観測構成を変えて比べる--本研究の有用性"
-id="toc-7-6-観測構成を変えて比べる--本研究の有用性">7-6.
+<li><a href="#7-6-観測構成を変えて比べる--本研究の有用性" id="toc-7-6-観測構成を変えて比べる--本研究の有用性">7-6.
 観測構成を変えて比べる ― 本研究の有用性</a>
 <ul>
-<li><a href="#先に読む106のどの計算を説明しているか"
-id="toc-先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</a></li>
-<li><a href="#本研究で実際に行った手続きrunrun_da_comparepy"
-id="toc-本研究で実際に行った手続きrunrun_da_comparepy">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</a></li>
-<li><a href="#この表のrmseは何を計算した値か"
-id="toc-この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</a></li>
+<li><a href="#先に読む106のどの計算を説明しているか" id="toc-先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</a></li>
+<li><a href="#本研究で実際に行った手続きrunrun_da_comparepy" id="toc-本研究で実際に行った手続きrunrun_da_comparepy">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</a></li>
+<li><a href="#この表のrmseは何を計算した値か" id="toc-この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</a></li>
 <li><a href="#結果" id="toc-結果">結果</a></li>
 </ul></li>
-<li><a href="#8-まだ分かっていないこと--代表点選択の未解決問題"
-id="toc-8-まだ分かっていないこと--代表点選択の未解決問題">8.
+<li><a href="#8-まだ分かっていないこと--代表点選択の未解決問題" id="toc-8-まだ分かっていないこと--代表点選択の未解決問題">8.
 まだ分かっていないこと ― 代表点選択の未解決問題</a></li>
-<li><a href="#9-まとめ--この記事でやったこと"
-id="toc-9-まとめ--この記事でやったこと">9. まとめ ―
+<li><a href="#9-まとめ--この記事でやったこと" id="toc-9-まとめ--この記事でやったこと">9. まとめ ―
 この記事でやったこと</a>
 <ul>
-<li><a href="#参考元になった実装詳細"
-id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
+<li><a href="#参考元になった実装詳細" id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </nav>
-<h1
-id="blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
+<h1 id="blog_004enkfを軽くするrom--pod-で代表点をデータから選ぶ">blog_004：EnKFを軽くするROM
 ― POD で代表点を「データから」選ぶ</h1>
+<blockquote>
+<p><strong>2026-10-05の読み直し：条件の区別</strong>
+PODは温度場のモード抽出、Q-DEIMはROM代表点選択、時間発展は校正した5点熱回路です。純粋なPOD-Galerkin法ではありません。主な同化図はROM双子実験で、追加検証の真値は各節に明記します。</p>
+</blockquote>
 <h2 id="この記事で確かめること">この記事で確かめること</h2>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -453,27 +401,26 @@ ROM</strong> を作れるか。その5点から<strong>全 20,696
 </tr>
 <tr class="odd">
 <td><strong>評価</strong></td>
-<td>加熱期 0〜300 秒の平均。復元精度は全 20,696 セルで評価</td>
+<td>主な逐次同化の集計は観測時刻30〜300秒。5点温度RMSE、全20,696セルRMSE、変位のMAE/RMSEを区別し、各図の条件を参照</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
 <p><strong>注意</strong>：§7-4 の「温度2点＋変位2点」は、評価している
-A・O をそのまま観測に使っています（循環）。 <strong>A・O
-を測らずに当てた結果は §7-4b と <a
-href="blog008.html">blog_008
+A・O
+をそのまま観測に使っています（観測点での適合評価。独立なholdout評価ではない）。
+<strong>A・O を測らずに当てた結果は §7-4b と <a href="blog008.html">blog_008
 §5</a></strong> にあります。</p>
 </blockquote>
-<hr />
-<h2
-id="読む前に入力から最終結果まで">読む前に：入力から最終結果まで</h2>
+<hr/>
+<h2 id="読む前に入力から最終結果まで">読む前に：入力から最終結果まで</h2>
 <p><strong>目的は、第3回のEnKFで毎回必要になる予報を軽くし、少数の温度状態から全温度場・変位まで復元することです。</strong>
 この記事では、既存のOpenFOAM温度履歴を入力にして、次の順にモデルを作ります。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -537,11 +484,11 @@ ROM（縮約モデル）に置き換える</strong>話です。ポイントは1�
 → EnKF/OIの予報を高速化」 という流れを、<strong>数式 →
 小さな行列の手計算 → 実データの図</strong>の順で追います。</p>
 <pre class="mermaid"><code>flowchart LR
-    A[&quot;OpenFOAM CHT&lt;br/&gt;固体20,696セルの温度履歴&quot;] --&gt; B[&quot;① POD(SVD)&lt;br/&gt;場の型(モード)を抽出&quot;]
-    B --&gt; C[&quot;② Q-DEIM&lt;br/&gt;代表5点を選定&quot;]
-    C --&gt; D[&quot;③ 5点でROMを組み校正&lt;br/&gt;残差0.014K&quot;]
-    D --&gt; E[&quot;④ 軽いROMでEnKF/OI&lt;br/&gt;単一ROMの前進積分が約31ms&quot;]</code></pre>
-<hr />
+    A["OpenFOAM CHT&lt;br/&gt;固体20,696セルの温度履歴"] --&gt; B["① POD(SVD)&lt;br/&gt;場の型(モード)を抽出"]
+    B --&gt; C["② Q-DEIM&lt;br/&gt;代表5点を選定"]
+    C --&gt; D["③ 5点でROMを組み校正&lt;br/&gt;残差0.014K"]
+    D --&gt; E["④ 軽いROMでEnKF/OI&lt;br/&gt;単一ROMの前進積分が約31ms"]</code></pre>
+<hr/>
 <h2 id="1-なぜ-rom-が要るか--enkf-は実ソルバだと重すぎる">1. なぜ ROM
 が要るか ― EnKF は実ソルバだと重すぎる</h2>
 <p>EnKF（blog_003）は、<strong>分身（アンサンブル）1つ1つについて予報モデルを前進</strong>させます。ざっくり
@@ -565,10 +512,10 @@ ROM（縮約モデル）に置き換える</strong>話です。ポイントは1�
 <strong>オンライン（本番）</strong> に分かれます:</p>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -587,17 +534,14 @@ ROM（縮約モデル）に置き換える</strong>話です。ポイントは1�
 </tr>
 <tr class="even">
 <td><strong>オンライン（本番）</strong></td>
-<td>軽いROMでEnKF/OIを回して温度・ <span
-class="math inline">\(Q\)</span> ・ <span
-class="math inline">\(h\)</span> を推定</td>
+<td>軽いROMでEnKF/OIを回して温度・ <span class="math inline">\(Q\)</span> ・ <span class="math inline">\(h\)</span> を推定</td>
 <td><strong>使わない</strong>（ROM 31ms）</td>
 <td>何十〜何百回</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li><strong>ROMはCFDの”蒸留物”</strong>：モードも代表点も係数 <span
-class="math inline">\(C,K,h\)</span>
+<li><strong>ROMはCFDの”蒸留物”</strong>：モードも代表点も係数 <span class="math inline">\(C,K,h\)</span>
 も、<strong>すべてOpenFOAMの結果から作られます</strong>。
 CFDが無ければROMは存在しない。ROMは3D連成解析の
 <strong>代役</strong>であって、独立した物理ソルバではありません。</li>
@@ -606,21 +550,20 @@ CFDが無ければROMは存在しない。ROMは3D連成解析の
 OpenFOAMのメリットが消えたのではなく、ROMという形に
 <strong>凝縮して前倒しした</strong>だけです。</li>
 <li><strong>有効範囲に注意</strong>：ROMは訓練データが覆った範囲でしか正しくない（外挿は苦手）。
-<strong>形状・境界条件・加熱シナリオが大きく変わると無効</strong>になり、CFDを回して作り直し／再校正が要ります。</li>
+<strong>形状・境界条件が変わる場合や、PODで表せない温度分布になる場合は、再検証・再校正が必要</strong>です。発熱量25
+Wや間欠加熱については、入力時刻を整合させた追加検証で使えることを確認しています（<a href="blog007.html">blog_007</a>）。加熱シナリオが変われば必ず無効、という意味ではありません。</li>
 </ul>
-<hr />
+<hr/>
 <h2 id="記号の読み替えと行列サイズ">記号の読み替えと行列サイズ</h2>
 <p><strong>§2〜5の <span class="math inline">\(u\)</span>
 は温度場です。§7の <span class="math inline">\(\boldsymbol u\)</span>
-は変位です。</strong> 既存の式を追う際は、温度の <span
-class="math inline">\(u\)</span> をノートでは <span
-class="math inline">\(T\)</span>
+は変位です。</strong> 既存の式を追う際は、温度の <span class="math inline">\(u\)</span> をノートでは <span class="math inline">\(T\)</span>
 と書き換えて構いません。温度と変位を同じ物理量として扱わないでください。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -668,12 +611,8 @@ m\)</span></td>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(\mathsf T\)</span> は転置、 <span
-class="math inline">\(^+\)</span> はMoore–Penrose疑似逆行列、 <span
-class="math inline">\(\sigma_k\)</span> は特異値、 <span
-class="math inline">\(\lambda_k\)</span> は固有値です。
-本文の「r点P」は選んだ点集合を指します。行列として書くと <span
-class="math inline">\(U_{r,P}=P\Phi\)</span> です。
+<p><span class="math inline">\(\mathsf T\)</span> は転置、 <span class="math inline">\(^+\)</span> はMoore–Penrose疑似逆行列、 <span class="math inline">\(\sigma_k\)</span> は特異値、 <span class="math inline">\(\lambda_k\)</span> は固有値です。
+本文の「r点P」は選んだ点集合を指します。行列として書くと <span class="math inline">\(U_{r,P}=P\Phi\)</span> です。
 PODの「エネルギー」は温度変動の二乗和であり、熱量[J]ではありません。この実装はセル体積の重みを付けないSVDです。</p>
 <p>平均場と基底は0〜600秒の121枚から作って固定します。300秒でヒータを切っても平均場だけを切り替えません。</p>
 <h2 id="2-pod-の数式--なぜ-svd-で場の型が出るのか">2. POD の数式 ― なぜ
@@ -681,15 +620,10 @@ SVD で場の「型」が出るのか</h2>
 <h3 id="2-1-スナップショット行列--温度場の写真を横に並べる">2-1.
 スナップショット行列 ― 温度場の「写真」を横に並べる</h3>
 <p>まず言葉で。ある時刻の温度場（全セルの温度）を1枚の<strong>写真</strong>だと思ってください。
-シミュレーションは時刻 <span
-class="math inline">\(t_1,t_2,\dots,t_m\)</span> の写真を <span
-class="math inline">\(m\)</span> 枚くれます。 この写真を
+シミュレーションは時刻 <span class="math inline">\(t_1,t_2,\dots,t_m\)</span> の写真を <span class="math inline">\(m\)</span> 枚くれます。 この写真を
 <strong>1枚＝1列</strong> にして横に並べたのが、スナップショット行列
 <span class="math inline">\(S\)</span> です
-（<strong>行＝場所＝セル</strong>、<strong>列＝時刻</strong>。 <span
-class="math inline">\(u_i(t_k)\)</span> ＝セル <span
-class="math inline">\(i\)</span> の時刻 <span
-class="math inline">\(t_k\)</span> の温度）:</p>
+（<strong>行＝場所＝セル</strong>、<strong>列＝時刻</strong>。 <span class="math inline">\(u_i(t_k)\)</span> ＝セル <span class="math inline">\(i\)</span> の時刻 <span class="math inline">\(t_k\)</span> の温度）:</p>
 <p><span class="math display">\[S=\begin{pmatrix}
 u_1(t_1) &amp; u_1(t_2) &amp; \cdots &amp; u_1(t_m)\\
 u_2(t_1) &amp; u_2(t_2) &amp; \cdots &amp; u_2(t_m)\\
@@ -699,8 +633,7 @@ u_N(t_1) &amp; u_N(t_2) &amp; \cdots &amp; u_N(t_m)
 <p>（横に読むと <strong>各行が1セルの時間履歴</strong>、縦に読むと
 <strong>各列が1時刻の温度場（1枚の写真）</strong>）</p>
 <ul>
-<li><strong>縦の1列</strong> <span
-class="math inline">\(u(t_k)=(u_1(t_k),\dots,u_N(t_k))^{\mathsf
+<li><strong>縦の1列</strong> <span class="math inline">\(u(t_k)=(u_1(t_k),\dots,u_N(t_k))^{\mathsf
 T}\)</span> … その時刻の温度場まるごと（1枚の写真）。</li>
 <li><strong>横の1行</strong> …
 あるセルの温度が時間とともにどう動いたか（1点の時間履歴）。</li>
@@ -709,8 +642,7 @@ T}\)</span> … その時刻の温度場まるごと（1枚の写真）。</li>
 </ul>
 <p>次に
 <strong>各セルから「そのセル自身の時間平均」を引きます</strong>。平均は下地なので、そこからの<strong>変動だけ</strong>を見たいからです。
-セル <span class="math inline">\(i\)</span> の時間平均を <span
-class="math inline">\(\bar u_i=\frac1m\sum_k u_i(t_k)\)</span>
+セル <span class="math inline">\(i\)</span> の時間平均を <span class="math inline">\(\bar u_i=\frac1m\sum_k u_i(t_k)\)</span>
 とし、これを各行から引いた行列を <span class="math inline">\(X\)</span>
 と書きます:</p>
 <p><span class="math display">\[X=\bigl[\,u(t_1)-\bar u,\ \dots,\
@@ -724,29 +656,25 @@ u_N)^{\mathsf T}\)</span> …
 の各成分は「そのセルが、その時刻に、自分の平均からどれだけ上下したか（変動）」。</li>
 <li>各行の平均はちょうど0（下地を抜いたので、残るのは揺れだけ）。</li>
 </ul>
-<p>この <strong>変動だけの写真束 <span
-class="math inline">\(X\)</span></strong>
+<p>この <strong>変動だけの写真束 <span class="math inline">\(X\)</span></strong>
 から共通の「型」を取り出すのが、次のPODです。</p>
 <h3 id="2-2-最良の型を求める変分問題--固有値問題">2-2.
 「最良の型」を求める変分問題 → 固有値問題</h3>
 <p>場を1つの単位ベクトル <span class="math inline">\(\varphi\)</span> （
 <span class="math inline">\(\lVert\varphi\rVert=1\)</span>
-）で最もよく表す、とは <strong>各スナップショットの <span
-class="math inline">\(\varphi\)</span>
+）で最もよく表す、とは <strong>各スナップショットの <span class="math inline">\(\varphi\)</span>
 方向成分の二乗和を最大化</strong>すること:</p>
 <p><span class="math display">\[\max_{\lVert\varphi\rVert=1}\
 \sum_{k=1}^{m}\bigl|\varphi^{\mathsf T}(u(t_k)-\bar u)\bigr|^2
 =\max_{\lVert\varphi\rVert=1}\ \varphi^{\mathsf T}\bigl(XX^{\mathsf
 T}\bigr)\varphi.\]</span></p>
 <p>制約 <span class="math inline">\(\varphi^{\mathsf
-T}\varphi=1\)</span> をラグランジュ乗数 <span
-class="math inline">\(\lambda\)</span> で組み込みます。</p>
+T}\varphi=1\)</span> をラグランジュ乗数 <span class="math inline">\(\lambda\)</span> で組み込みます。</p>
 <p><span class="math display">\[
 \mathcal L=\varphi^{\mathsf T}XX^{\mathsf
 T}\varphi-\lambda(\varphi^{\mathsf T}\varphi-1).
 \]</span></p>
-<p>対称行列Aに対して <span
-class="math inline">\(\partial(\varphi^{\mathsf
+<p>対称行列Aに対して <span class="math inline">\(\partial(\varphi^{\mathsf
 T}A\varphi)/\partial\varphi=2A\varphi\)</span> なので、</p>
 <p><span class="math display">\[
 \frac{\partial\mathcal L}{\partial\varphi}=2XX^{\mathsf
@@ -761,31 +689,24 @@ T})\,\varphi=\lambda\,\varphi\ }\]</span></p>
 <li>固有値 <span class="math inline">\(\lambda_k=\sigma_k^2\)</span> ＝
 その型の <strong>エネルギー</strong>（大きいほど支配的）</li>
 </ul>
-<h4
-id="固有値エネルギーとはどういう意味か">「固有値＝エネルギー」とはどういう意味か</h4>
+<h4 id="固有値エネルギーとはどういう意味か">「固有値＝エネルギー」とはどういう意味か</h4>
 <p><strong>ここでいう「エネルギー」は物理のエネルギー（J）ではなく、「温度の揺れの2乗の合計」</strong>のことです。</p>
 <p>固有値 <span class="math inline">\(\lambda_k\)</span>
-は、上で最大化した量そのものです。固有値問題の両辺に左から <span
-class="math inline">\(\varphi_k^{\mathsf T}\)</span> を掛けると</p>
+は、上で最大化した量そのものです。固有値問題の両辺に左から <span class="math inline">\(\varphi_k^{\mathsf T}\)</span> を掛けると</p>
 <p><span class="math display">\[
 \lambda_k = \varphi_k^{\mathsf T}\,(XX^{\mathsf T})\,\varphi_k =
 \sum_{t=1}^{m}\big(\varphi_k^{\mathsf T}x_t\big)^2
 \]</span></p>
-<p>（ <span class="math inline">\(x_t\)</span> は <span
-class="math inline">\(X\)</span> の <span
-class="math inline">\(t\)</span> 列目＝時刻 <span
-class="math inline">\(t\)</span> の「平均を引いた温度場」）になります。
+<p>（ <span class="math inline">\(x_t\)</span> は <span class="math inline">\(X\)</span> の <span class="math inline">\(t\)</span> 列目＝時刻 <span class="math inline">\(t\)</span> の「平均を引いた温度場」）になります。
 <span class="math inline">\(\varphi_k^{\mathsf T}x_t\)</span> は「時刻
-<span class="math inline">\(t\)</span> の写真を型 <span
-class="math inline">\(\varphi_k\)</span>
+<span class="math inline">\(t\)</span> の写真を型 <span class="math inline">\(\varphi_k\)</span>
 に重ねたときの長さ（その型がどれだけ含まれているか）」なので、</p>
 <blockquote>
 <p><strong><span class="math inline">\(\lambda_k\)</span>
 ＝「全時刻の写真が、型 <span class="math inline">\(k\)</span>
 をどれだけ含んでいるか」の2乗の合計</strong></p>
 </blockquote>
-<p>です。そして、全部の型の <span
-class="math inline">\(\lambda_k\)</span>
+<p>です。そして、全部の型の <span class="math inline">\(\lambda_k\)</span>
 を足すと、温度の揺れ全体の2乗の合計に一致します。</p>
 <p><span class="math display">\[
 \sum_{k}\lambda_k = \sum_{i=1}^{N}\sum_{t=1}^{m} X_{it}^2
@@ -809,18 +730,15 @@ X_{it}^2\)</span></td>
 <td style="text-align: right;">20.564</td>
 </tr>
 <tr class="even">
-<td>型1の <span
-class="math inline">\(\lambda_1=\sigma_1^2=4.161^2\)</span></td>
+<td>型1の <span class="math inline">\(\lambda_1=\sigma_1^2=4.161^2\)</span></td>
 <td style="text-align: right;">17.316（84.20 %）</td>
 </tr>
 <tr class="odd">
-<td>型2の <span
-class="math inline">\(\lambda_2=\sigma_2^2=1.802^2\)</span></td>
+<td>型2の <span class="math inline">\(\lambda_2=\sigma_2^2=1.802^2\)</span></td>
 <td style="text-align: right;">3.247（15.79 %）</td>
 </tr>
 <tr class="even">
-<td>型3の <span
-class="math inline">\(\lambda_3=\sigma_3^2=0.036^2\)</span></td>
+<td>型3の <span class="math inline">\(\lambda_3=\sigma_3^2=0.036^2\)</span></td>
 <td style="text-align: right;">0.001（0.01 %）</td>
 </tr>
 <tr class="odd">
@@ -830,13 +748,10 @@ class="math inline">\(\lambda_3=\sigma_3^2=0.036^2\)</span></td>
 </tbody>
 </table>
 <p>型1 <span class="math inline">\(\varphi_1=(0.566,\ 0.608,\
-0.557)\)</span> に4枚の写真を重ねた長さは <span
-class="math inline">\((-3.025,\ -0.584,\ 2.613,\ 0.997)\)</span>
-で、その2乗の合計がちょうど <span
-class="math inline">\(17.316=\lambda_1\)</span> です。</p>
+0.557)\)</span> に4枚の写真を重ねた長さは <span class="math inline">\((-3.025,\ -0.584,\ 2.613,\ 0.997)\)</span>
+で、その2乗の合計がちょうど <span class="math inline">\(17.316=\lambda_1\)</span> です。</p>
 <p>（ <span class="math inline">\(\sigma_k\)</span> は次の §2-3
-で出てくる「特異値」です。 <span
-class="math inline">\(\lambda_k=\sigma_k^2\)</span>
+で出てくる「特異値」です。 <span class="math inline">\(\lambda_k=\sigma_k^2\)</span>
 になる理由もそこで示します。）</p>
 <h3 id="2-3-svd-との同値実際の計算法">2-3. SVD
 との同値（実際の計算法）</h3>
@@ -850,9 +765,9 @@ m}
 \]</span></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -871,8 +786,7 @@ T}U=I\)</span> ）</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\Sigma\)</span></td>
-<td>対角に<strong>特異値</strong> <span
-class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\ge0\)</span>
+<td>対角に<strong>特異値</strong> <span class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\ge0\)</span>
 （各型の大きさ）</td>
 <td>対角以外は 0。大きい順に並ぶ</td>
 </tr>
@@ -885,23 +799,19 @@ T}V=I\)</span> ）</td>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(r\)</span> は <span
-class="math inline">\(N\)</span> と <span
-class="math inline">\(m\)</span> の小さい方以下の数（本ケースは <span
-class="math inline">\(m=121\)</span> ）です。
+<p><span class="math inline">\(r\)</span> は <span class="math inline">\(N\)</span> と <span class="math inline">\(m\)</span> の小さい方以下の数（本ケースは <span class="math inline">\(m=121\)</span> ）です。
 「直交」とは、2つの列の内積が 0 ＝
 型どうしが重なりを持たない、という意味です。
 具体的な数値（3点×4時刻）は、この節の後半「数字で最後まで追う」にあります。</p>
 <h4 id="どんな-x-でも-xusigma-vmathsf-t-と書けるのか--制限はない">どんな
-<span class="math inline">\(X\)</span> でも <span
-class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> と書けるのか ―
+<span class="math inline">\(X\)</span> でも <span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> と書けるのか ―
 制限はない</h4>
 <p><strong>書けます。 <span class="math inline">\(X\)</span>
 に制限はありません。</strong> 実数の行列なら、</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -926,72 +836,44 @@ class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> と書けるのか ―
 </table>
 <p><strong>なぜ必ず書けるのか（3行の証明）</strong></p>
 <ol type="1">
-<li><span class="math inline">\(X^{\mathsf T}X\)</span> （ <span
-class="math inline">\(m\times m\)</span> ）は、どんな <span
-class="math inline">\(X\)</span>
-でも<strong>対称</strong>で、固有値が<strong>0以上</strong>です（ <span
-class="math inline">\(v^{\mathsf T}X^{\mathsf T}Xv=\lVert
+<li><span class="math inline">\(X^{\mathsf T}X\)</span> （ <span class="math inline">\(m\times m\)</span> ）は、どんな <span class="math inline">\(X\)</span>
+でも<strong>対称</strong>で、固有値が<strong>0以上</strong>です（ <span class="math inline">\(v^{\mathsf T}X^{\mathsf T}Xv=\lVert
 Xv\rVert^2\ge0\)</span> だから）。
-対称行列は必ず直交する固有ベクトルで対角化できるので、 <span
-class="math inline">\(X^{\mathsf T}X=V\Lambda V^{\mathsf T}\)</span> 、
-<span
-class="math inline">\(\Lambda=\mathrm{diag}(\lambda_1,\lambda_2,\dots)\)</span>
+対称行列は必ず直交する固有ベクトルで対角化できるので、 <span class="math inline">\(X^{\mathsf T}X=V\Lambda V^{\mathsf T}\)</span> 、
+<span class="math inline">\(\Lambda=\mathrm{diag}(\lambda_1,\lambda_2,\dots)\)</span>
 、 <span class="math inline">\(\lambda_k\ge0\)</span> 。</li>
 <li><span class="math inline">\(\sigma_k=\sqrt{\lambda_k}\)</span>
-（0以上なので必ず平方根が取れる）、 <span
-class="math inline">\(u_k=Xv_k/\sigma_k\)</span> （ <span
-class="math inline">\(\sigma_k&gt;0\)</span> のもの）と置くと、 <span
-class="math inline">\(u_k\)</span> も長さ1で互いに直交します（ <span
-class="math inline">\(u_j^{\mathsf T}u_k=v_j^{\mathsf T}X^{\mathsf
+（0以上なので必ず平方根が取れる）、 <span class="math inline">\(u_k=Xv_k/\sigma_k\)</span> （ <span class="math inline">\(\sigma_k&gt;0\)</span> のもの）と置くと、 <span class="math inline">\(u_k\)</span> も長さ1で互いに直交します（ <span class="math inline">\(u_j^{\mathsf T}u_k=v_j^{\mathsf T}X^{\mathsf
 T}Xv_k/(\sigma_j\sigma_k)=\lambda_k v_j^{\mathsf
 T}v_k/(\sigma_j\sigma_k)\)</span> ）。</li>
-<li><span class="math inline">\(Xv_k=\sigma_ku_k\)</span> を全部の <span
-class="math inline">\(k\)</span> で並べると <span
-class="math inline">\(XV=U\Sigma\)</span> 。右から <span
-class="math inline">\(V^{\mathsf T}\)</span> を掛けて <span
-class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> 。</li>
+<li><span class="math inline">\(Xv_k=\sigma_ku_k\)</span> を全部の <span class="math inline">\(k\)</span> で並べると <span class="math inline">\(XV=U\Sigma\)</span> 。右から <span class="math inline">\(V^{\mathsf T}\)</span> を掛けて <span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> 。</li>
 </ol>
 <p><strong>決まり方について</strong></p>
 <ul>
-<li>特異値 <span class="math inline">\(\sigma_k\)</span> は、 <span
-class="math inline">\(X\)</span>
+<li>特異値 <span class="math inline">\(\sigma_k\)</span> は、 <span class="math inline">\(X\)</span>
 から<strong>ただ1通りに決まります</strong>（大きい順に並べた場合）。</li>
-<li><span class="math inline">\(u_k\)</span> ・ <span
-class="math inline">\(v_k\)</span>
-は、特異値がすべて違えば<strong>符号だけ</strong>任意です（ <span
-class="math inline">\(u_k\)</span> と <span
-class="math inline">\(v_k\)</span> を同時に反転しても同じ <span
-class="math inline">\(X\)</span>
+<li><span class="math inline">\(u_k\)</span> ・ <span class="math inline">\(v_k\)</span>
+は、特異値がすべて違えば<strong>符号だけ</strong>任意です（ <span class="math inline">\(u_k\)</span> と <span class="math inline">\(v_k\)</span> を同時に反転しても同じ <span class="math inline">\(X\)</span>
 ）。後半の「符号には任意性があります」はこのことです。</li>
 <li><span class="math inline">\(r\)</span> （使う型の数）は、0
 でない特異値の数＝ <span class="math inline">\(X\)</span>
-の<strong>ランク</strong>です。本ケースは時刻が 121 なので <span
-class="math inline">\(r\le121\)</span> 。</li>
+の<strong>ランク</strong>です。本ケースは時刻が 121 なので <span class="math inline">\(r\le121\)</span> 。</li>
 </ul>
 <p><strong>上の式で <span class="math inline">\(V^{\mathsf
-T}V=I\)</span> を使ってよい理由</strong>： <span
-class="math inline">\(V\)</span>
-の列は手順1の直交する固有ベクトルなので、 <span
-class="math inline">\(V^{\mathsf T}V=I\)</span> が必ず成り立ちます（
-<code>full_matrices=False</code> で <span
-class="math inline">\(U\)</span> を 121 列に絞っても、 <span
-class="math inline">\(V\)</span> は 121 × 121 のままなので同じ）。</p>
-<h4
-id="なぜ-svd-の-u-が-pod-のモードになり-lambda_ksigma_k2-になるのか">なぜ
+T}V=I\)</span> を使ってよい理由</strong>： <span class="math inline">\(V\)</span>
+の列は手順1の直交する固有ベクトルなので、 <span class="math inline">\(V^{\mathsf T}V=I\)</span> が必ず成り立ちます（
+<code>full_matrices=False</code> で <span class="math inline">\(U\)</span> を 121 列に絞っても、 <span class="math inline">\(V\)</span> は 121 × 121 のままなので同じ）。</p>
+<h4 id="なぜ-svd-の-u-が-pod-のモードになり-lambda_ksigma_k2-になるのか">なぜ
 SVD の <span class="math inline">\(U\)</span> が POD のモードになり、
 <span class="math inline">\(\lambda_k=\sigma_k^2\)</span>
 になるのか</h4>
-<p><span class="math inline">\(X\)</span> を特異値分解 <span
-class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> して、§2-2
+<p><span class="math inline">\(X\)</span> を特異値分解 <span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> して、§2-2
 の固有値問題に出てきた <span class="math inline">\(XX^{\mathsf
 T}\)</span> を計算すると</p>
 <p><span class="math display">\[XX^{\mathsf T}=U\Sigma V^{\mathsf
 T}\,(U\Sigma V^{\mathsf T})^{\mathsf T}=U\Sigma \underbrace{V^{\mathsf
 T}V}_{I}\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.\]</span></p>
-<p>（ <span class="math inline">\(V\)</span> の列が直交なので <span
-class="math inline">\(V^{\mathsf T}V=I\)</span> ）。両辺に右から <span
-class="math inline">\(U\)</span> を掛けると、 <span
-class="math inline">\(U^{\mathsf T}U=I\)</span> なので</p>
+<p>（ <span class="math inline">\(V\)</span> の列が直交なので <span class="math inline">\(V^{\mathsf T}V=I\)</span> ）。両辺に右から <span class="math inline">\(U\)</span> を掛けると、 <span class="math inline">\(U^{\mathsf T}U=I\)</span> なので</p>
 <p><span class="math display">\[
 XX^{\mathsf T}\,U = U\,\Sigma^2
 \quad\Longleftrightarrow\quad
@@ -1000,42 +882,29 @@ XX^{\mathsf T}\,u_k = \sigma_k^2\,u_k\qquad(k=1,2,\dots)
 <p>これは §2-2 の固有値問題 <span class="math inline">\((XX^{\mathsf
 T})\varphi=\lambda\varphi\)</span> そのものです。つまり</p>
 <ul>
-<li><span class="math inline">\(U\)</span> の <span
-class="math inline">\(k\)</span> 列目 <span
-class="math inline">\(u_k\)</span> ＝ 固有ベクトル <span
-class="math inline">\(\varphi_k\)</span> ＝ <strong>POD
+<li><span class="math inline">\(U\)</span> の <span class="math inline">\(k\)</span> 列目 <span class="math inline">\(u_k\)</span> ＝ 固有ベクトル <span class="math inline">\(\varphi_k\)</span> ＝ <strong>POD
 モード</strong></li>
-<li><span class="math inline">\(\sigma_k^2\)</span> ＝ 固有値 <span
-class="math inline">\(\lambda_k\)</span> ＝
+<li><span class="math inline">\(\sigma_k^2\)</span> ＝ 固有値 <span class="math inline">\(\lambda_k\)</span> ＝
 <strong>その型のエネルギー</strong></li>
 </ul>
-<p><strong>3点×4時刻の例で確かめると</strong>： <span
-class="math inline">\(XX^{\mathsf T}u_1=(9.798,\ 10.526,\
-9.646)\)</span> 、 <span
-class="math inline">\(\sigma_1^2u_1=17.316\times(0.566,\ 0.608,\
+<p><strong>3点×4時刻の例で確かめると</strong>： <span class="math inline">\(XX^{\mathsf T}u_1=(9.798,\ 10.526,\
+9.646)\)</span> 、 <span class="math inline">\(\sigma_1^2u_1=17.316\times(0.566,\ 0.608,\
 0.557)=(9.798,\ 10.526,\ 9.646)\)</span> で一致します。</p>
 <p>つまり <strong><span class="math inline">\(U\)</span>
 の各列がそのまま <span class="math inline">\(XX^{\mathsf T}\)</span>
-の固有ベクトル＝PODモード</strong>、 <span
-class="math inline">\(\sigma_k^2\)</span> が固有値。 巨大な <span
-class="math inline">\(XX^{\mathsf T}\)</span> （ <span
-class="math inline">\(N\times N\)</span>
-）を作らず、<strong>SVD一発でPODが得られます</strong>。 しかも上位 <span
-class="math inline">\(r\)</span>
-モードで打ち切った近似は、<strong>ランク <span
-class="math inline">\(r\)</span>
+の固有ベクトル＝PODモード</strong>、 <span class="math inline">\(\sigma_k^2\)</span> が固有値。 巨大な <span class="math inline">\(XX^{\mathsf T}\)</span> （ <span class="math inline">\(N\times N\)</span>
+）を作らず、<strong>SVD一発でPODが得られます</strong>。 しかも上位 <span class="math inline">\(r\)</span>
+モードで打ち切った近似は、<strong>ランク <span class="math inline">\(r\)</span>
 の全行列の中でフロベニウス誤差を最小</strong>にする （Eckart–Young
 の定理）＝「PODは最もエネルギー効率のよいモード分解」です。</p>
-<h4
-id="実際のコードは3行--nplinalgsvd-の中で何が起きているか">実際のコードは3行
+<h4 id="実際のコードは3行--nplinalgsvd-の中で何が起きているか">実際のコードは3行
 ― <code>np.linalg.svd</code> の中で何が起きているか</h4>
 <p>ここまでが理屈ですが、<strong>実装は拍子抜けするほど短い</strong>です。本研究のモード分解は
 <code>run/select_points_qdeim.py</code>
 の次の3行がすべてです（専用ライブラリは使っていません）。</p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)                                <span class="co"># セルごとの時間平均</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]                             <span class="co"># 平均を引いて「変動だけ」にする</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)    <span class="co"># ← これがモード分解</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a aria-hidden="true" href="#cb2-1" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)                                <span class="co"># セルごとの時間平均</span></span>
+<span id="cb2-2"><a aria-hidden="true" href="#cb2-2" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]                             <span class="co"># 平均を引いて「変動だけ」にする</span></span>
+<span id="cb2-3"><a aria-hidden="true" href="#cb2-3" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)    <span class="co"># ← これがモード分解</span></span></code></pre></div>
 <p>出てくる3つの箱の意味は次のとおりです（本ケースの実サイズつき）。</p>
 <table>
 <thead>
@@ -1073,21 +942,15 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a hr
 </tr>
 </tbody>
 </table>
-<p><code>full_matrices=False</code> は「20,696 × 20,696 の巨大な <span
-class="math inline">\(U\)</span>
+<p><code>full_matrices=False</code> は「20,696 × 20,696 の巨大な <span class="math inline">\(U\)</span>
 を作らず、意味のある121列だけ計算する」という指定です。</p>
 <p><strong>中でやっていること</strong>を一言でいうと、行列を次のように<strong>足し算へ分解</strong>しています:</p>
 <p><span class="math display">\[X=\sigma_1\,u_1v_1^{\mathsf
 T}+\sigma_2\,u_2v_2^{\mathsf T}+\cdots+\sigma_r\,u_rv_r^{\mathsf
 T}\]</span></p>
-<p>各項が「<strong>空間の型 <span
-class="math inline">\(u_k\)</span></strong> × <strong>時間の動き <span
-class="math inline">\(v_k\)</span></strong> × <strong>大きさ <span
-class="math inline">\(\sigma_k\)</span></strong>」の1セット。</p>
-<p><strong><span class="math inline">\(u_k\)</span> と <span
-class="math inline">\(v_k\)</span>
-は行列ではなく、縦ベクトルです。</strong> <span
-class="math inline">\(\sigma_k\)</span> はただの数です。</p>
+<p>各項が「<strong>空間の型 <span class="math inline">\(u_k\)</span></strong> × <strong>時間の動き <span class="math inline">\(v_k\)</span></strong> × <strong>大きさ <span class="math inline">\(\sigma_k\)</span></strong>」の1セット。</p>
+<p><strong><span class="math inline">\(u_k\)</span> と <span class="math inline">\(v_k\)</span>
+は行列ではなく、縦ベクトルです。</strong> <span class="math inline">\(\sigma_k\)</span> はただの数です。</p>
 <p><span class="math display">\[
 \underbrace{\sigma_k}_{\text{scalar}}\;
 \underbrace{u_k}_{N\times1}\;
@@ -1096,9 +959,9 @@ class="math inline">\(\sigma_k\)</span> はただの数です。</p>
 \]</span></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1145,17 +1008,9 @@ T}\ (1\times4)}
 -1.839&amp;-0.355&amp;1.589&amp;0.606\\
 -1.685&amp;-0.326&amp;1.456&amp;0.555\end{pmatrix}}_{3\times4}
 \]</span></p>
-<p>（1行1列目は <span
-class="math inline">\(4.161\times0.566\times(-0.727)=-1.712\)</span>
-。行列の <span class="math inline">\((i,t)\)</span> 成分は「 <span
-class="math inline">\(\sigma_1\times\)</span> セル <span
-class="math inline">\(i\)</span> の重み <span
-class="math inline">\(\times\)</span> 時刻 <span
-class="math inline">\(t\)</span> の係数」）</p>
-<p><strong>行列の形で書くと</strong>こうなっています（ <span
-class="math inline">\(N\)</span> ＝セル数、 <span
-class="math inline">\(m\)</span> ＝時刻数、 <span
-class="math inline">\(r\)</span> ＝モード数）:</p>
+<p>（1行1列目は <span class="math inline">\(4.161\times0.566\times(-0.727)=-1.712\)</span>
+。行列の <span class="math inline">\((i,t)\)</span> 成分は「 <span class="math inline">\(\sigma_1\times\)</span> セル <span class="math inline">\(i\)</span> の重み <span class="math inline">\(\times\)</span> 時刻 <span class="math inline">\(t\)</span> の係数」）</p>
+<p><strong>行列の形で書くと</strong>こうなっています（ <span class="math inline">\(N\)</span> ＝セル数、 <span class="math inline">\(m\)</span> ＝時刻数、 <span class="math inline">\(r\)</span> ＝モード数）:</p>
 <p><span class="math display">\[\underbrace{X}_{N\times
 m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\
 \underbrace{V^{\mathsf T}}_{r\times m}
@@ -1169,25 +1024,19 @@ m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\
 -\ v_r^{\mathsf T}\ -\end{pmatrix}\]</span></p>
 <ul>
 <li><span class="math inline">\(u_k\)</span>
-は<strong>縦ベクトル</strong>（長さ <span
-class="math inline">\(N\)</span> ）＝ 全セルぶんの重み ＝
+は<strong>縦ベクトル</strong>（長さ <span class="math inline">\(N\)</span> ）＝ 全セルぶんの重み ＝
 <strong>1枚の温度分布の絵</strong></li>
 <li><span class="math inline">\(v_k\)</span>
-は<strong>縦ベクトル</strong>（長さ <span
-class="math inline">\(m\)</span> ）＝ 全時刻ぶんの係数 ＝
+は<strong>縦ベクトル</strong>（長さ <span class="math inline">\(m\)</span> ）＝ 全時刻ぶんの係数 ＝
 <strong>その絵の濃さの時間変化</strong></li>
 <li><span class="math inline">\(\sigma_k u_k v_k^{\mathsf T}\)</span>
-は<strong>縦×横の外積</strong>なので、 <span
-class="math inline">\(X\)</span> と同じ <span
-class="math inline">\(N\times m\)</span> の行列になる</li>
+は<strong>縦×横の外積</strong>なので、 <span class="math inline">\(X\)</span> と同じ <span class="math inline">\(N\times m\)</span> の行列になる</li>
 <li><span class="math inline">\(\Sigma\)</span>
 は<strong>対角以外がすべて 0</strong> の行列（対角行列）。だから「型
-<span class="math inline">\(k\)</span> の大きさ <span
-class="math inline">\(\sigma_k\)</span>
+<span class="math inline">\(k\)</span> の大きさ <span class="math inline">\(\sigma_k\)</span>
 」が、ほかの型と混ざらずに1つずつ掛かる</li>
 </ul>
-<p>しかも <span
-class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
+<p>しかも <span class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
 と<strong>大きい順に並ぶ</strong>ので、頭からいくつか取れば良い近似になります。
 （アルゴリズムとしてはLAPACKの <code>gesdd</code>
 が呼ばれ、二重対角化してから反復で特異値を求めます。
@@ -1196,13 +1045,8 @@ class="math inline">\(\sigma_1\ge\sigma_2\ge\cdots\)</span>
 4時刻の分解</h4>
 <p>数字の前に、同じ大きさ（3点 ×
 4時刻）の場合を<strong>文字のまま</strong>展開します。</p>
-<p><strong>① 入力：平均を引いた温度の行列 <span
-class="math inline">\(X\)</span> （3 × 4）</strong></p>
-<p><span class="math inline">\(x_{it}\)</span> ＝ 点 <span
-class="math inline">\(i\)</span> の、時刻 <span
-class="math inline">\(t\)</span> の「平均からのずれ」（ <span
-class="math inline">\(i=1,2,3\)</span> 、 <span
-class="math inline">\(t=1,\dots,4\)</span> ）。</p>
+<p><strong>① 入力：平均を引いた温度の行列 <span class="math inline">\(X\)</span> （3 × 4）</strong></p>
+<p><span class="math inline">\(x_{it}\)</span> ＝ 点 <span class="math inline">\(i\)</span> の、時刻 <span class="math inline">\(t\)</span> の「平均からのずれ」（ <span class="math inline">\(i=1,2,3\)</span> 、 <span class="math inline">\(t=1,\dots,4\)</span> ）。</p>
 <p><span class="math display">\[
 X=\begin{pmatrix}
 x_{11}&amp;x_{12}&amp;x_{13}&amp;x_{14}\\
@@ -1223,8 +1067,8 @@ v_{13}&amp;v_{23}&amp;v_{33}&amp;v_{43}\end{pmatrix}
 \]</span></p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1234,9 +1078,7 @@ v_{13}&amp;v_{23}&amp;v_{33}&amp;v_{43}\end{pmatrix}
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(U\)</span> の <span
-class="math inline">\(k\)</span> 列目 <span
-class="math inline">\(u_k=(u_{1k},u_{2k},u_{3k})^{\mathsf
+<td><span class="math inline">\(U\)</span> の <span class="math inline">\(k\)</span> 列目 <span class="math inline">\(u_k=(u_{1k},u_{2k},u_{3k})^{\mathsf
 T}\)</span></td>
 <td>型 <span class="math inline">\(k\)</span>
 の<strong>場所ごとの重み</strong>（3点分）</td>
@@ -1244,37 +1086,24 @@ T}\)</span></td>
 <tr class="even">
 <td><span class="math inline">\(\sigma_k\)</span></td>
 <td>型 <span class="math inline">\(k\)</span> の<strong>大きさ</strong>
-<span
-class="math inline">\((\sigma_1\ge\sigma_2\ge\sigma_3\ge0)\)</span></td>
+<span class="math inline">\((\sigma_1\ge\sigma_2\ge\sigma_3\ge0)\)</span></td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(V\)</span> の <span
-class="math inline">\(k\)</span> 列目 <span
-class="math inline">\(v_k=(v_{1k},\dots,v_{4k})^{\mathsf
+<td><span class="math inline">\(V\)</span> の <span class="math inline">\(k\)</span> 列目 <span class="math inline">\(v_k=(v_{1k},\dots,v_{4k})^{\mathsf
 T}\)</span></td>
 <td>型 <span class="math inline">\(k\)</span>
-の<strong>時刻ごとの係数</strong>（4時刻分）。 <span
-class="math inline">\(V^{\mathsf T}\)</span> では <span
-class="math inline">\(k\)</span> 行目に横に並ぶ</td>
+の<strong>時刻ごとの係数</strong>（4時刻分）。 <span class="math inline">\(V^{\mathsf T}\)</span> では <span class="math inline">\(k\)</span> 行目に横に並ぶ</td>
 </tr>
 </tbody>
 </table>
 <p><strong>③ 掛け算すると、成分は「3つの型の足し算」になる</strong></p>
-<p><span class="math inline">\(U\Sigma V^{\mathsf T}\)</span> の <span
-class="math inline">\((i,t)\)</span> 成分を計算すると（ <span
-class="math inline">\(\Sigma\)</span> の対角以外が 0 なので、 <span
-class="math inline">\(k\)</span> が一致する項だけ残る）</p>
+<p><span class="math inline">\(U\Sigma V^{\mathsf T}\)</span> の <span class="math inline">\((i,t)\)</span> 成分を計算すると（ <span class="math inline">\(\Sigma\)</span> の対角以外が 0 なので、 <span class="math inline">\(k\)</span> が一致する項だけ残る）</p>
 <p><span class="math display">\[
 x_{it} = \sigma_1\,u_{i1}\,v_{t1} + \sigma_2\,u_{i2}\,v_{t2} +
 \sigma_3\,u_{i3}\,v_{t3}
 \]</span></p>
-<p>たとえば点1・時刻1は <span
-class="math inline">\(x_{11}=\sigma_1u_{11}v_{11}+\sigma_2u_{12}v_{12}+\sigma_3u_{13}v_{13}\)</span>
-です。 <strong>「点 <span class="math inline">\(i\)</span> ・時刻 <span
-class="math inline">\(t\)</span> の温度のずれ」＝「型 <span
-class="math inline">\(k\)</span> の大きさ × 点 <span
-class="math inline">\(i\)</span> での型の重み × 時刻 <span
-class="math inline">\(t\)</span>
+<p>たとえば点1・時刻1は <span class="math inline">\(x_{11}=\sigma_1u_{11}v_{11}+\sigma_2u_{12}v_{12}+\sigma_3u_{13}v_{13}\)</span>
+です。 <strong>「点 <span class="math inline">\(i\)</span> ・時刻 <span class="math inline">\(t\)</span> の温度のずれ」＝「型 <span class="math inline">\(k\)</span> の大きさ × 点 <span class="math inline">\(i\)</span> での型の重み × 時刻 <span class="math inline">\(t\)</span>
 での型の係数」を、型ごとに足したもの。</strong></p>
 <p><strong>④ 型1つ分を行列で書くと</strong></p>
 <p><span class="math display">\[
@@ -1288,31 +1117,24 @@ u_{31}v_{11}&amp;u_{31}v_{21}&amp;u_{31}v_{31}&amp;u_{31}v_{41}
 \end{pmatrix}
 \]</span></p>
 <p><strong>この行列は、どの列も <span class="math inline">\(u_1\)</span>
-の定数倍</strong>（列 <span class="math inline">\(t\)</span> ＝ <span
-class="math inline">\(\sigma_1v_{t1}\times u_1\)</span> ）。
+の定数倍</strong>（列 <span class="math inline">\(t\)</span> ＝ <span class="math inline">\(\sigma_1v_{t1}\times u_1\)</span> ）。
 つまり「<strong>温度分布の形は <span class="math inline">\(u_1\)</span>
-のまま、時刻ごとに強さ <span
-class="math inline">\(\sigma_1v_{t1}\)</span>
-だけが変わる</strong>」型です。型2・型3も同じ形で、3つ足すと <span
-class="math inline">\(X\)</span> に戻ります。</p>
+のまま、時刻ごとに強さ <span class="math inline">\(\sigma_1v_{t1}\)</span>
+だけが変わる</strong>」型です。型2・型3も同じ形で、3つ足すと <span class="math inline">\(X\)</span> に戻ります。</p>
 <p><span class="math display">\[
 X=\sigma_1u_1v_1^{\mathsf T}+\sigma_2u_2v_2^{\mathsf
 T}+\sigma_3u_3v_3^{\mathsf T}
 \]</span></p>
 <p><strong>⑤ 型を捨てたときの誤差</strong></p>
-<p>型3を捨てた近似 <span
-class="math inline">\(X_2=\sigma_1u_1v_1^{\mathsf
-T}+\sigma_2u_2v_2^{\mathsf T}\)</span> との差は <span
-class="math inline">\(\sigma_3u_3v_3^{\mathsf T}\)</span>
+<p>型3を捨てた近似 <span class="math inline">\(X_2=\sigma_1u_1v_1^{\mathsf
+T}+\sigma_2u_2v_2^{\mathsf T}\)</span> との差は <span class="math inline">\(\sigma_3u_3v_3^{\mathsf T}\)</span>
 だけで、その全成分の2乗の合計は</p>
 <p><span class="math display">\[
 \sum_{i,t}\big(X-X_2\big)_{it}^2=\sigma_3^2
 \]</span></p>
-<p>（ <span class="math inline">\(u_3\)</span> ・ <span
-class="math inline">\(v_3\)</span> は長さ1なので）。<strong>捨てた型の
+<p>（ <span class="math inline">\(u_3\)</span> ・ <span class="math inline">\(v_3\)</span> は長さ1なので）。<strong>捨てた型の
 <span class="math inline">\(\sigma^2\)</span>
-がそのまま誤差になる</strong>ので、 <span
-class="math inline">\(\sigma\)</span>
+がそのまま誤差になる</strong>ので、 <span class="math inline">\(\sigma\)</span>
 の小さい型から捨てればよい、というのが「少ないモードで済む」理由です。</p>
 <p>次の数値例は、この文字に実データを入れたものです。</p>
 <h4 id="数字で最後まで追う--3点--4時刻の完全分解">数字で最後まで追う ―
@@ -1320,11 +1142,8 @@ class="math inline">\(\sigma\)</span>
 <p>言葉だけでは分かりにくいので、<strong>実データから3点・4時刻だけ抜き出して全部書き下します</strong>
 （P2＝ヒータ側、P0＝中央高さ、P4＝反対側の底面。時刻は50, 150, 300,
 500秒）。</p>
-<p><strong>入力</strong>（温度、単位は℃）と、各行から時間平均 <span
-class="math inline">\(m\)</span> を引いた <span
-class="math inline">\(X\)</span> :</p>
-<p><span
-class="math display">\[\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
+<p><strong>入力</strong>（温度、単位は℃）と、各行から時間平均 <span class="math inline">\(m\)</span> を引いた <span class="math inline">\(X\)</span> :</p>
+<p><span class="math display">\[\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
 21.615&amp;23.307&amp;25.239&amp;23.667\\
 20.097&amp;20.922&amp;22.648&amp;23.573\end{pmatrix}
 -\begin{pmatrix}23.864\\ 23.457\\ 21.810\end{pmatrix}
@@ -1333,8 +1152,7 @@ class="math display">\[\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
 -1.712&amp;-0.888&amp;0.838&amp;1.763\end{pmatrix}}_{X\
 (3\times4)}\]</span></p>
 <p>これを <code>np.linalg.svd</code> にかけると、次の3つが返ります:</p>
-<p><span
-class="math display">\[U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
+<p><span class="math display">\[U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
 0.608&amp;0.269&amp;-0.747\\
 0.557&amp;-0.815&amp;0.159\end{pmatrix},\quad
 \Sigma=\begin{pmatrix}4.161&amp;0&amp;0\\ 0&amp;1.802&amp;0\\
@@ -1342,12 +1160,10 @@ class="math display">\[U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
 V^{\mathsf T}=\begin{pmatrix}-0.727&amp;-0.140&amp;0.628&amp;0.240\\
 0.020&amp;0.380&amp;0.422&amp;-0.823\\
 0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}\]</span></p>
-<p><strong>ここからが本題です。</strong> 各項 <span
-class="math inline">\(\sigma_k u_kv_k^{\mathsf T}\)</span>
+<p><strong>ここからが本題です。</strong> 各項 <span class="math inline">\(\sigma_k u_kv_k^{\mathsf T}\)</span>
 を実際に計算すると、 どれも <span class="math inline">\(X\)</span>
 と同じ3×4の行列になります:</p>
-<p><strong>第1項</strong>（ <span
-class="math inline">\(\sigma_1=4.161\)</span> 、エネルギー84.20 %）―
+<p><strong>第1項</strong>（ <span class="math inline">\(\sigma_1=4.161\)</span> 、エネルギー84.20 %）―
 <span class="math inline">\(u_1\)</span>
 は3成分とも同符号・同程度なので「<strong>全体が一緒に上下する型</strong>」:</p>
 <p><span class="math display">\[4.161\begin{pmatrix}0.566\\ 0.608\\
@@ -1355,27 +1171,22 @@ class="math inline">\(\sigma_1=4.161\)</span> 、エネルギー84.20 %）―
 =\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
 -1.839&amp;-0.355&amp;1.589&amp;0.606\\
 -1.685&amp;-0.326&amp;1.456&amp;0.555\end{pmatrix}\]</span></p>
-<p><strong>第2項</strong>（ <span
-class="math inline">\(\sigma_2=1.802\)</span> 、15.79 %）― <span
-class="math inline">\(u_2\)</span>
+<p><strong>第2項</strong>（ <span class="math inline">\(\sigma_2=1.802\)</span> 、15.79 %）― <span class="math inline">\(u_2\)</span>
 は上2点が正・底面が負なので「<strong>上下の偏りの型</strong>」:</p>
 <p><span class="math display">\[1.802\begin{pmatrix}0.513\\ 0.269\\
 -0.815\end{pmatrix}\begin{pmatrix}0.020&amp;0.380&amp;0.422&amp;-0.823\end{pmatrix}
 =\begin{pmatrix}0.019&amp;0.351&amp;0.390&amp;-0.760\\
 0.010&amp;0.184&amp;0.205&amp;-0.399\\
 -0.030&amp;-0.558&amp;-0.620&amp;1.208\end{pmatrix}\]</span></p>
-<p><strong>第3項</strong>（ <span
-class="math inline">\(\sigma_3=0.036\)</span> 、0.01 %）―
+<p><strong>第3項</strong>（ <span class="math inline">\(\sigma_3=0.036\)</span> 、0.01 %）―
 成分がすべて0.02以下の「<strong>ほぼ何もない項</strong>」:</p>
 <p><span class="math display">\[0.036\begin{pmatrix}0.646\\ -0.747\\
 0.159\end{pmatrix}\begin{pmatrix}0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}
 =\begin{pmatrix}0.011&amp;-0.018&amp;0.010&amp;-0.003\\
 -0.013&amp;0.020&amp;-0.011&amp;0.003\\
 0.003&amp;-0.004&amp;0.002&amp;-0.001\end{pmatrix}\]</span></p>
-<p><strong>3項を足すと元に戻ります</strong>（差の最大値 <span
-class="math inline">\(1.1\times10^{-15}\)</span> ）:</p>
-<p><span
-class="math display">\[\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
+<p><strong>3項を足すと元に戻ります</strong>（差の最大値 <span class="math inline">\(1.1\times10^{-15}\)</span> ）:</p>
+<p><span class="math display">\[\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
 \vdots\end{pmatrix}
 +\begin{pmatrix}0.019&amp;0.351&amp;0.390&amp;-0.760\\
 \vdots\end{pmatrix}
@@ -1416,13 +1227,12 @@ class="math display">\[\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
 %</strong>になります。</p>
 <p><strong>本当にそうなっているか、実データで確かめます。</strong>
 検証スクリプトを同梱しました:</p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python3</span> run/svd_explained.py</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a aria-hidden="true" href="#cb3-1" tabindex="-1"></a><span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python3</span> run/svd_explained.py</span></code></pre></div>
 <p>実行結果（20,696セル × 121時刻、0〜600秒）:</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1438,11 +1248,8 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="
 ＝<strong>厳密に分解</strong>（近似ではない）</td>
 </tr>
 <tr class="even">
-<td>② <span class="math inline">\(U\)</span> の列は <span
-class="math inline">\(XX^{\mathsf T}\)</span> の固有ベクトルか</td>
-<td><span class="math inline">\(XX^{\mathsf T}u_1\)</span> と <span
-class="math inline">\(\sigma_1^2u_1\)</span> の差 <span
-class="math inline">\(4.3\times10^{-16}\)</span>
+<td>② <span class="math inline">\(U\)</span> の列は <span class="math inline">\(XX^{\mathsf T}\)</span> の固有ベクトルか</td>
+<td><span class="math inline">\(XX^{\mathsf T}u_1\)</span> と <span class="math inline">\(\sigma_1^2u_1\)</span> の差 <span class="math inline">\(4.3\times10^{-16}\)</span>
 ＝<strong>一致</strong></td>
 </tr>
 <tr class="odd">
@@ -1457,8 +1264,7 @@ class="math inline">\(4.3\times10^{-16}\)</span>
 </tr>
 </tbody>
 </table>
-<p>②は §2-2 の固有値問題と、③は「巨大な <span
-class="math inline">\(XX^{\mathsf T}\)</span>
+<p>②は §2-2 の固有値問題と、③は「巨大な <span class="math inline">\(XX^{\mathsf T}\)</span>
 を作らなくてよい」という主張の実証です。</p>
 <p><strong>何モードで足りるか</strong>（④ Eckart–Young の実測）:</p>
 <table>
@@ -1494,15 +1300,12 @@ class="math inline">\(XX^{\mathsf T}\)</span>
 </table>
 <p>ここで<strong>注意が1つ</strong>あります。「2モードでエネルギー99.89
 %」と「相対誤差3.31 %」は矛盾しません。
-エネルギーは<strong>2乗の量</strong>なので、誤差は <span
-class="math inline">\(\sqrt{1-0.9989}=0.033\)</span> ＝ 3.3 %
+エネルギーは<strong>2乗の量</strong>なので、誤差は <span class="math inline">\(\sqrt{1-0.9989}=0.033\)</span> ＝ 3.3 %
 になります。
 <strong>エネルギー比は実際の誤差よりも良く見える</strong>ので、モード数を決めるときは
 温度のRMSE（ここでは0.04
 K）のような<strong>物理量での誤差も併せて見る</strong>のが安全です。</p>
-<p>最後に <code>Vt</code>（時間の動き）の中身も見ておきます。 <span
-class="math inline">\(\sigma_k v_k\)</span> が「モード <span
-class="math inline">\(k\)</span>
+<p>最後に <code>Vt</code>（時間の動き）の中身も見ておきます。 <span class="math inline">\(\sigma_k v_k\)</span> が「モード <span class="math inline">\(k\)</span>
 が各時刻にどれだけ効いているか」です:</p>
 <table>
 <thead>
@@ -1551,8 +1354,7 @@ class="math inline">\(k\)</span>
 と <span class="math inline">\(v_k\)</span> の両方を同時に反転しても同じ
 <span class="math inline">\(X\)</span> になるため、
 モードの色の向きが逆に出ることがあります。物理的な意味は変わりません。）</p>
-<h4
-id="自分のケースで試す--cfd結果からpodまでの手順8ステップ">自分のケースで試す
+<h4 id="自分のケースで試す--cfd結果からpodまでの手順8ステップ">自分のケースで試す
 ― CFD結果からPODまでの手順（8ステップ）</h4>
 <p>「行列を入れれば出る」とはいえ、<strong>CFDの結果をその行列にするまで</strong>が実務では一番手間です。
 本研究で実際に踏んだ手順を、そのまま再現できる形で書きます。</p>
@@ -1576,9 +1378,8 @@ writeFormat     ascii;    // 後で読むのでasciiが楽</code></pre>
 </ul>
 <p><strong>STEP 2. セル中心座標（と体積）を書き出す</strong></p>
 <p>温度の値だけでは「どのセルがどこにあるか」が分かりません。後で図示・選点に使うので出しておきます:</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellCentres <span class="at">-time</span> 5</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellVolumes <span class="at">-time</span> 5   <span class="co"># 体積重みを使う場合</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a aria-hidden="true" href="#cb5-1" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellCentres <span class="at">-time</span> 5</span>
+<span id="cb5-2"><a aria-hidden="true" href="#cb5-2" tabindex="-1"></a><span class="ex">postProcess</span> <span class="at">-region</span> solid <span class="at">-func</span> writeCellVolumes <span class="at">-time</span> 5   <span class="co"># 体積重みを使う場合</span></span></code></pre></div>
 <p>→
 <code>5/solid/C</code>（セル中心座標）、<code>5/solid/V</code>（セル体積）が生成されます。</p>
 <p><strong>STEP 3. 温度場ファイルを読んで行列に積む</strong></p>
@@ -1586,19 +1387,18 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="
 <code>internalField nonuniform List&lt;scalar&gt; 20696 ( ... )</code>
 という形式です。 正規表現で中身を取り出します（本研究の
 <code>read_foam_field()</code> の要点）:</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> read_foam_field(path, ncell<span class="op">=</span><span class="va">None</span>):</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    txt <span class="op">=</span> <span class="bu">open</span>(path).read()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    seg <span class="op">=</span> txt[txt.find(<span class="st">&quot;internalField&quot;</span>):]</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">&quot;uniform&quot;</span> <span class="kw">in</span> seg[:<span class="dv">40</span>] <span class="kw">and</span> <span class="st">&quot;nonuniform&quot;</span> <span class="kw">not</span> <span class="kw">in</span> seg[:<span class="dv">40</span>]:   <span class="co"># 均一場（初期条件など）</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> <span class="bu">float</span>(re.findall(<span class="vs">r&quot;uniform\s+([-\d.eE ]+);&quot;</span>, seg)[<span class="dv">0</span>])</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.full(ncell, v)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">int</span>(re.search(<span class="vs">r&quot;List&lt;\w+&gt;\s*\n?\s*(\d+)&quot;</span>, seg).group(<span class="dv">1</span>))</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    body <span class="op">=</span> seg[seg.find(<span class="st">&quot;(&quot;</span>)<span class="op">+</span><span class="dv">1</span>:]</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([<span class="bu">float</span>(x) <span class="cf">for</span> x <span class="kw">in</span> re.findall(<span class="vs">r&quot;[-+]?\d[\d.eE+-]*&quot;</span>, body)[:n]])</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>times <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">int</span>(d) <span class="cf">for</span> d <span class="kw">in</span> os.listdir(case) <span class="cf">if</span> d.isdigit())</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([read_foam_field(<span class="ss">f&quot;</span><span class="sc">{</span>case<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">/solid/T&quot;</span>, ncell) <span class="cf">for</span> t <span class="kw">in</span> times])</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a aria-hidden="true" href="#cb6-1" tabindex="-1"></a><span class="kw">def</span> read_foam_field(path, ncell<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-2"><a aria-hidden="true" href="#cb6-2" tabindex="-1"></a>    txt <span class="op">=</span> <span class="bu">open</span>(path).read()</span>
+<span id="cb6-3"><a aria-hidden="true" href="#cb6-3" tabindex="-1"></a>    seg <span class="op">=</span> txt[txt.find(<span class="st">"internalField"</span>):]</span>
+<span id="cb6-4"><a aria-hidden="true" href="#cb6-4" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"uniform"</span> <span class="kw">in</span> seg[:<span class="dv">40</span>] <span class="kw">and</span> <span class="st">"nonuniform"</span> <span class="kw">not</span> <span class="kw">in</span> seg[:<span class="dv">40</span>]:   <span class="co"># 均一場（初期条件など）</span></span>
+<span id="cb6-5"><a aria-hidden="true" href="#cb6-5" tabindex="-1"></a>        v <span class="op">=</span> <span class="bu">float</span>(re.findall(<span class="vs">r"uniform\s+([-\d.eE ]+);"</span>, seg)[<span class="dv">0</span>])</span>
+<span id="cb6-6"><a aria-hidden="true" href="#cb6-6" tabindex="-1"></a>        <span class="cf">return</span> np.full(ncell, v)</span>
+<span id="cb6-7"><a aria-hidden="true" href="#cb6-7" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">int</span>(re.search(<span class="vs">r"List&lt;\w+&gt;\s*\n?\s*(\d+)"</span>, seg).group(<span class="dv">1</span>))</span>
+<span id="cb6-8"><a aria-hidden="true" href="#cb6-8" tabindex="-1"></a>    body <span class="op">=</span> seg[seg.find(<span class="st">"("</span>)<span class="op">+</span><span class="dv">1</span>:]</span>
+<span id="cb6-9"><a aria-hidden="true" href="#cb6-9" tabindex="-1"></a>    <span class="cf">return</span> np.array([<span class="bu">float</span>(x) <span class="cf">for</span> x <span class="kw">in</span> re.findall(<span class="vs">r"[-+]?\d[\d.eE+-]*"</span>, body)[:n]])</span>
+<span id="cb6-10"><a aria-hidden="true" href="#cb6-10" tabindex="-1"></a></span>
+<span id="cb6-11"><a aria-hidden="true" href="#cb6-11" tabindex="-1"></a>times <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">int</span>(d) <span class="cf">for</span> d <span class="kw">in</span> os.listdir(case) <span class="cf">if</span> d.isdigit())</span>
+<span id="cb6-12"><a aria-hidden="true" href="#cb6-12" tabindex="-1"></a>X <span class="op">=</span> np.column_stack([read_foam_field(<span class="ss">f"</span><span class="sc">{</span>case<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span>t<span class="sc">}</span><span class="ss">/solid/T"</span>, ncell) <span class="cf">for</span> t <span class="kw">in</span> times])</span></code></pre></div>
 <p><strong>ここが一番の落とし穴</strong>です:</p>
 <ul>
 <li><strong>初期時刻は <code>uniform</code>
@@ -1610,47 +1410,40 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a hr
 のような<strong>数字でないディレクトリを除外</strong>する</li>
 </ul>
 <p><strong>STEP 4. 平均を引く</strong></p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)      <span class="co"># セルごとの時間平均</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a aria-hidden="true" href="#cb7-1" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)      <span class="co"># セルごとの時間平均</span></span>
+<span id="cb7-2"><a aria-hidden="true" href="#cb7-2" tabindex="-1"></a>Xc   <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]</span></code></pre></div>
 <p>引かないとモード1が「平均場そのもの」になり、変動の型が2番目以降にずれます。</p>
 <p><strong>STEP 5. SVDをかける</strong></p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a aria-hidden="true" href="#cb8-1" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)</span></code></pre></div>
 <p><code>full_matrices=False</code>
-を<strong>必ず付けます</strong>。付けないと <span
-class="math inline">\(N\times N\)</span>
+を<strong>必ず付けます</strong>。付けないと <span class="math inline">\(N\times N\)</span>
 （20,696角）の行列を作ろうとして メモリが破綻します。</p>
 <p><strong>STEP 6. エネルギーを見てモード数を決める</strong></p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.cumsum(energy)[:<span class="dv">5</span>])      <span class="co"># → 0.918, 0.999, ...</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a aria-hidden="true" href="#cb9-1" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()</span>
+<span id="cb9-2"><a aria-hidden="true" href="#cb9-2" tabindex="-1"></a><span class="bu">print</span>(np.cumsum(energy)[:<span class="dv">5</span>])      <span class="co"># → 0.918, 0.999, ...</span></span></code></pre></div>
 <p>ここで <strong>§2-3
 で述べた「エネルギーは2乗の量」の注意</strong>が効きます。 99.9
 %でも誤差は3.3
 %なので、<strong>物理量（温度RMSE）でも確認</strong>してから打ち切ります:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>]:</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    Xr <span class="op">=</span> (U[:, :r] <span class="op">*</span> S[:r]) <span class="op">@</span> Vt[:r]</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(r, np.sqrt(((Xc <span class="op">-</span> Xr)<span class="op">**</span><span class="dv">2</span>).mean()), <span class="st">&quot;K&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a aria-hidden="true" href="#cb10-1" tabindex="-1"></a><span class="cf">for</span> r <span class="kw">in</span> [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>]:</span>
+<span id="cb10-2"><a aria-hidden="true" href="#cb10-2" tabindex="-1"></a>    Xr <span class="op">=</span> (U[:, :r] <span class="op">*</span> S[:r]) <span class="op">@</span> Vt[:r]</span>
+<span id="cb10-3"><a aria-hidden="true" href="#cb10-3" tabindex="-1"></a>    <span class="bu">print</span>(r, np.sqrt(((Xc <span class="op">-</span> Xr)<span class="op">**</span><span class="dv">2</span>).mean()), <span class="st">"K"</span>)</span></code></pre></div>
 <p><strong>STEP 7. モードを可視化して物理的に意味を確認する</strong></p>
-<p>数値だけで進めず、<strong>必ず絵にして確認</strong>します。 <span
-class="math inline">\(U\)</span> の各列は「全セル分の値」なので、
+<p>数値だけで進めず、<strong>必ず絵にして確認</strong>します。 <span class="math inline">\(U\)</span> の各列は「全セル分の値」なので、
 そのままCFDのスカラー場として書き出せばParaViewで見られます。
 モード1が「全体の昇温」、モード2が「左右の偏り」のように<strong>物理的に読めるか</strong>をチェックします。
 読めない場合は、データの取り方（時間窓・出力間隔）を疑います。</p>
 <p><strong>STEP 8. 代表点を選ぶ（Q-DEIM）</strong></p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.linalg <span class="im">import</span> qr</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :r].T, pivoting<span class="op">=</span><span class="va">True</span>)   <span class="co"># 枢軸QR</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>points <span class="op">=</span> piv[:r]                             <span class="co"># 先頭r個が代表点</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a aria-hidden="true" href="#cb11-1" tabindex="-1"></a><span class="im">from</span> scipy.linalg <span class="im">import</span> qr</span>
+<span id="cb11-2"><a aria-hidden="true" href="#cb11-2" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :r].T, pivoting<span class="op">=</span><span class="va">True</span>)   <span class="co"># 枢軸QR</span></span>
+<span id="cb11-3"><a aria-hidden="true" href="#cb11-3" tabindex="-1"></a>points <span class="op">=</span> piv[:r]                             <span class="co"># 先頭r個が代表点</span></span></code></pre></div>
 <p>詳細は §4 で説明します。</p>
 <p><strong>まとめ（つまずきやすい点）</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1706,9 +1499,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a h
 時間窓）まで含めて決まります。対比すると分かりやすいはずです:</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1758,9 +1551,9 @@ X_{ik}=\sqrt{V_i}\;X_{ik}\]</span></p>
 （<code>run/pod_volume_weight_check.py</code>）:</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1819,22 +1612,18 @@ POD・SVD・特異値分解の違い</h3>
 </blockquote>
 <ul>
 <li><strong>SVD（＝特異値分解）</strong> …
-<strong>どんな行列にも使える線形代数の”道具”</strong>。行列を <span
-class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span>
+<strong>どんな行列にも使える線形代数の”道具”</strong>。行列を <span class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span>
 の3つに分解する操作、それ以上でも以下でもありません。物理も温度も知りません。</li>
 <li><strong>POD（固有直交分解）</strong> …
 <strong>データから”エネルギー最大の型”を取り出す”目的・考え方”</strong>。その計算に
-SVD を使います。「PODをする」＝実際には「平均を引いた <span
-class="math inline">\(X\)</span> を SVD し、 <span
-class="math inline">\(U\)</span> の列を”モード”、 <span
-class="math inline">\(\sigma_k^2\)</span>
+SVD を使います。「PODをする」＝実際には「平均を引いた <span class="math inline">\(X\)</span> を SVD し、 <span class="math inline">\(U\)</span> の列を”モード”、 <span class="math inline">\(\sigma_k^2\)</span>
 を”エネルギー”と読む」こと。</li>
 </ul>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1869,8 +1658,7 @@ class="math inline">\(\sigma_k^2\)</span>
 <strong>PCA（主成分分析）</strong> や確率過程の <strong>Karhunen–Loève
 展開</strong> も、呼び名が違うだけで本質は同じ仲間です。</p>
 <p>（別解：SVDを使わず <span class="math inline">\(XX^{\mathsf
-T}\)</span> の固有値分解や、時間側の小さい <span
-class="math inline">\(X^{\mathsf T}X\)</span>
+T}\)</span> の固有値分解や、時間側の小さい <span class="math inline">\(X^{\mathsf T}X\)</span>
 を解く”スナップショット法”でも、同じPODモードが得られます。SVDはその中で最も安定・簡単な計算法という位置づけ。）</p>
 <h3 id="2-5-コラムpod以外のモデル縮約--クリロフ部分空間法との違い">2-5.
 コラム：POD以外のモデル縮約 ― クリロフ部分空間法との違い</h3>
@@ -1882,10 +1670,10 @@ Reduction）にはPOD以外の流派もあります。代表は
 <strong>部分空間の作り方</strong> です:</p>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1899,8 +1687,7 @@ Reduction）にはPOD以外の流派もあります。代表は
 <tr class="odd">
 <td>部分空間の材料</td>
 <td><strong>データ</strong>（スナップショットのSVD）</td>
-<td><strong>方程式の行列</strong>： <span
-class="math inline">\(\mathrm{span}(b,\ Ab,\ A^2b,\dots)\)</span></td>
+<td><strong>方程式の行列</strong>： <span class="math inline">\(\mathrm{span}(b,\ Ab,\ A^2b,\dots)\)</span></td>
 <td>可制御性・可観測性グラミアン</td>
 </tr>
 <tr class="even">
@@ -1930,16 +1717,12 @@ class="math inline">\(\mathrm{span}(b,\ Ab,\ A^2b,\dots)\)</span></td>
 </tr>
 </tbody>
 </table>
-<h4
-id="そもそもクリロフ部分空間とは何か--3ノードの手計算で">そもそも「クリロフ部分空間」とは何か
+<h4 id="そもそもクリロフ部分空間とは何か--3ノードの手計算で">そもそも「クリロフ部分空間」とは何か
 ― 3ノードの手計算で</h4>
-<p>名前は難しいですが、定義は1行です。行列 <span
-class="math inline">\(A\)</span> と入力ベクトル <span
-class="math inline">\(b\)</span> から作る</p>
+<p>名前は難しいですが、定義は1行です。行列 <span class="math inline">\(A\)</span> と入力ベクトル <span class="math inline">\(b\)</span> から作る</p>
 <p><span class="math display">\[\mathcal K_r(A,b)=\mathrm{span}\{\,b,\
 Ab,\ A^2b,\ \dots,\ A^{r-1}b\,\}\]</span></p>
-<p>＝「 <span class="math inline">\(b\)</span> に <span
-class="math inline">\(A\)</span>
+<p>＝「 <span class="math inline">\(b\)</span> に <span class="math inline">\(A\)</span>
 を繰り返し掛けてできる方向を集めた空間」。これだけです。
 <strong>物理的な意味は「入力の影響が系の中を伝わっていく順番」</strong>。3ノードの熱伝導（ヒータは端の節点1）で確かめます:</p>
 <p><span class="math display">\[A=\begin{pmatrix}-1&amp;1&amp;0\\
@@ -1963,24 +1746,19 @@ A^2b=\begin{pmatrix}2\\ -3\\ 1\end{pmatrix}.\]</span></p>
 を1回掛ける＝熱が隣へ1ステップ伝わる</strong>。クリロフ基底は「ヒータの影響が届く順」に空間を張っていきます。
 これが解と直結する理由は、熱方程式 <span class="math inline">\(\dot
 T=AT+bQ\)</span> の解に出てくる行列指数関数のテイラー級数</p>
-<p><span
-class="math display">\[e^{At}b=b+tAb+\frac{t^2}{2}A^2b+\cdots\]</span></p>
+<p><span class="math display">\[e^{At}b=b+tAb+\frac{t^2}{2}A^2b+\cdots\]</span></p>
 <p>が <strong>まさにクリロフ方向の和</strong>
-だから。早い項ほど支配的なので、<strong>最初の <span
-class="math inline">\(r\)</span>
+だから。早い項ほど支配的なので、<strong>最初の <span class="math inline">\(r\)</span>
 方向だけ残して打ち切っても良い近似</strong>になる
 ＝これがクリロフ縮約の原理です。実際の手順は:</p>
 <ol type="1">
 <li><span class="math inline">\(b, Ab, A^2b,\dots\)</span> を
 <strong>Arnoldi法</strong>（グラム・シュミット直交化と同じ発想）で直交基底
-<span class="math inline">\(V_r\)</span> にする （生の <span
-class="math inline">\(A^kb\)</span>
+<span class="math inline">\(V_r\)</span> にする （生の <span class="math inline">\(A^kb\)</span>
 はすぐ同じ向きに揃ってしまい数値的に危ないため）。</li>
 <li>大きい系を <span class="math inline">\(T\approx V_r\,a\)</span>
 と置いて射影： <span class="math inline">\(\dot a=(V_r^{\mathsf
-T}AV_r)\,a+V_r^{\mathsf T}b\,Q\)</span> 。 これで <span
-class="math inline">\(N\)</span> 次元の方程式が <strong><span
-class="math inline">\(r\times r\)</span>
+T}AV_r)\,a+V_r^{\mathsf T}b\,Q\)</span> 。 これで <span class="math inline">\(N\)</span> 次元の方程式が <strong><span class="math inline">\(r\times r\)</span>
 の小さい方程式</strong>になります。</li>
 </ol>
 <p>PODとの対比で言うと：<strong>PODは「シミュレーション結果（データ）」から支配方向を後付けで学ぶ</strong>のに対し、
@@ -2008,7 +1786,7 @@ OpenFOAMのCHTソルバから系行列を取り出すのは大変です。PODは
 という<strong>物理的に読める係数</strong>にしたことで、EnKFの拡大状態（
 <span class="math inline">\(Q,h\)</span>
 推定）へ自然につながります。</p>
-<hr />
+<hr/>
 <h2 id="3-小さな行列で-pod-を手計算する3セル--4時刻文字式">3.
 小さな行列で POD を手計算する（3セル × 4時刻・文字式）</h2>
 <p>言葉だけでは腑に落ちないので、<strong>3セル(A,B,C) ×
@@ -2017,43 +1795,32 @@ OpenFOAMのCHTソルバから系行列を取り出すのは大変です。PODは
 <p><span class="math display">\[u_i(t_k)=\bar u_i+a_i\,g_k,\qquad
 \sum_{k=1}^4 g_k=0\]</span></p>
 <p>と置くこと。ここで <span class="math inline">\(\bar u_i\)</span> は
-<strong>下地（時間平均）</strong>、 <span
-class="math inline">\(a_i\)</span> は
-<strong>その場所の変動の強さ</strong>、 <span
-class="math inline">\(g_k\)</span> は
+<strong>下地（時間平均）</strong>、 <span class="math inline">\(a_i\)</span> は
+<strong>その場所の変動の強さ</strong>、 <span class="math inline">\(g_k\)</span> は
 <strong>全セル共通の時間プロファイル</strong>（平均を引いてあるので総和ゼロ）。
-「<strong>場所ごとの強さ <span
-class="math inline">\(a_i\)</span></strong>」と「<strong>時間の動き
-<span
-class="math inline">\(g_k\)</span></strong>」の積で温度が決まる、という素直な仮定です。</p>
+「<strong>場所ごとの強さ <span class="math inline">\(a_i\)</span></strong>」と「<strong>時間の動き
+<span class="math inline">\(g_k\)</span></strong>」の積で温度が決まる、という素直な仮定です。</p>
 <p>イメージはこうです ――
 <strong>中空円筒を片側から加熱</strong>し、ヒータ側から順に
 A（強）・B（中）・C（弱）の3セルを取ります。
-3セルとも同じように昇温しますが（共通の <span
-class="math inline">\(g_k\)</span> ）、ヒータに近いほど大きく振れます（
+3セルとも同じように昇温しますが（共通の <span class="math inline">\(g_k\)</span> ）、ヒータに近いほど大きく振れます（
 <span class="math inline">\(a_A&gt;a_B&gt;a_C\)</span> ）:</p>
 <figure>
-<img src="img/pod_example_geometry.png"
-alt="最小例のイメージ（中空円筒断面と温度の時間変化）" />
-<figcaption
-aria-hidden="true">最小例のイメージ（中空円筒断面と温度の時間変化）</figcaption>
+<img alt="最小例のイメージ（中空円筒断面と温度の時間変化）" src="img/pod_example_geometry.png"/>
+<figcaption aria-hidden="true">最小例のイメージ（中空円筒断面と温度の時間変化）</figcaption>
 </figure>
-<p><em>左＝場所（断面イメージ）：ヒータに近い順に「変動の強さ」 <span
-class="math inline">\(a_i\)</span> が大きい。
+<p><em>左＝場所（断面イメージ）：ヒータに近い順に「変動の強さ」 <span class="math inline">\(a_i\)</span> が大きい。
 右＝時間：3セルは同じ増え方 <span class="math inline">\(g_k\)</span>
-を共有し、<strong>傾き（振れ幅）の違いが <span
-class="math inline">\(a_i\)</span> の違い</strong>。 この「場所 <span
-class="math inline">\(a_i\)</span> × 時間 <span
-class="math inline">\(g_k\)</span>
+を共有し、<strong>傾き（振れ幅）の違いが <span class="math inline">\(a_i\)</span> の違い</strong>。 この「場所 <span class="math inline">\(a_i\)</span> × 時間 <span class="math inline">\(g_k\)</span>
 」という掛け算の形が、次で効いてきます。</em></p>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2092,8 +1859,7 @@ class="math inline">\(g_k\)</span>
 </tr>
 </tbody>
 </table>
-<p>ヒータ側ほど強く反応するので <span
-class="math inline">\(a_A&gt;a_B&gt;a_C&gt;0\)</span>
+<p>ヒータ側ほど強く反応するので <span class="math inline">\(a_A&gt;a_B&gt;a_C&gt;0\)</span>
 。各セルから自分の平均 <span class="math inline">\(\bar u_i\)</span>
 を引くと、 PODに渡す変動行列 <span class="math inline">\(X\)</span> は
 <strong>場所ベクトル <span class="math inline">\(a\)</span> と
@@ -2110,8 +1876,7 @@ g_4\bigr)
 T}\)</span> ＝ランク1</strong>（1つの空間パターン ×
 1つの時間プロファイル）。
 「場の変動は、たった1つの型で説明できる」ことが、もう形から見えています。</p>
-<h3 id="3-1-相関行列-xxmathsf-t-を作る">3-1. 相関行列 <span
-class="math inline">\(XX^{\mathsf T}\)</span> を作る</h3>
+<h3 id="3-1-相関行列-xxmathsf-t-を作る">3-1. 相関行列 <span class="math inline">\(XX^{\mathsf T}\)</span> を作る</h3>
 <p><span class="math inline">\(X=a\,g^{\mathsf T}\)</span>
 を代入するだけです。 <span class="math inline">\(g^{\mathsf T}g=\lVert
 g\rVert^2\)</span> はただのスカラーなので、</p>
@@ -2121,16 +1886,13 @@ T}\,g\,a^{\mathsf T}=\lVert g\rVert^2\,a\,a^{\mathsf T},\qquad
 <p>右辺は <strong>場所ベクトル <span class="math inline">\(a\)</span>
 の外積 <span class="math inline">\(a a^{\mathsf T}\)</span>
 の定数倍</strong> ＝ やはり <strong>ランク1</strong>。 時間プロファイル
-<span class="math inline">\(g\)</span> は「大きさ <span
-class="math inline">\(\lVert g\rVert^2\)</span>
-」という1個の数にまとまり、 <strong>空間の型は <span
-class="math inline">\(a\)</span>
+<span class="math inline">\(g\)</span> は「大きさ <span class="math inline">\(\lVert g\rVert^2\)</span>
+」という1個の数にまとまり、 <strong>空間の型は <span class="math inline">\(a\)</span>
 だけで決まる</strong>ことが読み取れます。</p>
 <h3 id="3-2-固有値と-podモード文字式">3-2. 固有値と
 PODモード（文字式）</h3>
 <p>ランク1行列 <span class="math inline">\(XX^{\mathsf T}=\lVert
-g\rVert^2\,a a^{\mathsf T}\)</span> の非ゼロ固有ベクトルは <span
-class="math inline">\(a\)</span> の向き、固有値はその係数です。
+g\rVert^2\,a a^{\mathsf T}\)</span> の非ゼロ固有ベクトルは <span class="math inline">\(a\)</span> の向き、固有値はその係数です。
 PODモード <span class="math inline">\(\varphi_1\)</span> とエネルギー
 <span class="math inline">\(\lambda_1\)</span> は</p>
 <p><span class="math display">\[\varphi_1=\frac{a}{\lVert
@@ -2140,17 +1902,14 @@ a\rVert},\qquad
 <p><span class="math display">\[\frac{\lambda_1}{\mathrm{tr}(XX^{\mathsf
 T})}=\frac{\lVert g\rVert^2\lVert a\rVert^2}{\lVert g\rVert^2\lVert
 a\rVert^2}=1,\]</span></p>
-<p>すなわち <strong>モード1だけで100％</strong>。 モード <span
-class="math inline">\(\varphi_1=a/\lVert a\rVert\)</span>
-の中身は「<strong>各セルの変動の強さの比 <span
-class="math inline">\(a_A:a_B:a_C\)</span></strong>」そのもの。 つまり
+<p>すなわち <strong>モード1だけで100％</strong>。 モード <span class="math inline">\(\varphi_1=a/\lVert a\rVert\)</span>
+の中身は「<strong>各セルの変動の強さの比 <span class="math inline">\(a_A:a_B:a_C\)</span></strong>」そのもの。 つまり
 PODモードとは「<strong>どの場所がどれだけ強く動くか</strong>」という空間パターンで、
-<span class="math inline">\(\bar u\)</span> ＝下地、 <span
-class="math inline">\(\varphi_1\)</span>
+<span class="math inline">\(\bar u\)</span> ＝下地、 <span class="math inline">\(\varphi_1\)</span>
 ＝そこからの変動の型、という役割分担です。</p>
 <p>（本物の場は完全なランク1ではありませんが、後で見るように
 <strong>モード1で91.8％</strong>まで説明でき、構図は同じです。）</p>
-<hr />
+<hr/>
 <h2 id="4-q-deim--どの点を測れば場を復元できるか">4. Q-DEIM ―
 どの点を測れば場を復元できるか</h2>
 <p><strong>Q-DEIM
@@ -2163,9 +1922,9 @@ class="math inline">\(\varphi_1\)</span>
 <h4 id="一言でいうと">一言でいうと</h4>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2194,8 +1953,7 @@ class="math inline">\(\varphi_1\)</span>
 </tr>
 <tr class="even">
 <td>出力</td>
-<td>測る点の番号 <span
-class="math inline">\(P=\{P_1,\dots,P_5\}\)</span></td>
+<td>測る点の番号 <span class="math inline">\(P=\{P_1,\dots,P_5\}\)</span></td>
 <td>全セルの温度 <span class="math inline">\(\hat T\)</span>
 （20,696×1）</td>
 </tr>
@@ -2236,18 +1994,15 @@ class="math inline">\(P=\{P_1,\dots,P_5\}\)</span></td>
 Q-DEIM です。 頭の Q は、まさに
 <code>scipy.linalg.qr(..., pivoting=True)</code> の Q です。</li>
 </ul>
-<h4
-id="なぜ穴だらけでも復元できるのか">なぜ「穴だらけ」でも復元できるのか</h4>
+<h4 id="なぜ穴だらけでも復元できるのか">なぜ「穴だらけ」でも復元できるのか</h4>
 <p>ふつうに考えれば、20,696個の数を5個の測定値から復元するのは無理です。<strong>情報が足りません。</strong>
 できるのは、<strong>POD
 が先に「答えの形」を教えてくれている</strong>からです。</p>
 <p>§3 で見たとおり、温度場は</p>
 <p><span class="math display">\[\hat T=\bar
 T+a_1\varphi_1+a_2\varphi_2+\dots+a_5\varphi_5\]</span></p>
-<p>と書けました。 <span class="math inline">\(\bar T\)</span> も <span
-class="math inline">\(\varphi_k\)</span>
-も<strong>計算済みで固定</strong>。時刻ごとに変わるのは <span
-class="math inline">\(a_1,\dots,a_5\)</span> の
+<p>と書けました。 <span class="math inline">\(\bar T\)</span> も <span class="math inline">\(\varphi_k\)</span>
+も<strong>計算済みで固定</strong>。時刻ごとに変わるのは <span class="math inline">\(a_1,\dots,a_5\)</span> の
 <strong>5個だけ</strong>です。</p>
 <blockquote>
 <p><strong>つまり「20,696個を当てる問題」は、PODを通した瞬間に「5個を当てる問題」に化けています。</strong>
@@ -2258,21 +2013,21 @@ class="math inline">\(a_1,\dots,a_5\)</span> の
 5個のつまみを合わせれば、測っていないセルも自動的に決まります。</p>
 <h4 id="流れを図にすると">流れを図にすると</h4>
 <pre class="mermaid"><code>flowchart LR
-  A[&quot;CHT解析&lt;br/&gt;温度場121枚&quot;] --&gt; B[&quot;POD（SVD）&lt;br/&gt;モード φ1..φ5 を得る&quot;]
-  B --&gt; C[&quot;Q-DEIM&lt;br/&gt;測る5点 P を選ぶ&quot;]
-  C --&gt; D[&quot;【ここまでオフライン・1回だけ】&quot;]
-  D --&gt; E[&quot;5点を測る&lt;br/&gt;T_P（5個の数）&quot;]
-  E --&gt; F[&quot;gappy-POD&lt;br/&gt;a を解いて全場へ&quot;]
-  F --&gt; G[&quot;全20,696セルの温度&quot;]
+  A["CHT解析&lt;br/&gt;温度場121枚"] --&gt; B["POD（SVD）&lt;br/&gt;モード φ1..φ5 を得る"]
+  B --&gt; C["Q-DEIM&lt;br/&gt;測る5点 P を選ぶ"]
+  C --&gt; D["【ここまでオフライン・1回だけ】"]
+  D --&gt; E["5点を測る&lt;br/&gt;T_P（5個の数）"]
+  E --&gt; F["gappy-POD&lt;br/&gt;a を解いて全場へ"]
+  F --&gt; G["全20,696セルの温度"]
   G --&gt; E</code></pre>
 <p>上半分（POD→Q-DEIM）は<strong>設計時に1回</strong>。下半分（測る→gappy-POD）は<strong>毎時刻くるくる回る</strong>ループです。</p>
 <h4 id="gappy-pod-の中身3ステップ">gappy-POD の中身（3ステップ）</h4>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2304,8 +2059,7 @@ class="math inline">\(a_1,\dots,a_5\)</span> の
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(U_{r,P}\)</span> は <strong><span
-class="math inline">\(U_r\)</span>
+<p><span class="math inline">\(U_{r,P}\)</span> は <strong><span class="math inline">\(U_r\)</span>
 （20,696×5）から「測った5行」だけを抜き出した 5×5 行列</strong>です。
 ②で逆行列を取るのはこの 5×5
 だけ。だから毎時刻回しても一瞬で終わります。</p>
@@ -2331,8 +2085,7 @@ T_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\dots+a_5\varphi_5[c]\]</span></p>
 <span class="math inline">\(c\)</span>
 が測定点でなくても持っている値</strong>（モードは全セル分そろっている）。
 だから<strong>測っていないセルも、モードを通して値が決まる</strong>わけです。</p>
-<h4
-id="そこで-q-deim-の出番--どの5行を抜くかで連立の解きやすさが変わる">そこで
+<h4 id="そこで-q-deim-の出番--どの5行を抜くかで連立の解きやすさが変わる">そこで
 Q-DEIM の出番 ― 「どの5行を抜くか」で連立の解きやすさが変わる</h4>
 <p>ここまで来ると、Q-DEIM の役割がはっきりします。 ②の連立を解くのは
 <span class="math inline">\(U_{r,P}\)</span> ＝
@@ -2344,7 +2097,7 @@ Q-DEIM の出番 ― 「どの5行を抜くか」で連立の解きやすさが�
 <p>行がそっくりな点を選んでしまうと「同じ式を何回も書いている」状態になり、連立が解けません。
 実データで確かめると差は歴然です:</p>
 <figure>
-<img src="img/pod_to_points.png" alt="PODと測定点の関係" />
+<img alt="PODと測定点の関係" src="img/pod_to_points.png"/>
 <figcaption aria-hidden="true">PODと測定点の関係</figcaption>
 </figure>
 <p><em>③Q-DEIMが選んだ5点の <span class="math inline">\(U_{r,P}\)</span>
@@ -2363,7 +2116,7 @@ mK。
 <h4 id="効果を温度kで見る">効果を温度[K]で見る</h4>
 <p>選点の進行を測る「残差ノルム」は<strong>復元前のモード空間の無次元量</strong>なので、実際の温度で何Kになるのかを別に出しておきます:</p>
 <figure>
-<img src="img/qdeim_rmse_vs_npoints.png" alt="点数ごとの温度RMSE" />
+<img alt="点数ごとの温度RMSE" src="img/qdeim_rmse_vs_npoints.png"/>
 <figcaption aria-hidden="true">点数ごとの温度RMSE</figcaption>
 </figure>
 <p><em>左：点を1つ足すごとの、全20,696セルの復元RMSE。<strong>1点 0.527
@@ -2387,18 +2140,10 @@ Q-DEIMの価値は「いつも最良」ではなく、<strong>大外れを確実
 <p><span class="math display">\[\hat u=\bar
 u+a_1\varphi_1+a_2\varphi_2+\dots+a_r\varphi_r=\bar
 u+U_r\,a.\]</span></p>
-<p>ここで未知は <strong>モードの混ぜ具合 <span
-class="math inline">\(a=(a_1,\dots,a_r)\)</span></strong> の <span
-class="math inline">\(r\)</span> 個だけ。 <span
-class="math inline">\(r\)</span> 個の未知を決めるには <strong><span
-class="math inline">\(r\)</span>
+<p>ここで未知は <strong>モードの混ぜ具合 <span class="math inline">\(a=(a_1,\dots,a_r)\)</span></strong> の <span class="math inline">\(r\)</span> 個だけ。 <span class="math inline">\(r\)</span> 個の未知を決めるには <strong><span class="math inline">\(r\)</span>
 個の独立な測定</strong>があり、選点行列がフルランクなら係数を決められる
-―― これが「少数点でROMを組める」理由です。 <span
-class="math inline">\(r\)</span> 点 <span
-class="math inline">\(P\)</span>
-で測ると、その点でのモードの値だけを並べた <span
-class="math inline">\(r\times r\)</span> 行列 <span
-class="math inline">\(U_{r,P}\)</span> を使って、連立方程式</p>
+―― これが「少数点でROMを組める」理由です。 <span class="math inline">\(r\)</span> 点 <span class="math inline">\(P\)</span>
+で測ると、その点でのモードの値だけを並べた <span class="math inline">\(r\times r\)</span> 行列 <span class="math inline">\(U_{r,P}\)</span> を使って、連立方程式</p>
 <p><span class="math display">\[U_{r,P}\,a=u_P-\bar
 u_P\quad\Rightarrow\quad a=\bigl(U_{r,P}\bigr)^{-1}\bigl(u_P-\bar
 u_P\bigr)\]</span></p>
@@ -2406,8 +2151,7 @@ u_P\bigr)\]</span></p>
 ＝選んだ点の測定値）。<strong>問題は、この連立が「ちゃんと解けるか」</strong>。</p>
 <ul>
 <li><strong>選んだ2点がモードから見て”そっくり”</strong>（例：どちらも「モード1が大きくモード2は小さい」）だと、
-2本の式がほぼ同じ式になり、<strong>連立が解けない</strong>（ <span
-class="math inline">\(U_{r,P}\)</span> が特異に近い）。
+2本の式がほぼ同じ式になり、<strong>連立が解けない</strong>（ <span class="math inline">\(U_{r,P}\)</span> が特異に近い）。
 測定に少しでもノイズが乗ると、復元が大暴れします。</li>
 <li><strong>選んだ点が互いに”別々のことを言う”</strong>（1点はモード1を、別の点はモード2をよく映す）なら、
 連立はスッキリ解け、復元は安定。</li>
@@ -2436,39 +2180,33 @@ U_r=
 <span class="math inline">\(\varphi_1\)</span> はモード1の型で、20,696
 セル分の値が並んでいます。</li>
 <li><strong>横の1行</strong>＝1つのセルの<strong>行ベクトル</strong>（そのセルでの5つのモードの値）。この記事では、セル
-<span class="math inline">\(i\)</span> の行ベクトルを <span
-class="math inline">\(\psi_i\)</span> と書きます。</li>
+<span class="math inline">\(i\)</span> の行ベクトルを <span class="math inline">\(\psi_i\)</span> と書きます。</li>
 </ul>
 <p><span class="math display">\[
 \psi_i=\big(\varphi_1[i],\ \varphi_2[i],\ \varphi_3[i],\ \varphi_4[i],\
 \varphi_5[i]\big)
 \]</span></p>
-<p>（ <span class="math inline">\(U_r\)</span> の <span
-class="math inline">\(i\)</span> 行目）</p>
-<p>（ <span class="math inline">\(\varphi_k\)</span> は「モード <span
-class="math inline">\(k\)</span> ＝列」、 <span
-class="math inline">\(\psi_i\)</span> は「セル <span
-class="math inline">\(i\)</span>
+<p>（ <span class="math inline">\(U_r\)</span> の <span class="math inline">\(i\)</span> 行目）</p>
+<p>（ <span class="math inline">\(\varphi_k\)</span> は「モード <span class="math inline">\(k\)</span> ＝列」、 <span class="math inline">\(\psi_i\)</span> は「セル <span class="math inline">\(i\)</span>
 ＝行」です。混同しないよう記号を分けています。）</p>
 <p><strong>行ベクトルの長さ</strong>は、その行の5つの値の2乗和の平方根です。</p>
 <p><span class="math display">\[
 \lVert\psi_i\rVert=\sqrt{\varphi_1[i]^2+\varphi_2[i]^2+\varphi_3[i]^2+\varphi_4[i]^2+\varphi_5[i]^2}
 \]</span></p>
 <p>長いセルほど、どこかのモードが大きく出るセルです。測ると、そのモードの混ざり具合がよく分かります。短いセルは、どのモードもほとんど出ないので、測っても情報が少ないセルです。</p>
-<p><strong>実際の値</strong>（この研究の <span
-class="math inline">\(U_r\)</span>
+<p><strong>実際の値</strong>（この研究の <span class="math inline">\(U_r\)</span>
 から抜き出したもの。<code>results/qdeim_points.npz</code> の
 <code>pod_modes</code>）：</p>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
+<col style="width: 10%"/>
+<col style="width: 10%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2479,8 +2217,7 @@ class="math inline">\(U_r\)</span>
 <th style="text-align: right;">モード3</th>
 <th style="text-align: right;">モード4</th>
 <th style="text-align: right;">モード5</th>
-<th style="text-align: right;">行ベクトルの長さ <span
-class="math inline">\(\lVert\psi_i\rVert\)</span></th>
+<th style="text-align: right;">行ベクトルの長さ <span class="math inline">\(\lVert\psi_i\rVert\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -2589,10 +2326,8 @@ class="math inline">\(\lVert\psi_i\rVert\)</span></th>
 <span class="math inline">\((\varphi_1[i],\ \varphi_2[i])\)</span>
 として平面に置きます:</p>
 <figure>
-<img src="img/qdeim_concept.png"
-alt="Q-DEIMの直感（行ベクトルと選点）" />
-<figcaption
-aria-hidden="true">Q-DEIMの直感（行ベクトルと選点）</figcaption>
+<img alt="Q-DEIMの直感（行ベクトルと選点）" src="img/qdeim_concept.png"/>
+<figcaption aria-hidden="true">Q-DEIMの直感（行ベクトルと選点）</figcaption>
 </figure>
 <p><em>左（良い）：<strong>行ベクトルが直交気味の2点</strong>を選ぶと、原点からの2ベクトルが作る平行四辺形が広い
 ＝ <span class="math inline">\(\lvert\det U_{r,P}\rvert\)</span>
@@ -2607,10 +2342,8 @@ aria-hidden="true">Q-DEIMの直感（行ベクトルと選点）</figcaption>
 選びます。これが「モード行列の転置に <strong>列枢軸付きQR分解</strong>
 をかける」の中身:</p>
 <ol type="1">
-<li><strong>1点目</strong>：全セル（ <span
-class="math inline">\(U_r\)</span> の 20,696
-行）の中で、行ベクトルの長さ <span
-class="math inline">\(\lVert\psi_i\rVert\)</span> が
+<li><strong>1点目</strong>：全セル（ <span class="math inline">\(U_r\)</span> の 20,696
+行）の中で、行ベクトルの長さ <span class="math inline">\(\lVert\psi_i\rVert\)</span> が
 <strong>最大</strong>のセルを選ぶ（一番強く場に効く点）。実際はセル
 7634（P0、0.0369）。</li>
 <li><strong>2点目</strong>：1点目の方向を全セルから
@@ -2626,23 +2359,18 @@ class="math inline">\(\lVert\psi_i\rVert\)</span> が
 直交気味の良いペアになります。列枢軸QRはこの手順を数値的に安定に行うだけで、魔法ではありません。</p>
 <h3 id="4-3-手計算1点で場が復元できることを確かめる文字式">4-3.
 手計算：1点で場が復元できることを確かめる（文字式）</h3>
-<p>いちばん簡単な <strong>モード1本（ <span
-class="math inline">\(r=1\)</span> ）</strong>
-の場合で、上の手順を最後までやってみます。 <span
-class="math inline">\(U_1=\varphi_1=a/\lVert a\rVert\)</span>
+<p>いちばん簡単な <strong>モード1本（ <span class="math inline">\(r=1\)</span> ）</strong>
+の場合で、上の手順を最後までやってみます。 <span class="math inline">\(U_1=\varphi_1=a/\lVert a\rVert\)</span>
 （§3のランク1例）。 枢軸QRは
-<strong>絶対値が最大の成分</strong>を最初の点に選ぶので、 <span
-class="math inline">\(a_A&gt;a_B&gt;a_C\)</span> より選ばれるのは
+<strong>絶対値が最大の成分</strong>を最初の点に選ぶので、 <span class="math inline">\(a_A&gt;a_B&gt;a_C\)</span> より選ばれるのは
 <strong>セルA</strong>
 （一番よく振れる点）。「振れの大きい場所を測れ」という直感どおりです。</p>
 <p>では本当に <strong>A の1点だけ</strong>で場全体が戻るか。ある時刻
 <span class="math inline">\(t_k\)</span> で <strong>A
-だけ測る</strong>と、 測定値の変動は <span
-class="math inline">\(u_A(t_k)-\bar u_A=a_A g_k\)</span> 。選点行は
+だけ測る</strong>と、 測定値の変動は <span class="math inline">\(u_A(t_k)-\bar u_A=a_A g_k\)</span> 。選点行は
 <span class="math inline">\(U_{1,A}=\varphi_1[A]=a_A/\lVert
 a\rVert\)</span> なので、係数は</p>
-<p><span
-class="math display">\[\alpha=\bigl(U_{1,A}\bigr)^{+}\bigl(u_A-\bar
+<p><span class="math display">\[\alpha=\bigl(U_{1,A}\bigr)^{+}\bigl(u_A-\bar
 u_A\bigr)
 =\frac{\lVert a\rVert}{a_A}\times a_A g_k=\lVert
 a\rVert\,g_k.\]</span></p>
@@ -2650,35 +2378,31 @@ a\rVert\,g_k.\]</span></p>
 <p><span class="math display">\[\hat u=\bar u+\varphi_1\,\alpha
 =\bar u+\frac{a}{\lVert a\rVert}\times\lVert a\rVert\,g_k
 =\bar u+a\,g_k.\]</span></p>
-<p>一方、真値は §3 の定義そのまま <span
-class="math inline">\(u(t_k)=\bar u+a\,g_k\)</span> 。つまり</p>
+<p>一方、真値は §3 の定義そのまま <span class="math inline">\(u(t_k)=\bar u+a\,g_k\)</span> 。つまり</p>
 <p><span class="math display">\[\boxed{\ \hat u=\bar u+a\,g_k=u(t_k)\
 }\]</span></p>
-<p><strong>測っていない B・C まで、真値にピタリ一致</strong>。 <span
-class="math inline">\(\lVert a\rVert\)</span>
+<p><strong>測っていない B・C まで、真値にピタリ一致</strong>。 <span class="math inline">\(\lVert a\rVert\)</span>
 がきれいに約分して消えるのがミソで、
 <strong>ランク1なら1点測るだけで場が完全復元</strong>できる、というのが文字式で最後まで確認できました。
 本物は2〜3モードなので、同じ理屈で
 <strong>数点</strong>あれば場が復元できます。これが「少数の代表点でROMを組める」根拠です。</p>
-<h4
-id="実データで貪欲選択を1ステップずつ追う">実データで貪欲選択を1ステップずつ追う</h4>
+<h4 id="実データで貪欲選択を1ステップずつ追う">実データで貪欲選択を1ステップずつ追う</h4>
 <p>§4-2の手順（①いちばん強い点を選ぶ ②その方向を差し引く ③繰り返す）が、
 <strong>実際にそのとおり動いているか</strong>を20,696セルで確認します（<code>run/qdeim_explained.py</code>）:</p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>W <span class="op">=</span> Ur.copy()                                  <span class="co"># Ur = 先頭5モード (20696×5)</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各行（各セルの行ベクトル ψ_i）の長さ＝「残っている情報」の大きさ</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    p <span class="op">=</span> <span class="bu">int</span>(np.argmax(norms))                  <span class="co"># ← 最大の点を選ぶ</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> W[p] <span class="op">/</span> np.linalg.norm(W[p])</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    W <span class="op">-=</span> np.outer(W <span class="op">@</span> v, v)                    <span class="co"># ← その方向を全セルから差し引く</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a aria-hidden="true" href="#cb13-1" tabindex="-1"></a>W <span class="op">=</span> Ur.copy()                                  <span class="co"># Ur = 先頭5モード (20696×5)</span></span>
+<span id="cb13-2"><a aria-hidden="true" href="#cb13-2" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb13-3"><a aria-hidden="true" href="#cb13-3" tabindex="-1"></a>    norms <span class="op">=</span> np.linalg.norm(W, axis<span class="op">=</span><span class="dv">1</span>)          <span class="co"># 各行（各セルの行ベクトル ψ_i）の長さ＝「残っている情報」の大きさ</span></span>
+<span id="cb13-4"><a aria-hidden="true" href="#cb13-4" tabindex="-1"></a>    p <span class="op">=</span> <span class="bu">int</span>(np.argmax(norms))                  <span class="co"># ← 最大の点を選ぶ</span></span>
+<span id="cb13-5"><a aria-hidden="true" href="#cb13-5" tabindex="-1"></a>    v <span class="op">=</span> W[p] <span class="op">/</span> np.linalg.norm(W[p])</span>
+<span id="cb13-6"><a aria-hidden="true" href="#cb13-6" tabindex="-1"></a>    W <span class="op">-=</span> np.outer(W <span class="op">@</span> v, v)                    <span class="co"># ← その方向を全セルから差し引く</span></span></code></pre></div>
 <p>実行すると、<strong>選ばれる点と残差の減り方</strong>はこうなりました:</p>
 <table>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2733,8 +2457,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a h
 → 0.0143。
 1点選ぶごとに「まだ分かっていない情報」が着実に減っています。</li>
 <li><strong>5点目で残差がちょうど0</strong>：5モードぶんの情報を5点で完全に張り切ったということ。
-これが「 <span class="math inline">\(r\)</span> モードには <span
-class="math inline">\(r\)</span> 点」の意味です。</li>
+これが「 <span class="math inline">\(r\)</span> モードには <span class="math inline">\(r\)</span> 点」の意味です。</li>
 <li><strong>選ばれる順番が意外</strong>：1点目は<strong>ヒータ最近傍ではなく中央高さの点</strong>(21.3,
 −1.6, 51.6)。 ヒータ側の点(36.5, 6.9, 50.8)は3番目です。
 Q-DEIMは「一番熱い点」ではなく「<strong>場全体をいちばんよく代表する点</strong>」を選ぶためで、
@@ -2781,16 +2504,13 @@ scipy 枢軸QR      : [7634, 7924, 7765, 859, 733]   → 完全一致</code></pr
 K）</li>
 <li>しかし<strong>最悪のランダム配置は1.396 K</strong> ＝
 Q-DEIMの<strong>約1700倍</strong>の誤差</li>
-<li>選点行列の行列式でも Q-DEIM <span
-class="math inline">\(4.6\times10^{-9}\)</span> に対しランダム中央値
+<li>選点行列の行列式でも Q-DEIM <span class="math inline">\(4.6\times10^{-9}\)</span> に対しランダム中央値
 <span class="math inline">\(3.1\times10^{-11}\)</span> （約150倍）</li>
 </ul>
 <p>この2つを図にするとこうなります:</p>
 <figure>
-<img src="img/qdeim_value.png"
-alt="Q-DEIMの貪欲選択と、ランダム配置との比較" />
-<figcaption
-aria-hidden="true">Q-DEIMの貪欲選択と、ランダム配置との比較</figcaption>
+<img alt="Q-DEIMの貪欲選択と、ランダム配置との比較" src="img/qdeim_value.png"/>
+<figcaption aria-hidden="true">Q-DEIMの貪欲選択と、ランダム配置との比較</figcaption>
 </figure>
 <p><em>左：1点選ぶごとに残差が減り、5点で完全にゼロになる。右：ランダム5点200通りの復元RMSE分布（対数軸）。多くは
 Q-DEIM の近くに集まるが、<strong>裾が1.4
@@ -2802,18 +2522,15 @@ Kまで伸びている</strong>のが危険。</em></p>
 <h3 id="4-4-実際に選ばれた5点">4-4. 実際に選ばれた5点</h3>
 <p>本ケース（20,696セル、モード5本）に Q-DEIM
 をかけると、上の貪欲手順で次の5点が選ばれます:</p>
-<p><img src="img/qdeim_points.png" alt="POD＋Q-DEIMで選んだROM代表点（3D）" width="460"></p>
+<p><img alt="POD＋Q-DEIMで選んだROM代表点（3D）" src="img/qdeim_points.png" width="460"/></p>
 <p>5点を個別に読み取れるよう、5点と実際の変位観測点を同じ座標系に重ねた図も示します。</p>
-<h4
-id="高感度低感度はどういうロジックで決めているか">「高感度／低感度」はどういうロジックで決めているか</h4>
+<h4 id="高感度低感度はどういうロジックで決めているか">「高感度／低感度」はどういうロジックで決めているか</h4>
 <blockquote>
-<p><strong>2026-10-02 訂正</strong>：以前は「温度センサは発熱感度 <span
-class="math inline">\(\partial T/\partial Q\)</span>
+<p><strong>2026-10-02 訂正</strong>：以前は「温度センサは発熱感度 <span class="math inline">\(\partial T/\partial Q\)</span>
 の高い点に置く」と書いていましたが、この選び方はやめました。発熱感度の上位から選ぶと、熱源のある
 A
 側に2本とも集まり、温度場全体や反りを当てるには不利でした（温度2点・ROM真値の比較で、A
-側だけの P2＋P0 は両側の P2＋P4 の約2倍の誤差）。温度センサの選び方は <a
-href="blog005.html">blog_005 §4-6</a>
+側だけの P2＋P0 は両側の P2＋P4 の約2倍の誤差）。温度センサの選び方は <a href="blog005.html">blog_005 §4-6</a>
 にあります（熱感度 <span class="math inline">\(W\)</span>
 と温度のばらつきから選ぶ）。</p>
 </blockquote>
@@ -2825,18 +2542,15 @@ Q\)</span></strong></p>
 <p>「ヒータの発熱が変わったとき、<strong>温度がよく反応する場所</strong>はどこか」</p>
 </blockquote>
 <ol type="1">
-<li>発熱を10%増やして（ <span
-class="math inline">\(q_\mathrm{scale}\)</span> :
+<li>発熱を10%増やして（ <span class="math inline">\(q_\mathrm{scale}\)</span> :
 1.0→1.1）ROMをもう一度回す</li>
 <li>加熱ピーク（ <span class="math inline">\(t=300\)</span>
-s）で、各点の温度上昇の差をとる： <span
-class="math inline">\(s_i=\dfrac{T_i(1.1Q)-T_i(Q)}{0.1Q}\)</span></li>
+s）で、各点の温度上昇の差をとる： <span class="math inline">\(s_i=\dfrac{T_i(1.1Q)-T_i(Q)}{0.1Q}\)</span></li>
 <li>大きい順に並べる →
 <strong>最大＝高感度（P2＝ヒータ最近傍、5.7）</strong>、<strong>最小＝低感度（P4＝反対側の底面、2.6）</strong></li>
 </ol>
 <p>物理的な理屈：<strong>熱源に近いほど発熱変化が薄まらずに届く</strong>ので反応が大きい。遠い点は拡散でならされ、反応が鈍い。</p>
-<p><strong>② 変位センサの高/低感度（高W/低W）＝ 温度への変位感度 <span
-class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
+<p><strong>② 変位センサの高/低感度（高W/低W）＝ 温度への変位感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <blockquote>
 <p>「温度が変わったとき、<strong>変位がよく動く場所</strong>はどこか」</p>
 </blockquote>
@@ -2854,9 +2568,9 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <p><strong>まとめ表</strong>：</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2899,12 +2613,12 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 <p>（詳しい導出は blog_002 §4 と
 <code>105_0_sensor_placement_sensitivity/docs/03_sensor_design_guide.md</code>
 にあります。）</p>
-<p><img src="img/sensor_positions.png" alt="5温度点と変位観測点A/Oの位置" width="520"></p>
+<p><img alt="5温度点と変位観測点A/Oの位置" src="img/sensor_positions.png" width="520"/></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -2949,25 +2663,22 @@ class="math inline">\(W=K_s^{-1}H_T\)</span></strong></p>
 以降＝それまでで分からない情報が最大の点」を繰り返した結果で、
 <strong>上下・ヒータ側/反対側にバラけて場全体を押さえている</strong>のが分かります。
 「勘」ではなく「データから系統的に」選んだ点であることがポイント。</em></p>
-<hr />
+<hr/>
 <h2 id="5-実データの-pod-結果図で確認">5. 実データの POD
 結果（図で確認）</h2>
 <h3 id="5-0-小例から実データへ--モードは空間の分布型">5-0.
 小例から実データへ ― モードは「空間の分布（型）」</h3>
 <p>§3の小例は <span class="math inline">\(X=a\,g^{\mathsf T}\)</span>
-とランク1で、<strong>モードは1本</strong>（ <span
-class="math inline">\(\varphi_1=a/\lVert a\rVert\)</span> ）＝
+とランク1で、<strong>モードは1本</strong>（ <span class="math inline">\(\varphi_1=a/\lVert a\rVert\)</span> ）＝
 「A強・B中・C弱」という <strong>3セル上の分布</strong>
 でした。実物の温度場は片側加熱で少し複雑なので、 1本では足りず
 <strong>数本のモード</strong> が要ります。ただしやることは全く同じ:
 <strong>20,696セル × 121時刻のスナップショット行列を SVD すると、モード
 <span class="math inline">\(\varphi_1,\varphi_2,\varphi_3,\dots\)</span>
 が出ます。</strong></p>
-<p>ここで大事なのは、<strong>各モード <span
-class="math inline">\(\varphi_k\)</span>
+<p>ここで大事なのは、<strong>各モード <span class="math inline">\(\varphi_k\)</span>
 は「1枚の空間分布（円筒のどこがどれだけ動くかの地図）」</strong>
-だということ。 小例の <span
-class="math inline">\(a=(a_A,a_B,a_C)\)</span>
+だということ。 小例の <span class="math inline">\(a=(a_A,a_B,a_C)\)</span>
 を、3セルから20,696セルへ拡張したものです。 そして温度場は「平均場 ＋
 モード分布の足し合わせ」で表せます:</p>
 <p><span class="math display">\[\hat u(t)=\bar
@@ -2979,9 +2690,9 @@ u+a_1(t)\,\varphi_1+a_2(t)\,\varphi_2+\dots\]</span></p>
 <p>下の図が、実際に出た <strong>平均場と上位3モードの空間分布</strong>
 です:</p>
 <figure>
-<img src="img/pod_modes.png" alt="PODで出た温度場のモード" />
+<img alt="PODで出た温度場のモード" src="img/pod_modes.png">
 <figcaption aria-hidden="true">PODで出た温度場のモード</figcaption>
-</figure>
+</img></figure>
 <p>各パネルの色は「そのモードが円筒のどこで正／負か」を表します。読み方:</p>
 <ul>
 <li><strong>平均場</strong>：定常的な下地の温度分布（ヒータ側が高い、実際の℃）。ここからの<strong>変動</strong>をモードが表す。</li>
@@ -3010,9 +2721,7 @@ SVDはヒータの存在も物理も知らず、ただ「分散が最大の直�
 <strong>対称性・物理から”顔ぶれ”の見当はつきます</strong>：片側加熱の対称な物体なら、
 経験的に「①全体昇温 → ②ヒータ側と反対側のdipole（偏り）→
 ③高次の細かい模様」となりがちで、 今回もそのとおりでした。なお
-<strong>モードの符号は任意</strong>（ <span
-class="math inline">\(\varphi\)</span> と <span
-class="math inline">\(-\varphi\)</span> は同じ意味）で、
+<strong>モードの符号は任意</strong>（ <span class="math inline">\(\varphi\)</span> と <span class="math inline">\(-\varphi\)</span> は同じ意味）で、
 エネルギーが近い2モードは <strong>順番が入れ替わる</strong>
 こともあります。 加熱位置や境界条件が変われば
 <strong>モードも変わる</strong>（その問題固有）。</p>
@@ -3054,31 +2763,24 @@ class="math inline">\(-\varphi\)</span> は同じ意味）で、
 <h3 id="5-3-モードを足すほど真値に近づく">5-3.
 モードを足すほど真値に近づく</h3>
 <figure>
-<img src="img/pod_reconstruction.png"
-alt="モードを足すと真値に近づく" />
+<img alt="モードを足すと真値に近づく" src="img/pod_reconstruction.png">
 <figcaption aria-hidden="true">モードを足すと真値に近づく</figcaption>
-</figure>
+</img></figure>
 <p><em>平均場のみ（誤差1.175K）→ ＋モード1（0.583K）→
 ＋モード1,2（0.055K）→ ＋モード1,2,3（0.005K）。
 モードを1つ足すごとに桁で誤差が縮む＝PODが効率よく場を捉えている証拠。</em></p>
-<h3
-id="5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる">5-4.
+<h3 id="5-4-5点から温度分布を復元する--遠いセルもモード経由で決まる">5-4.
 5点から温度分布を復元する ― 遠いセルも「モード経由」で決まる</h3>
 <p>データ同化が <strong>5点の温度</strong> を出したら、そこから
 <strong>全20,696セルの温度分布</strong>
 を復元できます（gappy-POD）。手順は2段:</p>
 <ol type="1">
-<li><strong>5点の測定値からモードの混ぜ具合を解く</strong>： <span
-class="math inline">\(a=U_{5,P}^{-1}\,(T_5-\bar u_5)\)</span> （ <span
-class="math inline">\(U_{5,P}\)</span> ＝5点でのモード値の <span
-class="math inline">\(5\times5\)</span> 行列）</li>
+<li><strong>5点の測定値からモードの混ぜ具合を解く</strong>： <span class="math inline">\(a=U_{5,P}^{-1}\,(T_5-\bar u_5)\)</span> （ <span class="math inline">\(U_{5,P}\)</span> ＝5点でのモード値の <span class="math inline">\(5\times5\)</span> 行列）</li>
 <li><strong>全セルを復元</strong>： <span class="math inline">\(\hat
 T_i=\bar u_i+\sum_k a_k\,\varphi_{k,i}\)</span> （各セルは
-<strong>自分のモード値</strong> <span
-class="math inline">\(\varphi_{k,i}\)</span> を使う）</li>
+<strong>自分のモード値</strong> <span class="math inline">\(\varphi_{k,i}\)</span> を使う）</li>
 </ol>
-<h4
-id="選択行列から復元式まで省略せずに書く">選択行列から復元式まで省略せずに書く</h4>
+<h4 id="選択行列から復元式まで省略せずに書く">選択行列から復元式まで省略せずに書く</h4>
 <p><span class="math inline">\(T_r\)</span>
 はデータ同化後の5代表点温度（全5点の直接測定値ではありません）。全場を
 <span class="math inline">\(T_{\rm full}\approx\bar u+\Phi a\)</span>
@@ -3101,48 +2803,38 @@ a=(P\Phi)^+(T_r-P\bar u),\qquad
 が、固定したモードをどれだけ足すかを決めます</strong>。係数は負にもなり、合計1の割合ではありません。式の2つの部品は役割がはっきり違います:</p>
 <ul>
 <li><span class="math inline">\(a_k(t)\)</span> …
-<strong>モードの割合（混ぜ具合）</strong>。時刻ごとに1組の数（ <span
-class="math inline">\(a_1,a_2,\dots\)</span>
+<strong>モードの割合（混ぜ具合）</strong>。時刻ごとに1組の数（ <span class="math inline">\(a_1,a_2,\dots\)</span>
 ）で、<strong>全セルで共通</strong>。5点の測定から決まる。</li>
 <li><span class="math inline">\(\varphi_{k,i}\)</span> …
 <strong>そのセルがモード <span class="math inline">\(k\)</span>
-をどれだけ受け取るか</strong>（＝ <span
-class="math inline">\(U_r\)</span> の <span
-class="math inline">\(i\)</span> 行目、 <span
-class="math inline">\(k\)</span> 番目の値）。POD
+をどれだけ受け取るか</strong>（＝ <span class="math inline">\(U_r\)</span> の <span class="math inline">\(i\)</span> 行目、 <span class="math inline">\(k\)</span> 番目の値）。POD
 で1度だけ決まり、<strong>時間によらず固定</strong>。</li>
 </ul>
 <p>だから各セルの温度は「<strong>下地 <span class="math inline">\(\bar
 u_i\)</span> ＋（全体の割合 <span class="math inline">\(a_k\)</span>
-）×（そのセルの受け取り <span
-class="math inline">\(\varphi_{k,i}\)</span> ）の合計</strong>」。
+）×（そのセルの受け取り <span class="math inline">\(\varphi_{k,i}\)</span> ）の合計</strong>」。
 例えるなら
 <strong>ミキシングボード</strong>：モードが1本ずつのスライダー（空間パターン）で、
 <span class="math inline">\(a_k\)</span> がその上げ幅。
 5点で「今どのスライダーがどれだけ上がっているか」を読み取れば、あとは各セルが自分の感度でその音を受け取るだけです。</p>
-<p><strong>1セルで確認</strong>（上のCで、割合が <span
-class="math inline">\(a=(1,\ 0.5)\)</span> のとき）:</p>
+<p><strong>1セルで確認</strong>（上のCで、割合が <span class="math inline">\(a=(1,\ 0.5)\)</span> のとき）:</p>
 <p><span class="math display">\[\hat T_C=\bar
 u_C+a_1\,\varphi_{1,C}+a_2\,\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4.\]</span></p>
 <p>もし別の時刻で割合が <span class="math inline">\(a=(2,\ 0.3)\)</span>
 に変われば、<strong>同じC</strong>でも</p>
 <p><span class="math display">\[\hat
 T_C=20.75+2\times0.3+0.3\times0.7=21.56\]</span></p>
-<p>と変わります。つまり <strong>温度の時間変化は「割合 <span
-class="math inline">\(a(t)\)</span>
+<p>と変わります。つまり <strong>温度の時間変化は「割合 <span class="math inline">\(a(t)\)</span>
 の変化」で表される</strong>（下地とモードの形は固定、動くのは割合だけ）。
 そして <strong>全セルが同じ <span class="math inline">\(a\)</span>
 を共有する</strong>から、5点で <span class="math inline">\(a\)</span>
 さえ決めれば、残り全部が決まる ――
 これが「5点から分布を作る」の芯です。</p>
 <p><strong>ここが肝心</strong>：遠いセルは「近くの5点からの距離で内挿」しているのでは
-<strong>ありません</strong>。 5点で決めた係数 <span
-class="math inline">\(a\)</span> を、そのセル
-<strong>自身の行ベクトル</strong> <span
-class="math inline">\(\varphi_{k,i}\)</span> に掛けて計算します。
+<strong>ありません</strong>。 5点で決めた係数 <span class="math inline">\(a\)</span> を、そのセル
+<strong>自身の行ベクトル</strong> <span class="math inline">\(\varphi_{k,i}\)</span> に掛けて計算します。
 だから「5点から遠い反対側のセル」も、モードの形を通じてちゃんと値が決まります。</p>
-<p><strong>具体例（2モードで確認）</strong>：3セルA,B,C、平均 <span
-class="math inline">\(\bar u=(23,\ 21.5,\ 20.75)\)</span> 、モード</p>
+<p><strong>具体例（2モードで確認）</strong>：3セルA,B,C、平均 <span class="math inline">\(\bar u=(23,\ 21.5,\ 20.75)\)</span> 、モード</p>
 <p><span class="math display">\[\varphi_1=(0.8,\ 0.5,\ 0.3),\qquad
 \varphi_2=(0.1,\ -0.6,\ 0.7).\]</span></p>
 <p>真の混ぜ具合を <span class="math inline">\(a=(1,\ 0.5)\)</span>
@@ -3157,8 +2849,7 @@ u_C=21.4.\]</span></p>
 u_P-\bar u_P=\begin{pmatrix}23.85-23\\
 21.7-21.5\end{pmatrix}=\begin{pmatrix}0.85\\
 0.2\end{pmatrix}.\]</span></p>
-<p>逆行列（ <span
-class="math inline">\(\det=0.8\cdot(-0.6)-0.1\cdot0.5=-0.53\)</span>
+<p>逆行列（ <span class="math inline">\(\det=0.8\cdot(-0.6)-0.1\cdot0.5=-0.53\)</span>
 ）を掛けて混ぜ具合を復元:</p>
 <p><span class="math display">\[a=U_{2,P}^{-1}\begin{pmatrix}0.85\\
 0.2\end{pmatrix}
@@ -3167,61 +2858,51 @@ class="math inline">\(\det=0.8\cdot(-0.6)-0.1\cdot0.5=-0.53\)</span>
 =\frac{1}{-0.53}\begin{pmatrix}-0.53\\ -0.265\end{pmatrix}
 =\begin{pmatrix}1\\ 0.5\end{pmatrix}.\]</span></p>
 <p>この <span class="math inline">\(a=(1,0.5)\)</span>
-を、<strong>一度も測っていないC</strong> の行ベクトル <span
-class="math inline">\(\varphi_{\cdot,C}=(0.3,\ 0.7)\)</span>
+を、<strong>一度も測っていないC</strong> の行ベクトル <span class="math inline">\(\varphi_{\cdot,C}=(0.3,\ 0.7)\)</span>
 に掛けると:</p>
 <p><span class="math display">\[\hat T_C=\bar
 u_C+a_1\varphi_{1,C}+a_2\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4=u_C.\]</span></p>
 <p><strong>遠いCが、測らずにピタリ復元できました。</strong>
-距離で内挿したのではなく、 「5点で決めた <span
-class="math inline">\(a\)</span> ×Cのモード値」で決まっている ――
+距離で内挿したのではなく、 「5点で決めた <span class="math inline">\(a\)</span> ×Cのモード値」で決まっている ――
 これが「5点から分布を作る」の正体です。</p>
 <p><strong>動く絵で見ると</strong>（各時刻でROMの5点温度から全場を復元）:</p>
 <figure>
-<img src="img/blog_temp_recon_anim.gif"
-alt="5点→全温度場の復元アニメ" />
+<img alt="5点→全温度場の復元アニメ" src="img/blog_temp_recon_anim.gif"/>
 <figcaption aria-hidden="true">5点→全温度場の復元アニメ</figcaption>
 </figure>
 <p><em>ピンク色の球（マゼンタ）＝復元に使う5点（温度コンタは半透明で内部の点も見える）。各時刻でROMが出す5点温度からモード係数
 <span class="math inline">\(a(t)\)</span> を解き、全20,696セルを復元。
 ヒータ側が熱く反対側が冷たい分布が、加熱→（300秒でOFF）→冷却と動く。
 <strong>5点しか使っていないのに、面全体の温度分布が出る</strong>のがPODの効きどころです。</em></p>
-<hr />
+<hr/>
 <h2 id="6-選んだ5点で-rom-を組み校正する">6. 選んだ5点で ROM
 を組み、校正する</h2>
 <h3 id="6-1-一般化した集中定数モデル">6-1. 一般化した集中定数モデル</h3>
 <p><strong>ノードは §4
-で選んだ5点そのもの</strong>（P0〜P4）。その各ノード <span
-class="math inline">\(i\)</span> について、次の1本を立てます （ <span
-class="math inline">\(i=0,1,2,3,4\)</span>
+で選んだ5点そのもの</strong>（P0〜P4）。その各ノード <span class="math inline">\(i\)</span> について、次の1本を立てます （ <span class="math inline">\(i=0,1,2,3,4\)</span>
 の<strong>5本</strong>の連立式）:</p>
 <p><span class="math display">\[C_i\frac{dT_i}{dt}=\sum_{j\ne
 i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\mathrm{air}).\]</span></p>
 <p>右辺は左から「<strong>他ノードからの熱流入</strong>」「<strong>発熱</strong>」「<strong>空気への放熱</strong>」の3項です。</p>
 <ul>
-<li><span class="math inline">\(C_i\)</span> … ノード <span
-class="math inline">\(i\)</span> の熱容量 [J/K]</li>
-<li><span class="math inline">\(K_{ij}\)</span> … ノード <span
-class="math inline">\(i,j\)</span> 間コンダクタンス
+<li><span class="math inline">\(C_i\)</span> … ノード <span class="math inline">\(i\)</span> の熱容量 [J/K]</li>
+<li><span class="math inline">\(K_{ij}\)</span> … ノード <span class="math inline">\(i,j\)</span> 間コンダクタンス
 [W/K]（対称・全点対、5点なら10本）</li>
 <li><span class="math inline">\(q_i\)</span> …
-発熱。<strong>ヒータ最近傍ノード P2 だけに投入</strong>（他は <span
-class="math inline">\(q_i=0\)</span> ）</li>
+発熱。<strong>ヒータ最近傍ノード P2 だけに投入</strong>（他は <span class="math inline">\(q_i=0\)</span> ）</li>
 <li><span class="math inline">\(h\)</span> … 放熱係数 [W/K]</li>
 </ul>
 <p>「どのノードの式か」を3Dで示すと（ParaView風）:</p>
-<p><img src="img/rom_network.png" alt="ROMの5ノードと結合ネットワーク" width="440"></p>
+<p><img alt="ROMの5ノードと結合ネットワーク" src="img/rom_network.png" width="440"/></p>
 <p><em>ノード＝POD＋Q-DEIM選定5点。各辺の太さが校正で決まったコンダクタンス
 <span class="math inline">\(K_{ij}\)</span> で、 <strong>P0–P2 が最強（
 <span class="math inline">\(K=17.5\)</span>
 W/K）</strong>＝ヒータ側どうしが強く熱をやり取りする。
-<strong>オレンジのP2がヒータ発熱ノード</strong>（ <span
-class="math inline">\(q\)</span> を投入）、そこから
+<strong>オレンジのP2がヒータ発熱ノード</strong>（ <span class="math inline">\(q\)</span> を投入）、そこから
 P0→P3→…と全ノードへ熱が伝わる。 底面 P3・P4
 は弱い結合で、冷えやすい末端。</em></p>
 <p>各ノードの熱容量 <span class="math inline">\(C_i\)</span> ・結合
-<span class="math inline">\(K_{ij}\)</span> ・放熱 <span
-class="math inline">\(h\)</span> は次の6-2で実データに合わせて決めます。
+<span class="math inline">\(K_{ij}\)</span> ・放熱 <span class="math inline">\(h\)</span> は次の6-2で実データに合わせて決めます。
 行列形にすると線形システムになり、RK4
 で一括前進積分できます（これが約31msの正体）。</p>
 <blockquote>
@@ -3229,9 +2910,7 @@ class="math inline">\(h\)</span> は次の6-2で実データに合わせて決�
 まさに 1D-CAE（Modelica／Simulink や熱回路網法）でやる
 <strong>集中定数モデル</strong> と同じ枠組みです。
 違いは2点だけ：教科書的な1D-CAEが <strong>ノードを勘で置き</strong> 、
-<strong>係数を幾何の公式</strong>（例 <span
-class="math inline">\(K=kA/L\)</span> , <span
-class="math inline">\(C=\rho c V\)</span> ）で 決めるのに対し、ここでは
+<strong>係数を幾何の公式</strong>（例 <span class="math inline">\(K=kA/L\)</span> , <span class="math inline">\(C=\rho c V\)</span> ）で 決めるのに対し、ここでは
 <strong>ノードを POD＋Q-DEIM でデータから選び</strong> 、
 <strong>係数を3D連成解析にフィット</strong> します。 つまり
 <strong>“点も係数もデータ駆動の1D-CAE”</strong> です。</p>
@@ -3243,9 +2922,9 @@ class="math inline">\(C=\rho c V\)</span> ）で 決めるのに対し、ここ�
 でも、<strong>実際のヒータは面状に広がっています</strong>。ここは近似なので、はっきり書いておきます。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3270,15 +2949,14 @@ class="math inline">\(C=\rho c V\)</span> ）で 決めるのに対し、ここ�
 </table>
 <p>Python
 のコードで見ると、こうなっています（<code>dacore/rom_general.py</code>）。</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#                      t &lt; 300 s なら  q × 15 W、それ以降は 0 W</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deriv(Tv, t):</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    heat <span class="op">=</span> np.zeros_like(Tv)                                        <span class="co"># ① まず5点ともゼロ</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    heat[:, heat_node] <span class="op">=</span> heater_power_W(t, q_scale) <span class="op">/</span> C[heat_node]  <span class="co"># ② P2 の列だけに入れる</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.einsum(<span class="st">&quot;eij,ej-&gt;ei&quot;</span>, M, Tv) <span class="op">+</span> b_air <span class="op">+</span> heat</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a aria-hidden="true" href="#cb15-1" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb15-2"><a aria-hidden="true" href="#cb15-2" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span>
+<span id="cb15-3"><a aria-hidden="true" href="#cb15-3" tabindex="-1"></a>    <span class="co">#                      t &lt; 300 s なら  q × 15 W、それ以降は 0 W</span></span>
+<span id="cb15-4"><a aria-hidden="true" href="#cb15-4" tabindex="-1"></a></span>
+<span id="cb15-5"><a aria-hidden="true" href="#cb15-5" tabindex="-1"></a><span class="kw">def</span> deriv(Tv, t):</span>
+<span id="cb15-6"><a aria-hidden="true" href="#cb15-6" tabindex="-1"></a>    heat <span class="op">=</span> np.zeros_like(Tv)                                        <span class="co"># ① まず5点ともゼロ</span></span>
+<span id="cb15-7"><a aria-hidden="true" href="#cb15-7" tabindex="-1"></a>    heat[:, heat_node] <span class="op">=</span> heater_power_W(t, q_scale) <span class="op">/</span> C[heat_node]  <span class="co"># ② P2 の列だけに入れる</span></span>
+<span id="cb15-8"><a aria-hidden="true" href="#cb15-8" tabindex="-1"></a>    <span class="cf">return</span> np.einsum(<span class="st">"eij,ej-&gt;ei"</span>, M, Tv) <span class="op">+</span> b_air <span class="op">+</span> heat</span></code></pre></div>
 <p><code>heat_node = 2</code>（P2、(36.5, 6.9, 50.8)
 mm）で、実際のヒータにいちばん近い代表点です。
 配列で書くと、どのメンバーも P2 の列だけが非ゼロです。</p>
@@ -3288,17 +2966,13 @@ mm）で、実際のヒータにいちばん近い代表点です。
         [0, 0, ●, 0, 0]]      ← メンバー60
               ↑ heat_node = 2（P2）</code></pre>
 <h4 id="なぜ1点集中でも合うのか">なぜ1点集中でも合うのか</h4>
-<p><strong><span class="math inline">\(C_i\)</span> と <span
-class="math inline">\(K_{ij}\)</span> を、OpenFOAM
+<p><strong><span class="math inline">\(C_i\)</span> と <span class="math inline">\(K_{ij}\)</span> を、OpenFOAM
 の結果に合うよう逆算しているからです</strong>（次の §6-2）。</p>
 <p>「発熱は P2 の1点に入る」という前提のもとで、<strong>5点の温度履歴が
 OpenFOAM と一致するように</strong>係数を決めています。
-つまり、<strong>ヒータが面状に広がっていることの効果も、 <span
-class="math inline">\(C\)</span> と <span
-class="math inline">\(K\)</span> が吸収しています。</strong></p>
+つまり、<strong>ヒータが面状に広がっていることの効果も、 <span class="math inline">\(C\)</span> と <span class="math inline">\(K\)</span> が吸収しています。</strong></p>
 <p>実際、ROM 単体の予測誤差は最大 <strong>0.038 K</strong>
-で、温度計のノイズ 0.3 K の約 1/8 に収まっています （<a
-href="blog007.html">blog_007
+で、温度計のノイズ 0.3 K の約 1/8 に収まっています （<a href="blog007.html">blog_007
 §2</a>）。1点集中でも実用上は問題ありませんでした。</p>
 <blockquote>
 <p><strong>言い換えると</strong>：ROM の P2
@@ -3309,9 +2983,9 @@ href="blog007.html">blog_007
 <h4 id="この近似が効いてくる場面">この近似が効いてくる場面</h4>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3345,53 +3019,48 @@ href="blog007.html">blog_007
 <h3 id="6-2-係数-k_ij-はどう決める--幾何でなく校正最小二乗">6-2. 係数
 <span class="math inline">\(K_{ij}\)</span> はどう決める？ ―
 幾何でなく校正（最小二乗）</h3>
-<p><span class="math inline">\(K_{ij}\)</span> は公式 <span
-class="math inline">\(K=kA/L\)</span>
+<p><span class="math inline">\(K_{ij}\)</span> は公式 <span class="math inline">\(K=kA/L\)</span>
 では計算しません。<strong>「5点のROM温度履歴が、OpenFOAMの5点温度履歴に一致するように」</strong>
 未知パラメータをまとめて逆算（同定）します。未知は</p>
-<p><span
-class="math display">\[\theta=[\,\underbrace{C_1,\dots,C_5}_{5},\
+<p><span class="math display">\[\theta=[\,\underbrace{C_1,\dots,C_5}_{5},\
 \underbrace{K_{12},K_{13},\dots,K_{45}}_{10},\
 \underbrace{h}_{1}\,],\]</span></p>
 <p>の <strong>合計16個</strong>。</p>
 <p>ROMを <span class="math inline">\(\theta\)</span>
-で前進積分して5点温度 <span
-class="math inline">\(T_p^{\mathrm{ROM}}(t;\theta)\)</span>
-を作り、OpenFOAM の <span
-class="math inline">\(T_p^{\mathrm{OF}}(t)\)</span> との差を最小化します
+で前進積分して5点温度 <span class="math inline">\(T_p^{\mathrm{ROM}}(t;\theta)\)</span>
+を作り、OpenFOAM の <span class="math inline">\(T_p^{\mathrm{OF}}(t)\)</span> との差を最小化します
 （ <span class="math inline">\(C,K,h\ge0\)</span>
 の範囲制約つき、<code>scipy.optimize.least_squares</code>）:</p>
 <p><span class="math display">\[\hat\theta=\arg\min_{\theta}\
 \sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.\]</span></p>
 <p><strong>実際のコードはこれだけ</strong>です（<code>run/build_calibrate_rom.py</code>
 の要点）:</p>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。&quot;&quot;&quot;</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        Y.append(T.copy())</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
-<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a aria-hidden="true" href="#cb17-1" tabindex="-1"></a><span class="im">from</span> scipy.optimize <span class="im">import</span> least_squares</span>
+<span id="cb17-2"><a aria-hidden="true" href="#cb17-2" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb17-3"><a aria-hidden="true" href="#cb17-3" tabindex="-1"></a></span>
+<span id="cb17-4"><a aria-hidden="true" href="#cb17-4" tabindex="-1"></a><span class="co"># Yobs : OpenFOAMの5点温度履歴 (nt,5)  ← 校正の目標</span></span>
+<span id="cb17-5"><a aria-hidden="true" href="#cb17-5" tabindex="-1"></a><span class="co"># ts   : 時刻列,  DT: 内部刻み,  heat_node: 発熱を入れるノード(=P2)</span></span>
+<span id="cb17-6"><a aria-hidden="true" href="#cb17-6" tabindex="-1"></a></span>
+<span id="cb17-7"><a aria-hidden="true" href="#cb17-7" tabindex="-1"></a><span class="kw">def</span> forward(theta):</span>
+<span id="cb17-8"><a aria-hidden="true" href="#cb17-8" tabindex="-1"></a>    <span class="co">"""θ=[C(5), K上三角(10), h(1)] でROMを前進積分し、5点温度履歴を返す。"""</span></span>
+<span id="cb17-9"><a aria-hidden="true" href="#cb17-9" tabindex="-1"></a>    C <span class="op">=</span> theta[:<span class="dv">5</span>]</span>
+<span id="cb17-10"><a aria-hidden="true" href="#cb17-10" tabindex="-1"></a>    K <span class="op">=</span> tri_to_matrix(theta[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>)      <span class="co"># 10個 → 対称5x5コンダクタンス行列</span></span>
+<span id="cb17-11"><a aria-hidden="true" href="#cb17-11" tabindex="-1"></a>    h <span class="op">=</span> theta[<span class="dv">15</span>]</span>
+<span id="cb17-12"><a aria-hidden="true" href="#cb17-12" tabindex="-1"></a>    T <span class="op">=</span> np.full(<span class="dv">5</span>, T_air)<span class="op">;</span> Y <span class="op">=</span> [T.copy()]</span>
+<span id="cb17-13"><a aria-hidden="true" href="#cb17-13" tabindex="-1"></a>    <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(ts[:<span class="op">-</span><span class="dv">1</span>], ts[<span class="dv">1</span>:]):      <span class="co"># 各区間を RK4 で前進</span></span>
+<span id="cb17-14"><a aria-hidden="true" href="#cb17-14" tabindex="-1"></a>        T <span class="op">=</span> integrate_rom(T, C, K, h, q<span class="op">=</span><span class="fl">1.0</span>, heat_node<span class="op">=</span>heat_node, t0<span class="op">=</span>a, t1<span class="op">=</span>b, dt<span class="op">=</span>DT)</span>
+<span id="cb17-15"><a aria-hidden="true" href="#cb17-15" tabindex="-1"></a>        Y.append(T.copy())</span>
+<span id="cb17-16"><a aria-hidden="true" href="#cb17-16" tabindex="-1"></a>    <span class="cf">return</span> np.array(Y)                      <span class="co"># (nt,5)</span></span>
+<span id="cb17-17"><a aria-hidden="true" href="#cb17-17" tabindex="-1"></a></span>
+<span id="cb17-18"><a aria-hidden="true" href="#cb17-18" tabindex="-1"></a><span class="kw">def</span> resid(theta):</span>
+<span id="cb17-19"><a aria-hidden="true" href="#cb17-19" tabindex="-1"></a>    <span class="cf">return</span> (forward(theta) <span class="op">-</span> Yobs).ravel()  <span class="co"># OpenFOAMとの差（残差ベクトル）</span></span>
+<span id="cb17-20"><a aria-hidden="true" href="#cb17-20" tabindex="-1"></a></span>
+<span id="cb17-21"><a aria-hidden="true" href="#cb17-21" tabindex="-1"></a>x0 <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>, <span class="fl">120.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1.5</span>),  <span class="fl">0.3</span> ]   <span class="co"># 初期推定 [C,K,h]</span></span>
+<span id="cb17-22"><a aria-hidden="true" href="#cb17-22" tabindex="-1"></a>lb <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,   <span class="fl">1.0</span>), np.full(<span class="dv">10</span>, <span class="fl">1e-4</span>), <span class="fl">1e-4</span>]   <span class="co"># 下限（すべて≥0）</span></span>
+<span id="cb17-23"><a aria-hidden="true" href="#cb17-23" tabindex="-1"></a>ub <span class="op">=</span> np.r_[np.full(<span class="dv">5</span>,<span class="fl">5000.0</span>), np.full(<span class="dv">10</span>, <span class="fl">200.0</span>), <span class="fl">50.0</span>]  <span class="co"># 上限</span></span>
+<span id="cb17-24"><a aria-hidden="true" href="#cb17-24" tabindex="-1"></a></span>
+<span id="cb17-25"><a aria-hidden="true" href="#cb17-25" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))          <span class="co"># ← 16個をまとめて同定</span></span>
+<span id="cb17-26"><a aria-hidden="true" href="#cb17-26" tabindex="-1"></a>C, K, h <span class="op">=</span> sol.x[:<span class="dv">5</span>], tri_to_matrix(sol.x[<span class="dv">5</span>:<span class="dv">15</span>], <span class="dv">5</span>), sol.x[<span class="dv">15</span>]</span></code></pre></div>
 <p>やっていることは「 <span class="math inline">\(\theta\)</span>
 を少しずつ変えて <code>forward</code> の出力を OpenFOAM
 に近づける」だけ。 <code>least_squares</code> が残差の二乗和を最小にする
@@ -3400,9 +3069,8 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a h
 <blockquote>
 <p><strong><code>Yobs</code> の正体＝OpenFOAM
 の結果</strong>です。実際には</p>
-<div class="sourceCode" id="cb18"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a aria-hidden="true" href="#cb18-1" tabindex="-1"></a>ts, C_all, X <span class="op">=</span> load_snapshots()   <span class="co"># OpenFOAMの各時刻 solid/T を読む (20696×121)</span></span>
+<span id="cb18-2"><a aria-hidden="true" href="#cb18-2" tabindex="-1"></a>Yobs <span class="op">=</span> X[cells, :].T              <span class="co"># そのうちQ-DEIM選定5点の温度履歴だけ抜き出す</span></span></code></pre></div>
 <p>のように、<strong><code>load_snapshots()</code>
 がCHT結果を読み込み</strong>、5点ぶんを取り出したものが校正の目標。
 OpenFOAMの結果は <strong>①POD＋Q-DEIM（点選び）</strong> と
@@ -3410,9 +3078,9 @@ OpenFOAMの結果は <strong>①POD＋Q-DEIM（点選び）</strong> と
 これが「オフラインでCFDが必須」（§1-1）の正体です。</p>
 </blockquote>
 <figure>
-<img src="img/rom_calib_fit.png" alt="POD選定5点ROMの校正結果" />
+<img alt="POD選定5点ROMの校正結果" src="img/rom_calib_fit.png">
 <figcaption aria-hidden="true">POD選定5点ROMの校正結果</figcaption>
-</figure>
+</img></figure>
 <p><em>太い半透明線＝OpenFOAM、破線＝POD選定5点ROM。ほぼ完全に重なる（残差
 RMSE 0.014 K）。</em></p>
 <p>同定された <span class="math inline">\(K_{ij}\)</span>
@@ -3465,25 +3133,22 @@ K</strong>（OpenFOAMをほぼ完全に再現）</li>
 V\approx1195\)</span> J/K とほぼ一致 （数字合わせでなく
 <strong>物理的にも妥当</strong>。フィットなのに物理量として筋が通る）</li>
 </ul>
-<hr />
-<h2
-id="7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す">7.
+<hr/>
+<h2 id="7-温度が求まったら--実形状にマッピングして-frontistr-で変位を出す">7.
 温度が求まったら ― 実形状にマッピングして FrontISTR で変位を出す</h2>
 <p>ROM＋データ同化で温度が求まっても、本当に知りたいのは
 <strong>変位（熱膨張・反り）</strong> です。 温度→変位は blog_001 と同じ
 FrontISTR
 ですが、ここでは「<strong>温度をどう実形状へ渡すか</strong>」を数式で押さえます。</p>
-<h3
-id="7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る">7-0.
+<h3 id="7-0-変位を観測として使う手続き--状態に入れずに観測演算子で作る">7-0.
 変位を「観測」として使う手続き ― 状態に入れずに観測演算子で作る</h3>
 <p>先に、いちばん分かりにくいところを片付けます。
 <strong>「変位計の値をデータ同化にどう入れるのか」</strong>です。</p>
 <figure>
-<img src="img/obs_pipeline.png" alt="観測の作り方と使い方" />
+<img alt="観測の作り方と使い方" src="img/obs_pipeline.png"/>
 <figcaption aria-hidden="true">観測の作り方と使い方</figcaption>
 </figure>
-<p><em>①観測データの作り方（双子実験）／②予報観測 <span
-class="math inline">\(Y_f\)</span> の作り方／③EnKFの更新式。</em></p>
+<p><em>①観測データの作り方（双子実験）／②予報観測 <span class="math inline">\(Y_f\)</span> の作り方／③EnKFの更新式。</em></p>
 <h4 id="まず結論">まず結論</h4>
 <blockquote>
 <p><strong>変位は状態ベクトルに入れません。</strong> 状態はあくまで
@@ -3495,30 +3160,24 @@ T}\)</span> の7次元のままです。
 <h4 id="手続き4ステップ">手続き（4ステップ）</h4>
 <p>EnKFの各サイクルで、<strong>60メンバーそれぞれについて</strong>次を実行します。</p>
 <p><strong>ステップ1：そのメンバーの5点温度を取り出す</strong></p>
-<p><span
-class="math display">\[T_5^{(m)}=(T_1^{(m)},\dots,T_5^{(m)})\qquad
+<p><span class="math display">\[T_5^{(m)}=(T_1^{(m)},\dots,T_5^{(m)})\qquad
 m=1,\dots,60\]</span></p>
 <p><strong>ステップ2：gappy-POD でモード係数にする</strong>（§4-0
 と同じ計算）</p>
 <p><span class="math display">\[a^{(m)}=U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
 T_P\bigr)\quad(5\times1)\]</span></p>
 <p><strong>ステップ3：モード係数から変位を出す</strong></p>
-<p><span
-class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
+<p><span class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
 <p>ここで <span class="math inline">\(D\)</span> は <strong>FrontISTR
-で事前に作った定数行列</strong>です（ <span
-class="math inline">\(2\times5\)</span> ）。</p>
+で事前に作った定数行列</strong>です（ <span class="math inline">\(2\times5\)</span> ）。</p>
 <figure>
-<img src="img/D_matrix_explained.png" alt="D行列とは何か" />
+<img alt="D行列とは何か" src="img/D_matrix_explained.png"/>
 <figcaption aria-hidden="true">D行列とは何か</figcaption>
 </figure>
 <p><em>①線形性で <span class="math inline">\(u=W\bar T+\sum
-a_k(W\varphi_k)\)</span> と分けられ、 <span
-class="math inline">\(W\varphi_k\)</span> は <span
-class="math inline">\(a_k\)</span> に依存しない →
+a_k(W\varphi_k)\)</span> と分けられ、 <span class="math inline">\(W\varphi_k\)</span> は <span class="math inline">\(a_k\)</span> に依存しない →
 先に計算して保存できる。②FrontISTR を6回（平均場＋5モード）呼ぶだけ。
-③実際の <span class="math inline">\(D\)</span> （ <span
-class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
+③実際の <span class="math inline">\(D\)</span> （ <span class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
 逆向きで反りを生む）。 ④60メンバー分の変位計算が <strong>5.2
 µs</strong>。毎サイクルFEMを呼べば数日かかる。</em></p>
 <blockquote>
@@ -3526,45 +3185,38 @@ class="math inline">\(\varphi_2\)</span> の列は A が−、O が＋ ＝
 塑性・クリープ・接触があると <span class="math inline">\(W\)</span>
 が状態に依存するので、重ね合わせが成り立ちません。</p>
 </blockquote>
-<p>各列 <span class="math inline">\(D[:,k]\)</span> が「モード <span
-class="math inline">\(\varphi_k\)</span>
+<p>各列 <span class="math inline">\(D[:,k]\)</span> が「モード <span class="math inline">\(\varphi_k\)</span>
 が1単位混ざったときの上面A/Oの変位」で、 <strong>データ同化を始める前に
 FrontISTR を <span class="math inline">\(1+5=6\)</span>
 回だけ呼んで作ってあります</strong>（§7-2）。</p>
 <blockquote>
 <p><strong>重要：データ同化のループ中に FrontISTR
-は一度も呼びません。</strong> 呼ぶのは事前の6回だけ。あとは <span
-class="math inline">\(2\times5\)</span>
+は一度も呼びません。</strong> 呼ぶのは事前の6回だけ。あとは <span class="math inline">\(2\times5\)</span>
 の行列を掛けるだけなので一瞬です。</p>
 </blockquote>
 <p><strong>ステップ4：観測予報 <span class="math inline">\(Y_f\)</span>
 に並べる</strong></p>
 <p>温度2点と変位2点を観測するなら、メンバーごとに4つの値を並べます:</p>
-<p><span
-class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{T},\
+<p><span class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{T},\
 \underbrace{u_1^{(m)},\,u_2^{(m)}}_{u}\bigr)\]</span></p>
-<p>（ <span class="math inline">\(T\)</span> ＝温度2点、 <span
-class="math inline">\(u\)</span> ＝変位2点）</p>
+<p>（ <span class="math inline">\(T\)</span> ＝温度2点、 <span class="math inline">\(u\)</span> ＝変位2点）</p>
 <p>実装はこれだけです:</p>
-<div class="sourceCode" id="cb19"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> disp_of_T5(T5):                      <span class="co"># (…,5) -&gt; (…,2)</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> (T5 <span class="op">-</span> mean[pod_cells]) <span class="op">@</span> UP_pinv.T   <span class="co"># ステップ2：gappy-POD</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> uz_mean <span class="op">+</span> a <span class="op">@</span> Dmode.T             <span class="co"># ステップ3：モード→変位</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ステップ4：温度と変位を横に並べて観測予報にする</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([Z[:, nodes],                    <span class="co"># 温度2点</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                      disp_of_T5(Z[:, :NPT])])        <span class="co"># 変位2点</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>Z  <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a aria-hidden="true" href="#cb19-1" tabindex="-1"></a><span class="kw">def</span> disp_of_T5(T5):                      <span class="co"># (…,5) -&gt; (…,2)</span></span>
+<span id="cb19-2"><a aria-hidden="true" href="#cb19-2" tabindex="-1"></a>    a <span class="op">=</span> (T5 <span class="op">-</span> mean[pod_cells]) <span class="op">@</span> UP_pinv.T   <span class="co"># ステップ2：gappy-POD</span></span>
+<span id="cb19-3"><a aria-hidden="true" href="#cb19-3" tabindex="-1"></a>    <span class="cf">return</span> uz_mean <span class="op">+</span> a <span class="op">@</span> Dmode.T             <span class="co"># ステップ3：モード→変位</span></span>
+<span id="cb19-4"><a aria-hidden="true" href="#cb19-4" tabindex="-1"></a></span>
+<span id="cb19-5"><a aria-hidden="true" href="#cb19-5" tabindex="-1"></a><span class="co"># ステップ4：温度と変位を横に並べて観測予報にする</span></span>
+<span id="cb19-6"><a aria-hidden="true" href="#cb19-6" tabindex="-1"></a>Yf <span class="op">=</span> np.column_stack([Z[:, nodes],                    <span class="co"># 温度2点</span></span>
+<span id="cb19-7"><a aria-hidden="true" href="#cb19-7" tabindex="-1"></a>                      disp_of_T5(Z[:, :NPT])])        <span class="co"># 変位2点</span></span>
+<span id="cb19-8"><a aria-hidden="true" href="#cb19-8" tabindex="-1"></a>Z  <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span></code></pre></div>
 <h4 id="なぜこれで温度が直るのか">なぜこれで温度が直るのか</h4>
 <p>EnKF
 の更新式は<strong>温度だけを観測したときとまったく同じ</strong>です:</p>
 <p><span class="math display">\[z^a=z^b+K\,(y-Y_f),\qquad
 K=C_{zy}\,(C_{yy}+R)^{-1}\]</span></p>
-<p>変わるのは <span
-class="math inline">\(C_{zy}=\mathrm{Cov}(z,Y_f)\)</span> の中身だけ。
+<p>変わるのは <span class="math inline">\(C_{zy}=\mathrm{Cov}(z,Y_f)\)</span> の中身だけ。
 <span class="math inline">\(Y_f\)</span>
-に変位が入っているので、<strong>温度と変位の共分散 <span
-class="math inline">\(\mathrm{Cov}(T_i,u_j)\)</span> が
+に変位が入っているので、<strong>温度と変位の共分散 <span class="math inline">\(\mathrm{Cov}(T_i,u_j)\)</span> が
 アンサンブルから自動的に計算されます</strong>。</p>
 <p><span class="math display">\[C_{zy}=\begin{pmatrix}
 \mathrm{Cov}(T_1,T_{i_1}) &amp; \cdots &amp;
@@ -3574,39 +3226,29 @@ class="math inline">\(\mathrm{Cov}(T_i,u_j)\)</span> が
 \mathrm{Cov}(Q,T_{i_1}) &amp; \cdots &amp;
 \color{red}{\mathrm{Cov}(Q,u_1)} &amp; \color{red}{\mathrm{Cov}(Q,u_2)}
 \end{pmatrix}\]</span></p>
-<p><strong>赤い列があるから、変位の残差 <span
-class="math inline">\(y_u-u^b\)</span>
+<p><strong>赤い列があるから、変位の残差 <span class="math inline">\(y_u-u^b\)</span>
 が温度と発熱量を引っぱります。</strong> 仕組みは blog_003 §4-0
 の「温度しか測らなくても <span class="math inline">\(Q\)</span>
 が動く」とまったく同じで、
 <strong>測っていない量でも、測った量と相関していれば更新される</strong>という一点に尽きます。</p>
-<h4
-id="非線形な観測でも同じ形で書ける">非線形な観測でも同じ形で書ける</h4>
-<p><code>enkf_update</code> は観測行列 <span
-class="math inline">\(H\)</span> ではなく <strong>予報観測 <span
-class="math inline">\(Y_f\)</span>
+<h4 id="非線形な観測でも同じ形で書ける">非線形な観測でも同じ形で書ける</h4>
+<p><code>enkf_update</code> は観測行列 <span class="math inline">\(H\)</span> ではなく <strong>予報観測 <span class="math inline">\(Y_f\)</span>
 をそのまま受け取る</strong>設計にしてあります
 （<code>dacore/enkf.py</code>）。</p>
-<div class="sourceCode" id="cb20"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> enkf_update(Zf, y, H, R, rng, inflation<span class="op">=</span><span class="fl">1.0</span>, Yf<span class="op">=</span><span class="va">None</span>):</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> Yf <span class="kw">is</span> <span class="va">None</span>:</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> Zf <span class="op">@</span> H.T        <span class="co"># 線形観測ならここで作る</span></span></code></pre></div>
-<p>今回の変位写像はたまたま線形（ <span
-class="math inline">\(u=u_{\mathrm{mean}}+D\,a\)</span> ）ですが、
-<strong>メンバーごとに実ソルバを通すような非線形観測でも、 <span
-class="math inline">\(Y_f\)</span> を渡せば同じ式で動きます</strong>。
-実際 104 では、各メンバーの温度場を FrontISTR に通した変位を <span
-class="math inline">\(Y_f\)</span> にしていました
+<div class="sourceCode" id="cb20"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a aria-hidden="true" href="#cb20-1" tabindex="-1"></a><span class="kw">def</span> enkf_update(Zf, y, H, R, rng, inflation<span class="op">=</span><span class="fl">1.0</span>, Yf<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb20-2"><a aria-hidden="true" href="#cb20-2" tabindex="-1"></a>    ...</span>
+<span id="cb20-3"><a aria-hidden="true" href="#cb20-3" tabindex="-1"></a>    <span class="cf">if</span> Yf <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb20-4"><a aria-hidden="true" href="#cb20-4" tabindex="-1"></a>        Yf <span class="op">=</span> Zf <span class="op">@</span> H.T        <span class="co"># 線形観測ならここで作る</span></span></code></pre></div>
+<p>今回の変位写像はたまたま線形（ <span class="math inline">\(u=u_{\mathrm{mean}}+D\,a\)</span> ）ですが、
+<strong>メンバーごとに実ソルバを通すような非線形観測でも、 <span class="math inline">\(Y_f\)</span> を渡せば同じ式で動きます</strong>。
+実際 104 では、各メンバーの温度場を FrontISTR に通した変位を <span class="math inline">\(Y_f\)</span> にしていました
 （そのぶん1サイクルが分オーダーになり、ROM化の動機になりました）。</p>
 <h3 id="7-1-温度を実形状femメッシュへマッピング--逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</h3>
 <p><strong>ここからは空間の移し替えです。</strong>
 5点→全セルの復元は§5のgappy-PODで済んでいます。その後、CFDセルとFEM節点の位置の違いを補間します。以下はIDWの説明で、すべての図が同じ補間実装という意味ではありません。例えば未観測C/Dの検証スクリプトは最近傍セルを使います。各図の再現スクリプトで確認してください。</p>
-<p>CFD（またはPOD復元）の温度は <strong>セル中心 <span
-class="math inline">\(x_c\)</span></strong> の値。いっぽう FrontISTR
-が要るのは <strong>節点 <span
-class="math inline">\(x_p\)</span></strong> の温度です。
+<p>CFD（またはPOD復元）の温度は <strong>セル中心 <span class="math inline">\(x_c\)</span></strong> の値。いっぽう FrontISTR
+が要るのは <strong>節点 <span class="math inline">\(x_p\)</span></strong> の温度です。
 そこで各節点に、近い <span class="math inline">\(k\)</span> 個のセルから
 <strong>逆距離加重（IDW）</strong> で内挿します:</p>
 <p><span class="math display">\[T_p=\frac{\sum_{c\in\mathcal N_k(p)}
@@ -3614,9 +3256,7 @@ w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)} w_{pc}},\qquad
 w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}.\]</span></p>
 <p>近いセルほど重み <span class="math inline">\(w_{pc}\)</span>
 が大きい、という素直な加重平均です（節点がセル中心と一致したらそのセル値をそのまま採用）。
-<span class="math inline">\(\mathcal N_k(p)\)</span> は節点 <span
-class="math inline">\(p\)</span> に近い <span
-class="math inline">\(k\)</span> 個のセル。これで
+<span class="math inline">\(\mathcal N_k(p)\)</span> は節点 <span class="math inline">\(p\)</span> に近い <span class="math inline">\(k\)</span> 個のセル。これで
 <strong>温度分布が実物形状の節点に乗ります</strong>。</p>
 <p><strong>具体例（ <span class="math inline">\(k=3\)</span>
 ）</strong>：ある節点 <span class="math inline">\(p\)</span>
@@ -3634,8 +3274,7 @@ T_3}{w_1+w_2+w_3}
 <p>つまり <span class="math inline">\(T_p\approx23.9\)</span>
 ℃。<strong>一番近いセル（25℃,
 重み1）に最も引っ張られ、遠いセルほど効きが弱い</strong>のが数字で見えます。
-もし節点がどれかのセルに重なると（ <span
-class="math inline">\(d\to0\)</span>
+もし節点がどれかのセルに重なると（ <span class="math inline">\(d\to0\)</span>
 ）その重みが無限大になり、<strong>そのセル値がそのまま採用</strong>されます
 （＝最近傍フォールバック）。</p>
 <h4 id="次のfem式に出てくる記号">次のFEM式に出てくる記号</h4>
@@ -3649,43 +3288,37 @@ class="math inline">\(d\to0\)</span>
 th}\)</span> は等価熱荷重[N]、 <span class="math inline">\(K_s\)</span>
 は構造剛性[N/m]です。
 <strong>このBはOIの誤差共分散ではなく、このDはPODモード変位応答でもありません。</strong>
-テンソルの熱ひずみを実装のVoigt表記に直すと、 <span
-class="math inline">\(\alpha\Delta T(1,1,1,0,0,0)^{\mathsf T}\)</span>
+テンソルの熱ひずみを実装のVoigt表記に直すと、 <span class="math inline">\(\alpha\Delta T(1,1,1,0,0,0)^{\mathsf T}\)</span>
 です。後半3成分はせん断ひずみです。</p>
 <h3 id="7-2-熱ひずみ--節点荷重--つり合い熱弾性fem">7-2. 熱ひずみ →
 節点荷重 → つり合い（熱弾性FEM）</h3>
 <blockquote>
 <p><strong>ここは FrontISTR
 が内部でやること</strong>です。私たちが渡すのは §7-1 の
-<strong>節点温度</strong> と <strong>材料定数（ <span
-class="math inline">\(E,\nu,\alpha,T_\mathrm{ref}\)</span>
+<strong>節点温度</strong> と <strong>材料定数（ <span class="math inline">\(E,\nu,\alpha,T_\mathrm{ref}\)</span>
 ）・底面固定の拘束</strong>だけ。以下は「その黒箱の中で何が起きているか」の説明で、
-自分でコードを書くわけではありません（返ってくるのは節点変位 <span
-class="math inline">\(u\)</span> ）。</p>
+自分でコードを書くわけではありません（返ってくるのは節点変位 <span class="math inline">\(u\)</span> ）。</p>
 </blockquote>
 <p>節点温度が入ると、各要素に
 <strong>熱ひずみ</strong>（等方・線膨張）が生じます:</p>
-<p><span
-class="math display">\[\varepsilon_\mathrm{th}=\alpha\,(T-T_\mathrm{ref})\,\mathbf
+<p><span class="math display">\[\varepsilon_\mathrm{th}=\alpha\,(T-T_\mathrm{ref})\,\mathbf
 I.\]</span></p>
 <p>これは「温めると各要素がこれだけ伸びたい」という量。FrontISTR
 はこれを <strong>等価節点熱荷重</strong> に変換し、</p>
 <p><span class="math display">\[f_\mathrm{th}=\sum_e\int_{\Omega_e}
 B^{\mathsf T} D\,\varepsilon_\mathrm{th}\,dV\]</span></p>
-<p>（ <span class="math inline">\(B\)</span> ＝ひずみ-変位行列、 <span
-class="math inline">\(D\)</span>
+<p>（ <span class="math inline">\(B\)</span> ＝ひずみ-変位行列、 <span class="math inline">\(D\)</span>
 ＝弾性行列）、<strong>底面固定</strong>の拘束のもとで線形弾性のつり合いを解きます:</p>
 <p><span class="math display">\[\boxed{\ K_s\,u=f_\mathrm{th}\
 }\]</span></p>
 <p>得られる <span class="math inline">\(u=(u_x,u_y,u_z)\)</span>
-が各節点の変位です。要するに 「<strong>伸びたい量 <span
-class="math inline">\(\alpha\Delta T\)</span>
+が各節点の変位です。要するに 「<strong>伸びたい量 <span class="math inline">\(\alpha\Delta T\)</span>
 を集めて、つながりと拘束の中でつり合わせると変位が出る</strong>」。
 片側だけ熱いと伸びに差が出て、円筒が反ります。</p>
 <h3 id="7-3-変形アニメーション">7-3. 変形アニメーション</h3>
 <p><strong>表示の条件</strong>：<code>run/make_temp_to_disp_figs.py</code>は、保存した1つのFrontISTR変位形状をA−O時系列の振幅で拡大縮小して動画にしています。色も元の変位場を使用します。各フレームでFrontISTRを解き直した変形時刻歴ではなく、反りの変化を説明する模式アニメーションです。定量的な時刻歴は次節のグラフで確認します。</p>
 <figure>
-<img src="img/blog_deform_anim.gif" alt="熱変形のアニメーション" />
+<img alt="熱変形のアニメーション" src="img/blog_deform_anim.gif"/>
 <figcaption aria-hidden="true">熱変形のアニメーション</figcaption>
 </figure>
 <p><em>色＝ <span class="math inline">\(U_z\)</span>
@@ -3694,8 +3327,7 @@ class="math inline">\(\alpha\Delta T\)</span>
 <strong>反る</strong>。300秒でヒータOFF→全体が均されて反りが戻る。半透明の灰＝元形状。</em></p>
 <h3 id="7-4-変位の時系列グラフ">7-4. 変位の時系列グラフ</h3>
 <figure>
-<img src="img/blog_disp_timeseries.png"
-alt="FrontISTR真値の変位時系列" />
+<img alt="FrontISTR真値の変位時系列" src="img/blog_disp_timeseries.png"/>
 <figcaption aria-hidden="true">FrontISTR真値の変位時系列</figcaption>
 </figure>
 <p><em>上面2点の上向き変位 <span class="math inline">\(U_z\)</span>
@@ -3709,10 +3341,8 @@ A−O差（緑）＝反りは加熱中に増えてピーク約2.8µm、ヒータ
 で比較したものです。薄い帯は5
 seedのばらつきです。図内に「FrontISTR真値」とある場合も、この比較の真値はROM温度からFrontISTRのモード応答を用いて計算したものを指します。</p>
 <figure>
-<img src="img/blog_disp_timeseries_truth_vs_da.png"
-alt="ROM真値とデータ同化後温度から求めた変位差" />
-<figcaption
-aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差</figcaption>
+<img alt="ROM真値とデータ同化後温度から求めた変位差" src="img/blog_disp_timeseries_truth_vs_da.png"/>
+<figcaption aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差</figcaption>
 </figure>
 <p><em>黒太線はROM真値から同じ変位写像で計算した参照値。独立したOpenFOAM温度履歴を毎時刻FrontISTRで解析した真値ではありません。
 これは変位を状態変数として直接積分した結果ではなく、
@@ -3722,7 +3352,7 @@ aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差<
 この図の赤線は、成果として示せるものではありません。</strong>
 赤（温度2点＋変位2点）は、<strong>評価している A・O
 の変位をそのまま観測に使っています</strong>。
-測った場所の値を当てているだけなので（循環）、真値に近いのは当然です。
+これは観測点での適合を評価した結果です。未観測点への予測精度は、別のholdout評価で確認します。観測点でも真値との一致が自動的に保証されるわけではありません。
 <strong>測らずに当てた結果は §7-4b</strong>（中段の B・C
 だけを測り、上面 A・O の反りを誤差 <strong>0.081 µm</strong>
 で当てた）にあります。そちらが本来の成果です。</p>
@@ -3739,12 +3369,9 @@ aria-hidden="true">ROM真値とデータ同化後温度から求めた変位差<
 （温度そのもののRMSEでは P2 0.62 vs P4 1.04 K
 と約1.7倍の差があり、場所の効きは評価量に依存します。）</p>
 <p><strong>さらに大事な注意
-―「差」だけで評価してはいけない</strong>。個別の <span
-class="math inline">\(U_z(A)\)</span> ・ <span
-class="math inline">\(U_z(O)\)</span> も見ると:</p>
+―「差」だけで評価してはいけない</strong>。個別の <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> も見ると:</p>
 <figure>
-<img src="img/blog_disp_timeseries_truth_vs_da_points.png"
-alt="個別のUz(A)/Uz(O)と差の比較" />
+<img alt="個別のUz(A)/Uz(O)と差の比較" src="img/blog_disp_timeseries_truth_vs_da_points.png"/>
 <figcaption aria-hidden="true">個別のUz(A)/Uz(O)と差の比較</figcaption>
 </figure>
 <p><em>「差」には罠があります。<strong>データ同化なし（灰）は個別には10µm級で大外れなのに、差のRMSEは0.30µmと最小級</strong>
@@ -3752,13 +3379,13 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 （P2ヒータ側→A良0.41／O悪1.33µm、P4底→O良0.65／A悪1.75µm）。
 赤（0.16µm）は A・O を観測に使っているので、合って当然です。 →
 教訓：<strong>評価は差だけでなく個別の変位でも行う。そして評価点を観測に使った結果は成果として数えない</strong>。</em></p>
-<h3 id="7-4b-重要知りたい場所を測らずに当てる--循環を断つ">7-4b.
-【重要】知りたい場所を測らずに当てる ― 循環を断つ</h3>
+<h3 id="7-4b-重要知りたい場所を測らずに当てる--未観測点で評価する">7-4b.
+【重要】知りたい場所を測らずに当てる ― 未観測点で評価する</h3>
 <p>§7-4 のグラフは <span class="math inline">\(U_z(A)-U_z(O)\)</span>
 （上面の反り）を評価していますが、 「温度2点＋変位2点」の構成では
 <strong>A と O をそのまま観測に使っています</strong>。</p>
 <blockquote>
-<p><strong>測った場所の値を当てて「当たりました」と言っているだけ</strong>で、これは<strong>循環</strong>です。</p>
+<p><strong>観測した場所で精度を評価している</strong>ため、未観測点への予測性能を示す試験ではありません。同化結果として有効な評価ですが、独立したholdout評価を追加します。</p>
 </blockquote>
 <h4 id="実務ではむしろ逆になる">実務ではむしろ逆になる</h4>
 <p>工作機械で本当に知りたいのは<strong>工具先端側の変位</strong>です。ところが</p>
@@ -3770,10 +3397,10 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 そこで、この構図をそのまま実験にします。</p>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3805,20 +3432,17 @@ alt="個別のUz(A)/Uz(O)と差の比較" />
 </tbody>
 </table>
 <figure>
-<img src="img/AO_from_elsewhere.png"
-alt="A/Oを測らずにA/Oの反りを当てる" />
-<figcaption
-aria-hidden="true">A/Oを測らずにA/Oの反りを当てる</figcaption>
+<img alt="A/Oを測らずにA/Oの反りを当てる" src="img/AO_from_elsewhere.png"/>
+<figcaption aria-hidden="true">A/Oを測らずにA/Oの反りを当てる</figcaption>
 </figure>
-<h4
-id="結果知りたい量上面の反り真値の振幅-2735-µm">結果（知りたい量＝上面の反り。真値の振幅
+<h4 id="結果知りたい量上面の反り真値の振幅-2735-µm">結果（知りたい量＝上面の反り。真値の振幅
 2.735 µm）</h4>
 <table>
 <colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3859,19 +3483,16 @@ id="結果知りたい量上面の反り真値の振幅-2735-µm">結果（知�
 <blockquote>
 <p><strong>この続き（2026-10-03 追記）</strong>：ここでは B/C
 を「人が決めて」測っています。
-その後、<strong>全5,040節点×3成分の中から変位2点を計算で選び直す</strong>試験を行いました（<a
-href="blog008.html">blog_008 §5</a>）。
-選定した2点（上面の (9.7, −36.2, 100.5) の <span
-class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span
-class="math inline">\(U_z\)</span> ）だと、 <strong>反りの誤差は 0.076
+その後、<strong>全5,040節点×3成分の中から変位2点を計算で選び直す</strong>試験を行いました（<a href="blog008.html">blog_008 §5</a>）。
+選定した2点（上面の (9.7, −36.2, 100.5) の <span class="math inline">\(U_x\)</span> と (−34.6, 14.4, 100.5) の <span class="math inline">\(U_z\)</span> ）だと、 <strong>反りの誤差は 0.076
 µm</strong>（振幅の 2.8 %）で、B/C（0.185 µm）より良い結果でした。</p>
 <p><strong>数値の出どころの違いに注意。</strong> この表と blog_008 §5
 の表は、評価の仕方が違うので直接は比べられません。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3912,23 +3533,17 @@ class="math inline">\(U_z\)</span> ）だと、 <strong>反りの誤差は 0.076
 <blockquote>
 <p><strong>「工具先端に変位計を置けなくても、置ける場所に置けばよい」</strong>
 ― 実務で意味があるのはこの一点です。
-さらに、<strong>置ける場所の中からどこを選ぶかも計算で決められます</strong>（<a
-href="blog008.html">blog_008
+さらに、<strong>置ける場所の中からどこを選ぶかも計算で決められます</strong>（<a href="blog008.html">blog_008
 §5</a>）。</p>
 </blockquote>
 <p><strong>② 温度だけでは反りは当たらない</strong></p>
-<p>温度2点だけだと 0.697 µm（振幅の 25 %）。 個別の <span
-class="math inline">\(U_z(A)\)</span> は 0.160 µm
-まで合うのに、<strong>反りは合いません</strong>。 <span
-class="math inline">\(U_z(A)\)</span> と <span
-class="math inline">\(U_z(O)\)</span>
+<p>温度2点だけだと 0.697 µm（振幅の 25 %）。 個別の <span class="math inline">\(U_z(A)\)</span> は 0.160 µm
+まで合うのに、<strong>反りは合いません</strong>。 <span class="math inline">\(U_z(A)\)</span> と <span class="math inline">\(U_z(O)\)</span>
 の<strong>差</strong>を当てるには、変位観測が必要です。</p>
 <p><strong>③ ※ データ同化なしの 0.238 µm に騙されないこと</strong></p>
 <p>データ同化なしは個別に <strong>5.6 µm も外れている</strong>のに、A と
 O が同じ方向に外れるため
-<strong>差では相殺</strong>されて小さく見えます。 <span
-class="math inline">\(U_z(A)\)</span> ・ <span
-class="math inline">\(U_z(O)\)</span>
+<strong>差では相殺</strong>されて小さく見えます。 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span>
 の個別グラフ（図の左・中）を見れば、
 灰色の線が真値から大きく離れているのが分かります。</p>
 <blockquote>
@@ -3938,8 +3553,8 @@ class="math inline">\(U_z(O)\)</span>
 <h4 id="循環していないと言える根拠">循環していないと言える根拠</h4>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -3973,8 +3588,7 @@ class="math inline">\(U_z(O)\)</span>
                         A/O の反りも正しくなる</code></pre>
 <p><strong>A/O を当てているのではなく、温度場を当てた結果として A/O
 が付いてくる</strong>わけです。</p>
-<h4
-id="なぜ反りを知る必要があるのか--工具長で補正量が変わる">なぜ「反り」を知る必要があるのか
+<h4 id="なぜ反りを知る必要があるのか--工具長で補正量が変わる">なぜ「反り」を知る必要があるのか
 ― 工具長で補正量が変わる</h4>
 <p>「3軸機は軸をオフセットするだけなので、<strong>傾きは補正できないのでは</strong>」という疑問があります。
 文献で確かめたところ、<strong>半分正しく、半分違います</strong>。</p>
@@ -3982,8 +3596,7 @@ id="なぜ反りを知る必要があるのか--工具長で補正量が変わ�
 <p><strong>違う部分</strong>：傾き角は<strong>工具先端では並進の位置ずれに化ける</strong>ので、NCオフセットで補正できます。</p>
 <p><span class="math display">\[\delta \;\simeq\; \theta \times
 L\]</span></p>
-<p>（ <span class="math inline">\(\theta\)</span> ：傾き角、 <span
-class="math inline">\(L\)</span> ：工具長）</p>
+<p>（ <span class="math inline">\(\theta\)</span> ：傾き角、 <span class="math inline">\(L\)</span> ：工具長）</p>
 <p>Yang らはまさにこれを指摘しています。</p>
 <blockquote>
 <p>“The present error compensation technology of computer numerical
@@ -3991,14 +3604,12 @@ control machine tools <strong>ignores radial thermal tilt angle errors
 of the spindle</strong>, while the thermal-induced offset is
 <strong>closely related to the tilt angle and the handle
 length</strong>.” — Yang, Mei, Zhao, Ma, Shi, Feng (2015), <em>Proc.
-IMechE Part B</em> <a
-href="https://doi.org/10.1177/0954405414556499">doi:10.1177/0954405414556499</a></p>
+IMechE Part B</em> <a href="https://doi.org/10.1177/0954405414556499">doi:10.1177/0954405414556499</a></p>
 </blockquote>
 <p>彼らはヨー角・ピッチ角・伸びの3モデルを立て、<strong>傾き角と工具長に基づいて補正</strong>しています。</p>
 <h4 id="本ケースで具体的に計算すると">本ケースで具体的に計算すると</h4>
 <p>A と O は 57.4 mm 離れているので、反り 2.735 µm は傾き角に直すと</p>
-<p><span
-class="math display">\[\theta=\frac{2.735\times10^{-6}}{57.4\times10^{-3}}=4.77\times10^{-5}\
+<p><span class="math display">\[\theta=\frac{2.735\times10^{-6}}{57.4\times10^{-3}}=4.77\times10^{-5}\
 \mathrm{rad}=0.0027^\circ\]</span></p>
 <p>これを工具長で工具先端の位置ずれに換算します。<strong>工具先端の変位そのものは解析していません</strong>。下の表は上面の反りから
 <span class="math inline">\(\delta=\theta L\)</span>
@@ -4048,14 +3659,12 @@ L\)</span></th>
 <p><strong>これが「反りを推定する価値」です。</strong>
 並進成分だけ測っていては、
 工具を替えるたびに補正量が変わることに対応できません。</p>
-<h4
-id="ただし機械によっては無視できる">ただし機械によっては無視できる</h4>
+<h4 id="ただし機械によっては無視できる">ただし機械によっては無視できる</h4>
 <p>旋盤（turning center）を扱った Zhao らは、最大傾き角が
 <strong>0.0099°</strong> と小さいため
 「多くの場合、主軸軸線の動きを<strong>並進運動とみなしてよい</strong>」と結論しています。</p>
 <blockquote>
-<p>— Zhao, Guo, Tang, Zhang, Yi (2025), <em>Scientific Reports</em> <a
-href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/">PMC12223237</a>（<strong>全文無料</strong>）</p>
+<p>— Zhao, Guo, Tang, Zhang, Yi (2025), <em>Scientific Reports</em> <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12223237/">PMC12223237</a>（<strong>全文無料</strong>）</p>
 </blockquote>
 <p>本ケースの 0.0027° はその 1/3.6
 です。<strong>傾きが効くかどうかは、機械構成と工具長で決まります</strong>。
@@ -4082,17 +3691,17 @@ z=75.4 mm）</li>
 <p>実機では内部に熱電対を入れられないことがあります。変位計だけで足りるなら
 センサ構成の選択肢が広がるので、確かめました。</p>
 <figure>
-<img src="img/disp_only_da.png" alt="変位だけで温度場を直せるか" />
+<img alt="変位だけで温度場を直せるか" src="img/disp_only_da.png"/>
 <figcaption aria-hidden="true">変位だけで温度場を直せるか</figcaption>
 </figure>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -4165,8 +3774,7 @@ z=75.4 mm）</li>
 0–300 s だと <strong>0.160 K</strong>、60–300 s だと <strong>0.127
 K</strong> です。</p>
 </blockquote>
-<h4
-id="結論変位計だけで温度場は直せるしかも温度計だけより良い">結論：変位計だけで温度場は直せる。しかも温度計だけより良い</h4>
+<h4 id="結論変位計だけで温度場は直せるしかも温度計だけより良い">結論：変位計だけで温度場は直せる。しかも温度計だけより良い</h4>
 <p><strong>③ 変位2点だけ（温度センサ0本）で温度RMSE 0.207 K。</strong>
 <strong>② 温度2点だけ（0.453 K）の
 2.2倍良い</strong>結果になりました。</p>
@@ -4174,9 +3782,7 @@ id="結論変位計だけで温度場は直せるしかも温度計だけより�
 <p><strong>温度を測らずに温度を当てている</strong>わけですが、不思議なことではありません。
 §7-0
 のとおり、変位計は「<strong>5点温度の重み付き和</strong>」を測っています。
-重みは <span class="math inline">\(D\)</span> の行そのもので、A の <span
-class="math inline">\(U_z\)</span> なら <span
-class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
+重みは <span class="math inline">\(D\)</span> の行そのもので、A の <span class="math inline">\(U_z\)</span> なら <span class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
 。
 <strong>1本で5点すべてに触れている</strong>ので、温度計1本より情報が広いのです。</p>
 </blockquote>
@@ -4231,27 +3837,20 @@ class="math inline">\((-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\)</span>
 <strong>差では相殺</strong>されて小さく見えているだけです（§7-4b）。</p>
 <p>再現:
 <code>OMP_NUM_THREADS=4 python3 run/disp_only_da_check.py</code></p>
-<h3
-id="7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか">7-5.
-<span class="math inline">\(x\)</span> ・ <span
-class="math inline">\(y\)</span> ・ <span
-class="math inline">\(z\)</span> の全成分を見る ―
+<h3 id="7-5-x--y--z-の全成分を見る--観測していない方向評価点はどうなるか">7-5.
+<span class="math inline">\(x\)</span> ・ <span class="math inline">\(y\)</span> ・ <span class="math inline">\(z\)</span> の全成分を見る ―
 観測していない方向・評価点はどうなるか</h3>
 <p>ここまでの図はすべて <strong><span class="math inline">\(z\)</span>
-成分（上下・軸方向）だけ</strong>でした。 FrontISTR は当然 <span
-class="math inline">\(U_x,U_y,U_z\)</span>
-の3成分を返しているので、<strong>観測していない <span
-class="math inline">\(x,y\)</span> 方向</strong>と
+成分（上下・軸方向）だけ</strong>でした。 FrontISTR は当然 <span class="math inline">\(U_x,U_y,U_z\)</span>
+の3成分を返しているので、<strong>観測していない <span class="math inline">\(x,y\)</span> 方向</strong>と
 <strong>評価点（未観測点）</strong>がどうなるかを確かめます。</p>
-<p>観測に使うのは今までどおり <strong>「温度2点 ＋ 上面A/O の <span
-class="math inline">\(U_z\)</span> だけ」</strong>。 <span
-class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
+<p>観測に使うのは今までどおり <strong>「温度2点 ＋ 上面A/O の <span class="math inline">\(U_z\)</span> だけ」</strong>。 <span class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
 点は一度もデータ同化に使いません。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -4286,24 +3885,23 @@ class="math inline">\(x,y\)</span> は一切観測しませんし、下の B・C
 </tbody>
 </table>
 <figure>
-<img src="img/xyz_disp_da.png" alt="xyz全成分のデータ同化結果" />
+<img alt="xyz全成分のデータ同化結果" src="img/xyz_disp_da.png"/>
 <figcaption aria-hidden="true">xyz全成分のデータ同化結果</figcaption>
 </figure>
 <p><em>行が成分（上から <span class="math inline">\(U_x,U_y,U_z\)</span>
 ）、列が点（A・O＝観測、B・C＝未観測）。
 灰点線＝データ同化なし、赤破線＝データ同化後、太い灰実線＝真値。</em></p>
-<p>5 seed平均、<strong>初回サイクル（ <span
-class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–300 s
+<p>5 seed平均、<strong>初回サイクル（ <span class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–300 s
 の MAE</strong>:</p>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -4404,21 +4002,13 @@ class="math inline">\(t=30\)</span> s）のスピンアップを除いた 60–3
 <p><strong>① <span class="math inline">\(U_x\)</span>
 は観測していないのに直る。</strong> O点で 2.87 → 0.036
 µm（80倍）、未観測のC点でも 2.78 → 0.022 µm（126倍）。</p>
-<p>理屈は §7-2 の熱弾性から明らかです。変位は温度場から <span
-class="math inline">\(u=W(T-T_\mathrm{ref})\)</span> で決まり、 <span
-class="math inline">\(W=K_s^{-1}H_T\)</span>
+<p>理屈は §7-2 の熱弾性から明らかです。変位は温度場から <span class="math inline">\(u=W(T-T_\mathrm{ref})\)</span> で決まり、 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
 は<strong>3成分すべてを含む行列</strong>です。
 つまり<strong>データ同化が直しているのは変位ではなく温度場</strong>であって、
 温度場が正しくなれば <span class="math inline">\(W\)</span> を通じて
-<strong><span class="math inline">\(x\)</span> も <span
-class="math inline">\(y\)</span> も <span
-class="math inline">\(z\)</span> も自動的に従います</strong>。 「 <span
-class="math inline">\(U_z\)</span> を観測して <span
-class="math inline">\(U_x\)</span>
+<strong><span class="math inline">\(x\)</span> も <span class="math inline">\(y\)</span> も <span class="math inline">\(z\)</span> も自動的に従います</strong>。 「 <span class="math inline">\(U_z\)</span> を観測して <span class="math inline">\(U_x\)</span>
 が直る」のは不思議なことではなく、当然の帰結です。</p>
-<p><strong>② 評価点（未観測点）は観測点と同じ率で直る。</strong> <span
-class="math inline">\(U_z\)</span> で観測点179倍・評価点172倍、 <span
-class="math inline">\(U_x\)</span> で観測点80倍・評価点126倍。
+<p><strong>② 評価点（未観測点）は観測点と同じ率で直る。</strong> <span class="math inline">\(U_z\)</span> で観測点179倍・評価点172倍、 <span class="math inline">\(U_x\)</span> で観測点80倍・評価点126倍。
 <strong>「測ったところだけ合っている」のではありません。</strong> これは
 §5-4（未観測セルの温度復元）と同じ主張を、変位の側から確かめたことになります。</p>
 <p><strong>③ <span class="math inline">\(U_y\)</span>
@@ -4431,10 +4021,8 @@ A・O・B・C はすべて <span class="math inline">\(y=0\)</span>
 <span class="math inline">\(y\neq0\)</span>
 の点で確かめる必要があります）。</p>
 <blockquote>
-<p><strong>正直な注記</strong>： <span
-class="math inline">\(t=30\)</span> s
-の初回サイクルだけを含めて平均すると、 <span
-class="math inline">\(U_y\)</span> は 0.028 → 0.098 µm
+<p><strong>正直な注記</strong>： <span class="math inline">\(t=30\)</span> s
+の初回サイクルだけを含めて平均すると、 <span class="math inline">\(U_y\)</span> は 0.028 → 0.098 µm
 と「悪化」して見えます。これは<strong>1回目の更新での行き過ぎ</strong>が
 平均を押し上げているだけで、2サイクル目以降は真値に乗っています。
 上の表が 60–300 s なのはこのためです。</p>
@@ -4445,14 +4033,12 @@ class="math inline">\(U_y\)</span> は 0.028 → 0.098 µm
 <code>results/xyz_disp_da.json</code> に保存）</p>
 <p><strong>仕上げに、まったく別の未観測点でも確認</strong>します。観測点（赤/橙）から離れた
 <strong>未観測の温度3点（緑）と変位3点（紫）</strong>の位置はこちら:</p>
-<p><img src="img/unobs_points_locations.png" alt="観測点と未観測評価点の位置" width="440"></p>
+<p><img alt="観測点と未観測評価点の位置" src="img/unobs_points_locations.png" width="440"/></p>
 <p>この6か所すべてで、真値と各構成を時系列比較すると:</p>
 <figure>
-<img src="img/unobs_multi_timeseries.png"
-alt="未観測の温度3点・変位3点の時系列" />
-<figcaption
-aria-hidden="true">未観測の温度3点・変位3点の時系列</figcaption>
-</figure>
+<img alt="未観測の温度3点・変位3点の時系列" src="img/unobs_multi_timeseries.png">
+<figcaption aria-hidden="true">未観測の温度3点・変位3点の時系列</figcaption>
+</img></figure>
 <p><em>データ同化なし（灰）は6点すべてで大外れ。データ同化した構成は<strong>観測していない場所でも</strong>真値に沿い、
 温度＋変位（赤）が最も近い（特に底面側の温度と z=75mm
 反対側の変位の立ち上がり）。
@@ -4460,11 +4046,8 @@ aria-hidden="true">未観測の温度3点・変位3点の時系列</figcaption>
 <blockquote>
 <p><strong>凡例の「高感度／低感度」の意味</strong>：ここでの感度は
 <strong>発熱量への温度感度 <span class="math inline">\(\partial
-T/\partial Q\)</span></strong> です （ <span
-class="math inline">\(q_\mathrm{scale}\)</span>
-を1.0→1.1に振った有限差分、加熱ピーク <span
-class="math inline">\(t=300\)</span> s で評価）。 高感度＝ <span
-class="math inline">\(\partial T/\partial Q\)</span>
+T/\partial Q\)</span></strong> です （ <span class="math inline">\(q_\mathrm{scale}\)</span>
+を1.0→1.1に振った有限差分、加熱ピーク <span class="math inline">\(t=300\)</span> s で評価）。 高感度＝ <span class="math inline">\(\partial T/\partial Q\)</span>
 最大のP2（ヒータ側）、低感度＝最小のP4（反対側）、
 温度2点(高感度)＝上位2ノード（P2とP0）。上の観測点図（sensor_positions）の色付けと同じ量です。
 なお <strong>熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span>
@@ -4475,46 +4058,37 @@ blog_005 §4-6）。</p>
 <blockquote>
 <p>実務では、この温度→変位を毎回FrontISTRで解く代わりに、<strong>線形化した感度
 <span class="math inline">\(W=K_s^{-1}H_T\)</span></strong>（blog_002
-§4）で 温度から直接変位を出せます。 <span
-class="math inline">\(W\)</span>
+§4）で 温度から直接変位を出せます。 <span class="math inline">\(W\)</span>
 は多数の温度入力に対する線形応答です。剛性行列の分解を再利用できますが、単一の熱荷重を1回解くだけで全Wが得られるわけではありません。POD版では必要なモード応答だけを事前に計算します。</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="7-6-観測構成を変えて比べる--本研究の有用性">7-6.
 観測構成を変えて比べる ― 本研究の有用性</h2>
 <p>ここまでの部品（POD＋Q-DEIM＋ROM＋EnKF）を組み合わせ、<strong>観測の構成だけを変えて</strong>比べます。</p>
-<h3
-id="先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</h3>
+<h3 id="先に読む106のどの計算を説明しているか">先に読む：106のどの計算を説明しているか</h3>
 <p>106では複数の観測構成を試しています。この節の主試験は
 <strong>P2/P0＋変位A/O</strong>（<code>run/run_da_compare.py</code>）です。
 これとは別に、<strong>P2/P0＋高W変位S1/S2を観測して、観測しないC/Dを評価した試験</strong>があります。
 観測点・変位写像・ノイズの乱数系列が異なるため、Qの値や変位誤差を混ぜて読まないでください。</p>
-<p>後者の実際の手順を、<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/20_actual_enkf_displacement_and_heat_identification.md">「今回行った計算を順番に追う」</a>
+<p>後者の実際の手順を、<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/20_actual_enkf_displacement_and_heat_identification.md">「今回行った計算を順番に追う」</a>
 にまとめました。読む順番は次のとおりです。</p>
 <ol type="1">
 <li><strong>60組の仮説を用意する。</strong>
-各組は温度P0〜P4、発熱倍率q、放熱hの7個を持つ。Qは <span
-class="math inline">\(15q\)</span> W。</li>
+各組は温度P0〜P4、発熱倍率q、放熱hの7個を持つ。Qは <span class="math inline">\(15q\)</span> W。</li>
 <li><strong>次の30秒まで予測する。</strong>
 各組のq・hでRK4を進め、その組の予報温度を得る。</li>
 <li><strong>温度から変位を予測する。</strong>
 5点温度→POD係数→事前計算したFrontISTR応答Dの順に計算する。</li>
-<li><strong>測定値との差を作る。</strong> 予報は <span
-class="math inline">\([T_2,T_0,u_{S1},u_{S2}]\)</span>
+<li><strong>測定値との差を作る。</strong> 予報は <span class="math inline">\([T_2,T_0,u_{S1},u_{S2}]\)</span>
 の4成分。C/Dは観測に入れない。</li>
 <li><strong>60組の共分散を作る。</strong>
-同じ時刻の平均と偏差から、7×4の <span
-class="math inline">\(C_{zy}\)</span> と4×4の <span
-class="math inline">\(C_{yy}\)</span> を59で割って計算する。</li>
+同じ時刻の平均と偏差から、7×4の <span class="math inline">\(C_{zy}\)</span> と4×4の <span class="math inline">\(C_{yy}\)</span> を59で割って計算する。</li>
 <li><strong>温度・q・hを補正する。</strong>
 カルマンゲインで4成分の残差を7未知数へ配り、次の予測に使う。</li>
 </ol>
 <p>例えば温度P0と発熱倍率qの補正は、コードの添字で書くと</p>
-<p><span
-class="math display">\[T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},\]</span></p>
-<p><span
-class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.\]</span></p>
+<p><span class="math display">\[T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},\]</span></p>
+<p><span class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.\]</span></p>
 <p>ここでfは偏差膨張後の予報、aはデータ同化後、dは「観測＋メンバー別の観測摂動−予報観測」です。
 <strong>各式の最後の2項が、変位観測から温度や発熱倍率へ入る補正</strong>です。補正したqを15倍するとQ
 [W]になります。</p>
@@ -4525,25 +4099,19 @@ class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}
 となります。以後の更新で修正され、このseedの600秒では <strong>14.890
 W</strong> です。初回から真値に一致するわけではありません。</p>
 <p>数値の内訳、観測ノイズと観測摂動の違い、実コード、保存ファイル、5seed結果は
-<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/20_actual_enkf_displacement_and_heat_identification.md">手順の詳細</a>
+<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/20_actual_enkf_displacement_and_heat_identification.md">手順の詳細</a>
 に記載しています。</p>
-<h3
-id="本研究で実際に行った手続きrunrun_da_comparepy">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</h3>
+<h3 id="本研究で実際に行った手続きrunrun_da_comparepy">本研究で実際に行った手続き（<code>run/run_da_compare.py</code>）</h3>
 <p>ここに書くのは説明用の簡略例ではなく、表の数値を出した計算そのものの設定である。</p>
-<p><strong>真値（双子実験）</strong>　校正済みの5点ROMを、発熱量 <span
-class="math inline">\(Q=15\)</span> W（ヒータ点 P2）、放熱 <span
-class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
+<p><strong>真値（双子実験）</strong>　校正済みの5点ROMを、発熱量 <span class="math inline">\(Q=15\)</span> W（ヒータ点 P2）、放熱 <span class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
 冷却で時間積分したものを真値とする。</p>
 <p><strong>状態ベクトル</strong>（7次元）</p>
 <p><span class="math display">\[z=(T_1,\dots,T_5,\ q,\ h),\qquad
 Q=15\,q\ [\mathrm W]\]</span></p>
-<p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span
-class="math inline">\(q=1\)</span> ）。変位は状態に入れない。</p>
+<p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span class="math inline">\(q=1\)</span> ）。変位は状態に入れない。</p>
 <p><strong>観測</strong>（30 s ごと、計20回）　温度2点（P2,
 P0。この計算では発熱感度 <span class="math inline">\(\partial T/\partial
-Q\)</span> の上位2点として選んだ。どちらも A 側）と、 上面 A・O の <span
-class="math inline">\(U_z\)</span>
+Q\)</span> の上位2点として選んだ。どちらも A 側）と、 上面 A・O の <span class="math inline">\(U_z\)</span>
 の計4個。真値にノイズを足して作る。</p>
 <p><span class="math display">\[y=\bigl(T_{P2},\ T_{P0},\ U_z(A),\
 U_z(O)\bigr)^{\mathrm{true}}+\varepsilon,\qquad
@@ -4566,9 +4134,7 @@ T_\mathrm{air}+12]\)</span> K</td>
 </tr>
 <tr class="even">
 <td><span class="math inline">\(q\)</span></td>
-<td>一様分布 <span class="math inline">\([0.3,\ 1.8]\)</span> （ <span
-class="math inline">\(Q=4.5\)</span> 〜 <span
-class="math inline">\(27\)</span> W）</td>
+<td>一様分布 <span class="math inline">\([0.3,\ 1.8]\)</span> （ <span class="math inline">\(Q=4.5\)</span> 〜 <span class="math inline">\(27\)</span> W）</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(h\)</span></td>
@@ -4577,67 +4143,42 @@ class="math inline">\(27\)</span> W）</td>
 </tr>
 </tbody>
 </table>
-<p><strong>各サイクルの手続き</strong>（ <span
-class="math inline">\(t_k=30k\)</span> s、 <span
-class="math inline">\(k=1,\dots,20\)</span> ）</p>
+<p><strong>各サイクルの手続き</strong>（ <span class="math inline">\(t_k=30k\)</span> s、 <span class="math inline">\(k=1,\dots,20\)</span> ）</p>
 <ol type="1">
-<li><strong>予報</strong>　各メンバーを、そのメンバー自身の <span
-class="math inline">\(q,h\)</span> を使ってROMで30 s
+<li><strong>予報</strong>　各メンバーを、そのメンバー自身の <span class="math inline">\(q,h\)</span> を使ってROMで30 s
 前進させる（RK4、刻み2 s）。 <span class="math inline">\(q,h\)</span>
 は前進中は変えない。</li>
 <li><strong>予報観測</strong> <span class="math inline">\(Y_f\)</span>
 （ <span class="math inline">\(60\times4\)</span>
 ）　各メンバーについて、温度2点はそのまま取り出し、
-変位2点は温度から計算する（§7-0）。 <span
-class="math display">\[u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
+変位2点は温度から計算する（§7-0）。 <span class="math display">\[u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
 T_P\bigr)\]</span></li>
 <li><strong>共分散膨張</strong>　メンバーの平均からのずれを1.02倍に広げる（標本数不足で分散が縮みすぎるのを防ぐ）。</li>
-<li><strong>ゲイン</strong>　60メンバーの偏差 <span
-class="math inline">\(dZ\)</span> （ <span
-class="math inline">\(60\times7\)</span> ）、 <span
-class="math inline">\(dY\)</span> （ <span
-class="math inline">\(60\times4\)</span> ）から <span
-class="math display">\[C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\
+<li><strong>ゲイン</strong>　60メンバーの偏差 <span class="math inline">\(dZ\)</span> （ <span class="math inline">\(60\times7\)</span> ）、 <span class="math inline">\(dY\)</span> （ <span class="math inline">\(60\times4\)</span> ）から <span class="math display">\[C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\
 (7\times4),\quad
   C_{yy}=\frac{dY^{\mathsf T}dY}{59}\ (4\times4),\quad
   K=C_{zy}\,(C_{yy}+R)^{-1}\ (7\times4)\]</span></li>
-<li><strong>更新</strong>　メンバーごとに観測ノイズ <span
-class="math inline">\(\varepsilon^{(m)}\sim N(0,R)\)</span>
-を足して更新する（摂動観測法）。 <span
-class="math display">\[z^{(m)}\leftarrow
+<li><strong>更新</strong>　メンバーごとに観測ノイズ <span class="math inline">\(\varepsilon^{(m)}\sim N(0,R)\)</span>
+を足して更新する（摂動観測法）。 <span class="math display">\[z^{(m)}\leftarrow
 z^{(m)}+K\bigl(y+\varepsilon^{(m)}-Y_f^{(m)}\bigr)\]</span></li>
-<li><strong>制約</strong>　 <span
-class="math inline">\(q\in[0,3]\)</span> 、 <span
-class="math inline">\(h\in[10^{-4},0.2]\)</span> に収める。</li>
+<li><strong>制約</strong>　 <span class="math inline">\(q\in[0,3]\)</span> 、 <span class="math inline">\(h\in[10^{-4},0.2]\)</span> に収める。</li>
 </ol>
 <p>これを5つの乱数シード（20260913〜20260917）で繰り返し、平均を取る。</p>
 <p><strong>発熱量 <span class="math inline">\(Q\)</span>
-が同定される仕組み</strong>　手順5で更新されるのは <span
-class="math inline">\(z\)</span> の7成分すべてであり、 <span
-class="math inline">\(q\)</span> はその6番目の成分である。 <span
-class="math inline">\(q\)</span> の更新量は <span
-class="math inline">\(K\)</span> の6行目 <span
-class="math display">\[K_{q,:}=\mathrm{Cov}(q,\
-Y_f)\,(C_{yy}+R)^{-1}\]</span> で決まる。手順1で <span
-class="math inline">\(q\)</span>
+が同定される仕組み</strong>　手順5で更新されるのは <span class="math inline">\(z\)</span> の7成分すべてであり、 <span class="math inline">\(q\)</span> はその6番目の成分である。 <span class="math inline">\(q\)</span> の更新量は <span class="math inline">\(K\)</span> の6行目 <span class="math display">\[K_{q,:}=\mathrm{Cov}(q,\
+Y_f)\,(C_{yy}+R)^{-1}\]</span> で決まる。手順1で <span class="math inline">\(q\)</span>
 の大きいメンバーほど温度が上がり、手順2でその温度から計算される変位も大きくなるため、
-<span class="math inline">\(\mathrm{Cov}(q,T)\)</span> と <span
-class="math inline">\(\mathrm{Cov}(q,u)\)</span>
+<span class="math inline">\(\mathrm{Cov}(q,T)\)</span> と <span class="math inline">\(\mathrm{Cov}(q,u)\)</span>
 は0にならない。したがって <span class="math inline">\(q\)</span>
-を直接観測していなくても、 温度と変位の残差 <span
-class="math inline">\(y-Y_f\)</span> が <span
-class="math inline">\(q\)</span> を動かす。</p>
-<p><strong>結果</strong>　20回の更新後、 <span
-class="math inline">\(Q=14.89\)</span> W（真値 15
+を直接観測していなくても、 温度と変位の残差 <span class="math inline">\(y-Y_f\)</span> が <span class="math inline">\(q\)</span> を動かす。</p>
+<p><strong>結果</strong>　20回の更新後、 <span class="math inline">\(Q=14.89\)</span> W（真値 15
 W）。加熱期の全5点温度RMSEは 0.160 K、 上面の変位差の誤差は 0.165
 µm（下の表の最終行）。
 なお真値も同じROMで作っているため、モデル誤差のない条件での結果である。</p>
-<h3
-id="この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</h3>
+<h3 id="この表のrmseは何を計算した値か">この表の「RMSE」は何を計算した値か</h3>
 <p>数字を出す前に定義をはっきりさせます。同じ観測構成で乱数条件を5回変えて計算します。
 <span class="math inline">\(s=1,\ldots,5\)</span> が計算番号（seed）、
-<span class="math inline">\(i=0,\ldots,4\)</span> がROMの温度点、 <span
-class="math inline">\(m=1,\ldots,60\)</span>
+<span class="math inline">\(i=0,\ldots,4\)</span> がROMの温度点、 <span class="math inline">\(m=1,\ldots,60\)</span>
 がEnKFメンバーです。<strong>5 seed
 は再試行の数であり、60メンバーとは別物</strong>です。</p>
 <p>まず各時刻のデータ同化後アンサンブルから、点ごとの推定温度を出します:</p>
@@ -4660,9 +4201,7 @@ r_{s,k}=\sqrt{\frac{1}{5}\sum_{i=0}^{4}e_{s,i,k}^2}\]</span></p>
 全20,696セルの温度RMSEでもなく、メンバーの標準偏差でもなく、最終300秒だけの誤差でもありません。
 また「全時刻・全点の二乗誤差をまとめてから平方根を取る」定義とも違います。</p>
 </blockquote>
-<p><strong>小さな数値例</strong>：ある時刻の5点の誤差が <span
-class="math inline">\([1,-2,0,2,-1]\)</span> K なら <span
-class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
+<p><strong>小さな数値例</strong>：ある時刻の5点の誤差が <span class="math inline">\([1,-2,0,2,-1]\)</span> K なら <span class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 これを10時刻それぞれで計算して平均し、さらに5 seed を平均します。</p>
 <p>実装は <code>run/run_da_compare.py</code> の
 <code>run_cfg_seed()</code> 内の
@@ -4672,20 +4211,20 @@ class="math inline">\(r=\sqrt{(1+4+0+4+1)/5}=\sqrt2=1.414\)</span> K。
 時間とseedはどちらも算術平均なので、平均の順序は交換できます。</p>
 <h3 id="結果">結果</h3>
 <figure>
-<img src="img/da_compare_traj.png" alt="収束の比較" />
+<img alt="収束の比較" src="img/da_compare_traj.png"/>
 <figcaption aria-hidden="true">収束の比較</figcaption>
 </figure>
 <p><em>ROM双子実験／60メンバー／30秒ごと20回更新（0〜600秒）／真値も同じROM／seed
 20260913〜20260917 の5回。</em></p>
 <figure>
-<img src="img/da_compare_rmse.png" alt="有用性の棒グラフ" />
+<img alt="有用性の棒グラフ" src="img/da_compare_rmse.png"/>
 <figcaption aria-hidden="true">有用性の棒グラフ</figcaption>
 </figure>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -4742,7 +4281,7 @@ seed）では、 A 側と O 側に1本ずつ置いた P2＋P4
 「<strong>データ同化の性能</strong>にとって最適な点数」は別問題で、センサ数を1〜5点と変えたときの
 精度カーブの系統検証はこれからです。</p></li>
 <li><p><strong>Q-DEIM点は「復元に良い点」であって「推定に最適な点」の保証はない</strong>。
-Q-DEIMは行列式最大化の<strong>貪欲近似</strong>で、大域最適の保証がそもそもありません。さらに、
+Q-DEIMはモード行列の転置に列枢軸QRを適用する選択法で、復元の条件を良くする狙いがあります。ノイズや推定対象を含む同化誤差の大域最適解を保証する方法ではありません。さらに、
 推定したい量が変わると最適配置も変わります。実際、本リポジトリの実験では
 <strong>温度場推定なら「散らした」配置がQ-DEIM点と同程度</strong>、<strong>Q・h推定では温度センサの場所はほぼ効かない</strong>
 （感度が空間的にほぼ一様）という結果でした。<strong>「Q-DEIMで選んだ＝観測もそこが最良」ではない</strong>のです。</p></li>
@@ -4763,7 +4302,7 @@ Q-DEIMは行列式最大化の<strong>貪欲近似</strong>で、大域最適の
 <p>まとめると、<strong>「代表点＝ROMの状態を進める点」としては実証済み（残差0.014K）ですが、
 「観測点としての最適性」「点数」「条件変化への頑健性」は開いた問題</strong>です。
 これらはそのまま、学会発表（計算力学：推定対象依存の観測配置）の研究課題になっています。</p>
-<hr />
+<hr/>
 <h2 id="9-まとめ--この記事でやったこと">9. まとめ ―
 この記事でやったこと</h2>
 <ol type="1">
@@ -4780,15 +4319,11 @@ T}\varphi=\lambda\varphi\)</span> ）。</li>
 <span class="math inline">\(\hat u=\bar u+U_r a\)</span> ）。</li>
 <li>実データでは <strong>2モードで99.9％</strong>、選んだ5点ROMは
 <strong>残差0.014K</strong> で OpenFOAM を再現。</li>
-<li>温度が求まったら <strong>IDWで実形状へマッピング → 熱ひずみ <span
-class="math inline">\(\alpha\Delta T\)</span> → <span
-class="math inline">\(K_s u=f_\mathrm{th}\)</span></strong>
+<li>温度が求まったら <strong>IDWで実形状へマッピング → 熱ひずみ <span class="math inline">\(\alpha\Delta T\)</span> → <span class="math inline">\(K_s u=f_\mathrm{th}\)</span></strong>
 で変位（反り）が出る（§7）。</li>
 </ol>
 <p>この軽い ROM の上で、<strong>OI（blog_002）と
-EnKF（blog_003）</strong> を回すと、温度場・発熱量 <span
-class="math inline">\(Q\)</span> ・放熱係数 <span
-class="math inline">\(h\)</span> を 少数観測から高速に推定でき、さらに
+EnKF（blog_003）</strong> を回すと、温度場・発熱量 <span class="math inline">\(Q\)</span> ・放熱係数 <span class="math inline">\(h\)</span> を 少数観測から高速に推定でき、さらに
 <strong>温度→変位</strong> まで通して「反り」を評価できます。
 <strong>「軽い予報モデル」と「賢い観測点」</strong>の2本柱がそろいました。</p>
 <p><strong>ただし忘れてはいけない点</strong>：ROMはOpenFOAMを
@@ -4797,7 +4332,7 @@ class="math inline">\(h\)</span> を 少数観測から高速に推定でき、�
 で、CFDは <strong>オフラインで1回</strong>必ず要ります。 そして
 <strong>訓練が覆った範囲でしか正しくない</strong>（形状・条件が大きく変われば作り直し）。
 「高価なCFDを一度払って、安価なリアルタイムを得る」という前払い構造だ、と理解しておくのが大切です。</p>
-<hr />
+<hr/>
 <h3 id="参考元になった実装詳細">参考（元になった実装・詳細）</h3>
 <ul>
 <li>POD／Q-DEIM の数式と手続き：本記事 §2〜§4（旧
@@ -4808,8 +4343,7 @@ class="math inline">\(h\)</span> を 少数観測から高速に推定でき、�
 <li>この上でのデータ同化：<code>blog_002_oi_data_assimilation.md</code>,
 <code>blog_003_ensemble_kalman_filter.md</code></li>
 </ul>
-<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
 を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>

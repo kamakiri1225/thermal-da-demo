@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_002：OI（最適内挿）でデータ同化</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_002：OI（最適内挿）でデータ同化</title>
+<style>
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -162,17 +163,14 @@
       vertical-align: middle;
     }
   </style>
-  
-  <style>
+<style>
    html body { max-width: 1120px !important; }
    body { padding: 0 24px; }
    img { max-width: 100%; height: auto; }
    table { font-size: 0.95em; }
   </style>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
-  type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
 </head>
 <body>
 <header id="title-block-header">
@@ -180,106 +178,79 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a
-href="#blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する"
-id="toc-blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
+<li><a href="#blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する" id="toc-blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
 ― まず数式と小さな行列で「OIとは何か」を理解する</a>
 <ul>
-<li><a href="#読む前にこの記事で分かること"
-id="toc-読む前にこの記事で分かること">読む前に：この記事で分かること</a></li>
-<li><a href="#記号の約束状態観測誤差を分ける"
-id="toc-記号の約束状態観測誤差を分ける">記号の約束：状態・観測・誤差を分ける</a>
+<li><a href="#読む前にこの記事で分かること" id="toc-読む前にこの記事で分かること">読む前に：この記事で分かること</a></li>
+<li><a href="#記号の約束状態観測誤差を分ける" id="toc-記号の約束状態観測誤差を分ける">記号の約束：状態・観測・誤差を分ける</a>
 <ul>
-<li><a href="#更新式が出てくる理由"
-id="toc-更新式が出てくる理由">更新式が出てくる理由</a></li>
+<li><a href="#更新式が出てくる理由" id="toc-更新式が出てくる理由">更新式が出てくる理由</a></li>
 </ul></li>
 <li><a href="#1-ミニ模型3つの温度点" id="toc-1-ミニ模型3つの温度点">1.
 ミニ模型：3つの温度点</a></li>
-<li><a href="#2-oi-のしくみ4つの部品と1本の式"
-id="toc-2-oi-のしくみ4つの部品と1本の式">2. OI
+<li><a href="#2-oi-のしくみ4つの部品と1本の式" id="toc-2-oi-のしくみ4つの部品と1本の式">2. OI
 のしくみ（4つの部品と1本の式）</a></li>
-<li><a href="#3-手計算で-oi-をやってみる3点観測1点"
-id="toc-3-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
+<li><a href="#3-手計算で-oi-をやってみる3点観測1点" id="toc-3-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
 をやってみる（3点・観測1点）</a>
 <ul>
-<li><a href="#3-1-部品に数字を入れる"
-id="toc-3-1-部品に数字を入れる">3-1. 部品に数字を入れる</a></li>
-<li><a href="#3-2-カルマンゲイン-k-を計算"
-id="toc-3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
-class="math inline">\(K\)</span> を計算</a></li>
+<li><a href="#3-1-部品に数字を入れる" id="toc-3-1-部品に数字を入れる">3-1. 部品に数字を入れる</a></li>
+<li><a href="#3-2-カルマンゲイン-k-を計算" id="toc-3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span class="math inline">\(K\)</span> を計算</a></li>
 <li><a href="#3-3-更新answer" id="toc-3-3-更新answer">3-3.
 更新（answer）</a></li>
-<li><a href="#3-4-結果を真値と比べる"
-id="toc-3-4-結果を真値と比べる">3-4. 結果を真値と比べる</a></li>
-<li><a href="#3-5-温度変位発熱量-q-が更新式のどこに入るか文字式"
-id="toc-3-5-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
+<li><a href="#3-4-結果を真値と比べる" id="toc-3-4-結果を真値と比べる">3-4. 結果を真値と比べる</a></li>
+<li><a href="#3-5-温度変位発熱量-q-が更新式のどこに入るか文字式" id="toc-3-5-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
 温度・変位・発熱量 <span class="math inline">\(Q\)</span>
 が更新式のどこに入るか（文字式）</a></li>
-<li><a href="#3-6-温度を測ると-q-が動く文字式"
-id="toc-3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
-class="math inline">\(Q\)</span> が動く（文字式）</a></li>
-<li><a href="#3-7-変位を測ると全部動く文字式"
-id="toc-3-7-変位を測ると全部動く文字式">3-7.
+<li><a href="#3-6-温度を測ると-q-が動く文字式" id="toc-3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span class="math inline">\(Q\)</span> が動く（文字式）</a></li>
+<li><a href="#3-7-変位を測ると全部動く文字式" id="toc-3-7-変位を測ると全部動く文字式">3-7.
 変位を測ると全部動く（文字式）</a></li>
-<li><a href="#3-8--q-が同定できる周辺化積分の正体"
-id="toc-3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span
-class="math inline">\(Q\)</span>
+<li><a href="#3-8--q-が同定できる周辺化積分の正体" id="toc-3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</a></li>
 </ul></li>
-<li><a href="#4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ"
-id="toc-4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ">4.
+<li><a href="#4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ" id="toc-4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ">4.
 どこを測ると効くか ― 熱感度 <span class="math inline">\(W\)</span>
 の分布で観測点を選ぶ</a>
 <ul>
-<li><a href="#4-1-熱感度-wk_s-1h_t-とは"
-id="toc-4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span
-class="math inline">\(W=K_s^{-1}H_T\)</span> とは</a></li>
+<li><a href="#4-1-熱感度-wk_s-1h_t-とは" id="toc-4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span> とは</a></li>
 <li><a href="#4-2-感度の分布図" id="toc-4-2-感度の分布図">4-2.
 感度の分布（図）</a></li>
-<li><a href="#4-3-実際の選定手順105106"
-id="toc-4-3-実際の選定手順105106">4-3.
+<li><a href="#4-3-実際の選定手順105106" id="toc-4-3-実際の選定手順105106">4-3.
 実際の選定手順（105→106）</a></li>
 </ul></li>
-<li><a href="#5-感度が低い点で測るとどうなるかoi-で確かめる失敗例"
-id="toc-5-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
+<li><a href="#5-感度が低い点で測るとどうなるかoi-で確かめる失敗例" id="toc-5-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
 感度が低い点で測るとどうなるか（OI で確かめる失敗例）</a></li>
-<li><a href="#6-実モデル104実ソルバで回した比較"
-id="toc-6-実モデル104実ソルバで回した比較">6.
+<li><a href="#6-実モデル104実ソルバで回した比較" id="toc-6-実モデル104実ソルバで回した比較">6.
 実モデル（104実ソルバ）で回した比較</a>
 <ul>
-<li><a href="#6-1-σqスタディ発熱の背景分散を変える"
-id="toc-6-1-σqスタディ発熱の背景分散を変える">6-1.
+<li><a href="#6-1-σqスタディ発熱の背景分散を変える" id="toc-6-1-σqスタディ発熱の背景分散を変える">6-1.
 σQスタディ：発熱の背景分散を変える</a></li>
-<li><a href="#6-2-σtスタディ温度誤差の大きさを変える"
-id="toc-6-2-σtスタディ温度誤差の大きさを変える">6-2.
+<li><a href="#6-2-σtスタディ温度誤差の大きさを変える" id="toc-6-2-σtスタディ温度誤差の大きさを変える">6-2.
 σTスタディ：温度誤差の大きさを変える</a></li>
 </ul></li>
-<li><a href="#7-104と106で何が同じで何が違うか"
-id="toc-7-104と106で何が同じで何が違うか">7.
+<li><a href="#7-104と106で何が同じで何が違うか" id="toc-7-104と106で何が同じで何が違うか">7.
 104と106で何が同じで、何が違うか</a></li>
-<li><a href="#8-まとめ--第2回で押さえたこと"
-id="toc-8-まとめ--第2回で押さえたこと">8. まとめ ―
+<li><a href="#8-まとめ--第2回で押さえたこと" id="toc-8-まとめ--第2回で押さえたこと">8. まとめ ―
 第2回で押さえたこと</a>
 <ul>
-<li><a href="#参考元になった実装詳細"
-id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
+<li><a href="#参考元になった実装詳細" id="toc-参考元になった実装詳細">参考（元になった実装・詳細）</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </nav>
-<h1
-id="blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
+<h1 id="blog_002oi最適内挿でデータ同化--まず数式と小さな行列でoiとは何かを理解する">blog_002：OI（最適内挿）でデータ同化
 ― まず数式と小さな行列で「OIとは何か」を理解する</h1>
-<h2
-id="読む前にこの記事で分かること">読む前に：この記事で分かること</h2>
+<blockquote>
+<p><strong>2026-10-05の読み直し：条件の区別</strong>
+3点の手計算、106のROM-OI、104の実ソルバOIは別の計算です。固定Bの作り方・状態数・更新周期を区別します。106のEnKFの結果をOIの結果として読み替えません。</p>
+</blockquote>
+<h2 id="読む前にこの記事で分かること">読む前に：この記事で分かること</h2>
 <p><strong>目的は、温度・変位の観測から、測っていない温度と発熱量をどう補正するかを理解することです。</strong>
-<a
-href="blog001.html">前回</a>の温度→熱変位計算を「予報」に使い、その予報を観測で直します。</p>
+<a href="blog001.html">前回</a>の温度→熱変位計算を「予報」に使い、その予報を観測で直します。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -306,13 +277,12 @@ href="blog001.html">前回</a>の温度→熱変位計算を「予報」に使�
 </tr>
 </tbody>
 </table>
-<p>ここでROMは「温度を少数変数で時間発展させる軽量モデル」です。作り方は<a
-href="blog004.html">第4回</a>で説明します。
+<p>ここでROMは「温度を少数変数で時間発展させる軽量モデル」です。作り方は<a href="blog004.html">第4回</a>で説明します。
 §5と§6は<strong>モデルも背景共分散の作り方も異なる実験</strong>です。同じ結果の続きを示すものではありません。</p>
 <pre class="mermaid"><code>flowchart LR
- A[&quot;物理モデルで予報&quot;] --&gt; B[&quot;予報温度から観測温度・変位を計算&quot;]
- B --&gt; C[&quot;観測との差を固定した共分散で配分&quot;]
- C --&gt; D[&quot;温度・パラメータを更新&quot;]
+ A["物理モデルで予報"] --&gt; B["予報温度から観測温度・変位を計算"]
+ B --&gt; C["観測との差を固定した共分散で配分"]
+ C --&gt; D["温度・パラメータを更新"]
  D --&gt; A</code></pre>
 <p>第2回は <strong>データ同化</strong> です。データ同化とは、</p>
 <blockquote>
@@ -324,23 +294,20 @@ Interpolation, 最適内挿）</strong> を扱います。</p>
 <p><strong>この記事の流れ</strong>： 1.
 <strong>OIとは何かを数式で理解</strong>する 2.
 <strong>節点を3つに減らしたミニ模型</strong>で、行列計算を手で追って腑に落とす
-3. <strong>どこを測ると効くか</strong>を熱感度（FrontISTRの <span
-class="math inline">\(W\)</span> ）の<strong>分布</strong>で見抜く 4.
+3. <strong>どこを測ると効くか</strong>を熱感度（FrontISTRの <span class="math inline">\(W\)</span> ）の<strong>分布</strong>で見抜く 4.
 最後に、<strong>104の実ソルバ（OpenFOAM＋FrontISTR）で回した比較結果</strong>を見る</p>
 <p>いきなり結果を見ても分からないので、<strong>まず仕組み →
 次に結果</strong>の順で進めます。</p>
 </blockquote>
-<hr />
-<h2
-id="記号の約束状態観測誤差を分ける">記号の約束：状態・観測・誤差を分ける</h2>
+<hr/>
+<h2 id="記号の約束状態観測誤差を分ける">記号の約束：状態・観測・誤差を分ける</h2>
 <p>ベクトルは列ベクトルです。 <span class="math inline">\(x\)</span>
-の成分数を <span class="math inline">\(n\)</span> 、観測数を <span
-class="math inline">\(p\)</span> とします。</p>
+の成分数を <span class="math inline">\(n\)</span> 、観測数を <span class="math inline">\(p\)</span> とします。</p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -382,15 +349,9 @@ class="math inline">\(p\)</span> とします。</p>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(\mathsf T\)</span> は転置、 <span
-class="math inline">\(^{-1}\)</span> は逆行列、 <span
-class="math inline">\(\mathrm{tr}\)</span> は対角成分の和、 <span
-class="math inline">\(\lVert v\rVert^2=\sum_i v_i^2\)</span> です。
-<span class="math inline">\(K\)</span> はゲインで、構造剛性 <span
-class="math inline">\(K_s\)</span> とは別です。
-温度だけならBの単位はK²。温度・Qを混ぜる場合、 <span
-class="math inline">\(B_{TQ}\)</span> はK·W、 <span
-class="math inline">\(B_{QQ}\)</span>
+<p><span class="math inline">\(\mathsf T\)</span> は転置、 <span class="math inline">\(^{-1}\)</span> は逆行列、 <span class="math inline">\(\mathrm{tr}\)</span> は対角成分の和、 <span class="math inline">\(\lVert v\rVert^2=\sum_i v_i^2\)</span> です。
+<span class="math inline">\(K\)</span> はゲインで、構造剛性 <span class="math inline">\(K_s\)</span> とは別です。
+温度だけならBの単位はK²。温度・Qを混ぜる場合、 <span class="math inline">\(B_{TQ}\)</span> はK·W、 <span class="math inline">\(B_{QQ}\)</span>
 はW²となり、全成分が同じ単位ではありません。</p>
 <h3 id="更新式が出てくる理由">更新式が出てくる理由</h3>
 <p>予報と観測の双方から大きく離れない状態を、各誤差の分散で重みづけして求めます。BとRが正定値の場合、</p>
@@ -402,8 +363,7 @@ J(x)=\frac12(x-x^b)^{\mathsf T}B^{-1}(x-x^b)
 <p><span class="math display">\[
 \nabla J=B^{-1}(x-x^b)-H^{\mathsf T}R^{-1}(y-Hx)=0.
 \]</span></p>
-<p><span class="math inline">\(\delta x=x-x^b\)</span> 、 <span
-class="math inline">\(d=y-Hx^b\)</span> と置いて整理すると、</p>
+<p><span class="math inline">\(\delta x=x-x^b\)</span> 、 <span class="math inline">\(d=y-Hx^b\)</span> と置いて整理すると、</p>
 <p><span class="math display">\[
 (B^{-1}+H^{\mathsf T}R^{-1}H)\delta x=H^{\mathsf T}R^{-1}d.
 \]</span></p>
@@ -418,28 +378,23 @@ class="math inline">\(d=y-Hx^b\)</span> と置いて整理すると、</p>
 <p>本物は固体20,696セルですが、いきなりは分かりません。まず
 <strong>3点だけの温度</strong> で考えます。</p>
 <ul>
-<li>状態（知りたいもの）：3点の温度 <span
-class="math inline">\(x=(T_1,T_2,T_3)\)</span> 。</li>
-<li><strong>真値（本当はこうなっている）</strong>： <span
-class="math inline">\(x^\mathrm{true}=(30,\ 27,\ 25)\)</span>
+<li>状態（知りたいもの）：3点の温度 <span class="math inline">\(x=(T_1,T_2,T_3)\)</span> 。</li>
+<li><strong>真値（本当はこうなっている）</strong>： <span class="math inline">\(x^\mathrm{true}=(30,\ 27,\ 25)\)</span>
 ℃。片側が熱く、離れるほどぬるい。</li>
-<li><strong>予報（シミュレーションの当て推量）</strong>： <span
-class="math inline">\(x^b=(25,\ 25,\ 25)\)</span>
+<li><strong>予報（シミュレーションの当て推量）</strong>： <span class="math inline">\(x^b=(25,\ 25,\ 25)\)</span>
 ℃。全部同じと置いた雑な初期値。</li>
 </ul>
 <p>やりたいのは、<strong>1点だけ温度計を置いて測り</strong>、その1点の情報から
 <strong>3点全部を真値へ寄せる</strong>ことです。</p>
-<hr />
+<hr/>
 <h2 id="2-oi-のしくみ4つの部品と1本の式">2. OI
 のしくみ（4つの部品と1本の式）</h2>
 <p>OI は次の4つの部品でできています。</p>
 <ol type="1">
 <li><strong>予報 <span class="math inline">\(x^b\)</span>
-</strong>：シミュレーションの当て推量。ここでは <span
-class="math inline">\((25,25,25)\)</span> 。</li>
+</strong>：シミュレーションの当て推量。ここでは <span class="math inline">\((25,25,25)\)</span> 。</li>
 <li><strong>観測 <span class="math inline">\(y\)</span>
-</strong>：実際に測った値。ここでは点1を測って <span
-class="math inline">\(y=30\)</span> （真値30に近い）。</li>
+</strong>：実際に測った値。ここでは点1を測って <span class="math inline">\(y=30\)</span> （真値30に近い）。</li>
 <li><strong>背景誤差共分散 <span class="math inline">\(B\)</span>
 </strong>（3×3行列）：<strong>予報がどれくらい外れているか＆点どうしがどれだけ連動するか</strong>を表す。
 OI では <strong>これを事前に決め打ちして固定</strong>します（ここが EnKF
@@ -460,16 +415,12 @@ K=BH^{\mathsf T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
 ：<strong>予報のハズレ</strong>（innovation）。「測ったら予報と何度違ったか」。</li>
 <li><span class="math inline">\(K\)</span>
 ：<strong>カルマンゲイン</strong>。ハズレを各点にどれだけ配分するかの重み。
-<span class="math inline">\(B\)</span> と <span
-class="math inline">\(R\)</span> から決まる。</li>
+<span class="math inline">\(B\)</span> と <span class="math inline">\(R\)</span> から決まる。</li>
 </ul>
-<p>言葉にすると：<strong>「予報のハズレ」に「配分の重み <span
-class="math inline">\(K\)</span>
-」をかけて予報を直す</strong>、それだけです。 <span
-class="math inline">\(K\)</span> を作るのに <span
-class="math inline">\(B\)</span>
+<p>言葉にすると：<strong>「予報のハズレ」に「配分の重み <span class="math inline">\(K\)</span>
+」をかけて予報を直す</strong>、それだけです。 <span class="math inline">\(K\)</span> を作るのに <span class="math inline">\(B\)</span>
 （点どうしの連動）が効くので、次に具体的な数字で計算してみます。</p>
-<hr />
+<hr/>
 <h2 id="3-手計算で-oi-をやってみる3点観測1点">3. 手計算で OI
 をやってみる（3点・観測1点）</h2>
 <h3 id="3-1-部品に数字を入れる">3-1. 部品に数字を入れる</h3>
@@ -482,29 +433,17 @@ class="math inline">\(B\)</span>
 \sigma_{21} &amp; \sigma_{22} &amp; \sigma_{23}\\
 \sigma_{31} &amp; \sigma_{32} &amp; \sigma_{33}
 \end{pmatrix}\]</span></p>
-<p>ここで <span class="math inline">\(\sigma_i\)</span> は点 <span
-class="math inline">\(i\)</span> の予報の標準偏差、 <span
-class="math inline">\(\rho_{ij}\)</span> は点 <span
-class="math inline">\(i,j\)</span> の相関係数（ <span
-class="math inline">\(-1\)</span> 〜 <span
-class="math inline">\(1\)</span> ）。 <span
-class="math inline">\(\sigma_{ij}:=\mathrm{Cov}(e_i,e_j)=\rho_{ij}\sigma_i\sigma_j\)</span>
+<p>ここで <span class="math inline">\(\sigma_i\)</span> は点 <span class="math inline">\(i\)</span> の予報の標準偏差、 <span class="math inline">\(\rho_{ij}\)</span> は点 <span class="math inline">\(i,j\)</span> の相関係数（ <span class="math inline">\(-1\)</span> 〜 <span class="math inline">\(1\)</span> ）。 <span class="math inline">\(\sigma_{ij}:=\mathrm{Cov}(e_i,e_j)=\rho_{ij}\sigma_i\sigma_j\)</span>
 、 <span class="math inline">\(\sigma_{ii}=\sigma_i^2\)</span>
 と定義します。ここで <span class="math inline">\(e_i=x_i^{\rm
-true}-x_i^b\)</span> 、共分散は平均を引いた誤差の積の期待値です。 <span
-class="math inline">\(\sigma_{ij}\)</span>
+true}-x_i^b\)</span> 、共分散は平均を引いた誤差の積の期待値です。 <span class="math inline">\(\sigma_{ij}\)</span>
 は標準偏差ではなく共分散です。 <span class="math inline">\(B\)</span>
-は対称なので <span
-class="math inline">\(\sigma_{ij}=\sigma_{ji}\)</span>
+は対称なので <span class="math inline">\(\sigma_{ij}=\sigma_{ji}\)</span>
 。<strong>この記号のまま更新式を追える</strong>のがポイントです。</p>
-<p>数字を入れるとき：どの点も予報は <span
-class="math inline">\(\sigma_i=2\)</span> ℃ ばらつくとし（ <span
-class="math inline">\(\sigma_i^2=4\)</span> ）、相関は 隣どうし <span
-class="math inline">\(\rho_{12}=\rho_{23}=0.5\)</span>
+<p>数字を入れるとき：どの点も予報は <span class="math inline">\(\sigma_i=2\)</span> ℃ ばらつくとし（ <span class="math inline">\(\sigma_i^2=4\)</span> ）、相関は 隣どうし <span class="math inline">\(\rho_{12}=\rho_{23}=0.5\)</span>
 （連動大）、離れた <span class="math inline">\(\rho_{13}=0.2\)</span>
 （連動小）:</p>
-<p><span
-class="math display">\[\sigma_{11}=\sigma_{22}=\sigma_{33}=4,\quad
+<p><span class="math display">\[\sigma_{11}=\sigma_{22}=\sigma_{33}=4,\quad
 \sigma_{12}=\sigma_{23}=0.5\times2\times2=2,\quad
 \sigma_{13}=0.2\times2\times2=0.8
 \;\Rightarrow\;
@@ -513,13 +452,11 @@ B=\begin{pmatrix}4 &amp; 2 &amp; 0.8\\ 2 &amp; 4 &amp; 2\\ 0.8 &amp; 2
 <p><strong>観測演算子</strong> <span class="math inline">\(H=(1,\ 0,\
 0)\)</span> 。<strong>観測ノイズ</strong> 温度計の標準偏差 0.3 ℃ なので
 <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
-<h3 id="3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span
-class="math inline">\(K\)</span> を計算</h3>
+<h3 id="3-2-カルマンゲイン-k-を計算">3-2. カルマンゲイン <span class="math inline">\(K\)</span> を計算</h3>
 <p><span class="math inline">\(H=(1,\ 0,\ 0)\)</span>
 が点1を抜き出すので、 <span class="math inline">\(BH^{\mathsf
 T}\)</span> ＝「 <span class="math inline">\(B\)</span> の1列目」、
-<span class="math inline">\(HBH^{\mathsf T}\)</span> ＝「 <span
-class="math inline">\(B\)</span> の (1,1) 成分」。 まず
+<span class="math inline">\(HBH^{\mathsf T}\)</span> ＝「 <span class="math inline">\(B\)</span> の (1,1) 成分」。 まず
 <strong>記号のまま</strong>書くと、ゲインの構造が見えます:</p>
 <p><span class="math display">\[BH^{\mathsf
 T}=\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
@@ -528,8 +465,7 @@ HBH^{\mathsf T}+R=\sigma_{11}+R,\qquad
 K=\frac{1}{\sigma_{11}+R}\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
 \sigma_{31}\end{pmatrix}.\]</span></p>
 <p>＝「<strong>観測点との共分散
-÷（観測点の分散＋ノイズ）</strong>」。数字を入れると（ <span
-class="math inline">\(\sigma_{11}=4,\ \sigma_{21}=2,\ \sigma_{31}=0.8,\
+÷（観測点の分散＋ノイズ）</strong>」。数字を入れると（ <span class="math inline">\(\sigma_{11}=4,\ \sigma_{21}=2,\ \sigma_{31}=0.8,\
 R=0.09\)</span> ）:</p>
 <p><span class="math display">\[K=\frac{1}{4+0.09}\begin{pmatrix}4\\ 2\\
 0.8\end{pmatrix}
@@ -548,11 +484,11 @@ R=0.09\)</span> ）:</p>
 <h3 id="3-4-結果を真値と比べる">3-4. 結果を真値と比べる</h3>
 <table>
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -591,19 +527,16 @@ R=0.09\)</span> ）:</p>
 <p><strong>点1と未観測の点2は改善しました。一方、点3は悪化しました。</strong>
 全体のRMSEは約3.11 Kから約0.62
 Kへ下がりますが、各点が必ず改善するわけではありません。 これが OI
-の効果です。ミソは <strong>背景共分散 <span
-class="math inline">\(B\)</span>
+の効果です。ミソは <strong>背景共分散 <span class="math inline">\(B\)</span>
 が「点どうしの連動」を持っている</strong>こと。
-「点1が予報より5℃高かった → 連動する点2も高いはず」と <span
-class="math inline">\(B\)</span>
+「点1が予報より5℃高かった → 連動する点2も高いはず」と <span class="math inline">\(B\)</span>
 が教えてくれるので、補正が全体に広がります。</p>
 <h3 id="3-5-温度変位発熱量-q-が更新式のどこに入るか文字式">3-5.
 温度・変位・発熱量 <span class="math inline">\(Q\)</span>
 が更新式のどこに入るか（文字式）</h3>
 <p>ここまでは温度だけでした。本研究の狙いは
 <strong>温度と変位から、発熱量 <span class="math inline">\(Q\)</span>
-まで当てる</strong>ことです。 「温度を測る」「変位を測る」「 <span
-class="math inline">\(Q\)</span>
+まで当てる</strong>ことです。 「温度を測る」「変位を測る」「 <span class="math inline">\(Q\)</span>
 を同定する」――この3つが、同じ1本の更新式</p>
 <p><span class="math display">\[x^a=x^b+K\,(y-Hx^b),\qquad K=BH^{\mathsf
 T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
@@ -613,19 +546,13 @@ T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
 <p>に絞ります。物理の仮定は2つだけ:</p>
 <ul>
 <li><strong>固定した時刻・条件で、Qに対する温度応答を線形近似する</strong>:
-<span class="math inline">\(T_i=T_\mathrm{air}+s_i\,Q\)</span> 。 <span
-class="math inline">\(s_i=\partial T_i/\partial Q\)</span> は <span
-class="math inline">\(Q\)</span> への感度。</li>
-<li><strong>変位は温度で決まる</strong>（熱膨張）: <span
-class="math inline">\(u=w_1(T_1-T_\mathrm{air})+w_2(T_2-T_\mathrm{air})\)</span>
+<span class="math inline">\(T_i=T_\mathrm{air}+s_i\,Q\)</span> 。 <span class="math inline">\(s_i=\partial T_i/\partial Q\)</span> は <span class="math inline">\(Q\)</span> への感度。</li>
+<li><strong>変位は温度で決まる</strong>（熱膨張）: <span class="math inline">\(u=w_1(T_1-T_\mathrm{air})+w_2(T_2-T_\mathrm{air})\)</span>
 。 <span class="math inline">\(w_i=\partial u/\partial T_i\)</span>
 。</li>
 </ul>
 <p>まず背景共分散 <span class="math inline">\(B\)</span> を
-<strong>記号のまま</strong>作ります。温度の予報ばらつき <span
-class="math inline">\(\sigma_T\)</span> に加え、 <strong>温度が <span
-class="math inline">\(Q\)</span> で決まるので温度と <span
-class="math inline">\(Q\)</span> は必ず連動</strong>します。この連動を
+<strong>記号のまま</strong>作ります。温度の予報ばらつき <span class="math inline">\(\sigma_T\)</span> に加え、 <strong>温度が <span class="math inline">\(Q\)</span> で決まるので温度と <span class="math inline">\(Q\)</span> は必ず連動</strong>します。この連動を
 <span class="math inline">\(a=(s_1,\ s_2,\ 1)^{\mathsf T}\)</span>
 の外積で入れると:</p>
 <p><span class="math display">\[B=\begin{pmatrix}\sigma_T^2 &amp; 0
@@ -639,17 +566,12 @@ s_2\\
 \sigma_Q^2 s_1 &amp; \sigma_Q^2 s_2 &amp; \sigma_Q^2
 \end{pmatrix}.\]</span></p>
 <blockquote>
-<p><strong>ここが全ての鍵</strong>：右上・左下の <span
-class="math inline">\(B_{TQ}=\sigma_Q^2\,(s_1,\ s_2)\)</span> が
+<p><strong>ここが全ての鍵</strong>：右上・左下の <span class="math inline">\(B_{TQ}=\sigma_Q^2\,(s_1,\ s_2)\)</span> が
 <strong>「温度と <span class="math inline">\(Q\)</span>
-の相関」</strong>。 これがゼロだと、温度や変位をいくら測っても <span
-class="math inline">\(Q\)</span> は1ミリも動きません。 <strong><span
-class="math inline">\(Q\)</span> が同定できるのは、この <span
-class="math inline">\(B_{TQ}\neq0\)</span> のおかげ</strong>（＝温度が
+の相関」</strong>。 これがゼロだと、温度や変位をいくら測っても <span class="math inline">\(Q\)</span> は1ミリも動きません。 <strong><span class="math inline">\(Q\)</span> が同定できるのは、この <span class="math inline">\(B_{TQ}\neq0\)</span> のおかげ</strong>（＝温度が
 <span class="math inline">\(Q\)</span> で決まるから）です。</p>
 </blockquote>
-<h3 id="3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span
-class="math inline">\(Q\)</span> が動く（文字式）</h3>
+<h3 id="3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span class="math inline">\(Q\)</span> が動く（文字式）</h3>
 <p>温度計を点1に置くと <span class="math inline">\(H=(1,\ 0,\
 0)\)</span> 、観測ノイズ分散を <span class="math inline">\(R=r\)</span>
 とします。 <span class="math inline">\(BH^{\mathsf T}\)</span> は「
@@ -665,22 +587,14 @@ s_1^2+r}
 \ \Rightarrow\
 \boxed{\,K_Q=\frac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2
 s_1^2+r}\,}.\]</span></p>
-<p><strong>点1の温度しか測っていないのにゲインの <span
-class="math inline">\(Q\)</span> 行 <span
-class="math inline">\(K_Q\neq0\)</span></strong> 。だから予報のハズレ
-<span class="math inline">\(y-Hx^b\)</span> が <span
-class="math inline">\(Q^a=Q^b+K_Q(y-Hx^b)\)</span> で <span
-class="math inline">\(Q\)</span> を動かします。分子の <span
-class="math inline">\(\sigma_Q^2 s_1\)</span> は、まさに <span
-class="math inline">\(B_{T_1Q}\)</span> 。 <strong>「温度を測ると <span
-class="math inline">\(Q\)</span> が同定される」の正体は、この <span
-class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span></strong>
-です。</p>
+<p><strong>点1の温度しか測っていないのにゲインの <span class="math inline">\(Q\)</span> 行 <span class="math inline">\(K_Q\neq0\)</span></strong> 。だから予報のハズレ
+<span class="math inline">\(y-Hx^b\)</span> が <span class="math inline">\(Q^a=Q^b+K_Q(y-Hx^b)\)</span> で <span class="math inline">\(Q\)</span> を動かします。分子の <span class="math inline">\(\sigma_Q^2 s_1\)</span> は、まさに <span class="math inline">\(B_{T_1Q}\)</span> 。
+<strong>温度観測の差がQの更新へ伝わる経路は、 <span class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span></strong>
+です。Qが動くことと、真値を正しく同定できることは別です。</p>
 <h3 id="3-7-変位を測ると全部動く文字式">3-7.
 変位を測ると全部動く（文字式）</h3>
 <p>変位計は温度を直接は測らず、<strong>温度の重み付き和</strong>を測ります。だから
-<strong>観測演算子 <span class="math inline">\(H\)</span> が感度 <span
-class="math inline">\(w\)</span> そのもの</strong>になります
+<strong>観測演算子 <span class="math inline">\(H\)</span> が感度 <span class="math inline">\(w\)</span> そのもの</strong>になります
 （これが本研究の <span class="math inline">\(W=K_s^{-1}H_T\)</span>
 の1行版）:</p>
 <p><span class="math display">\[H_u=(w_1,\ w_2,\ 0).\]</span></p>
@@ -691,30 +605,20 @@ y_u^b=H_u x^b+c_u,\qquad c_u=-(w_1+w_2)T_{\rm air}.
 <p>更新には <span class="math inline">\(y_u-y_u^b\)</span>
 を使います。以下の温度誤差の式では、基準温度からの温度差を使うか、この切片を差し引いた観測を使うものとします。</p>
 <p><span class="math inline">\(Q\)</span>
-に効くのはゲインの3行目だけ見れば十分で、 <span
-class="math inline">\(BH_u^{\mathsf T}\)</span> の第3成分は</p>
+に効くのはゲインの3行目だけ見れば十分で、 <span class="math inline">\(BH_u^{\mathsf T}\)</span> の第3成分は</p>
 <p><span class="math display">\[\bigl(BH_u^{\mathsf
 T}\bigr)_Q=\sigma_Q^2 s_1 w_1+\sigma_Q^2 s_2 w_2=\sigma_Q^2\,(s\cdot
 w).\]</span></p>
 <p>ただし <span class="math inline">\(s\cdot w=0\)</span>
 ならQへのゲインは0です。符号が異なる寄与が相殺される場合もあります。</p>
 <p>温度と違い、変位は
-<strong>複数点の温度の和</strong>なので、その1個の測定値が <span
-class="math inline">\(B\)</span> を通じて <span
-class="math inline">\(T_1,\ T_2,\ Q\)</span>
-<strong>全部</strong>へ配られます。 <span
-class="math inline">\(Q\)</span> への効き目は <span
-class="math inline">\(\sigma_Q^2\,(s\cdot w)\)</span> ＝「感度 <span
-class="math inline">\(s\)</span> と <span
-class="math inline">\(w\)</span>
+<strong>複数点の温度の和</strong>なので、その1個の測定値が <span class="math inline">\(B\)</span> を通じて <span class="math inline">\(T_1,\ T_2,\ Q\)</span>
+<strong>全部</strong>へ配られます。 <span class="math inline">\(Q\)</span> への効き目は <span class="math inline">\(\sigma_Q^2\,(s\cdot w)\)</span> ＝「感度 <span class="math inline">\(s\)</span> と <span class="math inline">\(w\)</span>
 の内積」で決まる、というのが文字式で読み取れる要点です。</p>
-<h4
-id="なぜ変位を測ると温度まで良くなるのか--分散で丁寧に導く">なぜ「変位を測ると温度まで良くなる」のか
+<h4 id="なぜ変位を測ると温度まで良くなるのか--分散で丁寧に導く">なぜ「変位を測ると温度まで良くなる」のか
 ― 分散で丁寧に導く</h4>
 <p>「変位計は温度を測っていないのに、なぜ温度が良くなるのか」を、共分散の式で最後まで追います。</p>
-<p><strong>① 変位のズレ＝温度誤差の射影</strong>。温度の予報誤差を <span
-class="math inline">\(\delta T=T-T^b\)</span> （共分散 <span
-class="math inline">\(B\)</span> ）とすると、 この段落のBは温度部分
+<p><strong>① 変位のズレ＝温度誤差の射影</strong>。温度の予報誤差を <span class="math inline">\(\delta T=T-T^b\)</span> （共分散 <span class="math inline">\(B\)</span> ）とすると、 この段落のBは温度部分
 <span class="math inline">\(B_{TT}\)</span>
 を表し、拡大状態全体のBとは大きさが異なります。変位は温度の線形写像なので</p>
 <p><span class="math display">\[u-u^b=w^{\mathsf T}\delta T=w_1\,\delta
@@ -722,27 +626,18 @@ T_1+w_2\,\delta T_2+\cdots\]</span></p>
 <p>変位計は「温度誤差の <span class="math inline">\(w\)</span>
 方向成分」を1つの数として読む器械です。</p>
 <figure>
-<img src="img/disp_to_temp_mechanism.png"
-alt="変位観測が温度を直す仕組みの図解" />
-<figcaption
-aria-hidden="true">変位観測が温度を直す仕組みの図解</figcaption>
+<img alt="変位観測が温度を直す仕組みの図解" src="img/disp_to_temp_mechanism.png"/>
+<figcaption aria-hidden="true">変位観測が温度を直す仕組みの図解</figcaption>
 </figure>
 <p><em>左：実線＝温度誤差が重み <span class="math inline">\(w\)</span>
-で変位計へ<strong>射影</strong>される。破線＝変位のハズレが <span
-class="math inline">\(\mathrm{Cov}(T_i,\ u)\)</span>
+で変位計へ<strong>射影</strong>される。破線＝変位のハズレが <span class="math inline">\(\mathrm{Cov}(T_i,\ u)\)</span>
 に比例して各温度へ<strong>逆流</strong>する。 右：高W/低Wの差＝信号
-<span class="math inline">\(g\,\sigma_a\)</span> がノイズ <span
-class="math inline">\(\sqrt r\)</span> を超えるかどうか。</em></p>
-<p><strong>② 温度が動く理由＝共分散 <span
-class="math inline">\(Bw\)</span></strong> 。 <span
-class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
+<span class="math inline">\(g\,\sigma_a\)</span> がノイズ <span class="math inline">\(\sqrt r\)</span> を超えるかどうか。</em></p>
+<p><strong>② 温度が動く理由＝共分散 <span class="math inline">\(Bw\)</span></strong> 。 <span class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
 <p><span class="math display">\[K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
 w^{\mathsf T}Bw=\mathrm{Var}(u).\]</span></p>
-<p><strong>行列を成分まで書き下す</strong>と（2点、 <span
-class="math inline">\(B\)</span> の成分を <span
-class="math inline">\(\sigma_{ij}\)</span> とする）:</p>
-<p><span
-class="math display">\[B=\begin{pmatrix}\sigma_{11}&amp;\sigma_{12}\\
+<p><strong>行列を成分まで書き下す</strong>と（2点、 <span class="math inline">\(B\)</span> の成分を <span class="math inline">\(\sigma_{ij}\)</span> とする）:</p>
+<p><span class="math display">\[B=\begin{pmatrix}\sigma_{11}&amp;\sigma_{12}\\
 \sigma_{12}&amp;\sigma_{22}\end{pmatrix},\quad
 w=\begin{pmatrix}w_1\\ w_2\end{pmatrix}
 \ \Rightarrow\
@@ -750,66 +645,48 @@ Bw=\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
 \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\quad
 w^{\mathsf
 T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,\]</span></p>
-<p><span
-class="math display">\[K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
+<p><span class="math display">\[K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
 \begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
 \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\qquad
 \begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix}
 =\begin{pmatrix}T_1^b\\ T_2^b\end{pmatrix}+K\,d,\quad
 d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).\]</span></p>
 <p><strong>読み方</strong>： <span class="math inline">\(K_1\)</span>
-の分子は <span
-class="math inline">\(\sigma_{11}w_1+\sigma_{12}w_2\)</span>
+の分子は <span class="math inline">\(\sigma_{11}w_1+\sigma_{12}w_2\)</span>
 ＝「自分の重み <span class="math inline">\(w_1\)</span> 経由」＋「相関
 <span class="math inline">\(\sigma_{12}\)</span> 経由」の2経路。 だから
 <strong><span class="math inline">\(w_2\)</span> が小さい点でも、相関
 <span class="math inline">\(\sigma_{12}\)</span>
 が補正を運んでくる</strong>――これが成分で見た「温度まで直る」仕組みです。</p>
-<p>温度 <span class="math inline">\(T_i\)</span> が更新されるのは <span
-class="math inline">\(\mathrm{Cov}(T_i,\ u)\neq0\)</span> （＝ベクトル
-<span class="math inline">\(Bw\)</span> の第 <span
-class="math inline">\(i\)</span> 成分がゼロでない）、 つまり「 <span
-class="math inline">\(T_i\)</span>
+<p>温度 <span class="math inline">\(T_i\)</span> が更新されるのは <span class="math inline">\(\mathrm{Cov}(T_i,\ u)\neq0\)</span> （＝ベクトル
+<span class="math inline">\(Bw\)</span> の第 <span class="math inline">\(i\)</span> 成分がゼロでない）、 つまり「 <span class="math inline">\(T_i\)</span>
 の誤差と変位の誤差が<strong>連動</strong>している」から。変位のハズレが、連動の強さに比例して各温度へ配られます。</p>
 <p><strong>③ どれだけ良くなるか（事後分散）</strong>：</p>
 <p><span class="math display">\[B^a=B-\frac{(Bw)(Bw)^{\mathsf
 T}}{w^{\mathsf T}Bw+r},\qquad
 \Delta=\mathrm{tr}\,B-\mathrm{tr}\,B^a=\frac{\lVert
 Bw\rVert^2}{w^{\mathsf T}Bw+r}.\]</span></p>
-<p>これは「変位から見える温度パターン <span
-class="math inline">\(Bw\)</span>
+<p>これは「変位から見える温度パターン <span class="math inline">\(Bw\)</span>
 の方向」の分散が減る式です。観測ノイズがあれば一般には残り、丸ごと消えるわけではありません。</p>
 <p><strong>④
 核心：温度誤差が「共通の型」なら変位1本で全温度が直る</strong>。
 説明用に、温度誤差が発熱量 <span class="math inline">\(Q\)</span>
-の間違いに支配され、1つの空間パターン <span
-class="math inline">\(\varphi\)</span>
-（≒PODモード1「全体が昇温する型」）で起きます： <span
-class="math inline">\(\delta T\approx a\,\varphi\)</span> （ <span
-class="math inline">\(a\)</span> はスカラー係数、 <span
-class="math inline">\(\mathrm{Var}(a)=\sigma_a^2\)</span>
+の間違いに支配され、1つの空間パターン <span class="math inline">\(\varphi\)</span>
+（≒PODモード1「全体が昇温する型」）で起きます： <span class="math inline">\(\delta T\approx a\,\varphi\)</span> （ <span class="math inline">\(a\)</span> はスカラー係数、 <span class="math inline">\(\mathrm{Var}(a)=\sigma_a^2\)</span>
 ）。このとき</p>
 <p><span class="math display">\[u-u^b=g\,a,\qquad g\equiv w^{\mathsf
 T}\varphi\]</span></p>
 <p>型 <span class="math inline">\(\varphi=(\varphi_1,\
-\varphi_2)^{\mathsf T}\)</span> のとき <span
-class="math inline">\(B=\sigma_a^2\,\varphi\varphi^{\mathsf T}\)</span>
+\varphi_2)^{\mathsf T}\)</span> のとき <span class="math inline">\(B=\sigma_a^2\,\varphi\varphi^{\mathsf T}\)</span>
 。これを行列で書き下すと</p>
-<p><span
-class="math display">\[B=\sigma_a^2\begin{pmatrix}\varphi_1^2&amp;\varphi_1\varphi_2\\
+<p><span class="math display">\[B=\sigma_a^2\begin{pmatrix}\varphi_1^2&amp;\varphi_1\varphi_2\\
 \varphi_1\varphi_2&amp;\varphi_2^2\end{pmatrix},\qquad
 Bw=\sigma_a^2\,g\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix},\qquad
 K=\frac{\sigma_a^2\,g}{g^2\sigma_a^2+r}\begin{pmatrix}\varphi_1\\
-\varphi_2\end{pmatrix}.\]</span> <strong>ゲイン <span
-class="math inline">\(K\)</span> が型 <span
-class="math inline">\(\varphi\)</span>
+\varphi_2\end{pmatrix}.\]</span> <strong>ゲイン <span class="math inline">\(K\)</span> が型 <span class="math inline">\(\varphi\)</span>
 に比例</strong>しています。つまり補正は「型の形のまま」全点へ一斉に入る――
 行列で見ると「変位1本で全温度が直る」の正体はこれです。</p>
-<p>つまり<strong>変位計は「型の係数 <span
-class="math inline">\(a\)</span> をゲイン <span
-class="math inline">\(g\)</span> で測る器械」</strong>。 <span
-class="math inline">\(a\)</span> が決まれば <span
-class="math inline">\(T^a=T^b+\varphi\,\hat a\)</span>
+<p>つまり<strong>変位計は「型の係数 <span class="math inline">\(a\)</span> をゲイン <span class="math inline">\(g\)</span> で測る器械」</strong>。 <span class="math inline">\(a\)</span> が決まれば <span class="math inline">\(T^a=T^b+\varphi\,\hat a\)</span>
 で<strong>全点の温度が一斉に</strong>直ります（未観測点まで直る理由もこれ）。係数の事後分散は</p>
 <p><span class="math display">\[\mathrm{Var}(a\mid
 u)=\frac{\sigma_a^2\,r}{g^2\sigma_a^2+r}.\]</span></p>
@@ -817,66 +694,52 @@ u)=\frac{\sigma_a^2\,r}{g^2\sigma_a^2+r}.\]</span></p>
 <ul>
 <li><strong>高W点</strong>（ <span class="math inline">\(\lVert
 w\rVert\)</span> が大きく <span class="math inline">\(\varphi\)</span>
-と同じ向き）→ <span class="math inline">\(g\)</span> 大 → <span
-class="math inline">\(\mathrm{Var}\approx r/g^2\to0\)</span>
+と同じ向き）→ <span class="math inline">\(g\)</span> 大 → <span class="math inline">\(\mathrm{Var}\approx r/g^2\to0\)</span>
 ＝ほぼ確定</li>
 <li><strong>低W点</strong> → <span class="math inline">\(g\to0\)</span>
 → <span class="math inline">\(\mathrm{Var}\to\sigma_a^2\)</span>
-＝<strong>何も学べない</strong>（信号 <span
-class="math inline">\(g\,a\)</span> がノイズ <span
-class="math inline">\(\sqrt r\)</span> に埋もれる）</li>
+＝<strong>何も学べない</strong>（信号 <span class="math inline">\(g\,a\)</span> がノイズ <span class="math inline">\(\sqrt r\)</span> に埋もれる）</li>
 </ul>
 <p>§5の実験値は高W観測の有効性を示します。ただし、多次元の誤差を持つ実験を、この1モード近似だけで定量説明したものではありません。</p>
-<p><strong>⑤ 数値で確認</strong>（2点、 <span
-class="math inline">\(\sigma=1,\ \rho=0.9,\ w=(0.5,\ 0.2),\
+<p><strong>⑤ 数値で確認</strong>（2点、 <span class="math inline">\(\sigma=1,\ \rho=0.9,\ w=(0.5,\ 0.2),\
 r=0.01\)</span> ）：</p>
 <p><span class="math display">\[w^{\mathsf
 T}Bw=0.25+0.04+2(0.9)(0.1)=0.47,\qquad Bw=\begin{pmatrix}0.68\\
 0.65\end{pmatrix},\qquad
 K=\frac{1}{0.48}\begin{pmatrix}0.68\\
 0.65\end{pmatrix}=\begin{pmatrix}1.42\\ 1.35\end{pmatrix}.\]</span></p>
-<p>分散減少 <span
-class="math inline">\(\Delta=0.8849/0.48\approx1.844\)</span> →
+<p>分散減少 <span class="math inline">\(\Delta=0.8849/0.48\approx1.844\)</span> →
 温度の総分散 <span class="math inline">\(2\to0.16\)</span>
-（<strong>92%減</strong>）。 注目は <span
-class="math inline">\(w_2=0.2\)</span> と小さい <span
-class="math inline">\(T_2\)</span> までゲイン1.35で直る点——<strong>相関
+（<strong>92%減</strong>）。 注目は <span class="math inline">\(w_2=0.2\)</span> と小さい <span class="math inline">\(T_2\)</span> までゲイン1.35で直る点——<strong>相関
 <span class="math inline">\(\rho\)</span>
-が補正を運ぶ</strong>からです。 比較：温度計1本（点1、 <span
-class="math inline">\(r_T=0.09\)</span> ）だと <span
-class="math inline">\(\Delta=1.81/1.09=1.66\)</span> →事後0.34。
+が補正を運ぶ</strong>からです。 比較：温度計1本（点1、 <span class="math inline">\(r_T=0.09\)</span> ）だと <span class="math inline">\(\Delta=1.81/1.09=1.66\)</span> →事後0.34。
 この条件では<strong>変位1本の方が温度計1本より温度を良くします</strong>（変位は複数点の誤差をまとめて見るため）。</p>
-<p><strong>⑥ EnKFでは</strong>この <span
-class="math inline">\(Bw=\mathrm{Cov}(T,u)\)</span>
+<p><strong>⑥ EnKFでは</strong>この <span class="math inline">\(Bw=\mathrm{Cov}(T,u)\)</span>
 を分身たちが自動で作ります （ <span class="math inline">\(T\)</span>
 が高い分身は <span class="math inline">\(u\)</span>
 も大きい→標本共分散に現れる）。</p>
 <blockquote>
-<p><strong>まとめ：変位観測が温度を直す3条件</strong> ① <span
-class="math inline">\(w\)</span> が大きく、誤差の型 <span
-class="math inline">\(\varphi\)</span>
+<p><strong>まとめ：変位観測が温度を直す3条件</strong> ① <span class="math inline">\(w\)</span> が大きく、誤差の型 <span class="math inline">\(\varphi\)</span>
 と揃う点で測る（高Wは候補選定の目安であり、方向の整合も必要） ②
 温度誤差が空間相関を持つ（ここでは低次元の型を仮定。温度スナップショットのPOD寄与率だけでは、予報誤差の共分散まで同じ型とは証明できません）
 ③ 観測ノイズが信号より小さい（ <span class="math inline">\(r\lt
 g^2\sigma_a^2\)</span> ）</p>
 </blockquote>
-<h3 id="3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span
-class="math inline">\(Q\)</span>
+<h3 id="3-8--q-が同定できる周辺化積分の正体">3-8. 「 <span class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</h3>
 <p><span class="math inline">\(Q\)</span> の更新だけ取り出すと、ゲインの
 <span class="math inline">\(Q\)</span> 行を使って</p>
 <p><span class="math display">\[Q^a=Q^b+K_{Q,:}\,(y-Hx^b).\]</span></p>
 <p>線形観測・ガウス事前分布・独立なガウス観測誤差を仮定すると、これは確率の言葉では、同時分布
 <span class="math inline">\(p(T,Q\mid y)\)</span> から温度を
-<strong>積分して消す（周辺化）</strong> した後の <span
-class="math inline">\(Q\)</span> の事後平均そのものです:</p>
+<strong>積分して消す（周辺化）</strong> した後の <span class="math inline">\(Q\)</span> の事後平均そのものです:</p>
 <p><span class="math display">\[p(Q\mid y)=\int p(T,Q\mid y)\,dT,\qquad
 \mathbb E[Q\mid y]=\underbrace{\mathbb E[Q]}_{Q^b}
-+\underbrace{\mathrm{Cov}(Q,y)\,\mathrm{Cov}(y,y)^{-1}}_{=\,K_{Q,:}}\bigl(y-\mathbb
-E[y]\bigr).\]</span></p>
-<p>つまり <strong>「周辺化の積分」＝「カルマン更新の <span
-class="math inline">\(Q\)</span> の行」</strong>。そして <span
-class="math inline">\(Q\)</span> と観測の共分散は</p>
++\underbrace{B_{Q,:}H^{\mathsf T}(HBH^{\mathsf
+T}+R)^{-1}}_{=\,K_{Q,:}}\bigl(y-\mathbb E[y]\bigr).\]</span></p>
+<p>この式の <span class="math inline">\(y\)</span>
+はノイズを含む観測値です。線形・ガウス仮定のもとで、<strong>周辺事後分布の平均を、カルマン更新のQ行として解析的に計算できます</strong>。コードで温度に関する数値積分を実行しているわけではなく、周辺化と状態更新を同じ操作として定義しているわけでもありません。そして
+<span class="math inline">\(Q\)</span> と観測の共分散は</p>
 <p><span class="math display">\[\mathrm{Cov}(Q,y)=B_{Q,:}\,H^{\mathsf
 T}=\sigma_Q^2\,(s_1,\ s_2,\ 1)\,H^{\mathsf T}\]</span></p>
 <p>で、温度観測なら <span class="math inline">\(\sigma_Q^2 s_1\)</span>
@@ -884,14 +747,12 @@ T}=\sigma_Q^2\,(s_1,\ s_2,\ 1)\,H^{\mathsf T}\]</span></p>
 。 <strong><span class="math inline">\(Q\)</span> が観測から動く条件は
 <span class="math inline">\(\mathrm{Cov}(Q,y)\neq0\)</span> 、すなわち「
 <span class="math inline">\(Q\)</span>
-を変えると観測が変わる」こと</strong>です。 温度も変位も <span
-class="math inline">\(Q\)</span> で変わるので、両方が <span
-class="math inline">\(Q\)</span> の同定に効きます。</p>
+を変えると観測が変わる」こと</strong>です。 温度も変位も <span class="math inline">\(Q\)</span> で変わるので、両方が <span class="math inline">\(Q\)</span> の同定に効きます。</p>
 <p><strong>3つの入り方まとめ</strong>：</p>
 <table>
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -902,22 +763,16 @@ class="math inline">\(Q\)</span> の同定に効きます。</p>
 <tbody>
 <tr class="odd">
 <td><strong>温度をデータ同化</strong></td>
-<td><span class="math inline">\(H\)</span> が温度成分を取り出す（ <span
-class="math inline">\(H=(1,0,0)\)</span> ）。</td>
+<td><span class="math inline">\(H\)</span> が温度成分を取り出す（ <span class="math inline">\(H=(1,0,0)\)</span> ）。</td>
 </tr>
 <tr class="even">
 <td><strong>変位をデータ同化</strong></td>
 <td><span class="math inline">\(H\)</span> が <strong>温度→変位の感度
-<span class="math inline">\(w\)</span></strong> になる（ <span
-class="math inline">\(H_u=(w_1,w_2,0)\)</span> ）。</td>
+<span class="math inline">\(w\)</span></strong> になる（ <span class="math inline">\(H_u=(w_1,w_2,0)\)</span> ）。</td>
 </tr>
 <tr class="odd">
 <td><strong><span class="math inline">\(Q\)</span> を同定</strong></td>
-<td><span class="math inline">\(B\)</span> の <strong>温度と <span
-class="math inline">\(Q\)</span> の相関 <span
-class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span></strong> が <span
-class="math inline">\(\mathrm{Cov}(Q,y)\)</span> を生み、観測が <span
-class="math inline">\(Q\)</span> を動かす（＝周辺化）。</td>
+<td><span class="math inline">\(B\)</span> の <strong>温度と <span class="math inline">\(Q\)</span> の相関 <span class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span></strong> が <span class="math inline">\(\mathrm{Cov}(Q,y)\)</span> を生み、観測が <span class="math inline">\(Q\)</span> を動かす（＝周辺化）。</td>
 </tr>
 </tbody>
 </table>
@@ -926,13 +781,11 @@ class="math inline">\(Q\)</span> を動かす（＝周辺化）。</td>
 （何が連動するか）</strong> に落ちます。本物の 20,697 次元
 （温度20,696セル＋ <span class="math inline">\(Q\)</span>
 ）でも、行列が大きいだけで、やっている計算はこの3×3と同じです。
-ただし決め打ち <span class="math inline">\(B\)</span> の <span
-class="math inline">\(\sigma_Q\)</span> で <span
-class="math inline">\(Q\)</span>
+ただし決め打ち <span class="math inline">\(B\)</span> の <span class="math inline">\(\sigma_Q\)</span> で <span class="math inline">\(Q\)</span>
 の伸び幅が決まるため、<strong>1回では真値まで届かない</strong>
 （60秒ごとに何度も更新）。この決め打ちの弱さを分身の散らばりで作り直すのが
 EnKF（blog_003）です。</p>
-<hr />
+<hr/>
 <h2 id="4-どこを測ると効くか--熱感度-w-の分布で観測点を選ぶ">4.
 どこを測ると効くか ― 熱感度 <span class="math inline">\(W\)</span>
 の分布で観測点を選ぶ</h2>
@@ -941,34 +794,25 @@ EnKF（blog_003）です。</p>
 <strong>変位センサ</strong>をどこに置くかは、FrontISTR で求めた
 <strong>熱感度 <span class="math inline">\(W\)</span></strong>
 の<strong>分布</strong>で決めます。</p>
-<h3 id="4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span
-class="math inline">\(W=K_s^{-1}H_T\)</span> とは</h3>
+<h3 id="4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span> とは</h3>
 <p>温度節点ベクトルを <span class="math inline">\(T\)</span>
 、基準温度との差を <span class="math inline">\(\Delta T=T-T_{\rm
-ref}\mathbf1\)</span> 、熱荷重行列を <span
-class="math inline">\(H_T\)</span> 、構造剛性行列を <span
-class="math inline">\(K_s\)</span> とすると、線形熱弾性では</p>
+ref}\mathbf1\)</span> 、熱荷重行列を <span class="math inline">\(H_T\)</span> 、構造剛性行列を <span class="math inline">\(K_s\)</span> とすると、線形熱弾性では</p>
 <p><span class="math display">\[K_s u=H_T\Delta T,\qquad
 W=\frac{\partial u}{\partial T}=K_s^{-1}H_T.\]</span></p>
-<p><span class="math inline">\(W_{ij}\)</span> は「温度節点 <span
-class="math inline">\(j\)</span> を1 K変えたとき、変位自由度 <span
-class="math inline">\(i\)</span> がどれだけ変わるか（m/K）」です。
+<p><span class="math inline">\(W_{ij}\)</span> は「温度節点 <span class="math inline">\(j\)</span> を1 K変えたとき、変位自由度 <span class="math inline">\(i\)</span> がどれだけ変わるか（m/K）」です。
 変位観測点 <span class="math inline">\(i\)</span>
-の候補を選ぶときは、その行の大きさ <span
-class="math inline">\(S_i=\sum_j \lvert W_{ij}\rvert\)</span>
+の候補を選ぶときは、その行の大きさ <span class="math inline">\(S_i=\sum_j \lvert W_{ij}\rvert\)</span>
 を比べます。 <span class="math inline">\(S_i\)</span>
 が大きい場所ほど、<strong>温度変化に大きく応答し得る候補</strong>です。ただし実際の誤差の空間分布と観測ノイズも考慮する必要があります。</p>
 <h3 id="4-2-感度の分布図">4-2. 感度の分布（図）</h3>
 <p>この <span class="math inline">\(W\)</span>
 の行感度を円筒上に色で描くと、<strong>どこが高感度か</strong>が一目で分かります。</p>
 <figure>
-<img src="img/frontistr_sensitivity.png"
-alt="FrontISTRで求めた熱感度Wの分布と変位観測点A/O" />
-<figcaption
-aria-hidden="true">FrontISTRで求めた熱感度Wの分布と変位観測点A/O</figcaption>
+<img alt="FrontISTRで求めた熱感度Wの分布と変位観測点A/O" src="img/frontistr_sensitivity.png"/>
+<figcaption aria-hidden="true">FrontISTRで求めた熱感度Wの分布と変位観測点A/O</figcaption>
 </figure>
-<p><em>105のFrontISTR（DUMPWパッチ版）が計算した <span
-class="math inline">\(W\)</span>
+<p><em>105のFrontISTR（DUMPWパッチ版）が計算した <span class="math inline">\(W\)</span>
 の変位行感度を色で表示（灰色は拘束などで除外した点）。
 <strong>底面固定・上端自由なので、上端（自由端）ほど熱感度が高い</strong>。
 赤球＝変位観測点 A(+X上面)・青球＝O(−X上面)
@@ -986,11 +830,8 @@ class="math inline">\(W\)</span>
 <ol type="1">
 <li><code>105…/run/dumpw_cylinder.py</code> が FrontISTR で
 <code>DUMPW=YES</code> を指定し、温度→変位感度を出力。</li>
-<li><code>105…/run/build_W_from_dumps.py</code> が <span
-class="math inline">\(K_s,H_T\)</span> のダンプから <span
-class="math inline">\(W=K_s^{-1}H_T\)</span> を構築。</li>
-<li><code>105…/run/kinvh_sensitivity.py</code> が行感度 <span
-class="math inline">\(S_i\)</span>
+<li><code>105…/run/build_W_from_dumps.py</code> が <span class="math inline">\(K_s,H_T\)</span> のダンプから <span class="math inline">\(W=K_s^{-1}H_T\)</span> を構築。</li>
+<li><code>105…/run/kinvh_sensitivity.py</code> が行感度 <span class="math inline">\(S_i\)</span>
 を計算し、拘束部の見かけの巨大値を除外して高感度2点・低感度2点を選ぶ。</li>
 <li>106の <code>run/run_disp_selection.py</code>
 が、温度点に高感度／低感度の変位2点を加えて比較。</li>
@@ -998,22 +839,17 @@ class="math inline">\(S_i\)</span>
 <blockquote>
 <p>補足：ここで選んでいるのは<strong>変位センサ</strong>の置き場所です。<strong>温度センサ</strong>の置き場所は、
 <span class="math inline">\(W\)</span>
-の大きい点に置けばよいわけではありません。 <span
-class="math inline">\(W\)</span>
-と温度のばらつきを組み合わせて選びます（<a
-href="blog005.html">blog_005 §4-6</a>）。</p>
+の大きい点に置けばよいわけではありません。 <span class="math inline">\(W\)</span>
+と温度のばらつきを組み合わせて選びます（<a href="blog005.html">blog_005 §4-6</a>）。</p>
 </blockquote>
-<hr />
+<hr/>
 <h2 id="5-感度が低い点で測るとどうなるかoi-で確かめる失敗例">5.
 感度が低い点で測るとどうなるか（OI で確かめる失敗例）</h2>
-<p>第4節で選んだ観測点を、実際に <strong>OI（固定 <span
-class="math inline">\(B\)</span> ）</strong> で回して確かめます。まず
+<p>第4節で選んだ観測点を、実際に <strong>OI（固定 <span class="math inline">\(B\)</span> ）</strong> で回して確かめます。まず
 <strong>観測点の場所</strong>（3D）:</p>
 <figure>
-<img src="img/blog_oi_obs_locations.png"
-alt="OIの観測点の位置：温度P2＋高W/低W変位＋A/O" />
-<figcaption
-aria-hidden="true">OIの観測点の位置：温度P2＋高W/低W変位＋A/O</figcaption>
+<img alt="OIの観測点の位置：温度P2＋高W/低W変位＋A/O" src="img/blog_oi_obs_locations.png"/>
+<figcaption aria-hidden="true">OIの観測点の位置：温度P2＋高W/低W変位＋A/O</figcaption>
 </figure>
 <p><em>黒＝温度センサ
 P2（ヒータ側・中央高さ）、赤＝<strong>高W変位2点（上端の自由端）</strong>、青＝<strong>低W変位2点（底面近くの拘束側）</strong>、緑＝A/O（上面）。
@@ -1025,8 +861,7 @@ P2（ヒータ側・中央高さ）、赤＝<strong>高W変位2点（上端の�
 <li><strong>＋低W変位2点</strong>：温度P2 ＋ 低感度の変位2点。</li>
 <li><strong>＋高W変位2点</strong>：温度P2 ＋ 高感度の変位2点。</li>
 </ul>
-<p>同じ真値・初期条件で <strong>OI（106の5点温度ROM、背景共分散 <span
-class="math inline">\(B\)</span> を固定）</strong>
+<p>同じ真値・初期条件で <strong>OI（106の5点温度ROM、背景共分散 <span class="math inline">\(B\)</span> を固定）</strong>
 で回し、温度と変位を比べました（5seed平均）。</p>
 <p><strong>ここでの計算条件とBの出典</strong>：<code>run/blog_oi_disp_selection.py</code>。状態は5温度＋発熱倍率q＋h、Q=15q
 W。
@@ -1042,41 +877,34 @@ W。
 \]</span></p>
 <p>時間方向もまとめて二乗平均してから平方根を取るRMSEとは異なります。</p>
 <p><strong>まず「実際の値」の時系列</strong>で追従の様子を見ます。左は<strong>観測に使っていない点
-P1 の温度</strong>、右は<strong>変位差</strong> <span
-class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
+P1 の温度</strong>、右は<strong>変位差</strong> <span class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
 です（どちらも黒太線＝真値）。</p>
 <figure>
-<img src="img/blog_oi_timeseries.png"
-alt="OIの温度・変位の時系列（実値）" />
-<figcaption
-aria-hidden="true">OIの温度・変位の時系列（実値）</figcaption>
+<img alt="OIの温度・変位の時系列（実値）" src="img/blog_oi_timeseries.png"/>
+<figcaption aria-hidden="true">OIの温度・変位の時系列（実値）</figcaption>
 </figure>
 <p><em>赤（データ同化なし）は加熱で真値からどんどん離れ、P1温度は真値25°Cに対し31°Cまで暴走。
 温度P2でデータ同化する（灰）と真値へ引き戻され、<strong>高W変位2点を足す（青）と未観測点P1でも真値に最も寄り、変位も真値に追従</strong>します。
 「観測していない場所」まで直るのが、感度の高い点でデータ同化することの効果です。</em></p>
 <p>次に、同じ結果を<strong>誤差（RMSE）と変位差</strong>でまとめたのが下の図です。</p>
 <figure>
-<img src="img/blog_oi_disp_selection.png"
-alt="OIで高W／低W変位点を比べた温度と変位" />
-<figcaption
-aria-hidden="true">OIで高W／低W変位点を比べた温度と変位</figcaption>
+<img alt="OIで高W／低W変位点を比べた温度と変位" src="img/blog_oi_disp_selection.png"/>
+<figcaption aria-hidden="true">OIで高W／低W変位点を比べた温度と変位</figcaption>
 </figure>
 <p><em>これは
-<strong>OI（最適内挿）によるデータ同化の結果</strong>（固定 <span
-class="math inline">\(B\)</span> ・ROM）。
+<strong>OI（最適内挿）によるデータ同化の結果</strong>（固定 <span class="math inline">\(B\)</span> ・ROM）。
 <strong>左＝温度の推定誤差</strong>（全5点RMSE）、<strong>右＝変位差
 <span class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
 の時刻歴</strong>（黒＝真値）。
 <strong>赤（データ同化なし）は補正されないので真値から最も外れたまま</strong>。温度P2でデータ同化すると灰へ改善し、
 <strong>高W（青）は温度も変位も真値に最も近い</strong>。低W（橙）・温度のみ（灰）は温度がなかなか下がらず、
-<strong>変位に至っては真値から大きく外れる</strong>（変位は <span
-class="math inline">\(W\)</span>
+<strong>変位に至っては真値から大きく外れる</strong>（変位は <span class="math inline">\(W\)</span>
 が温度誤差を増幅するため、悪い温度だと特に外れる）。</em></p>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1114,47 +942,40 @@ class="math inline">\(W\)</span>
 （感度 <span class="math inline">\(W\)</span>
 自体は105のFrontISTR計算由来。再現は
 <code>run/blog_oi_disp_selection.py</code>。EnKF版でも同じ傾向です。）</p>
-<hr />
+<hr/>
 <h2 id="6-実モデル104実ソルバで回した比較">6.
 実モデル（104実ソルバ）で回した比較</h2>
 <p>ここまでは考え方の理解でした。ここからは
 <strong>104のOpenFOAM＋FrontISTR実ソルバ</strong>で回した結果です
 （106のROMではなく、実ソルバの結果を106の全体ストーリーに追加したもの）。連成の流れ:</p>
 <pre class="mermaid"><code>flowchart LR
-    A[&quot;OpenFOAM CHT&lt;br/&gt;固体20,696セルの温度&quot;] --&gt; B[&quot;セル温度をFEM節点へ補間&quot;]
-    B --&gt; C[&quot;FrontISTR熱弾性解析&lt;br/&gt;温度上昇 → 熱変位&quot;]
-    C --&gt; D[&quot;A/O変位・A−O差&lt;br/&gt;未観測C/D・C−D差&quot;]
-    D --&gt; E[&quot;OIで温度とQを補正&lt;br/&gt;次の60秒計算へ&quot;]
+    A["OpenFOAM CHT&lt;br/&gt;固体20,696セルの温度"] --&gt; B["セル温度をFEM節点へ補間"]
+    B --&gt; C["FrontISTR熱弾性解析&lt;br/&gt;温度上昇 → 熱変位"]
+    C --&gt; D["A/O変位・A−O差&lt;br/&gt;未観測C/D・C−D差"]
+    D --&gt; E["OIで温度とQを補正&lt;br/&gt;次の60秒計算へ"]
     E --&gt; A</code></pre>
 <p><strong>下の結果グラフがどの点の値かを先に示します</strong>（σQ・σTスタディ共通の観測点・評価点）:</p>
 <figure>
-<img src="img/blog_oi_sigmastudy_locations.png"
-alt="σQ/σTスタディの観測点・評価点の位置（3D）" />
-<figcaption
-aria-hidden="true">σQ/σTスタディの観測点・評価点の位置（3D）</figcaption>
+<img alt="σQ/σTスタディの観測点・評価点の位置（3D）" src="img/blog_oi_sigmastudy_locations.png"/>
+<figcaption aria-hidden="true">σQ/σTスタディの観測点・評価点の位置（3D）</figcaption>
 </figure>
 <p><em>円筒上の観測点・評価点。<strong>赤＝T1=hot／T2=cold（観測に使う温度2点、中央高さ）</strong>、<strong>緑＝A/O（観測に使う上面変位）</strong>。
 <strong>橙＝T3/T4（観測に使わない未観測の温度点）</strong>、<strong>青＝C/D（観測に使わない未観測の変位、中高さ
 z=75 mm）</strong>。
 C−D差は「データ同化に使っていない別の変位差」で、<strong>データ同化がその未観測点まで当たるか（汎化）</strong>を見る評価量です。
-（A/Oは実際には上面の +X/−X 節点列の平均。側面投影版は <a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a> の
+（A/Oは実際には上面の +X/−X 節点列の平均。側面投影版は <a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a> の
 <code>oi_evaluation_locations.png</code> 参照。）</em></p>
 <h3 id="6-1-σqスタディ発熱の背景分散を変える">6-1.
 σQスタディ：発熱の背景分散を変える</h3>
-<p>背景発熱量の標準偏差を <span
-class="math inline">\(\sigma_Q=0.5,2,6,50\)</span> Wと変え、 <span
-class="math inline">\(\sigma_T=1.5\)</span>
+<p>背景発熱量の標準偏差を <span class="math inline">\(\sigma_Q=0.5,2,6,50\)</span> Wと変え、 <span class="math inline">\(\sigma_T=1.5\)</span>
 K・観測点・初期値・60秒更新を揃えて比較しました。 温度は hot/cold
 と未観測点、変位は上面A/Oとその差、さらに未観測中高さC/DとC−D差を評価しています。</p>
 <figure>
-<img src="img/oi_fullsolver_compare.png"
-alt="実ソルバOI：σQ 4条件の温度・変位・変位差" />
+<img alt="実ソルバOI：σQ 4条件の温度・変位・変位差" src="img/oi_fullsolver_compare.png"/>
 <figcaption aria-hidden="true">実ソルバOI：σQ
 4条件の温度・変位・変位差</figcaption>
 </figure>
-<p>最終の温度場RMSEは 0.090〜0.113 K まで小さくなる一方、推定 <span
-class="math inline">\(Q\)</span> は 8.82〜8.96 W で、真値15
+<p>最終の温度場RMSEは 0.090〜0.113 K まで小さくなる一方、推定 <span class="math inline">\(Q\)</span> は 8.82〜8.96 W で、真値15
 Wに届きませんでした。 つまり、<strong>温度分布がよく合っても、発熱量
 <span class="math inline">\(Q\)</span>
 が同じ精度で同定できるとは限らない</strong>（弱可同定）。 今回試した
@@ -1162,33 +983,29 @@ Wに届きませんでした。 つまり、<strong>温度分布がよく合っ�
 の範囲ではQの改善は小さく、固定した感度・観測配置を含めた設計の見直しが必要です。OI一般の限界とまでは言えません。</p>
 <h3 id="6-2-σtスタディ温度誤差の大きさを変える">6-2.
 σTスタディ：温度誤差の大きさを変える</h3>
-<p>背景温度の標準偏差 <span
-class="math inline">\(\sigma_T=0.3,0.75,1.237,1.5\)</span> K
+<p>背景温度の標準偏差 <span class="math inline">\(\sigma_T=0.3,0.75,1.237,1.5\)</span> K
 を実ソルバで比較しました （1.237 Kは、長さ75
-mmの温度誤差モードを60秒拡散させた残り <span
-class="math inline">\(5\exp[-\alpha(\pi/0.075)^2\,60]=1.237\)</span> K
+mmの温度誤差モードを60秒拡散させた残り <span class="math inline">\(5\exp[-\alpha(\pi/0.075)^2\,60]=1.237\)</span> K
 という試算値）。</p>
 <figure>
-<img src="img/oi_sigma_t_full_4cases.png"
-alt="実ソルバOI：σT 4条件の温度・変位・変位差" />
+<img alt="実ソルバOI：σT 4条件の温度・変位・変位差" src="img/oi_sigma_t_full_4cases.png"/>
 <figcaption aria-hidden="true">実ソルバOI：σT
 4条件の温度・変位・変位差</figcaption>
 </figure>
 <p>加熱期の全場温度RMSEは 0.479〜0.482 K、未観測C−D変位差RMSEは
 1.188〜1.192 µm と、<strong>σTを動かしてもほぼ不変</strong>でした。
-この固定共分散・固定感度のOIでは、σTだけで温度場・変位差・ <span
-class="math inline">\(Q\)</span> を同時に真値へ合わせることはできません
+この固定共分散・固定感度のOIでは、σTだけで温度場・変位差・ <span class="math inline">\(Q\)</span> を同時に真値へ合わせることはできません
 （OI一般の限界ではなく、今回の観測配置と共分散近似に対する結論）。詳細は
 <a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/18_oi_sigma_t_validation.md">18_oi_sigma_t_validation.md</a>
 参照。</p>
-<hr />
+<hr/>
 <h2 id="7-104と106で何が同じで何が違うか">7.
 104と106で何が同じで、何が違うか</h2>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
 </colgroup>
 <thead>
 <tr class="header">
@@ -1224,41 +1041,29 @@ class="math inline">\(Q\)</span> を同時に真値へ合わせることはで�
 §5では200サンプルを<strong>Bの初期化だけ</strong>に使い、毎サイクル200本の予報をするわけではありません。
 今回の104ではBの調整だけでQは真値へ届きませんでしたが、これはOI一般の不可能性を意味しません。
 次回は予報メンバーから毎回共分散を作るEnKFを説明します。EnKFでも観測情報が乏しければ同定は難しくなります。</p>
-<hr />
+<hr/>
 <h2 id="8-まとめ--第2回で押さえたこと">8. まとめ ―
 第2回で押さえたこと</h2>
 <ol type="1">
-<li><strong>OIは更新式1本</strong>： <span
-class="math inline">\(x^a=x^b+K(y-Hx^b)\)</span> 、 <span
-class="math inline">\(K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1}\)</span>
+<li><strong>OIは更新式1本</strong>： <span class="math inline">\(x^a=x^b+K(y-Hx^b)\)</span> 、 <span class="math inline">\(K=BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1}\)</span>
 。</li>
 <li>3点の手計算で、<strong>固定 <span class="math inline">\(B\)</span>
 の相関が1点の観測を未観測点まで広げる</strong>のを確認した。</li>
 <li><strong>温度・変位・ <span class="math inline">\(Q\)</span>
-は同じ更新式の <span class="math inline">\(H\)</span> と <span
-class="math inline">\(B\)</span> に入る</strong>（§3-5〜3-8）。温度は
-<span class="math inline">\(H\)</span> が成分抽出、変位は <span
-class="math inline">\(H\)</span> が感度 <span
-class="math inline">\(w\)</span> 、 <span
-class="math inline">\(Q\)</span> 同定は <span
-class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span>
+は同じ更新式の <span class="math inline">\(H\)</span> と <span class="math inline">\(B\)</span> に入る</strong>（§3-5〜3-8）。温度は
+<span class="math inline">\(H\)</span> が成分抽出、変位は <span class="math inline">\(H\)</span> が感度 <span class="math inline">\(w\)</span> 、 <span class="math inline">\(Q\)</span> 同定は <span class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span>
 の相関。すべて文字式で追える。</li>
-<li><strong>観測点は感度の分布で選ぶ</strong>。変位は熱感度 <span
-class="math inline">\(W\)</span> の高い上端、温度は <span
-class="math inline">\(\partial T/\partial Q\)</span>
-の高い点。今回の条件では高W変位観測の方が改善が大きかった。</li>
-<li>実ソルバの σQ/σT スタディでは、<strong>温度場は合うが <span
-class="math inline">\(Q\)</span> は弱可同定</strong>で、決め打ち <span
-class="math inline">\(B\)</span>
+<li><strong>感度の分布は観測候補を選ぶ手掛かり</strong>です。感度の大きさだけで最適配置は決まりません。観測ノイズ、温度の共分散、推定対象、複数点の情報の重複も考慮します。条件付きで感度から最適性を示す方法は
+<a href="blog005.html">blog_005 §1-2</a>
+で導出します。</li>
+<li>実ソルバの σQ/σT スタディでは、<strong>温度場は合うが <span class="math inline">\(Q\)</span> は弱可同定</strong>で、決め打ち <span class="math inline">\(B\)</span>
 の調整では届かない、という限界も見えた。</li>
 </ol>
 <p>次回（blog_003）は
-<strong>アンサンブルカルマンフィルタ（EnKF）</strong>。 「 <span
-class="math inline">\(B\)</span>
-を決め打ちしない」で、<strong>多数の分身の散らばりから <span
-class="math inline">\(B\)</span> を毎サイクル作り直す</strong>やり方を、
+<strong>アンサンブルカルマンフィルタ（EnKF）</strong>。 「 <span class="math inline">\(B\)</span>
+を決め打ちしない」で、<strong>多数の分身の散らばりから <span class="math inline">\(B\)</span> を毎サイクル作り直す</strong>やり方を、
 やはり <strong>節点を減らした具体的な手計算</strong>で見ていきます。</p>
-<hr />
+<hr/>
 <h3 id="参考元になった実装詳細">参考（元になった実装・詳細）</h3>
 <ul>
 <li>EnKF
@@ -1267,8 +1072,7 @@ class="math inline">\(B\)</span> を毎サイクル作り直す</strong>やり�
 <li>σTスタディの詳細：<code>18_oi_sigma_t_validation.md</code></li>
 <li>全ストーリー：<code>blog_004_pod_selected_rom.md</code></li>
 </ul>
-<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
+<p>研究として何を主張できるか、先行研究の確認範囲と優先する追加検証は <a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">研究の優位性と検証計画</a>
 を参照してください。ROM双子実験の精度と独立したOpenFOAM＋FrontISTR真値・実測での精度を区別しています。</p>
 </body>
 </html>
