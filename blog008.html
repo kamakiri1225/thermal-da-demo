@@ -205,6 +205,10 @@ POD でモード分解</a></li>
 温度1点＋変位2点でもデータ同化でき、精度が上がる</a></li>
 <li><a href="#0-9-何を推定したいかで適切なセンサ位置は変わる" id="toc-0-9-何を推定したいかで適切なセンサ位置は変わる">0-9.
 何を推定したいかで、適切なセンサ位置は変わる</a></li>
+<li><a href="#0-10-発表の結論どのセンサ配置が良くなぜ良かったのか" id="toc-0-10-発表の結論どのセンサ配置が良くなぜ良かったのか">0-10.
+発表の結論：どのセンサ配置が良く、なぜ良かったのか</a></li>
+<li><a href="#0-11-ブログ全体の結果で確かめる--3つの問いへの答え" id="toc-0-11-ブログ全体の結果で確かめる--3つの問いへの答え">0-11.
+ブログ全体の結果で確かめる ― 3つの問いへの答え</a></li>
 </ul></li>
 <li><a href="#1-主張したいこと" id="toc-1-主張したいこと">1.
 主張したいこと</a></li>
@@ -587,6 +591,18 @@ A最適 0.090・D最適 0.108 µm）。ただし差は 15〜20 %（§7）。</p>
 <td>推定したい量のあいまいさ σ を、熱感度 <span class="math inline">\(W\)</span> とばらつきから測る前に計算して選ぶ</td>
 <td><a href="#5-検証2別の場所の変位で測っていない-ao-を当てられるか">§5・§7</a>、<a href="blog005.html">blog_005</a></td>
 </tr>
+<tr class="even">
+<td>0-10</td>
+<td>発表の結論：どのセンサ配置が良く、なぜ良かったのか</td>
+<td>温度計はヒータ側と反対側、変位計は上面の S1・S2。 <span class="math inline">\(W\)</span> と温度のばらつきから配置を選ぶ</td>
+<td>本節</td>
+</tr>
+<tr class="odd">
+<td>0-11</td>
+<td>ブログ全体の結果で確かめる</td>
+<td>未観測点も合う。悪い置き方（底面・同じことを2回測る）。 <span class="math inline">\(W\)</span> だけでは決まらず、 <span class="math inline">\(\sigma\)</span> で順位が当たる</td>
+<td>本節</td>
+</tr>
 </tbody>
 </table>
 <p>真値はすべて計算（ROM の双子実験、または
@@ -624,15 +640,15 @@ EnKF（アンサンブルカルマンフィルタ）を実ソルバで試しま�
 <tbody>
 <tr class="odd">
 <td>OI</td>
-<td>温度場は 0.09 K まで合う</td>
-<td>予報の共分散を固定するので、<strong>発熱量が 8.9 W
-止まり</strong>（正解 15 W）</td>
+<td>最終温度場RMSEは約 0.09 K</td>
+<td>今回の固定共分散・観測条件では、<strong>発熱量が約 8.9
+W</strong>（正解 15
+W）。共分散の調整だけでは改善しなかったが、OI一般の限界を証明した結果ではない</td>
 </tr>
 <tr class="even">
 <td>EnKF</td>
-<td>発熱量も当たる</td>
-<td>メンバー（50〜200
-個）ごとに実ソルバを回すので、<strong>1回のデータ同化に数時間〜数日</strong></td>
+<td>104では最終発熱量が約 14.93 W（正解 15 W）</td>
+<td><strong>5メンバー・60秒ごと10更新</strong>でも、600秒間の現象を扱う一連の計算に<strong>約13時間</strong>かかった。1回の更新の時間ではない</td>
 </tr>
 </tbody>
 </table>
@@ -721,8 +737,9 @@ P2 は合っていても、反対側の温度が分からないためです。</
 温度1点＋変位2点でもデータ同化でき、精度が上がる</h3>
 <p><strong>何をしたか</strong>：温度計1本（P2）に、上面の変位計2本（S1・S2。§5
 で選んだ点）を足してデータ同化しました。比較として、温度計2本（P2・P4）の場合も回しました。真値は
-OpenFOAM＋FrontISTR、5 seed 平均、加熱期 30〜300 秒（
-<code>run/temp1_disp2.py</code> ）。</p>
+OpenFOAM＋FrontISTR、5 seed 平均、評価時刻は 30, 60, …, 300 秒（
+<code>run/temp1_disp2.py</code> ）。S1は上面の <span class="math inline">\((x,y)\simeq(9.7,-36.2)\)</span> mm の <span class="math inline">\(U_x\)</span> 、S2は <span class="math inline">\((-34.6,14.4)\)</span> mm の <span class="math inline">\(U_z\)</span> です。<strong>2点とも <span class="math inline">\(U_z\)</span>
+を測る構成ではありません</strong>。</p>
 <figure>
 <img alt="温度1点＋変位2点" src="img/temp1_disp2.png"/>
 <figcaption aria-hidden="true">温度1点＋変位2点</figcaption>
@@ -769,7 +786,22 @@ OpenFOAM＋FrontISTR、5 seed 平均、加熱期 30〜300 秒（
 </tr>
 </tbody>
 </table>
-<p>（間欠加熱は、ヒータの ON/OFF を ROM に与えた場合）</p>
+<p>（間欠加熱は、ヒータの ON/OFF を ROM
+に与えた場合。0〜150秒と300〜450秒がONなので、この表の30〜300秒には冷却区間も含まれます。QはON時の発熱量パラメータで、OFF時の瞬間の発熱量とは区別します。）</p>
+<p><strong>表の誤差の計算方法</strong>：温度は各時刻で全セルのRMSEを計算してから時間平均、反りは絶対誤差の時間平均（MAE）です。反りの値をRMSEと呼ばないようにします。</p>
+<p><span class="math display">\[
+E_T^{(s)}=\frac{1}{10}\sum_{k=1}^{10}\sqrt{\frac{1}{20696}\sum_{i=1}^{20696}\left(\widehat
+T_i^{(s)}(30k)-T_i^{\mathrm{true}}(30k)\right)^2}
+\]</span></p>
+<p><span class="math display">\[
+E_{A-O}^{(s)}=\frac{1}{10}\sum_{k=1}^{10}\left|\widehat
+d^{(s)}(30k)-d^{\mathrm{true}}(30k)\right|,
+\qquad d=U_z(A)-U_z(O)
+\]</span></p>
+<p><span class="math inline">\(s\)</span> は5個の乱数seedの番号、 <span class="math inline">\(i\)</span> はセル番号、 <span class="math inline">\(k\)</span> は評価時刻の番号、 <span class="math inline">\(\widehat T\)</span> ・ <span class="math inline">\(\widehat d\)</span>
+は同化後60メンバー平均から求めた推定値です。表はさらに <span class="math inline">\(\frac{1}{5}\sum_{s=1}^{5}E^{(s)}\)</span>
+を載せています。A・Oの変位は観測に使っていません。発熱量の列は時間平均ではなく、<strong>300秒の更新後のQ推定値の5
+seed平均</strong>です。</p>
 <p><strong>分かったこと</strong></p>
 <ul>
 <li><strong>温度1点に変位2点を足すと、温度場の誤差は約
@@ -781,14 +813,65 @@ OpenFOAM＋FrontISTR、5 seed 平均、加熱期 30〜300 秒（
 <h3 id="0-9-何を推定したいかで適切なセンサ位置は変わる">0-9.
 何を推定したいかで、適切なセンサ位置は変わる</h3>
 <p><strong>問い</strong>：「〇〇に対する△△の感度」から、測る前にセンサ位置を決められないか。</p>
-<p><strong>この研究での答え</strong>：〇〇＝<strong>推定したい量</strong>（反り
-A−O、温度場全体、発熱量など）、△△＝<strong>センサの読み</strong>です。
-推定したい量とセンサの読みは、どちらも「5点の温度に、FrontISTR の熱感度
-<span class="math inline">\(W\)</span> （温度 1 K あたり何 µm 動くか）や
-POD の重みを掛けて足したもの」で書けます。
+<p><strong>この研究で確認した答え</strong>：反り A−O
+の配置設計には、温度から反りへの感度と、温度からセンサの読みへの感度を使います。どちらも5点温度の線形写像で表せます。ここで使う5点温度の重みは、FrontISTRの熱弾性応答にPOD復元を組み合わせたものです。</p>
+<p><strong>ただし発熱量Qは、温度に重みを掛けるだけの出力ではありません。</strong>
+Qや放熱コンダクタンス <span class="math inline">\(h_{\mathrm{ROM}}\)</span>
+の配置設計には、熱モデルを微分した <span class="math inline">\(\partial
+T/\partial Q\)</span> 、 <span class="math inline">\(\partial T/\partial
+h_{\mathrm{ROM}}\)</span>
+と、必要に応じて変位への写像を使います。この反りの配置試験だけでQ/hの最適配置まで実証したとは言えません。
 そこで、<strong>そのセンサを測ったとしたら、推定したい量のあいまいさ σ
 がどこまで小さくなるか</strong>を、熱感度と ROM
 で作った温度のばらつきから計算します（測定値は使わない）。</p>
+<p><strong>推定対象と使う感度の対応</strong>（既に試したことと、今後の検証を分けます）</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>推定したい量</th>
+<th>使う感度・基準</th>
+<th>本研究での確認範囲</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場</td>
+<td>POD基底と観測位置の関係、復元誤差</td>
+<td>Q-DEIM代表点と全場復元を実装。全候補配置の最適性は未証明</td>
+</tr>
+<tr class="even">
+<td>発熱量Q</td>
+<td>観測値の <span class="math inline">\(\partial y/\partial Q\)</span>
+を観測ノイズで規格化</td>
+<td>QのEnKF更新は実装済み。直接感度によるQ専用配置の性能比較は別途必要</td>
+</tr>
+<tr class="odd">
+<td>放熱 <span class="math inline">\(h_{\mathrm{ROM}}\)</span></td>
+<td><span class="math inline">\(\partial y/\partial
+h_{\mathrm{ROM}}\)</span> の時刻歴</td>
+<td>h推定は実装済み。加熱・冷却の時間情報を含む配置検証が必要</td>
+</tr>
+<tr class="even">
+<td>Qとhの同時推定</td>
+<td>両感度の独立性、ノイズ・パラメータ尺度をそろえたFisher情報</td>
+<td>大きい感度だけでは識別できない。配置ごとの推定試験で確認する課題</td>
+</tr>
+<tr class="odd">
+<td>未観測の反りA−O</td>
+<td>温度→反りの重み <span class="math inline">\(w\)</span>
+と観測感度、事後分散 <span class="math inline">\(w^{\mathsf T}B^a
+w\)</span></td>
+<td>本記事§5〜7で配置選定とEnKFによる比較を実施</td>
+</tr>
+</tbody>
+</table>
+<p>感度最大点が最適になる条件の導出は <a href="blog005.html">blog_005 §1-2</a>
+に残しています。<strong>単一パラメータ・局所線形・既知の他パラメータ・同じ観測ノイズ</strong>という条件付きの説明です。複数パラメータや未観測変位には、そのまま一般化しません。</p>
 <figure>
 <img alt="σ の意味" src="img/explain_sigma_meaning.png"/>
 <figcaption aria-hidden="true">σ の意味</figcaption>
@@ -797,11 +880,502 @@ POD の重みを掛けて足したもの」で書けます。
 <ul>
 <li>反り A−O を狙うと、選ばれる変位計の位置は上面（S1・S2）。A・O
 を直接測るより正確だった（§5・§6）。</li>
-<li><strong>温度場全体を狙う配置（A最適）と、反りを狙う配置（目的指向）は別の場所</strong>になり、反りの誤差は目的指向のほうが小さかった（§7）。</li>
+<li><strong>代表5点温度の不確かさを狙う配置（A最適）と、反りを狙う配置（目的指向）は別の場所</strong>になり、反りの誤差は目的指向のほうが小さかった（§7）。</li>
 <li>「よく動く点に置く」だけでは、2点が近くに固まって失敗した（§7）。</li>
 <li>温度センサについても、反りを当てたいなら「ヒータ側と反対側に分けて置く」が良かった（<a href="blog005.html">blog_005 §4-6</a>）。</li>
 <li><strong>推定したい量が変わると、選ばれる位置が変わる</strong>。ただし試したのは主に反り
 A−O で、ほかの量では限られた比較のみです。</li>
+</ul>
+<h3 id="0-10-発表の結論どのセンサ配置が良くなぜ良かったのか">0-10.
+発表の結論：どのセンサ配置が良く、なぜ良かったのか</h3>
+<p><strong>今回示したのは、温度と変位を観測として組み合わせることで、観測していない場所の温度場・熱変位も、温度だけを使う同化より良く推定できたことです。</strong>
+観測点に合うことに加え、同化に使っていない2点間変位差で効果を確かめた点が重要です。ここでの「正解」は数値解析で作ったもので、実機実験ではありません。</p>
+<h4 id="どこにセンサを置くと良かったか">どこにセンサを置くと良かったか</h4>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>今回良かった配置</th>
+<th>分かったこと</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度2点</td>
+<td><strong>ヒータ側P2と反対側P4</strong>。概略位置はP2： <span class="math inline">\((36,7,51)\)</span> mm、P4： <span class="math inline">\((-35,1,1)\)</span> mm</td>
+<td>片側に2本置くより、両側に分ける方が良かった。ただしP2＋P4が唯一の最適配置とまでは言えない</td>
+</tr>
+<tr class="even">
+<td>変位2点</td>
+<td><strong>上面S1の横方向変位 <span class="math inline">\(U_x\)</span>
+と、S2の上下方向変位 <span class="math inline">\(U_z\)</span></strong>。S1： <span class="math inline">\((9.7,-36.2,100.5)\)</span> mm、S2： <span class="math inline">\((-34.6,14.4,100.5)\)</span> mm</td>
+<td>未観測の反りA−Oを推定する目的で選んだ配置が良かった。2本とも上下方向の変位計ではない</td>
+</tr>
+</tbody>
+</table>
+<p>座標はモデルの <span class="math inline">\((x,y,z)\)</span>
+、単位はmmです。温度点はOpenFOAMのセル、変位点はFrontISTRの節点です。<strong>Q-DEIMで決めるROM代表点と、観測センサの位置を決めることは別の手続き</strong>です。今回の温度配置比較では、代表5点を候補にしただけで、観測が代表点に限られるわけではありません。</p>
+<figure>
+<img alt="温度候補点P0〜P4と、反りを評価するA・O" src="img/sensor_pair_positions.png"/>
+<figcaption aria-hidden="true">温度候補点P0〜P4と、反りを評価するA・O</figcaption>
+</figure>
+<p><em>温度配置の比較：ヒータ側と反対側を測り分ける。A・Oは変位差の評価位置。</em></p>
+<figure>
+<img alt="変位観測点と未観測の評価点" src="img/blog008_obs_points.png"/>
+<figcaption aria-hidden="true">変位観測点と未観測の評価点</figcaption>
+</figure>
+<p><em>変位配置の比較：A・Oとは別のS1・S2を測り、A・Oの変位差を評価する。</em></p>
+<p><strong>この2行は、別々の試験で得た知見です。</strong>
+「P2＋P4とS1＋S2を組み合わせた配置が、すべての候補の中で最適だと証明した」という意味ではありません。</p>
+<ul>
+<li><strong>温度配置の試験</strong>：同じROMを正解・推定モデルにした双子実験。温度2本の全10組を比較し、P2＋P4はP0＋P2より温度場・変位の誤差が小さくなりました。両側に置く組み合わせ同士の差は、乱数によるばらつきもあり、優劣を断定できません（<a href="blog005.html">blog_005 §4-6</a>）。</li>
+<li><strong>変位配置の試験</strong>：温度P2＋P0を共通にし、変位2点の置き場所を比較しました。OpenFOAM＋FrontISTRを正解とする15
+W条件では、未観測のA−Oの平均絶対誤差が、底面近くの2点で <strong>0.581
+µm</strong>、選定した上面S1＋S2で <strong>0.075 µm</strong>
+でした（本記事§6）。</li>
+</ul>
+<p>別途、P2＋P4とS1＋S2を組み合わせた試験も行っています。本記事§0-8の15
+W条件では、温度2点のみから変位2点を追加すると、全温度場の誤差は
+<strong>0.16 → 0.08 K</strong>、未観測A−Oの誤差は <strong>0.23 → 0.11
+µm</strong>
+に改善しました。ただし、この試験は全配置を比較した最適性の証明ではありません。</p>
+<h4 id="理論ではwをどう使って配置を考えるか">理論では、Wをどう使って配置を考えるか</h4>
+<p><strong>「大きく動く点」ではなく、「知りたい変位差の不確かさを減らせる点」を選びます。</strong>
+手順は、感度で誤差の伝わり方を表し、候補センサを測った後に残る誤差分散を予測する、というものです。</p>
+<p>代表5点の温度誤差を <span class="math inline">\(\delta\mathbf
+T\in\mathbb R^5\)</span> とします。反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
+の誤差は、線形な熱弾性応答と固定したPOD復元を用いると、</p>
+<p><span class="math display">\[
+\delta d=\mathbf w^{\mathsf T}\delta\mathbf T
+\]</span></p>
+<p>です。 <span class="math inline">\(\mathbf w\in\mathbb R^5\)</span>
+は、<strong>代表5点の温度が1
+Kずれたとき、A−Oが何µmずれるか</strong>を表す感度です。</p>
+<p>FrontISTRの全温度自由度から全変位への行列を <span class="math inline">\(W\)</span>
+、代表5点の温度差からFrontISTRに渡す全温度差への復元・写像を <span class="math inline">\(R_T\)</span> 、全変位から <span class="math inline">\(U_z(A)-U_z(O)\)</span> を取り出す行ベクトルを
+<span class="math inline">\(\mathbf l^{\mathsf T}\)</span>
+とすると、</p>
+<p><span class="math display">\[
+\mathbf w^{\mathsf T}=\mathbf l^{\mathsf T}W R_T
+\]</span></p>
+<p>となります。<strong>全場のWそのものと、代表5点への合成感度wは区別します。</strong>
+実装では、FrontISTRで事前計算したPODモードの変位応答から、この合成感度を作っています（本記事§5、<a href="blog006.html">blog_006</a>）。</p>
+<p>温度誤差の共分散を <span class="math inline">\(B=\mathrm{Cov}(\delta\mathbf T)\)</span>
+とすると、反りの誤差分散は、</p>
+<p><span class="math display">\[
+\mathrm{Var}(\delta d)=\mathbf w^{\mathsf T}B\mathbf w
+\]</span></p>
+<p>です。したがって、<strong>WだけでなくBも必要</strong>です。Wは「どの温度誤差が変位に効くか」、Bは「どの温度が、どれだけ一緒に不確かになるか」を表します。</p>
+<p>候補センサ集合 <span class="math inline">\(S\)</span>
+の読みを温度から求める行列を <span class="math inline">\(H_S\)</span>
+、観測ノイズの共分散を <span class="math inline">\(R_S\)</span>
+とします。温度計の行は温度の取り出し・POD復元、変位計の行は温度からその方向の変位への合成感度です。線形・ガウスの仮定では、測った後の温度共分散は、</p>
+<p><span class="math display">\[
+B_S^a=B-BH_S^{\mathsf T}
+\left(H_SBH_S^{\mathsf T}+R_S\right)^{-1}H_SB
+\]</span></p>
+<p>と予測できます。ここで上付き <span class="math inline">\(a\)</span>
+は補正後を表します。温度と変位を混ぜる場合も、それぞれのノイズ分散を
+<span class="math inline">\(R_S\)</span>
+に入れて単位・精度の違いを反映します。今回の標準偏差は温度0.30
+K、変位0.30 µmです。</p>
+<p>最後に、候補ごとの</p>
+<p><span class="math display">\[
+\sigma_{d,S}^2=\mathbf w^{\mathsf T}B_S^a\mathbf w
+\]</span></p>
+<p>を比べます。<strong>同じセンサ数で、この値が小さい配置を優先する</strong>のが今回の考え方です。実際には30〜300秒の各時刻で予測した標準偏差を平均して採点し、変位2点は1点ずつ貪欲に追加しています。全ペアの総当たりによる最適解とは区別します。</p>
+<p>直感的には、ヒータ側だけを測ると、反対側の温度が不確かなまま残り、左右の伸びの差が外れます。両側の温度、あるいはその温度分布の違いを映す変位を測れば、反りに効く不確かさを減らせます。ただし、互いに似た情報しか持たないセンサを増やしても効果は限られるため、感度の大きさだけでは選べません。</p>
+<p><strong>理論と計算結果の一致は、どこまで確認したか。</strong>
+温度2点のROM双子実験では、この基準による予測順位とEnKFで得た反り誤差の順位相関は0.98でした。一方、温度1点では順位相関は0.5にとどまりました。したがって、配置を物理・統計的に説明する基準にはなりますが、有限メンバーの逐次EnKFの最終誤差を常に最小にする保証ではありません。</p>
+<blockquote>
+<p><strong>OpenCAE発表での結論</strong>
+温度・変位観測を併用したEnKFにより、未観測の温度場と2点間熱変位差の推定精度が改善した。さらに、FrontISTR由来の熱感度とROMの予報共分散を組み合わせ、推定したい変位差に適した観測配置を事前に選定できることを、今回の数値実験で示した。</p>
+</blockquote>
+<h3 id="0-11-ブログ全体の結果で確かめる--3つの問いへの答え">0-11.
+ブログ全体の結果で確かめる ― 3つの問いへの答え</h3>
+<p>0-10 の結論を、blog_001〜008
+の結果を集めて確かめます。問いは次の3つです。</p>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>問い</th>
+<th>答え（先に）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>問い1</strong>：データ同化で、<strong>観測していない点</strong>の温度と変位も合うようになったか</td>
+<td><strong>なった。</strong>
+温度計の少ない状態に変位計を足すと、未観測の温度場と反りの誤差が数分の1〜1/10程度になった</td>
+</tr>
+<tr class="even">
+<td><strong>問い2</strong>：センサはどこに置くと良く、どこに置くと悪かったか</td>
+<td>良い：温度計は<strong>ヒータ側と反対側に分ける</strong>、変位計は<strong>上面（自由端）で、ヒータの反対側を含む離れた2点</strong>。悪い：<strong>底面の近く</strong>、<strong>同じことを2回測る置き方</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>問い3</strong>：熱感度 <span class="math inline">\(W\)</span>
+だけで場所は決まるか。理論はどこまで当たったか</td>
+<td><strong><span class="math inline">\(W\)</span>
+だけでは決まらない。</strong> <span class="math inline">\(W\)</span>
+と温度のばらつきから計算した <span class="math inline">\(\sigma\)</span>
+（0-10）で、<strong>順位なら</strong>予測できた</td>
+</tr>
+</tbody>
+</table>
+<h4 id="問い1観測していない点も合うようになったか">問い1：観測していない点も合うようになったか</h4>
+<p><strong>観測した点が合うのは、データ同化なら当たり前です。</strong>
+大事なのは、観測していない点が合うかどうかです。
+各記事で観測に使わない点（未観測点）を評価してきました。並べると、どれも同じ向きの結果です。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>何を足したか</th>
+<th>真値</th>
+<th>観測していない量の誤差</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度1点 → ＋変位2点</td>
+<td>OpenFOAM＋FrontISTR（15 W）</td>
+<td>温度場 0.65 → <strong>0.15 K</strong>、反り A−O 0.92 → <strong>0.10
+µm</strong></td>
+<td>0-8</td>
+</tr>
+<tr class="even">
+<td>温度2点 → ＋変位2点（A・O は測らない）</td>
+<td>OpenFOAM＋FrontISTR（15 W・25 W・間欠）</td>
+<td>反り 0.63〜1.41 → <strong>0.07〜0.08 µm</strong></td>
+<td>§6</td>
+</tr>
+<tr class="odd">
+<td>温度1点 → 2点 → ＋変位2点</td>
+<td>ROM</td>
+<td>温度 0.617 → 0.197 → <strong>0.159 K</strong>、反り 0.869 → 0.151 →
+<strong>0.077 µm</strong></td>
+<td><a href="blog003.html">blog_003 §6-1</a></td>
+</tr>
+<tr class="even">
+<td>観測していない向き（ <span class="math inline">\(U_x\)</span>
+）と点（B・C）</td>
+<td>ROM</td>
+<td>17〜195 倍改善。<strong>観測点と同じくらいの割合で直る</strong></td>
+<td><a href="blog004.html">blog_004 §7-5</a></td>
+</tr>
+<tr class="odd">
+<td>温度計を1本も使わず、変位計2本だけ</td>
+<td>ROM</td>
+<td>温度場 <strong>0.207 K</strong>（温度計2本 P2＋P0 だけの 0.453 K
+より良い）</td>
+<td><a href="blog004.html">blog_004 §7-4c</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>なぜ観測していない点まで合うのか。</strong>
+データ同化が直しているのは、センサの読みそのものではなく、<strong>ROM
+の代表5点の温度と発熱量・放熱</strong>です。
+そこから全セルの温度（gappy-POD）と全節点の変位（FrontISTR
+の応答）を計算し直すので、観測していない点も一緒に直ります（<a href="blog006.html">blog_006 §3</a>）。</p>
+<pre><code>センサの読みと予測のずれ
+   ↓ カルマンゲイン（60メンバーの共分散から計算）
+代表5点の温度・発熱量・放熱を直す
+   ↓ gappy-POD／FrontISTR の応答
+全セルの温度・全節点の変位が直る（観測していない点も）</code></pre>
+<p><strong>注意</strong></p>
+<ul>
+<li>真値はすべて計算です。実機では確かめていません。</li>
+<li>「変位計を足すと良くなる」比較では、センサの本数が増えています。</li>
+<li><strong>同じ場所・同じ本数なら、温度場では温度計と変位計は互角</strong>でした（0.132
+対 0.145 K）。反りでは変位計のほうが良い結果でした（0.135 対 0.201
+µm、§4）。変位計の価値は「情報量が多い」ことではなく、<strong>温度計を置けない場所に置けること</strong>です。</li>
+</ul>
+<h4 id="問い2どこに置くと良くどこに置くと悪かったか">問い2：どこに置くと良く、どこに置くと悪かったか</h4>
+<p>0-10
+では「良かった配置」を示しました。ここでは<strong>悪かった配置も並べて</strong>、何が効いているのかを見ます。</p>
+<p><strong>温度計</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>試したこと</th>
+<th>良かった置き方</th>
+<th>悪かった置き方</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計2本の全10通り（ROM）</td>
+<td><strong>両側に分ける</strong>（P2＋P4：温度場 0.16 K、反り 0.24
+µm）</td>
+<td>同じ側に2本（P0＋P2：0.33 K、0.53 µm）</td>
+<td><a href="blog005.html">blog_005
+§4-6</a></td>
+</tr>
+<tr class="even">
+<td>代表点でないセルに置く（ROM）</td>
+<td>両側に分ける（0.258 K）</td>
+<td>同じ側に2本（0.306 K）</td>
+<td><a href="blog007.html">blog_007 §10</a></td>
+</tr>
+<tr class="odd">
+<td>「よく効く点」を上から2つ選ぶ（ROM）</td>
+<td>30 mm 離した2点（0.35 K）</td>
+<td>1.6 mm しか離れていない隣どうし（0.91 K。2点の温度の相関
+1.00000）</td>
+<td><a href="blog005.html">blog_005
+§4-2</a></td>
+</tr>
+</tbody>
+</table>
+<p>効いているのは「代表点かどうか」ではなく、<strong>ヒータ側と反対側に分かれているか、2本が同じことを測っていないか</strong>です。</p>
+<p><strong>変位計</strong></p>
+<figure>
+<img alt="選び方ごとの変位計の位置" src="img/placement_method_points.png"/>
+<figcaption aria-hidden="true">選び方ごとの変位計の位置</figcaption>
+</figure>
+<p><em>上面を真上から見た図。□＝選ばれた変位計、矢印＝測る向き、●＝評価点
+A・O（測らない）、赤い弧＝ヒータ側。「よく動く点に置く」だけ、2つの□がほぼ重なっている。</em></p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>試したこと</th>
+<th>良かった置き方</th>
+<th>悪かった置き方</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱感度 <span class="math inline">\(W\)</span>
+が大きい点と小さい点（OI、ROM）</td>
+<td>上端の2点（温度 0.86 K）</td>
+<td>底面近くの2点（2.43 K。変位なしは 3.52 K）</td>
+<td><a href="blog002.html">blog_002 §5</a></td>
+</tr>
+<tr class="even">
+<td>置く高さ（OpenFOAM＋FrontISTR）</td>
+<td>上面の S1・S2（反り 0.075 µm）</td>
+<td>底面近く（0.58〜1.10 µm）</td>
+<td>§6</td>
+</tr>
+<tr class="odd">
+<td>選び方6通り（OpenFOAM＋FrontISTR）</td>
+<td>本研究の選び方 0.075 µm、A最適 0.090 µm</td>
+<td>「よく動く点」の上位2つ（2点の間隔 5 mm）0.564
+µm。<strong>ランダム（0.315 µm）より悪い</strong></td>
+<td>§7</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>底面の近くは置いても効きません。</strong>
+底面は固定されていて、温度が変わってもほとんど動かないからです。</li>
+<li><strong>「よく動く点」を上から2つ選ぶと失敗します。</strong>
+よく動く点は一か所に固まっているので、ほとんど同じ場所を2回測ることになります。</li>
+<li>良い配置は、どれも<strong>ヒータの反対側</strong>に点を持っていました。反りは「ヒータ側と反対側の温度差」で決まるので、片側だけ見ていては差が分かりません。</li>
+</ul>
+<blockquote>
+<p><strong>温度計にも変位計にも共通するのは、「ヒータ側と反対側の両方の情報を取る」「同じことを2回測らない」の2つです。</strong></p>
+</blockquote>
+<h4 id="問い3熱感度-w-だけで場所は決まるか理論はどこまで当たったか">問い3：熱感度
+<span class="math inline">\(W\)</span>
+だけで場所は決まるか。理論はどこまで当たったか</h4>
+<p><strong>段階① <span class="math inline">\(W\)</span>
+だけで分かるのは「置いても無駄な場所」</strong></p>
+<p><span class="math inline">\(W\)</span>
+が小さい場所（底面の近く）には、変位計を置いても効きません（<a href="blog002.html">blog_002 §4・§5</a>）。 しかし、
+<strong><span class="math inline">\(W\)</span>
+が大きい順に選ぶと失敗します。</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th><span class="math inline">\(W\)</span> が大きい順に選んだ結果</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位計</td>
+<td>上位2点が 5 mm しか離れておらず、ランダムより悪い（0.564 µm）</td>
+<td>§7</td>
+</tr>
+<tr class="even">
+<td>温度計1本</td>
+<td>反りへの <span class="math inline">\(W\)</span> が最大の P1
+に置いても反りは当たらない（0.92 µm）。一番良かったのは <span class="math inline">\(W\)</span> が最小の P3（0.68 µm）</td>
+<td><a href="blog005.html">blog_005
+§4-6</a></td>
+</tr>
+</tbody>
+</table>
+<p>温度計について <span class="math inline">\(W\)</span>
+が教えてくれるのは、「<strong>温度の推定がずれると、反りが大きくずれる点はどこか</strong>」＝「<strong>温度を正確に推定しておく必要がある点はどこか</strong>」です。センサを置くべき点そのものではありません。</p>
+<p><strong>段階② <span class="math inline">\(W\)</span> ＋
+温度のばらつきで、測った後に残る誤差 <span class="math inline">\(\sigma\)</span> を計算する</strong></p>
+<p>0-10
+の式です。センサが1本だけの場合に書き直すと、意味が見やすくなります。</p>
+<p><span class="math display">\[
+\Delta\sigma_d^2=\frac{\mathrm{Cov}(d,\,y)^2}{\mathrm{Var}(y)+r}
+\]</span></p>
+<p>（ <span class="math inline">\(\Delta\sigma_d^2\)</span>
+：測ることで減る反りの分散、 <span class="math inline">\(d\)</span>
+：反り、 <span class="math inline">\(y\)</span> ：センサの読み、 <span class="math inline">\(r\)</span> ：センサのノイズの分散）</p>
+<p>効くのは「 <span class="math inline">\(W\)</span>
+が大きいこと」ではなく、<strong>「推定したい反り <span class="math inline">\(d\)</span>
+と一緒に動くこと（共分散が大きい）」</strong>です。2本目以降は、<strong>1本目で分かったことと重ならないこと</strong>も必要です。
+問い2の「両側に分ける」「同じことを2回測らない」は、この式から出てきます。「両側に分ける」は勘ではなく、反りへの感度
+<span class="math inline">\(w\)</span> の符号（ヒータ側の P0・P2
+が＋、反対側の P1・P4 が−）から出てきます。</p>
+<p><strong>段階③ 実際にどこまで当たったか</strong></p>
+<figure>
+<img alt="測る前の予測と実際の結果" src="img/sensor_pair_pred_vs_actual.png"/>
+<figcaption aria-hidden="true">測る前の予測と実際の結果</figcaption>
+</figure>
+<p><em>横軸：データ同化の前に計算した <span class="math inline">\(\sigma\)</span>
+、縦軸：データ同化した後の実際の反りの誤差。温度計2本の全10通り（ROM
+の双子実験）。</em></p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 23%"/>
+<col style="width: 30%"/>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>対象</th>
+<th style="text-align: right;">測る前の予測と、実際の順位の相関</th>
+<th>真値</th>
+<th>詳しく</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計2本の全10通り</td>
+<td style="text-align: right;"><strong>0.98</strong></td>
+<td>ROM</td>
+<td><a href="blog005.html">blog_005
+§4-6</a></td>
+</tr>
+<tr class="even">
+<td>変位計の選び方6通り</td>
+<td style="text-align: right;"><strong>0.9</strong></td>
+<td>OpenFOAM＋FrontISTR</td>
+<td>§7</td>
+</tr>
+<tr class="odd">
+<td>温度計1本</td>
+<td style="text-align: right;">0.5（<strong>当たらない</strong>）</td>
+<td>ROM</td>
+<td><a href="blog005.html">blog_005
+§4-6</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>この理論で言えないこと</strong></p>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>限界</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>当たるのは順位だけ</td>
+<td>予測の値（例：0.59 µm）と実際の誤差（0.24 µm）は合わない</td>
+</tr>
+<tr class="even">
+<td>1回の更新だけで計算すると当たらない</td>
+<td>最初の予報だけで計算した値は、20回データ同化した後の誤差の順位と一致しなかった（<a href="blog005.html">blog_005
+§6-1</a>）。<strong>30〜300
+秒の各時刻で計算して平均する</strong>必要がある</td>
+</tr>
+<tr class="odd">
+<td>温度計1本では差が出ない</td>
+<td>1本の候補どうしでは <span class="math inline">\(\sigma\)</span>
+がほとんど変わらず、順位を当てられなかった</td>
+</tr>
+<tr class="even">
+<td>熱源の位置が前提</td>
+<td>熱源の位置を間違えると、順位相関が 0.72〜0.73
+に下がった。発熱量・放熱・初期温度のずれには強い</td>
+</tr>
+<tr class="odd">
+<td>確かめた目的は反り A−O だけ</td>
+<td>発熱量や放熱を推定したい場合の配置は、比較試験をしていない</td>
+</tr>
+<tr class="even">
+<td>温度計と変位計を同時には選んでいない</td>
+<td>温度計は温度計だけで、変位計は温度計 P2＋P0 を固定して選んだ</td>
+</tr>
+</tbody>
+</table>
+<h4 id="まとめと残っている課題">まとめと、残っている課題</h4>
+<blockquote>
+<ol type="1">
+<li><strong>データ同化で、観測していない点の温度と反りも合うようになった。</strong>
+温度計の少ない状態に変位計を足すと、未観測の温度場と反りの誤差が数分の1〜1/10程度になった（OpenFOAM＋FrontISTR
+を真値にした3条件でも同じ）。</li>
+<li><strong>良い置き方は、温度計は「ヒータ側と反対側に分ける」、変位計は「上面で、ヒータの反対側を含む離れた2点」。</strong>
+底面の近くや、同じことを2回測る置き方は効かない。</li>
+<li><strong>熱感度 <span class="math inline">\(W\)</span>
+だけでは決まらない。 <span class="math inline">\(W\)</span> と ROM
+の温度のばらつきから計算した <span class="math inline">\(\sigma\)</span>
+で、測る前に順位を予測できた</strong>（順位相関
+0.9〜0.98）。ただし順位まで、反りが目的の場合、熱源の位置が分かっている場合に限る。</li>
+</ol>
+</blockquote>
+<p><strong>残っている課題</strong></p>
+<ul>
+<li>§5〜§7 の温度計 P2＋P0
+は、<strong>2本ともヒータ側にある</strong>組み合わせです。温度だけでデータ同化すると、両側に分けた
+P2＋P4 の約2倍の誤差になります。§5〜§7 の変位計の比較を P2＋P4
+でやり直す計算はしていません（0-8 の P2＋P4＋S1・S2
+は、変位計の置き場所を比較した試験ではありません）。</li>
+<li>温度計と変位計の置き場所を、同じ <span class="math inline">\(\sigma\)</span>
+の式でまとめて選ぶ試験はしていません。</li>
+<li>数値を比べるときは、同じ表の中で比べてください。例えば A・O
+を直接測った場合の反りの誤差は、<a href="blog004.html">blog_004 §7-4b</a> では 0.077 µm、§5
+では 0.135 µm です。変位の計算方法と集計時間が違うためです。</li>
 </ul>
 <hr/>
 <h2 id="1-主張したいこと">1. 主張したいこと</h2>
@@ -2058,18 +2632,18 @@ W／間欠加熱の3条件</td>
 </tr>
 <tr class="odd">
 <td><strong>Q-DEIM（QR 列ピボット）</strong></td>
-<td>モード行列の条件数</td>
-<td>温度場（モード係数）</td>
+<td>モード応答の独立性を確保する（条件数の全球最小を保証する方法ではない）</td>
+<td>モード係数の復元</td>
 </tr>
 <tr class="even">
 <td><strong>A最適</strong></td>
 <td>温度5点の事後共分散の <strong>trace</strong></td>
-<td><strong>温度場全体</strong></td>
+<td><strong>代表5点温度の分散の和</strong></td>
 </tr>
 <tr class="odd">
 <td><strong>D最適</strong></td>
 <td>温度5点の事後共分散の <strong>det</strong></td>
-<td><strong>温度場全体</strong></td>
+<td><strong>代表5点温度の不確かさの体積</strong></td>
 </tr>
 <tr class="even">
 <td><strong>目的指向（本研究）</strong></td>
@@ -2083,10 +2657,11 @@ T}(\cdots)w\)</span></td>
 の分野で標準的な点の選び方で、 <a href="blog004.html">blog_004 §4</a> で ROM
 の代表5点を選んだのと同じ方法です。</p>
 <blockquote>
-<p><strong>比較の軸はここです。</strong> A最適・D最適・Q-DEIM
-は「<strong>温度場を</strong>いちばん良く知る配置」を選びます。
-本研究だけが「<strong>反り A−O
-を</strong>いちばん良く知る配置」を選びます（ <span class="math inline">\(w\)</span> で目的を指定しているため）。</p>
+<p><strong>比較の軸はここです。</strong>
+今回のA最適・D最適は<strong>代表5点の温度共分散</strong>、Q-DEIMは<strong>モード応答の独立性</strong>を基準にします。全20,696セルの温度RMSEを直接最小化する方法ではありません。
+今回の比較法のうち、目的指向は<strong>反り A−O
+の予測事後分散</strong>を基準にします（ <span class="math inline">\(w\)</span>
+で目的を指定）。仮定した共分散・ノイズの下での予測値であり、EnKFの実際の誤差の最小を保証するものではありません。</p>
 <p><strong>温度場を良く知れば、反りも良く分かるはずだ</strong> ―
 これが正しいなら、A最適と本研究は同じ答えになるはずです。
 違う答えになるなら、「目的を指定すること」に意味があることになります。</p>
