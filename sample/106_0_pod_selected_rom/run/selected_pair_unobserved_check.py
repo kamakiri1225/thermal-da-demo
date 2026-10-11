@@ -45,6 +45,11 @@ COMPI = {"Ux": 0, "Uy": 1, "Uz": 2}
 
 
 def configs(setname):
+    if setname == "v":
+        return ("検証3：A・O を一度も観測せずに、3条件で確かめる",
+                [("変位なし（温度 P2・P0 のみ）", P2P0, [], "#9AA5B1", "-"),
+                 ("A・O 自身を測る（参考）", P2P0, [(A_XYZ, 2), (O_XYZ, 2)], "#2E86C1", "-"),
+                 ("選んだ別の2点 S1・S2（本研究）", P2P0, SEL, "#C0392B", "-")])
     if setname == "s":
         return ("温度計 P2・P0 に変位計2点を足す：置き場所による違い",
                 [("温度 P2・P0 のみ", P2P0, [], "#9AA5B1", "--"),
@@ -127,6 +132,13 @@ def main(setname, case):
         print(f"[{setname} {case}] {nm}: 温度場 {c_['field_rmse_K']} K  反り {c_['displacement_um']['反り A−O']} µm  "
               f"Uz(A) {c_['displacement_um']['Uz(A)']}  Uz(O) {c_['displacement_um']['Uz(O)']}", flush=True)
     json.dump(out, open(os.path.join(RES, f"unobserved_check_{setname}_{case}.json"), "w"), ensure_ascii=False, indent=1)
+    np.savez_compressed(os.path.join(RES, f"unobserved_traj_{setname}_{case}.npz"), t=tt, Ttrue=Ttrue, Utrue=Utrue,
+                        tlabels=np.array([l for l, _ in tcells]), ulabels=np.array([l for l, _ in unodes]),
+                        names=np.array([c[0] for c in CFG]), colors=np.array([c[3] for c in CFG]),
+                        T=np.array([traj[c[0]][0] for c in CFG]), U=np.array([traj[c[0]][1] for c in CFG]),
+                        R=np.array([traj[c[0]][2] for c in CFG]))
+    if setname == "v":
+        return
 
     # ---- 図 ----------------------------------------------------------------
     fig = plt.figure(figsize=(21, 26))
@@ -211,7 +223,7 @@ def main(setname, case):
 
 
 if __name__ == "__main__":
-    sets = [a for a in sys.argv[1:] if a in ("s", "n")] or ["s", "n"]
+    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v")] or ["s", "n", "v"]
     cases = [a for a in sys.argv[1:] if a in CASES] or list(CASES)
     for s_ in sets:
         for c in cases:
