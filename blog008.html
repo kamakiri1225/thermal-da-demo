@@ -254,6 +254,8 @@ Zurich (2024)</a></li>
 <li><a href="#6-2-結果" id="toc-6-2-結果">6-2. 結果</a></li>
 <li><a href="#6-3-分かったこと" id="toc-6-3-分かったこと">6-3.
 分かったこと</a></li>
+<li><a href="#6-4-温度計も代表点以外から選ぶとどうなるか" id="toc-6-4-温度計も代表点以外から選ぶとどうなるか">6-4.
+温度計も代表点以外から選ぶと、どうなるか</a></li>
 </ul></li>
 <li><a href="#7-検証4配置の決め方は既存の方法より良いか" id="toc-7-検証4配置の決め方は既存の方法より良いか">7.
 【検証4】配置の決め方は、既存の方法より良いか</a>
@@ -2224,6 +2226,107 @@ T}B\,\mathbf h_c\)</span></td>
 </tr>
 </tbody>
 </table>
+<h4 id="選んだ2点で観測していない温度変位はどう合ったか">選んだ2点で、観測していない温度・変位はどう合ったか</h4>
+<p>選んだ S1・S2
+を実際にデータ同化に入れて、<strong>観測していない場所</strong>を見ます。
+反り A−O だけでなく、<strong>A・O それぞれの <span class="math inline">\(U_z\)</span></strong>、<strong>ほかの未観測点の
+<span class="math inline">\(U_z\)</span></strong>（D・E・F）、<strong>観測していない温度</strong>（代表点
+P1・P3・P4
+と、代表点以外のセル4点）、<strong>温度場全体</strong>も比べます。</p>
+<p><strong>条件</strong>：真値＝OpenFOAM（温度場）＋FrontISTR（全節点の変位）、15
+W。ROM＋EnKF（60メンバー、30 秒ごと、5 seed）。観測は温度計 P2・P0 ＋
+変位計2点だけで、グラフの点はすべて観測に使っていません（
+<code>run/selected_pair_unobserved_check.py</code> ）。</p>
+<figure>
+<img alt="選んだ2点で、観測していない温度・変位" src="img/unobserved_s_learned.png"/>
+<figcaption aria-hidden="true">選んだ2点で、観測していない温度・変位</figcaption>
+</figure>
+<p><em>上段＝センサと評価点の位置（●温度計、■変位計、▲温度の評価点、★変位の評価点）。2〜3段目＝観測していない温度、4〜5段目＝観測していない変位。太い灰色＝真値。各グラフ右上の数字＝30〜300
+秒の平均誤差（線の色と対応）。</em></p>
+<table>
+<colgroup>
+<col style="width: 15%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測していない量（30〜300 秒の平均誤差）</th>
+<th style="text-align: right;">温度 P2・P0 のみ</th>
+<th style="text-align: right;">＋底面近く（悪い例）</th>
+<th style="text-align: right;">＋中段 B・C</th>
+<th style="text-align: right;"><strong>＋選定 S1・S2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場全体（20,696 セルの RMSE）</td>
+<td style="text-align: right;">0.54 K</td>
+<td style="text-align: right;">0.43 K</td>
+<td style="text-align: right;">0.18 K</td>
+<td style="text-align: right;"><strong>0.13 K</strong></td>
+</tr>
+<tr class="even">
+<td>未観測の温度7点のうち最大</td>
+<td style="text-align: right;">0.90 K</td>
+<td style="text-align: right;">0.70 K</td>
+<td style="text-align: right;">0.22 K</td>
+<td style="text-align: right;"><strong>0.19 K</strong></td>
+</tr>
+<tr class="odd">
+<td>反り A−O</td>
+<td style="text-align: right;">0.77 µm</td>
+<td style="text-align: right;">0.58 µm</td>
+<td style="text-align: right;">0.19 µm</td>
+<td style="text-align: right;"><strong>0.075 µm</strong></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_z(A)\)</span></td>
+<td style="text-align: right;">0.24 µm</td>
+<td style="text-align: right;">0.20 µm</td>
+<td style="text-align: right;">0.15 µm</td>
+<td style="text-align: right;"><strong>0.10 µm</strong></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(U_z(O)\)</span></td>
+<td style="text-align: right;">0.94 µm</td>
+<td style="text-align: right;">0.74 µm</td>
+<td style="text-align: right;">0.16 µm</td>
+<td style="text-align: right;"><strong>0.09 µm</strong></td>
+</tr>
+<tr class="even">
+<td>D（上面・+y 側）の <span class="math inline">\(U_z\)</span></td>
+<td style="text-align: right;">0.64 µm</td>
+<td style="text-align: right;">0.49 µm</td>
+<td style="text-align: right;">0.16 µm</td>
+<td style="text-align: right;"><strong>0.12 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>E（ヒータ側・中段）の <span class="math inline">\(U_z\)</span></td>
+<td style="text-align: right;">0.10 µm</td>
+<td style="text-align: right;">0.08 µm</td>
+<td style="text-align: right;">0.08 µm</td>
+<td style="text-align: right;"><strong>0.05 µm</strong></td>
+</tr>
+<tr class="even">
+<td>F（反対側・中段）の <span class="math inline">\(U_z\)</span></td>
+<td style="text-align: right;">0.52 µm</td>
+<td style="text-align: right;">0.41 µm</td>
+<td style="text-align: right;">0.09 µm</td>
+<td style="text-align: right;"><strong>0.06 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>σ で選んだ S1・S2
+は、反りだけでなく、観測していない温度・個別の変位のすべてで一番良い結果</strong>でした。</li>
+<li>温度 P2・P0 だけだと、<strong>反対側（O
+側）の温度と変位が外れます</strong>（P4 0.90 K、 <span class="math inline">\(U_z(O)\)</span> 0.94 µm）。ヒータ側の <span class="math inline">\(U_z(A)\)</span> や E
+は、もともとそこそこ合っています。</li>
+<li>底面近くの変位計は、ほとんど効きません。</li>
+</ul>
 <h4 id="まとめ">まとめ</h4>
 <blockquote>
 <p><strong>やったこと</strong>：候補 14,754
@@ -2513,6 +2616,66 @@ seed 平均。</em></p>
 </tr>
 </tbody>
 </table>
+<p><strong>反り以外の、観測していない量も3条件で見る</strong>（
+<code>run/selected_pair_unobserved_check.py</code>
+、同じ真値・同じ設定）</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測していない量</th>
+<th>温度2点のみ（15 W／25 W／間欠）</th>
+<th><strong>＋選定2点（15 W／25 W／間欠）</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場全体（RMSE）</td>
+<td>0.54／0.88／0.53 K</td>
+<td><strong>0.13／0.14／0.12 K</strong></td>
+</tr>
+<tr class="even">
+<td>未観測の温度7点のうち最大</td>
+<td>0.90／1.48／0.85 K</td>
+<td><strong>0.19／0.19／0.18 K</strong></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(U_z(A)\)</span></td>
+<td>0.24／0.31／0.28 µm</td>
+<td><strong>0.10／0.12／0.09 µm</strong></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_z(O)\)</span></td>
+<td>0.94／1.69／0.87 µm</td>
+<td><strong>0.09／0.10／0.09 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>未観測の <span class="math inline">\(U_z\)</span>
+（D・E・F）のうち最大</td>
+<td>0.64／1.06／0.64 µm</td>
+<td><strong>0.12／0.12／0.12 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>15 W の図は §5-2 にあります。25 W
+と間欠加熱の図は次のとおりです。</p>
+<figure>
+<img alt="25 W：観測していない温度・変位" src="img/unobserved_s_q25.png"/>
+<figcaption aria-hidden="true">25
+W：観測していない温度・変位</figcaption>
+</figure>
+<p><em>25 W（ROM の係数を決めていない条件）。見方は §5-2
+の図と同じ。</em></p>
+<figure>
+<img alt="間欠加熱：観測していない温度・変位" src="img/unobserved_s_intermittent.png"/>
+<figcaption aria-hidden="true">間欠加熱：観測していない温度・変位</figcaption>
+</figure>
+<p><em>15 W 間欠加熱（ヒータ ON は 0〜150 秒と 300〜450 秒）。見方は
+§5-2 の図と同じ。</em></p>
 <h3 id="6-3-分かったこと">6-3. 分かったこと</h3>
 <p><strong>ROM
 真値のときと同じ結論が、実ソルバ真値でも得られました。</strong></p>
@@ -2537,6 +2700,226 @@ seed 平均。</em></p>
 係数を決めていない 25 W でも成立し、変位なし（1.408 µm）から <strong>17
 倍</strong>改善した。 - 置き場所が悪いと 25 W で 1.096 µm ＝
 ほとんど改善しない。<strong>置き場所の設計に意味がある。</strong></p>
+</blockquote>
+<h3 id="6-4-温度計も代表点以外から選ぶとどうなるか">6-4.
+温度計も代表点以外から選ぶと、どうなるか</h3>
+<blockquote>
+<p><strong>この節で知りたいこと</strong>：ここまでの温度計 P2・P0 は ROM
+の代表点で、しかも2本ともヒータ側にある。温度計も<strong>代表点以外の全セル</strong>から
+σ で選び、変位計2点と一緒に決めたら、もっと良くなるか</p>
+<p><strong>条件</strong>：選び方は §5-2 と同じ（4000 本の事前分布、反り
+A−O の σ を 30〜300 秒で平均）。真値は OpenFOAM＋FrontISTR（15 W・25
+W・間欠加熱）、EnKF・5 seed</p>
+</blockquote>
+<h4 id="やったこと">やったこと</h4>
+<ol type="1">
+<li><strong>候補を広げる。</strong>
+温度計の候補＝代表5点を除く全セル（20,691 個）。変位計の候補＝§5-2
+と同じ 14,754 個。</li>
+<li><strong>温度計の観測行列の行を作る。</strong> 代表点以外のセル <span class="math inline">\(j\)</span> の温度は、gappy-POD
+で代表5点の温度の一次式になるので、行は <span class="math inline">\(\mathbf g_j=\boldsymbol\psi_jU_{rP}^{-1}\)</span>
+です（代表点なら <span class="math inline">\((0,0,1,0,0)\)</span>
+のような行になる）。</li>
+<li><strong>何も測らない状態から、σ
+が一番小さくなる候補を1本ずつ足す。</strong>
+温度計・変位計がそれぞれ2本になったら、その種類は候補から外す（
+<code>run/select_nonrep_temp_disp.py</code> ）。</li>
+<li><strong>選んだ4本でデータ同化し、観測していない量を比べる</strong>（
+<code>run/selected_pair_unobserved_check.py</code> ）。</li>
+</ol>
+<h4 id="選ばれた場所">選ばれた場所</h4>
+<table>
+<colgroup>
+<col style="width: 23%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">順番</th>
+<th>種類</th>
+<th>座標 [mm]</th>
+<th>位置</th>
+<th style="text-align: right;">足した後の σ （予測）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">―</td>
+<td>何も測らない</td>
+<td></td>
+<td></td>
+<td style="text-align: right;">1.451 µm</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td>変位 <span class="math inline">\(U_x\)</span></td>
+<td>(18.8, 32.5, 100.5)</td>
+<td>上面・+y 側</td>
+<td style="text-align: right;">0.368 µm</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td>変位 <span class="math inline">\(U_x\)</span></td>
+<td>(18.8, −32.5, 100.5)</td>
+<td>上面・−y 側（1本目と鏡写し）</td>
+<td style="text-align: right;">0.296 µm</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td>温度</td>
+<td>(−30.1, −20.6, 51.6)</td>
+<td><strong>反対側</strong>・中段</td>
+<td style="text-align: right;">0.280 µm</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td>温度</td>
+<td>(36.7, 0.8, 72.7)</td>
+<td><strong>ヒータ側</strong>・やや上</td>
+<td style="text-align: right;"><strong>0.220 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>温度計は、ヒータ側と反対側に1本ずつ</strong>選ばれました（§0-11
+の「両側に分ける」と同じ）。</li>
+<li><strong>変位計2本は、y=0
+の面について鏡写しの位置</strong>で、5点の温度への重みもほぼ同じでした。同じ量を2回測ってノイズを平均する形です。</li>
+</ul>
+<p>測る前の予測 σ では、今の配置（温度 P2・P0 ＋ 変位 S1・S2）の 0.256
+µm より小さくなりました。</p>
+<table>
+<thead>
+<tr class="header">
+<th>配置</th>
+<th style="text-align: right;">予測 σ （測る前）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度 P2・P0 のみ</td>
+<td style="text-align: right;">1.186 µm</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P4 のみ（代表点・両側）</td>
+<td style="text-align: right;">0.590 µm</td>
+</tr>
+<tr class="odd">
+<td>代表点以外の温度2点のみ（σ で選んだ）</td>
+<td style="text-align: right;">0.499 µm</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P0 ＋ 変位 S1・S2（今の配置）</td>
+<td style="text-align: right;">0.256 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>代表点以外の温度2点＋変位2点（σ で選んだ）</strong></td>
+<td style="text-align: right;"><strong>0.220 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<h4 id="データ同化した結果">データ同化した結果</h4>
+<figure>
+<img alt="代表点以外から選んだ配置と、今の配置" src="img/unobserved_n_learned.png"/>
+<figcaption aria-hidden="true">代表点以外から選んだ配置と、今の配置</figcaption>
+</figure>
+<p><em>15 W。見方は §5-2
+の図と同じ。青＝代表点以外の温度2点のみ、赤＝代表点以外の温度2点＋変位2点、橙＝今の配置（温度
+P2・P0 ＋ 変位 S1・S2）。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測していない量（15 W／25 W／間欠）</th>
+<th>温度 P2・P0 のみ</th>
+<th>代表点以外の温度2点のみ</th>
+<th>今の配置（P2・P0 ＋ S1・S2）</th>
+<th>代表点以外の温度2点＋変位2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度場全体（RMSE）</td>
+<td>0.54／0.88／0.53 K</td>
+<td>0.24／0.27／0.24 K</td>
+<td><strong>0.13／0.14／0.12 K</strong></td>
+<td>0.20／0.18／0.20 K</td>
+</tr>
+<tr class="even">
+<td>反り A−O</td>
+<td>0.77／1.41／0.63 µm</td>
+<td>0.23／0.26／0.19 µm</td>
+<td><strong>0.075／0.083／0.071 µm</strong></td>
+<td>0.089／0.094／0.073 µm</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(U_z(A)\)</span></td>
+<td>0.24／0.31／0.28 µm</td>
+<td>0.23／0.25／0.22 µm</td>
+<td><strong>0.10／0.12／0.09 µm</strong></td>
+<td>0.18／0.17／0.18 µm</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_z(O)\)</span></td>
+<td>0.94／1.69／0.87 µm</td>
+<td>0.24／0.28／0.24 µm</td>
+<td><strong>0.09／0.10／0.09 µm</strong></td>
+<td>0.19／0.17／0.19 µm</td>
+</tr>
+</tbody>
+</table>
+<p>25 W と間欠加熱の図：<a href="img/unobserved_n_q25.png">unobserved_n_q25.png</a>、<a href="img/unobserved_n_intermittent.png">unobserved_n_intermittent.png</a></p>
+<h4 id="分かったこと">分かったこと</h4>
+<ol type="1">
+<li><strong>温度計は代表点以外から選んでも、データ同化できる。</strong>
+両側に分けた代表点以外の温度2点だけで、温度場 0.24 K・反り 0.23
+µm。代表点 P2・P0（片側）の 0.54 K・0.77 µm
+より、ずっと良い結果でした。</li>
+<li><strong>ただし、予測 σ
+が一番小さかった「代表点以外の温度2点＋変位2点」は、実際には今の配置より良くなりませんでした。</strong>
+<ul>
+<li>反り A−O は今の配置とほぼ同じか、わずかに悪い（0.089 対 0.075 µm
+など）。</li>
+<li>温度場、 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> は、はっきり悪い（温度場 0.20 対
+0.13 K、 <span class="math inline">\(U_z(A)\)</span> 0.18 対 0.10
+µm）。</li>
+<li><strong>予測 σ の順位（0.220 ＜
+0.256）が、実際の順位と逆になりました。</strong> σ
+で順位が当たらない例です。</li>
+</ul></li>
+<li><strong>考えられる理由</strong>（どれも確かめていません）
+<ul>
+<li><strong>σ は反り A−O だけを見て選んでいる。</strong>
+鏡写しの変位計2本は、反り（A と O の差）にはよく効きますが、A・O
+それぞれの値や温度場の情報は少ない。目的を反りだけにすると、反り以外の量が犠牲になり得ます。</li>
+<li><strong>鏡写しの2本は、ほぼ同じことを測っている。</strong> σ
+の計算では「ノイズが独立なら2回測ると平均で減る」と扱いますが、実際には
+ROM
+と真値のずれ（モデル誤差）が2本に共通に乗るので、平均しても減りません。</li>
+<li><strong>代表点以外の温度計には、復元の誤差が乗る。</strong>
+代表点以外のセルの温度は POD
+の5つの型で表した近似です。真値（OpenFOAM）とのずれは σ の計算のノイズ
+<span class="math inline">\(R\)</span> に入れていません。</li>
+</ul></li>
+</ol>
+<blockquote>
+<p><strong>この節で分かったこと</strong> -
+温度計も<strong>代表点以外から選べる</strong>。σ
+で選ぶと、ヒータ側と反対側に1本ずつ選ばれた。 -
+代表点以外の温度2点＋変位2点は、<strong>予測 σ
+では今の配置より良かったが、実際のデータ同化では反りがほぼ同じ、温度場と個別の変位は悪かった</strong>。
+- σ
+で選ぶときは、<strong>目的（反りだけか、温度場や個別の変位も含むか）</strong>と、<strong>同じ量を測るセンサの重複・モデル誤差</strong>を考える必要がある。今回の
+σ はどちらも入れていない。</p>
 </blockquote>
 <hr/>
 <h2 id="7-検証4配置の決め方は既存の方法より良いか">7.
