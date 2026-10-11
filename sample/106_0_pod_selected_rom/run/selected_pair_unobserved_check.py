@@ -53,7 +53,8 @@ def configs(setname):
                  ("選んだ別の2点 S1・S2（本研究）", P2P0, SEL, "#C0392B", "-")])
     if setname == "s":
         return ("温度計 P2・P0 に変位計2点を足す：置き場所による違い",
-                [("温度 P2・P0 のみ", P2P0, [], "#9AA5B1", "--"),
+                [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
+                 ("温度 P2・P0 のみ", P2P0, [], "#9AA5B1", "--"),
                  ("＋底面近くの変位2点（悪い例）", P2P0, LOW, "#8E44AD", "--"),
                  ("＋中段 B・C の変位2点", P2P0, BC, "#E67E22", "--"),
                  ("＋選定 S1・S2（σ で選んだ）", P2P0, SEL, "#C0392B", "-")])
@@ -61,7 +62,8 @@ def configs(setname):
     tsel = [("xyz", tuple(np.array(p["xyz_mm"]) / 1000)) for p in js["picked"] if p["kind"] == "温度"]
     usel = [(tuple(np.array(p["xyz_mm"]) / 1000), COMPI[p["comp"]]) for p in js["picked"] if p["kind"] == "変位"]
     return ("温度計も代表点以外から選ぶ：σ で選んだ温度2点＋変位2点と、今の配置",
-            [("温度 P2・P0 のみ", P2P0, [], "#9AA5B1", "--"),
+            [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
+             ("温度 P2・P0 のみ", P2P0, [], "#9AA5B1", "--"),
              ("温度 P2・P0 ＋ 変位 S1・S2（今の配置）", P2P0, SEL, "#E67E22", "--"),
              ("代表点以外の温度2点のみ（σ で選んだ）", tsel, [], "#2E86C1", "--"),
              ("代表点以外の温度2点＋変位2点（σ で選んだ）", tsel, usel, "#C0392B", "-")])
@@ -159,7 +161,7 @@ def main(setname, case):
         axs.scatter(X[0], X[2], marker=mk, s=s, c=col, edgecolor="k", zorder=5, label=lab)
     seen = set()
     for nm, tobs, dobs, col, _ in CFG:
-        for o in tobs:
+        for o in (tobs or []):
             key = ("T", str(o))
             if key in seen: continue
             seen.add(key); mark(Cc[cell_of(o)], "o", col, f"温度計：{nm}")
