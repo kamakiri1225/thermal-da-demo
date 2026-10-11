@@ -2544,20 +2544,28 @@ ROM の温度のばらつきだけで決められる。</p>
 <h3 id="6-2-結果">6-2. 結果</h3>
 <p>3条件それぞれで、<strong>温度と変位がどう合ったか</strong>を見ます。</p>
 <figure>
-<img alt="検証3の詳細" src="img/ver3_detail.png"/>
+<img alt="検証3の詳細" src="img/ver3_detail_full.png"/>
 <figcaption aria-hidden="true">検証3の詳細</figcaption>
 </figure>
-<p><em>上段＝<strong>温度</strong>（温度計を置いていない
-P4）／下段＝<strong>変位</strong>（一度も観測していない反り A−O）。
-左から 15 W・25 W・間欠加熱。黒が真値（OpenFOAM＋FrontISTR）。</em></p>
+<p><em>左から 15 W・25 W・間欠加熱。行は上から、温度場全体の
+RMSE、観測していない温度3点（代表点
+P4、代表点以外のセル2点）、変位（反り A−O、 <span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span> 、反対側・中段 F の <span class="math inline">\(U_z\)</span>
+）。黒が真値（OpenFOAM＋FrontISTR）。各グラフ右上の数字＝30〜300
+秒の平均誤差。青の「A・O 自身を測る」だけは、A−O・ <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> を観測しているので参考値です（
+<code>run/make_ver3_full_fig.py</code> ）。</em></p>
 <ul>
-<li><strong>温度（上段）</strong>：変位なし（灰）は 300
-秒あたりまで真値より高めに外れますが、変位2点を足すと3条件とも真値に重なります。</li>
-<li><strong>変位（下段）</strong>：間欠加熱（右下）では真値が 150
-秒で落ち、300 秒で再び上がります。
-<strong>この2回目の山まで追えています</strong>（ヒータの ON/OFF
-をモデルに与えているため）。</li>
-<li>25 W（中央下）は ROM
+<li><strong>温度（2〜4行目）</strong>：変位なし（灰）は加熱の前半で真値より高めに外れます。変位2点を足すと、<strong>代表点
+P4 も、代表点以外のセルも</strong>、3条件とも真値に重なります。</li>
+<li><strong>反り A−O（5行目）</strong>：間欠加熱（右）では真値が 150
+秒で落ち、300
+秒で再び上がります。<strong>この2回目の山まで追えています</strong>（ヒータの
+ON/OFF をモデルに与えているため）。</li>
+<li><strong>個別の変位（6〜8行目）</strong>：変位なし（灰）は、ヒータの反対側の
+<span class="math inline">\(U_z(O)\)</span> と F が大きく外れます（15 W
+で 0.94 µm、0.52 µm）。選んだ2点（赤）は、A・O
+を一度も測らずに、<strong>A・O
+自身を測った場合（青）と同じか、それ以上に</strong>合いました（ <span class="math inline">\(U_z(A)\)</span> 0.10 対 0.14 µm、 <span class="math inline">\(U_z(O)\)</span> 0.09 対 0.10 µm、15 W）。</li>
+<li>25 W（中央）は ROM
 の係数を決めていない条件ですが、変位なし（灰）が大きく外れるのに対し、選んだ2点（赤）は真値に重なります。</li>
 </ul>
 <p>誤差を加熱期で平均すると次のようになります。</p>
