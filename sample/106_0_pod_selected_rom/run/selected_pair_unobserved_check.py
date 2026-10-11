@@ -47,7 +47,8 @@ COMPI = {"Ux": 0, "Uy": 1, "Uz": 2}
 def configs(setname):
     if setname == "v":
         return ("検証3：A・O を一度も観測せずに、3条件で確かめる",
-                [("変位なし（温度 P2・P0 のみ）", P2P0, [], "#9AA5B1", "-"),
+                [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
+                 ("温度 P2・P0 だけでデータ同化", P2P0, [], "#9AA5B1", "-"),
                  ("A・O 自身を測る（参考）", P2P0, [(A_XYZ, 2), (O_XYZ, 2)], "#2E86C1", "-"),
                  ("選んだ別の2点 S1・S2（本研究）", P2P0, SEL, "#C0392B", "-")])
     if setname == "s":
@@ -93,7 +94,8 @@ def main(setname, case):
         return f(iA) - f(iO) if i is None else f(i)
 
     def run(tobs, dobs, seed):
-        tc = [cell_of(o) for o in tobs]
+        noda = tobs is None
+        tc = [] if noda else [cell_of(o) for o in tobs]
         drow = [(nn(x), c) for x, c in dobs]
         rng = np.random.default_rng(seed); ro = np.random.default_rng(seed + 7)
         Z = np.zeros((N_ENS, NAUG)); Z[:, :NPT] = rng.uniform(rg.T_AIR_K - 3, rg.T_AIR_K + 12, (N_ENS, NPT))
@@ -103,6 +105,10 @@ def main(setname, case):
         for ci, tb in enumerate(t[1:], 1):
             Z = Z.copy(); Z[:, :NPT] = integ_on(Z[:, :NPT], C, Km, Z[:, IH], Z[:, IQ], heat, on, tp, tb); tp = tb
             dZ = Z[:, :NPT] - mp
+            if noda:
+                dm = Z[:, :NPT].mean(0) - mp
+                Tc.append([mean[j] + G[j] @ dm for _, j in tcells]); Uc.append([est_u(dm, i) for _, i in unodes])
+                rms.append(np.sqrt(np.mean((mean + G @ dm - Tf[ci]) ** 2))); continue
             yv = [Tf[ci, j] for j in tc] + [ut[ci, i, c] for i, c in drow]
             Yf = np.column_stack([mean[j] + dZ @ G[j] for j in tc] + [um[i, c] + dZ @ Wall[i, c] for i, c in drow])
             y = np.array(yv) + ro.normal(0, np.sqrt(np.diag(Rd)))

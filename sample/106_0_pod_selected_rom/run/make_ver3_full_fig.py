@@ -53,7 +53,7 @@ def main():
                 for k in range(len(names)): ax.plot(t, ys[k], color=cols[k], lw=2.2)
             yy = 0.97
             for k, e in enumerate(errs):
-                ref = (k == 1 and kind == "U" and title in ("反り A−O", "Uz(A)", "Uz(O)"))
+                ref = ("A・O 自身" in names[k] and kind == "U" and title in ("反り A−O", "Uz(A)", "Uz(O)"))
                 ax.text(0.98, yy, f"{e:.2f} {unit}" + ("（観測した点）" if ref else ""), transform=ax.transAxes,
                         ha="right", va="top", fontsize=12, color=cols[k], weight="bold",
                         bbox=dict(fc="white", ec="none", alpha=.8, pad=1)); yy -= 0.10
@@ -62,12 +62,12 @@ def main():
             if r == len(ROWS) - 1: ax.set_xlabel("時刻 [s]")
     handles = [Line2D([], [], color="#111", lw=2.6, marker="o", ms=4, label="真値（OpenFOAM＋FrontISTR）")] + \
               [Line2D([], [], color=c, lw=2.5, label=n) for n, c in zip(names, cols)]
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.983), ncol=4, fontsize=14, frameon=False)
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.986), ncol=3, fontsize=14, frameon=False)
     fig.suptitle("検証3　真値を OpenFOAM＋FrontISTR にして、観測していない温度・変位を3条件で確かめる（5 seed 平均）",
                  fontsize=18, weight="bold", y=0.997)
-    fig.text(0.5, 0.962, "温度計は P2・P0（観測）。グラフの点は、青の「A・O 自身を測る」の A−O・Uz(A)・Uz(O) を除き、観測に使っていない。"
+    fig.text(0.5, 0.950, "黄＝データ同化なし（ROM だけ）。それ以外は温度計 P2・P0 を観測。グラフの点は、青の「A・O 自身を測る」の A−O・Uz(A)・Uz(O) を除き、観測に使っていない。\n"
              "数字＝30〜300 秒の平均誤差（線の色と対応）。橙の帯＝ヒータ ON", ha="center", fontsize=13, color="#444")
-    fig.tight_layout(rect=(0, 0, 1, 0.952))
+    fig.tight_layout(rect=(0, 0, 1, 0.940))
     fig.savefig(os.path.join(IMG, "ver3_detail_full.png"), dpi=85, facecolor="white"); plt.close(fig)
     print("wrote ver3_detail_full.png")
 
