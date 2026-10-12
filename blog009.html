@@ -298,7 +298,26 @@ W・間欠加熱でも確かめる</a></li>
 </ul></li>
 <li><a href="#7-結論と再現場所" id="toc-7-結論と再現場所">7.
 結論と再現場所</a></li>
-<li><a href="#8-先行研究温度センサの位置はどこが良いとされているか" id="toc-8-先行研究温度センサの位置はどこが良いとされているか">8.
+<li><a href="#8-4000-本の総当たりではなく理論から最適位置を求める" id="toc-8-4000-本の総当たりではなく理論から最適位置を求める">8. 4,000
+本の総当たりではなく、理論から最適位置を求める</a>
+<ul>
+<li><a href="#8-1-センサ1本の-σ-は閉じた式で書ける" id="toc-8-1-センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
+は、閉じた式で書ける</a></li>
+<li><a href="#8-2-候補を全体の温まりと温度差の2軸で見る" id="toc-8-2-候補を全体の温まりと温度差の2軸で見る">8-2.
+候補を「全体の温まり」と「温度差」の2軸で見る</a></li>
+<li><a href="#8-3-2本の全組み合わせを厳密に評価する" id="toc-8-3-2本の全組み合わせを厳密に評価する">8-3.
+2本の全組み合わせを、厳密に評価する</a></li>
+<li><a href="#8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ" id="toc-8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
+目的を「反り＋ <span class="math inline">\(U_z(A)\)</span>
+＋平均温度」にして、2本を厳密に選ぶ</a></li>
+<li><a href="#8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ" id="toc-8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
+補正を積み重ねた後の σ も、式で計算できる（逐次 σ）</a></li>
+<li><a href="#8-6-理論で選んだ配置をenkf-で確かめる" id="toc-8-6-理論で選んだ配置をenkf-で確かめる">8-6.
+理論で選んだ配置を、EnKF で確かめる</a></li>
+<li><a href="#8-7-まとめ4000-本の総当たりは何に置き換わるか" id="toc-8-7-まとめ4000-本の総当たりは何に置き換わるか">8-7.
+まとめ：4,000 本の総当たりは何に置き換わるか</a></li>
+</ul></li>
+<li><a href="#9-先行研究温度センサの位置はどこが良いとされているか" id="toc-9-先行研究温度センサの位置はどこが良いとされているか">9.
 先行研究：温度センサの位置は、どこが良いとされているか</a></li>
 </ul></li>
 </ul>
@@ -2277,7 +2296,423 @@ Kになりました。</strong>
 <a href="blog010.html">blog010：評価点を変えた観測配置の検証</a>
 にまとめました。</p>
 <hr/>
-<h2 id="8-先行研究温度センサの位置はどこが良いとされているか">8.
+<h2 id="8-4000-本の総当たりではなく理論から最適位置を求める">8. 4,000
+本の総当たりではなく、理論から最適位置を求める</h2>
+<p>ここまでの選び方は「ROM を 4,000 本回してばらつき <span class="math inline">\(B\)</span>
+を作り、候補を1本ずつ総当たりで採点する」ものでした。同じ答えを、<strong>もっと理論的に、短い計算で</strong>出せるかを確かめました（
+<code>run/theory_based_selection.py</code> ）。 <span class="math inline">\(B\)</span>
+は乱数ではなく式で計算したもの（blog_008 §5-2
+の「共分散の伝播」）を使っています。</p>
+<p><span class="math inline">\(B\)</span>
+を熱方程式から求める部分（固定した放熱条件での線形応答＋放熱条件の数値積分、および接線近似）は、<a href="blog011.html">blog_011</a>
+で別に詳しく扱っています。この節では、 <span class="math inline">\(B\)</span>
+が手に入った後の「候補の選び方」を理論的にする部分（閉じた式、2軸の見方、全ペアの厳密評価、複数目的、逐次
+σ）を扱います。</p>
+<h3 id="8-1-センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
+は、閉じた式で書ける</h3>
+<p>センサ1本（重み <span class="math inline">\(\mathbf h\)</span>
+）を付けた後の反りの σ
+は、付録Aの式をそのまま変形すると、次の2つの掛け算になります。</p>
+<p><span class="math display">\[
+\sigma^2=\mathbf w^{\mathsf T}B\,\mathbf
+w\Big(1-\cos^2\theta_B\cdot\frac{\mathrm{SNR}}{1+\mathrm{SNR}}\Big),\qquad
+\cos\theta_B=\frac{\mathbf w^{\mathsf T}B\,\mathbf h}{\sqrt{(\mathbf
+w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
+\mathrm{SNR}=\frac{\mathbf h^{\mathsf T}B\,\mathbf h}{r}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\cos\theta_B\)</span>
+：温度のばらつき方で測った、<strong>センサの重みと反りの重みの向きの近さ</strong>。</li>
+<li><span class="math inline">\(\mathrm{SNR}\)</span>
+：センサの値のばらつき ÷ ノイズ。<strong>値がよく動くか</strong>。</li>
+</ul>
+<p><strong>理想のセンサは、重みが反りの重みと同じ向きで（ <span class="math inline">\(\cos\theta_B\to\pm1\)</span> ）、値が大きく動く（
+<span class="math inline">\(\mathrm{SNR}\gg1\)</span>
+）もの</strong>です。この式で全候補を並べた結果は、総当たりの σ
+と一致しました（差 <span class="math inline">\(10^{-16}\)</span>
+µm、計算 0.03
+秒）。総当たりが要らないのではなく、「総当たりの採点が、この2つの量に分解できる」ということです。</p>
+<h3 id="8-2-候補を全体の温まりと温度差の2軸で見る">8-2.
+候補を「全体の温まり」と「温度差」の2軸で見る</h3>
+<p>温度のばらつき <span class="math inline">\(B\)</span>
+を固有値分解すると、<strong>90 %
+が「5点が一緒に上がる」方向（全体の温まり）、7 %
+が「ヒータ側⇔反対側」の方向（温度差）</strong>で、残りは 3 %
+です。各候補の重みをこの2方向に射影し、ノイズで割ると、候補は平面上の点になります。</p>
+<figure>
+<img alt="候補を2軸で見る" src="img/two_axis_plane.png"/>
+<figcaption aria-hidden="true">候補を2軸で見る</figcaption>
+</figure>
+<p><em>横軸＝全体の温まりがどれだけ見えるか、縦軸＝温度差がどれだけ見えるか（どちらも信号÷ノイズ、30〜300
+秒の平均）。灰色の点＝変位計の候補 14,754、橙の点＝温度計の候補
+20,696。★＝反りの重み（ <code>run/make_two_axis_plane_fig.py</code>
+）。</em></p>
+<ul>
+<li><strong>反り（★）は縦軸の上</strong>にあります。横軸（全体の温まり）には反応しません。</li>
+<li><strong>温度計は全部、右側（横軸
+7〜9）</strong>にあります。温度計はどこに置いても全体の温まりが見えます。縦軸の位置はヒータ側（＋）か反対側（−）かで決まります。</li>
+<li><strong>変位計は広く散らばります</strong>。上面の横方向（ <span class="math inline">\(U_x\)</span> ）の候補は横軸がほぼ 0
+で、温度差だけを見ます。上面の上下方向（ <span class="math inline">\(U_z\)</span> 、S2
+など）は右下にあり、全体の温まりも見えます。</li>
+<li><strong>blog_009
+の鏡写しの変位計2本（◆）は、縦軸の近くの同じ場所</strong>にあります。反りと同じ軸しか見ていないので反りは当たり、全体の温まりが見えないので温度は当たらない、ということが一目で分かります。</li>
+<li>2本で温度場まで直したいなら、<strong>右側（温度計か上下方向の変位計）と、縦軸の近く（横方向の変位計）を1本ずつ</strong>取るのが良い組み合わせです。</li>
+</ul>
+<p>この2軸だけに落として σ
+を計算すると、1本の順位はほぼ合いますが、<strong>2本の組み合わせでは精度が足りませんでした</strong>（2軸で最良のペアを本来の
+<span class="math inline">\(B\)</span> で評価し直すと、変位2本で
+0.32、温度2本で 0.54 µm と、貪欲法より悪い）。残り 3 %
+の方向も2本目の選定には効きます。図は説明のために使い、選定は5次元のままで行います。</p>
+<h3 id="8-3-2本の全組み合わせを厳密に評価する">8-3.
+2本の全組み合わせを、厳密に評価する</h3>
+<p>2本の σ は、1本足すごとの更新式（付録B）を2回使うと、<strong>2×2
+の式で閉じます</strong>。そのため、候補の全組み合わせ（変位2本：約1.1億組、温度2本：約2.1億組）を、近似なしで評価できます（各時刻の
+<span class="math inline">\(B\)</span> で計算して10時刻平均。1組あたり
+2×2 の行列の計算だけ）。</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 28%"/>
+<col style="width: 28%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>選び方（目的＝反り A−O）</th>
+<th>選ばれた2本</th>
+<th style="text-align: right;">σ（反り）</th>
+<th style="text-align: right;">計算時間</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位2本・貪欲法（§2）</td>
+<td>上面 <span class="math inline">\(U_x\)</span> の鏡写し <span class="math inline">\((18.8,\,\pm32.5)\)</span></td>
+<td style="text-align: right;">0.296 µm</td>
+<td style="text-align: right;">数秒</td>
+</tr>
+<tr class="even">
+<td><strong>変位2本・全ペア厳密</strong></td>
+<td>上面 <span class="math inline">\(U_x\)</span> <span class="math inline">\((26.5,\,26.5)\)</span> ＋ <span class="math inline">\((9.7,\,-36.2)\)</span></td>
+<td style="text-align: right;"><strong>0.293 µm</strong></td>
+<td style="text-align: right;">81 秒</td>
+</tr>
+<tr class="odd">
+<td>温度2本・貪欲法（§2）</td>
+<td>ヒータ側・中段 ＋ 反対側・中段</td>
+<td style="text-align: right;">0.366 µm</td>
+<td style="text-align: right;">数秒</td>
+</tr>
+<tr class="even">
+<td><strong>温度2本・全ペア厳密</strong></td>
+<td>同じ（座標が 1 mm ほど違うだけ）</td>
+<td style="text-align: right;"><strong>0.366 µm</strong></td>
+<td style="text-align: right;">176 秒</td>
+</tr>
+<tr class="odd">
+<td><strong>温度1本＋変位1本・全ペア厳密</strong></td>
+<td>温度：反対側 <span class="math inline">\(z=80\)</span> mm ＋ 変位
+<span class="math inline">\(U_x\)</span> 上面 <span class="math inline">\((-4.9,\,-37.2)\)</span></td>
+<td style="text-align: right;"><strong>0.286 µm</strong></td>
+<td style="text-align: right;">124 秒</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>貪欲法は、厳密な最適解の 1 % 以内でした。</strong>
+1本ずつ選ぶ方法で十分だったことが、厳密解で確かめられました。</li>
+<li>反りだけを目的にすると、種類を問わない最良は「温度1本＋変位1本」（0.286
+µm）です。ただし温度計1本では <span class="math inline">\(U_z(A)\)</span> の σ が 0.51 µm（§8-4
+の表）で、全体の温まりは半分しか直りません。</li>
+</ul>
+<h3 id="8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
+目的を「反り＋ <span class="math inline">\(U_z(A)\)</span>
+＋平均温度」にして、2本を厳密に選ぶ</h3>
+<p>§5
+の落とし穴（反りだけを目的にすると全体の温まりが見えない）を避けるため、知りたい量を3つにして、「それぞれの
+σ が測る前の何割残るか」の二乗の和 <span class="math inline">\(J\)</span>
+を最小にする2本を、全組み合わせから厳密に選びました。</p>
+<p><span class="math display">\[
+J=\Big(\frac{\sigma_{A-O}}{\sigma_{A-O,0}}\Big)^2+\Big(\frac{\sigma_{U_z(A)}}{\sigma_{U_z(A),0}}\Big)^2+\Big(\frac{\sigma_{\bar
+T}}{\sigma_{\bar T,0}}\Big)^2
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>2本の配置</th>
+<th style="text-align: right;">反り A−O の σ</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の σ</th>
+<th style="text-align: right;">5点の平均温度の σ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>何も測らない</td>
+<td style="text-align: right;">1.46 µm</td>
+<td style="text-align: right;">3.02 µm</td>
+<td style="text-align: right;">2.39 K</td>
+</tr>
+<tr class="even">
+<td>変位2本（反りだけ、§2 の鏡写し <span class="math inline">\(U_x\)</span> ）</td>
+<td style="text-align: right;"><strong>0.30 µm</strong></td>
+<td style="text-align: right;">2.58 µm</td>
+<td style="text-align: right;">2.14 K</td>
+</tr>
+<tr class="odd">
+<td>温度1本＋変位1本（反りだけ、厳密）</td>
+<td style="text-align: right;">0.29 µm</td>
+<td style="text-align: right;">0.51 µm</td>
+<td style="text-align: right;">0.40 K</td>
+</tr>
+<tr class="even">
+<td><strong>変位2本（3つの目的、厳密）</strong>：上面 <span class="math inline">\(U_z\)</span> の鏡写し <span class="math inline">\((\mp36.2,\,\pm9.7)\)</span></td>
+<td style="text-align: right;">0.33 µm</td>
+<td style="text-align: right;"><strong>0.27 µm</strong></td>
+<td style="text-align: right;"><strong>0.24 K</strong></td>
+</tr>
+<tr class="odd">
+<td>温度2本（3つの目的、厳密）：ヒータ側 <span class="math inline">\(z=48\)</span> ＋ 反対側 <span class="math inline">\(z=67\)</span> mm</td>
+<td style="text-align: right;">0.38 µm</td>
+<td style="text-align: right;">0.38 µm</td>
+<td style="text-align: right;">0.24 K</td>
+</tr>
+<tr class="even">
+<td>温度1本＋変位1本（3つの目的、厳密）：温度 ヒータ側 <span class="math inline">\(z=36\)</span> ＋ 変位 <span class="math inline">\(U_z\)</span> 上面 <span class="math inline">\((-36.2,\,9.7)\)</span></td>
+<td style="text-align: right;">0.36 µm</td>
+<td style="text-align: right;">0.35 µm</td>
+<td style="text-align: right;">0.23 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>目的を3つにすると、<strong>変位2本でも「上面の上下方向 <span class="math inline">\(U_z\)</span> 」が選ばれ</strong>、反り・ <span class="math inline">\(U_z(A)\)</span> ・平均温度のすべてが測る前の
+1/4〜1/10 になります。反りは 0.30 → 0.33 µm
+とわずかに譲るだけです。</li>
+<li>2軸の図で言うと、上下方向の変位計は右下（全体の温まりも温度差も見える）にあるので、2本で両方の軸を押さえられます。</li>
+<li>これらの配置を実際に
+EnKF（真値＝OpenFOAM＋FrontISTR、3条件）で確かめた結果は、§8-6
+にあります。</li>
+</ul>
+<h3 id="8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
+補正を積み重ねた後の σ も、式で計算できる（逐次 σ）</h3>
+<p>σ は「直す前の状態から1回だけ直したら」の値なので、30
+秒ごとに20回直す実際のデータ同化より大きめに出ます（blog_008 §5-2
+(c″)）。補正を積み重ねた後の分からなさも、測定値なしで式で追えます（カルマンフィルタのリッカチ方程式）。</p>
+<p><span class="math display">\[
+P^f_{k+1}=\Phi\,P^a_k\,\Phi^{\mathsf T},\qquad
+P^a_{k+1}=P^f_{k+1}-P^f_{k+1}H^{\mathsf T}\big(HP^f_{k+1}H^{\mathsf
+T}+R\big)^{-1}HP^f_{k+1}
+\]</span></p>
+<p>（ <span class="math inline">\(\Phi\)</span> ＝ROM を 30
+秒進める行列。7変数（温度5点・ <span class="math inline">\(q\)</span> ・
+<span class="math inline">\(h\)</span>
+）で、平均の軌道のまわりの一次近似。モデル誤差は入れていない。）</p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>配置</th>
+<th style="text-align: right;">1回だけ補正の σ</th>
+<th style="text-align: right;">20回積み重ねた σ（逐次）</th>
+<th style="text-align: right;">実際の EnKF の誤差（15 W）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度 P2・P0（片側）</td>
+<td style="text-align: right;">1.20 µm</td>
+<td style="text-align: right;">0.96 µm</td>
+<td style="text-align: right;">0.77 µm</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P4（両側）</td>
+<td style="text-align: right;">0.59 µm</td>
+<td style="text-align: right;">0.46 µm</td>
+<td style="text-align: right;">0.23 µm</td>
+</tr>
+<tr class="odd">
+<td>温度2本（§2）</td>
+<td style="text-align: right;">0.37 µm</td>
+<td style="text-align: right;">0.23 µm</td>
+<td style="text-align: right;">0.20 µm</td>
+</tr>
+<tr class="even">
+<td>変位 S1・S2（blog_008）</td>
+<td style="text-align: right;">0.32 µm</td>
+<td style="text-align: right;">0.21 µm</td>
+<td style="text-align: right;">0.16 µm</td>
+</tr>
+<tr class="odd">
+<td>変位2本（§2）</td>
+<td style="text-align: right;">0.30 µm</td>
+<td style="text-align: right;">0.20 µm</td>
+<td style="text-align: right;">0.12 µm</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P0 ＋ 変位 S1・S2</td>
+<td style="text-align: right;">0.26 µm</td>
+<td style="text-align: right;">0.15 µm</td>
+<td style="text-align: right;">0.075 µm</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>順位は、1回だけの σ でも逐次 σ
+でも、実際の誤差と完全に一致</strong>しました（この6配置では順位相関
+1.0）。</li>
+<li>逐次 σ のほうが、値が実際に近づきます。それでもまだ 1.5〜2
+倍大きいのは、モデル誤差を入れていないことと、一次近似のためと考えられます（確かめていません）。</li>
+</ul>
+<h3 id="8-6-理論で選んだ配置をenkf-で確かめる">8-6.
+理論で選んだ配置を、EnKF で確かめる</h3>
+<p>§8-3・§8-4 で選んだ配置を、真値＝OpenFOAM＋FrontISTR の3条件で EnKF
+にかけ、測っていない量の誤差を比べました（
+<code>run/selected_pair_unobserved_check.py mo</code> ）。</p>
+<figure>
+<img alt="理論で選んだ2本と、反りだけで選んだ2本" src="img/unobserved_mo_learned.png"/>
+<figcaption aria-hidden="true">理論で選んだ2本と、反りだけで選んだ2本</figcaption>
+</figure>
+<blockquote>
+<p>15
+W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的3つで選んだ変位2本（上面
+<span class="math inline">\(U_z\)</span>
+の鏡写し）、緑＝目的3つで選んだ温度1本＋変位1本、紫＝反りだけで厳密に選んだ温度1本＋変位1本。見方は
+§4 の図と同じ。25 W と間欠加熱の図：<a href="img/unobserved_mo_q25.png">unobserved_mo_q25.png</a>、<a href="img/unobserved_mo_intermittent.png">unobserved_mo_intermittent.png</a></p>
+</blockquote>
+<p><strong>測っていない量の誤差</strong>（30〜300
+秒の平均、5回の平均。15 W／25 W／間欠）</p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+<col style="width: 20%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>2本の配置</th>
+<th>反り A−O</th>
+<th>温度場全体</th>
+<th><span class="math inline">\(U_z(A)\)</span></th>
+<th><span class="math inline">\(U_z(O)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>データ同化なし</td>
+<td>0.24／1.38／0.14 µm ※</td>
+<td>4.58／3.12／4.51 K</td>
+<td>5.60／3.22／5.49 µm</td>
+<td>5.37／4.59／5.35 µm</td>
+</tr>
+<tr class="even">
+<td>変位2本（反りだけ、§2 の鏡写し <span class="math inline">\(U_x\)</span> ）</td>
+<td><strong>0.12／0.13／0.09 µm</strong></td>
+<td>4.44／4.58／4.42 K</td>
+<td>5.32／5.54／5.29 µm</td>
+<td>5.36／5.55／5.33 µm</td>
+</tr>
+<tr class="odd">
+<td>温度1本＋変位1本（反りだけ、厳密）</td>
+<td>0.13／0.15／0.12 µm</td>
+<td>0.23／0.24／0.22 K</td>
+<td>0.23／0.29／0.22 µm</td>
+<td>0.19／0.24／0.19 µm</td>
+</tr>
+<tr class="even">
+<td><strong>変位2本（反り＋ <span class="math inline">\(U_z(A)\)</span>
+＋平均温度、厳密）</strong></td>
+<td>0.16／0.17／0.14 µm</td>
+<td><strong>0.14／0.14／0.14 K</strong></td>
+<td><strong>0.15／0.14／0.14 µm</strong></td>
+<td><strong>0.10／0.10／0.11 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>温度1本＋変位1本（反り＋ <span class="math inline">\(U_z(A)\)</span>
+＋平均温度、厳密）</td>
+<td>0.20／0.23／0.17 µm</td>
+<td>0.18／0.19／0.15 K</td>
+<td>0.20／0.21／0.15 µm</td>
+<td>0.09／0.10／0.09 µm</td>
+</tr>
+</tbody>
+</table>
+<p>※ A と O
+が同じ向きにずれて打ち消し合うため、データ同化なしでも反りだけは小さく見えます（§4）。</p>
+<ul>
+<li><strong>目的を3つにして選んだ変位2本（上面の上下方向）は、2本だけで温度場
+0.14 K、 <span class="math inline">\(U_z(A)\)</span> 0.15 µm、 <span class="math inline">\(U_z(O)\)</span> 0.10 µm まで直りました。</strong>
+反りは 0.12 → 0.16 µm
+とわずかに譲るだけです。反りだけで選んだ2本（温度場 4.4 K、 <span class="math inline">\(U_z\)</span> 5 µm 以上のまま）との違いは、§5
+の理論どおりです。</li>
+<li>反りだけを目的に「温度1本＋変位1本」を厳密に選ぶと、反りは変位2本とほぼ同じ（0.13
+µm）で、温度場も 0.23 K
+まで直ります。温度計が全体の温まりを見るためです。</li>
+<li><strong>測る前の σ の予測（§8-4 の表）と、実際の EnKF
+の順位はそろいました。</strong> 3条件（25 W・間欠加熱は ROM
+を作っていない条件）でも同じ傾向です。</li>
+<li>2本で温度場・個別の変位・反りをすべて当てたいなら、この中では「目的3つで選んだ変位2本（上面の上下方向の鏡写し）」が一番良い結果でした。</li>
+</ul>
+<h3 id="8-7-まとめ4000-本の総当たりは何に置き換わるか">8-7.
+まとめ：4,000 本の総当たりは何に置き換わるか</h3>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>今までの方法</th>
+<th>理論的な置き換え</th>
+<th>効果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ROM 4,000 本で <span class="math inline">\(B\)</span> を作る</td>
+<td>共分散の伝播（式で直接計算）</td>
+<td>乱数のぶれなし、本数を決めなくてよい、0.04 秒</td>
+</tr>
+<tr class="even">
+<td>候補を1本ずつ総当たりで採点</td>
+<td><span class="math inline">\(\cos\theta_B\)</span> と SNR
+の閉じた式</td>
+<td>結果は同じ。「反りと同じ向きで、よく動く」と意味が分かる</td>
+</tr>
+<tr class="odd">
+<td>1本ずつ足す貪欲法</td>
+<td>全組み合わせの厳密評価（2×2 の式）</td>
+<td>貪欲法が最適解の 1 % 以内と確認できた</td>
+</tr>
+<tr class="even">
+<td>反りだけの σ</td>
+<td>複数の目的の <span class="math inline">\(J\)</span></td>
+<td>全体の温まりが見えない配置を避けられる</td>
+</tr>
+<tr class="odd">
+<td>1回だけ補正の σ</td>
+<td>逐次 σ（リッカチ）</td>
+<td>順位は同じ。値が実際の誤差に近づく</td>
+</tr>
+</tbody>
+</table>
+<p><strong>やっていないこと</strong>：3本以上の厳密解（組み合わせが多すぎるので、貪欲法か凸緩和が必要）、モデル誤差
+<span class="math inline">\(Q\)</span> を入れた逐次
+σ、ノイズを実物並み（1 K、1 µm）にした場合。</p>
+<h2 id="9-先行研究温度センサの位置はどこが良いとされているか">9.
 先行研究：温度センサの位置は、どこが良いとされているか</h2>
 <p>工作機械の熱変形の研究で、温度センサの配置は、ほぼすべて「<strong>熱変位（工具先端のずれ）を推定するための配置</strong>」として選ばれています。結論は大きく3つの流派に分かれます。<strong>共通する答えは「熱源の近く」と「互いに違う情報を持つ点を選ぶ」の2点</strong>で、どの機械にも当てはまる場所の正解はなく、機械や運転条件ごとに決める、という見方で一致しています。</p>
 <table>
@@ -2310,10 +2745,14 @@ Kizaki, Teshima, Sugita（2025、東大、IJAT）は 307 点から LASSO
 </tr>
 <tr class="odd">
 <td><strong>FEM・ROM による事前選定</strong></td>
-<td>Mian ら（2012、ハダースフィールド大）、Teshima ら（2024、CIRP J.
-Manuf. Sci. Technol.）</td>
-<td>FEM
-や縮約モデルで、実験の前に場所を選ぶ枠組み。決まった場所ではなく、<strong>手順として</strong>提案している</td>
+<td>Mian ら（2012、ハダースフィールド大、MATADOR）、Teshima
+ら（2024、CIRP J. Manuf. Sci. Technol.）</td>
+<td>FEM や縮約モデルで、実験の前に場所を選ぶ枠組み。Mian
+らは3軸立形マシニングセンタの FEM から、<strong>温度 1 °C
+あたりの工具変位（傾き）が大きく、ヒステリシス（時間遅れ）が小さい節点</strong>を選び、主軸の熱には<strong>主軸を支えるキャリア（主軸頭）の表面</strong>、環境温度にはコラム・ベース・テーブルの節点を挙げている（実測との相関
+84 %）。Teshima
+らは伝達関数行列と感度関数で、センサを付けずに数と場所を決め、3軸マシニングセンタでセンサ数を
+50 % 減らした（場所の詳細は要旨に記載なし）</td>
 </tr>
 </tbody>
 </table>
@@ -2362,9 +2801,10 @@ Manuf. Sci. Technol.）</td>
 </tr>
 </tbody>
 </table>
-<p><strong>注意</strong>：全文を読んで確かめたのは Zhu
-らの論文だけです。Tanaka ら、Teshima ら、Mian
-らは要旨と書誌の確認だけで、選ばれた具体的な場所（主軸、コラムなど）までは確かめていません。発表で引用するときは、全文を確認する必要があります。</p>
+<p><strong>確認した範囲</strong>：全文を読んで確かめたのは Zhu
+ら（2008）と Mian ら（2012）です。Teshima
+ら（2024）は要旨と要点（OpenAlex 経由）まで、Tanaka
+ら（2025）は要旨までです。この2件は本文が取れず、選ばれた具体的な場所（主軸頭、コラムなど）は確かめていません。発表で引用するときは、本文を確認する必要があります。</p>
 <p><strong>参考文献</strong></p>
 <ul>
 <li><a href="https://wumrc.engin.umich.edu/wp-content/uploads/sites/51/2013/08/08JMSEZhuMachinetoolthermalerrorcompensation.pdf">Zhu,

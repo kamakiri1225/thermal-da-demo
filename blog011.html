@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_011：4,000ケースを使わず熱方程式からセンサを選ぶ</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+<style>
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
+  </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_011：4,000ケースを使わず熱方程式からセンサを選ぶ</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#blog0114000ケースを使わず熱方程式から温度変位センサを選べるか" id="toc-blog0114000ケースを使わず熱方程式から温度変位センサを選べるか">blog011：4,000ケースを使わず、熱方程式から温度・変位センサを選べるか</a>
+<ul>
+<li><a href="#1-今回の問いと実際に試した結果" id="toc-1-今回の問いと実際に試した結果">1.
+今回の問いと、実際に試した結果</a></li>
+<li><a href="#2-4000ケースで計算していたものは何か" id="toc-2-4000ケースで計算していたものは何か">2.
+4,000ケースで計算していたものは何か</a>
+<ul>
+<li><a href="#2-1-比較する不確かさをそろえる" id="toc-2-1-比較する不確かさをそろえる">2-1.
+比較する不確かさをそろえる</a></li>
+</ul></li>
+<li><a href="#3-放熱条件を固定すると熱モデルは線形になる" id="toc-3-放熱条件を固定すると熱モデルは線形になる">3.
+放熱条件を固定すると、熱モデルは線形になる</a>
+<ul>
+<li><a href="#3-1-5点の初期温度と発熱の影響を6列の行列にする" id="toc-3-1-5点の初期温度と発熱の影響を6列の行列にする">3-1.
+5点の初期温度と発熱の影響を、6列の行列にする</a></li>
+<li><a href="#3-2-固定したhでの平均共分散は掛け算で求まる" id="toc-3-2-固定したhでの平均共分散は掛け算で求まる">3-2.
+固定したhでの平均・共分散は、掛け算で求まる</a></li>
+</ul></li>
+<li><a href="#4-hの違いを1次元の数値積分でまとめる" id="toc-4-hの違いを1次元の数値積分でまとめる">4.
+hの違いを、1次元の数値積分でまとめる</a>
+<ul>
+<li><a href="#4-1-実際の積分方法とクリップ処理" id="toc-4-1-実際の積分方法とクリップ処理">4-1.
+実際の積分方法と、クリップ処理</a></li>
+<li><a href="#4-2-積分点数を増やして確かめた結果" id="toc-4-2-積分点数を増やして確かめた結果">4-2.
+積分点数を増やして確かめた結果</a></li>
+</ul></li>
+<li><a href="#5-補助比較感度方程式だけでも共分散を作れるか" id="toc-5-補助比較感度方程式だけでも共分散を作れるか">5.
+補助比較：感度方程式だけでも共分散を作れるか</a></li>
+<li><a href="#6-共分散が分かればどの候補が良いかを計算できる" id="toc-6-共分散が分かればどの候補が良いかを計算できる">6.
+共分散が分かれば、どの候補が良いかを計算できる</a>
+<ul>
+<li><a href="#6-1-温度変位反りを同じ5点温度で表す" id="toc-6-1-温度変位反りを同じ5点温度で表す">6-1.
+温度・変位・反りを、同じ5点温度で表す</a></li>
+<li><a href="#6-2-候補を測ると仮定したときどれだけ反りの不確かさを減らせるか" id="toc-6-2-候補を測ると仮定したときどれだけ反りの不確かさを減らせるか">6-2.
+候補を測ると仮定したとき、どれだけ反りの不確かさを減らせるか</a></li>
+<li><a href="#6-3-熱感度wだけから選ぶこととの違い" id="toc-6-3-熱感度wだけから選ぶこととの違い">6-3.
+熱感度Wだけから選ぶこととの違い</a></li>
+</ul></li>
+<li><a href="#7-方程式から得たjc分布と選ばれた4本" id="toc-7-方程式から得たjc分布と選ばれた4本">7.
+方程式から得たJc分布と、選ばれた4本</a></li>
+<li><a href="#8-選んだセンサで実際にデータ同化した結果" id="toc-8-選んだセンサで実際にデータ同化した結果">8.
+選んだセンサで実際にデータ同化した結果</a>
+<ul>
+<li><a href="#8-1-温度2本から変位2本を追加した効果" id="toc-8-1-温度2本から変位2本を追加した効果">8-1.
+温度2本から、変位2本を追加した効果</a></li>
+<li><a href="#8-2-代表点以外の未観測温度変位の時刻歴" id="toc-8-2-代表点以外の未観測温度変位の時刻歴">8-2.
+代表点以外の未観測温度・変位の時刻歴</a></li>
+</ul></li>
+<li><a href="#9-計算時間と検証した範囲" id="toc-9-計算時間と検証した範囲">9. 計算時間と検証した範囲</a></li>
+<li><a href="#10-数式プログラム保存先の対応" id="toc-10-数式プログラム保存先の対応">10.
+数式・プログラム・保存先の対応</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="blog0114000ケースを使わず熱方程式から温度変位センサを選べるか">blog011：4,000ケースを使わず、熱方程式から温度・変位センサを選べるか</h1>
+<h2 id="1-今回の問いと実際に試した結果">1.
+今回の問いと、実際に試した結果</h2>
+<p>blog009では、初期温度・発熱・放熱条件を変えてROMを4,000本計算し、そのばらつきから温度2点、続いて変位2点を選びました。</p>
+<p><strong>今回は、その4,000本を、熱方程式から共分散を計算する方法に置き換えました。温度2点・変位2点はすべて同じ位置・方向になり、同じEnKFを使うと未観測温度・変位の時刻歴も一致しました。</strong>
+この条件では、大量の乱数計算をせずに、同じ配置を決められました。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>比較した方法</th>
+<th>共分散の求め方</th>
+<th>選ばれた温度2点・変位2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>従来法：MC4000</td>
+<td>4,000本のROM結果を集計</td>
+<td>blog009のT1・T2、S1のUx・S2のUx</td>
+</tr>
+<tr class="even">
+<td>今回の主方法：quad32</td>
+<td>固定した放熱条件で線形応答を求め、放熱条件だけ数値積分</td>
+<td>従来法と4本すべて一致</td>
+</tr>
+<tr class="odd">
+<td>補助比較：tangent</td>
+<td>基準温度の周りで熱方程式を微分し、不確かさを伝える</td>
+<td>従来法と4本すべて一致</td>
+</tr>
+</tbody>
+</table>
+<p><strong>何を良くする配置か</strong>：観測に使わない反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
+の推定です。全温度場や発熱量に対する最適性を証明した試験ではありません。対象A・O、ヒータ位置、候補範囲はblog009と同じです。blog010の90°回転したA・Oについては、今回の方法での再選定はまだ行っていません。</p>
+<figure>
+<img alt="方程式から求めた採点値と計算時間" src="img/blog011/scores_and_cost.png"/>
+<figcaption aria-hidden="true">方程式から求めた採点値と計算時間</figcaption>
+</figure>
+<blockquote>
+<p>左：同じ候補の採点値 <span class="math inline">\(J_c\)</span>
+を比較。破線は完全一致の線。表示する点を間引いていますが、選定には全候補を使用。右：30〜300秒の共分散を作る時間。候補探索、描画、EnKF、OpenFOAM・FrontISTRの事前計算を含みません。</p>
+</blockquote>
+<h2 id="2-4000ケースで計算していたものは何か">2.
+4,000ケースで計算していたものは何か</h2>
+<p>代表点5点の温度を、次の列ベクトルで表します。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf T_P(t)}_{5\times1}=
+\begin{bmatrix}T[P0]{}(t)\\T[P1]{}(t)\\T[P2]{}(t)\\T[P3]{}(t)\\T[P4]{}(t)\end{bmatrix}.
+\]</span></p>
+<p><span class="math inline">\(T[Pj]\)</span>
+はOpenFOAM上の代表セルPjの温度です。今回の共分散計算は、まだ観測で補正していない状態から始めます。</p>
+<p>4,000ケース法では、同じ時刻の温度を並べ、平均からの偏差を作ります。</p>
+<p><span class="math display">\[
+\overline{\mathbf T}_P(t)=\frac1{4000}\sum_{m=1}^{4000}\mathbf
+T_P^{(m)}(t),
+\qquad
+\delta\mathbf T_P^{(m)}=\mathbf T_P^{(m)}-\overline{\mathbf T}_P.
+\]</span></p>
+<p><span class="math display">\[
+\underbrace{B(t)}_{5\times5}=
+\frac1{3999}\sum_{m=1}^{4000}
+\underbrace{\delta\mathbf T_P^{(m)}}_{5\times1}
+\underbrace{(\delta\mathbf T_P^{(m)})^{\mathsf T}}_{1\times5}.
+\]</span></p>
+<p><strong>センサ候補を採点する段階で必要なのは、この <span class="math inline">\(B(t)\)</span> です。</strong>
+4,000本の時刻歴そのものを、候補ごとのデータ同化に使っているわけではありません。今回は、この行列を方程式から作ります。実際のデータ同化のメンバー数は、引き続き60です。</p>
+<h3 id="2-1-比較する不確かさをそろえる">2-1.
+比較する不確かさをそろえる</h3>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>入力</th>
+<th>blog009と今回で共通に与えた分布</th>
+<th>単位</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>初期温度5点</td>
+<td>各点独立、17〜32 ℃の一様分布</td>
+<td>Kまたは℃</td>
+</tr>
+<tr class="even">
+<td>発熱倍率 <span class="math inline">\(q\)</span></td>
+<td>0.3〜1.8の一様分布、 <span class="math inline">\(Q=15q\)</span></td>
+<td><span class="math inline">\(q\)</span> は無次元、 <span class="math inline">\(Q\)</span> はW</td>
+</tr>
+<tr class="odd">
+<td>放熱 <span class="math inline">\(h\)</span></td>
+<td>平均0.02、標準偏差0.01の正規乱数を0.001〜0.1にクリップ</td>
+<td>W/K</td>
+</tr>
+</tbody>
+</table>
+<p>ここから <span class="math inline">\(q=q_{\mathrm{scale}}\)</span> 、
+<span class="math inline">\(h=h_{\mathrm{ROM}}\)</span>
+と短く書きます。<strong>この <span class="math inline">\(h\)</span>
+は集中定数ROMの放熱コンダクタンスであり、表面熱伝達率 [W/(m² K)]
+とは区別します。</strong> 5点初期温度、 <span class="math inline">\(q\)</span> 、 <span class="math inline">\(h\)</span> は互いに独立という仮定です。</p>
+<p>不確かさの大きさは、今回も事前に仮定しています。熱方程式が決めるのは、与えた不確かさが時間とともにどう広がるかです。</p>
+<h2 id="3-放熱条件を固定すると熱モデルは線形になる">3.
+放熱条件を固定すると、熱モデルは線形になる</h2>
+<p>代表点iの熱方程式は、既存コードのままです。</p>
+<p><span class="math display">\[
+C_i\dot T[P_i] =\sum_{j\ne i}K_{ij}\big(T[P_j]-T[P_i]\big)
+-h\big(T[P_i]-T_{\mathrm{air}}\big) +15b_iq\,s(t).
+\]</span></p>
+<ul>
+<li><span class="math inline">\(C_i\)</span> ：熱容量 [J/K]。</li>
+<li><span class="math inline">\(K_{ij}\)</span>
+：代表点間の熱コンダクタンス [W/K]。</li>
+<li><span class="math inline">\(b_i\)</span>
+：ヒータ入力点だけ1、ほかは0。</li>
+<li><span class="math inline">\(s(t)\)</span>
+：加熱ONなら1、OFFなら0。配置設計では0〜300秒ON。</li>
+<li><span class="math inline">\(T_{\mathrm{air}}=293.15\)</span> K（20
+℃）。</li>
+</ul>
+<p>外気温からの温度上昇を <span class="math inline">\(\boldsymbol\theta=\mathbf
+T_P-T_{\mathrm{air}}\mathbf1\)</span>
+と定義します。熱容量行列と熱移動行列は、</p>
+<p><span class="math display">\[
+\underbrace{C}_{5\times5}=\mathrm{diag}(C_0,\ldots,C_4),
+\qquad
+L_{ij}=K_{ij}\ (i\ne j),\quad L_{ii}=-\sum_{j\ne i}K_{ij}.
+\]</span></p>
+<p>したがって、</p>
+<p><span class="math display">\[
+\underbrace{\dot{\boldsymbol\theta}}_{5\times1}
+=\underbrace{C^{-1}(L-hI)}_{A_h:\ 5\times5}
+\underbrace{\boldsymbol\theta}_{5\times1} +\underbrace{15C^{-1}\mathbf
+b}_{\mathbf b_q:\ 5\times1}q\,s(t).
+\]</span></p>
+<p>** <span class="math inline">\(h\)</span> を固定すると、初期温度と
+<span class="math inline">\(q\)</span> に対して線形です。**
+ここを使います。</p>
+<h3 id="3-1-5点の初期温度と発熱の影響を6列の行列にする">3-1.
+5点の初期温度と発熱の影響を、6列の行列にする</h3>
+<p>初期温度上昇と発熱倍率をまとめます。</p>
+<p><span class="math display">\[
+\underbrace{\boldsymbol\xi}_{6\times1}=
+\begin{bmatrix}
+\theta[P0]{}(0)\\\theta[P1]{}(0)\\\theta[P2]{}(0)\\\theta[P3]{}(0)\\\theta[P4]{}(0)\\q
+\end{bmatrix}.
+\]</span></p>
+<p>固定した <span class="math inline">\(h\)</span>
+について、時刻tの温度上昇は、</p>
+<p><span class="math display">\[
+\boxed{
+\underbrace{\boldsymbol\theta(t)}_{5\times1}
+=\underbrace{F_h(t)}_{5\times6}
+\underbrace{\boldsymbol\xi}_{6\times1}
+}
+\]</span></p>
+<p>と表せます。 <span class="math inline">\(F_h\)</span>
+の各列の意味を明示すると、</p>
+<p><span class="math display">\[
+F_h=
+\begin{bmatrix}
+f_{00}&amp;f_{01}&amp;f_{02}&amp;f_{03}&amp;f_{04}&amp;f_{0q}\\
+f_{10}&amp;f_{11}&amp;f_{12}&amp;f_{13}&amp;f_{14}&amp;f_{1q}\\
+f_{20}&amp;f_{21}&amp;f_{22}&amp;f_{23}&amp;f_{24}&amp;f_{2q}\\
+f_{30}&amp;f_{31}&amp;f_{32}&amp;f_{33}&amp;f_{34}&amp;f_{3q}\\
+f_{40}&amp;f_{41}&amp;f_{42}&amp;f_{43}&amp;f_{44}&amp;f_{4q}
+\end{bmatrix}.
+\]</span></p>
+<p><span class="math inline">\(f_{ij}\)</span> は「初期のPj温度が1
+K違うと、時刻tのPi温度が何 K違うか」、 <span class="math inline">\(f_{iq}\)</span>
+は「発熱倍率が1違うと、時刻tのPi温度が何 K違うか」です。</p>
+<p>例えばP0温度は、</p>
+<p><span class="math display">\[
+\theta[P0]{}(t)=
+f_{00}\theta[P0]{}(0)+f_{01}\theta[P1]{}(0)+f_{02}\theta[P2]{}(0)
++f_{03}\theta[P3]{}(0)+f_{04}\theta[P4]{}(0)+f_{0q}q.
+\]</span></p>
+<p>連続時間の解として書けば、</p>
+<p><span class="math display">\[
+F_h(t)=\begin{bmatrix}
+\underbrace{\exp(A_ht)}_{5\times5}&amp;
+\underbrace{\int_0^t\exp(A_h(t-\tau))\mathbf
+b_qs(\tau)\,d\tau}_{5\times1}
+\end{bmatrix}.
+\]</span></p>
+<p><strong>今回の実装では、行列指数を直接計算せず、既存のRK4積分器で単位応答を作りました。</strong>
+外気温・発熱ゼロの基準1本、初期温度を1点ずつ1
+K上げる5本、発熱倍率だけ1にする1本の、計7本を同時に進めます。基準との差が
+<span class="math inline">\(F_h\)</span> の6列です。</p>
+<p>これは乱数を使わない、決まった入力に対する応答計算です。任意入力の直接ROM計算との最大差は、150秒で
+** <span class="math inline">\(2.27\times10^{-12}\)</span> K**
+でした。</p>
+<h3 id="3-2-固定したhでの平均共分散は掛け算で求まる">3-2.
+固定したhでの平均・共分散は、掛け算で求まる</h3>
+<p>一様分布 <span class="math inline">\(U(a,b)\)</span> の平均は <span class="math inline">\((a+b)/2\)</span> 、分散は <span class="math inline">\((b-a)^2/12\)</span> です。今回、</p>
+<p><span class="math display">\[
+\underbrace{\boldsymbol\mu_\xi}_{6\times1}
+=\begin{bmatrix}4.5\\4.5\\4.5\\4.5\\4.5\\1.05\end{bmatrix},
+\qquad
+\underbrace{V_\xi}_{6\times6} =\mathrm{diag}\left(
+\frac{15^2}{12},\frac{15^2}{12},\frac{15^2}{12},\frac{15^2}{12},\frac{15^2}{12},\frac{1.5^2}{12}
+\right).
+\]</span></p>
+<p>最初の5成分の単位は、平均がK、分散がK²です。最後の成分は無次元です。独立なので、
+<span class="math inline">\(V_\xi\)</span> の非対角はゼロです。</p>
+<p><span class="math inline">\(h\)</span>
+を固定したときの平均温度上昇と共分散は、</p>
+<p><span class="math display">\[
+\underbrace{\boldsymbol\mu_h}_{5\times1}
+=\underbrace{F_h}_{5\times6}\underbrace{\boldsymbol\mu_\xi}_{6\times1},
+\qquad
+\boxed{
+\underbrace{B_h}_{5\times5}
+=\underbrace{F_h}_{5\times6}\underbrace{V_\xi}_{6\times6}
+\underbrace{F_h^{\mathsf T}}_{6\times5}
+}.
+\]</span></p>
+<p>導出は、平均からのずれ <span class="math inline">\(\delta\boldsymbol\xi=\boldsymbol\xi-\boldsymbol\mu_\xi\)</span>
+を使うと、</p>
+<p><span class="math display">\[
+\delta\boldsymbol\theta=F_h\delta\boldsymbol\xi,
+\]</span></p>
+<p><span class="math display">\[
+\mathbb E[\delta\boldsymbol\theta\delta\boldsymbol\theta^{\mathsf T}\mid
+h] =F_h\mathbb E[\delta\boldsymbol\xi\delta\boldsymbol\xi^{\mathsf
+T}]F_h^{\mathsf T} =F_hV_\xi F_h^{\mathsf T}.
+\]</span></p>
+<p>つまり、初期温度・発熱倍率を何千通りも振る必要はありません。</p>
+<h2 id="4-hの違いを1次元の数値積分でまとめる">4.
+hの違いを、1次元の数値積分でまとめる</h2>
+<p>まだ <span class="math inline">\(h\)</span>
+の不確かさが残っています。 <span class="math inline">\(h\)</span>
+ごとの結果を、 <span class="math inline">\(h\)</span>
+の確率分布に従って平均します。</p>
+<p><span class="math display">\[
+\overline{\boldsymbol\theta}(t)=\mathbb E_h[\boldsymbol\mu_h(t)].
+\]</span></p>
+<p>全体の温度偏差を2つに分けます。</p>
+<p><span class="math display">\[
+\boldsymbol\theta-\overline{\boldsymbol\theta}
+=\underbrace{(\boldsymbol\theta-\boldsymbol\mu_h)}_{(1)}
++\underbrace{(\boldsymbol\mu_h-\overline{\boldsymbol\theta})}_{(2)}.
+\]</span></p>
+<p>（(1) 同じ <span class="math inline">\(h\)</span>
+での初期温度・発熱の違い、(2) <span class="math inline">\(h\)</span>
+が違うことによる平均温度の違い。）</p>
+<p>この列ベクトルとその転置を掛けて平均すると、交差項は <span class="math inline">\(\mathbb E[\boldsymbol\theta-\boldsymbol\mu_h\mid
+h]=0\)</span> により消えます。したがって、</p>
+<p><span class="math display">\[
+\boxed{
+B(t)=\mathbb E_h[B_h(t)] +\mathbb E_h\left[
+(\boldsymbol\mu_h-\overline{\boldsymbol\theta})
+(\boldsymbol\mu_h-\overline{\boldsymbol\theta})^{\mathsf T}
+\right]
+}\qquad(5\times5).
+\]</span></p>
+<p>温度上昇と絶対温度は定数だけ違うので、温度の共分散も同じ <span class="math inline">\(B(t)\)</span> です。</p>
+<h3 id="4-1-実際の積分方法とクリップ処理">4-1.
+実際の積分方法と、クリップ処理</h3>
+<p>積分点を <span class="math inline">\(h_\ell\)</span> 、その重みを
+<span class="math inline">\(\omega_\ell\)</span> とすると、</p>
+<p><span class="math display">\[
+\overline{\boldsymbol\theta}\approx\sum_\ell\omega_\ell\boldsymbol\mu_{h_\ell},
+\]</span></p>
+<p><span class="math display">\[
+B\approx\sum_\ell\omega_\ell B_{h_\ell} +\sum_\ell\omega_\ell
+(\boldsymbol\mu_{h_\ell}-\overline{\boldsymbol\theta})
+(\boldsymbol\mu_{h_\ell}-\overline{\boldsymbol\theta})^{\mathsf T}.
+\]</span></p>
+<p>区間 <span class="math inline">\([0.001,0.1]\)</span>
+の積分にGauss–Legendre求積を使いました。これは、決められた位置で関数を評価し、重みを掛けて足す数値積分です。</p>
+<p>元コードの <code>np.clip()</code>
+は、範囲外の乱数を端点へ移します。そのため、区間内部の正規分布密度の積分に加え、下端・上端の確率も含めます。
+<span class="math inline">\(Z\sim\mathcal N(0.02,0.01^2)\)</span>
+とすると、任意の関数 <span class="math inline">\(f\)</span>
+の平均は、</p>
+<p><span class="math display">\[
+\mathbb E[f(h)] =\Pr(Z\le0.001)f(0.001)
++\int_{0.001}^{0.1}f(h)p_Z(h)\,dh +\Pr(Z\ge0.1)f(0.1).
+\]</span></p>
+<p><strong>「範囲内だけで正規分布を再正規化する」処理ではありません。元のクリップした分布に合わせています。</strong></p>
+<h3 id="4-2-積分点数を増やして確かめた結果">4-2.
+積分点数を増やして確かめた結果</h3>
+<table>
+<colgroup>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 20%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">区間内部の積分点数</th>
+<th style="text-align: right;">重みの合計</th>
+<th style="text-align: right;">64点計算に対する共分散の相対差</th>
+<th>判断</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1.002893</td>
+<td style="text-align: right;">約13％</td>
+<td>重みの合計の検査を満たさないため不採用</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">1.0000000059</td>
+<td style="text-align: right;"><span class="math inline">\(6.71\times10^{-9}\)</span></td>
+<td>ほぼ収束</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">1.0000000000</td>
+<td style="text-align: right;"><span class="math inline">\(1.96\times10^{-13}\)</span></td>
+<td>本比較に採用</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">1.0000000000</td>
+<td style="text-align: right;">基準</td>
+<td>収束確認用</td>
+</tr>
+</tbody>
+</table>
+<p>相対差は、10時刻すべての行列要素の二乗和の平方根で比較しています。8点は粗い積分の診断結果であり、その共分散を配置選定には使用していません。</p>
+<p>32点法は、区間内部32点と両端2点で、各7本の単位応答、計
+<strong>238本相当</strong>
+を計算します。初期温度・発熱の分布は行列で扱い、乱数サンプルは使いません。64点との一致は
+<strong>h方向の積分の収束</strong>
+の確認であり、ROMの物理精度やRK4の時間刻み誤差の検証とは別です。</p>
+<h2 id="5-補助比較感度方程式だけでも共分散を作れるか">5.
+補助比較：感度方程式だけでも共分散を作れるか</h2>
+<p>もう1つ、基準の温度・発熱・放熱の周りで線形化する方法も試しました。</p>
+<p>初期入力を <span class="math inline">\(\boldsymbol\chi=[\boldsymbol\theta(0)^{\mathsf
+T},q,h]^{\mathsf T}\)</span> （7×1）、その共分散を <span class="math inline">\(V_\chi\)</span> （7×7）とします。 <span class="math inline">\(h\)</span>
+の平均・分散には、上記のクリップ分布の数値積分値を使います。</p>
+<p><span class="math display">\[
+\underbrace{S(t)}_{5\times7}
+=\frac{\partial\boldsymbol\theta(t)}{\partial\boldsymbol\chi^{\mathsf
+T}} =\begin{bmatrix}S_0&amp;S_q&amp;S_h\end{bmatrix},
+\quad S_0:5\times5,\quad S_q,S_h:5\times1.
+\]</span></p>
+<p>基準解の放熱を <span class="math inline">\(\bar h\)</span> とし、
+<span class="math inline">\(A_{\bar h}=C^{-1}(L-\bar hI)\)</span>
+とすると、</p>
+<p><span class="math display">\[
+\dot S_0=A_{\bar h}S_0,\qquad S_0(0)=I,
+\]</span></p>
+<p><span class="math display">\[
+\dot S_q=A_{\bar h}S_q+\mathbf b_qs(t),\qquad S_q(0)=0,
+\]</span></p>
+<p><span class="math display">\[
+\dot S_h=A_{\bar h}S_h-C^{-1}\boldsymbol\theta(t),\qquad S_h(0)=0.
+\]</span></p>
+<p>最後の式は、放熱項 <span class="math inline">\(-hC^{-1}\boldsymbol\theta\)</span>
+をhで微分し、積の微分を適用して得られます。</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial h}[-hC^{-1}\boldsymbol\theta]
+=-C^{-1}\boldsymbol\theta-hC^{-1}S_h.
+\]</span></p>
+<p>温度5成分と感度35成分を、同じRK4ステージで積分します。求めたい共分散は、</p>
+<p><span class="math display">\[
+\boxed{B_{\mathrm{tangent}}(t)\approx
+\underbrace{S(t)}_{5\times7}
+\underbrace{V_\chi}_{7\times7}
+\underbrace{S(t)^{\mathsf T}}_{7\times5}}.
+\]</span></p>
+<p><strong>今回は、この局所線形化でも十分近い結果になりました。</strong>
+32点積分法との共分散の相対差は約 <strong>0.0150％</strong>
+です。ただし、hの不確かさを大きくした場合や、温度依存物性・放射などを含む場合にも成立するとは限りません。</p>
+<p>発熱量Qに対する感度は、 <span class="math inline">\(Q=15q\)</span>
+より <span class="math inline">\(\partial\mathbf T/\partial
+Q=S_q/15\)</span>
+です。今回、これらの感度は温度共分散を作るために使いました。Q/h推定専用のセンサ配置比較は行っていません。</p>
+<figure>
+<img alt="共分散と温度・反りのばらつき" src="img/blog011/covariance_comparison.png"/>
+<figcaption aria-hidden="true">共分散と温度・反りのばらつき</figcaption>
+</figure>
+<p><em>観測前の反り・代表5点温度の標準偏差を比較。右は150秒での「4,000ケースの標本共分散
+−
+32点積分の共分散」。全10時刻での相対差は約1.01％。有限サンプルの標本共分散と、仮定した独立分布の積分値を比較しています。</em></p>
+<h2 id="6-共分散が分かればどの候補が良いかを計算できる">6.
+共分散が分かれば、どの候補が良いかを計算できる</h2>
+<h3 id="6-1-温度変位反りを同じ5点温度で表す">6-1.
+温度・変位・反りを、同じ5点温度で表す</h3>
+<p>代表5点温度のずれを <span class="math inline">\(\delta\mathbf
+T_P\)</span> （5×1）とすると、候補cのセンサ値と反りのずれは、</p>
+<p><span class="math display">\[
+\delta y_c=
+\underbrace{\begin{bmatrix}h_{c,0}&amp;h_{c,1}&amp;h_{c,2}&amp;h_{c,3}&amp;h_{c,4}\end{bmatrix}}_{\mathbf
+h_c^{\mathsf T}:\ 1\times5}
+\underbrace{\delta\mathbf T_P}_{5\times1},
+\qquad
+\delta d=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\delta\mathbf T_P.
+\]</span></p>
+<p>ここで <span class="math inline">\(h_{c,j}\)</span> は「Pj温度が1
+K違うと、候補cの値がいくら違うか」という固定の重みであり、放熱パラメータhとは別です。</p>
+<p>重みは、既存のPOD・IDW・FrontISTR応答から求めます。</p>
+<p><span class="math display">\[
+\underbrace{G}_{20696\times5} =\underbrace{\Phi}_{20696\times5}
+\underbrace{(\Phi_P)^+}_{5\times5},
+\qquad \Phi_P=\Phi[P,:].
+\]</span></p>
+<p>（ <span class="math inline">\(\Phi[P,:]\)</span> ＝ <span class="math inline">\(\Phi\)</span>
+から代表5セルの行だけを取り出したもの。）</p>
+<p>温度候補セルcの重みは、 <span class="math inline">\(G\)</span>
+のc行です。変位の重みは、</p>
+<p><span class="math display">\[
+\underbrace{H_u}_{15120\times5}
+=\underbrace{D}_{15120\times5}(\Phi_P)^+,
+\qquad
+D=\underbrace{W}_{15120\times5040}
+\underbrace{M}_{5040\times20696}\Phi.
+\]</span></p>
+<ul>
+<li><span class="math inline">\(M\)</span>
+：OpenFOAMセル温度をFEM節点温度へ写すIDW写像（8近傍、距離の逆数、行和1）。</li>
+<li><span class="math inline">\(W\)</span>
+：FEM節点温度変化から全節点の3方向変位への、固定の熱弾性応答。</li>
+<li><span class="math inline">\(D\)</span>
+：各PODモードのFrontISTR変位応答。実装は保存済みのDを使用し、候補ごとにFrontISTRを実行しません。</li>
+<li><span class="math inline">\(H_u\)</span>
+：FEM節点・方向ごとの5点温度への重み。保存配列の形は節点×3方向×5モードです。</li>
+</ul>
+<p>対象の反りは、 <span class="math inline">\(H_u\)</span>
+のAのUz行とOのUz行の差です。</p>
+<p><span class="math display">\[
+\mathbf w^{\mathsf T}=[H_u]_{A,z,:}-[H_u]_{O,z,:}.
+\]</span></p>
+<h3 id="6-2-候補を測ると仮定したときどれだけ反りの不確かさを減らせるか">6-2.
+候補を測ると仮定したとき、どれだけ反りの不確かさを減らせるか</h3>
+<p>現在残っている5点温度の誤差共分散を <span class="math inline">\(P(t)\)</span> （5×5）とします。最初は <span class="math inline">\(P=B\)</span> です。</p>
+<p>候補cの観測ノイズを独立な <span class="math inline">\(\varepsilon_c\)</span> 、分散を <span class="math inline">\(r_c\)</span>
+とすると、反り誤差を候補の観測と予報の差から補正する係数をaとして、補正後の分散は、</p>
+<p><span class="math display">\[
+V_d-2aC_{dy}+a^2V_y,
+\]</span></p>
+<p><span class="math display">\[
+V_d=\mathbf w^{\mathsf T}P\mathbf w,
+\qquad C_{dy}=\mathbf w^{\mathsf T}P\mathbf h_c,
+\qquad V_y=\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c.
+\]</span></p>
+<p>平方完成すると、</p>
+<p><span class="math display">\[
+V_y\left(a-\frac{C_{dy}}{V_y}\right)^2+V_d-\frac{C_{dy}^2}{V_y}.
+\]</span></p>
+<p>最小にする係数は <span class="math inline">\(a=C_{dy}/V_y\)</span>
+なので、候補を使うことで減らせる反り分散は、</p>
+<p><span class="math display">\[
+\boxed{\Delta V_c(t)=
+\frac{(\mathbf w^{\mathsf T}P(t)\mathbf h_c)^2}
+{\mathbf h_c^{\mathsf T}P(t)\mathbf h_c+r_c}}.
+\]</span></p>
+<p>これは線形補正の平均二乗誤差を最小化した結果です。ガウス分布を仮定しなくても、この線形補正の評価には使えます。非ガウス分布での厳密な条件付き分散が、すべての測定値でこの値になると主張するものではありません。</p>
+<p>現在のプログラムと同じ採点値は、10時刻での残る標準偏差の平均です。</p>
+<p><span class="math display">\[
+\boxed{J_c=\frac1{10}\sum_{k=1}^{10}
+\sqrt{\mathbf w^{\mathsf T}P(t_k)\mathbf w-\Delta V_c(t_k)}}.
+\]</span></p>
+<p><span class="math inline">\(t_k=30,60,\ldots,300\)</span> 秒、 <span class="math inline">\(r_c=0.3^2\)</span> K²または0.3² µm²です。** <span class="math inline">\(J_c\)</span> が小さい候補を選びます。**
+分散の時間平均の平方根ではなく、各時刻の標準偏差を平均しています。</p>
+<p>1本を選んだ後の共分散は、</p>
+<p><span class="math display">\[
+\underbrace{P_{+c}}_{5\times5}=P-
+\frac{\underbrace{P\mathbf h_c}_{5\times1}
+\underbrace{\mathbf h_c^{\mathsf T}P}_{1\times5}}
+{\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}.
+\]</span></p>
+<p>この更新後の行列を使って次の候補を再採点します。温度2本を先に選び、その2本を固定した条件で変位2本を選びます。</p>
+<p>配置設計では、各時刻の事前共分散 <span class="math inline">\(B(t_k)\)</span>
+に対して、その時刻で選定センサを測れると仮定した線形補正を評価します。時刻間の観測履歴まで含むEnKFの予報共分散を、この段階で計算しているわけではありません。実際に30秒ごとに補正を繰り返した効果は、§8のEnKF試験で確認します。</p>
+<h3 id="6-3-熱感度wだけから選ぶこととの違い">6-3.
+熱感度Wだけから選ぶこととの違い</h3>
+<p><span class="math inline">\(W\)</span>
+は「どこが温まると対象がどう変位するか」を表します。今回の採点式では、それに温度の不確かさ
+<span class="math inline">\(P\)</span> と観測ノイズ <span class="math inline">\(r_c\)</span> を組み合わせます。</p>
+<p><strong>選ばれるのは、まだ分からない温度の組合せを捉え、その情報が目的の反りを直すのに役立つ候補です。</strong>
+<span class="math inline">\(W\)</span>
+が大きい場所や、よく動く場所を単独で順位付けする基準ではありません。</p>
+<p>今回の試験で置き換えたのは <span class="math inline">\(B\)</span>
+を作る方法です。 <span class="math inline">\(W\)</span>
+、温度復元の重み、候補の採点式は共通です。</p>
+<h2 id="7-方程式から得たjc分布と選ばれた4本">7.
+方程式から得たJc分布と、選ばれた4本</h2>
+<p>温度候補は代表5セルを除く
+<strong>20,691セル</strong>、変位候補はA/O近傍12 mmを除く
+<strong>4,918節点×3方向＝14,754成分</strong>
+です。元のA/Oはヒータ側・反対側の上面で、実際の節点座標はA=(28.75,0,100.5)
+mm、O=(−28.75,0,100.5) mmです。</p>
+<figure>
+<img alt="温度1本目の採点分布" src="img/blog011/temperature_1.png"/>
+<figcaption aria-hidden="true">温度1本目の採点分布</figcaption>
+</figure>
+<figure>
+<img alt="温度2本目の採点分布" src="img/blog011/temperature_2.png"/>
+<figcaption aria-hidden="true">温度2本目の採点分布</figcaption>
+</figure>
+<figure>
+<img alt="変位1本目の採点分布" src="img/blog011/displacement_1.png"/>
+<figcaption aria-hidden="true">変位1本目の採点分布</figcaption>
+</figure>
+<figure>
+<img alt="変位2本目の採点分布" src="img/blog011/displacement_2.png"/>
+<figcaption aria-hidden="true">変位2本目の採点分布</figcaption>
+</figure>
+<p><em>斜めアングル。小さいJcほど良い候補。変位はUx・Uy・Uzのすべてを採点し、各方向を同じカラースケールで表示。色の範囲は選定段階ごとに異なります。</em></p>
+<table>
+<colgroup>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>順序</th>
+<th>選んだセンサ</th>
+<th>概略座標 [mm]</th>
+<th style="text-align: right;">4,000ケース法のJ [µm]</th>
+<th style="text-align: right;">32点積分法のJ [µm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>温度T1：ヒータ側・中段</td>
+<td>(36.7, 0.8, 49.2)</td>
+<td style="text-align: right;">1.225906</td>
+<td style="text-align: right;">1.231774</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>温度T2：反対側・中段</td>
+<td>(−35.9, −1.5, 51.6)</td>
+<td style="text-align: right;">0.365559</td>
+<td style="text-align: right;">0.365736</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>変位S1：上面、Ux</td>
+<td>(4.9, −37.2, 100.5)</td>
+<td style="text-align: right;">0.245882</td>
+<td style="text-align: right;">0.245913</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>変位S2：上面、Ux</td>
+<td>(4.9, 37.2, 100.5)</td>
+<td style="text-align: right;">0.204461</td>
+<td style="text-align: right;">0.204454</td>
+</tr>
+</tbody>
+</table>
+<p>この表のJは、各段階でそれまでの観測をすべて追加した条件の値です。Jは設計時の予測標準偏差であり、次節の実際の同化誤差と同じ量ではありません。</p>
+<p><strong>今回は、乱数による標本共分散と理論に基づく共分散の差があっても、候補の最小位置は変わりませんでした。</strong>
+これは今回の分布・候補範囲・目的量での検証結果です。4本の組合せ全体について大域的最適を証明したものではありません。</p>
+<h2 id="8-選んだセンサで実際にデータ同化した結果">8.
+選んだセンサで実際にデータ同化した結果</h2>
+<p>今回プログラムを実行して得た計算結果を示します。真値には、既存のOpenFOAM温度場とFrontISTR全節点変位を使用しています。実機での検証は今後の課題です。</p>
+<ul>
+<li>EnKF：60メンバー、30秒ごとに20回更新、0〜600秒。</li>
+<li>乱数seed：20260913〜20260917の5回。</li>
+<li>温度・変位の観測ノイズ標準偏差：0.3 K、0.3 µm。</li>
+<li>インフレーション：偏差を1.02倍。</li>
+<li>更新する状態：代表5点温度・発熱倍率q・放熱hの計7変数。</li>
+<li>真値：15 W基準、25 W、15 W間欠加熱の保存済み高忠実度解析結果。</li>
+<li>配置設計は15
+W・0〜300秒ONの事前分布から行い、配置を固定して3条件で試験。</li>
+</ul>
+<p>MC4000、quad32、tangentの各配置を、同じEnKF・同じseedでそれぞれ計算し直しました。<strong>選択点が同じなので、3方式の同化後の保存時刻歴は配列として完全一致しました。</strong>
+図では重なる線を1組にまとめています。</p>
+<h3 id="8-1-温度2本から変位2本を追加した効果">8-1.
+温度2本から、変位2本を追加した効果</h3>
+<figure>
+<img alt="3加熱条件の未観測量の誤差" src="img/blog011/holdout_error_bars.png"/>
+<figcaption aria-hidden="true">3加熱条件の未観測量の誤差</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 13%"/>
+<col style="width: 18%"/>
+<col style="width: 18%"/>
+<col style="width: 18%"/>
+<col style="width: 18%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>加熱条件</th>
+<th>観測配置</th>
+<th style="text-align: right;">全温度場 [K]</th>
+<th style="text-align: right;">反りA−O [µm]</th>
+<th style="text-align: right;">Uz(A) [µm]</th>
+<th style="text-align: right;">Uz(O) [µm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td>手動温度P2・P0</td>
+<td style="text-align: right;">0.543</td>
+<td style="text-align: right;">0.775</td>
+<td style="text-align: right;">0.241</td>
+<td style="text-align: right;">0.951</td>
+</tr>
+<tr class="even">
+<td>15 W</td>
+<td>選定温度T1・T2</td>
+<td style="text-align: right;">0.208</td>
+<td style="text-align: right;">0.198</td>
+<td style="text-align: right;">0.200</td>
+<td style="text-align: right;">0.204</td>
+</tr>
+<tr class="odd">
+<td>15 W</td>
+<td>T1・T2＋S1・S2のUx</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: right;">0.103</td>
+<td style="text-align: right;">0.140</td>
+<td style="text-align: right;">0.168</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td>手動温度P2・P0</td>
+<td style="text-align: right;">0.882</td>
+<td style="text-align: right;">1.417</td>
+<td style="text-align: right;">0.311</td>
+<td style="text-align: right;">1.699</td>
+</tr>
+<tr class="odd">
+<td>25 W</td>
+<td>選定温度T1・T2</td>
+<td style="text-align: right;">0.247</td>
+<td style="text-align: right;">0.242</td>
+<td style="text-align: right;">0.226</td>
+<td style="text-align: right;">0.298</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td>T1・T2＋S1・S2のUx</td>
+<td style="text-align: right;">0.206</td>
+<td style="text-align: right;">0.107</td>
+<td style="text-align: right;">0.180</td>
+<td style="text-align: right;">0.221</td>
+</tr>
+<tr class="odd">
+<td>15 W間欠</td>
+<td>手動温度P2・P0</td>
+<td style="text-align: right;">0.528</td>
+<td style="text-align: right;">0.635</td>
+<td style="text-align: right;">0.276</td>
+<td style="text-align: right;">0.874</td>
+</tr>
+<tr class="even">
+<td>15 W間欠</td>
+<td>選定温度T1・T2</td>
+<td style="text-align: right;">0.194</td>
+<td style="text-align: right;">0.161</td>
+<td style="text-align: right;">0.170</td>
+<td style="text-align: right;">0.210</td>
+</tr>
+<tr class="odd">
+<td>15 W間欠</td>
+<td>T1・T2＋S1・S2のUx</td>
+<td style="text-align: right;">0.167</td>
+<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.139</td>
+<td style="text-align: right;">0.166</td>
+</tr>
+</tbody>
+</table>
+<p>全温度場は、30〜300秒の10時刻それぞれで全20,696セルのRMSEを求め、その時間平均を5
+seedで平均した値です。変位は同じ10時刻の平均絶対誤差を5
+seedで平均しています。</p>
+<p><span class="math display">\[
+E_T=\frac15\sum_{s=1}^{5}\frac1{10}\sum_{k=1}^{10}
+\sqrt{\frac1{20696}\sum_{i=1}^{20696}
+\big(\widehat T_i^{(s)}(t_k)-T_i^*(t_k)\big)^2},
+\]</span></p>
+<p><span class="math display">\[
+E_d=\frac15\sum_{s=1}^{5}\frac1{10}\sum_{k=1}^{10}
+\left|\widehat d^{(s)}(t_k)-d^*(t_k)\right|.
+\]</span></p>
+<p>星印は真値、帽子は同化後60メンバーの平均から求めた推定値です。平均した線の誤差ではなく、seedごとの誤差を平均しています。</p>
+<h3 id="8-2-代表点以外の未観測温度変位の時刻歴">8-2.
+代表点以外の未観測温度・変位の時刻歴</h3>
+<figure>
+<img alt="15Wの未観測温度・変位" src="img/blog011/holdout_history_learned.png"/>
+<figcaption aria-hidden="true">15Wの未観測温度・変位</figcaption>
+</figure>
+<figure>
+<img alt="25Wの未観測温度・変位" src="img/blog011/holdout_history_q25.png"/>
+<figcaption aria-hidden="true">25Wの未観測温度・変位</figcaption>
+</figure>
+<figure>
+<img alt="間欠加熱の未観測温度・変位" src="img/blog011/holdout_history_intermittent.png"/>
+<figcaption aria-hidden="true">間欠加熱の未観測温度・変位</figcaption>
+</figure>
+<p><em>上段：代表点にも観測点にも使わない4セルの温度。下段：観測しない反りA−O、Uz(A)、Uz(O)、上面+y側DのUz。Dの評価位置はおよそ(0,36.2,100.5)
+mmで、S1・S2のUxとは異なる観測成分・位置です。黒が真値、橙が手動温度2点、青が選定温度2点、赤がさらに選定変位2点を追加した結果。橙色の背景は加熱ON。線は5
+seed平均、1回目の同化を行った30秒以降。</em></p>
+<p>固定した未観測温度4点の概略位置は、ヒータ側上部(35.1,−0.8,94.6)、反対側上部(−37.5,0,90)、+y側中段(0,35.5,50)、反対側下部(−32.9,−1.6,29.7)
+mmです。最寄りのOpenFOAMセルで比較しています。</p>
+<p>15 Wの温度＋変位同化では、この4点の平均絶対誤差は
+<strong>0.146、0.206、0.095、0.149 K</strong> です。同化なしでは
+<strong>4.610、4.493、4.560、4.466 K</strong>
+でした。代表点以外・観測点以外の温度も真値へ近づいています。ただし、変位を追加した配置がすべての温度点で最小誤差になるとは限りません。</p>
+<h2 id="9-計算時間と検証した範囲">9. 計算時間と検証した範囲</h2>
+<table>
+<thead>
+<tr class="header">
+<th>方法</th>
+<th style="text-align: right;">共分散作成 [s]</th>
+<th style="text-align: right;">4本の候補探索 [s]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4,000ケース法</td>
+<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.086</td>
+</tr>
+<tr class="even">
+<td>32点＋両端の数値積分</td>
+<td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.088</td>
+</tr>
+<tr class="odd">
+<td>局所線形化</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.094</td>
+</tr>
+</tbody>
+</table>
+<p>この実行では共分散作成が約4.6倍速くなりました。いずれも既に小さい5点ROMであり、1回の計測値です。入出力・描画を含む全体速度や、高忠実度解析の高速化率を示す値ではありません。選定後のEnKFは、8構成×5
+seedを各加熱条件で実行し、1条件あたり約4.7〜4.9秒（既存評価図の作成を含む）でした。</p>
+<p>検査した事項は、単位応答と任意入力の直接計算の一致、積分重みの合計、32点と64点の収束、共分散の対称性・半正定値性、3方式の同化時刻歴の一致です。</p>
+<p><strong>今回言えること</strong>：blog009の条件では、温度共分散を熱モデルから作り、4,000ケースと同じ温度・変位配置を決められました。その配置による未観測温度・変位の推定精度も維持されました。</p>
+<p><strong>今後の確認</strong>：事前分布を変えた場合、A/Oを回転した場合、非線形な熱モデル、学習範囲外の大きな放熱変化でも同じ配置・精度になるか。今回の結果だけで「どの問題にも最適」「Q/h推定にも最適」とは結論しません。</p>
+<h2 id="10-数式プログラム保存先の対応">10.
+数式・プログラム・保存先の対応</h2>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>数式・処理</th>
+<th>プログラム</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>固定hでのROM、単位応答RK4</td>
+<td><code>dacore/rom_general.py</code> の
+<code>integrate_ensemble()</code></td>
+</tr>
+<tr class="even">
+<td>クリップ正規分布の積分点・端点確率</td>
+<td><code>run/analytic_covariance_sensor_study.py</code> の
+<code>h_quadrature()</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(F_hV_\xi F_h^{\mathsf T}\)</span>
+、全共分散の合成</td>
+<td>同ファイルの <code>conditional_covariance()</code></td>
+</tr>
+<tr class="even">
+<td>基準温度と直接感度Sの同時RK4</td>
+<td>同ファイルの <code>tangent_covariance()</code></td>
+</tr>
+<tr class="odd">
+<td>候補の重みG、Hu、反り重みw</td>
+<td>同ファイルの <code>operators()</code></td>
+</tr>
+<tr class="even">
+<td>温度2本→変位2本の貪欲選定</td>
+<td>同ファイルの <code>select()</code></td>
+</tr>
+<tr class="odd">
+<td>Jcと1本追加後の共分散</td>
+<td>既存 <code>run/select_nonrep_temp_disp.py</code> の
+<code>score()</code>、<code>add_row()</code></td>
+</tr>
+<tr class="even">
+<td>共通条件でのEnKF・未観測量評価</td>
+<td>既存 <code>run/selected_pair_unobserved_check.py</code>
+を新規スクリプトから呼び出し</td>
+</tr>
+<tr class="odd">
+<td>Jc分布・誤差・時刻歴の図</td>
+<td><code>run/make_blog011_figures.py</code></td>
+</tr>
+</tbody>
+</table>
+<p>計算フォルダは
+<strong><code>sample/106_0_pod_selected_rom/results/blog011/</code></strong>
+です。既存のblog009・010の結果は上書きしていません。</p>
+<ul>
+<li><code>study.json</code>：選定結果、共分散差、収束、検査値、計算時間。</li>
+<li><code>covariances.npz</code>：10時刻の各方式の共分散。</li>
+<li><code>selection_*.json</code>、<code>scores_*.npz</code>：選定点と全候補のJc。</li>
+<li><code>unobserved_check_analytic_*.json</code>：各加熱条件の誤差。</li>
+<li><code>unobserved_traj_analytic_*.npz</code>：未観測温度・変位の時刻歴。</li>
+<li><code>vtk/analytic_sensor_scores.vtu</code>：ParaView用のJc分布。温度は表示メッシュへのIDW写像、変位はFEM節点値。</li>
+</ul>
+<p>再現コマンド（106フォルダ内で実行）：</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a aria-hidden="true" href="#cb1-1" tabindex="-1"></a><span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python</span> run/analytic_covariance_sensor_study.py</span>
+<span id="cb1-2"><a aria-hidden="true" href="#cb1-2" tabindex="-1"></a><span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python</span> run/make_blog011_figures.py</span>
+<span id="cb1-3"><a aria-hidden="true" href="#cb1-3" tabindex="-1"></a><span class="ex">python</span> run/build_local_site.py</span></code></pre></div>
+<p>既存のOpenFOAM・FrontISTR真値、校正済みROM、POD・変位応答が必要です。この試験ではそれらを再利用し、共分散計算・候補選定・ROM＋EnKFを新たに実行しました。</p>
+</body>
+</html>
