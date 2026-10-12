@@ -2346,6 +2346,66 @@ U_z(A)\approx \bar u_A+\sum_{j=0}^{4}h_{A,j}\big(T_j-\bar T_j\big)
 %）しか違いません。</strong> データ同化の推定の誤差（反りで 0.07〜0.08
 µm
 など）のほとんどは、<strong>5点の温度をどこまで正しく推定できたか</strong>で決まり、温度から変位への換算の誤差はほぼ無視できます。</p>
+<p><strong>熱感度 <span class="math inline">\(W\)</span> の分布で見る
+―「感度が高い場所」と「実際に効いている場所」</strong></p>
+<p>重み <span class="math inline">\(\mathbf h_c\)</span>
+は5つの数にまとめたものですが、もとの熱感度 <span class="math inline">\(W\)</span> は<strong>全 5,040
+節点それぞれ</strong>について「その節点の温度が 1 K 上がると、A（または
+O）が何 µm 動くか」を持っています。
+ただし、<strong>感度が高くても、そこの温度が上がらなければ A・O
+は動きません</strong>。そこで、 <span class="math inline">\(W\)</span>
+の分布（左）と、 <span class="math inline">\(W\times\)</span>
+温度の上がり分（右）を並べました。右を全節点で足すと、A・O
+の変位になります。</p>
+<p><span class="math display">\[
+U_z(A)(t)=\sum_{n=1}^{5040}W_{A,n}\,\big(T_n(t)-20\ {}^\circ\mathrm
+C\big)
+\]</span></p>
+<figure>
+<img alt="熱感度 W と、W × 温度の時刻歴" src="img/W_AO_times_temp_anim.gif"/>
+<figcaption aria-hidden="true">熱感度 W と、W ×
+温度の時刻歴</figcaption>
+</figure>
+<p><em>上から A の上下変位、O の上下変位、反り A−O。左＝熱感度 <span class="math inline">\(W\)</span> （時間で変わらない）、中＝ <span class="math inline">\(W\times\)</span>
+温度の上がり分（時間とともに変わる）、右＝中の図を全節点で足したもの（線）と
+FrontISTR の答え（○）。15 W。 <span class="math inline">\(W\)</span>
+の行は、FrontISTR がダンプした剛性行列と熱荷重行列から随伴法で求めた（A
+に単位荷重をかけて1回解くと、A の行が丸ごと出る）。温度は OpenFOAM
+の真値。色の範囲は、底面の支持点（3節点）と A・O
+の真上の局所的な値を除いて決めた。ParaView 用の VTK（
+<code>results/vtk/W_AO.vtu</code> 、
+<code>results/vtk/contrib.pvd</code> ）も出力した（
+<code>run/make_W_AO_vtk_anim.py</code> ）。</em></p>
+<ul>
+<li><strong>A
+の上下変位</strong>：熱感度はヒータ側の側面で高く、そこが実際に温まるので、ヒータ側の側面が
+A を持ち上げています。</li>
+<li><strong>O
+の上下変位</strong>：熱感度は反対側の側面で正、ヒータ側の下部で負です。ヒータ側が温まると円筒が傾き、O
+を押し下げる向きに働きます（加熱の始め、O
+が一度下がるのはこのため）。</li>
+<li><strong>反り
+A−O</strong>：ヒータ側の側面の温度が、反りの主な原因になっています。</li>
+<li>全節点で足した値は FrontISTR の答えとほぼ一致しました（ <span class="math inline">\(U_z(A)\)</span> で最大 0.011 µm、反りで最大 0.049
+µm の差。 <span class="math inline">\(W\)</span>
+は四面体に分けたメッシュ、FrontISTR
+の答えは六面体のメッシュで計算しているための差を含みます）。</li>
+</ul>
+<p><strong>重み <span class="math inline">\(\mathbf h_c\)</span>
+との関係</strong>：「代表点 <span class="math inline">\(P_j\)</span>
+だけを 1 K 上げ、ほかの4点は変えない温度分布」（gappy-POD
+で全節点に広げたもの）に <span class="math inline">\(W\)</span>
+の行を掛けて足すと、重み <span class="math inline">\(h_{c,j}\)</span>
+になります。</p>
+<p><span class="math display">\[
+h_{c,j}=\sum_{n=1}^{5040}W_{c,n}\,g_{n,j}
+\]</span></p>
+<p>（ <span class="math inline">\(n\)</span> は FEM の節点番号（5,040
+個）、 <span class="math inline">\(g_{n,j}\)</span> ：代表点 <span class="math inline">\(P_j\)</span> だけを 1 K 上げたときの、節点 <span class="math inline">\(n\)</span> の温度の上がり分。）実際に計算すると
+<span class="math inline">\(\mathbf
+h_A=(0.326,\,-0.131,\,0.260,\,0.637,\,0.118)\)</span> で、FrontISTR
+6回から作った値 <span class="math inline">\((0.329,\,-0.134,\,0.261,\,0.639,\,0.115)\)</span>
+とほぼ一致します（メッシュの違いによる差）。</p>
 <p>知りたい反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
 も、同じ形の重み <span class="math inline">\(\mathbf w\)</span>
 で書けます。</p>
