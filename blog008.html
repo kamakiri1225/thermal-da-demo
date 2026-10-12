@@ -2770,6 +2770,124 @@ h_ih_jB_{ij}\)</span> 。</li>
 も一緒に測ります。また2本目は、1本目を測った後に選びます。 考え方は (a)
 と同じで、<strong>「すでに測ったセンサで分かったことを除いた、残りのばらつき」について、同じことを繰り返します</strong>。
 これを1つの式にまとめたのが、カルマンフィルタの更新式です。</p>
+<p><strong>観測行列 <span class="math inline">\(H\)</span>
+とは</strong>：代表5点の温度から、各センサが示す値を計算するための「換算表」です。</p>
+<ul>
+<li><strong>行＝センサ1本</strong>（ここでは温度計 P2、温度計
+P0、候補の変位計の3本なので3行）</li>
+<li><strong>列＝代表点1つ</strong>（P0〜P4 なので5列）</li>
+<li><strong>各マスの数＝「その代表点の温度が 1 K
+上がると、そのセンサの値がいくつ変わるか」</strong></li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>センサ ＼ 代表点</th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計 P2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td>温度計 P0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td>変位計 S1</td>
+<td style="text-align: right;">−0.532</td>
+<td style="text-align: right;">0.596</td>
+<td style="text-align: right;">−0.763</td>
+<td style="text-align: right;">0.286</td>
+<td style="text-align: right;">0.290</td>
+</tr>
+</tbody>
+</table>
+<p>温度計 P2 の行は「P2
+の温度をそのまま示し、ほかの点には反応しない」。変位計 S1
+の行はステップ1の重み <span class="math inline">\(\mathbf h\)</span>
+で、5点すべての温度に反応します。</p>
+<p><strong>使い方</strong>：温度に掛けると、センサの値が出ます（ <span class="math inline">\(\mathbf y=H\mathbf T\)</span>
+）。例えば5点の温度上昇が <span class="math inline">\(\mathbf
+T=(2,1,3,1,1)\)</span> K なら、</p>
+<table>
+<colgroup>
+<col style="width: 30%"/>
+<col style="width: 30%"/>
+<col style="width: 40%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>計算（行の数 × 温度 を足す）</th>
+<th style="text-align: right;">値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計 P2</td>
+<td><span class="math inline">\(0\cdot2+0\cdot1+1\cdot3+0\cdot1+0\cdot1\)</span></td>
+<td style="text-align: right;">3 K</td>
+</tr>
+<tr class="even">
+<td>温度計 P0</td>
+<td><span class="math inline">\(1\cdot2+0\cdot1+0\cdot3+0\cdot1+0\cdot1\)</span></td>
+<td style="text-align: right;">2 K</td>
+</tr>
+<tr class="odd">
+<td>変位計 S1</td>
+<td><span class="math inline">\((-0.532)(2)+(0.596)(1)+(-0.763)(3)+(0.286)(1)+(0.290)(1)\)</span></td>
+<td style="text-align: right;">−2.18 µm</td>
+</tr>
+</tbody>
+</table>
+<p>（この温度は説明用の例です。）データ同化では、ROM
+が計算した温度にこの換算表を掛けて「センサが示すはずの値」を出し、実際の値と比べて温度を直します。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサの種類</th>
+<th>その行の中身</th>
+<th>どこから</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>代表点にある温度計</td>
+<td>1か所だけ 1、ほかは 0</td>
+<td>―</td>
+</tr>
+<tr class="even">
+<td>代表点以外のセルにある温度計</td>
+<td>gappy-POD の重み（5つとも 0 でない）</td>
+<td>POD</td>
+</tr>
+<tr class="odd">
+<td>変位計</td>
+<td>重み <span class="math inline">\(\mathbf h\)</span></td>
+<td>FrontISTR 6回（ステップ1）</td>
+</tr>
+</tbody>
+</table>
 <p><strong>行列でまとめると</strong>：測るセンサの重みを縦に並べた観測行列（温度計
 P2・P0 ＋ 候補 <span class="math inline">\(c\)</span> ）：</p>
 <p><span class="math display">\[
