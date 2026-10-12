@@ -707,12 +707,12 @@ $$
 T(x)\approx\bar T(x)+a_1\varphi_1(x)+a_2\varphi_2(x)+\cdots+a_5\varphi_5(x)
 $$
 
-2. **型ごとに FrontISTR を1回ずつ解く（計6回）。** 平均の温度分布を入れた変位 $\mathbf u[\bar T]$ と、型 $\varphi_k$ だけを入れた変位 $\mathbf u[\varphi_k]$ です。FEM は1回解くと**全 5,040 節点 × 3方向の変位が一度に出る**ので、6回で全候補の答えがそろいます。
+2. **型ごとに FrontISTR を1回ずつ解く（計6回）。** 平均の温度分布を入れた変位 $\bar{\mathbf u}$ と、型 $\varphi_k$ だけを入れた変位 $\mathbf d_k$ です。 $\mathbf d_1,\dots,\mathbf d_5$ を横に並べた 15,120×5 の行列が $D$ で、blog_006 §7 の $D=WU_r$ （ $W$ ＝FrontISTR の熱感度、 $U_r$ ＝型を並べた行列）と同じものです。 $D_{c,k}$ は、節点 $c$ のある方向の、型 $k$ による変位です。FEM は1回解くと**全 5,040 節点 × 3方向の変位が一度に出る**ので、6回で全候補の答えがそろいます。
 
 3. **変位も同じ足し算になる。** 熱弾性の計算は線形（温度が2倍なら変位も2倍、温度の足し算は変位の足し算）なので、
 
 $$
-\mathbf u\approx\mathbf u[\bar T]+a_1\,\mathbf u[\varphi_1]+a_2\,\mathbf u[\varphi_2]+\cdots+a_5\,\mathbf u[\varphi_5]
+\mathbf u\approx\bar{\mathbf u}+a_1\,\mathbf d_1+a_2\,\mathbf d_2+\cdots+a_5\,\mathbf d_5
 $$
 
 4. **型の強さ $a_k$ は、代表5点の温度から決まる（gappy-POD）。** ここで添字 $P$ は「P0〜P4の代表5点で取り出した値」という目印です。この式の $P$ 自体が新しい未知数や行列という意味ではありません。
@@ -731,10 +731,10 @@ $$
 
 $T(Pj)$ は今の時刻の代表点Pjの温度、 $\bar T(Pj)$ はその点での学習データの時間平均温度です。**平均温度も各点で違う5個の値**です。 $a_k$ はPODの第 $k$ モードを何倍使うかを表します。
 
-次に、各モードの値を代表5点で取り出して並べます。
+次に、各モードの値を代表5点で取り出して並べます。これは $U_r$ から代表5点の行だけを取り出したもので、 $U_{rP}$ と書きます（blog_006 と同じ記号）。
 
 $$
-\Phi_P=
+U_{rP}=
 \begin{bmatrix}
 \varphi_1(P0)&\varphi_2(P0)&\varphi_3(P0)&\varphi_4(P0)&\varphi_5(P0)\\
 \varphi_1(P1)&\varphi_2(P1)&\varphi_3(P1)&\varphi_4(P1)&\varphi_5(P1)\\
@@ -747,19 +747,19 @@ $$
 **行は場所、列はモード**です。例えば1行目は「P0の温度を、5つのモードでどう表すか」を示し、 $T(P0)-\bar T(P0)=\sum_{k=1}^{5}\varphi_k(P0)a_k$ となります。これを5点についてまとめると、次の式になります。
 
 $$
-\mathbf T_P=\bar{\mathbf T}_P+\Phi_P\,\mathbf a\quad\Rightarrow\quad\mathbf a=\Phi_P^{-1}\big(\mathbf T_P-\bar{\mathbf T}_P\big)
+\mathbf T_P=\bar{\mathbf T}_P+U_{rP}\,\mathbf a\quad\Rightarrow\quad\mathbf a=U_{rP}^{-1}\big(\mathbf T_P-\bar{\mathbf T}_P\big)
 $$
 
-ここで $\Phi_P^{-1}$ は、5点の温度差から5モードの係数を逆に求める操作です。上式は正則な5×5行列の場合の表記で、コードでは `np.linalg.pinv()` による擬似逆行列を使います。**センサの観測値をここに直接代入して同化するのではなく、各メンバーのROMが計算した代表5点の温度から、センサ位置の予測値を作るために使います。**
+ここで $U_{rP}^{-1}$ は、5点の温度差から5モードの係数を逆に求める操作です。上式は正則な5×5行列の場合の表記で、コードでは `np.linalg.pinv()` による擬似逆行列を使います。**センサの観測値をここに直接代入して同化するのではなく、各メンバーのROMが計算した代表5点の温度から、センサ位置の予測値を作るために使います。**
 
 5. **3と4を合わせると、重みが出る。** 節点 $c$ のある方向の変位は
 
 $$
-u_c=u_c[\bar T]+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf T}_P\big),\qquad
-\mathbf h_c^{\mathsf T}=\big(u_c[\varphi_1],\dots,u_c[\varphi_5]\big)\,\Phi_P^{-1}
+u_c=\bar u_c+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf T}_P\big),\qquad
+\mathbf h_c^{\mathsf T}=\big(D_{c,1},\dots,D_{c,5}\big)\,U_{rP}^{-1}
 $$
 
-つまり重み $\mathbf h_c$ は、6回の FrontISTR の結果のうち節点 $c$ の値を取り出して、5×5 の行列 $\Phi_P^{-1}$ を掛けるだけで出ます。15,120 通りすべてについて、掛け算だけで計算できます。
+つまり重み $\mathbf h_c$ は、6回の FrontISTR の結果のうち節点 $c$ の値を取り出して、5×5 の行列 $U_{rP}^{-1}$ を掛けるだけで出ます。15,120 通りすべてについて、掛け算だけで計算できます。
 
 **近似が入るのは、1の「5つの型で表す」ところ（と、OpenFOAM のセルの温度を FEM の節点へ受け渡すところ）**です。2・3は FEM の線形性そのものなので、近似はありません。
 
@@ -775,40 +775,23 @@ $$
 
 | 回 | 入れる温度 | 出てくるもの |
 |---|---|---|
-| 1回目 | 平均の温度分布 $\bar T(x)$ （OpenFOAM の 121 時刻の平均） | 全節点 × 3方向の変位 $\mathbf u[\bar T]$ |
-| 2〜6回目 | 基準温度 ＋ 型 $\varphi_k(x)$ （型をそのまま温度の上がり分として入れる） | 型を1倍入れたときの全節点 × 3方向の変位 $\mathbf u[\varphi_k]$ |
+| 1回目 | 平均の温度分布 $\bar T(x)$ （OpenFOAM の 121 時刻の平均） | 全節点 × 3方向の変位 $\bar{\mathbf u}$ |
+| 2〜6回目 | 基準温度 ＋ 型 $\varphi_k(x)$ （型をそのまま温度の上がり分として入れる） | 型を1倍入れたときの全節点 × 3方向の変位 $\mathbf d_k$ |
 
 **例：点 A の上下変位の重み。** 2〜6回目の結果から節点 A の $U_z$ を取り出すと
 
 $$
-\big(u_A[\varphi_1],\dots,u_A[\varphi_5]\big)=(-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\ \mu\mathrm m
+\big(D_{A,1},\dots,D_{A,5}\big)=(-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\ \mu\mathrm m
 $$
 
-（型は全セルで大きさ 1 にそろえた形なので、1か所あたりの温度は 0.01 K 程度と小さく、変位も小さくなります。）これに 5×5 の換算表 $\Phi_P^{-1}$ を掛けると
+（型は全セルで大きさ 1 にそろえた形なので、1か所あたりの温度は 0.01 K 程度と小さく、変位も小さくなります。）これに 5×5 の換算表 $U_{rP}^{-1}$ を掛けると
 
 $$
-\mathbf h_A^{\mathsf T}=\big(u_A[\varphi_1],\dots,u_A[\varphi_5]\big)\,\Phi_P^{-1}=(0.329,\,-0.134,\,0.261,\,0.639,\,0.115)\ \mu\mathrm m/\mathrm K
+\mathbf h_A^{\mathsf T}=\big(D_{A,1},\dots,D_{A,5}\big)\,U_{rP}^{-1}=(0.329,\,-0.134,\,0.261,\,0.639,\,0.115)\ \mu\mathrm m/\mathrm K
 $$
 
 になります。反りの重みは $\mathbf w=\mathbf h_{A,z}-\mathbf h_{O,z}$ です。
 
-**記号の対応（blog_002・004・006 との関係）**：記事ごとに記号が違うので、ここでまとめます。
-
-| 記号 | 中身 | 大きさ | 書いた場所 |
-|---|---|---|---|
-| $W=K_s^{-1}H_T$ | 熱感度：FEM の各温度自由度が 1 K 上がると、各変位がいくつ動くか | 15,120 × FEM の温度自由度の数 | blog_002 §4 |
-| $U_r$ | POD の型5つ（ $\varphi_1,\dots,\varphi_5$ を並べたもの） | 場所の数 × 5 | blog_004 |
-| $D=WU_r$ | **型1つあたりの変位**（型 $\varphi_k$ を1倍入れたときの変位 $\mathbf u[\varphi_k]$ ）。FrontISTR を型ごとに1回ずつ解いて作る | 15,120 × 5 | blog_006 §7 |
-| $U_{rP}$ （＝ $\Phi_P$ ） | 型の、代表5点での値 | 5 × 5 | blog_006 は $U_{rP}$ 、この記事は $\Phi_P$ |
-| $\mathbf h_c^{\mathsf T}=D_c\,U_{rP}^{-1}$ | **代表点 1 K あたりの変位**（重み）。 $D_c$ は $D$ の節点 $c$ ・その方向の行 | 1 × 5 | blog_008・009 |
-
-$D$ は「型1つあたり」、 $\mathbf h_c$ は「代表点 1 K あたり」で、同じものを違う単位で表しているだけです。
-
-$$
-u_c=\bar u_c+D_c\,\mathbf a=\bar u_c+D_c\,U_{rP}^{-1}\big(\mathbf T_P-\bar{\mathbf T}_P\big)=\bar u_c+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf T}_P\big)
-$$
-
-プログラムでは `Wall = einsum(D, pinv(U_rP))` が全節点の $\mathbf h_c$ をまとめた配列（15,120 × 5）です。名前は `Wall` ですが、blog_002 の $W$ とは別物です。
 
 **確かめ：重み × 実際の温度の時刻歴は、FrontISTR の答えと合うか。** データ同化を使わずに、OpenFOAM の実際の5点の温度の時刻歴に重みを掛け、FrontISTR に全温度場を入れて解いた変位（真値）と比べました。
 
@@ -817,7 +800,7 @@ $$
 *15 W。① 代表5点の温度（平均の温度分布からの上がり分）。② $U_z(A)$ を「平均の温度分布での変位 3.97 µm ＋ 各点の 重み × 上がり分」で積み上げたもの（○＝FrontISTR の答え）。③ 時刻歴：線＝重み × 温度、点＝FrontISTR。（ `run/make_weight_times_temp_anim.py` ）*
 
 $$
-U_z(A)\approx u_A[\bar T]+\sum_{j=0}^{4}h_{A,j}\big(T_j-\bar T_j\big)
+U_z(A)\approx \bar u_A+\sum_{j=0}^{4}h_{A,j}\big(T_j-\bar T_j\big)
 $$
 
 | 条件 | $U_z(A)$ の最大値 | $U_z(A)$ の差（平均／最大） | 反り A−O の差（平均／最大） |

@@ -44,23 +44,22 @@ def main():
     for x in xs:
         arrow(ax, x + 0.0675, 0.635, x + 0.0675, 0.598, GRAY)
     ax.text(0.03, 0.568, "② 型ごとに FrontISTR を1回ずつ解く（計6回）", fontsize=19, weight="bold", color=BLUE)
-    ulabs = ["$u[\\bar T]$", "$u[\\varphi_1]$", "$u[\\varphi_2]$", "$u[\\varphi_3]$",
-             "$u[\\varphi_4]$", "$u[\\varphi_5]$"]
+    ulabs = ["$\\bar u$", "$d_1$", "$d_2$", "$d_3$", "$d_4$", "$d_5$"]
     for x, l in zip(xs, ulabs):
         rbox(ax, x, 0.415, 0.135, 0.13, "#EDF3FC", BLUE, l + "\n全 5,040 節点 × 3方向\nの変位", fs=15)
     ax.text(0.5, 0.375, "熱弾性は線形なので、変位も同じ足し算になる：　"
-            "$u\\;\\approx\\;u[\\bar T]+a_1u[\\varphi_1]+a_2u[\\varphi_2]+\\cdots+a_5u[\\varphi_5]$",
+            "$u\\;\\approx\\;\\bar u+a_1d_1+a_2d_2+\\cdots+a_5d_5$",
             ha="center", fontsize=19, color=INK)
 
     # 段3：a を代表5点の温度から
     ax.text(0.03, 0.30, "③ 型の強さ $a_k$ は、代表5点の温度から決まる（gappy-POD）", fontsize=19, weight="bold", color=GOLD)
-    ax.text(0.5, 0.24, "代表5点の温度 $T_P=\\bar{T}_P+\\Phi_P\\,a$　→　$a=\\Phi_P^{-1}(T_P-\\bar{T}_P)$"
-            "　（ $\\Phi_P$ ＝5つの型の、代表5点での値。5×5）", ha="center", fontsize=19, color=INK)
+    ax.text(0.5, 0.24, "代表5点の温度 $T_P=\\bar{T}_P+U_{rP}\\,a$　→　$a=U_{rP}^{-1}(T_P-\\bar{T}_P)$"
+            "　（ $U_{rP}$ ＝5つの型の、代表5点での値。5×5）", ha="center", fontsize=19, color=INK)
 
     # 段4：まとめ
     rbox(ax, 0.06, 0.04, 0.88, 0.14, "#14213D", "#14213D",
          "②と③を合わせると、どの節点 $c$ のどの方向の変位も、代表5点の温度の一次式になる\n"
-         "$u_c=u_c[\\bar T]+h_c^{T}(T_P-\\bar{T}_P)$,　　重み $h_c^{T}=(u_c[\\varphi_1],\\dots,u_c[\\varphi_5])\\,\\Phi_P^{-1}$"
+         "$u_c=\\bar u_c+h_c^{T}(T_P-\\bar{T}_P)$,　　重み $h_c^{T}=(D_{c,1},\\dots,D_{c,5})\\,U_{rP}^{-1}$"
          "　→　6回の結果から、15,120 通りすべての重みが掛け算で出る", fs=18, col="#F4F1EA")
     fig.savefig(os.path.join(IMG, "fem6_superposition.png"), dpi=95, facecolor="white"); plt.close(fig)
     print("wrote fem6_superposition.png")
