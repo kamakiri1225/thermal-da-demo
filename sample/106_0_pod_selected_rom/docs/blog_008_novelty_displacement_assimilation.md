@@ -792,6 +792,24 @@ $$
 
 になります。反りの重みは $\mathbf w=\mathbf h_{A,z}-\mathbf h_{O,z}$ です。
 
+**記号の対応（blog_002・004・006 との関係）**：記事ごとに記号が違うので、ここでまとめます。
+
+| 記号 | 中身 | 大きさ | 書いた場所 |
+|---|---|---|---|
+| $W=K_s^{-1}H_T$ | 熱感度：FEM の各温度自由度が 1 K 上がると、各変位がいくつ動くか | 15,120 × FEM の温度自由度の数 | blog_002 §4 |
+| $U_r$ | POD の型5つ（ $\varphi_1,\dots,\varphi_5$ を並べたもの） | 場所の数 × 5 | blog_004 |
+| $D=WU_r$ | **型1つあたりの変位**（型 $\varphi_k$ を1倍入れたときの変位 $\mathbf u[\varphi_k]$ ）。FrontISTR を型ごとに1回ずつ解いて作る | 15,120 × 5 | blog_006 §7 |
+| $U_{rP}$ （＝ $\Phi_P$ ） | 型の、代表5点での値 | 5 × 5 | blog_006 は $U_{rP}$ 、この記事は $\Phi_P$ |
+| $\mathbf h_c^{\mathsf T}=D_c\,U_{rP}^{-1}$ | **代表点 1 K あたりの変位**（重み）。 $D_c$ は $D$ の節点 $c$ ・その方向の行 | 1 × 5 | blog_008・009 |
+
+$D$ は「型1つあたり」、 $\mathbf h_c$ は「代表点 1 K あたり」で、同じものを違う単位で表しているだけです。
+
+$$
+u_c=\bar u_c+D_c\,\mathbf a=\bar u_c+D_c\,U_{rP}^{-1}\big(\mathbf T_P-\bar{\mathbf T}_P\big)=\bar u_c+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf T}_P\big)
+$$
+
+プログラムでは `Wall = einsum(D, pinv(U_rP))` が全節点の $\mathbf h_c$ をまとめた配列（15,120 × 5）です。名前は `Wall` ですが、blog_002 の $W$ とは別物です。
+
 **確かめ：重み × 実際の温度の時刻歴は、FrontISTR の答えと合うか。** データ同化を使わずに、OpenFOAM の実際の5点の温度の時刻歴に重みを掛け、FrontISTR に全温度場を入れて解いた変位（真値）と比べました。
 
 ![熱感度の重み × 温度の時刻歴 ＝ 変位](img/weight_times_temp_anim.gif)
