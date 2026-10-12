@@ -45,6 +45,23 @@ COMPI = {"Ux": 0, "Uy": 1, "Uz": 2}
 
 
 def configs(setname):
+    if setname == "mo":
+        js = json.load(open(os.path.join(RES, "theory_based_selection.json"), encoding="utf-8"))
+        import re
+        def parse(lab):
+            xyz = tuple(np.array([float(v) for v in re.findall(r"-?\d+\.?\d*", lab.split("[")[1])]) / 1000)
+            if lab.startswith("温度"): return ("T", ("xyz", xyz))
+            return ("U", (xyz, COMPI["U" + lab.split()[1].lower()]))
+        def cfg(entry, name, col, ls):
+            t_ = [parse(l)[1] for l in entry["best"] if parse(l)[0] == "T"]; u_ = [parse(l)[1] for l in entry["best"] if parse(l)[0] == "U"]
+            return (name, t_, u_, col, ls)
+        mo = js["multi_objective_exact"]; ex = js["pair_exact"]
+        return ("理論で選んだ2本（全ペア厳密・複数目的）と、反りだけで選んだ2本の比較",
+                [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
+                 ("変位2本（反りだけ、貪欲法：blog_009）", [], [((0.0188, 0.0325, H_), 0), ((0.0188, -0.0325, H_), 0)], "#9AA5B1", "--"),
+                 cfg(ex["温度1本＋変位1本"], "温度1本＋変位1本（反りだけ、全ペア厳密）", "#8E44AD", "--"),
+                 cfg(mo["変位2本"], "変位2本（反り＋Uz(A)＋平均温度）", "#C0392B", "-"),
+                 cfg(mo["温度1本＋変位1本"], "温度1本＋変位1本（反り＋Uz(A)＋平均温度）", "#2E8B57", "-")])
     if setname == "seq":
         js = json.load(open(os.path.join(RES, "sequential_selection.json"), encoding="utf-8"))
         ts = [("xyz", tuple(np.array(p["xyz_m"]))) for p in js["temperature"]]
@@ -252,7 +269,7 @@ def main(setname, case):
 
 
 if __name__ == "__main__":
-    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v", "t2", "seq")] or ["s", "n", "v"]
+    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v", "t2", "seq", "mo")] or ["s", "n", "v"]
     cases = [a for a in sys.argv[1:] if a in CASES] or list(CASES)
     for s_ in sets:
         for c in cases:

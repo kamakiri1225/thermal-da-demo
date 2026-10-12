@@ -29,6 +29,7 @@ TITLES = {
     "blog_008": "blog_008：温度だけでなく変位も同化に使う ― 本研究の主張",
     "blog_009": "blog_009：温度2点を選び、次に変位2点を追加する",
     "blog_010": "blog_010：評価点A・Oを90°回した観測配置の検証",
+    "blog_011": "blog_011：4,000ケースを使わず熱方程式からセンサを選ぶ",
 }
 LEAD = {
     "blog_001": "中空円筒のCHT解析からFrontISTRの熱膨張まで。熱伝達率の分布も出す。",
@@ -41,6 +42,7 @@ LEAD = {
     "blog_008": "先行研究を調べたうえで、変位を観測に入れることが研究の主張として成り立つかを整理する。",
     "blog_009": "温度のJ分布で2点を選び、その配置に変位2点を追加する。未観測温度・変位の改善を同条件で比較する。",
     "blog_010": "ヒータを固定し、評価対象A・Oだけ90°回転。同じ4,000ケース・EnKF条件で温度と変位を選び直す。",
+    "blog_011": "共分散を熱方程式と1次元の数値積分で計算。4,000ケース法との配置・採点分布・未観測温度と変位を比較する。",
 }
 
 CSS = """
@@ -172,7 +174,7 @@ def build():
         f'<p>{LEAD[s]}</p>'
         + (f'<p class="sub">PDF: <a href="pdf/{s}.pdf">{s}.pdf</a></p>' if (DOCS / "pdf" / f"{s}.pdf").exists() else '')
         + '</a>\n'
-        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005", "blog_006", "blog_007", "blog_008", "blog_009", "blog_010"])
+        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005", "blog_006", "blog_007", "blog_008", "blog_009", "blog_010", "blog_011"])
     (OUT / "index.html").write_text(
         f'<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">'
         f'<title>熱データ同化 研究ノート（ローカル閲覧）</title>{INDEX_CSS}</head><body>'
