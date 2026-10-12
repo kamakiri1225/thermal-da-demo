@@ -293,6 +293,8 @@ Ux観測が、未観測Uzを直す数学的な経路</a></li>
 Wの結果：温度配置を選び、変位配置を追加する</a></li>
 <li><a href="#6-3-25-w間欠加熱でも確かめる" id="toc-6-3-25-w間欠加熱でも確かめる">6-3. 25
 W・間欠加熱でも確かめる</a></li>
+<li><a href="#6-4-代表点以外の未観測温度も同化で正解に近づくか" id="toc-6-4-代表点以外の未観測温度も同化で正解に近づくか">6-4.
+代表点以外の未観測温度も、同化で正解に近づくか</a></li>
 </ul></li>
 <li><a href="#7-結論と再現場所" id="toc-7-結論と再現場所">7.
 結論と再現場所</a></li>
@@ -1989,6 +1991,276 @@ W・間欠加熱でも確かめる</h3>
 <p><em>直前の表と同じ値です。各加熱条件で、手動温度2点、選定温度2点、選定温度＋選定変位の3構成を比較します。</em></p>
 <p>どちらも評価区間は30〜300秒です。25
 Wでは底面変位を追加した方が温度場RMSEは小さく、選定変位を追加した方が反り誤差は小さくなりました。<strong>今回のJは反りを目的にした採点値</strong>であることを、結果でも区別します。</p>
+<h3 id="6-4-代表点以外の未観測温度も同化で正解に近づくか">6-4.
+代表点以外の未観測温度も、同化で正解に近づくか</h3>
+<p><strong>P1・P3・P4は未観測でもROMの代表点です。ここではさらに、代表点P0〜P4に含まれず、温度観測にも使っていない別の4セルで確認します。</strong>
+既存検証コードで固定している4点を全て掲載し、blog009・010の両方で同じ検証点を使います。観測に使った温度へ合うかだけでなく、復元した別の場所の温度にも合うかを比較します。</p>
+<figure>
+<img alt="代表点以外の未観測温度の検証位置" src="img/nonrep_temperature_positions.png"/>
+<figcaption aria-hidden="true">代表点以外の未観測温度の検証位置</figcaption>
+</figure>
+<p><em>青は温度を確かめる4つの未観測セル。赤はヒータ、右図の紫は選定温度センサT1・T2、灰はROM代表点です。上から重なって見える点も、高さやセル番号は異なります。検証点は温度センサにもROM代表点にも含まれないことをセル番号で確認しています。</em></p>
+<table>
+<colgroup>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+<col style="width: 30%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>検証点</th>
+<th>位置</th>
+<th>実際のOpenFOAMセル中心 [mm]</th>
+<th style="text-align: right;">セル番号（コードの0始まり）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>検証点1</td>
+<td>ヒータ側・上部</td>
+<td>(35.12, -0.78, 94.58)</td>
+<td style="text-align: right;">15481</td>
+</tr>
+<tr class="even">
+<td>検証点2</td>
+<td>反対側・上部</td>
+<td>(-35.89, -1.55, 89.06)</td>
+<td style="text-align: right;">388</td>
+</tr>
+<tr class="odd">
+<td>検証点3</td>
+<td>横（+y）・中段</td>
+<td>(1.51, 35.86, 51.56)</td>
+<td style="text-align: right;">2212</td>
+</tr>
+<tr class="even">
+<td>検証点4</td>
+<td>反対側・下部</td>
+<td>(-32.88, -1.57, 29.69)</td>
+<td style="text-align: right;">6236</td>
+</tr>
+</tbody>
+</table>
+<p>この4点の温度はROMで独立に時間積分していません。EnKFで補正した代表5点温度から、gappy-PODの復元行列Gを使って計算しています。検証セルcの温度は、</p>
+<p><span class="math display">\[
+\widehat T[c](t)=\bar T[c]
++\underbrace{\begin{bmatrix}G_{c,0}&amp;G_{c,1}&amp;G_{c,2}&amp;G_{c,3}&amp;G_{c,4}\end{bmatrix}}_{1\times5}
+\underbrace{\begin{bmatrix}
+\widehat T[P0](t)-\bar T[P0]\\
+\widehat T[P1](t)-\bar T[P1]\\
+\widehat T[P2](t)-\bar T[P2]\\
+\widehat T[P3](t)-\bar T[P3]\\
+\widehat T[P4](t)-\bar T[P4]
+\end{bmatrix}}_{5\times1}
+\]</span></p>
+<p>です。バーはPODの時間平均場、ハットは同化後の推定値です。<strong>観測のずれで代表5点を補正した影響が、この復元式を通して、観測していないセルの温度にも反映されます。</strong>
+同化なしでは、観測で補正せずに進めた代表5点から、同じGで復元します。</p>
+<p>以下は、既存の同一EnKF比較で保存した全7温度点のうち、代表点以外の4点を抜き出した図です。新しく異なる条件のEnKFを計算した結果ではありません。</p>
+<h4 id="15-w0300秒加熱での比較">15 W：0〜300秒加熱での比較</h4>
+<figure>
+<img alt="代表点以外の未観測4点温度：15 W：0〜300秒加熱" src="img/nonrep_temperature_learned.png"/>
+<figcaption aria-hidden="true">代表点以外の未観測4点温度：15
+W：0〜300秒加熱</figcaption>
+</figure>
+<p><em>黒＝OpenFOAMの正解。灰破線＝同化なし、橙破線＝手動温度P2・P0、青＝選定温度T1・T2、緑破線＝選定温度＋底面変位、赤＝選定温度＋選定変位。60メンバー・30秒ごと20更新・5seedで、線は各試行の60メンバー平均をさらに5試行で平均。橙帯は加熱中。更新後30〜600秒を表示しています。</em></p>
+<p>下表は各検証セルの<strong>平均絶対温度誤差
+[K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>検証点</th>
+<th style="text-align: right;">同化なし</th>
+<th style="text-align: right;">手動温度P2・P0</th>
+<th style="text-align: right;">選定温度T1・T2</th>
+<th style="text-align: right;">＋底面変位2点</th>
+<th style="text-align: right;">＋選定変位2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>検証点1</td>
+<td style="text-align: right;">4.610</td>
+<td style="text-align: right;">0.294</td>
+<td style="text-align: right;">0.166</td>
+<td style="text-align: right;">0.125</td>
+<td style="text-align: right;">0.146</td>
+</tr>
+<tr class="even">
+<td>検証点2</td>
+<td style="text-align: right;">4.493</td>
+<td style="text-align: right;">0.875</td>
+<td style="text-align: right;">0.235</td>
+<td style="text-align: right;">0.190</td>
+<td style="text-align: right;">0.206</td>
+</tr>
+<tr class="odd">
+<td>検証点3</td>
+<td style="text-align: right;">4.560</td>
+<td style="text-align: right;">0.358</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.095</td>
+</tr>
+<tr class="even">
+<td>検証点4</td>
+<td style="text-align: right;">4.466</td>
+<td style="text-align: right;">0.807</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.132</td>
+<td style="text-align: right;">0.149</td>
+</tr>
+</tbody>
+</table>
+<h4 id="25-w0300秒加熱での比較">25 W：0〜300秒加熱での比較</h4>
+<figure>
+<img alt="代表点以外の未観測4点温度：25 W：0〜300秒加熱" src="img/nonrep_temperature_q25.png"/>
+<figcaption aria-hidden="true">代表点以外の未観測4点温度：25
+W：0〜300秒加熱</figcaption>
+</figure>
+<p><em>黒＝OpenFOAMの正解。灰破線＝同化なし、橙破線＝手動温度P2・P0、青＝選定温度T1・T2、緑破線＝選定温度＋底面変位、赤＝選定温度＋選定変位。60メンバー・30秒ごと20更新・5seedで、線は各試行の60メンバー平均をさらに5試行で平均。橙帯は加熱中。更新後30〜600秒を表示しています。</em></p>
+<p>下表は各検証セルの<strong>平均絶対温度誤差
+[K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>検証点</th>
+<th style="text-align: right;">同化なし</th>
+<th style="text-align: right;">手動温度P2・P0</th>
+<th style="text-align: right;">選定温度T1・T2</th>
+<th style="text-align: right;">＋底面変位2点</th>
+<th style="text-align: right;">＋選定変位2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>検証点1</td>
+<td style="text-align: right;">2.997</td>
+<td style="text-align: right;">0.461</td>
+<td style="text-align: right;">0.229</td>
+<td style="text-align: right;">0.131</td>
+<td style="text-align: right;">0.189</td>
+</tr>
+<tr class="even">
+<td>検証点2</td>
+<td style="text-align: right;">3.716</td>
+<td style="text-align: right;">1.471</td>
+<td style="text-align: right;">0.251</td>
+<td style="text-align: right;">0.173</td>
+<td style="text-align: right;">0.222</td>
+</tr>
+<tr class="odd">
+<td>検証点3</td>
+<td style="text-align: right;">3.051</td>
+<td style="text-align: right;">0.682</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">0.094</td>
+</tr>
+<tr class="even">
+<td>検証点4</td>
+<td style="text-align: right;">3.672</td>
+<td style="text-align: right;">1.414</td>
+<td style="text-align: right;">0.194</td>
+<td style="text-align: right;">0.124</td>
+<td style="text-align: right;">0.154</td>
+</tr>
+</tbody>
+</table>
+<h4 id="15-w0150秒300450秒の間欠加熱での比較">15
+W：0〜150秒・300〜450秒の間欠加熱での比較</h4>
+<figure>
+<img alt="代表点以外の未観測4点温度：15 W：0〜150秒・300〜450秒の間欠加熱" src="img/nonrep_temperature_intermittent.png"/>
+<figcaption aria-hidden="true">代表点以外の未観測4点温度：15
+W：0〜150秒・300〜450秒の間欠加熱</figcaption>
+</figure>
+<p><em>黒＝OpenFOAMの正解。灰破線＝同化なし、橙破線＝手動温度P2・P0、青＝選定温度T1・T2、緑破線＝選定温度＋底面変位、赤＝選定温度＋選定変位。60メンバー・30秒ごと20更新・5seedで、線は各試行の60メンバー平均をさらに5試行で平均。橙帯は加熱中。更新後30〜600秒を表示しています。</em></p>
+<p>下表は各検証セルの<strong>平均絶対温度誤差
+[K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>検証点</th>
+<th style="text-align: right;">同化なし</th>
+<th style="text-align: right;">手動温度P2・P0</th>
+<th style="text-align: right;">選定温度T1・T2</th>
+<th style="text-align: right;">＋底面変位2点</th>
+<th style="text-align: right;">＋選定変位2点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>検証点1</td>
+<td style="text-align: right;">4.541</td>
+<td style="text-align: right;">0.304</td>
+<td style="text-align: right;">0.151</td>
+<td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.146</td>
+</tr>
+<tr class="even">
+<td>検証点2</td>
+<td style="text-align: right;">4.460</td>
+<td style="text-align: right;">0.826</td>
+<td style="text-align: right;">0.242</td>
+<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.206</td>
+</tr>
+<tr class="odd">
+<td>検証点3</td>
+<td style="text-align: right;">4.497</td>
+<td style="text-align: right;">0.382</td>
+<td style="text-align: right;">0.083</td>
+<td style="text-align: right;">0.099</td>
+<td style="text-align: right;">0.092</td>
+</tr>
+<tr class="even">
+<td>検証点4</td>
+<td style="text-align: right;">4.436</td>
+<td style="text-align: right;">0.764</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.149</td>
+</tr>
+</tbody>
+</table>
+<p>各点cの誤差は、試行sの60メンバー平均を使い、次式で計算しています。</p>
+<p><span class="math display">\[
+E_c=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
+\left|\widehat T_s[c](30k)-T^*[c](30k)\right|.
+\]</span></p>
+<p>星は保存済みOpenFOAM正解です。グラフに描いた5試行平均の線から誤差を求めるのではなく、各試行の誤差を計算してから平均しています。</p>
+<p><strong>代表点以外の4点でも、同化なしでは15 Wの平均誤差が約4.5
+Kあるのに対し、選定温度＋選定変位の同化では0.095〜0.206
+Kになりました。</strong>
+したがって、今回の固定4点では、観測していない場所の復元温度も正解に近づいたことが確認できます。</p>
+<p>ただし、変位を追加すれば全ての温度点で最良になるわけではありません。観測位置は反りA−Oを対象に選んでいるため、温度だけの同化や底面変位を加えた場合の方が温度誤差の小さい点もあります。変位推定の改善と、各点温度の改善は別々に表で確認します。</p>
+<p>図の作成：<code>run/make_nonrep_temperature_validation.py</code>。点のセル番号・座標・観測との非重複確認・誤差一覧は
+<code>results/nonrep_temperature_validation.json</code>
+に保存しています。</p>
 <h2 id="7-結論と再現場所">7. 結論と再現場所</h2>
 <p>温度2点を先に選び、その配置に変位2点を追加すると、今回の3条件では未観測の反りの推定誤差が段階的に改善しました。位置を選ぶ理由は、単なる熱感度の大きさではなく、<strong>既に選んだセンサで残る不確かさを、追加候補がどれだけ減らせるか</strong>です。</p>
 <p>代表5点温度が完全に既知なら、固定した復元式の範囲では温度由来の不確かさはゼロです。ただしPODの復元誤差、モデル誤差、未知Q/hによる将来の予測誤差は別に残ります。</p>
