@@ -828,69 +828,153 @@ $$
 
 **だから $B$ が必要です。** $B$ は「5点の温度がどう一緒にばらつくか」で、そこから「反りと値がどう一緒にばらつくか」が計算できます。4,000 本の点を候補ごとに描き直す必要はありません。
 
-##### (b′) σ の式を、文字式で1行ずつ導く
+##### (b′) σ の式を、省略なしで導く
 
-記号を平均からのずれで書きます（4,000 本の平均を引いた値）。センサの値 $y$ にはノイズ $\varepsilon$ （分散 $r$ 、温度とは無関係）が乗ります。
+**0. 記号を決める。** すべて「4,000 本の平均からのずれ」で書きます。
 
-$$
-d=\mathbf w^{\mathsf T}\mathbf T,\qquad y=\mathbf h^{\mathsf T}\mathbf T+\varepsilon
-$$
+- $d$ ：反りの、平均からのずれ
+- $y$ ：センサの値の、平均からのずれ
+- $\langle\ \rangle$ ：4,000 本の平均をとる記号
 
-**① センサの値 $y$ から反り $d$ を直線で予想する。** 予想を $\hat d=a\,y$ とし、外れ $d-\hat d$ の二乗の平均を考えます。
-
-$$
-E\big[(d-a\,y)^2\big]=\mathrm{Var}(d)-2a\,\mathrm{Cov}(d,y)+a^2\,\mathrm{Var}(y)
-$$
-
-**② 外れが一番小さくなる傾き $a$ を選ぶ。** $a$ で微分して 0 とおきます。
+平均からのずれなので、分散と共分散は「掛けて平均するだけ」になります。
 
 $$
--2\,\mathrm{Cov}(d,y)+2a\,\mathrm{Var}(y)=0
-\quad\Rightarrow\quad
-a=\frac{\mathrm{Cov}(d,y)}{\mathrm{Var}(y)}
+\mathrm{Var}(d)=\langle d^2\rangle,\qquad
+\mathrm{Var}(y)=\langle y^2\rangle,\qquad
+\mathrm{Cov}(d,y)=\langle d\,y\rangle
 $$
 
-これが散布図の黒い直線の傾きです。
-
-**③ その $a$ を①に戻すと、残る外れが σ²。**
+**1. センサの値から反りを予想する式を決める。** 傾き $a$ の直線で予想します（散布図の黒い直線）。
 
 $$
-\sigma^2=\mathrm{Var}(d)-2\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}+\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
-=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
+\hat d=a\,y
 $$
 
-これが散布図の帯の幅です。相関係数 $\rho=\mathrm{Cov}(d,y)/\sqrt{\mathrm{Var}(d)\mathrm{Var}(y)}$ を使うと $\sigma^2=\mathrm{Var}(d)\,(1-\rho^2)$ 。 $\lvert\rho\rvert$ が 1 に近い（散布図が細い直線）ほど σ が小さくなります。
-
-**④ 3つの量を、温度の共分散 $B$ と重みで展開する。** $B_{ij}=\mathrm{Cov}(T_i,T_j)$ と書くと、
+予想の外れは
 
 $$
-\mathrm{Var}(d)=\sum_{i}\sum_{j}w_i\,w_j\,B_{ij},\qquad
-\mathrm{Cov}(d,y)=\sum_{i}\sum_{j}w_i\,h_j\,B_{ij},\qquad
-\mathrm{Var}(y)=\sum_{i}\sum_{j}h_i\,h_j\,B_{ij}+r
+d-\hat d=d-a\,y
 $$
 
-（ノイズ $\varepsilon$ は温度と無関係なので、 $\mathrm{Cov}(d,y)$ には入らず、 $\mathrm{Var}(y)$ に $r$ だけ足されます。）
-
-**⑤ 代表点が2つ（ $T_1,T_2$ ）だけの場合に、全部書き出すと：**
+**2. 外れを二乗して、展開する。**
 
 $$
-\mathrm{Var}(d)=w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}
+(d-a\,y)^2=d^2-2a\,d\,y+a^2\,y^2
+$$
+
+**3. 4,000 本で平均する。** $a$ は定数なので平均の外に出せます。
+
+$$
+\langle(d-a\,y)^2\rangle=\langle d^2\rangle-2a\,\langle d\,y\rangle+a^2\,\langle y^2\rangle
+=\mathrm{Var}(d)-2a\,\mathrm{Cov}(d,y)+a^2\,\mathrm{Var}(y)
+$$
+
+**4. $a$ について平方完成する。** 見やすくするため $V_d=\mathrm{Var}(d)$ 、 $C=\mathrm{Cov}(d,y)$ 、 $V_y=\mathrm{Var}(y)$ と書きます。
+
+$$
+V_d-2aC+a^2V_y
+=V_y\Big(a^2-2a\frac{C}{V_y}\Big)+V_d
+=V_y\Big(a-\frac{C}{V_y}\Big)^2-\frac{C^2}{V_y}+V_d
+$$
+
+（右辺の括弧を展開すると $V_y a^2-2aC+C^2/V_y$ なので、 $-C^2/V_y$ で打ち消すと左辺に戻ります。）
+
+**5. 外れが一番小さくなる $a$ と、そのときの外れ。** 第1項 $V_y(a-C/V_y)^2$ は 0 以上で、 $a=C/V_y$ のとき 0 になります。
+
+$$
+a=\frac{C}{V_y}=\frac{\mathrm{Cov}(d,y)}{\mathrm{Var}(y)}
+$$
+
+これが散布図の黒い直線の傾きです。このときの外れが σ² （散布図の帯の幅の二乗）です。
+
+$$
+\sigma^2=\langle(d-a\,y)^2\rangle_{\min}=V_d-\frac{C^2}{V_y}=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
+$$
+
+**6. 小さな数値例で確かめる。** 世界が5つだけ、と考えます（数字は説明用の作り話）。
+
+| 世界 | 反り | 反りのずれ $d$ | 場所 X の値 | X のずれ $y$ | $d\,y$ | $y^2$ |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 1.0 | −0.8 | 2.0 | −1.6 | 1.28 | 2.56 |
+| 2 | 2.0 | 0.2 | 4.0 | 0.4 | 0.08 | 0.16 |
+| 3 | 3.0 | 1.2 | 6.0 | 2.4 | 2.88 | 5.76 |
+| 4 | 2.0 | 0.2 | 4.1 | 0.5 | 0.10 | 0.25 |
+| 5 | 1.0 | −0.8 | 1.9 | −1.7 | 1.36 | 2.89 |
+| 平均 | 1.8 | 0 | 3.6 | 0 | **1.14** | **2.324** |
+
+$d^2$ の平均は $(0.64+0.04+1.44+0.04+0.64)/5=0.56$ です。よって
+
+$$
+V_d=0.56,\qquad C=1.14,\qquad V_y=2.324,\qquad a=\frac{1.14}{2.324}=0.491
 $$
 
 $$
-\mathrm{Cov}(d,y)=w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}
+\sigma^2=0.56-\frac{1.14^2}{2.324}=0.56-0.559=0.0008,\qquad \sigma=0.03
+$$
+
+測る前の幅 $\sqrt{0.56}=0.75$ が、X の値を知ると 0.03 まで縮みます。
+同じ計算を、反りと関係のない場所 Y（値 5.1, 1.3, 4.8, 3.0, 2.2）でやると $C=0.156$ 、 $V_y=2.158$ 、 $\sigma^2=0.56-0.011=0.549$ 、 $\sigma=0.74$ で、ほとんど縮みません。
+
+**7. センサのノイズを入れる。** 実際の値には、温度とは無関係なノイズ $\varepsilon$ （分散 $r$ ）が乗ります： $y=y_0+\varepsilon$ （ $y_0$ ＝ノイズのない値）。
+
+$$
+\langle d\,y\rangle=\langle d\,y_0\rangle+\langle d\,\varepsilon\rangle=\langle d\,y_0\rangle+0
 $$
 
 $$
-\mathrm{Var}(y)=h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r
+\langle y^2\rangle=\langle y_0^2\rangle+2\langle y_0\,\varepsilon\rangle+\langle\varepsilon^2\rangle=\langle y_0^2\rangle+0+r
+$$
+
+ノイズは共分散を変えず、分母に $r$ を足すだけです。
+
+$$
+\sigma^2=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y_0)^2}{\mathrm{Var}(y_0)+r}
+$$
+
+**8. 反りとセンサの値を、温度で書き直す。** 代表点が2つ（温度のずれ $\Delta T_1,\Delta T_2$ ）の場合で書きます。ステップ1の重みを使うと
+
+$$
+d=w_1\Delta T_1+w_2\Delta T_2,\qquad y_0=h_1\Delta T_1+h_2\Delta T_2
+$$
+
+温度の分散・共分散を $B_{11}=\langle\Delta T_1^2\rangle$ 、 $B_{22}=\langle\Delta T_2^2\rangle$ 、 $B_{12}=\langle\Delta T_1\Delta T_2\rangle$ と書きます。
+
+**$\mathrm{Var}(d)$** ：二乗を展開して平均します。
+
+$$
+d^2=w_1^2\Delta T_1^2+2w_1w_2\,\Delta T_1\Delta T_2+w_2^2\Delta T_2^2
 $$
 
 $$
-\sigma^2=\big(w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}\big)-\frac{\big(w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}\big)^2}{h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r}
+\mathrm{Var}(d)=\langle d^2\rangle=w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}
 $$
 
-- **重み $w,h$ は FrontISTR、 $B$ は ROM 4,000 本、 $r$ はセンサの仕様**から決まります。測定値はどこにも出てきません。
-- 実際は代表点が5つなので、和が 5×5＝25 項になるだけで、形は同じです。
+**$\mathrm{Cov}(d,y_0)$** ：積を4項に展開して平均します。
+
+$$
+d\,y_0=w_1h_1\Delta T_1^2+w_1h_2\,\Delta T_1\Delta T_2+w_2h_1\,\Delta T_2\Delta T_1+w_2h_2\Delta T_2^2
+$$
+
+$$
+\mathrm{Cov}(d,y_0)=w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}
+$$
+
+**$\mathrm{Var}(y_0)$** ： $\mathrm{Var}(d)$ の $w$ を $h$ に置き換えたものです。
+
+$$
+\mathrm{Var}(y_0)=h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}
+$$
+
+**9. 7に代入すると、σ が温度の共分散 $B$ と重みだけで書ける。**
+
+$$
+\sigma^2=\big(w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}\big)
+-\frac{\big(w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}\big)^2}{h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r}
+$$
+
+- 重み $w,h$ は FrontISTR、 $B$ は ROM 4,000 本、 $r$ はセンサの仕様から決まります。測定値はどこにも出てきません。
+- 本研究は代表点が5つなので、和が 5×5＝25 項になるだけで、形は同じです： $\mathrm{Var}(d)=\sum_i\sum_j w_iw_jB_{ij}$ 、 $\mathrm{Cov}=\sum_i\sum_j w_ih_jB_{ij}$ 、 $\mathrm{Var}(y_0)=\sum_i\sum_j h_ih_jB_{ij}$ 。
+- ここでは平均を「÷本数」で書きました。プログラムは「÷(本数−1)」で計算していますが、4,000 本では差は 0.03 % で、結果は変わりません。
 
 ##### (c) 温度計と一緒に測る場合、2本目を選ぶ場合
 
