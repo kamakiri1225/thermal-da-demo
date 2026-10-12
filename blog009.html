@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_009：センサ2本だけで反りを当てる ― 代表点以外から σ で選ぶ</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+<style>
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
+  </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_009：センサ2本だけで反りを当てる ― 代表点以外から
+σ で選ぶ</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ" id="toc-blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ">blog_009：センサ2本だけで反りを当てる
+― 代表点以外から σ で選ぶ</a>
+<ul>
+<li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
+<li><a href="#1-選び方の理論" id="toc-1-選び方の理論">1.
+選び方の理論</a>
+<ul>
+<li><a href="#1-1-何を小さくするか--σ" id="toc-1-1-何を小さくするか--σ">1-1. 何を小さくするか ― σ</a></li>
+<li><a href="#1-2-センサ1本の-σ-の式導き方" id="toc-1-2-センサ1本の-σ-の式導き方">1-2. センサ1本の σ
+の式（導き方）</a></li>
+<li><a href="#1-3-2本目を足すときの式導き方" id="toc-1-3-2本目を足すときの式導き方">1-3.
+2本目を足すときの式（導き方）</a></li>
+<li><a href="#1-4-選ぶ手順" id="toc-1-4-選ぶ手順">1-4. 選ぶ手順</a></li>
+</ul></li>
+<li><a href="#2-選ばれた場所" id="toc-2-選ばれた場所">2.
+選ばれた場所</a></li>
+<li><a href="#3-結果--データ同化で確かめる" id="toc-3-結果--データ同化で確かめる">3. 結果 ― データ同化で確かめる</a>
+<ul>
+<li><a href="#3-1-温度計2本代表点以外" id="toc-3-1-温度計2本代表点以外">3-1. 温度計2本（代表点以外）</a></li>
+<li><a href="#3-2-変位計2本代表点以外" id="toc-3-2-変位計2本代表点以外">3-2. 変位計2本（代表点以外）</a></li>
+</ul></li>
+<li><a href="#4-なぜ変位計2本は反りしか当てられなかったのか--理論" id="toc-4-なぜ変位計2本は反りしか当てられなかったのか--理論">4.
+なぜ変位計2本は、反りしか当てられなかったのか ― 理論</a>
+<ul>
+<li><a href="#4-1-温度を全体の温まりと温度差に分ける" id="toc-4-1-温度を全体の温まりと温度差に分ける">4-1.
+温度を「全体の温まり」と「温度差」に分ける</a></li>
+<li><a href="#4-2-分からなさの大部分は全体の温まり" id="toc-4-2-分からなさの大部分は全体の温まり">4-2.
+分からなさの大部分は「全体の温まり」</a></li>
+<li><a href="#4-3-反りは全体の温まりに反応しない" id="toc-4-3-反りは全体の温まりに反応しない">4-3.
+反りは「全体の温まり」に反応しない</a></li>
+<li><a href="#4-4-選ばれた変位計2本も全体の温まりに反応しない" id="toc-4-4-選ばれた変位計2本も全体の温まりに反応しない">4-4.
+選ばれた変位計2本も「全体の温まり」に反応しない</a></li>
+<li><a href="#4-5-だから反りは当たりほかは当たらない" id="toc-4-5-だから反りは当たりほかは当たらない">4-5.
+だから、反りは当たり、ほかは当たらない</a></li>
+<li><a href="#4-6-このことは測る前に-σ-の式で分かる" id="toc-4-6-このことは測る前に-σ-の式で分かる">4-6. このことは、測る前に
+σ の式で分かる</a></li>
+<li><a href="#4-7-なぜ同じ場所を2回測るような2本が選ばれたのか" id="toc-4-7-なぜ同じ場所を2回測るような2本が選ばれたのか">4-7.
+なぜ同じ場所を2回測るような2本が選ばれたのか</a></li>
+</ul></li>
+<li><a href="#5-分かったこと" id="toc-5-分かったこと">5.
+分かったこと</a></li>
+<li><a href="#6-言えないことやっていないこと" id="toc-6-言えないことやっていないこと">6.
+言えないこと・やっていないこと</a>
+<ul>
+<li><a href="#使ったスクリプト" id="toc-使ったスクリプト">使ったスクリプト</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ">blog_009：センサ2本だけで反りを当てる
+― 代表点以外から σ で選ぶ</h1>
+<p>更新日：2026-10-12</p>
+<p><a href="blog008.html">blog_008</a>
+では、温度計 P2・P0 を固定して、変位計2本の場所を σ で選びました。
+この記事では、<strong>センサを全部で2本だけ</strong>にして、<strong>代表点（P0〜P4）以外の場所</strong>から、反り
+A−O を一番よく当てられる2本を σ で選びます。
+温度計2本・変位計2本・種類を問わず2本の3通りを選び、OpenFOAM＋FrontISTR
+を真値にしたデータ同化で確かめます。</p>
+<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>確かめたいこと</strong></td>
+<td>代表点以外の場所から2本だけ選んで、反り A−O
+を当てられるか。どの種類・どの場所が良いか</td>
+</tr>
+<tr class="even">
+<td><strong>選び方</strong></td>
+<td>σ
+（センサを付けた後でも残る、反りの分からなさ）が一番小さくなる候補を1本ずつ足す（blog_008
+§5-2 と同じ考え方）</td>
+</tr>
+<tr class="odd">
+<td><strong>候補</strong></td>
+<td>温度計：代表5点を除く全セル 20,691 個。変位計：A・O から 12 mm
+以内を除く全節点 × 3方向 14,754 個</td>
+</tr>
+<tr class="even">
+<td><strong>比べる配置</strong></td>
+<td>データ同化なし／代表点の温度計
+P2・P0（片側）／P2・P4（両側）／変位計 S1・S2 だけ（blog_008 §5
+で選んだ2点）／σ で選んだ温度計2本／σ で選んだ変位計2本</td>
+</tr>
+<tr class="odd">
+<td><strong>真値</strong></td>
+<td>OpenFOAM（温度場）＋FrontISTR（全節点の変位）。15 W・25 W・15 W
+間欠加熱</td>
+</tr>
+<tr class="even">
+<td><strong>データ同化</strong></td>
+<td>ROM＋EnKF、60メンバー、30 秒ごと、5 seed 平均。ノイズは温度 0.3
+K、変位 0.3 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>評価</strong></td>
+<td>30〜300
+秒の平均誤差。観測に使っていない温度（7点）・温度場全体・反り A−O・
+<span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> ・ほかの変位</td>
+</tr>
+<tr class="even">
+<td><strong>実機</strong></td>
+<td>実機の測定はしていない</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>この記事の結論</strong> 1. <strong>温度計2本</strong>を σ
+で選ぶと、<strong>ヒータ側の中段と、反対側の中段</strong>に1本ずつ選ばれた。反りの誤差は
+0.20 µm（15 W）で、代表点の P2・P4（0.23 µm）より少し良かった。 2.
+<strong>変位計2本</strong>（種類を問わず選んでも同じ）を σ
+で選ぶと、<strong>上面の鏡写しの2点</strong>（同じ向き <span class="math inline">\(U_x\)</span>
+）が選ばれた。<strong>反りは一番よく当たった</strong>（0.12
+µm）が、<strong>温度場は 4.4 K、 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> は 5.3 µm
+ずれたまま</strong>で、データ同化なしと同じだった。 3.
+理由は、この2本が「<strong>全体が一様に温まる</strong>」ことに反応しないから。反りも一様な温まりには反応しないので、反りだけを目的に
+σ で選ぶと、こういう2本が選ばれる。 4. 同じ σ の式で「 <span class="math inline">\(U_z(A)\)</span>
+の分からなさ」を計算すると、この2本ではほとんど縮まない（3.0 → 2.6
+µm）ことが<strong>測る前に分かる</strong>。σ
+で選ぶときは、<strong>知りたい量を反りだけにしない</strong>ほうがよい。</p>
+</blockquote>
+<hr/>
+<h2 id="1-選び方の理論">1. 選び方の理論</h2>
+<h3 id="1-1-何を小さくするか--σ">1-1. 何を小さくするか ― σ</h3>
+<p><strong>σ ＝
+センサを付けたとしたら、それでもまだ残る、反りの分からなさ</strong>です。
+ROM を条件を変えて 4,000
+本回した「ありえる世界」で、横軸にセンサの値、縦軸に反りをとった散布図を描くと、σ
+は「センサの値が分かったときに残る、反りの縦の幅」になります（blog_008
+§5-2 ステップ3の図）。 <strong>センサの値が反りと一緒に動く場所ほど σ
+が小さく、良い場所</strong>です。</p>
+<h3 id="1-2-センサ1本の-σ-の式導き方">1-2. センサ1本の σ
+の式（導き方）</h3>
+<p>記号はすべて 4,000 本の平均からのずれで、 <span class="math inline">\(\langle\ \rangle\)</span> は 4,000
+本の平均です。</p>
+<ul>
+<li>反り： <span class="math inline">\(d=\mathbf w^{\mathsf T}\mathbf
+T\)</span> （ <span class="math inline">\(\mathbf w\)</span>
+＝反りの重み、 <span class="math inline">\(\mathbf T\)</span>
+＝代表5点の温度）</li>
+<li>センサの値： <span class="math inline">\(y=\mathbf h^{\mathsf
+T}\mathbf T+\varepsilon\)</span> （ <span class="math inline">\(\mathbf
+h\)</span> ＝そのセンサの重み、 <span class="math inline">\(\varepsilon\)</span> ＝ノイズ、分散 <span class="math inline">\(r\)</span> ）</li>
+</ul>
+<p>重み <span class="math inline">\(\mathbf w\)</span> と <span class="math inline">\(\mathbf h\)</span> は、FrontISTR
+を6回解いて作った「温度が 1 K 上がると何 µm 動くか」の表です（温度計なら
+gappy-POD の重み。blog_008 §5-2 ステップ1）。</p>
+<p><strong>①
+センサの値から反りを直線で予想し、外れを二乗して平均する。</strong></p>
+<p><span class="math display">\[
+\langle(d-a\,y)^2\rangle=\langle d^2\rangle-2a\,\langle
+d\,y\rangle+a^2\,\langle y^2\rangle
+\]</span></p>
+<p><strong>② 3つの平均を、温度の分からなさの表 <span class="math inline">\(B=\langle\mathbf T\mathbf T^{\mathsf
+T}\rangle\)</span> で書く。</strong> ノイズは温度と無関係（ <span class="math inline">\(\langle\mathbf T\varepsilon\rangle=0\)</span>
+）なので、</p>
+<p><span class="math display">\[
+\langle d^2\rangle=\mathbf w^{\mathsf T}B\,\mathbf w,\qquad
+\langle d\,y\rangle=\mathbf w^{\mathsf T}B\,\mathbf h,\qquad
+\langle y^2\rangle=\mathbf h^{\mathsf T}B\,\mathbf h+r
+\]</span></p>
+<p><strong>③ 傾き <span class="math inline">\(a\)</span>
+について平方完成する。</strong> <span class="math inline">\(V_d=\mathbf
+w^{\mathsf T}B\mathbf w\)</span> 、 <span class="math inline">\(C=\mathbf w^{\mathsf T}B\mathbf h\)</span> 、
+<span class="math inline">\(V_y=\mathbf h^{\mathsf T}B\mathbf
+h+r\)</span> と書くと、</p>
+<p><span class="math display">\[
+V_d-2aC+a^2V_y=V_y\Big(a-\frac{C}{V_y}\Big)^2+V_d-\frac{C^2}{V_y}
+\]</span></p>
+<p><strong>④ 第1項が 0 になる <span class="math inline">\(a=C/V_y\)</span>
+のとき、外れが一番小さい。そのとき残る外れが σ²。</strong></p>
+<p><span class="math display">\[
+\sigma^2=V_d-\frac{C^2}{V_y}=\mathbf w^{\mathsf T}B\,\mathbf
+w-\frac{(\mathbf w^{\mathsf T}B\,\mathbf h)^2}{\mathbf h^{\mathsf
+T}B\,\mathbf h+r}
+\]</span></p>
+<p>測定値はどこにも出てきません。重み（FrontISTR）、 <span class="math inline">\(B\)</span> （ROM 4,000 本）、 <span class="math inline">\(r\)</span>
+（センサの仕様）だけで、<strong>センサを付ける前に</strong>計算できます。</p>
+<h3 id="1-3-2本目を足すときの式導き方">1-3.
+2本目を足すときの式（導き方）</h3>
+<p>2本目は、「1本目を付けた後でも残る分からなさ」について、同じことをします。
+1本目を付けた後の温度の分からなさの表を <span class="math inline">\(P\)</span> とします（付ける前は <span class="math inline">\(P=B\)</span> ）。</p>
+<p><strong>①
+知りたい量が何であっても同じ式になることを確かめる。</strong>
+知りたい量を <span class="math inline">\(z=\mathbf v^{\mathsf T}\mathbf
+T\)</span> （ <span class="math inline">\(\mathbf v\)</span>
+は任意の重み）とすると、1-2 と同じ計算で</p>
+<p><span class="math display">\[
+\sigma_z^2{}'=\mathbf v^{\mathsf T}P\,\mathbf v-\frac{(\mathbf
+v^{\mathsf T}P\,\mathbf h)^2}{\mathbf h^{\mathsf T}P\,\mathbf h+r}
+\]</span></p>
+<p><strong>② <span class="math inline">\((\mathbf v^{\mathsf T}P\mathbf
+h)^2=\mathbf v^{\mathsf T}(P\mathbf h)(P\mathbf h)^{\mathsf T}\mathbf
+v\)</span> と書き直す。</strong> <span class="math inline">\(P\)</span>
+が対称なので <span class="math inline">\(\mathbf h^{\mathsf T}P\mathbf
+v=(P\mathbf h)^{\mathsf T}\mathbf v\)</span> です。</p>
+<p><span class="math display">\[
+\sigma_z^2{}'=\mathbf v^{\mathsf T}\Big(P-\frac{(P\mathbf
+h)(P\mathbf h)^{\mathsf T}}{\mathbf h^{\mathsf T}P\,\mathbf
+h+r}\Big)\mathbf v
+\]</span></p>
+<p><strong>③ どんな <span class="math inline">\(\mathbf v\)</span>
+でも括弧の中が共通なので、センサを1本足した後の分からなさの表は</strong></p>
+<p><span class="math display">\[
+P'=P-\frac{(P\mathbf h)(P\mathbf h)^{\mathsf T}}{\mathbf h^{\mathsf
+T}P\,\mathbf h+r}
+\]</span></p>
+<p>これを1本ごとに繰り返せば、何本付けた後の分からなさも計算できます（センサのノイズが互いに無関係なら、blog_008
+§5-2 (c′) の行列の式で一度に計算した結果と同じ）。反りの σ は <span class="math inline">\(\sigma^2=\mathbf w^{\mathsf T}P'\mathbf
+w\)</span> です。</p>
+<h3 id="1-4-選ぶ手順">1-4. 選ぶ手順</h3>
+<ol type="1">
+<li>30, 60, …, 300 秒の10時刻それぞれで、ROM 4,000 本から <span class="math inline">\(B(t_k)\)</span> を作る。</li>
+<li>すべての候補について、1-2 の σ を10時刻で計算して平均する（点数
+<span class="math inline">\(J\)</span> ）。</li>
+<li>点数が一番小さい候補を1本目にする。</li>
+<li>1-3 の式で各時刻の <span class="math inline">\(P\)</span>
+を更新し、残りの候補を採点し直して、2本目を選ぶ。</li>
+</ol>
+<p>温度計2本（T2）、変位計2本（U2）、種類を問わず2本（ANY2）の3通りで行いました（
+<code>run/select_two_nonrep.py</code> ）。</p>
+<hr/>
+<h2 id="2-選ばれた場所">2. 選ばれた場所</h2>
+<table>
+<colgroup>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+<col style="width: 23%"/>
+<col style="width: 30%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>選び方</th>
+<th>1本目</th>
+<th>2本目</th>
+<th style="text-align: right;">予測 σ （反り A−O）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計2本（T2）</td>
+<td>温度：ヒータ側・中段 <span class="math inline">\((36.7,0.8,49.2)\)</span> mm</td>
+<td>温度：<strong>反対側</strong>・中段 <span class="math inline">\((-32.9,1.6,51.6)\)</span> mm</td>
+<td style="text-align: right;">0.365 µm</td>
+</tr>
+<tr class="even">
+<td>変位計2本（U2）</td>
+<td>変位 <span class="math inline">\(U_x\)</span> ：上面 <span class="math inline">\((18.8,32.5,100.5)\)</span> mm</td>
+<td>変位 <span class="math inline">\(U_x\)</span> ：上面 <span class="math inline">\((18.8,-32.5,100.5)\)</span>
+mm（1本目の鏡写し）</td>
+<td style="text-align: right;"><strong>0.296 µm</strong></td>
+</tr>
+<tr class="odd">
+<td>種類を問わず2本（ANY2）</td>
+<td>U2 と同じ</td>
+<td>U2 と同じ</td>
+<td style="text-align: right;">0.296 µm</td>
+</tr>
+</tbody>
+</table>
+<p>比較用の配置の予測 σ ：何も測らない 1.451 µm、温度 P2・P0 1.186
+µm、温度 P2・P4 0.590 µm、変位 S1・S2 のみ 0.318 µm（いずれも 30〜300
+秒の平均）。</p>
+<ul>
+<li><strong>温度計2本は、ヒータ側と反対側に1本ずつ</strong>選ばれました。反りの重み
+<span class="math inline">\(\mathbf w\)</span> はヒータ側の P0・P2
+が＋、反対側の P1・P4
+が−なので、両側の温度を知ると反りが分かるためです。</li>
+<li><strong>変位計2本は、上面の、y=0
+の面について鏡写しの2点</strong>が選ばれました。向きも同じ <span class="math inline">\(U_x\)</span> です。</li>
+</ul>
+<hr/>
+<h2 id="3-結果--データ同化で確かめる">3. 結果 ―
+データ同化で確かめる</h2>
+<figure>
+<img alt="センサ2本だけで反りを当てる" src="img/unobserved_t2_learned.png"/>
+<figcaption aria-hidden="true">センサ2本だけで反りを当てる</figcaption>
+</figure>
+<p><em>15
+W。上段＝センサと評価点の位置（●温度計、■変位計、▲温度の評価点、★変位の評価点）。2〜3段目＝観測していない温度、4〜5段目＝観測していない変位。太い灰色＝真値。各グラフ右上の数字＝30〜300
+秒の平均誤差（線の色と対応）。黄＝データ同化なし、赤＝σ
+で選んだ変位計2本、青＝σ で選んだ温度計2本（
+<code>run/selected_pair_unobserved_check.py t2</code> ）。</em></p>
+<p>25 W と間欠加熱の図：<a href="img/unobserved_t2_q25.png">unobserved_t2_q25.png</a>、<a href="img/unobserved_t2_intermittent.png">unobserved_t2_intermittent.png</a></p>
+<p><strong>観測していない量の誤差（30〜300 秒の平均、5 seed。15 W／25
+W／間欠）</strong></p>
+<table>
+<colgroup>
+<col style="width: 15%"/>
+<col style="width: 21%"/>
+<col style="width: 15%"/>
+<col style="width: 15%"/>
+<col style="width: 15%"/>
+<col style="width: 15%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>配置（センサ2本）</th>
+<th style="text-align: right;">予測 σ</th>
+<th>反り A−O</th>
+<th>温度場全体</th>
+<th><span class="math inline">\(U_z(A)\)</span></th>
+<th><span class="math inline">\(U_z(O)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>データ同化なし</td>
+<td style="text-align: right;">1.451</td>
+<td>0.24／1.38／0.14 µm ※</td>
+<td>4.58／3.12／4.51 K</td>
+<td>5.60／3.22／5.49 µm</td>
+<td>5.37／4.59／5.35 µm</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P0（代表点・片側）</td>
+<td style="text-align: right;">1.186</td>
+<td>0.77／1.41／0.63 µm</td>
+<td>0.54／0.88／0.53 K</td>
+<td>0.24／0.31／0.28 µm</td>
+<td>0.94／1.69／0.87 µm</td>
+</tr>
+<tr class="odd">
+<td>温度 P2・P4（代表点・両側）</td>
+<td style="text-align: right;">0.590</td>
+<td>0.23／0.28／0.20 µm</td>
+<td><strong>0.16／0.18／0.15 K</strong></td>
+<td><strong>0.17／0.17／0.15 µm</strong></td>
+<td><strong>0.20／0.28／0.20 µm</strong></td>
+</tr>
+<tr class="even">
+<td>変位 S1・S2 のみ</td>
+<td style="text-align: right;">0.318</td>
+<td>0.16／0.17／0.11 µm</td>
+<td>0.22／0.22／0.18 K</td>
+<td>0.25／0.29／0.21 µm</td>
+<td>0.17／0.18／0.16 µm</td>
+</tr>
+<tr class="odd">
+<td><strong>温度2本（代表点以外、σ で選んだ）</strong></td>
+<td style="text-align: right;">0.365</td>
+<td>0.20／0.24／0.16 µm</td>
+<td>0.21／0.25／0.20 K</td>
+<td>0.20／0.23／0.17 µm</td>
+<td>0.20／0.30／0.21 µm</td>
+</tr>
+<tr class="even">
+<td><strong>変位2本（代表点以外、σ で選んだ）</strong></td>
+<td style="text-align: right;"><strong>0.296</strong></td>
+<td><strong>0.12／0.13／0.09 µm</strong></td>
+<td><strong>4.44／4.58／4.42 K</strong></td>
+<td><strong>5.32／5.54／5.29 µm</strong></td>
+<td><strong>5.36／5.55／5.33 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>※ データ同化なしの反りが小さく見えるのは、A も O も同じ向きに約 5.5
+µm ずれて、差を取ると打ち消し合うためです（blog_008 §6-2）。</p>
+<h3 id="3-1-温度計2本代表点以外">3-1. 温度計2本（代表点以外）</h3>
+<ul>
+<li>反りは 0.20／0.24／0.16 µm で、<strong>代表点の
+P2・P4（0.23／0.28／0.20 µm）より少し良い</strong>結果でした。予測 σ
+の順（0.365 ＜ 0.590）と同じです。</li>
+<li>温度場全体は 0.21 K で、P2・P4 の 0.16 K よりやや悪い結果でした。σ
+は反りを目的に選んでいるので、温度場が一番良くなるとは限りません。</li>
+<li>片側の P2・P0（反り 0.77
+µm）より、ずっと良くなりました。<strong>両側に1本ずつ</strong>が効いています。</li>
+</ul>
+<h3 id="3-2-変位計2本代表点以外">3-2. 変位計2本（代表点以外）</h3>
+<ul>
+<li><strong>反り A−O は 6
+つの配置の中で一番よく当たりました</strong>（0.12／0.13／0.09 µm）。予測
+σ も一番小さく（0.296）、ここは予測どおりです。</li>
+<li><strong>ところが、温度場全体（4.4 K）、 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> （5.3
+µm）は、データ同化なしとほとんど同じ</strong>でした。図でも、赤い線は観測していない温度と個別の変位で、黄の線（データ同化なし）とほぼ重なっています。</li>
+<li>つまり、この2本は<strong>反りだけを当て、ほかは何も直していません</strong>。</li>
+</ul>
+<hr/>
+<h2 id="4-なぜ変位計2本は反りしか当てられなかったのか--理論">4.
+なぜ変位計2本は、反りしか当てられなかったのか ― 理論</h2>
+<h3 id="4-1-温度を全体の温まりと温度差に分ける">4-1.
+温度を「全体の温まり」と「温度差」に分ける</h3>
+<p>代表5点の温度を、5点の平均 <span class="math inline">\(m\)</span>
+と、平均からの差 <span class="math inline">\(\boldsymbol\delta\)</span>
+に分けます。</p>
+<p><span class="math display">\[
+\mathbf T=m\,\mathbf 1+\boldsymbol\delta,\qquad \mathbf
+1=(1,1,1,1,1),\qquad \sum_i\delta_i=0
+\]</span></p>
+<p><span class="math inline">\(m\)</span>
+は「全体がどれだけ温まったか」、 <span class="math inline">\(\boldsymbol\delta\)</span>
+は「どこが他より熱いか（温度差）」です。</p>
+<h3 id="4-2-分からなさの大部分は全体の温まり">4-2.
+分からなさの大部分は「全体の温まり」</h3>
+<p><span class="math inline">\(t=150\)</span> 秒の <span class="math inline">\(B\)</span> を固有値分解すると、一番大きい固有値が
+27.2 K²（全体の約 96 %）で、その方向はほぼ <span class="math inline">\((1,1,1,1,1)\)</span>
+（5点がそろって上下する）でした。
+発熱量や初期温度が分からないと、<strong>まず「全体がどれだけ温まったか」が分からない</strong>、ということです。</p>
+<h3 id="4-3-反りは全体の温まりに反応しない">4-3.
+反りは「全体の温まり」に反応しない</h3>
+<p>反りの重みの合計は 0 です（ <span class="math inline">\(0.470-0.654+0.604+0.038-0.458=0\)</span>
+）。そのため、</p>
+<p><span class="math display">\[
+d=\mathbf w^{\mathsf T}\mathbf T=m\,(\mathbf w^{\mathsf T}\mathbf
+1)+\mathbf w^{\mathsf T}\boldsymbol\delta=m\cdot 0+\mathbf w^{\mathsf
+T}\boldsymbol\delta=\mathbf w^{\mathsf T}\boldsymbol\delta
+\]</span></p>
+<p><strong>反りは温度差 <span class="math inline">\(\boldsymbol\delta\)</span>
+だけで決まり、全体の温まり <span class="math inline">\(m\)</span>
+には反応しません。</strong>
+全体が一様に温まると円筒は伸びるだけで、傾かないからです。</p>
+<h3 id="4-4-選ばれた変位計2本も全体の温まりに反応しない">4-4.
+選ばれた変位計2本も「全体の温まり」に反応しない</h3>
+<p>選ばれた変位計の重みは2本とも <span class="math inline">\(\mathbf
+h=(-0.521,\,0.564,\,-0.773,\,0.405,\,0.313)\)</span> で、合計は <span class="math inline">\(-0.013\)</span> とほぼ 0 です。</p>
+<p><span class="math display">\[
+y=\mathbf h^{\mathsf T}\mathbf T+\varepsilon\approx\mathbf h^{\mathsf
+T}\boldsymbol\delta+\varepsilon
+\]</span></p>
+<p>この2本は<strong>温度差だけを見ていて、全体の温まり <span class="math inline">\(m\)</span> は見ていません</strong>。
+上面の横方向（ <span class="math inline">\(U_x\)</span>
+）の変位は、円筒が傾くと動き、一様に温まって伸びても（この位置では）ほとんど動かないためと考えられます。</p>
+<table>
+<thead>
+<tr class="header">
+<th>センサ・量</th>
+<th style="text-align: right;">重みの合計（全体が 1 K
+温まったときの反応）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反り A−O</td>
+<td style="text-align: right;">0.00 µm</td>
+</tr>
+<tr class="even">
+<td>選ばれた変位計2本（ <span class="math inline">\(U_x\)</span> ）</td>
+<td style="text-align: right;">−0.01 µm</td>
+</tr>
+<tr class="odd">
+<td>変位計 S1（ <span class="math inline">\(U_x\)</span> 、blog_008
+§5）</td>
+<td style="text-align: right;">−0.12 µm</td>
+</tr>
+<tr class="even">
+<td>変位計 S2（ <span class="math inline">\(U_z\)</span> 、blog_008
+§5）</td>
+<td style="text-align: right;"><strong>1.21 µm</strong></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span></td>
+<td style="text-align: right;">1.21 µm</td>
+</tr>
+<tr class="even">
+<td>温度計（どこでも）</td>
+<td style="text-align: right;">1.00 K</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-5-だから反りは当たりほかは当たらない">4-5.
+だから、反りは当たり、ほかは当たらない</h3>
+<ul>
+<li>反りは温度差だけで決まり、2本の変位計も温度差だけを見ている →
+<strong>反りは当たる</strong>。</li>
+<li>温度場、 <span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span> は全体の温まり <span class="math inline">\(m\)</span> で大きく動く（ <span class="math inline">\(U_z\)</span> の重みの合計は 1.21 µm/K）。しかし
+<span class="math inline">\(m\)</span> を見ているセンサがない →
+<strong>当たらない</strong>。</li>
+<li>σ は反りだけを目的にして選んだので、 <span class="math inline">\(m\)</span>
+を見ないセンサでも「反りには十分」と判断して選びました。</li>
+</ul>
+<p><strong>blog_008 §5 の S1・S2 では、S2 が上下方向 <span class="math inline">\(U_z\)</span>
+で、全体の温まりに反応します（1.21）。</strong> だから S1・S2
+だけでも、温度場（0.22 K）や <span class="math inline">\(U_z(A)\)</span>
+（0.25 µm）がそこそこ当たりました。</p>
+<h3 id="4-6-このことは測る前に-σ-の式で分かる">4-6. このことは、測る前に
+σ の式で分かる</h3>
+<p>1-3 の式は、知りたい量の重み <span class="math inline">\(\mathbf
+v\)</span> を何にしても使えます。反りの代わりに <span class="math inline">\(U_z(A)\)</span>
+や「5点の平均温度」を知りたい量にして、同じ配置の σ を計算すると：</p>
+<table>
+<thead>
+<tr class="header">
+<th>配置</th>
+<th style="text-align: right;">反り A−O の σ</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の σ</th>
+<th style="text-align: right;">5点の平均温度の σ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>何も測らない</td>
+<td style="text-align: right;">1.45 µm</td>
+<td style="text-align: right;">3.01 µm</td>
+<td style="text-align: right;">2.38 K</td>
+</tr>
+<tr class="even">
+<td>温度 P2・P4</td>
+<td style="text-align: right;">0.59 µm</td>
+<td style="text-align: right;">0.43 µm</td>
+<td style="text-align: right;">0.27 K</td>
+</tr>
+<tr class="odd">
+<td>変位 S1・S2 のみ</td>
+<td style="text-align: right;">0.32 µm</td>
+<td style="text-align: right;">0.47 µm</td>
+<td style="text-align: right;">0.32 K</td>
+</tr>
+<tr class="even">
+<td>温度2本（σ で選んだ）</td>
+<td style="text-align: right;">0.37 µm</td>
+<td style="text-align: right;">0.46 µm</td>
+<td style="text-align: right;">0.26 K</td>
+</tr>
+<tr class="odd">
+<td><strong>変位2本（σ で選んだ）</strong></td>
+<td style="text-align: right;"><strong>0.30 µm</strong></td>
+<td style="text-align: right;"><strong>2.55 µm</strong></td>
+<td style="text-align: right;"><strong>2.12 K</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（30〜300 秒の平均。データ同化はしていない。）</p>
+<p><strong>変位2本は、反りの σ は一番小さいのに、 <span class="math inline">\(U_z(A)\)</span> と平均温度の σ
+はほとんど縮みません。</strong>
+データ同化を回す前に、この表を見れば「反り以外は当たらない」と分かります。</p>
+<h3 id="4-7-なぜ同じ場所を2回測るような2本が選ばれたのか">4-7.
+なぜ同じ場所を2回測るような2本が選ばれたのか</h3>
+<p>2本の重みはまったく同じなので、2本の値の平均をとると</p>
+<p><span class="math display">\[
+\frac{y_1+y_2}{2}=\mathbf h^{\mathsf T}\mathbf
+T+\frac{\varepsilon_1+\varepsilon_2}{2}
+\]</span></p>
+<p>になり、ノイズの分散が <span class="math inline">\(r\)</span> から
+<span class="math inline">\(r/2\)</span>
+に半分になります（ノイズが互いに無関係なら）。σ
+の式では「同じ量を2回測ってノイズを減らす」ことが、別の場所を測ることより得だと判断されました（σ
+が 0.368 → 0.296 µm）。 ただし実際には、ROM
+と真値のずれ（モデル誤差）は2本に共通に乗るので、平均しても減りません。blog_008
+§6-4 でも同じ鏡写しの2本が選ばれ、予測ほど良くなりませんでした。</p>
+<hr/>
+<h2 id="5-分かったこと">5. 分かったこと</h2>
+<ol type="1">
+<li><strong>代表点以外から選んでも、2本で反りを当てられる。</strong>
+温度計2本なら、ヒータ側と反対側の中段に1本ずつ。反りの誤差は 0.20 µm（15
+W）で、代表点 P2・P4 より少し良い。</li>
+<li><strong>変位計2本は、反りは一番よく当たる（0.12
+µm）が、反りしか当たらない。</strong>
+温度場と個別の変位は、データ同化なしと同じだけずれたまま。</li>
+<li><strong>原因は「全体の温まり」を見るセンサがないこと。</strong>
+反りも、選ばれた変位計（上面の横方向）も、全体が一様に温まることに反応しない。</li>
+<li><strong>σ で選ぶときは、知りたい量を反りだけにしない。</strong>
+例えば <span class="math inline">\(U_z(A)\)</span> や平均温度の σ
+も同時に小さくする、あるいは全体の温まりに反応するセンサ（温度計1本、または上下方向の変位計）を必ず1本入れる。どちらも、データ同化を回す前に
+σ の表で確かめられる。</li>
+</ol>
+<h2 id="6-言えないことやっていないこと">6.
+言えないこと・やっていないこと</h2>
+<ul>
+<li>実機では確かめていません。真値はすべて数値計算（OpenFOAM＋FrontISTR）です。</li>
+<li>選び方は1本ずつ足す方法（貪欲法）で、2本の組み合わせ全部を調べた最良ではありません。</li>
+<li>「反りと <span class="math inline">\(U_z(A)\)</span>
+を両方小さくする」ように目的を変えて選び直す計算は、まだしていません。</li>
+<li>4-4 の「上面の <span class="math inline">\(U_x\)</span>
+は一様な温まりで動かない」理由は解釈で、変位の分布を描いて確かめてはいません。</li>
+<li>熱源の位置が変わると、ROM も選ぶ場所も作り直しが必要です。</li>
+</ul>
+<h3 id="使ったスクリプト">使ったスクリプト</h3>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>スクリプト</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/select_two_nonrep.py</code></td>
+<td>σ で2本を選ぶ（T2・U2・ANY2）。結果
+<code>results/two_nonrep_selection.json</code></td>
+</tr>
+<tr class="even">
+<td><code>run/selected_pair_unobserved_check.py t2</code></td>
+<td>選んだ配置でデータ同化し、観測していない量を評価。図
+<code>docs/img/unobserved_t2_*.png</code></td>
+</tr>
+<tr class="odd">
+<td><code>run/select_nonrep_temp_disp.py</code></td>
+<td>σ の計算の共通部分（4000 本の事前分布、1本足す更新）</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
