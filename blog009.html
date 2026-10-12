@@ -567,8 +567,54 @@ W、seed 20260913）。</p>
 <p><span class="math display">\[
 \mathbf z=(T_0,\,T_1,\,T_2,\,T_3,\,T_4,\,q,\,h)
 \]</span></p>
-<p><span class="math inline">\(T_0\)</span> 〜 <span class="math inline">\(T_4\)</span> は代表5点の温度、 <span class="math inline">\(q\)</span> は発熱の倍率（発熱量 <span class="math inline">\(Q=15q\)</span> W）、 <span class="math inline">\(h\)</span> は ROM の放熱 [W/K]
-です。センサの値は7つの中に入れず、毎回、温度から計算します。</p>
+<p><span class="math inline">\(T_0\)</span> 〜 <span class="math inline">\(T_4\)</span> は代表5点の温度、 <span class="math inline">\(q\)</span> は発熱の倍率（発熱量 <span class="math inline">\(Q=15q\)</span> W）、 <span class="math inline">\(h\)</span> は ROM の放熱 [W/K] です。</p>
+<p><strong>各メンバーが「持っていて、直す」のは、この7つの値だけ</strong>です。センサの値（例えば変位計
+S1 の変位）は、7つとは別に持っていません。必要になるたびに（30
+秒ごとに）、そのメンバーの5点の温度から換算表 <span class="math inline">\(H\)</span> で計算します（§3-2b）。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>各メンバーが持つ値（直す値）</th>
+<th>その場で計算するだけの値（持たない・直さない）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>中身</td>
+<td><span class="math inline">\(T_0,\dots,T_4\)</span> 、 <span class="math inline">\(q\)</span> 、 <span class="math inline">\(h\)</span> （7つ）</td>
+<td>センサの値、A・O の変位、反り、全セルの温度</td>
+</tr>
+<tr class="even">
+<td>どう決まるか</td>
+<td>ROM で予報し、データ同化で直す</td>
+<td>5点の温度から、換算表（ <span class="math inline">\(H\)</span>
+、gappy-POD、FrontISTR の重み）で計算する</td>
+</tr>
+<tr class="odd">
+<td>例（メンバー1、 <span class="math inline">\(t=30\)</span> 秒）</td>
+<td><span class="math inline">\((24.22,\,22.15,\,25.04,\,23.43,\,20.85)\)</span>
+°C、 <span class="math inline">\(q\)</span> 、 <span class="math inline">\(h\)</span></td>
+<td>変位計の予想値 −3.226 µm（§3-2b で計算）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>なぜセンサの値を7つに入れないのか。</strong></p>
+<ul>
+<li>変位は温度で決まります（FrontISTR の線形な関係、blog_008
+§5-2）。変位を別に持って別に直すと、「温度から計算した変位」と「持っている変位」が食い違うおそれがあります。温度だけを持てば、変位は常に温度と矛盾しません。</li>
+<li>ROM が時間を進められるのは温度だけです。変位は ROM
+の中で進められないので、持っていても予報できません。</li>
+<li>直すのは7つだけなので、 <span class="math inline">\(C_{zy}\)</span>
+は 7×2、カルマンゲイン <span class="math inline">\(K\)</span> も 7×2
+で済みます。センサの値のずれは、 <span class="math inline">\(K\)</span>
+を通して7つの値の直し量に換算されます（§3-3 の⑤⑥）。</li>
+</ul>
 <p><strong>初期値</strong>：温度は5点それぞれ 17〜32 °C の一様乱数、
 <span class="math inline">\(q\)</span> は 0.3〜1.8 の一様乱数、 <span class="math inline">\(h\)</span> は平均 0.02・標準偏差 0.01
 の正規乱数です。今回の60個のメンバーの平均（同じ点の60個の値を足して60で割ったもの）は、温度
