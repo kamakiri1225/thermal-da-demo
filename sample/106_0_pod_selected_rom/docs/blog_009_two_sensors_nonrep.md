@@ -1395,3 +1395,38 @@ $$
 
 
 評価対象A・Oだけをz軸まわりに90°回し、同じ手順・3加熱条件で選び直した比較は [blog010：評価点を変えた観測配置の検証](blog_010_rotated_target_sensor_placement.md) にまとめました。
+
+---
+
+## 8. 先行研究：温度センサの位置は、どこが良いとされているか
+
+工作機械の熱変形の研究で、温度センサの配置は、ほぼすべて「**熱変位（工具先端のずれ）を推定するための配置**」として選ばれています。結論は大きく3つの流派に分かれます。**共通する答えは「熱源の近く」と「互いに違う情報を持つ点を選ぶ」の2点**で、どの機械にも当てはまる場所の正解はなく、機械や運転条件ごとに決める、という見方で一致しています。
+
+| 流派 | 代表例 | 結論（どこが良いか） |
+|---|---|---|
+| **熱モード（物理モデル）** | Zhu, Ni, Shih（2008、ミシガン大、J. Manuf. Sci. Eng.） | FEM で温度場の「型（熱モード）」を求め、**主要な型の数だけセンサを置く**。一番目の型（ほぼ一様に温まる型）は**熱源のできるだけ近く**、それ以降の型は**温度の振れ幅が最大の場所**に置く。目的は、温度データどうしを独立にして推定を安定させること |
+| **データ駆動（温度感応点）** | ファジィクラスタリング＋灰色関連分析、LASSO など多数。Tanaka, Kizaki, Teshima, Sugita（2025、東大、IJAT）は 307 点から LASSO で選択 | 多数のセンサを仮に付け、**熱変位との相関が高く、互いの相関が低い点**を各グループから1つずつ選ぶ（例：10点→4点）。結果は主軸の軸受・モータなど熱源の近くに集まりやすい。**運転パターンが変わると、重要な点も変わる**（Tanaka ら。センサ数を 76 % 減らしても誤差 10 µm 以下） |
+| **FEM・ROM による事前選定** | Mian ら（2012、ハダースフィールド大）、Teshima ら（2024、CIRP J. Manuf. Sci. Technol.） | FEM や縮約モデルで、実験の前に場所を選ぶ枠組み。決まった場所ではなく、**手順として**提案している |
+
+**本研究との関係**
+
+| | 先行研究 | 本研究 |
+|---|---|---|
+| 同じところ | 熱モードの数だけ、型をとらえる場所に置く | Q-DEIM の代表点の選び方は、同じ考え方 |
+| 同じところ | 熱変位との相関が高く、互いの相関が低い点を選ぶ | 「ヒータ側と反対側に分ける」「同じことを2回測らない」は同じ結論 |
+| 同じところ | 一番目の型（一様な温まり）をとらえるセンサが要る（Zhu ら） | 「反りだけを目的にすると、全体の温まりが見えないセンサが選ばれる」（§5）を、別の角度から示した |
+| 違うところ | 観測は**温度だけ**。変位は回帰などで出す | **変位計も観測の候補**に入れ、データ同化の分散 σ で温度計と変位計の場所を一緒に評価 |
+| 違うところ | 相関や回帰の精度で選ぶ | 目的（反り、 $U_z(A)$ 、全体の温まり）ごとの σ を、測る前に式で計算して選ぶ。目的によって最適な場所が変わり、落とし穴があることを理論で説明 |
+
+**注意**：全文を読んで確かめたのは Zhu らの論文だけです。Tanaka ら、Teshima ら、Mian らは要旨と書誌の確認だけで、選ばれた具体的な場所（主軸、コラムなど）までは確かめていません。発表で引用するときは、全文を確認する必要があります。
+
+**参考文献**
+
+- [Zhu, Ni, Shih (2008) Robust machine tool thermal error modeling through thermal mode concept, J. Manuf. Sci. Eng.](https://wumrc.engin.umich.edu/wp-content/uploads/sites/51/2013/08/08JMSEZhuMachinetoolthermalerrorcompensation.pdf)
+- [Mian et al. (2012) An efficient offline method for determining the thermally sensitive points of a machine tool structure](https://pure.hud.ac.uk/en/publications/an-efficient-offline-method-for-determining-the-thermally-sensiti/)
+- [Tanaka, Kizaki, Teshima, Sugita (2025) Int. J. Automation Technol.（307 点の温度センサと LASSO）](https://www.fujipress.jp/ijat/au/ijate001900050758/)
+- [Teshima, Tanaka, Kizaki, Sugita (2024) Sensor placement strategy based on reduced-order models for thermal error estimation in machine tools, CIRP JMST 55, 403–410](https://doi.org/10.1016/j.cirpj.2024.10.015)
+- [温度感応点の選定（ファジィクラスタリング＋灰色関連分析）の例：MDPI Machines](https://www2.mdpi.com/2075-1702/9/11/286)
+- [温度感応点の選定の例（PMC 掲載論文）](https://pmc.ncbi.nlm.nih.gov/articles/PMC9315643/)
+- [熱誤差補償とセンサ配置の概説：Euspen Thermal SIG](https://eprints.hud.ac.uk/21510/1/Euspen_Thermal_SIG_Extended_abstract_SF_v2.pdf)
+
