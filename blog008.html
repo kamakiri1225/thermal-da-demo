@@ -1936,10 +1936,69 @@ y_c=y_{c,0}+\mathbf h_c^{\mathsf T}\mathbf T,\qquad
 \mathbf h_c=(h_{c,0},\,h_{c,1},\,h_{c,2},\,h_{c,3},\,h_{c,4})
 \]</span></p>
 <p><span class="math inline">\(y_{c,0}\)</span>
-は温度が基準のときの値（定数）、 <span class="math inline">\(h_{c,j}\)</span> は「代表点 <span class="math inline">\(P_j\)</span> の温度が 1 K 上がると、候補 <span class="math inline">\(c\)</span> の変位が何 µm 動くか」です。 FrontISTR
-を<strong>6回だけ</strong>回して作りました（平均の温度場で1回、POD
-の型5つで1回ずつ）。FEM は1回解くと全節点の変位が出るので、この6回で
-15,120 通りすべての重みがそろいます。追加の FEM 計算は要りません。</p>
+は温度が基準のときの値（定数）、 <span class="math inline">\(h_{c,j}\)</span> は「代表点 <span class="math inline">\(P_j\)</span> の温度が 1 K 上がると、候補 <span class="math inline">\(c\)</span> の変位が何 µm 動くか」です。
+この重みは、FrontISTR を<strong>6回だけ</strong>解いて作りました。15,120
+通りの候補ごとに FEM
+を解く必要はありません。理由は「重ね合わせ」です。</p>
+<figure>
+<img alt="FrontISTR 6回で重みがそろう理由" src="img/fem6_superposition.png"/>
+<figcaption aria-hidden="true">FrontISTR
+6回で重みがそろう理由</figcaption>
+</figure>
+<p><em>① 温度分布を6つの型（平均＋POD の型5つ）の足し算で表す。②
+型ごとに FrontISTR を1回ずつ解く。③ 型の強さ <span class="math inline">\(a_k\)</span>
+は代表5点の温度から決まる。②と③を合わせると、どの節点のどの方向の変位も、代表5点の温度の一次式になる（
+<code>run/make_fem6_fig.py</code> ）。</em></p>
+<ol type="1">
+<li><strong>温度分布を6つの型の足し算で書く。</strong> OpenFOAM
+の温度場を POD で分解すると、どの時刻の温度分布も「平均の温度分布 <span class="math inline">\(\bar T(x)\)</span> ＋ 型 <span class="math inline">\(\varphi_1(x),\dots,\varphi_5(x)\)</span>
+をそれぞれ <span class="math inline">\(a_1,\dots,a_5\)</span>
+倍したもの」でほぼ表せます（5つの型で 99.9 % 以上）。</li>
+</ol>
+<p><span class="math display">\[
+T(x)\approx\bar
+T(x)+a_1\varphi_1(x)+a_2\varphi_2(x)+\cdots+a_5\varphi_5(x)
+\]</span></p>
+<ol start="2" type="1">
+<li><p><strong>型ごとに FrontISTR を1回ずつ解く（計6回）。</strong>
+平均の温度分布を入れた変位 <span class="math inline">\(\mathbf u[\bar
+T]\)</span> と、型 <span class="math inline">\(\varphi_k\)</span>
+だけを入れた変位 <span class="math inline">\(\mathbf
+u[\varphi_k]\)</span> です。FEM は1回解くと<strong>全 5,040 節点 ×
+3方向の変位が一度に出る</strong>ので、6回で全候補の答えがそろいます。</p></li>
+<li><p><strong>変位も同じ足し算になる。</strong>
+熱弾性の計算は線形（温度が2倍なら変位も2倍、温度の足し算は変位の足し算）なので、</p></li>
+</ol>
+<p><span class="math display">\[
+\mathbf u\approx\mathbf u[\bar T]+a_1\,\mathbf u[\varphi_1]+a_2\,\mathbf
+u[\varphi_2]+\cdots+a_5\,\mathbf u[\varphi_5]
+\]</span></p>
+<ol start="4" type="1">
+<li><strong>型の強さ <span class="math inline">\(a_k\)</span>
+は、代表5点の温度から決まる（gappy-POD）。</strong>
+代表5点での型の値を並べた 5×5 の行列を <span class="math inline">\(\Phi_P\)</span> とすると、</li>
+</ol>
+<p><span class="math display">\[
+\mathbf T_P=\bar{\mathbf T}_P+\Phi_P\,\mathbf
+a\quad\Rightarrow\quad\mathbf a=\Phi_P^{-1}\big(\mathbf T_P-\bar{\mathbf
+T}_P\big)
+\]</span></p>
+<ol start="5" type="1">
+<li><strong>3と4を合わせると、重みが出る。</strong> 節点 <span class="math inline">\(c\)</span> のある方向の変位は</li>
+</ol>
+<p><span class="math display">\[
+u_c=u_c[\bar T]+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf
+T}_P\big),\qquad
+\mathbf h_c^{\mathsf
+T}=\big(u_c[\varphi_1],\dots,u_c[\varphi_5]\big)\,\Phi_P^{-1}
+\]</span></p>
+<p>つまり重み <span class="math inline">\(\mathbf h_c\)</span> は、6回の
+FrontISTR の結果のうち節点 <span class="math inline">\(c\)</span>
+の値を取り出して、5×5 の行列 <span class="math inline">\(\Phi_P^{-1}\)</span> を掛けるだけで出ます。15,120
+通りすべてについて、掛け算だけで計算できます。</p>
+<p><strong>近似が入るのは、1の「5つの型で表す」ところ（と、OpenFOAM
+のセルの温度を FEM の節点へ受け渡すところ）</strong>です。2・3は FEM
+の線形性そのものなので、近似はありません。</p>
 <p>知りたい反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
 も、同じ形の重み <span class="math inline">\(\mathbf w\)</span>
 で書けます。</p>
