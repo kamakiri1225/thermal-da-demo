@@ -179,79 +179,59 @@
 </header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ" id="toc-blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ">blog_009：センサ2本だけで反りを当てる
-― 代表点以外から σ で選ぶ</a>
+<li><a href="#blog_009センサ2本だけで反りを当てる--代表点以外から選ぶ" id="toc-blog_009センサ2本だけで反りを当てる--代表点以外から選ぶ">blog_009：センサ2本だけで反りを当てる
+― 代表点以外から選ぶ</a>
 <ul>
-<li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
-<li><a href="#この記事に出てくる平均は5種類ある" id="toc-この記事に出てくる平均は5種類ある">この記事に出てくる「平均」は5種類ある</a></li>
-<li><a href="#1-選び方の理論" id="toc-1-選び方の理論">1.
-選び方の理論</a>
+<li><a href="#この記事で分かること" id="toc-この記事で分かること">この記事で分かること</a></li>
+<li><a href="#1-やったこと" id="toc-1-やったこと">1. やったこと</a></li>
+<li><a href="#2-どうやって場所を選んだか" id="toc-2-どうやって場所を選んだか">2. どうやって場所を選んだか</a>
 <ul>
-<li><a href="#1-1-何を小さくするか--σ" id="toc-1-1-何を小さくするか--σ">1-1. 何を小さくするか ― σ</a></li>
-<li><a href="#1-2-センサ1本の-σ-の式導き方" id="toc-1-2-センサ1本の-σ-の式導き方">1-2. センサ1本の σ
-の式（導き方）</a></li>
-<li><a href="#1-3-2本目を足すときの式導き方" id="toc-1-3-2本目を足すときの式導き方">1-3.
-2本目を足すときの式（導き方）</a></li>
-<li><a href="#1-4-選ぶ手順" id="toc-1-4-選ぶ手順">1-4. 選ぶ手順</a></li>
-</ul></li>
-<li><a href="#2-選ばれた場所" id="toc-2-選ばれた場所">2.
+<li><a href="#2-1-考え方" id="toc-2-1-考え方">2-1. 考え方</a></li>
+<li><a href="#2-2-σ-の計算に使うもの" id="toc-2-2-σ-の計算に使うもの">2-2. σ の計算に使うもの</a></li>
+<li><a href="#2-3-選ばれた場所" id="toc-2-3-選ばれた場所">2-3.
 選ばれた場所</a></li>
-<li><a href="#3-2本を選んだ後のデータ同化の手続き" id="toc-3-2本を選んだ後のデータ同化の手続き">3.
-2本を選んだ後のデータ同化の手続き</a>
-<ul>
-<li><a href="#3-1-何を直すか状態" id="toc-3-1-何を直すか状態">3-1.
-何を直すか（状態）</a></li>
-<li><a href="#3-2-1サイクルの手順" id="toc-3-2-1サイクルの手順">3-2.
-1サイクルの手順</a></li>
-<li><a href="#3-2b-センサとセンサの値を予想するとは" id="toc-3-2b-センサとセンサの値を予想するとは">3-2b.
-「センサ」と「センサの値を予想する」とは</a></li>
-<li><a href="#3-3-1回目の補正を数字で追う-t30-秒" id="toc-3-3-1回目の補正を数字で追う-t30-秒">3-3.
-1回目の補正を数字で追う（ <span class="math inline">\(t=30\)</span>
-秒）</a></li>
 </ul></li>
-<li><a href="#4-結果--データ同化で確かめる" id="toc-4-結果--データ同化で確かめる">4. 結果 ― データ同化で確かめる</a>
+<li><a href="#3-選んだ2本でデータ同化する" id="toc-3-選んだ2本でデータ同化する">3. 選んだ2本で、データ同化する</a>
 <ul>
-<li><a href="#4-1-温度計2本代表点以外" id="toc-4-1-温度計2本代表点以外">4-1. 温度計2本（代表点以外）</a></li>
-<li><a href="#4-2-変位計2本代表点以外" id="toc-4-2-変位計2本代表点以外">4-2. 変位計2本（代表点以外）</a></li>
+<li><a href="#3-1-流れ" id="toc-3-1-流れ">3-1. 流れ</a></li>
+<li><a href="#3-2-変位計の値でどうやって直すのか" id="toc-3-2-変位計の値でどうやって直すのか">3-2.
+変位計の値で、どうやって直すのか</a></li>
+<li><a href="#3-3-1回目の補正で何が起きたか30-秒" id="toc-3-3-1回目の補正で何が起きたか30-秒">3-3.
+1回目の補正で、何が起きたか（30 秒）</a></li>
 </ul></li>
-<li><a href="#5-なぜ変位計2本は反りしか当てられなかったのか--理論" id="toc-5-なぜ変位計2本は反りしか当てられなかったのか--理論">5.
-なぜ変位計2本は、反りしか当てられなかったのか ― 理論</a>
+<li><a href="#4-結果" id="toc-4-結果">4. 結果</a></li>
+<li><a href="#5-なぜ変位計2本は反りしか当てられなかったか" id="toc-5-なぜ変位計2本は反りしか当てられなかったか">5.
+なぜ、変位計2本は反りしか当てられなかったか</a></li>
+<li><a href="#6-まとめ" id="toc-6-まとめ">6. まとめ</a></li>
+<li><a href="#付録" id="toc-付録">付録</a>
 <ul>
-<li><a href="#5-1-温度を全体の温まりと温度差に分ける" id="toc-5-1-温度を全体の温まりと温度差に分ける">5-1.
-温度を「全体の温まり」と「温度差」に分ける</a></li>
-<li><a href="#5-2-分からなさの大部分は全体の温まり" id="toc-5-2-分からなさの大部分は全体の温まり">5-2.
-分からなさの大部分は「全体の温まり」</a></li>
-<li><a href="#5-3-反りは全体の温まりに反応しない" id="toc-5-3-反りは全体の温まりに反応しない">5-3.
-反りは「全体の温まり」に反応しない</a></li>
-<li><a href="#5-4-選ばれた変位計2本も全体の温まりに反応しない" id="toc-5-4-選ばれた変位計2本も全体の温まりに反応しない">5-4.
-選ばれた変位計2本も「全体の温まり」に反応しない</a></li>
-<li><a href="#5-5-だから反りは当たりほかは当たらない" id="toc-5-5-だから反りは当たりほかは当たらない">5-5.
-だから、反りは当たり、ほかは当たらない</a></li>
-<li><a href="#5-6-このことは測る前に-σ-の式で分かる" id="toc-5-6-このことは測る前に-σ-の式で分かる">5-6. このことは、測る前に
-σ の式で分かる</a></li>
-<li><a href="#5-7-なぜ同じ場所を2回測るような2本が選ばれたのか" id="toc-5-7-なぜ同じ場所を2回測るような2本が選ばれたのか">5-7.
-なぜ同じ場所を2回測るような2本が選ばれたのか</a></li>
-</ul></li>
-<li><a href="#6-分かったこと" id="toc-6-分かったこと">6.
-分かったこと</a></li>
-<li><a href="#7-言えないことやっていないこと" id="toc-7-言えないことやっていないこと">7.
-言えないこと・やっていないこと</a>
-<ul>
+<li><a href="#付録a-σ-の式の導き方センサ1本" id="toc-付録a-σ-の式の導き方センサ1本">付録A. σ
+の式の導き方（センサ1本）</a></li>
+<li><a href="#付録b-2本目を足すときの式" id="toc-付録b-2本目を足すときの式">付録B. 2本目を足すときの式</a></li>
+<li><a href="#付録c-1回目の補正の全数値15-wseed-20260913-t30-秒" id="toc-付録c-1回目の補正の全数値15-wseed-20260913-t30-秒">付録C.
+1回目の補正の全数値（15 W、seed 20260913、 <span class="math inline">\(t=30\)</span> 秒）</a></li>
+<li><a href="#付録d-知りたい量を変えたときの-σ測る前の計算" id="toc-付録d-知りたい量を変えたときの-σ測る前の計算">付録D.
+知りたい量を変えたときの σ（測る前の計算）</a></li>
+<li><a href="#付録e-この記事の平均" id="toc-付録e-この記事の平均">付録E.
+この記事の「平均」</a></li>
 <li><a href="#使ったスクリプト" id="toc-使ったスクリプト">使ったスクリプト</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </nav>
-<h1 id="blog_009センサ2本だけで反りを当てる--代表点以外から-σ-で選ぶ">blog_009：センサ2本だけで反りを当てる
-― 代表点以外から σ で選ぶ</h1>
+<h1 id="blog_009センサ2本だけで反りを当てる--代表点以外から選ぶ">blog_009：センサ2本だけで反りを当てる
+― 代表点以外から選ぶ</h1>
 <p>更新日：2026-10-12</p>
-<p><a href="blog008.html">blog_008</a>
-では、温度計 P2・P0 を固定して、変位計2本の場所を σ で選びました。
-この記事では、<strong>センサを全部で2本だけ</strong>にして、<strong>代表点（P0〜P4）以外の場所</strong>から、反り
-A−O を一番よく当てられる2本を σ で選びます。
-温度計2本・変位計2本・種類を問わず2本の3通りを選び、OpenFOAM＋FrontISTR
-を真値にしたデータ同化で確かめます。</p>
-<h2 id="この記事で確かめること">この記事で確かめること</h2>
+<h2 id="この記事で分かること">この記事で分かること</h2>
+<ol type="1">
+<li>センサを<strong>2本だけ</strong>置けるとき、反り A−O
+を一番よく当てられる場所を、<strong>測る前に計算で</strong>選んだ。</li>
+<li><strong>温度計2本</strong>なら「ヒータ側と反対側に1本ずつ」が選ばれ、反りも温度もよく当たった。</li>
+<li><strong>変位計2本</strong>なら「上面の鏡写しの2点」が選ばれ、<strong>反りは一番よく当たったが、温度と個別の変位はまったく当たらなかった</strong>。反りだけを目的に選ぶと、こういう落とし穴がある。</li>
+</ol>
+<p>真値はすべて計算（OpenFOAM＋FrontISTR）です。実機では確かめていません。</p>
+<hr/>
+<h2 id="1-やったこと">1. やったこと</h2>
 <table>
 <colgroup>
 <col style="width: 50%"/>
@@ -265,245 +245,141 @@ A−O を一番よく当てられる2本を σ で選びます。
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>確かめたいこと</strong></td>
-<td>代表点以外の場所から2本だけ選んで、反り A−O
-を当てられるか。どの種類・どの場所が良いか</td>
+<td>問い</td>
+<td>センサが2本だけなら、どこに置けば反り A−O が一番よく当たるか</td>
 </tr>
 <tr class="even">
-<td><strong>選び方</strong></td>
-<td>σ
-（センサを付けた後でも残る、反りの分からなさ）が一番小さくなる候補を1本ずつ足す（blog_008
-§5-2 と同じ考え方）</td>
+<td>候補</td>
+<td><strong>代表点（P0〜P4）以外</strong>の、温度計 20,691
+か所と、変位計 14,754 通り（全節点 × 3方向。A・O のすぐ近くは除く）</td>
 </tr>
 <tr class="odd">
-<td><strong>候補</strong></td>
-<td>温度計：代表5点を除く全セル 20,691 個。変位計：A・O から 12 mm
-以内を除く全節点 × 3方向 14,754 個</td>
+<td>選び方</td>
+<td>測る前に、σ（後で説明）が一番小さくなる候補を1本ずつ選ぶ。温度計2本・変位計2本・種類を問わず2本の3通り</td>
 </tr>
 <tr class="even">
-<td><strong>比べる配置</strong></td>
-<td>データ同化なし／代表点の温度計
-P2・P0（片側）／P2・P4（両側）／変位計 S1・S2 だけ（blog_008 §5
-で選んだ2点）／σ で選んだ温度計2本／σ で選んだ変位計2本</td>
+<td>確かめ方</td>
+<td>選んだ2本だけを使ってデータ同化し、<strong>測っていない場所</strong>の温度と変位が真値に合うかを見る</td>
 </tr>
 <tr class="odd">
-<td><strong>真値</strong></td>
-<td>OpenFOAM（温度場）＋FrontISTR（全節点の変位）。15 W・25 W・15 W
-間欠加熱</td>
-</tr>
-<tr class="even">
-<td><strong>データ同化</strong></td>
-<td>ROM＋EnKF、60メンバー、30 秒ごと、5 seed 平均。ノイズは温度 0.3
-K、変位 0.3 µm</td>
-</tr>
-<tr class="odd">
-<td><strong>評価</strong></td>
-<td>30〜300
-秒の平均誤差。観測に使っていない温度（7点）・温度場全体・反り A−O・
-<span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> ・ほかの変位</td>
-</tr>
-<tr class="even">
-<td><strong>実機</strong></td>
-<td>実機の測定はしていない</td>
+<td>真値</td>
+<td>OpenFOAM（温度）＋FrontISTR（変位）。15 W・25 W・15 W
+間欠加熱の3条件</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p><strong>この記事の結論</strong> 1. <strong>温度計2本</strong>を σ
-で選ぶと、<strong>ヒータ側の中段と、反対側の中段</strong>に1本ずつ選ばれた。反りの誤差は
-0.20 µm（15 W）で、代表点の P2・P4（0.23 µm）より少し良かった。 2.
-<strong>変位計2本</strong>（種類を問わず選んでも同じ）を σ
-で選ぶと、<strong>上面の鏡写しの2点</strong>（同じ向き <span class="math inline">\(U_x\)</span>
-）が選ばれた。<strong>反りは一番よく当たった</strong>（0.12
-µm）が、<strong>温度場は 4.4 K、 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> は 5.3 µm
-ずれたまま</strong>で、データ同化なしと同じだった。 3.
-理由は、この2本が「<strong>全体が一様に温まる</strong>」ことに反応しないから。反りも一様な温まりには反応しないので、反りだけを目的に
-σ で選ぶと、こういう2本が選ばれる。 4. 同じ σ の式で「 <span class="math inline">\(U_z(A)\)</span>
-の分からなさ」を計算すると、この2本ではほとんど縮まない（3.0 → 2.6
-µm）ことが<strong>測る前に分かる</strong>。σ
-で選ぶときは、<strong>知りたい量を反りだけにしない</strong>ほうがよい。</p>
-</blockquote>
-<hr/>
-<h2 id="この記事に出てくる平均は5種類ある">この記事に出てくる「平均」は5種類ある</h2>
-<p>「平均」という言葉が、何についての平均かで5種類出てきます。<strong>時間の平均、場所の平均、メンバーの平均は別物</strong>です。</p>
-<table style="width:100%;">
+<p><strong>言葉の意味</strong>（この記事ではこの意味で使います）</p>
+<table>
 <colgroup>
-<col style="width: 16%"/>
-<col style="width: 16%"/>
-<col style="width: 16%"/>
-<col style="width: 16%"/>
-<col style="width: 16%"/>
-<col style="width: 16%"/>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
-<th>呼び方</th>
-<th>何を平均するか</th>
-<th>時間</th>
-<th>場所</th>
-<th>式</th>
-<th>使う場所</th>
+<th>言葉</th>
+<th>意味</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>60個のメンバーの平均</strong></td>
-<td>同じ時刻・同じ点の、60個のメンバー（ありえる世界）の値</td>
-<td>平均しない（その時刻だけ）</td>
-<td>平均しない（その点だけ）</td>
-<td><span class="math inline">\(\displaystyle
-\frac{1}{60}\sum_{m=1}^{60}T_j^{(m)}(t)\)</span></td>
-<td>データ同化の推定値。§3-3 の表</td>
+<td>代表点 P0〜P4</td>
+<td>ROM（軽い計算モデル）が温度を計算する5つの点</td>
 </tr>
 <tr class="even">
-<td><strong>平均の温度分布</strong> <span class="math inline">\(\bar
-T\)</span></td>
-<td>OpenFOAM の 121 時刻（0〜600 秒、5 秒ごと）の温度場（15 W、ROM
-を作ったときの計算）</td>
-<td><strong>時間で平均</strong></td>
-<td>平均しない（セルごと）</td>
-<td><span class="math inline">\(\displaystyle \bar
-T(x)=\frac{1}{121}\sum_{k=1}^{121}T(x,t_k)\)</span></td>
-<td>換算表 <span class="math inline">\(H\)</span> の基準（ <span class="math inline">\(\bar T_j\)</span> 、 <span class="math inline">\(\bar y\)</span> ）</td>
+<td>センサ</td>
+<td>「ここに温度計（または変位計）を置いたとしたら」という場所。実物は使っていない</td>
 </tr>
 <tr class="odd">
-<td><strong>4,000 本の平均</strong></td>
-<td>同じ時刻の、4,000 本の ROM 計算（ありえる世界）</td>
-<td>平均しない</td>
-<td>平均しない</td>
-<td><span class="math inline">\(\displaystyle \langle
-T_j\rangle=\frac{1}{4000}\sum_{n=1}^{4000}T_j^{(n)}(t)\)</span></td>
-<td>σ の計算（§1）</td>
+<td>センサの値</td>
+<td>そのセンサが示す数字。計算の中では「真値＋ノイズ（0.3 K または 0.3
+µm）」を測った値とする</td>
 </tr>
 <tr class="even">
-<td><strong>30〜300 秒の平均誤差</strong></td>
-<td>各時刻の誤差</td>
-<td><strong>時間で平均</strong>（30, 60, …, 300 秒の10時刻）</td>
-<td>平均しない</td>
-<td><span class="math inline">\(\displaystyle
-\frac{1}{10}\sum_{k=1}^{10}\big\lvert\hat
-d(30k)-d(30k)\big\rvert\)</span></td>
-<td>結果の表（§4）</td>
-</tr>
-<tr class="odd">
-<td><strong>5 seed 平均</strong></td>
-<td>乱数の種を変えた5回のデータ同化</td>
-<td>―</td>
-<td>―</td>
-<td><span class="math inline">\(\displaystyle
-\frac{1}{5}\sum_{s=1}^{5}(\cdots)\)</span></td>
-<td>結果の表（§4）</td>
+<td>反り A−O</td>
+<td>上面のヒータ側 A と反対側 O の、上下の変位の差。知りたい量。A・O
+は測らない</td>
 </tr>
 </tbody>
 </table>
-<p><strong>場所で平均するのは2か所だけ</strong>です。</p>
-<ul>
-<li>温度場全体の RMSE： <span class="math inline">\(\sqrt{\frac{1}{20696}\sum_i(\hat
-T_i-T_i)^2}\)</span> （全セルで平均。§4 の表）</li>
-<li>§5-1 の「5点の平均 <span class="math inline">\(m\)</span>
-」（代表5点の温度を足して5で割ったもの）</li>
-</ul>
-<h2 id="1-選び方の理論">1. 選び方の理論</h2>
-<h3 id="1-1-何を小さくするか--σ">1-1. 何を小さくするか ― σ</h3>
-<p><strong>σ ＝
-センサを付けたとしたら、それでもまだ残る、反りの分からなさ</strong>です。
-ROM を条件を変えて 4,000
-本回した「ありえる世界」で、横軸にセンサの値、縦軸に反りをとった散布図を描くと、σ
-は「センサの値が分かったときに残る、反りの縦の幅」になります（blog_008
-§5-2 ステップ3の図）。 <strong>センサの値が反りと一緒に動く場所ほど σ
-が小さく、良い場所</strong>です。</p>
-<h3 id="1-2-センサ1本の-σ-の式導き方">1-2. センサ1本の σ
-の式（導き方）</h3>
-<p>記号はすべて 4,000 本の平均からのずれで、 <span class="math inline">\(\langle\ \rangle\)</span> は 4,000
-本の平均です。</p>
-<ul>
-<li>反り： <span class="math inline">\(d=\mathbf w^{\mathsf T}\mathbf
-T\)</span> （ <span class="math inline">\(\mathbf w\)</span>
-＝反りの重み、 <span class="math inline">\(\mathbf T\)</span>
-＝代表5点の温度）</li>
-<li>センサの値： <span class="math inline">\(y=\mathbf h^{\mathsf
-T}\mathbf T+\varepsilon\)</span> （ <span class="math inline">\(\mathbf
-h\)</span> ＝そのセンサの重み、 <span class="math inline">\(\varepsilon\)</span> ＝ノイズ、分散 <span class="math inline">\(r\)</span> ）</li>
-</ul>
-<p>重み <span class="math inline">\(\mathbf w\)</span> と <span class="math inline">\(\mathbf h\)</span> は、FrontISTR
-を6回解いて作った「温度が 1 K 上がると何 µm 動くか」の表です（温度計なら
-gappy-POD の重み。blog_008 §5-2 ステップ1）。</p>
-<p><strong>①
-センサの値から反りを直線で予想し、外れを二乗して平均する。</strong></p>
-<p><span class="math display">\[
-\langle(d-a\,y)^2\rangle=\langle d^2\rangle-2a\,\langle
-d\,y\rangle+a^2\,\langle y^2\rangle
-\]</span></p>
-<p><strong>② 3つの平均を、温度の分からなさの表 <span class="math inline">\(B=\langle\mathbf T\mathbf T^{\mathsf
-T}\rangle\)</span> で書く。</strong> ノイズは温度と無関係（ <span class="math inline">\(\langle\mathbf T\varepsilon\rangle=0\)</span>
-）なので、</p>
-<p><span class="math display">\[
-\langle d^2\rangle=\mathbf w^{\mathsf T}B\,\mathbf w,\qquad
-\langle d\,y\rangle=\mathbf w^{\mathsf T}B\,\mathbf h,\qquad
-\langle y^2\rangle=\mathbf h^{\mathsf T}B\,\mathbf h+r
-\]</span></p>
-<p><strong>③ 傾き <span class="math inline">\(a\)</span>
-について平方完成する。</strong> <span class="math inline">\(V_d=\mathbf
-w^{\mathsf T}B\mathbf w\)</span> 、 <span class="math inline">\(C=\mathbf w^{\mathsf T}B\mathbf h\)</span> 、
-<span class="math inline">\(V_y=\mathbf h^{\mathsf T}B\mathbf
-h+r\)</span> と書くと、</p>
-<p><span class="math display">\[
-V_d-2aC+a^2V_y=V_y\Big(a-\frac{C}{V_y}\Big)^2+V_d-\frac{C^2}{V_y}
-\]</span></p>
-<p><strong>④ 第1項が 0 になる <span class="math inline">\(a=C/V_y\)</span>
-のとき、外れが一番小さい。そのとき残る外れが σ²。</strong></p>
-<p><span class="math display">\[
-\sigma^2=V_d-\frac{C^2}{V_y}=\mathbf w^{\mathsf T}B\,\mathbf
-w-\frac{(\mathbf w^{\mathsf T}B\,\mathbf h)^2}{\mathbf h^{\mathsf
-T}B\,\mathbf h+r}
-\]</span></p>
-<p>測定値はどこにも出てきません。重み（FrontISTR）、 <span class="math inline">\(B\)</span> （ROM 4,000 本）、 <span class="math inline">\(r\)</span>
-（センサの仕様）だけで、<strong>センサを付ける前に</strong>計算できます。</p>
-<h3 id="1-3-2本目を足すときの式導き方">1-3.
-2本目を足すときの式（導き方）</h3>
-<p>2本目は、「1本目を付けた後でも残る分からなさ」について、同じことをします。
-1本目を付けた後の温度の分からなさの表を <span class="math inline">\(P\)</span> とします（付ける前は <span class="math inline">\(P=B\)</span> ）。</p>
-<p><strong>①
-知りたい量が何であっても同じ式になることを確かめる。</strong>
-知りたい量を <span class="math inline">\(z=\mathbf v^{\mathsf T}\mathbf
-T\)</span> （ <span class="math inline">\(\mathbf v\)</span>
-は任意の重み）とすると、1-2 と同じ計算で</p>
-<p><span class="math display">\[
-\sigma_z^2{}'=\mathbf v^{\mathsf T}P\,\mathbf v-\frac{(\mathbf
-v^{\mathsf T}P\,\mathbf h)^2}{\mathbf h^{\mathsf T}P\,\mathbf h+r}
-\]</span></p>
-<p><strong>② <span class="math inline">\((\mathbf v^{\mathsf T}P\mathbf
-h)^2=\mathbf v^{\mathsf T}(P\mathbf h)(P\mathbf h)^{\mathsf T}\mathbf
-v\)</span> と書き直す。</strong> <span class="math inline">\(P\)</span>
-が対称なので <span class="math inline">\(\mathbf h^{\mathsf T}P\mathbf
-v=(P\mathbf h)^{\mathsf T}\mathbf v\)</span> です。</p>
-<p><span class="math display">\[
-\sigma_z^2{}'=\mathbf v^{\mathsf T}\Big(P-\frac{(P\mathbf
-h)(P\mathbf h)^{\mathsf T}}{\mathbf h^{\mathsf T}P\,\mathbf
-h+r}\Big)\mathbf v
-\]</span></p>
-<p><strong>③ どんな <span class="math inline">\(\mathbf v\)</span>
-でも括弧の中が共通なので、センサを1本足した後の分からなさの表は</strong></p>
-<p><span class="math display">\[
-P'=P-\frac{(P\mathbf h)(P\mathbf h)^{\mathsf T}}{\mathbf h^{\mathsf
-T}P\,\mathbf h+r}
-\]</span></p>
-<p>これを1本ごとに繰り返せば、何本付けた後の分からなさも計算できます（センサのノイズが互いに無関係なら、blog_008
-§5-2 (c′) の行列の式で一度に計算した結果と同じ）。反りの σ は <span class="math inline">\(\sigma^2=\mathbf w^{\mathsf T}P'\mathbf
-w\)</span> です。</p>
-<h3 id="1-4-選ぶ手順">1-4. 選ぶ手順</h3>
-<ol type="1">
-<li>30, 60, …, 300 秒の10時刻それぞれで、ROM 4,000 本から <span class="math inline">\(B(t_k)\)</span> を作る。</li>
-<li>すべての候補について、1-2 の σ を10時刻で計算して平均する（点数
-<span class="math inline">\(J\)</span> ）。</li>
-<li>点数が一番小さい候補を1本目にする。</li>
-<li>1-3 の式で各時刻の <span class="math inline">\(P\)</span>
-を更新し、残りの候補を採点し直して、2本目を選ぶ。</li>
-</ol>
-<p>温度計2本（T2）、変位計2本（U2）、種類を問わず2本（ANY2）の3通りで行いました（
-<code>run/select_two_nonrep.py</code> ）。</p>
 <hr/>
-<h2 id="2-選ばれた場所">2. 選ばれた場所</h2>
+<h2 id="2-どうやって場所を選んだか">2. どうやって場所を選んだか</h2>
+<h3 id="2-1-考え方">2-1. 考え方</h3>
+<p>ヒータの発熱量などは正確には分からないので、条件を変えて ROM を 4,000
+本計算し、「ありえる世界」を 4,000 個作ります。
+それぞれの世界で、<strong>候補のセンサが示すはずの値</strong>と、<strong>反り</strong>を計算します。</p>
+<p><strong>良い場所 ＝
+センサの値が分かれば、反りも分かる場所</strong>です。</p>
+<table>
+<thead>
+<tr class="header">
+<th>世界</th>
+<th style="text-align: right;">センサ X の値</th>
+<th style="text-align: right;">センサ Y の値</th>
+<th style="text-align: right;">反り</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">5.1</td>
+<td style="text-align: right;">1.0</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">2.0</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">4.8</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+</tbody>
+</table>
+<p>（数字は説明用。）X は値が大きいほど反りも大きいので、X
+を測れば反りが分かります。Y
+は反りと関係がないので、測っても反りは分かりません。</p>
+<p><strong>σ
+は「センサの値を知った後でも、反りがまだどれくらい分からないか」</strong>です。X
+なら小さく、Y なら大きくなります。</p>
+<h3 id="2-2-σ-の計算に使うもの">2-2. σ の計算に使うもの</h3>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>使うもの</th>
+<th>中身</th>
+<th>どこから</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>重み</td>
+<td>温度が 1 K 上がると、センサの値や反りがいくつ変わるか</td>
+<td>FrontISTR（blog_008 §5-2）</td>
+</tr>
+<tr class="even">
+<td>温度のばらつき方</td>
+<td>4,000 個の世界で、5点の温度がどうばらつくか</td>
+<td>ROM 4,000 本</td>
+</tr>
+<tr class="odd">
+<td>ノイズ</td>
+<td>センサの誤差 0.3 K、0.3 µm</td>
+<td>仕様</td>
+</tr>
+</tbody>
+</table>
+<p><strong>測った値は使いません。</strong>
+だから、センサを付ける前に計算できます。式の導き方は付録Aにあります。</p>
+<h3 id="2-3-選ばれた場所">2-3. 選ばれた場所</h3>
 <table>
 <colgroup>
 <col style="width: 23%"/>
@@ -516,323 +392,86 @@ w\)</span> です。</p>
 <th>選び方</th>
 <th>1本目</th>
 <th>2本目</th>
-<th style="text-align: right;">予測 σ （反り A−O）</th>
+<th style="text-align: right;">σ（反り）</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>温度計2本（T2）</td>
-<td>温度：ヒータ側・中段 <span class="math inline">\((36.7,0.8,49.2)\)</span> mm</td>
-<td>温度：<strong>反対側</strong>・中段 <span class="math inline">\((-32.9,1.6,51.6)\)</span> mm</td>
-<td style="text-align: right;">0.365 µm</td>
+<td>温度計2本</td>
+<td>ヒータ側・中段</td>
+<td><strong>反対側</strong>・中段</td>
+<td style="text-align: right;">0.37 µm</td>
 </tr>
 <tr class="even">
-<td>変位計2本（U2）</td>
-<td>変位 <span class="math inline">\(U_x\)</span> ：上面 <span class="math inline">\((18.8,32.5,100.5)\)</span> mm</td>
-<td>変位 <span class="math inline">\(U_x\)</span> ：上面 <span class="math inline">\((18.8,-32.5,100.5)\)</span>
-mm（1本目の鏡写し）</td>
-<td style="text-align: right;"><strong>0.296 µm</strong></td>
+<td>変位計2本</td>
+<td>上面 <span class="math inline">\((18.8,\,32.5)\)</span> mm
+の横方向</td>
+<td>上面 <span class="math inline">\((18.8,\,-32.5)\)</span> mm
+の横方向（<strong>1本目の鏡写し</strong>）</td>
+<td style="text-align: right;"><strong>0.30 µm</strong></td>
 </tr>
 <tr class="odd">
-<td>種類を問わず2本（ANY2）</td>
-<td>U2 と同じ</td>
-<td>U2 と同じ</td>
-<td style="text-align: right;">0.296 µm</td>
+<td>種類を問わず2本</td>
+<td>変位計2本と同じ</td>
+<td>同じ</td>
+<td style="text-align: right;">0.30 µm</td>
 </tr>
 </tbody>
 </table>
-<p>比較用の配置の予測 σ ：何も測らない 1.451 µm、温度 P2・P0 1.186
-µm、温度 P2・P4 0.590 µm、変位 S1・S2 のみ 0.318 µm（いずれも 30〜300
-秒の平均）。</p>
-<ul>
-<li><strong>温度計2本は、ヒータ側と反対側に1本ずつ</strong>選ばれました。反りの重み
-<span class="math inline">\(\mathbf w\)</span> はヒータ側の P0・P2
-が＋、反対側の P1・P4
-が−なので、両側の温度を知ると反りが分かるためです。</li>
-<li><strong>変位計2本は、上面の、y=0
-の面について鏡写しの2点</strong>が選ばれました。向きも同じ <span class="math inline">\(U_x\)</span> です。</li>
-</ul>
+<p>比べるための σ：何も測らない 1.45 µm、代表点の温度計
+P2・P0（片側）1.19 µm、P2・P4（両側）0.59 µm。</p>
 <hr/>
-<h2 id="3-2本を選んだ後のデータ同化の手続き">3.
-2本を選んだ後のデータ同化の手続き</h2>
-<p>2本を選んだら、その2本の値だけを使って、ROM＋EnKF
-でデータ同化します（ <code>run/selected_pair_unobserved_check.py</code>
-、1サイクルの中身は <code>run/dump_two_nonrep_da.py</code> ）。
-ここでは、σ
-で選んだ<strong>温度計2本（T2）</strong>と<strong>変位計2本（U2）</strong>について、1回目の補正（
-<span class="math inline">\(t=30\)</span> 秒）を実際の数字で追います（15
-W、seed 20260913）。</p>
-<h3 id="3-1-何を直すか状態">3-1. 何を直すか（状態）</h3>
-<p>60個のメンバー（ありえる世界）が、それぞれ次の7つの値を持ちます。</p>
-<p><span class="math display">\[
-\mathbf z=(T_0,\,T_1,\,T_2,\,T_3,\,T_4,\,q,\,h)
-\]</span></p>
-<p><span class="math inline">\(T_0\)</span> 〜 <span class="math inline">\(T_4\)</span> は代表5点の温度、 <span class="math inline">\(q\)</span> は発熱の倍率（発熱量 <span class="math inline">\(Q=15q\)</span> W）、 <span class="math inline">\(h\)</span> は ROM の放熱 [W/K] です。</p>
-<p><strong>各メンバーが「持っていて、直す」のは、この7つの値だけ</strong>です。センサの値（例えば変位計
-S1 の変位）は、7つとは別に持っていません。必要になるたびに（30
-秒ごとに）、そのメンバーの5点の温度から換算表 <span class="math inline">\(H\)</span> で計算します（§3-2b）。</p>
+<h2 id="3-選んだ2本でデータ同化する">3. 選んだ2本で、データ同化する</h2>
+<h3 id="3-1-流れ">3-1. 流れ</h3>
+<p>ROM の計算を 60 通り同時に回し（60個の「メンバー」）、30
+秒ごとにセンサの値と比べて直します。</p>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>各メンバーが持つ値（直す値）</th>
-<th>その場で計算するだけの値（持たない・直さない）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>中身</td>
-<td><span class="math inline">\(T_0,\dots,T_4\)</span> 、 <span class="math inline">\(q\)</span> 、 <span class="math inline">\(h\)</span> （7つ）</td>
-<td>センサの値、A・O の変位、反り、全セルの温度</td>
-</tr>
-<tr class="even">
-<td>どう決まるか</td>
-<td>ROM で予報し、データ同化で直す</td>
-<td>5点の温度から、換算表（ <span class="math inline">\(H\)</span>
-、gappy-POD、FrontISTR の重み）で計算する</td>
-</tr>
-<tr class="odd">
-<td>例（メンバー1、 <span class="math inline">\(t=30\)</span> 秒）</td>
-<td><span class="math inline">\((24.22,\,22.15,\,25.04,\,23.43,\,20.85)\)</span>
-°C、 <span class="math inline">\(q\)</span> 、 <span class="math inline">\(h\)</span></td>
-<td>変位計の予想値 −3.226 µm（§3-2b で計算）</td>
-</tr>
-</tbody>
-</table>
-<p><strong>なぜセンサの値を7つに入れないのか。</strong></p>
-<ul>
-<li>変位は温度で決まります（FrontISTR の線形な関係、blog_008
-§5-2）。変位を別に持って別に直すと、「温度から計算した変位」と「持っている変位」が食い違うおそれがあります。温度だけを持てば、変位は常に温度と矛盾しません。</li>
-<li>ROM が時間を進められるのは温度だけです。変位は ROM
-の中で進められないので、持っていても予報できません。</li>
-<li>直すのは7つだけなので、 <span class="math inline">\(C_{zy}\)</span>
-は 7×2、カルマンゲイン <span class="math inline">\(K\)</span> も 7×2
-で済みます。センサの値のずれは、 <span class="math inline">\(K\)</span>
-を通して7つの値の直し量に換算されます（§3-3 の⑤⑥）。</li>
-</ul>
-<p><strong>初期値</strong>：温度は5点それぞれ 17〜32 °C の一様乱数、
-<span class="math inline">\(q\)</span> は 0.3〜1.8 の一様乱数、 <span class="math inline">\(h\)</span> は平均 0.02・標準偏差 0.01
-の正規乱数です。今回の60個のメンバーの平均（同じ点の60個の値を足して60で割ったもの）は、温度
-<span class="math inline">\((25.3,\,24.3,\,23.2,\,24.6,\,25.0)\)</span>
-°C、 <span class="math inline">\(q=1.14\)</span> 、 <span class="math inline">\(h=0.020\)</span> でした（真値は温度 20 °C、 <span class="math inline">\(q=1\)</span> 、 <span class="math inline">\(h=0.0154\)</span> ）。</p>
-<h3 id="3-2-1サイクルの手順">3-2. 1サイクルの手順</h3>
-<table>
-<colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
 </colgroup>
 <thead>
 <tr class="header">
 <th>手順</th>
 <th>やること</th>
-<th>式</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>① 予報</td>
-<td>60個それぞれ、自分の <span class="math inline">\(q,h\)</span> で ROM
-を 30 秒進める（2 秒刻み、RK4）</td>
-<td><span class="math inline">\(\mathbf T^f=\mathrm{ROM}(\mathbf
-T,q,h)\)</span></td>
+<td>60個のメンバーが、それぞれ自分の発熱量・放熱で ROM を 30
+秒進め、5点の温度を出す</td>
 </tr>
 <tr class="even">
-<td>② センサの値を予想</td>
-<td>換算表 <span class="math inline">\(H\)</span>
-（2行×5列）で、各メンバーの温度からセンサの値を計算する</td>
-<td><span class="math inline">\(\mathbf y^f=\bar{\mathbf y}+H(\mathbf
-T^f-\bar T_P)\)</span></td>
+<td>② 予想</td>
+<td>各メンバーの5点の温度から、「センサはいくつを示すはずか」を計算する</td>
 </tr>
 <tr class="odd">
 <td>③ 測る</td>
-<td>真値（OpenFOAM＋FrontISTR）にノイズ 0.3
-を足した値を、センサの値とする</td>
-<td><span class="math inline">\(\mathbf y=\mathbf
-y^{\text{true}}+\boldsymbol\varepsilon\)</span></td>
+<td>センサの値（真値＋ノイズ）を得る</td>
 </tr>
 <tr class="even">
-<td>④ ばらつきを数える</td>
-<td>60個の「7つの値」と「センサの予想値」が、どう一緒にばらつくか</td>
-<td><span class="math inline">\(C_{zy}\)</span> （7×2）、 <span class="math inline">\(C_{yy}\)</span> （2×2）</td>
+<td>④ 比べて直す</td>
+<td>予想と測った値のずれに応じて、各メンバーの<strong>5点の温度・発熱量・放熱</strong>を直す</td>
 </tr>
 <tr class="odd">
-<td>⑤ 傾きを作る</td>
-<td>カルマンゲイン（センサの値のずれを、7つの値の直し量に換算する表）</td>
-<td><span class="math inline">\(K=C_{zy}(C_{yy}+R)^{-1}\)</span>
-（7×2）</td>
-</tr>
-<tr class="even">
-<td>⑥ 直す</td>
-<td>60個それぞれを、センサの値と予想のずれに合わせて直す</td>
-<td><span class="math inline">\(\mathbf z^a=\mathbf z^f+K(\mathbf
-y+\boldsymbol\varepsilon_m-\mathbf y^f_m)\)</span></td>
-</tr>
-<tr class="odd">
-<td>⑦ 次へ</td>
-<td>直した値から、次の 30 秒を予報する（①へ。20回くり返す）</td>
-<td></td>
+<td>⑤ 次へ</td>
+<td>直した値から、次の 30 秒を予報する（20回くり返す）</td>
 </tr>
 </tbody>
 </table>
 <ul>
-<li>②の <span class="math inline">\(\bar{\mathbf y}\)</span> と <span class="math inline">\(\bar T_P\)</span> は平均の温度分布での値で、 <span class="math inline">\(H\)</span> の作り方は blog_008 §5-2 (c)
-と同じです（温度計の行は gappy-POD の重み、変位計の行は FrontISTR
-の重み）。</li>
-<li>④では、60個のばらつきを 1.02
-倍に広げてから数えます（ばらつきが小さくなりすぎるのを防ぐため）。</li>
-<li>⑥の <span class="math inline">\(\boldsymbol\varepsilon_m\)</span>
-は、メンバーごとに足す観測ノイズです（摂動観測）。</li>
-<li>⑥の後、 <span class="math inline">\(q\)</span> は 0〜3、 <span class="math inline">\(h\)</span> は 0.0001〜0.2 の範囲に収めます。</li>
-<li>評価に使う全セルの温度と A・O
-の変位は、直した5点の温度の60個のメンバーの平均から、gappy-POD と
-FrontISTR の重みで計算します。</li>
+<li><strong>各メンバーが持っていて、直すのは「5点の温度・発熱量・放熱」の7つだけ</strong>です。センサの値は持っておらず、②で毎回、温度から計算します。</li>
+<li>④で「どの値をどれだけ直すか」は、60個のメンバーのばらつき方から決めます（カルマンゲイン）。</li>
 </ul>
-<h3 id="3-2b-センサとセンサの値を予想するとは">3-2b.
-「センサ」と「センサの値を予想する」とは</h3>
-<p><strong>センサ</strong>：この研究では実物のセンサは使っていません。「ここに温度計（または変位計）を置いたとしたら」という<strong>場所と種類</strong>のことです。</p>
+<h3 id="3-2-変位計の値でどうやって直すのか">3-2.
+変位計の値で、どうやって直すのか</h3>
+<p>変位計は温度を測りません。それでも温度を直せるのは、<strong>変位が5点の温度の重み付き和</strong>だからです。
+変位が予想とずれていたら、「どの点の温度がずれていれば、そのずれが説明できるか」を逆にたどって、温度を直します。
+<strong>変位そのものは直しません。直すのは温度で、変位は直した温度から計算し直します。</strong></p>
+<p><strong>① 予想する。</strong>
+メンバーの5点の温度に重みを掛けて足し、変位計が示すはずの値を出します。今回の変位計（上面の横方向）の重みは</p>
 <table>
-<colgroup>
-<col style="width: 25%"/>
-<col style="width: 25%"/>
-<col style="width: 25%"/>
-<col style="width: 25%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th>センサ</th>
-<th>置く場所</th>
-<th>示す値</th>
-<th>計算の中での「測った値」</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>温度計</td>
-<td>OpenFOAM のセル1つ（例：T2 の1本目は <span class="math inline">\((36.7,0.8,49.2)\)</span> mm）</td>
-<td>その場所の温度 [K]</td>
-<td>OpenFOAM の真の温度 ＋ ノイズ（標準偏差 0.3 K）</td>
-</tr>
-<tr class="even">
-<td>変位計</td>
-<td>FrontISTR の節点1つと、測る向き1つ（例：U2 の1本目は <span class="math inline">\((18.8,32.5,100.5)\)</span> mm の <span class="math inline">\(U_x\)</span> ）</td>
-<td>その場所・その向きの変位 [µm]</td>
-<td>FrontISTR の真の変位 ＋ ノイズ（標準偏差 0.3 µm）</td>
-</tr>
-</tbody>
-</table>
-<p><strong>センサの値を予想する</strong>：60個のメンバーはそれぞれ「5点の温度はこうだ」という仮説を持っています。その仮説が正しいとしたら、<strong>センサはいくつを示すはずか</strong>を計算することです。換算表
-<span class="math inline">\(H\)</span>
-を使って、次の式で計算します。</p>
-<p><span class="math display">\[
-y^f=\bar y+\sum_{j=0}^{4}H_{j}\,\big(T_j-\bar T_j\big)
-\]</span></p>
-<ul>
-<li><span class="math inline">\(T_j\)</span> ：そのメンバーの代表点
-<span class="math inline">\(P_j\)</span> の温度（ROM で予報した値）</li>
-<li><span class="math inline">\(\bar T_j\)</span> ：平均の温度分布での
-<span class="math inline">\(P_j\)</span> の温度。 <span class="math inline">\((23.51,\,22.55,\,23.79,\,23.00,\,22.21)\)</span>
-°C</li>
-<li><span class="math inline">\(H_j\)</span> ：換算表のそのセンサの行（
-<span class="math inline">\(P_j\)</span> が 1 K
-上がると、センサの値がいくつ変わるか）</li>
-<li><span class="math inline">\(\bar y\)</span>
-：平均の温度分布のとき、そのセンサが示す値</li>
-</ul>
-<p><strong>例：メンバー1、 <span class="math inline">\(t=30\)</span>
-秒</strong></p>
-<p>ROM で予報したメンバー1の温度は <span class="math inline">\((24.22,\,22.15,\,25.04,\,23.43,\,20.85)\)</span>
-°C なので、平均の温度分布からの上がり分は</p>
-<p><span class="math display">\[
-T_j-\bar T_j=(+0.707,\,-0.394,\,+1.252,\,+0.437,\,-1.364)\ \mathrm K
-\]</span></p>
-<p>これに各センサの行を掛けて足します。</p>
-<table>
-<colgroup>
-<col style="width: 8%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-<col style="width: 11%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th>センサ</th>
-<th style="text-align: right;"><span class="math inline">\(\bar
-y\)</span></th>
-<th style="text-align: right;">P0</th>
-<th style="text-align: right;">P1</th>
-<th style="text-align: right;">P2</th>
-<th style="text-align: right;">P3</th>
-<th style="text-align: right;">P4</th>
-<th style="text-align: right;">合計</th>
-<th style="text-align: right;">予想値 <span class="math inline">\(y^f\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>T2 温度計1</td>
-<td style="text-align: right;">296.94 K</td>
-<td style="text-align: right;"><span class="math inline">\(0.068\times0.707\)</span> <br/>＝0.048</td>
-<td style="text-align: right;"><span class="math inline">\(-0.011\times(-0.394)\)</span> <br/>＝0.004</td>
-<td style="text-align: right;"><span class="math inline">\(0.945\times1.252\)</span> <br/>＝1.183</td>
-<td style="text-align: right;"><span class="math inline">\(0.000\times0.437\)</span> <br/>＝0.000</td>
-<td style="text-align: right;"><span class="math inline">\(-0.002\times(-1.364)\)</span> <br/>＝0.003</td>
-<td style="text-align: right;">1.238</td>
-<td style="text-align: right;"><strong>298.17 K</strong></td>
-</tr>
-<tr class="even">
-<td>T2 温度計2</td>
-<td style="text-align: right;">295.41 K</td>
-<td style="text-align: right;"><span class="math inline">\(-0.094\times0.707\)</span> <br/>＝−0.066</td>
-<td style="text-align: right;"><span class="math inline">\(0.660\times(-0.394)\)</span> <br/>＝−0.260</td>
-<td style="text-align: right;"><span class="math inline">\(0.019\times1.252\)</span> <br/>＝0.023</td>
-<td style="text-align: right;"><span class="math inline">\(-0.120\times0.437\)</span> <br/>＝−0.052</td>
-<td style="text-align: right;"><span class="math inline">\(0.538\times(-1.364)\)</span> <br/>＝−0.734</td>
-<td style="text-align: right;">−1.089</td>
-<td style="text-align: right;"><strong>294.32 K</strong></td>
-</tr>
-<tr class="odd">
-<td>U2 変位計1</td>
-<td style="text-align: right;">−1.416 µm</td>
-<td style="text-align: right;"><span class="math inline">\(-0.521\times0.707\)</span> <br/>＝−0.368</td>
-<td style="text-align: right;"><span class="math inline">\(0.564\times(-0.394)\)</span> <br/>＝−0.222</td>
-<td style="text-align: right;"><span class="math inline">\(-0.774\times1.252\)</span> <br/>＝−0.969</td>
-<td style="text-align: right;"><span class="math inline">\(0.405\times0.437\)</span> <br/>＝0.177</td>
-<td style="text-align: right;"><span class="math inline">\(0.313\times(-1.364)\)</span> <br/>＝−0.427</td>
-<td style="text-align: right;">−1.810</td>
-<td style="text-align: right;"><strong>−3.226 µm</strong></td>
-</tr>
-</tbody>
-</table>
-<p>（U2 の変位計2は、重みが同じなので変位計1と同じ値になります。）</p>
-<p>これを60個すべてのメンバーで計算し、<strong>測った値と比べて</strong>、ずれに応じて温度・発熱量・放熱を直します（3-2
-の⑥）。</p>
-<h3 id="3-3-1回目の補正を数字で追う-t30-秒">3-3.
-1回目の補正を数字で追う（ <span class="math inline">\(t=30\)</span>
-秒）</h3>
-<p><strong>換算表 <span class="math inline">\(H\)</span>
-と、平均の温度分布での値 <span class="math inline">\(\bar{\mathbf
-y}\)</span></strong></p>
-<table>
-<colgroup>
-<col style="width: 11%"/>
-<col style="width: 14%"/>
-<col style="width: 14%"/>
-<col style="width: 14%"/>
-<col style="width: 14%"/>
-<col style="width: 14%"/>
-<col style="width: 14%"/>
-</colgroup>
 <thead>
 <tr class="header">
 <th></th>
@@ -841,53 +480,386 @@ y}\)</span></strong></p>
 <th style="text-align: right;">P2</th>
 <th style="text-align: right;">P3</th>
 <th style="text-align: right;">P4</th>
-<th style="text-align: right;"><span class="math inline">\(\bar
-y\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>T2 の温度計1（ヒータ側・中段）</td>
+<td>変位計の重み [µm/K]</td>
+<td style="text-align: right;">−0.52</td>
+<td style="text-align: right;">+0.56</td>
+<td style="text-align: right;">−0.77</td>
+<td style="text-align: right;">+0.41</td>
+<td style="text-align: right;">+0.31</td>
+</tr>
+</tbody>
+</table>
+<p>なので、ヒータ側（P0・P2）が温まると値が下がり、反対側（P1・P4）が温まると値が上がります。</p>
+<p><strong>② ずれを出す。</strong> ずれ ＝ 測った値 − 予想値。</p>
+<p><strong>③ ずれを温度の直し量に換算する。</strong>
+換算の係数（カルマンゲイン）は、60個のメンバーで「変位計の予想値」と「各点の温度」がどう一緒にばらついているかから決まります。今回の1回目（30
+秒）の係数は</p>
+<table>
+<thead>
+<tr class="header">
+<th>直す値</th>
+<th style="text-align: right;">変位計の値が予想より 1 µm
+大きかったときの直し量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0 の温度</td>
+<td style="text-align: right;">−0.13 K</td>
+</tr>
+<tr class="even">
+<td>P1 の温度</td>
+<td style="text-align: right;"><strong>+0.40 K</strong></td>
+</tr>
+<tr class="odd">
+<td>P2 の温度</td>
+<td style="text-align: right;">−0.12 K</td>
+</tr>
+<tr class="even">
+<td>P3 の温度</td>
+<td style="text-align: right;">−0.08 K</td>
+</tr>
+<tr class="odd">
+<td>P4 の温度</td>
+<td style="text-align: right;"><strong>+0.46 K</strong></td>
+</tr>
+<tr class="even">
+<td>発熱の倍率 <span class="math inline">\(q\)</span></td>
+<td style="text-align: right;">−0.01</td>
+</tr>
+</tbody>
+</table>
+<p>つまり「<strong>変位計の値が予想より大きい →
+反対側（P1・P4）が予想より熱い、ヒータ側（P0・P2）が予想より冷たい</strong>」と読み替えて、温度を直します。①の重みの向きと同じです。</p>
+<p><strong>④ 直した温度から、変位を計算し直す。</strong> A・O
+の変位も反りも、直した温度に重みを掛けて計算し直します。だから、測っていない
+A・O の変位まで直ります。</p>
+<p><strong>実際の数字（1回目、30
+秒、60個のメンバーの平均）</strong>：2本の変位計のずれは −0.19 µm と
+−0.07 µm でした。これに係数を掛けて足すと</p>
+<ul>
+<li>P1 の直し量 ＝ <span class="math inline">\(0.40\times(-0.19)+0.39\times(-0.07)=-0.10\)</span>
+K</li>
+<li>P4 の直し量 ＝ <span class="math inline">\(0.46\times(-0.19)+0.47\times(-0.07)=-0.12\)</span>
+K</li>
+</ul>
+<p>（2本目の変位計の係数は 1本目とほぼ同じです。）</p>
+<p><strong>大事な点</strong>：この係数は、P1・P4 を上げて P0・P2
+を下げる、つまり「<strong>ヒータ側と反対側の温度差</strong>」を直す向きです。<strong>5点を全部いっしょに上げ下げする向きには、ほとんど直しません。</strong>
+この変位計が、全体の温まりに反応しないからです（§5）。</p>
+<h3 id="3-3-1回目の補正で何が起きたか30-秒">3-3.
+1回目の補正で、何が起きたか（30 秒）</h3>
+<p>最初の予報は、どのメンバーも真値より<strong>約 4.6 K
+熱すぎ</strong>ました（最初に与えた温度が高めだったため）。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>温度計2本</th>
+<th>変位計2本</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>予想と測った値のずれ</td>
+<td><strong>−5.0 K</strong>（熱すぎを見つけた）</td>
+<td><strong>−0.1〜−0.2 µm</strong>（ほとんどずれを見つけられない）</td>
+</tr>
+<tr class="even">
+<td>直した後の5点の温度</td>
+<td>約 4.8 K 下がり、真値に 0.3 K まで近づいた</td>
+<td>ほとんど変わらず、4.6 K 熱すぎるまま</td>
+</tr>
+</tbody>
+</table>
+<p>温度計は「全体が熱すぎる」ことを直接見て、5点を全部下げました。変位計2本は、全体が熱すぎても値がほとんど変わらないので、気づけませんでした。全部の数値は付録Cにあります。</p>
+<hr/>
+<h2 id="4-結果">4. 結果</h2>
+<figure>
+<img alt="センサ2本だけで反りを当てる" src="img/unobserved_t2_learned.png"/>
+<figcaption aria-hidden="true">センサ2本だけで反りを当てる</figcaption>
+</figure>
+<p><em>15
+W。上段＝センサと評価点の位置。2〜3段目＝測っていない温度、4〜5段目＝測っていない変位。太い灰色＝真値。黄＝データ同化なし、青＝σ
+で選んだ温度計2本、赤＝σ で選んだ変位計2本。各グラフ右上の数字＝30〜300
+秒の平均誤差。</em></p>
+<p><strong>測っていない量の誤差</strong>（15 W。30〜300
+秒の平均、5回の平均）</p>
+<table>
+<colgroup>
+<col style="width: 15%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+<col style="width: 21%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ2本</th>
+<th style="text-align: right;">反り A−O</th>
+<th style="text-align: right;">温度場全体</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(U_z(O)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>データ同化なし</td>
+<td style="text-align: right;">0.24 µm ※</td>
+<td style="text-align: right;">4.58 K</td>
+<td style="text-align: right;">5.60 µm</td>
+<td style="text-align: right;">5.37 µm</td>
+</tr>
+<tr class="even">
+<td>温度計 P2・P0（代表点・片側）</td>
+<td style="text-align: right;">0.77 µm</td>
+<td style="text-align: right;">0.54 K</td>
+<td style="text-align: right;">0.24 µm</td>
+<td style="text-align: right;">0.94 µm</td>
+</tr>
+<tr class="odd">
+<td>温度計 P2・P4（代表点・両側）</td>
+<td style="text-align: right;">0.23 µm</td>
+<td style="text-align: right;"><strong>0.16 K</strong></td>
+<td style="text-align: right;"><strong>0.17 µm</strong></td>
+<td style="text-align: right;">0.20 µm</td>
+</tr>
+<tr class="even">
+<td>変位計 S1・S2 だけ（blog_008 で選んだ2点）</td>
+<td style="text-align: right;">0.16 µm</td>
+<td style="text-align: right;">0.22 K</td>
+<td style="text-align: right;">0.25 µm</td>
+<td style="text-align: right;"><strong>0.17 µm</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>温度計2本（代表点以外、σ で選んだ）</strong></td>
+<td style="text-align: right;">0.20 µm</td>
+<td style="text-align: right;">0.21 K</td>
+<td style="text-align: right;">0.20 µm</td>
+<td style="text-align: right;">0.20 µm</td>
+</tr>
+<tr class="even">
+<td><strong>変位計2本（代表点以外、σ で選んだ）</strong></td>
+<td style="text-align: right;"><strong>0.12 µm</strong></td>
+<td style="text-align: right;"><strong>4.44 K</strong></td>
+<td style="text-align: right;"><strong>5.32 µm</strong></td>
+<td style="text-align: right;"><strong>5.36 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>※ データ同化なしの反りが小さく見えるのは、A と O が同じ向きに約 5.5
+µm ずれて、差を取ると打ち消し合うためです。</p>
+<p>25 W・間欠加熱でも同じ傾向でした（図：<a href="img/unobserved_t2_q25.png">25 W</a>、<a href="img/unobserved_t2_intermittent.png">間欠加熱</a>）。</p>
+<ul>
+<li><strong>温度計2本</strong>：両側に1本ずつで、反りも温度もよく当たりました。代表点
+P2・P4 とほぼ同じです。</li>
+<li><strong>変位計2本</strong>：反りは一番よく当たりましたが、温度場と
+<span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span>
+は<strong>データ同化なしとほぼ同じ</strong>でした。反りしか当たっていません。</li>
+<li><strong>変位計 S1・S2
+だけ</strong>（上面の横方向1本＋上下方向1本）は、反りも温度もそこそこ当たりました。上下方向の変位計は、全体の温まりにも反応するからです（§5）。</li>
+</ul>
+<hr/>
+<h2 id="5-なぜ変位計2本は反りしか当てられなかったか">5.
+なぜ、変位計2本は反りしか当てられなかったか</h2>
+<p>ポイントは「<strong>全体が一様に温まること</strong>」に反応するかどうかです。</p>
+<table>
+<thead>
+<tr class="header">
+<th>量・センサ</th>
+<th style="text-align: right;">全体が一様に 1 K 温まったときの変化</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>反り A−O</td>
+<td style="text-align: right;"><strong>0
+µm</strong>（円筒は伸びるだけで傾かない）</td>
+</tr>
+<tr class="even">
+<td>選ばれた変位計2本（上面の横方向）</td>
+<td style="text-align: right;"><strong>−0.01
+µm</strong>（ほとんど動かない）</td>
+</tr>
+<tr class="odd">
+<td>変位計 S2（blog_008、上面の上下方向）</td>
+<td style="text-align: right;">1.21 µm（伸びる）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span> （上下方向）</td>
+<td style="text-align: right;">1.21 µm（伸びる）</td>
+</tr>
+<tr class="odd">
+<td>温度計（どこでも）</td>
+<td style="text-align: right;">1 K</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>温度の分からなさの大部分（約 96
+%）は「<strong>全体がどれだけ温まったか</strong>」です（発熱量や初期温度が分からないため）。</li>
+<li>反りは、全体の温まりに反応しません。反りを決めるのは「ヒータ側と反対側の<strong>温度差</strong>」だけです。</li>
+<li>選ばれた変位計2本も、全体の温まりに反応しません。だから §3-2
+のとおり、温度差だけを直し、全体の温まりは直しません。</li>
+<li>その結果、<strong>反り（温度差で決まる）は当たる</strong>。でも、<strong>温度や
+<span class="math inline">\(U_z\)</span>
+（全体の温まりで大きく動く）は当たらない</strong>。</li>
+</ol>
+<p>σ
+は反りだけを目的にして選んだので、「全体の温まり」を見ないセンサでも十分だと判断しました。</p>
+<p><strong>この落とし穴は、測る前に分かります。</strong> 同じ σ
+の計算で、知りたい量を反りから <span class="math inline">\(U_z(A)\)</span> に変えると、変位計2本では 3.0 →
+2.6 µm とほとんど縮みません（ほかの配置は 0.4〜0.5 µm
+まで縮む）。詳しくは付録Dにあります。</p>
+<hr/>
+<h2 id="6-まとめ">6. まとめ</h2>
+<ol type="1">
+<li><strong>代表点以外から2本だけでも、反りは当てられる。</strong>
+温度計2本なら、ヒータ側と反対側に1本ずつ置くと、反りも温度もよく当たる。</li>
+<li><strong>変位計は、温度を測らなくても温度を直せる。</strong>
+変位のずれを「どの点の温度がずれていれば説明できるか」に読み替えて、温度を直す。変位は、直した温度から計算し直す。</li>
+<li><strong>ただし、その変位計が反応しない温度の変わり方は直せない。</strong>
+上面の横方向の変位計は全体の温まりに反応しないので、温度差（＝反り）しか直せない。</li>
+<li><strong>σ で選ぶときは、反り以外（例えば <span class="math inline">\(U_z(A)\)</span> や平均温度）の σ
+も一緒に確かめる</strong>か、全体の温まりに反応するセンサ（温度計か、上下方向の変位計）を1本入れる。</li>
+</ol>
+<p><strong>言えないこと・やっていないこと</strong></p>
+<ul>
+<li>実機では確かめていない。</li>
+<li>1本ずつ足す選び方なので、2本の組み合わせを全部調べた最良ではない。</li>
+<li>「反りと <span class="math inline">\(U_z(A)\)</span>
+の両方を小さくする」目的で選び直す計算はしていない。</li>
+<li>上面の横方向の変位が一様な温まりで動かない理由は解釈で、変位の分布を描いて確かめてはいない。</li>
+<li>熱源の位置が変わると、ROM も選ぶ場所も作り直しが必要。</li>
+</ul>
+<hr/>
+<h2 id="付録">付録</h2>
+<h3 id="付録a-σ-の式の導き方センサ1本">付録A. σ
+の式の導き方（センサ1本）</h3>
+<p>記号は 4,000 個の世界の平均からのずれで書き、 <span class="math inline">\(\langle\ \rangle\)</span> を 4,000
+個の平均とします。</p>
+<ul>
+<li>反り： <span class="math inline">\(d=\mathbf w^{\mathsf T}\mathbf
+T\)</span> （ <span class="math inline">\(\mathbf w\)</span>
+＝反りの重み、 <span class="math inline">\(\mathbf T\)</span>
+＝5点の温度）</li>
+<li>センサの値： <span class="math inline">\(y=\mathbf h^{\mathsf
+T}\mathbf T+\varepsilon\)</span> （ <span class="math inline">\(\mathbf
+h\)</span> ＝センサの重み、 <span class="math inline">\(\varepsilon\)</span> ＝ノイズ、分散 <span class="math inline">\(r\)</span> ）</li>
+<li>温度のばらつき方： <span class="math inline">\(B=\langle\mathbf
+T\mathbf T^{\mathsf T}\rangle\)</span> （5×5）</li>
+</ul>
+<p>センサの値から反りを直線 <span class="math inline">\(\hat
+d=a\,y\)</span> で予想し、外れの二乗の平均を展開します。</p>
+<p><span class="math display">\[
+\langle(d-a\,y)^2\rangle=\langle d^2\rangle-2a\,\langle
+d\,y\rangle+a^2\,\langle y^2\rangle
+\]</span></p>
+<p>ノイズは温度と無関係なので、</p>
+<p><span class="math display">\[
+\langle d^2\rangle=\mathbf w^{\mathsf T}B\,\mathbf w,\qquad
+\langle d\,y\rangle=\mathbf w^{\mathsf T}B\,\mathbf h,\qquad
+\langle y^2\rangle=\mathbf h^{\mathsf T}B\,\mathbf h+r
+\]</span></p>
+<p><span class="math inline">\(V_d=\mathbf w^{\mathsf T}B\mathbf
+w\)</span> 、 <span class="math inline">\(C=\mathbf w^{\mathsf
+T}B\mathbf h\)</span> 、 <span class="math inline">\(V_y=\mathbf
+h^{\mathsf T}B\mathbf h+r\)</span> として平方完成すると、</p>
+<p><span class="math display">\[
+V_d-2aC+a^2V_y=V_y\Big(a-\frac{C}{V_y}\Big)^2+V_d-\frac{C^2}{V_y}
+\]</span></p>
+<p>第1項が 0 になる <span class="math inline">\(a=C/V_y\)</span>
+のとき外れが一番小さく、そのとき残る外れが σ² です。</p>
+<p><span class="math display">\[
+\sigma^2=\mathbf w^{\mathsf T}B\,\mathbf w-\frac{(\mathbf w^{\mathsf
+T}B\,\mathbf h)^2}{\mathbf h^{\mathsf T}B\,\mathbf h+r}
+\]</span></p>
+<p>30, 60, …, 300 秒の10時刻で計算して平均したものを点数にしました。</p>
+<h3 id="付録b-2本目を足すときの式">付録B. 2本目を足すときの式</h3>
+<p>1本目を付けた後の温度のばらつき方を <span class="math inline">\(P\)</span> とします（付ける前は <span class="math inline">\(P=B\)</span> ）。知りたい量を <span class="math inline">\(z=\mathbf v^{\mathsf T}\mathbf T\)</span> （ <span class="math inline">\(\mathbf v\)</span>
+は何でもよい）とすると、付録Aと同じ計算で</p>
+<p><span class="math display">\[
+\sigma_z^2=\mathbf v^{\mathsf T}P\,\mathbf v-\frac{(\mathbf v^{\mathsf
+T}P\,\mathbf h)^2}{\mathbf h^{\mathsf T}P\,\mathbf h+r}
+=\mathbf v^{\mathsf T}\Big(P-\frac{(P\mathbf h)(P\mathbf h)^{\mathsf
+T}}{\mathbf h^{\mathsf T}P\,\mathbf h+r}\Big)\mathbf v
+\]</span></p>
+<p>括弧の中は <span class="math inline">\(\mathbf v\)</span>
+によらないので、センサを1本足した後のばらつき方は</p>
+<p><span class="math display">\[
+P'=P-\frac{(P\mathbf h)(P\mathbf h)^{\mathsf T}}{\mathbf h^{\mathsf
+T}P\,\mathbf h+r}
+\]</span></p>
+<p>これを1本ごとに繰り返します（ <code>run/select_two_nonrep.py</code>
+）。</p>
+<h3 id="付録c-1回目の補正の全数値15-wseed-20260913-t30-秒">付録C.
+1回目の補正の全数値（15 W、seed 20260913、 <span class="math inline">\(t=30\)</span> 秒）</h3>
+<p><strong>換算表 <span class="math inline">\(H\)</span></strong>（温度が 1 K
+上がると、センサの値がいくつ変わるか）</p>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+<col style="width: 17%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計1（ヒータ側・中段）</td>
 <td style="text-align: right;">0.068</td>
 <td style="text-align: right;">−0.011</td>
 <td style="text-align: right;">0.945</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">−0.002</td>
-<td style="text-align: right;">296.94 K</td>
 </tr>
 <tr class="even">
-<td>T2 の温度計2（反対側・中段）</td>
+<td>温度計2（反対側・中段）</td>
 <td style="text-align: right;">−0.094</td>
 <td style="text-align: right;">0.660</td>
 <td style="text-align: right;">0.019</td>
 <td style="text-align: right;">−0.120</td>
 <td style="text-align: right;">0.538</td>
-<td style="text-align: right;">295.41 K</td>
 </tr>
 <tr class="odd">
-<td>U2 の変位計1（上面 <span class="math inline">\(+y\)</span> 、 <span class="math inline">\(U_x\)</span> ）</td>
+<td>変位計1・2（上面の横方向、2本とも同じ）</td>
 <td style="text-align: right;">−0.521</td>
 <td style="text-align: right;">0.564</td>
 <td style="text-align: right;">−0.774</td>
 <td style="text-align: right;">0.405</td>
 <td style="text-align: right;">0.313</td>
-<td style="text-align: right;">−1.416 µm</td>
-</tr>
-<tr class="even">
-<td>U2 の変位計2（上面 <span class="math inline">\(-y\)</span> 、 <span class="math inline">\(U_x\)</span> ）</td>
-<td style="text-align: right;">−0.521</td>
-<td style="text-align: right;">0.564</td>
-<td style="text-align: right;">−0.774</td>
-<td style="text-align: right;">0.405</td>
-<td style="text-align: right;">0.313</td>
-<td style="text-align: right;">−1.416 µm</td>
 </tr>
 </tbody>
 </table>
-<p>温度計1はほぼ P2 の温度、温度計2は P1 と P4
-を混ぜた温度を見ています。U2 の2本は、重みがまったく同じです。</p>
-<p><strong>①〜③ 予報・予想・測定</strong>（60個のメンバーの平均。 <span class="math inline">\(t=30\)</span>
-秒の、その点の値。時間や場所の平均ではない）</p>
+<p><strong>センサの値の予想の例（メンバー1）</strong>：予報した5点の温度が平均の温度分布より
+<span class="math inline">\((+0.707,\,-0.394,\,+1.252,\,+0.437,\,-1.364)\)</span>
+K 高いとき、温度計1の予想値は</p>
+<p><span class="math display">\[
+296.94+0.068(0.707)-0.011(-0.394)+0.945(1.252)+0.000(0.437)-0.002(-1.364)=298.17\
+\mathrm K
+\]</span></p>
+<p>（296.94 K は、平均の温度分布のときに温度計1が示す値。）</p>
+<p><strong>60個のメンバーの平均で見た、1回目の補正</strong></p>
 <table>
 <colgroup>
 <col style="width: 33%"/>
@@ -897,69 +869,53 @@ y\)</span></th>
 <thead>
 <tr class="header">
 <th></th>
-<th>T2（温度計2本）</th>
-<th>U2（変位計2本）</th>
+<th>温度計2本</th>
+<th>変位計2本</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>予報した5点の温度</td>
-<td><span class="math inline">\((25.7,\,24.6,\,26.4,\,24.9,\,24.9)\)</span>
-°C</td>
+<td>(25.7, 24.6, 26.4, 24.9, 24.9) °C</td>
 <td>同じ</td>
 </tr>
 <tr class="even">
 <td>真の5点の温度</td>
-<td><span class="math inline">\((21.1,\,20.2,\,21.7,\,20.3,\,20.0)\)</span>
-°C</td>
+<td>(21.1, 20.2, 21.7, 20.3, 20.0) °C</td>
 <td>同じ</td>
 </tr>
 <tr class="odd">
-<td>センサの予想値 <span class="math inline">\(\bar{\mathbf
-y}^f\)</span></td>
-<td><span class="math inline">\((299.48,\,297.81)\)</span> K</td>
-<td><span class="math inline">\((-1.767,\,-1.766)\)</span> µm</td>
+<td>センサの予想値</td>
+<td>(299.48, 297.81) K</td>
+<td>(−1.767, −1.766) µm</td>
 </tr>
 <tr class="even">
-<td>測った値 <span class="math inline">\(\mathbf y\)</span></td>
-<td><span class="math inline">\((294.53,\,292.94)\)</span> K</td>
-<td><span class="math inline">\((-1.894,\,-1.854)\)</span> µm</td>
+<td>測った値</td>
+<td>(294.53, 292.94) K</td>
+<td>(−1.894, −1.854) µm</td>
 </tr>
 <tr class="odd">
-<td>ずれ（測った値 − 予想値、平均）</td>
-<td><span class="math inline">\((-5.02,\,-4.85)\)</span> K</td>
-<td><span class="math inline">\((-0.19,\,-0.07)\)</span> µm</td>
+<td>直した後の5点の温度</td>
+<td>(20.9, 19.8, 21.4, 20.0, 20.0) °C</td>
+<td>(25.8, 24.5, 26.4, 25.0, 24.8) °C</td>
+</tr>
+<tr class="even">
+<td>発熱の倍率 <span class="math inline">\(q\)</span> （真値 1.0）</td>
+<td>1.14 → 0.80</td>
+<td>1.14 → 1.14</td>
 </tr>
 </tbody>
 </table>
-<p>予報は、どちらも真値より約 4.6 K 熱すぎます（初期値の平均が 24〜25 °C
-だったため）。 <strong>温度計2本は、この熱すぎを −5 K
-のずれとして見ています。変位計2本は −0.1 µm
-程度のずれしか見ていません。</strong>
-変位計2本は「全体の温まり」に反応しない（§5-4）ので、全体が 4.6 K
-熱すぎても値がほとんど変わらないからです。</p>
-<p><strong>④ ばらつき</strong></p>
-<p>T2（温度計2本、単位 K²）：</p>
-<p><span class="math display">\[
-C_{yy}+R=\begin{pmatrix}4.94&amp;3.00\\3.00&amp;11.08\end{pmatrix}
-\]</span></p>
-<p>U2（変位計2本、単位 µm²）：</p>
-<p><span class="math display">\[
-C_{yy}+R=\begin{pmatrix}5.38&amp;5.29\\5.29&amp;5.38\end{pmatrix}
-\]</span></p>
-<p>U2
-は2本がまったく同じ動きをする（非対角＝対角−ノイズ）ので、2本目は新しい情報をほとんど足しません。</p>
-<p><strong>⑤ カルマンゲイン <span class="math inline">\(K\)</span>
-（7×2）</strong>：「センサの値が 1
-ずれていたら、7つの値をいくつ直すか」の表です。</p>
+<p><strong>カルマンゲイン <span class="math inline">\(K\)</span></strong>（センサの値が 1
+ずれたら、各値をいくつ直すか）</p>
 <table>
 <thead>
 <tr class="header">
 <th>直す値</th>
-<th style="text-align: right;">T2：温度計1</th>
-<th style="text-align: right;">T2：温度計2</th>
-<th style="text-align: right;">U2：変位計1</th>
-<th style="text-align: right;">U2：変位計2</th>
+<th style="text-align: right;">温度計1</th>
+<th style="text-align: right;">温度計2</th>
+<th style="text-align: right;">変位計1</th>
+<th style="text-align: right;">変位計2</th>
 </tr>
 </thead>
 <tbody>
@@ -1005,337 +961,23 @@ C_{yy}+R=\begin{pmatrix}5.38&amp;5.29\\5.29&amp;5.38\end{pmatrix}
 <td style="text-align: right;">−0.010</td>
 <td style="text-align: right;">−0.009</td>
 </tr>
-<tr class="odd">
-<td><span class="math inline">\(h\)</span></td>
-<td style="text-align: right;">−0.0003</td>
-<td style="text-align: right;">−0.0006</td>
-<td style="text-align: right;">−0.0003</td>
-<td style="text-align: right;">−0.0003</td>
-</tr>
 </tbody>
 </table>
-<p>単位は、T2 が K/K（ <span class="math inline">\(q\)</span> は 1/K、
-<span class="math inline">\(h\)</span> は W/K²）、U2 が K/µm（ <span class="math inline">\(q\)</span> は 1/µm）です。</p>
-<p><strong>⑥ 直した量</strong>（60個のメンバーの平均。 <span class="math inline">\(K\times\)</span> ずれ ）</p>
-<table>
-<colgroup>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>直す前</th>
-<th>直した量</th>
-<th>直した後</th>
-<th>真値</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>T2：5点の温度</td>
-<td><span class="math inline">\((25.7,\,24.6,\,26.4,\,24.9,\,24.9)\)</span>
-°C</td>
-<td>約 <span class="math inline">\(-4.8\)</span> K ずつ</td>
-<td><span class="math inline">\((20.9,\,19.8,\,21.4,\,20.0,\,20.0)\)</span>
-°C</td>
-<td><span class="math inline">\((21.1,\,20.2,\,21.7,\,20.3,\,20.0)\)</span>
-°C</td>
-</tr>
-<tr class="even">
-<td>T2：発熱の倍率 <span class="math inline">\(q\)</span></td>
-<td>1.14</td>
-<td>−0.34</td>
-<td>0.80</td>
-<td>1.00</td>
-</tr>
-<tr class="odd">
-<td>U2：5点の温度</td>
-<td><span class="math inline">\((25.7,\,24.6,\,26.4,\,24.9,\,24.9)\)</span>
-°C</td>
-<td><span class="math inline">\((+0.03,\,-0.10,\,+0.03,\,+0.02,\,-0.12)\)</span>
-K</td>
-<td><span class="math inline">\((25.8,\,24.5,\,26.4,\,25.0,\,24.8)\)</span>
-°C</td>
-<td>同上</td>
-</tr>
-<tr class="even">
-<td>U2：発熱の倍率 <span class="math inline">\(q\)</span></td>
-<td>1.14</td>
-<td>+0.003</td>
-<td>1.14</td>
-<td>1.00</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li><strong>T2</strong>：ずれ −5 K に <span class="math inline">\(K\)</span> の 0.97 を掛けて、5点とも約 4.8 K
-下げました。1回で真値に 0.3 K まで近づきました。</li>
-<li><strong>U2</strong>：ずれが −0.1 µm
-しかないので、温度はほとんど直りません。4.6 K
-熱すぎるまま残ります。</li>
-</ul>
-<p><strong>20回続けた後（ <span class="math inline">\(t=300\)</span>
-秒）</strong></p>
-<table>
-<colgroup>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>5点の温度（推定）</th>
-<th>5点の温度（真値）</th>
-<th>反り A−O（推定／真値）</th>
-<th><span class="math inline">\(U_z(A)\)</span> （推定／真値）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>T2</td>
-<td><span class="math inline">\((24.9,\,23.2,\,25.4,\,24.0,\,22.7)\)</span>
-°C</td>
-<td><span class="math inline">\((25.2,\,23.3,\,25.8,\,24.2,\,22.6)\)</span>
-°C</td>
-<td>2.37／2.74 µm</td>
-<td>5.48／5.78 µm</td>
-</tr>
-<tr class="even">
-<td>U2</td>
-<td><span class="math inline">\((29.8,\,27.8,\,30.3,\,28.7,\,27.1)\)</span>
-°C</td>
-<td>同上</td>
-<td><strong>2.75／2.74 µm</strong></td>
-<td><strong>11.23／5.78 µm</strong></td>
-</tr>
-</tbody>
-</table>
-<p>U2 は最後まで温度が約 4.5 K
-熱すぎますが、<strong>反りはぴったり当たっています</strong>。反りは全体の温まりに関係しない（§5-3）ので、温度が全体に高すぎても反りは正しく出ます。一方、
-<span class="math inline">\(U_z(A)\)</span>
-は全体の温まりで伸びるので、2倍近くに外れています。これが §5
-の理論のとおりの動きです。</p>
-<h2 id="4-結果--データ同化で確かめる">4. 結果 ―
-データ同化で確かめる</h2>
-<figure>
-<img alt="センサ2本だけで反りを当てる" src="img/unobserved_t2_learned.png"/>
-<figcaption aria-hidden="true">センサ2本だけで反りを当てる</figcaption>
-</figure>
-<p><em>15
-W。上段＝センサと評価点の位置（●温度計、■変位計、▲温度の評価点、★変位の評価点）。2〜3段目＝観測していない温度、4〜5段目＝観測していない変位。太い灰色＝真値。各グラフ右上の数字＝30〜300
-秒の平均誤差（線の色と対応）。黄＝データ同化なし、赤＝σ
-で選んだ変位計2本、青＝σ で選んだ温度計2本（
-<code>run/selected_pair_unobserved_check.py t2</code> ）。</em></p>
-<p>25 W と間欠加熱の図：<a href="img/unobserved_t2_q25.png">unobserved_t2_q25.png</a>、<a href="img/unobserved_t2_intermittent.png">unobserved_t2_intermittent.png</a></p>
-<p><strong>観測していない量の誤差（30〜300 秒の平均、5 seed。15 W／25
-W／間欠）</strong></p>
-<table>
-<colgroup>
-<col style="width: 15%"/>
-<col style="width: 21%"/>
-<col style="width: 15%"/>
-<col style="width: 15%"/>
-<col style="width: 15%"/>
-<col style="width: 15%"/>
-</colgroup>
-<thead>
-<tr class="header">
-<th>配置（センサ2本）</th>
-<th style="text-align: right;">予測 σ</th>
-<th>反り A−O</th>
-<th>温度場全体</th>
-<th><span class="math inline">\(U_z(A)\)</span></th>
-<th><span class="math inline">\(U_z(O)\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>データ同化なし</td>
-<td style="text-align: right;">1.451</td>
-<td>0.24／1.38／0.14 µm ※</td>
-<td>4.58／3.12／4.51 K</td>
-<td>5.60／3.22／5.49 µm</td>
-<td>5.37／4.59／5.35 µm</td>
-</tr>
-<tr class="even">
-<td>温度 P2・P0（代表点・片側）</td>
-<td style="text-align: right;">1.186</td>
-<td>0.77／1.41／0.63 µm</td>
-<td>0.54／0.88／0.53 K</td>
-<td>0.24／0.31／0.28 µm</td>
-<td>0.94／1.69／0.87 µm</td>
-</tr>
-<tr class="odd">
-<td>温度 P2・P4（代表点・両側）</td>
-<td style="text-align: right;">0.590</td>
-<td>0.23／0.28／0.20 µm</td>
-<td><strong>0.16／0.18／0.15 K</strong></td>
-<td><strong>0.17／0.17／0.15 µm</strong></td>
-<td><strong>0.20／0.28／0.20 µm</strong></td>
-</tr>
-<tr class="even">
-<td>変位 S1・S2 のみ</td>
-<td style="text-align: right;">0.318</td>
-<td>0.16／0.17／0.11 µm</td>
-<td>0.22／0.22／0.18 K</td>
-<td>0.25／0.29／0.21 µm</td>
-<td>0.17／0.18／0.16 µm</td>
-</tr>
-<tr class="odd">
-<td><strong>温度2本（代表点以外、σ で選んだ）</strong></td>
-<td style="text-align: right;">0.365</td>
-<td>0.20／0.24／0.16 µm</td>
-<td>0.21／0.25／0.20 K</td>
-<td>0.20／0.23／0.17 µm</td>
-<td>0.20／0.30／0.21 µm</td>
-</tr>
-<tr class="even">
-<td><strong>変位2本（代表点以外、σ で選んだ）</strong></td>
-<td style="text-align: right;"><strong>0.296</strong></td>
-<td><strong>0.12／0.13／0.09 µm</strong></td>
-<td><strong>4.44／4.58／4.42 K</strong></td>
-<td><strong>5.32／5.54／5.29 µm</strong></td>
-<td><strong>5.36／5.55／5.33 µm</strong></td>
-</tr>
-</tbody>
-</table>
-<p>※ データ同化なしの反りが小さく見えるのは、A も O も同じ向きに約 5.5
-µm ずれて、差を取ると打ち消し合うためです（blog_008 §6-2）。</p>
-<h3 id="4-1-温度計2本代表点以外">4-1. 温度計2本（代表点以外）</h3>
-<ul>
-<li>反りは 0.20／0.24／0.16 µm で、<strong>代表点の
-P2・P4（0.23／0.28／0.20 µm）より少し良い</strong>結果でした。予測 σ
-の順（0.365 ＜ 0.590）と同じです。</li>
-<li>温度場全体は 0.21 K で、P2・P4 の 0.16 K よりやや悪い結果でした。σ
-は反りを目的に選んでいるので、温度場が一番良くなるとは限りません。</li>
-<li>片側の P2・P0（反り 0.77
-µm）より、ずっと良くなりました。<strong>両側に1本ずつ</strong>が効いています。</li>
-</ul>
-<h3 id="4-2-変位計2本代表点以外">4-2. 変位計2本（代表点以外）</h3>
-<ul>
-<li><strong>反り A−O は 6
-つの配置の中で一番よく当たりました</strong>（0.12／0.13／0.09 µm）。予測
-σ も一番小さく（0.296）、ここは予測どおりです。</li>
-<li><strong>ところが、温度場全体（4.4 K）、 <span class="math inline">\(U_z(A)\)</span> ・ <span class="math inline">\(U_z(O)\)</span> （5.3
-µm）は、データ同化なしとほとんど同じ</strong>でした。図でも、赤い線は観測していない温度と個別の変位で、黄の線（データ同化なし）とほぼ重なっています。</li>
-<li>つまり、この2本は<strong>反りだけを当て、ほかは何も直していません</strong>。</li>
-</ul>
-<hr/>
-<h2 id="5-なぜ変位計2本は反りしか当てられなかったのか--理論">5.
-なぜ変位計2本は、反りしか当てられなかったのか ― 理論</h2>
-<h3 id="5-1-温度を全体の温まりと温度差に分ける">5-1.
-温度を「全体の温まり」と「温度差」に分ける</h3>
-<p>代表5点の温度を、5点の平均 <span class="math inline">\(m\)</span>
-と、平均からの差 <span class="math inline">\(\boldsymbol\delta\)</span>
-に分けます。</p>
-<p><span class="math display">\[
-\mathbf T=m\,\mathbf 1+\boldsymbol\delta,\qquad \mathbf
-1=(1,1,1,1,1),\qquad \sum_i\delta_i=0
-\]</span></p>
-<p><span class="math inline">\(m\)</span>
-は「全体がどれだけ温まったか」、 <span class="math inline">\(\boldsymbol\delta\)</span>
-は「どこが他より熱いか（温度差）」です。</p>
-<h3 id="5-2-分からなさの大部分は全体の温まり">5-2.
-分からなさの大部分は「全体の温まり」</h3>
-<p><span class="math inline">\(t=150\)</span> 秒の <span class="math inline">\(B\)</span> を固有値分解すると、一番大きい固有値が
-27.2 K²（全体の約 96 %）で、その方向はほぼ <span class="math inline">\((1,1,1,1,1)\)</span>
-（5点がそろって上下する）でした。
-発熱量や初期温度が分からないと、<strong>まず「全体がどれだけ温まったか」が分からない</strong>、ということです。</p>
-<h3 id="5-3-反りは全体の温まりに反応しない">5-3.
-反りは「全体の温まり」に反応しない</h3>
-<p>反りの重みの合計は 0 です（ <span class="math inline">\(0.470-0.654+0.604+0.038-0.458=0\)</span>
-）。そのため、</p>
-<p><span class="math display">\[
-d=\mathbf w^{\mathsf T}\mathbf T=m\,(\mathbf w^{\mathsf T}\mathbf
-1)+\mathbf w^{\mathsf T}\boldsymbol\delta=m\cdot 0+\mathbf w^{\mathsf
-T}\boldsymbol\delta=\mathbf w^{\mathsf T}\boldsymbol\delta
-\]</span></p>
-<p><strong>反りは温度差 <span class="math inline">\(\boldsymbol\delta\)</span>
-だけで決まり、全体の温まり <span class="math inline">\(m\)</span>
-には反応しません。</strong>
-全体が一様に温まると円筒は伸びるだけで、傾かないからです。</p>
-<h3 id="5-4-選ばれた変位計2本も全体の温まりに反応しない">5-4.
-選ばれた変位計2本も「全体の温まり」に反応しない</h3>
-<p>選ばれた変位計の重みは2本とも <span class="math inline">\(\mathbf
-h=(-0.521,\,0.564,\,-0.773,\,0.405,\,0.313)\)</span> で、合計は <span class="math inline">\(-0.013\)</span> とほぼ 0 です。</p>
-<p><span class="math display">\[
-y=\mathbf h^{\mathsf T}\mathbf T+\varepsilon\approx\mathbf h^{\mathsf
-T}\boldsymbol\delta+\varepsilon
-\]</span></p>
-<p>この2本は<strong>温度差だけを見ていて、全体の温まり <span class="math inline">\(m\)</span> は見ていません</strong>。
-上面の横方向（ <span class="math inline">\(U_x\)</span>
-）の変位は、円筒が傾くと動き、一様に温まって伸びても（この位置では）ほとんど動かないためと考えられます。</p>
+<p><strong>300 秒後</strong>：温度計2本の5点の温度は (24.9, 23.2, 25.4,
+24.0, 22.7) °C（真値 25.2, 23.3, 25.8, 24.2, 22.6）。変位計2本は (29.8,
+27.8, 30.3, 28.7, 27.1) °C で約 4.5 K 熱すぎるまま。変位計2本の反りは
+2.75 µm（真値 2.74）で当たっているが、 <span class="math inline">\(U_z(A)\)</span> は 11.23 µm（真値 5.78）。</p>
+<p>（計算： <code>run/dump_two_nonrep_da.py</code> 、結果：
+<code>results/two_nonrep_da_dump.json</code> ）</p>
+<h3 id="付録d-知りたい量を変えたときの-σ測る前の計算">付録D.
+知りたい量を変えたときの σ（測る前の計算）</h3>
 <table>
 <thead>
 <tr class="header">
-<th>センサ・量</th>
-<th style="text-align: right;">重みの合計（全体が 1 K
-温まったときの反応）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>反り A−O</td>
-<td style="text-align: right;">0.00 µm</td>
-</tr>
-<tr class="even">
-<td>選ばれた変位計2本（ <span class="math inline">\(U_x\)</span> ）</td>
-<td style="text-align: right;">−0.01 µm</td>
-</tr>
-<tr class="odd">
-<td>変位計 S1（ <span class="math inline">\(U_x\)</span> 、blog_008
-§5）</td>
-<td style="text-align: right;">−0.12 µm</td>
-</tr>
-<tr class="even">
-<td>変位計 S2（ <span class="math inline">\(U_z\)</span> 、blog_008
-§5）</td>
-<td style="text-align: right;"><strong>1.21 µm</strong></td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span></td>
-<td style="text-align: right;">1.21 µm</td>
-</tr>
-<tr class="even">
-<td>温度計（どこでも）</td>
-<td style="text-align: right;">1.00 K</td>
-</tr>
-</tbody>
-</table>
-<h3 id="5-5-だから反りは当たりほかは当たらない">5-5.
-だから、反りは当たり、ほかは当たらない</h3>
-<ul>
-<li>反りは温度差だけで決まり、2本の変位計も温度差だけを見ている →
-<strong>反りは当たる</strong>。</li>
-<li>温度場、 <span class="math inline">\(U_z(A)\)</span> 、 <span class="math inline">\(U_z(O)\)</span> は全体の温まり <span class="math inline">\(m\)</span> で大きく動く（ <span class="math inline">\(U_z\)</span> の重みの合計は 1.21 µm/K）。しかし
-<span class="math inline">\(m\)</span> を見ているセンサがない →
-<strong>当たらない</strong>。</li>
-<li>σ は反りだけを目的にして選んだので、 <span class="math inline">\(m\)</span>
-を見ないセンサでも「反りには十分」と判断して選びました。</li>
-</ul>
-<p><strong>blog_008 §5 の S1・S2 では、S2 が上下方向 <span class="math inline">\(U_z\)</span>
-で、全体の温まりに反応します（1.21）。</strong> だから S1・S2
-だけでも、温度場（0.22 K）や <span class="math inline">\(U_z(A)\)</span>
-（0.25 µm）がそこそこ当たりました。</p>
-<h3 id="5-6-このことは測る前に-σ-の式で分かる">5-6. このことは、測る前に
-σ の式で分かる</h3>
-<p>1-3 の式は、知りたい量の重み <span class="math inline">\(\mathbf
-v\)</span> を何にしても使えます。反りの代わりに <span class="math inline">\(U_z(A)\)</span>
-や「5点の平均温度」を知りたい量にして、同じ配置の σ を計算すると：</p>
-<table>
-<thead>
-<tr class="header">
-<th>配置</th>
-<th style="text-align: right;">反り A−O の σ</th>
-<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の σ</th>
-<th style="text-align: right;">5点の平均温度の σ</th>
+<th>センサ2本</th>
+<th style="text-align: right;">反り A−O</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span></th>
+<th style="text-align: right;">5点の平均温度</th>
 </tr>
 </thead>
 <tbody>
@@ -1346,76 +988,73 @@ v\)</span> を何にしても使えます。反りの代わりに <span class="m
 <td style="text-align: right;">2.38 K</td>
 </tr>
 <tr class="even">
-<td>温度 P2・P4</td>
+<td>温度計 P2・P4</td>
 <td style="text-align: right;">0.59 µm</td>
 <td style="text-align: right;">0.43 µm</td>
 <td style="text-align: right;">0.27 K</td>
 </tr>
 <tr class="odd">
-<td>変位 S1・S2 のみ</td>
+<td>変位計 S1・S2</td>
 <td style="text-align: right;">0.32 µm</td>
 <td style="text-align: right;">0.47 µm</td>
 <td style="text-align: right;">0.32 K</td>
 </tr>
 <tr class="even">
-<td>温度2本（σ で選んだ）</td>
+<td>温度計2本（σ で選んだ）</td>
 <td style="text-align: right;">0.37 µm</td>
 <td style="text-align: right;">0.46 µm</td>
 <td style="text-align: right;">0.26 K</td>
 </tr>
 <tr class="odd">
-<td><strong>変位2本（σ で選んだ）</strong></td>
+<td><strong>変位計2本（σ で選んだ）</strong></td>
 <td style="text-align: right;"><strong>0.30 µm</strong></td>
 <td style="text-align: right;"><strong>2.55 µm</strong></td>
 <td style="text-align: right;"><strong>2.12 K</strong></td>
 </tr>
 </tbody>
 </table>
-<p>（30〜300 秒の平均。データ同化はしていない。）</p>
-<p><strong>変位2本は、反りの σ は一番小さいのに、 <span class="math inline">\(U_z(A)\)</span> と平均温度の σ
-はほとんど縮みません。</strong>
-データ同化を回す前に、この表を見れば「反り以外は当たらない」と分かります。</p>
-<h3 id="5-7-なぜ同じ場所を2回測るような2本が選ばれたのか">5-7.
-なぜ同じ場所を2回測るような2本が選ばれたのか</h3>
-<p>2本の重みはまったく同じなので、2本の値の平均をとると</p>
-<p><span class="math display">\[
-\frac{y_1+y_2}{2}=\mathbf h^{\mathsf T}\mathbf
-T+\frac{\varepsilon_1+\varepsilon_2}{2}
-\]</span></p>
-<p>になり、ノイズの分散が <span class="math inline">\(r\)</span> から
-<span class="math inline">\(r/2\)</span>
-に半分になります（ノイズが互いに無関係なら）。σ
-の式では「同じ量を2回測ってノイズを減らす」ことが、別の場所を測ることより得だと判断されました（σ
-が 0.368 → 0.296 µm）。 ただし実際には、ROM
-と真値のずれ（モデル誤差）は2本に共通に乗るので、平均しても減りません。blog_008
-§6-4 でも同じ鏡写しの2本が選ばれ、予測ほど良くなりませんでした。</p>
-<hr/>
-<h2 id="6-分かったこと">6. 分かったこと</h2>
-<ol type="1">
-<li><strong>代表点以外から選んでも、2本で反りを当てられる。</strong>
-温度計2本なら、ヒータ側と反対側の中段に1本ずつ。反りの誤差は 0.20 µm（15
-W）で、代表点 P2・P4 より少し良い。</li>
-<li><strong>変位計2本は、反りは一番よく当たる（0.12
-µm）が、反りしか当たらない。</strong>
-温度場と個別の変位は、データ同化なしと同じだけずれたまま。</li>
-<li><strong>原因は「全体の温まり」を見るセンサがないこと。</strong>
-反りも、選ばれた変位計（上面の横方向）も、全体が一様に温まることに反応しない。</li>
-<li><strong>σ で選ぶときは、知りたい量を反りだけにしない。</strong>
-例えば <span class="math inline">\(U_z(A)\)</span> や平均温度の σ
-も同時に小さくする、あるいは全体の温まりに反応するセンサ（温度計1本、または上下方向の変位計）を必ず1本入れる。どちらも、データ同化を回す前に
-σ の表で確かめられる。</li>
-</ol>
-<h2 id="7-言えないことやっていないこと">7.
-言えないこと・やっていないこと</h2>
-<ul>
-<li>実機では確かめていません。真値はすべて数値計算（OpenFOAM＋FrontISTR）です。</li>
-<li>選び方は1本ずつ足す方法（貪欲法）で、2本の組み合わせ全部を調べた最良ではありません。</li>
-<li>「反りと <span class="math inline">\(U_z(A)\)</span>
-を両方小さくする」ように目的を変えて選び直す計算は、まだしていません。</li>
-<li>5-4 の「上面の <span class="math inline">\(U_x\)</span>
-は一様な温まりで動かない」理由は解釈で、変位の分布を描いて確かめてはいません。</li>
-<li>熱源の位置が変わると、ROM も選ぶ場所も作り直しが必要です。</li>
-</ul>
+<p>変位計2本は、反りの σ は一番小さいのに、 <span class="math inline">\(U_z(A)\)</span> と平均温度の σ
+はほとんど縮みません。</p>
+<p><strong>鏡写しの2本が選ばれた理由</strong>：2本の重みがまったく同じなので、σ
+の計算では「同じ量を2回測ってノイズを半分にする」ことが得だと判断されました（0.37
+→ 0.30 µm）。実際には、ROM
+と真値のずれが2本に共通に乗るので、平均しても減りません。</p>
+<h3 id="付録e-この記事の平均">付録E. この記事の「平均」</h3>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>呼び方</th>
+<th>何を平均するか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>60個のメンバーの平均</td>
+<td>同じ時刻・同じ点の、60個のメンバーの値（時間や場所の平均ではない）</td>
+</tr>
+<tr class="even">
+<td>平均の温度分布</td>
+<td>OpenFOAM の 121 時刻（0〜600 秒、5 秒ごと、15
+W）の温度場を、セルごとに時間で平均したもの</td>
+</tr>
+<tr class="odd">
+<td>4,000 個の平均</td>
+<td>同じ時刻の、4,000 個の世界（ROM 計算）の値</td>
+</tr>
+<tr class="even">
+<td>30〜300 秒の平均誤差</td>
+<td>30, 60, …, 300 秒の10時刻の誤差の平均</td>
+</tr>
+<tr class="odd">
+<td>5回の平均</td>
+<td>乱数の種を変えた5回のデータ同化の平均</td>
+</tr>
+</tbody>
+</table>
 <h3 id="使ったスクリプト">使ったスクリプト</h3>
 <table>
 <colgroup>
@@ -1431,17 +1070,17 @@ W）で、代表点 P2・P4 より少し良い。</li>
 <tbody>
 <tr class="odd">
 <td><code>run/select_two_nonrep.py</code></td>
-<td>σ で2本を選ぶ（T2・U2・ANY2）。結果
+<td>σ で2本を選ぶ。結果
 <code>results/two_nonrep_selection.json</code></td>
 </tr>
 <tr class="even">
 <td><code>run/selected_pair_unobserved_check.py t2</code></td>
-<td>選んだ配置でデータ同化し、観測していない量を評価。図
+<td>選んだ2本でデータ同化し、測っていない量を評価。図
 <code>docs/img/unobserved_t2_*.png</code></td>
 </tr>
 <tr class="odd">
-<td><code>run/select_nonrep_temp_disp.py</code></td>
-<td>σ の計算の共通部分（4000 本の事前分布、1本足す更新）</td>
+<td><code>run/dump_two_nonrep_da.py</code></td>
+<td>1回目の補正の中身を書き出す</td>
 </tr>
 </tbody>
 </table>
