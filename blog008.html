@@ -2298,6 +2298,102 @@ T_i(t_k)\big)\big(T_j^{(m)}(t_k)-\bar T_j(t_k)\big),\qquad N=4000
 \sigma_0^2=\mathbf w^{\mathsf T}B\,\mathbf w=\sum_i\sum_j
 w_iw_j\,\mathrm{Cov}(T_i,T_j)
 \]</span></p>
+<p><strong>計算時間と、4,000 本で足りるかの確かめ</strong></p>
+<p>4,000
+本という本数は、はじめは根拠を確かめずに決めた値でした。本数を変えて、
+<span class="math inline">\(B\)</span>
+と選定の結果がどれだけ変わるかを確かめました（
+<code>run/analytic_prior_covariance.py</code> ）。基準は乱数 40,000
+本です。</p>
+<table>
+<colgroup>
+<col style="width: 13%"/>
+<col style="width: 18%"/>
+<col style="width: 13%"/>
+<col style="width: 18%"/>
+<col style="width: 18%"/>
+<col style="width: 18%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(B\)</span> の作り方</th>
+<th style="text-align: right;">計算時間</th>
+<th><span class="math inline">\(t=150\)</span>
+秒の対角（P0〜P4、K²）</th>
+<th style="text-align: right;"><span class="math inline">\(B\)</span>
+の差（40,000 本と比べて）</th>
+<th style="text-align: right;">候補 14,754 個の点数の順位相関</th>
+<th style="text-align: right;">上位100候補の一致</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>乱数 400 本</td>
+<td style="text-align: right;">0.03 秒</td>
+<td>6.59, 5.20, 7.41, 5.45, 5.26</td>
+<td style="text-align: right;">5.3 %</td>
+<td style="text-align: right;">0.998</td>
+<td style="text-align: right;">96 / 100</td>
+</tr>
+<tr class="even">
+<td><strong>乱数 4,000 本（本文で使った方法）</strong></td>
+<td style="text-align: right;"><strong>0.17 秒</strong></td>
+<td>6.22, 4.99, 6.99, 5.17, 5.08</td>
+<td style="text-align: right;">1.3 %</td>
+<td style="text-align: right;">0.99996</td>
+<td style="text-align: right;">99 / 100</td>
+</tr>
+<tr class="odd">
+<td>乱数 40,000 本（基準）</td>
+<td style="text-align: right;">1.5 秒</td>
+<td>6.21, 5.07, 6.96, 5.21, 5.20</td>
+<td style="text-align: right;">―</td>
+<td style="text-align: right;">―</td>
+<td style="text-align: right;">―</td>
+</tr>
+<tr class="even">
+<td><strong>式で直接計算（共分散の伝播）</strong></td>
+<td style="text-align: right;"><strong>0.04 秒</strong></td>
+<td>6.23, 5.05, 6.99, 5.22, 5.18</td>
+<td style="text-align: right;"><strong>0.4 %</strong></td>
+<td style="text-align: right;"><strong>0.999999</strong></td>
+<td style="text-align: right;"><strong>100 / 100</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（計算時間は、30〜300 秒の10時刻ぶんの <span class="math inline">\(B\)</span> を作る時間。ROM は1本 600 秒ぶんが約 31
+ms と軽く、4,000 本をまとめて行列で進めるので速い。）</p>
+<ul>
+<li><strong>4,000 本で足りていました。</strong> 選ばれる場所（上面 <span class="math inline">\((9.7,\,\pm36.2)\)</span> mm の <span class="math inline">\(U_x\)</span> 、鏡写しの2点は同点）も、40,000
+本と同じです。</li>
+<li><span class="math inline">\(B\)</span>
+は測定値にも候補の場所にもよらないので、<strong>分からなさの範囲・熱源の位置・ROM・評価する時刻が同じなら、1回作れば全候補に使い回せます</strong>。</li>
+</ul>
+<p><strong>4,000
+本の代わりに、式で直接計算する方法（共分散の伝播）</strong></p>
+<p>ROM
+は「温度の一次式で時間を進める」モデルなので、ばらつきの時間変化も式で計算できます。分からない7個の値
+<span class="math inline">\(\mathbf x=(T_0,\dots,T_4,\,q,\,h)\)</span>
+をまとめ、平均の軌道のまわりで一次近似すると、</p>
+<p><span class="math display">\[
+\frac{dP}{dt}=F(t)\,P+P\,F(t)^{\mathsf T},\qquad
+F=\begin{pmatrix}A(\bar h)&amp;\mathbf g&amp;-C^{-1}(\bar{\mathbf
+T}-T_{\mathrm{air}})\\ 0&amp;0&amp;0\\ 0&amp;0&amp;0\end{pmatrix}
+\]</span></p>
+<p><span class="math inline">\(A(\bar h)\)</span> は ROM
+の温度の進み方、 <span class="math inline">\(\mathbf g\)</span>
+はヒータの入り方、最後の列は放熱 <span class="math inline">\(h\)</span>
+が変わったときの温度の変わり方です。最初のばらつきは乱数の範囲から式で決まります（初期温度は一様分布
+−3〜+12 K なので分散 <span class="math inline">\(15^2/12\)</span> 、
+<span class="math inline">\(q\)</span> は <span class="math inline">\(1.5^2/12\)</span> 、 <span class="math inline">\(h\)</span> は <span class="math inline">\(0.01^2\)</span> ）。 <span class="math inline">\(B(t)\)</span> は <span class="math inline">\(P(t)\)</span> の左上 5×5 です。</p>
+<ul>
+<li><strong>乱数を使わないので結果がぶれず、本数を決める必要もありません。</strong>
+7×7 の行列を進めるだけなので 0.04 秒です。</li>
+<li>40,000 本との差は 0.4 % で、4,000 本（1.3
+%）より正確でした。選ばれる場所も同じです。</li>
+<li>近似が入るのは、放熱 <span class="math inline">\(h\)</span>
+と温度の掛け算を一次近似したところだけです。</li>
+</ul>
 <h4 id="ステップ3候補を採点する--測った後に残る反りの不確かさσ">ステップ3：候補を採点する
 ― 測った後に残る反りの不確かさσ</h4>
 <p><strong>この場所を測れば、知りたい反りA−Oをどれだけ正確に推定できそうか。</strong>
