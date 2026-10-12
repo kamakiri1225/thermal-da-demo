@@ -1373,7 +1373,7 @@ A・O（測らない）、赤い弧＝ヒータ側。「よく動く点に置く
 </table>
 <ul>
 <li><strong>底面の近くは置いても効きません。</strong>
-底面は固定されていて、温度が変わってもほとんど動かないからです。</li>
+底面は支持点（3節点）の近くで、温度が変わってもほとんど動かないからです。</li>
 <li><strong>「よく動く点」を上から2つ選ぶと失敗します。</strong>
 よく動く点は一か所に固まっているので、ほとんど同じ場所を2回測ることになります。</li>
 <li>良い配置は、どれも<strong>ヒータの反対側</strong>に点を持っていました。反りは「ヒータ側と反対側の温度差」で決まるので、片側だけ見ていては差が分かりません。</li>
@@ -2200,6 +2200,147 @@ FrontISTR の結果のうち節点 <span class="math inline">\(c\)</span>
 <p><strong>近似が入るのは、1の「5つの型で表す」ところ（と、OpenFOAM
 のセルの温度を FEM の節点へ受け渡すところ）</strong>です。2・3は FEM
 の線形性そのものなので、近似はありません。</p>
+<p><strong>FrontISTR で実際にやったこと</strong>（
+<code>run/build_full_disp_operator.py</code> ）</p>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>設定</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>形状・要素</td>
+<td>中空円筒（外径 75 mm・内径 40 mm・高さ 100.5 mm）。半径 4 × 周 48 ×
+高さ 20 分割、節点 5,040 個</td>
+</tr>
+<tr class="even">
+<td>材料</td>
+<td>鋼：ヤング率 205 GPa、ポアソン比 0.3、線膨張係数 <span class="math inline">\(1.2\times10^{-5}\)</span> /K</td>
+</tr>
+<tr class="odd">
+<td>解析</td>
+<td>線形の静的熱応力解析。熱ひずみ ＝ 線膨張係数 ×（温度 − 基準温度 20
+°C）</td>
+</tr>
+<tr class="even">
+<td>支持</td>
+<td><strong>底面の3節点だけ</strong>で、円筒が丸ごと動いたり回ったりするのを止める（1点は
+xyz、1点は yz、1点は z
+を固定）。底面全体を固定してはいないので、円筒は自由に熱膨張できる</td>
+</tr>
+<tr class="odd">
+<td>温度の渡し方</td>
+<td>FEM の各節点に、一番近い OpenFOAM のセルの温度を渡す</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>回</th>
+<th>入れる温度</th>
+<th>出てくるもの</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1回目</td>
+<td>平均の温度分布 <span class="math inline">\(\bar T(x)\)</span>
+（OpenFOAM の 121 時刻の平均）</td>
+<td>全節点 × 3方向の変位 <span class="math inline">\(\mathbf u[\bar
+T]\)</span></td>
+</tr>
+<tr class="even">
+<td>2〜6回目</td>
+<td>基準温度 ＋ 型 <span class="math inline">\(\varphi_k(x)\)</span>
+（型をそのまま温度の上がり分として入れる）</td>
+<td>型を1倍入れたときの全節点 × 3方向の変位 <span class="math inline">\(\mathbf u[\varphi_k]\)</span></td>
+</tr>
+</tbody>
+</table>
+<p><strong>例：点 A の上下変位の重み。</strong> 2〜6回目の結果から節点 A
+の <span class="math inline">\(U_z\)</span> を取り出すと</p>
+<p><span class="math display">\[
+\big(u_A[\varphi_1],\dots,u_A[\varphi_5]\big)=(-0.0077,\,-0.0088,\,-0.0063,\,-0.0065,\,+0.0008)\
+\mu\mathrm m
+\]</span></p>
+<p>（型は全セルで大きさ 1 にそろえた形なので、1か所あたりの温度は 0.01 K
+程度と小さく、変位も小さくなります。）これに 5×5 の換算表 <span class="math inline">\(\Phi_P^{-1}\)</span> を掛けると</p>
+<p><span class="math display">\[
+\mathbf h_A^{\mathsf
+T}=\big(u_A[\varphi_1],\dots,u_A[\varphi_5]\big)\,\Phi_P^{-1}=(0.329,\,-0.134,\,0.261,\,0.639,\,0.115)\
+\mu\mathrm m/\mathrm K
+\]</span></p>
+<p>になります。反りの重みは <span class="math inline">\(\mathbf
+w=\mathbf h_{A,z}-\mathbf h_{O,z}\)</span> です。</p>
+<p><strong>確かめ：重み × 実際の温度の時刻歴は、FrontISTR
+の答えと合うか。</strong> データ同化を使わずに、OpenFOAM
+の実際の5点の温度の時刻歴に重みを掛け、FrontISTR
+に全温度場を入れて解いた変位（真値）と比べました。</p>
+<figure>
+<img alt="熱感度の重み × 温度の時刻歴 ＝ 変位" src="img/weight_times_temp_anim.gif"/>
+<figcaption aria-hidden="true">熱感度の重み × 温度の時刻歴 ＝
+変位</figcaption>
+</figure>
+<p><em>15 W。① 代表5点の温度（平均の温度分布からの上がり分）。② <span class="math inline">\(U_z(A)\)</span> を「平均の温度分布での変位 3.97 µm
+＋ 各点の 重み × 上がり分」で積み上げたもの（○＝FrontISTR の答え）。③
+時刻歴：線＝重み × 温度、点＝FrontISTR。（
+<code>run/make_weight_times_temp_anim.py</code> ）</em></p>
+<p><span class="math display">\[
+U_z(A)\approx u_A[\bar T]+\sum_{j=0}^{4}h_{A,j}\big(T_j-\bar T_j\big)
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の最大値</th>
+<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の差（平均／最大）</th>
+<th style="text-align: right;">反り A−O の差（平均／最大）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td style="text-align: right;">5.78 µm</td>
+<td style="text-align: right;">0.001／0.005 µm</td>
+<td style="text-align: right;">0.001／0.010 µm</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">9.62 µm</td>
+<td style="text-align: right;">0.002／0.009 µm</td>
+<td style="text-align: right;">0.002／0.013 µm</td>
+</tr>
+<tr class="odd">
+<td>15 W 間欠加熱</td>
+<td style="text-align: right;">5.66 µm</td>
+<td style="text-align: right;">0.002／0.007 µm</td>
+<td style="text-align: right;">0.003／0.013 µm</td>
+</tr>
+</tbody>
+</table>
+<p><strong>重み × 実際の温度は、FrontISTR
+で全温度場を解いた変位と、反りで最大 0.013 µm（反りの約 0.5
+%）しか違いません。</strong> データ同化の推定の誤差（反りで 0.07〜0.08
+µm
+など）のほとんどは、<strong>5点の温度をどこまで正しく推定できたか</strong>で決まり、温度から変位への換算の誤差はほぼ無視できます。</p>
 <p>知りたい反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
 も、同じ形の重み <span class="math inline">\(\mathbf w\)</span>
 で書けます。</p>
@@ -3795,7 +3936,7 @@ Uz(A)</strong></th>
 </ul></li>
 <li><strong>置き場所で大きく変わります。</strong> 底面近く（0.559
 µm）は、変位なし（0.756
-µm）から少ししか改善しません。底面は固定されていてほとんど動かないためです。</li>
+µm）から少ししか改善しません。底面は支持点（3節点）の近くで、ほとんど動かないためです。</li>
 <li>選定は<strong>データ同化を回す前</strong>に、FrontISTR の熱感度と
 ROM で作った温度のばらつきだけで計算しています（<a href="blog005.html">blog_005 §4-6</a>
 と同じ方法）。</li>
@@ -4400,7 +4541,7 @@ seed（<code>run/placement_method_comparison.py</code>）</p>
 </tbody>
 </table>
 <p>これで言えるのは「<strong>選んだ点は、適当に決めた点より良かった</strong>」だけです。
-底面近くは固定端でほとんど動かないので、負けて当たり前です。</p>
+底面近くは支持点の近くでほとんど動かないので、負けて当たり前です。</p>
 <blockquote>
 <p><strong>本当に知りたいのは「σ
 を最小化するという選び方そのものが良いのか」です。</strong>
