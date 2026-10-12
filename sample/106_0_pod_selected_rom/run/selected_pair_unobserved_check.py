@@ -45,6 +45,17 @@ COMPI = {"Ux": 0, "Uy": 1, "Uz": 2}
 
 
 def configs(setname):
+    if setname == "t2":
+        js = json.load(open(os.path.join(RES, "two_nonrep_selection.json"), encoding="utf-8"))
+        tsel = [("xyz", tuple(np.array(p["xyz_mm"]) / 1000)) for p in js["modes"]["T2"]]
+        usel = [(tuple(np.array(p["xyz_mm"]) / 1000), COMPI[p["comp"]]) for p in js["modes"]["U2"]]
+        return ("センサ2本だけで反り A−O を当てる：代表点以外から σ で選んだ2本と、代表点の温度計2本",
+                [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
+                 ("温度 P2・P0（代表点・片側）", P2P0, [], "#9AA5B1", "--"),
+                 ("温度 P2・P4（代表点・両側）", [("rep", 2), ("rep", 4)], [], "#6B8E23", "--"),
+                 ("変位 S1・S2 のみ（§5 で選んだ2点）", [], SEL, "#8E44AD", "--"),
+                 ("温度2本（代表点以外、σ で選んだ）", tsel, [], "#2E86C1", "-"),
+                 ("変位2本（代表点以外、σ で選んだ）", [], usel, "#C0392B", "-")])
     if setname == "v":
         return ("検証3：A・O を一度も観測せずに、3条件で確かめる",
                 [("データ同化なし（ROM だけで予測）", None, [], "#E1A100", "-"),
@@ -150,7 +161,7 @@ def main(setname, case):
 
     # ---- 図 ----------------------------------------------------------------
     fig = plt.figure(figsize=(21, 26))
-    gs = fig.add_gridspec(5, 4, height_ratios=[1.25, 1, 1, 1, 1], hspace=0.45, wspace=0.27, top=0.90, bottom=0.03)
+    gs = fig.add_gridspec(5, 4, height_ratios=[1.25, 1, 1, 1, 1], hspace=0.45, wspace=0.27, top=(0.885 if len(CFG) > 5 else 0.90), bottom=0.03)
     th = np.linspace(0, 2 * np.pi, 200)
     axm = fig.add_subplot(gs[0, 0:2]); axs = fig.add_subplot(gs[0, 2:4])
     for r_ in (20, 37.5): axm.plot(r_ * np.cos(th), r_ * np.sin(th), color="#999", lw=1)
@@ -218,7 +229,7 @@ def main(setname, case):
         axt.text(0, yy, f"■ {nm}", va="top", fontsize=13, color=col, weight="bold"); yy -= 0.045
         axt.text(0.04, yy, f"温度場 {c_['field_rmse_K']:.2f} K、反り A−O {c_['displacement_um']['反り A−O']:.2f} µm\n"
                  f"Uz(A) {c_['displacement_um']['Uz(A)']:.2f} µm、Uz(O) {c_['displacement_um']['Uz(O)']:.2f} µm",
-                 va="top", fontsize=12.5, linespacing=1.5); yy -= 0.17
+                 va="top", fontsize=12.5, linespacing=1.5); yy -= (0.135 if len(CFG) > 5 else 0.17)
     handles = [Line2D([], [], color="#111", lw=6, alpha=.3, label="真値（OpenFOAM＋FrontISTR）")] + \
               [Line2D([], [], color=col, lw=2.5, ls=ls, label=nm) for nm, _, _, col, ls in CFG]
     fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.945), ncol=3, fontsize=13.5, frameon=False)
@@ -231,7 +242,7 @@ def main(setname, case):
 
 
 if __name__ == "__main__":
-    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v")] or ["s", "n", "v"]
+    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v", "t2")] or ["s", "n", "v"]
     cases = [a for a in sys.argv[1:] if a in CASES] or list(CASES)
     for s_ in sets:
         for c in cases:
