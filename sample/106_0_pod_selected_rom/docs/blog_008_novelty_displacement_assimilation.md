@@ -1019,6 +1019,93 @@ $$
 
 $R$ はセンサのノイズ（対角に $0.3^2$ ）。センサが候補1本だけなら、この式は (b) の式と同じになります。
 
+##### (c′) $P_c$ の導き方
+
+$P_c$ は、(b′) で1本のセンサについてやった「直線で予想して、残る外れを計算する」を、**センサが複数の場合に行列でやったもの**です。段階も (b′) と同じです。
+
+**0. 記号**（センサ3本の場合。すべて 4,000 本の平均からのずれ）
+
+| 記号 | 中身 | 大きさ |
+|---|---|---|
+| $\mathbf T$ | 代表5点の温度 | 5×1 |
+| $\mathbf y$ | センサ3本の値（温度計 P2、温度計 P0、候補の変位計） | 3×1 |
+| $H_c$ | 温度 → センサの値の重み（各行がセンサ1本） | 3×5 |
+| $\boldsymbol\varepsilon$ | ノイズ（共分散 $R$ 、対角に $0.3^2$ ） | 3×1 |
+| $B=\langle\mathbf T\mathbf T^{\mathsf T}\rangle$ | 温度の共分散（ROM 4,000 本） | 5×5 |
+
+センサの値は $\mathbf y=H_c\mathbf T+\boldsymbol\varepsilon$ です。
+
+**1. 必要な2つの量を、掛け算で出す。** (b′) の $\mathrm{Cov}(d,y)$ と $\mathrm{Var}(y)$ にあたるものです。
+
+$$
+\langle\mathbf T\mathbf y^{\mathsf T}\rangle=\langle\mathbf T\mathbf T^{\mathsf T}\rangle H_c^{\mathsf T}+\langle\mathbf T\boldsymbol\varepsilon^{\mathsf T}\rangle=BH_c^{\mathsf T}+0
+$$
+
+$$
+S=\langle\mathbf y\mathbf y^{\mathsf T}\rangle=H_c\langle\mathbf T\mathbf T^{\mathsf T}\rangle H_c^{\mathsf T}+H_c\langle\mathbf T\boldsymbol\varepsilon^{\mathsf T}\rangle+\langle\boldsymbol\varepsilon\mathbf T^{\mathsf T}\rangle H_c^{\mathsf T}+\langle\boldsymbol\varepsilon\boldsymbol\varepsilon^{\mathsf T}\rangle=H_cBH_c^{\mathsf T}+R
+$$
+
+ノイズは温度と無関係なので、 $\langle\mathbf T\boldsymbol\varepsilon^{\mathsf T}\rangle=0$ です。
+
+**2. センサの値から温度を予想する。** (b′) の直線 $\hat d=a\,y$ の行列版です。 $K$ は 5×3 の「傾き」です。
+
+$$
+\hat{\mathbf T}=K\mathbf y,\qquad \mathbf e=\mathbf T-K\mathbf y
+$$
+
+**3. 外れの共分散を展開する。** (b′) の $\langle(d-ay)^2\rangle$ の行列版です。
+
+$$
+\langle\mathbf e\mathbf e^{\mathsf T}\rangle=\langle\mathbf T\mathbf T^{\mathsf T}\rangle-K\langle\mathbf y\mathbf T^{\mathsf T}\rangle-\langle\mathbf T\mathbf y^{\mathsf T}\rangle K^{\mathsf T}+K\langle\mathbf y\mathbf y^{\mathsf T}\rangle K^{\mathsf T}
+=B-KH_cB-BH_c^{\mathsf T}K^{\mathsf T}+KSK^{\mathsf T}
+$$
+
+**4. 平方完成する。** $K^*=BH_c^{\mathsf T}S^{-1}$ とおくと、
+
+$$
+B-KH_cB-BH_c^{\mathsf T}K^{\mathsf T}+KSK^{\mathsf T}
+=(K-K^*)\,S\,(K-K^*)^{\mathsf T}+B-BH_c^{\mathsf T}S^{-1}H_cB
+$$
+
+（右辺第1項を展開すると $KSK^{\mathsf T}-KH_cB-BH_c^{\mathsf T}K^{\mathsf T}+BH_c^{\mathsf T}S^{-1}H_cB$ なので、最後の項を引くと左辺に戻ります。 $S$ と $B$ が対称なことを使っています。）
+
+**5. 一番小さくなる $K$ と、そのとき残る共分散。** 第1項は 0 以上で、 $K=K^*$ のとき 0 になります。
+
+$$
+K^*=BH_c^{\mathsf T}\big(H_cBH_c^{\mathsf T}+R\big)^{-1}
+$$
+
+$$
+P_c=B-BH_c^{\mathsf T}\big(H_cBH_c^{\mathsf T}+R\big)^{-1}H_cB
+$$
+
+$K^*$ はカルマンゲイン、 $P_c$ は「測った後に残る温度の共分散」です。
+
+**6. 反りの σ にする。** 反りは $d=\mathbf w^{\mathsf T}\mathbf T$ なので、反りの外れは $\mathbf w^{\mathsf T}\mathbf e$ です。
+
+$$
+\sigma_c^2=\langle(\mathbf w^{\mathsf T}\mathbf e)^2\rangle=\mathbf w^{\mathsf T}\langle\mathbf e\mathbf e^{\mathsf T}\rangle\mathbf w=\mathbf w^{\mathsf T}P_c\,\mathbf w
+$$
+
+**確かめ**：センサが候補1本だけなら、 $H_c=\mathbf h^{\mathsf T}$ 、 $S=\mathbf h^{\mathsf T}B\mathbf h+r$ （ただの数）なので、
+
+$$
+\mathbf w^{\mathsf T}P_c\mathbf w=\mathbf w^{\mathsf T}B\mathbf w-\frac{(\mathbf w^{\mathsf T}B\mathbf h)^2}{\mathbf h^{\mathsf T}B\mathbf h+r}=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)+r}
+$$
+
+となり、(b′) の式と一致します。
+
+**プログラムでは**、 `run/disp_elsewhere_predict_AO.py` の関数 `post` が5の式をそのまま計算しています。
+
+```python
+K = B @ H.T @ np.linalg.inv(H @ B @ H.T + R)   # カルマンゲイン（5×3）
+P = B - K @ H @ B                              # 測った後に残る温度の共分散（5×5）
+sigma = np.sqrt(w @ P @ w)                     # 反りの σ
+```
+
+これを 30〜300 秒の10時刻の $B(t_k)$ それぞれで計算して平均し、点数にしています。
+`run/select_nonrep_temp_disp.py` （§6-4）では、センサを1本ずつ足しながら $P\leftarrow P-(P\mathbf h)(P\mathbf h)^{\mathsf T}/(\mathbf h^{\mathsf T}P\mathbf h+r)$ を繰り返しています。センサのノイズが互いに無関係なら、まとめて計算した場合と同じ結果になります。
+
 ##### (d) 時刻平均して点数にする
 
 $B$ は時刻によって変わります（序盤は初期温度、中盤以降は発熱量・放熱が主な分からなさ）。加熱期全体で反りを当てたいので、30, 60, …, 300 秒の10時刻で σ を計算して平均し、点数にします。
