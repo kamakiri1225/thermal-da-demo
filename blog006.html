@@ -341,6 +341,9 @@ ROM の状態は温度5つだけ ―
 </nav>
 <h1 id="blog_006温度2点変位2点のデータ同化をセンサの読みから数式まで1ステップずつ追う">blog_006：「温度2点＋変位2点」のデータ同化を、センサの読みから数式まで1ステップずつ追う</h1>
 <blockquote>
+<p><strong>2026-10-12の更新</strong>：セル→FEM節点の温度写像を近傍8セルのIDWへ統一しました。旧本文の最近傍法による数値・図と、<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/25_sensor_selection_theory_and_idw.md">IDW再計算結果</a>を区別してください。</p>
+</blockquote>
+<blockquote>
 <p><strong>2026-10-05の読み直し：条件の区別</strong>
 本記事の「実測」は、実機の測定値ではなく真値にノイズを加えた人工観測を指します。7変数の状態は温度5個・q_scale・h_ROM。変位は観測と復元結果です。§3-8のコード照合例と他節の数値例には異なる観測構成があるため、同じケースの数値として混ぜません。</p>
 </blockquote>

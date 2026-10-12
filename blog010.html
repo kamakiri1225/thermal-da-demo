@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8"/>
+<meta content="pandoc" name="generator"/>
+<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
+<title>blog_010：評価点A・Oを90°回した観測配置の検証</title>
+<style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+<style>
+   html body { max-width: 1120px !important; }
+   body { padding: 0 24px; }
+   img { max-width: 100%; height: auto; }
+   table { font-size: 0.95em; }
+  </style>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">blog_010：評価点A・Oを90°回した観測配置の検証</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#blog010評価点aoを90回すと選ぶ温度変位センサはどう変わるか" id="toc-blog010評価点aoを90回すと選ぶ温度変位センサはどう変わるか">blog010：評価点A・Oを90°回すと、選ぶ温度・変位センサはどう変わるか</a>
+<ul>
+<li><a href="#1-変えたものは評価対象のaoだけ" id="toc-1-変えたものは評価対象のaoだけ">1.
+変えたものは、評価対象のA・Oだけ</a></li>
+<li><a href="#2-blog009とそろえた計算条件" id="toc-2-blog009とそろえた計算条件">2.
+blog009とそろえた計算条件</a></li>
+<li><a href="#3-新しい反りを対象に温度2点変位2点を選ぶ" id="toc-3-新しい反りを対象に温度2点変位2点を選ぶ">3.
+新しい反りを対象に、温度2点→変位2点を選ぶ</a>
+<ul>
+<li><a href="#150秒で残る分散を確認する" id="toc-150秒で残る分散を確認する">150秒で残る分散を確認する</a></li>
+</ul></li>
+<li><a href="#4-新しいaoのfrontistr熱感度と選択点を比較する" id="toc-4-新しいaoのfrontistr熱感度と選択点を比較する">4.
+新しいA・OのFrontISTR熱感度と、選択点を比較する</a></li>
+<li><a href="#5-選定した観測でenkfを実行する" id="toc-5-選定した観測でenkfを実行する">5.
+選定した観測でEnKFを実行する</a>
+<ul>
+<li><a href="#uyを観測して未観測のuzを補正する経路" id="toc-uyを観測して未観測のuzを補正する経路">Uyを観測して、未観測のUzを補正する経路</a></li>
+</ul></li>
+<li><a href="#6-15-wの結果未観測温度と変位の時刻歴" id="toc-6-15-wの結果未観測温度と変位の時刻歴">6. 15
+Wの結果：未観測温度と変位の時刻歴</a></li>
+<li><a href="#7-25-w間欠加熱でも同じ配置を検証する" id="toc-7-25-w間欠加熱でも同じ配置を検証する">7. 25
+W・間欠加熱でも同じ配置を検証する</a></li>
+<li><a href="#8-blog009との違いから何が言えるか" id="toc-8-blog009との違いから何が言えるか">8.
+blog009との違いから、何が言えるか</a></li>
+<li><a href="#9-計算フォルダ再現方法出力" id="toc-9-計算フォルダ再現方法出力">9.
+計算フォルダ・再現方法・出力</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="blog010評価点aoを90回すと選ぶ温度変位センサはどう変わるか">blog010：評価点A・Oを90°回すと、選ぶ温度・変位センサはどう変わるか</h1>
+<p><strong>ヒータと計算モデルを固定し、評価対象のA・Oだけをz軸まわりに＋90°回しました。</strong>
+<a href="blog009.html">blog009</a>と同じ手順・比較条件で、温度2点を選び、その温度配置を固定して変位2点を選び直し、EnKFで検証します。</p>
+<p>今回の問いは、<strong>「同じ熱変形でも、予測したい2点間変位差が変われば、役立つ観測位置・方向も変わるか」</strong>です。センサの位置だけでなく、変位の測定方向もUx・Uy・Uzの全候補から選びます。</p>
+<h2 id="1-変えたものは評価対象のaoだけ">1.
+変えたものは、評価対象のA・Oだけ</h2>
+<figure>
+<img alt="ヒータ固定でA・Oを90度回したモデル" src="img/blog010/model_rotated.png"/>
+<figcaption aria-hidden="true">ヒータ固定でA・Oを90度回したモデル</figcaption>
+</figure>
+<p><em>赤はヒータの領域、黒は今回の新A・O、灰はblog009の旧A・Oです。ヒータは外周＋x側、周方向約±80°、高さ24.75〜75.75
+mmのままです。</em></p>
+<p>回転は＋zから見て反時計回りです。回転行列を明示すると、</p>
+<p><span class="math display">\[
+\underbrace{\begin{bmatrix}x'\\y'\\z'\end{bmatrix}}_{3\times1}
+=\underbrace{\begin{bmatrix}0&amp;-1&amp;0\\1&amp;0&amp;0\\0&amp;0&amp;1\end{bmatrix}}_{3\times3}
+\underbrace{\begin{bmatrix}x\\y\\z\end{bmatrix}}_{3\times1}.
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>評価点</th>
+<th>blog009の実際のFEM節点 [mm]</th>
+<th>blog010の実際のFEM節点 [mm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A</td>
+<td>(28.75, 0, 100.5)</td>
+<td>(0, 28.75, 100.5)</td>
+</tr>
+<tr class="even">
+<td>O</td>
+<td>(−28.75, 0, 100.5)</td>
+<td>(0, −28.75, 100.5)</td>
+</tr>
+</tbody>
+</table>
+<p>コードでは旧指定座標±28
+mmを90°回し、その最近傍FEM節点を評価しています。実際に使う節点は上表の半径28.75
+mmの位置です。<strong>A・O自身のUzは同化に使わず、推定精度を測る未観測出力にします。</strong>
+新A・Oの近傍12 mm以内も変位観測候補から除きます。</p>
+<h2 id="2-blog009とそろえた計算条件">2. blog009とそろえた計算条件</h2>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>条件</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>高忠実度の正解</td>
+<td>保存済みOpenFOAMの温度場と、IDWで温度を渡したFrontISTRの全節点変位</td>
+</tr>
+<tr class="even">
+<td>ROM・POD</td>
+<td>blog009と同じ校正済み5点熱ROM、同じPOD基底・平均場・Q-DEIM代表点</td>
+</tr>
+<tr class="odd">
+<td>温度候補</td>
+<td>代表5点を除くOpenFOAM全セル</td>
+</tr>
+<tr class="even">
+<td>変位候補</td>
+<td>新A・O近傍12 mmを除く全FEM節点のUx・Uy・Uz</td>
+</tr>
+<tr class="odd">
+<td>配置設計</td>
+<td>4,000ケース、seed=20260930、RK4刻み2秒、30〜300秒の10時刻</td>
+</tr>
+<tr class="even">
+<td>初期温度の事前分布</td>
+<td>代表5点ごと独立に17〜32 ℃</td>
+</tr>
+<tr class="odd">
+<td>発熱の事前分布</td>
+<td>発熱倍率qが0.3〜1.8、ON時Q=15q W</td>
+</tr>
+<tr class="even">
+<td>放熱の事前分布</td>
+<td>h_ROMは平均0.02・標準偏差0.01 W/Kの正規分布を0.001〜0.1へ制限</td>
+</tr>
+<tr class="odd">
+<td>観測ノイズ</td>
+<td>温度0.3 K、変位0.3 µm（標準偏差）</td>
+</tr>
+<tr class="even">
+<td>EnKF</td>
+<td>60メンバー、30秒ごと20更新、0〜600秒、インフレーション1.02</td>
+</tr>
+<tr class="odd">
+<td>EnKFのseed</td>
+<td>20260913、20260914、20260915、20260916、20260917</td>
+</tr>
+<tr class="even">
+<td>加熱条件</td>
+<td>15 Wで0〜300秒ON、25 Wで0〜300秒ON、15
+Wで0〜150秒・300〜450秒ON</td>
+</tr>
+<tr class="odd">
+<td>誤差の評価</td>
+<td>30〜300秒の10時刻、5試行平均</td>
+</tr>
+</tbody>
+</table>
+<p>4,000ケースは観測で補正しない配置設計用、60メンバーは観測で補正を繰り返すEnKF用です。代表点の選択・全温度場復元と、両計算の違いは
+<a href="blog009.html">blog009 §2</a>
+に式展開を記載しています。ここでも同じ処理を使います。</p>
+<p>今回、OpenFOAM・FrontISTRの正解を再計算する必要はありません。全場・全節点の正解が保存されているため、新A・Oの節点からUzを取り出して評価します。<strong>新たに実行したのは、4,000ケースのROM、配置選定、3条件のEnKF比較、および新評価点の熱感度行の計算です。</strong></p>
+<h2 id="3-新しい反りを対象に温度2点変位2点を選ぶ">3.
+新しい反りを対象に、温度2点→変位2点を選ぶ</h2>
+<p>新しい対象は、</p>
+<p><span class="math display">\[
+d=U_z(A_{\mathrm{new}})-U_z(O_{\mathrm{new}})
+\]</span></p>
+<p>です。代表5点温度から変位への重みを使うと、</p>
+<p><span class="math display">\[
+\underbrace{\delta d}_{1\times1}
+=\underbrace{\begin{bmatrix}w_0&amp;w_1&amp;w_2&amp;w_3&amp;w_4\end{bmatrix}}_{1\times5}
+\underbrace{\begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta
+T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix}}_{5\times1},
+\qquad w_j=h_{A_{\mathrm{new}},z,j}-h_{O_{\mathrm{new}},z,j}.
+\]</span></p>
+<p><strong>A・Oが変わるので、対象の重みwを新しく取り出します。</strong>
+Bと温度復元行列G、全節点変位の復元係数はblog009と同じです。</p>
+<p>候補cの重みをh_c、現在残る温度誤差の共分散をPとすると、候補1本を使って補正したと仮定した後の共分散と、反りの標準偏差は、</p>
+<p><span class="math display">\[
+\underbrace{P_{+c}}_{5\times5}
+=\underbrace{P}_{5\times5}
+-\frac{\underbrace{(P\mathbf h_c)(P\mathbf h_c)^{\mathsf T}}_{5\times5}}
+{\underbrace{\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}_{1\times1}},
+\qquad
+\sigma_{+c}=\sqrt{\underbrace{\mathbf w^{\mathsf
+T}}_{1\times5}\underbrace{P_{+c}}_{5\times5}\underbrace{\mathbf
+w}_{5\times1}}.
+\]</span></p>
+<p>最初はP=Bです。候補を使った線形補正後にどれだけ誤差が残るかを、実測値を入れずに予測します。σを30〜300秒の10時刻で平均したJが最小となる候補を選びます。</p>
+<p><span class="math display">\[
+J_c=\frac1{10}\sum_{k=1}^{10}\sigma_{+c}(30k)
+\]</span></p>
+<p>温度1点目→共分散更新→温度2点目→共分散更新→変位1点目→共分散更新→変位2点目、の順序もblog009と同じです。全センサ組合せの総当たり最適化ではありません。</p>
+<figure>
+<img alt="新A・Oを対象にした4段階のJ分布" src="img/blog010/selection_overview.png"/>
+<figcaption aria-hidden="true">新A・Oを対象にした4段階のJ分布</figcaption>
+</figure>
+<p><em>色は候補を測った場合のJ
+[µm]、紫点は選定位置、矢印は測定方向です。温度は全候補セル、変位はUx・Uy・Uz全候補を比較し、上図には選ばれた方向を表示しています。各段階で色範囲は異なります。</em></p>
+<p>選ばれた位置は次のとおりです。T1・T2・S1・S2という名称は本記事内の選択順で、blog009と同じ座標を指しません。</p>
+<table>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>今回の位置 [mm]</th>
+<th>測る量</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>T1</td>
+<td>(-36.6, 0.8, 99.3)</td>
+<td>温度（反対側・上部）</td>
+</tr>
+<tr class="even">
+<td>T2</td>
+<td>(21.1, 0.8, 0.8)</td>
+<td>温度（ヒータ側・下部）</td>
+</tr>
+<tr class="odd">
+<td>S1</td>
+<td>(-17.3, -10.0, 100.5)</td>
+<td>Uy</td>
+</tr>
+<tr class="even">
+<td>S2</td>
+<td>(21.1, 12.2, 100.5)</td>
+<td>Uy</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>配置を選んだ段階</th>
+<th style="text-align: right;">J：反りの予測標準偏差の時間平均 [µm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度T1を追加</td>
+<td style="text-align: right;">0.2704</td>
+</tr>
+<tr class="even">
+<td>温度T2を追加</td>
+<td style="text-align: right;">0.1727</td>
+</tr>
+<tr class="odd">
+<td>さらに変位S1を追加</td>
+<td style="text-align: right;">0.0957</td>
+</tr>
+<tr class="even">
+<td>さらに変位S2を追加</td>
+<td style="text-align: right;">0.0775</td>
+</tr>
+</tbody>
+</table>
+<h3 id="150秒で残る分散を確認する">150秒で残る分散を確認する</h3>
+<p>同じB(150秒)について、選定済みの観測を順に加えた場合の共分散を計算しました。150秒だけで位置を選び直した試験ではありません。</p>
+<figure>
+<img alt="150秒の残存分散" src="img/blog010/posterior_t150.png"/>
+<figcaption aria-hidden="true">150秒の残存分散</figcaption>
+</figure>
+<p><em>左は新A−Oの分散と標準偏差、右は代表5点温度の残存共分散の対角成分です。実際のEnKF誤差ではなく、配置設計に用いた線形モデル内での予測です。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>観測</th>
+<th style="text-align: right;">σ(150秒) [µm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>なし</td>
+<td style="text-align: right;">0.1894</td>
+</tr>
+<tr class="even">
+<td>T1</td>
+<td style="text-align: right;">0.1656</td>
+</tr>
+<tr class="odd">
+<td>T1・T2</td>
+<td style="text-align: right;">0.1608</td>
+</tr>
+<tr class="even">
+<td>T1・T2＋S1</td>
+<td style="text-align: right;">0.1163</td>
+</tr>
+<tr class="odd">
+<td>T1・T2＋S1・S2</td>
+<td style="text-align: right;">0.0958</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-新しいaoのfrontistr熱感度と選択点を比較する">4.
+新しいA・OのFrontISTR熱感度と、選択点を比較する</h2>
+<figure>
+<img alt="新A・Oの熱感度Wと選定点" src="img/blog010/W_selected_overlay.png"/>
+<figcaption aria-hidden="true">新A・Oの熱感度Wと選定点</figcaption>
+</figure>
+<p><em>レインボー配色の青は負、赤は正。色はFEM節点温度を1
+K変えた場合の対象変位への感度 [µm/K]
+で、時間不変です。紫が温度センサ、緑が変位センサ、矢印がUyの測定方向です。上のモデル図で赤いヒータの位置を確認できます。</em></p>
+<p>今回のWは、105のFrontISTRが出力した剛性行列K_uと熱荷重行列H_thから、新しい評価自由度について求め直しています。</p>
+<p><span class="math display">\[
+\underbrace{K_u^{\mathsf T}}_{15120\times15120}
+\underbrace{\boldsymbol\lambda_A}_{15120\times1}
+=\underbrace{\mathbf e_{A,z}}_{15120\times1},
+\qquad
+\underbrace{W_{A,z,:}}_{1\times5040}
+=\underbrace{\boldsymbol\lambda_A^{\mathsf T}}_{1\times15120}
+\underbrace{H_{\mathrm{th}}}_{15120\times5040}.
+\]</span></p>
+<p>e_A,zは新Aのz自由度だけ1、ほかは0の選択ベクトルで、温度誤差eとは別です。Oも同様に求め、差W_A−W_Oを描きます。<strong>旧A・Oに対するFrontISTR直接出力Wdiffを、新A・Oの感度として流用していません。</strong>
+随伴方程式の相対残差は <code>results/blog010/W_metadata.json</code>
+に保存しています。</p>
+<p>このWは105の四面体分割による行列から求めたものです。一方、EnKFの変位復元は106の六面体で計算したPODモード応答Dを使用し、blog009と同じ離散化の違いがあります。W図は物理的な感度を比較するための図で、採点をそのWに置き換えてはいません。</p>
+<p>選ばれたT1・T2は、単純にW_A−W_Oの正の最大・負の最小を取った位置ではありません。今回のBと復元行列の下で、新しい対象の不確かさを減らす位置です。変位計も、新しい対象に関係する温度の違いを捉えるUyが選ばれました。これを「熱感度が高い場所なら常に最適」と一般化しません。</p>
+<h2 id="5-選定した観測でenkfを実行する">5.
+選定した観測でEnKFを実行する</h2>
+<p>状態はblog009と同じ7変数で、変位は独立した状態変数ではありません。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf z}_{7\times1}
+=\begin{bmatrix}T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]\\q_{\mathrm{scale}}\\h_{\mathrm{ROM}}\end{bmatrix}
+\]</span></p>
+<p>温度2点＋選定変位2点の場合、観測予報は今回はUyです。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf y^{f,(m)}}_{4\times1}
+=\begin{bmatrix}\theta_1^{f,(m)}\\\theta_2^{f,(m)}\\U_y^{f,(m)}(S1)\\U_y^{f,(m)}(S2)\end{bmatrix}
+=\underbrace{\bar{\mathbf y}}_{4\times1}
++\underbrace{\begin{bmatrix}
+g_{T1,0}&amp;g_{T1,1}&amp;g_{T1,2}&amp;g_{T1,3}&amp;g_{T1,4}\\
+g_{T2,0}&amp;g_{T2,1}&amp;g_{T2,2}&amp;g_{T2,3}&amp;g_{T2,4}\\
+h_{S1y,0}&amp;h_{S1y,1}&amp;h_{S1y,2}&amp;h_{S1y,3}&amp;h_{S1y,4}\\
+h_{S2y,0}&amp;h_{S2y,1}&amp;h_{S2y,2}&amp;h_{S2y,3}&amp;h_{S2y,4}
+\end{bmatrix}}_{4\times5}
+\underbrace{(\mathbf T_P^{f,(m)}-\bar{\mathbf T}_P)}_{5\times1}.
+\]</span></p>
+<p>θは選定した温度センサの予報、gはGの該当行、h_SiyはUyへの変位復元の重み、バーはPOD平均場とその応答です。60メンバーの状態・観測予報からCzyとCyyを計算し、</p>
+<p><span class="math display">\[
+\underbrace{K}_{7\times4}
+=\underbrace{C_{zy}}_{7\times4}\underbrace{(C_{yy}+R)^{-1}}_{4\times4},
+\qquad
+\underbrace{\mathbf z^{a,(m)}}_{7\times1}
+=\underbrace{\widetilde{\mathbf z}^{f,(m)}}_{7\times1}
++\underbrace{K}_{7\times4}\underbrace{(\mathbf
+y^{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\widetilde{\mathbf
+y}^{f,(m)})}_{4\times1}
+\]</span></p>
+<p>と補正します。チルダは1.02倍のインフレーション後、aは補正後です。観測値はOpenFOAM・FrontISTRの正解にノイズを加えた4成分、εは更新時のメンバー別観測摂動です。実装は逆行列を作らず
+<code>np.linalg.solve()</code> を使います。</p>
+<p>補正後の5点温度を次のROM初期値に使い、q・hも次の予報へ渡します。今回も、同化サイクル内でFrontISTRを毎回実行せず、事前計算した応答を使います。共分散の平均・偏差・成分ごとの更新式は
+<a href="blog009.html">blog009 §6-0</a>
+と同じです。</p>
+<h3 id="uyを観測して未観測のuzを補正する経路">Uyを観測して、未観測のUzを補正する経路</h3>
+<p>Kの温度5行をK_Tとすると、</p>
+<p><span class="math display">\[
+\underbrace{\Delta_{\mathrm{corr}}\mathbf T_P}_{5\times1}
+=\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1},
+\qquad
+\underbrace{\Delta_{\mathrm{corr}}d}_{1\times1}
+=\underbrace{\mathbf w^{\mathsf
+T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf
+r^{(m)}}_{4\times1}.
+\]</span></p>
+<p>rは観測＋メンバー別摂動−予報の4成分です。<strong>Uyの観測差→5点温度の補正→新A・OのUzを再計算</strong>という経路です。UyがUzを物理的に押し動かすという意味ではありません。</p>
+<h2 id="6-15-wの結果未観測温度と変位の時刻歴">6. 15
+Wの結果：未観測温度と変位の時刻歴</h2>
+<p>比較する5条件はblog009と同じです：同化なし、手動温度P2・P0、選定温度T1・T2、選定温度＋底面近くの変位2点、選定温度＋選定変位2点。</p>
+<figure>
+<img alt="15Wの未観測温度・変位の時刻歴" src="img/blog010/history_learned.png"/>
+<figcaption aria-hidden="true">15Wの未観測温度・変位の時刻歴</figcaption>
+</figure>
+<p><em>温度P1・P3・P4、変位A・O・E・Fは全て観測に使いません。Eはヒータ側中段、Fは反対側中段でblog009と同じ点です。黒が正解、色線は5試行それぞれの60メンバー平均をさらに平均した値。橙帯は加熱区間。初回更新後30秒から表示します。</em></p>
+<p>温度場は全20,696セルRMSEの時間平均、変位は平均絶対誤差で、いずれも30〜300秒の10時刻・5試行で平均します。反りについては、</p>
+<p><span class="math display">\[
+E_d=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
+\left|\widehat d_s(30k)-d^*(30k)\right|
+\]</span></p>
+<p>です。ハットはその試行の同化後60メンバー平均、星は正解です。温度場は、</p>
+<p><span class="math display">\[
+E_T=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
+\sqrt{\frac1{20696}\sum_{i=1}^{20696}\left(\widehat
+T_{s,i}(30k)-T_i^*(30k)\right)^2}
+\]</span></p>
+<p>です。5試行平均の線と正解との差を取ってから誤差を計算した値ではありません。</p>
+<table>
+<thead>
+<tr class="header">
+<th>観測配置</th>
+<th style="text-align: right;">温度場 [K]</th>
+<th style="text-align: right;">新反りA−O [µm]</th>
+<th style="text-align: right;">新Uz(A) [µm]</th>
+<th style="text-align: right;">新Uz(O) [µm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>同化なし</td>
+<td style="text-align: right;">4.581</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">5.495</td>
+<td style="text-align: right;">5.471</td>
+</tr>
+<tr class="even">
+<td>手動の温度2点 P2・P0</td>
+<td style="text-align: right;">0.543</td>
+<td style="text-align: right;">0.117</td>
+<td style="text-align: right;">0.642</td>
+<td style="text-align: right;">0.531</td>
+</tr>
+<tr class="odd">
+<td>選定した温度2点</td>
+<td style="text-align: right;">0.250</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.174</td>
+<td style="text-align: right;">0.184</td>
+</tr>
+<tr class="even">
+<td>選定温度2点＋底面変位2点</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.056</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.158</td>
+</tr>
+<tr class="odd">
+<td>選定温度2点＋選定変位2点</td>
+<td style="text-align: right;">0.208</td>
+<td style="text-align: right;">0.038</td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: right;">0.128</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img alt="15Wの誤差比較" src="img/blog010/error_bars_learned.png"/>
+<figcaption aria-hidden="true">15Wの誤差比較</figcaption>
+</figure>
+<p><strong>温度の位置を選ぶと新反りの誤差は0.117→0.068
+µm、選定Uy2点も追加すると0.038 µmへ減りました。</strong>
+一方、温度場RMSEは選定変位追加0.208 Kより底面変位追加0.185
+Kの方が小さい結果でした。新反りを狙う配置が全温度場にも最良とは限りません。</p>
+<p>同化なしでは新反り誤差が0.048 µmでも、A・O単体の誤差はそれぞれ約5.5
+µmです。同じ向きの誤差が差を取ると打ち消されるため、反りだけでは推定全体の良さを判断できません。これもblog009と同じ評価上の注意点です。</p>
+<h2 id="7-25-w間欠加熱でも同じ配置を検証する">7. 25
+W・間欠加熱でも同じ配置を検証する</h2>
+<p>配置は15
+Wの4,000ケースで決めたものを固定します。条件ごとに位置を選び直してはいません。</p>
+<figure>
+<img alt="25Wの未観測温度・変位" src="img/blog010/history_q25.png"/>
+<figcaption aria-hidden="true">25Wの未観測温度・変位</figcaption>
+</figure>
+<figure>
+<img alt="15W間欠加熱の未観測温度・変位" src="img/blog010/history_intermittent.png"/>
+<figcaption aria-hidden="true">15W間欠加熱の未観測温度・変位</figcaption>
+</figure>
+<p><em>観測・未観測点、EnKF条件、線の平均方法は15
+Wと同じ。間欠加熱は0〜150秒と300〜450秒ON、他の区間はOFFです。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+<col style="width: 26%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>加熱条件</th>
+<th style="text-align: right;">手動温度2点：新反り誤差</th>
+<th style="text-align: right;">選定温度2点：新反り誤差</th>
+<th style="text-align: right;">＋選定変位2点：新反り誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>25 W・0〜300秒ON</td>
+<td style="text-align: right;">0.137 µm</td>
+<td style="text-align: right;">0.123 µm</td>
+<td style="text-align: right;">0.043 µm</td>
+</tr>
+<tr class="even">
+<td>15 W・間欠加熱</td>
+<td style="text-align: right;">0.133 µm</td>
+<td style="text-align: right;">0.073 µm</td>
+<td style="text-align: right;">0.041 µm</td>
+</tr>
+</tbody>
+</table>
+<figure>
+<img alt="加熱条件を変えた場合の誤差棒グラフ" src="img/blog010/error_bars_other_conditions.png"/>
+<figcaption aria-hidden="true">加熱条件を変えた場合の誤差棒グラフ</figcaption>
+</figure>
+<p><strong>今回の3加熱条件では、選定した変位2点を追加すると、選定温度2点だけより新反りの誤差が小さくなりました。</strong>
+実機で検証した結果ではありません。</p>
+<h2 id="8-blog009との違いから何が言えるか">8.
+blog009との違いから、何が言えるか</h2>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>blog009：旧A−O</th>
+<th>blog010：新A−O</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>対象の向き</td>
+<td>ヒータ側＋xと反対側−xの上面差</td>
+<td>＋yと−yの上面差</td>
+</tr>
+<tr class="even">
+<td>選ばれた温度位置</td>
+<td>ヒータ側中段・反対側中段</td>
+<td>反対側上部・ヒータ側下部</td>
+</tr>
+<tr class="odd">
+<td>選ばれた変位方向</td>
+<td>Ux・Ux</td>
+<td>Uy・Uy</td>
+</tr>
+<tr class="even">
+<td>15 Wの真値の最大絶対変位差（30〜600秒）</td>
+<td>2.753 µm</td>
+<td>0.439 µm</td>
+</tr>
+</tbody>
+</table>
+<p><strong>目的の変位差を変えると、同じモデル・事前分布・採点法でも、選ばれる温度位置と変位の測定方向が変わりました。</strong>
+この点は「推定したい量に応じた観測設計」の具体例です。</p>
+<p>ただし、新しい評価方向は＋x側加熱に対する横方向の対向点で、真値の変位差も旧A−Oより小さい条件です。新旧の絶対誤差だけを比べて「blog010の方が同化性能が高い」とは言えません。また、得られた非ゼロの新A−O差が、流体温度場・メッシュ・写像などのどの要因に由来するかは、この比較で切り分けていません。</p>
+<p>今回の比較対象は手動温度P2・P0と底面変位の配置です。旧A−O向けの選定配置を新A−Oへそのまま使う移植比較は追加していないため、「今回の配置が旧選定配置より必ず優れる」とは結論しません。全配置の大域的最適性も未証明です。</p>
+<h2 id="9-計算フォルダ再現方法出力">9. 計算フォルダ・再現方法・出力</h2>
+<p>計算フォルダ：<code>sample/106_0_pod_selected_rom/</code>。</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a aria-hidden="true" href="#cb1-1" tabindex="-1"></a><span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python</span> run/rotated_target_sensor_study.py</span>
+<span id="cb1-2"><a aria-hidden="true" href="#cb1-2" tabindex="-1"></a><span class="va">OPENBLAS_NUM_THREADS</span><span class="op">=</span>4 <span class="va">OMP_NUM_THREADS</span><span class="op">=</span>4 <span class="ex">python</span> run/make_blog010_figures.py</span>
+<span id="cb1-3"><a aria-hidden="true" href="#cb1-3" tabindex="-1"></a><span class="ex">python</span> run/build_local_site.py</span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>ファイル・フォルダ</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/rotated_target_sensor_study.py</code></td>
+<td>旧コードの関数を使い、新A・Oと独立した出力先で同じ選定・EnKFを実行</td>
+</tr>
+<tr class="even">
+<td><code>run/sequential_sensor_study.py</code></td>
+<td>blog009と共通の温度2点→変位2点の選定処理</td>
+</tr>
+<tr class="odd">
+<td><code>run/select_nonrep_temp_disp.py</code></td>
+<td>共通の4,000ケース、score、共分散の1本ずつの更新</td>
+</tr>
+<tr class="even">
+<td><code>run/selected_pair_unobserved_check.py</code></td>
+<td>共通の5配置・3加熱条件・5seedのEnKF比較</td>
+</tr>
+<tr class="odd">
+<td><code>run/make_blog010_figures.py</code></td>
+<td>新評価点のW、J分布、時刻歴、誤差、150秒の分散を図示</td>
+</tr>
+<tr class="even">
+<td><code>results/blog010/conditions.json</code></td>
+<td>新旧条件の対応、実評価節点、計算時間</td>
+</tr>
+<tr class="odd">
+<td><code>results/blog010/sequential_selection.json</code></td>
+<td>選定セル・節点・方向とJ</td>
+</tr>
+<tr class="even">
+<td><code>results/blog010/sequential_scores.npz</code></td>
+<td>全温度・変位候補の採点値</td>
+</tr>
+<tr class="odd">
+<td><code>results/blog010/prior_covariances.npz</code></td>
+<td>4,000ケースから求めた30〜300秒の10個のB</td>
+</tr>
+<tr class="even">
+<td><code>results/blog010/unobserved_check_seq_*.json</code></td>
+<td>3条件の各配置の誤差</td>
+</tr>
+<tr class="odd">
+<td><code>results/blog010/unobserved_traj_seq_*.npz</code></td>
+<td>未観測温度・変位の時刻歴と正解</td>
+</tr>
+<tr class="even">
+<td><code>results/blog010/posterior_t150.json</code></td>
+<td>150秒のBと各観測段階のPc・σ</td>
+</tr>
+<tr class="odd">
+<td><code>results/blog010/vtk/sequential_sensor_scores.vtu</code></td>
+<td>ParaView用J分布</td>
+</tr>
+<tr class="even">
+<td><code>results/blog010/vtk/W_AO_rotated.vtu</code></td>
+<td>ParaView用の新A・OのW分布</td>
+</tr>
+<tr class="odd">
+<td><code>results/blog010/vtk/selected_points.vtp</code></td>
+<td>選定位置・測定方向。対応はW_metadata.json</td>
+</tr>
+<tr class="even">
+<td><code>docs/img/blog010/</code></td>
+<td>本記事の図</td>
+</tr>
+</tbody>
+</table>
+<p><code>results/blog010/</code>
+内の正解・ROM・POD入力npzは、親フォルダの入力を指す相対シンボリックリンクです。入力を共有し、blog009の出力を上書きしていません。</p>
+<p>計算時間の記録では、事前分布計算・選定・J図出力に約7.3秒、EnKFの5配置×5seedは15
+Wで約3.6秒、25
+Wで約3.4秒、間欠加熱で約3.6秒でした。保存済み正解と変位応答を使ったROM計算の時間で、OpenFOAM・FrontISTRの正解作成時間は含みません。W再計算と本記事用の図作成時間も、この記録には含めていません。</p>
+</body>
+</html>

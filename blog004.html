@@ -3246,7 +3246,7 @@ K=C_{zy}\,(C_{yy}+R)^{-1}\]</span></p>
 <h3 id="7-1-温度を実形状femメッシュへマッピング--逆距離加重">7-1.
 温度を実形状（FEMメッシュ）へマッピング ― 逆距離加重</h3>
 <p><strong>ここからは空間の移し替えです。</strong>
-5点→全セルの復元は§5のgappy-PODで済んでいます。その後、CFDセルとFEM節点の位置の違いを補間します。以下はIDWの説明で、すべての図が同じ補間実装という意味ではありません。例えば未観測C/Dの検証スクリプトは最近傍セルを使います。各図の再現スクリプトで確認してください。</p>
+5点→全セルの復元は§5のgappy-PODで済んでいます。その後、CFDセルとFEM節点の位置の違いをIDWで補間します。2026-10-12にモード変位応答の作成と関連処理も近傍8セルのIDWへ統一しました。旧最近傍結果と再計算結果の区別は<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/25_sensor_selection_theory_and_idw.md">IDW更新結果</a>を参照してください。</p>
 <p>CFD（またはPOD復元）の温度は <strong>セル中心 <span class="math inline">\(x_c\)</span></strong> の値。いっぽう FrontISTR
 が要るのは <strong>節点 <span class="math inline">\(x_p\)</span></strong> の温度です。
 そこで各節点に、近い <span class="math inline">\(k\)</span> 個のセルから
@@ -4319,7 +4319,8 @@ T}\varphi=\lambda\varphi\)</span> ）。</li>
 <span class="math inline">\(\hat u=\bar u+U_r a\)</span> ）。</li>
 <li>実データでは <strong>2モードで99.9％</strong>、選んだ5点ROMは
 <strong>残差0.014K</strong> で OpenFOAM を再現。</li>
-<li>温度が求まったら <strong>IDWで実形状へマッピング → 熱ひずみ <span class="math inline">\(\alpha\Delta T\)</span> → <span class="math inline">\(K_s u=f_\mathrm{th}\)</span></strong>
+<li>温度が求まったら <strong>セル温度をFEM節点へ写像（近傍8セルのIDW）→
+熱ひずみ <span class="math inline">\(\alpha\Delta T\)</span> → <span class="math inline">\(K_s u=f_\mathrm{th}\)</span></strong>
 で変位（反り）が出る（§7）。</li>
 </ol>
 <p>この軽い ROM の上で、<strong>OI（blog_002）と

@@ -321,11 +321,15 @@ A−O の誤差、30〜600 秒の平均）</a></li>
 未確認のこと</a></li>
 <li><a href="#13-使ったスクリプト" id="toc-13-使ったスクリプト">13.
 使ったスクリプト</a></li>
+<li><a href="#未観測の温度変位まで復元するとどこまで合うか" id="toc-未観測の温度変位まで復元するとどこまで合うか">未観測の温度・変位まで復元すると、どこまで合うか</a></li>
 </ul></li>
 </ul>
 </nav>
 <h1 id="blog_007作った-rom-はどこまで使えるか--適用範囲を実計算で確かめる">blog_007：作った
 ROM はどこまで使えるか ― 適用範囲を実計算で確かめる</h1>
+<blockquote>
+<p><strong>2026-10-12の更新</strong>：セル→FEM節点の温度写像を近傍8セルのIDWへ統一しました。旧本文の最近傍法による数値・図と、<a href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/25_sensor_selection_theory_and_idw.md">IDW再計算結果</a>を区別してください。</p>
+</blockquote>
 <blockquote>
 <p><strong>2026-10-05の読み直し：条件の区別</strong>
 モデル単体の予測、同化後の推定、全セルの時刻平均誤差は別の評価です。検証済みなのは15
@@ -1934,5 +1938,19 @@ ON/OFF（データ同化の更新間隔より速い変化）</li>
 </tr>
 </tbody>
 </table>
+<h2 id="未観測の温度変位まで復元するとどこまで合うか">未観測の温度・変位まで復元すると、どこまで合うか</h2>
+<p>代表点温度をgappy-PODで全場復元し、IDW＋FrontISTR応答で変位を求めて比較しました。温度T1・T2を先に選び、その配置に変位S1・S2を追加した試験です。P1・P3・P4の温度、A・O・E・Fの変位は観測に使っていません。正解はOpenFOAM＋FrontISTR、60メンバー、30秒ごと20更新、5seedです。</p>
+<figure>
+<img alt="25 W：未観測温度・変位" src="img/sequential_history_q25.png"/>
+<figcaption aria-hidden="true">25 W：未観測温度・変位</figcaption>
+</figure>
+<figure>
+<img alt="間欠加熱：未観測温度・変位" src="img/sequential_history_intermittent.png"/>
+<figcaption aria-hidden="true">間欠加熱：未観測温度・変位</figcaption>
+</figure>
+<p>選定温度2点のみ→選定変位2点追加で、全セル温度場RMSE／未観測反りの平均絶対誤差（30〜300秒）は、25
+Wでは <strong>0.247→0.206 K／0.242→0.107 µm</strong>、間欠加熱では
+<strong>0.194→0.167 K／0.161→0.090 µm</strong>
+でした。全セルRMSEには観測セルも含みます。選定手順と各点の誤差は <a href="blog009.html">blog_009</a> に記載しました。</p>
 </body>
 </html>
