@@ -2298,6 +2298,61 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 は「5点の温度がどう一緒にばらつくか」で、そこから「反りと値がどう一緒にばらつくか」が計算できます。4,000
 本の点を候補ごとに描き直す必要はありません。</p>
 <h5 id="b-σ-の式を省略なしで導く">(b′) σ の式を、省略なしで導く</h5>
+<p><strong>まず絵で、4段階で見ます。</strong>
+世界が5つだけの作り話の例です。上の段が良い場所 X、下の段が悪い場所 Y
+です。</p>
+<figure>
+<img alt="σ の求め方を4段階の絵で" src="img/sigma_steps.png"/>
+<figcaption aria-hidden="true">σ の求め方を4段階の絵で</figcaption>
+</figure>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>段階</th>
+<th>やること</th>
+<th>良い場所 X</th>
+<th>悪い場所 Y</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>①</td>
+<td>5つの世界を、横＝センサの値、縦＝反り の点で描く</td>
+<td>点がほぼ一直線に並ぶ</td>
+<td>点がばらばら</td>
+</tr>
+<tr class="even">
+<td>②</td>
+<td>試しに直線を1本引き、点と直線の縦のずれ（橙の棒）を測る。棒の長さを二乗して平均する</td>
+<td>0.085</td>
+<td>0.661</td>
+</tr>
+<tr class="odd">
+<td>③</td>
+<td>直線の傾きを少しずつ変えて、②の値が一番小さくなる傾きを探す</td>
+<td>傾き 0.49 で 0.0008</td>
+<td>傾き 0.07 で 0.549</td>
+</tr>
+<tr class="even">
+<td>④</td>
+<td>そのとき残る外れの平方根が σ
+。「センサの値から反りを一番うまく予想しても、まだこれだけ外れる」という幅</td>
+<td><strong>σ ＝ 0.03</strong>（測る前 0.75）</td>
+<td><strong>σ ＝ 0.74</strong>（ほとんど縮まない）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>σ が小さい場所 ＝ センサの値から反りをうまく予想できる場所 ＝
+良い場所</strong>です。 4,000 本の計算で、これと同じことを 14,754
+個の候補それぞれについて行い、σ が一番小さい場所を選びました（
+<code>run/make_sigma_steps_fig.py</code> ）。</p>
+<p><strong>以下は、同じことを式で書いたものです</strong>（③の「一番小さくなる傾き」を、探さずに計算で出す方法）。</p>
 <p><strong>0. 記号を決める。</strong> すべて「4,000
 本の平均からのずれ」で書きます。</p>
 <ul>
