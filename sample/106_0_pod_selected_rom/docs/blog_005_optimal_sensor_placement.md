@@ -49,10 +49,9 @@
 $$B^a=B-\frac{(Bv)(Bv)^{\mathsf T}}{v^{\mathsf T}Bv+r}$$
 
 と縮みます（ $v$ は観測行列の1行を転置した列ベクトル、 $r$ は観測ノイズ分散）。いま知りたい量（推定対象）を
-$X=c^{\mathsf T}x$ と書くと（ $c$ は対象を取り出すベクトル）、**$X$ の分散がどれだけ減るか**は
+$X=c^{\mathsf T}x$ と書くと（ $c$ は対象を取り出すベクトル）、** $X$ の分散がどれだけ減るか**は
 
-$$\boxed{\ \Delta(X,\ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
-=\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{v^{\mathsf T}Bv+r}\ }$$
+$$\boxed{\ \Delta(X,\ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r} =\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{v^{\mathsf T}Bv+r}\ }$$
 
 これが**観測の価値**です。読み方は簡単で、
 
@@ -70,15 +69,14 @@ $$\boxed{\ \Delta(X,\ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
 
 ![本研究のベイジアンネットワーク表現と相互情報量](img/bayes_network.png)
 
-*左：発熱量 $Q$ ・放熱 $h$ が温度場 $T$ を決め、 $T$ が変位 $u$ を決める。観測 $y$ はそこにノイズが乗ったもの。
-データ同化は**この矢印を逆にたどって未知数を絞り込む**操作にあたる。
-右：各観測がもたらす相互情報量。 $\Delta$ の順位と完全に一致する。*
+> 左：発熱量 $Q$ ・放熱 $h$ が温度場 $T$ を決め、 $T$ が変位 $u$ を決める。観測 $y$ はそこにノイズが乗ったもの。
+> データ同化は**この矢印を逆にたどって未知数を絞り込む**操作にあたる。
+> 右：各観測がもたらす相互情報量。 $\Delta$ の順位と完全に一致する。
 
 **なぜ一致するのか**。すべてがガウス分布なら、観測 $y$ を得たときの対象 $X$ の
 情報利得（相互情報量）は分散の比で書けます:
 
-$$I(X;y_{\mathrm{obs}})=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid y_{\mathrm{obs}})}
-=-\frac{1}{2}\ln\Bigl(1-\frac{\Delta(X,y)}{\mathrm{Var}(X)}\Bigr)$$
+$$I(X;y_{\mathrm{obs}})=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid y_{\mathrm{obs}})} =-\frac{1}{2}\ln\Bigl(1-\frac{\Delta(X,y)}{\mathrm{Var}(X)}\Bigr)$$
 
 $\Delta$ が大きいほど $I$ も大きい **単調な関係**なので、**同じスカラー対象・同じ事前分布なら観測の順位は変わりません**。ここでの $y$ はノイズを含まない予報なので、式の左辺は厳密には $I(X;y_{\rm obs})$ です。自然対数の式はnat単位で、bit表記には $\ln 2$ で割ります。
 実際に計算すると:
@@ -140,23 +138,20 @@ $$
 kは観測時刻番号です。温度センサならfは温度、sはK/W。変位センサならfは変位、sはµm/Wです。独立な観測誤差を $\epsilon_{i,k}\sim N(0,\sigma_{i,k}^2)$ とします。Qの事前分散を $v_Q>0$ とすれば、負の対数事後密度は定数を除いて、
 
 $$
-J(Q)=\frac{(Q-\mu_Q)^2}{2v_Q}
-+\frac12\sum_k
+J(Q)=\frac{(Q-\mu_Q)^2}{2v_Q} +\frac12\sum_k
 \frac{[y_{i,k}-f_i(t_k;Q_0)-s_{i,k}(Q-Q_0)]^2}{\sigma_{i,k}^2}.
 $$
 
 $\mu_Q$ は事前平均です。Qで2回微分すると、
 
 $$
-\frac{d^2J}{dQ^2}
-=\frac1{v_Q}+\underbrace{\sum_k\frac{s_{i,k}^2}{\sigma_{i,k}^2}}_{F_i}.
+\frac{d^2J}{dQ^2} =\frac1{v_Q}+\underbrace{\sum_k\frac{s_{i,k}^2}{\sigma_{i,k}^2}}_{F_i}.
 $$
 
 線形・ガウス問題の事後分散は、この曲率の逆数です。
 
 $$
-\mathrm{Var}(Q\mid\mathbf y_i)
-=\left(v_Q^{-1}+F_i\right)^{-1},
+\mathrm{Var}(Q\mid\mathbf y_i) =\left(v_Q^{-1}+F_i\right)^{-1},
 \qquad
 \boxed{i^*=\arg\max_i F_i}.
 $$
@@ -204,9 +199,7 @@ $$
 代表温度の変動を $\mathbf x$ 、その共分散をBとします。目的の2点間変位差を $X=\mathbf c^{\mathsf T}\mathbf x$ 、候補の観測予報を $y_i=\mathbf v_i^{\mathsf T}\mathbf x$ とすれば、
 
 $$
-\mathrm{Var}(X\mid y_{i,\mathrm{obs}})
-=\mathbf c^{\mathsf T}B\mathbf c
--\frac{(\mathbf c^{\mathsf T}B\mathbf v_i)^2}{\mathbf v_i^{\mathsf T}B\mathbf v_i+r_i}.
+\mathrm{Var}(X\mid y_{i,\mathrm{obs}}) =\mathbf c^{\mathsf T}B\mathbf c -\frac{(\mathbf c^{\mathsf T}B\mathbf v_i)^2}{\mathbf v_i^{\mathsf T}B\mathbf v_i+r_i}.
 $$
 
 $\mathbf c$ は評価する2点の変位応答の行の差、 $\mathbf v_i$ は観測位置の温度または変位の応答、 $r_i$ はその観測誤差分散です。**最適なのは、目的の変位差の分散減少Δが最大になる観測です。Wが大きい点とは限りません。** 候補同士の重複を考慮する複数観測の式は§4-6に示します。
@@ -247,9 +240,7 @@ B=\mathrm{diag}(\sigma_T^2,\ \sigma_T^2,\ 0)+\sigma_Q^2\,a\,a^{\mathsf T},\quad 
 
 $$B\begin{pmatrix}1\\0\\0\end{pmatrix}=\begin{pmatrix}1.36\\ 0.12\\ 1.2\end{pmatrix},\qquad
 B\begin{pmatrix}0\\1\\0\end{pmatrix}=\begin{pmatrix}0.12\\ 1.04\\ 0.4\end{pmatrix},\qquad
-B\begin{pmatrix}0.5\\0.2\\0\end{pmatrix}
-=\begin{pmatrix}0.5\cdot1.36+0.2\cdot0.12\\ 0.5\cdot0.12+0.2\cdot1.04\\ 0.5\cdot1.2+0.2\cdot0.4\end{pmatrix}
-=\begin{pmatrix}0.704\\ 0.268\\ 0.68\end{pmatrix}$$
+B\begin{pmatrix}0.5\\0.2\\0\end{pmatrix} =\begin{pmatrix}0.5\cdot1.36+0.2\cdot0.12\\ 0.5\cdot0.12+0.2\cdot1.04\\ 0.5\cdot1.2+0.2\cdot0.4\end{pmatrix} =\begin{pmatrix}0.704\\ 0.268\\ 0.68\end{pmatrix}$$
 
 $$\mathrm{Var}(y_1)+r=1.36+0.09=1.45,\qquad
 \mathrm{Var}(y_2)+r=1.04+0.09=1.13,$$
@@ -266,13 +257,13 @@ $$\Delta(Q,\ y_1)=\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{1.45}=\frac{1.2^2}{1.45}=
 
 $$\Delta(Q,\ u)=\frac{0.68^2}{0.4156}=1.113\ \gt\ 0.993$$
 
-→ **$Q$ には温度点1より変位の方が価値が高い**。
+→ ** $Q$ には温度点1より変位の方が価値が高い**。
 
 **例3：対象＝ $T_2$ を変位 $u$ で測る**（分子は $Bw$ の第2成分）
 
 $$\Delta(T_2,\ u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\ y_2)=\frac{1.04^2}{1.13}=0.957$$
 
-→ **$T_2$ には温度点2が最適**（変位は $w_2=0.2$ としか連動しない）。
+→ ** $T_2$ には温度点2が最適**（変位は $w_2=0.2$ としか連動しない）。
 
 ### 2-4. 全部並べると「★」が行ごとに動く
 
@@ -303,9 +294,9 @@ $$\Delta(T_2,\ u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\ y_2)=\frac{1.0
 
 ![変位観測が温度を直す仕組み](img/disp_to_temp_mechanism.png)
 
-*変位は複数点の温度誤差の**射影**（左・実線）を1つの数で読み、ハズレが共分散に比例して
-**逆流**する（左・破線）。誤差が「共通の型」で起きるとき、型と重み $w$ が揃う高W点は
-信号がノイズを超える（右）。詳しい導出は blog_002 §3-7。*
+> 変位は複数点の温度誤差の**射影**（左・実線）を1つの数で読み、ハズレが共分散に比例して
+> **逆流**する（左・破線）。誤差が「共通の型」で起きるとき、型と重み $w$ が揃う高W点は
+> 信号がノイズを超える（右）。詳しい導出は blog_002 §3-7。
 
 ---
 
@@ -357,8 +348,7 @@ $$
 
 $$
 L=\begin{pmatrix}-k&k\\k&-k\end{pmatrix},\qquad
-L\begin{pmatrix}T_0\\T_1\end{pmatrix}
-=\begin{pmatrix}k(T_1-T_0)\\k(T_0-T_1)\end{pmatrix}.
+L\begin{pmatrix}T_0\\T_1\end{pmatrix} =\begin{pmatrix}k(T_1-T_0)\\k(T_0-T_1)\end{pmatrix}.
 $$
 
 高温側から低温側へ流れる熱が、2点の和で打ち消し合います。全点をまとめると、
@@ -401,8 +391,7 @@ $$
 現行コードは $Q_0=15q_{\rm scale}$ Wなので、連鎖律より
 
 $$
-\frac{\partial\mathbf T}{\partial q_{\rm scale}}
-=15\frac{\partial\mathbf T}{\partial Q_0},\qquad
+\frac{\partial\mathbf T}{\partial q_{\rm scale}} =15\frac{\partial\mathbf T}{\partial Q_0},\qquad
 \mathbf S_Q=\frac1{15}\mathbf S_{q_{\rm scale}}.
 $$
 
@@ -414,8 +403,7 @@ q_scaleで微分した場合の駆動項は $15\mathbf b\chi(t)$ です。感度
 放熱項にはhが明示的に入り、温度Tもhに依存します。
 
 $$
-\frac{\partial}{\partial h}[-h(\mathbf T-T_\infty\mathbf1)]
-=-(\mathbf T-T_\infty\mathbf1)-h\mathbf S_h.
+\frac{\partial}{\partial h}[-h(\mathbf T-T_\infty\mathbf1)] =-(\mathbf T-T_\infty\mathbf1)-h\mathbf S_h.
 $$
 
 左の積のうち、hを微分した分が第1項、温度を微分した分が第2項です。Q₀を固定すればヒータ項のh微分は0なので、
@@ -580,8 +568,7 @@ $D$ にはFrontISTRで事前計算したモード変位応答を使います。�
 変位差 $d=u_{z,A}-u_{z,O}$ なら、
 
 $$
-\frac{\partial d}{\partial p}
-=\frac{\partial u_{z,A}}{\partial p}-\frac{\partial u_{z,O}}{\partial p}.
+\frac{\partial d}{\partial p} =\frac{\partial u_{z,A}}{\partial p}-\frac{\partial u_{z,O}}{\partial p}.
 $$
 
 AとOが同じだけ動けば差の感度は0です。したがって「大きく動く点」と「目的の変位差を識別できる点」は必ずしも同じではありません。
@@ -692,8 +679,8 @@ $Q,h$ で微分したもの）を計算すると:
 
 ![データ同化時間窓を変えたQ/h推定](img/qh_time_window.png)
 
-*$Q$ ：加熱期のみ0.57 W ≈ 全期間0.58 W、**冷却期のみだと4.23 W（7倍悪化）**＝ $Q$ は加熱期の観測が担う。
-$h$ ：冷却期を足すと7.6→5.3 mW/Kと相対改善（ただし温度応答＜ノイズで依然難）。*
+> $Q$ ：加熱期のみ0.57 W ≈ 全期間0.58 W、**冷却期のみだと4.23 W（7倍悪化）**＝ $Q$ は加熱期の観測が担う。
+> $h$ ：冷却期を足すと7.6→5.3 mW/Kと相対改善（ただし温度応答＜ノイズで依然難）。
 
 つまり最適観測は **どこで（空間）× 何を（種類）× いつ（時間）** の3軸で、どれも対象依存です。
 
@@ -743,7 +730,7 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004 §4-2
 ここで用語を整理します。本研究には**まったく別の2つの「感度」**が出てきます。
 混同すると結論を誤るので、はっきり分けます。
 
-| | **発熱感度**（基準A） | **熱感度 $W$**（基準B） |
+| | **発熱感度**（基準A） | **熱感度 $W$ **（基準B） |
 |---|---|---|
 | 定義 | $\partial T_i/\partial Q$ | $W=K_s^{-1}H_T$ から導く $\partial u/\partial T_i$ |
 | 何を表すか | 発熱が変わると**その点の温度**がどれだけ動くか | その点の温度が変わると**変形**がどれだけ動くか |
@@ -758,10 +745,10 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004 §4-2
 >
 > | 指標 | 温度RMSE との相関 |
 > |---|---|
-> | **発熱感度 $\partial T/\partial Q$** | **−0.835（最良）** |
+> | **発熱感度 $\partial T/\partial Q$ ** | **−0.835（最良）** |
 > | 熱感度 $W$ | **+0.405（高いほど悪い）** |
 >
-> となりました。**$W$ は「その点の温度を間違えると変位がどれだけずれるか」であって、
+> となりました。** $W$ は「その点の温度を間違えると変位がどれだけずれるか」であって、
 > 「その点を測ると何が分かるか」ではありません。**
 > $W$ が高い点＝よく動く点＝固定端から遠い「場の端」で、場全体を代表しないためです。
 >
@@ -771,8 +758,8 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004 §4-2
 
 ![2つの感度の使い分け](img/two_sensitivities.png)
 
-*左：温度センサを発熱感度で選ぶと相関 −0.835＝高いほど良い。
-中：同じ温度センサを $W$ で選ぶと +0.405＝高いほど悪い。右：使い分けのまとめ。*
+> 左：温度センサを発熱感度で選ぶと相関 −0.835＝高いほど良い。
+> 中：同じ温度センサを $W$ で選ぶと +0.405＝高いほど悪い。右：使い分けのまとめ。
 
 実際に5つの代表点で両方を計算すると、**順位がまったく違います**:
 
@@ -818,8 +805,8 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004 §4-2
 $$\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}$$
 
 で決まるからです。 $\partial u/\partial T_i$ が大きいことは
-「$T_i$ が $u$ を強く動かす」を意味しますが、**推定に効くかは
-「$T_i$ を測ると $u$ の不確かさがどれだけ減るか」**であって、同じではありません。
+「 $T_i$ が $u$ を強く動かす」を意味しますが、**推定に効くかは
+「 $T_i$ を測ると $u$ の不確かさがどれだけ減るか」**であって、同じではありません。
 実際、 $T_i$ 自身のばらつき $\mathrm{Var}(y)$ が大きければ分母で損をします。
 
 > **結論**：センサ選びは「**感度が高い点を選ぶ**」では決まりません。
@@ -835,8 +822,8 @@ $$\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}$$
 
 ![高W/低W変位点の比較（OI）](img/blog_oi_disp_selection.png)
 
-*同じ変位2点でも**低感度W点はほぼ効かず（2.43 K）、高W点は0.86 K**。
-§2の言葉では「対象＝変位・温度場」に対し $g=w^{\mathsf T}\varphi$ が大きい観測を選んだ、ということ。*
+> 同じ変位2点でも**低感度W点はほぼ効かず（2.43 K）、高W点は0.86 K**。
+> §2の言葉では「対象＝変位・温度場」に対し $g=w^{\mathsf T}\varphi$ が大きい観測を選んだ、ということ。
 
 さらに個別の変位で見ると、**温度センサだけでは「センサに近い側」しか合いません**:
 
@@ -886,7 +873,7 @@ $$\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}$$
 
 ![候補点と評価点の位置](img/sensor_pair_positions.png)
 
-*温度の候補点 P0〜P4 と、反りを評価する上面の A・O。赤は $W>0$ （温まると反りが増える）、青は $W<0$ の点。ヒータは P2 にある。*
+> 温度の候補点 P0〜P4 と、反りを評価する上面の A・O。赤は $W>0$ （温まると反りが増える）、青は $W<0$ の点。ヒータは P2 にある。
 
 #### ① 熱感度 $W$ の高い点に温度センサを1本置くと？
 
@@ -985,7 +972,7 @@ P2＋P4 はほとんど変わりませんが、**P2＋P0 は乱数しだいで�
 
 ![W と測った後に残る温度のずれ](img/sensor_pair_residual.png)
 
-*左：熱感度 $W$ 。P0・P2 は＋（A 側）、P1・P4 は−（O 側）。右：150 秒で1回データ同化した後の、推定温度のずれの大きさ（標準偏差）。*
+> 左：熱感度 $W$ 。P0・P2 は＋（A 側）、P1・P4 は−（O 側）。右：150 秒で1回データ同化した後の、推定温度のずれの大きさ（標準偏差）。
 
 | センサの置き方 | P0 | P1 | P2 | P3 | P4 | 反りのずれ |
 |---|---:|---:|---:|---:|---:|---:|

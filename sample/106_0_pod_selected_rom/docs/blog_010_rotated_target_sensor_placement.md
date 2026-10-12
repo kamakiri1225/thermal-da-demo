@@ -13,8 +13,7 @@
 回転は＋zから見て反時計回りです。回転行列を明示すると、
 
 $$
-\underbrace{\begin{bmatrix}x'\\y'\\z'\end{bmatrix}}_{3\times1}
-=\underbrace{\begin{bmatrix}0&-1&0\\1&0&0\\0&0&1\end{bmatrix}}_{3\times3}
+\underbrace{\begin{bmatrix}x'\\y'\\z'\end{bmatrix}}_{3\times1} =\underbrace{\begin{bmatrix}0&-1&0\\1&0&0\\0&0&1\end{bmatrix}}_{3\times3}
 \underbrace{\begin{bmatrix}x\\y\\z\end{bmatrix}}_{3\times1}.
 $$
 
@@ -58,8 +57,7 @@ $$
 です。代表5点温度から変位への重みを使うと、
 
 $$
-\underbrace{\delta d}_{1\times1}
-=\underbrace{\begin{bmatrix}w_0&w_1&w_2&w_3&w_4\end{bmatrix}}_{1\times5}
+\underbrace{\delta d}_{1\times1} =\underbrace{\begin{bmatrix}w_0&w_1&w_2&w_3&w_4\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix}}_{5\times1},
 \qquad w_j=h_{A_{\mathrm{new}},z,j}-h_{O_{\mathrm{new}},z,j}.
 $$
@@ -69,9 +67,7 @@ $$
 候補cの重みをh_c、現在残る温度誤差の共分散をPとすると、候補1本を使って補正したと仮定した後の共分散と、反りの標準偏差は、
 
 $$
-\underbrace{P_{+c}}_{5\times5}
-=\underbrace{P}_{5\times5}
--\frac{\underbrace{(P\mathbf h_c)(P\mathbf h_c)^{\mathsf T}}_{5\times5}}
+\underbrace{P_{+c}}_{5\times5} =\underbrace{P}_{5\times5} -\frac{\underbrace{(P\mathbf h_c)(P\mathbf h_c)^{\mathsf T}}_{5\times5}}
 {\underbrace{\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}_{1\times1}},
 \qquad
 \sigma_{+c}=\sqrt{\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\underbrace{P_{+c}}_{5\times5}\underbrace{\mathbf w}_{5\times1}}.
@@ -131,11 +127,9 @@ $$
 
 $$
 \underbrace{K_u^{\mathsf T}}_{15120\times15120}
-\underbrace{\boldsymbol\lambda_A}_{15120\times1}
-=\underbrace{\mathbf e_{A,z}}_{15120\times1},
+\underbrace{\boldsymbol\lambda_A}_{15120\times1} =\underbrace{\mathbf e_{A,z}}_{15120\times1},
 \qquad
-\underbrace{W_{A,z,:}}_{1\times5040}
-=\underbrace{\boldsymbol\lambda_A^{\mathsf T}}_{1\times15120}
+\underbrace{W_{A,z,:}}_{1\times5040} =\underbrace{\boldsymbol\lambda_A^{\mathsf T}}_{1\times15120}
 \underbrace{H_{\mathrm{th}}}_{15120\times5040}.
 $$
 
@@ -150,17 +144,13 @@ e_A,zは新Aのz自由度だけ1、ほかは0の選択ベクトルで、温度�
 状態はblog009と同じ7変数で、変位は独立した状態変数ではありません。
 
 $$
-\underbrace{\mathbf z}_{7\times1}
-=\begin{bmatrix}T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]\\q_{\mathrm{scale}}\\h_{\mathrm{ROM}}\end{bmatrix}
+\underbrace{\mathbf z}_{7\times1} =\begin{bmatrix}T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]\\q_{\mathrm{scale}}\\h_{\mathrm{ROM}}\end{bmatrix}
 $$
 
 温度2点＋選定変位2点の場合、観測予報は今回はUyです。
 
 $$
-\underbrace{\mathbf y^{f,(m)}}_{4\times1}
-=\begin{bmatrix}\theta_1^{f,(m)}\\\theta_2^{f,(m)}\\U_y^{f,(m)}(S1)\\U_y^{f,(m)}(S2)\end{bmatrix}
-=\underbrace{\bar{\mathbf y}}_{4\times1}
-+\underbrace{\begin{bmatrix}
+\underbrace{\mathbf y^{f,(m)}}_{4\times1} =\begin{bmatrix}\theta_1^{f,(m)}\\\theta_2^{f,(m)}\\U_y^{f,(m)}(S1)\\U_y^{f,(m)}(S2)\end{bmatrix} =\underbrace{\bar{\mathbf y}}_{4\times1} +\underbrace{\begin{bmatrix}
 g_{T1,0}&g_{T1,1}&g_{T1,2}&g_{T1,3}&g_{T1,4}\\
 g_{T2,0}&g_{T2,1}&g_{T2,2}&g_{T2,3}&g_{T2,4}\\
 h_{S1y,0}&h_{S1y,1}&h_{S1y,2}&h_{S1y,3}&h_{S1y,4}\\
@@ -172,12 +162,9 @@ $$
 θは選定した温度センサの予報、gはGの該当行、h_SiyはUyへの変位復元の重み、バーはPOD平均場とその応答です。60メンバーの状態・観測予報からCzyとCyyを計算し、
 
 $$
-\underbrace{K}_{7\times4}
-=\underbrace{C_{zy}}_{7\times4}\underbrace{(C_{yy}+R)^{-1}}_{4\times4},
+\underbrace{K}_{7\times4} =\underbrace{C_{zy}}_{7\times4}\underbrace{(C_{yy}+R)^{-1}}_{4\times4},
 \qquad
-\underbrace{\mathbf z^{a,(m)}}_{7\times1}
-=\underbrace{\widetilde{\mathbf z}^{f,(m)}}_{7\times1}
-+\underbrace{K}_{7\times4}\underbrace{(\mathbf y^{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\widetilde{\mathbf y}^{f,(m)})}_{4\times1}
+\underbrace{\mathbf z^{a,(m)}}_{7\times1} =\underbrace{\widetilde{\mathbf z}^{f,(m)}}_{7\times1} +\underbrace{K}_{7\times4}\underbrace{(\mathbf y^{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\widetilde{\mathbf y}^{f,(m)})}_{4\times1}
 $$
 
 と補正します。チルダは1.02倍のインフレーション後、aは補正後です。観測値はOpenFOAM・FrontISTRの正解にノイズを加えた4成分、εは更新時のメンバー別観測摂動です。実装は逆行列を作らず `np.linalg.solve()` を使います。
@@ -189,11 +176,9 @@ $$
 Kの温度5行をK_Tとすると、
 
 $$
-\underbrace{\Delta_{\mathrm{corr}}\mathbf T_P}_{5\times1}
-=\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1},
+\underbrace{\Delta_{\mathrm{corr}}\mathbf T_P}_{5\times1} =\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1},
 \qquad
-\underbrace{\Delta_{\mathrm{corr}}d}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1}.
+\underbrace{\Delta_{\mathrm{corr}}d}_{1\times1} =\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1}.
 $$
 
 rは観測＋メンバー別摂動−予報の4成分です。**Uyの観測差→5点温度の補正→新A・OのUzを再計算**という経路です。UyがUzを物理的に押し動かすという意味ではありません。
@@ -273,8 +258,7 @@ $$
 この4点の温度はROMで独立に時間積分していません。EnKFで補正した代表5点温度から、gappy-PODの復元行列Gを使って計算しています。検証セルcの温度は、
 
 $$
-\widehat T[c]{}(t)=\bar T[c]
-+\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
+\widehat T[c]{}(t)=\bar T[c] +\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 \widehat T[P0]{}(t)-\bar T[P0]\\
 \widehat T[P1]{}(t)-\bar T[P1]\\

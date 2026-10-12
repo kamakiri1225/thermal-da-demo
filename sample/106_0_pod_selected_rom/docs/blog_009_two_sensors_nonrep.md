@@ -68,8 +68,7 @@ $B$ は5×5行列です。対角は各代表点温度の分散、非対角は2�
 4,000ケースの時間発展は、各ケースについて
 
 $$
-\underbrace{\mathbf T_{P,k}^{(m)}}_{5\times1}
-=\mathcal M\left(\underbrace{\mathbf T_{P,k-1}^{(m)}}_{5\times1},\underbrace{q^{(m)}}_{1\times1},\underbrace{h^{(m)}}_{1\times1}\right),
+\underbrace{\mathbf T_{P,k}^{(m)}}_{5\times1} =\mathcal M\left(\underbrace{\mathbf T_{P,k-1}^{(m)}}_{5\times1},\underbrace{q^{(m)}}_{1\times1},\underbrace{h^{(m)}}_{1\times1}\right),
 \quad m=1,\ldots,4000
 $$
 
@@ -80,9 +79,7 @@ $$
 $$
 \underbrace{\mathbf z_k^{f,(m)}}_{7\times1}
 \ \longrightarrow\ 
-\underbrace{\mathbf z_k^{a,(m)}}_{7\times1}
-=\underbrace{\widetilde{\mathbf z}_k^{f,(m)}}_{7\times1}
-+\underbrace{K_k}_{7\times n_y}
+\underbrace{\mathbf z_k^{a,(m)}}_{7\times1} =\underbrace{\widetilde{\mathbf z}_k^{f,(m)}}_{7\times1} +\underbrace{K_k}_{7\times n_y}
 \underbrace{\left(\mathbf y_k^{\mathrm{obs}}+\boldsymbol\varepsilon_k^{(m)}-\widetilde{\mathbf y}_k^{f,(m)}\right)}_{n_y\times1}
 $$
 
@@ -98,8 +95,7 @@ $$
 **① OpenFOAMの温度場を列に並べ、セルごとの時間平均を引く。** セル数N=20,696、時刻数Nt=121（0〜600秒、5秒ごと）です。
 
 $$
-\underbrace{X}_{N\times N_t}
-=\begin{bmatrix}
+\underbrace{X}_{N\times N_t} =\begin{bmatrix}
 T_1(0)&T_1(5)&\cdots&T_1(600)\\
 T_2(0)&T_2(5)&\cdots&T_2(600)\\
 \vdots&\vdots&\ddots&\vdots\\
@@ -109,15 +105,13 @@ T_N(0)&T_N(5)&\cdots&T_N(600)
 $$
 
 $$
-\underbrace{X_c}_{N\times N_t}
-=X-\underbrace{\bar{\mathbf T}}_{N\times1}\underbrace{\mathbf1^{\mathsf T}}_{1\times N_t}
+\underbrace{X_c}_{N\times N_t} =X-\underbrace{\bar{\mathbf T}}_{N\times1}\underbrace{\mathbf1^{\mathsf T}}_{1\times N_t}
 $$
 
 **② SVDで上位5本の空間モードを取り出す。**
 
 $$
-\underbrace{X_c}_{20696\times121}
-=\underbrace{U}_{20696\times121}
+\underbrace{X_c}_{20696\times121} =\underbrace{U}_{20696\times121}
 \underbrace{\Sigma}_{121\times121}
 \underbrace{V^{\mathsf T}}_{121\times121},
 \qquad
@@ -128,8 +122,7 @@ $$
 
 $$
 \underbrace{\mathbf T_{\mathrm{cell}}}_{20696\times1}
-\approx\underbrace{\bar{\mathbf T}}_{20696\times1}
-+\underbrace{\Phi}_{20696\times5}\underbrace{\mathbf a_{\mathrm{POD}}}_{5\times1}
+\approx\underbrace{\bar{\mathbf T}}_{20696\times1} +\underbrace{\Phi}_{20696\times5}\underbrace{\mathbf a_{\mathrm{POD}}}_{5\times1}
 $$
 
 と温度分布を表します。これは温度分布の表現であり、5点熱ROMの時間積分式そのものではありません。
@@ -139,8 +132,7 @@ $$
 **④ 選んだ代表5点の温度から、5モードの係数を逆算する。** $\Phi$ のP0〜P4の行を抜き出すと、
 
 $$
-\underbrace{\Phi_P}_{5\times5}
-=\begin{bmatrix}
+\underbrace{\Phi_P}_{5\times5} =\begin{bmatrix}
 \phi_1[P0]&\phi_2[P0]&\phi_3[P0]&\phi_4[P0]&\phi_5[P0]\\
 \phi_1[P1]&\phi_2[P1]&\phi_3[P1]&\phi_4[P1]&\phi_5[P1]\\
 \phi_1[P2]&\phi_2[P2]&\phi_3[P2]&\phi_4[P2]&\phi_5[P2]\\
@@ -161,8 +153,7 @@ $$
 となります。この5本の方程式を解くため、コードは擬似逆行列を使います。
 
 $$
-\underbrace{\mathbf a_{\mathrm{POD}}}_{5\times1}
-=\underbrace{\Phi_P^+}_{5\times5}
+\underbrace{\mathbf a_{\mathrm{POD}}}_{5\times1} =\underbrace{\Phi_P^+}_{5\times5}
 \underbrace{(\mathbf T_P-\bar{\mathbf T}_P)}_{5\times1}
 $$
 
@@ -172,8 +163,7 @@ $$
 
 $$
 \underbrace{\mathbf T_{\mathrm{cell}}}_{20696\times1}
-\approx\underbrace{\bar{\mathbf T}}_{20696\times1}
-+\underbrace{\Phi}_{20696\times5}
+\approx\underbrace{\bar{\mathbf T}}_{20696\times1} +\underbrace{\Phi}_{20696\times5}
 \underbrace{\Phi_P^+}_{5\times5}
 \underbrace{(\mathbf T_P-\bar{\mathbf T}_P)}_{5\times1}
 $$
@@ -183,10 +173,8 @@ $$
 $$
 \begin{aligned}
 T[c]\approx\bar T[c]
-&+G_{c,0}\big(T[P0]-\bar T[P0]\big)
-+G_{c,1}\big(T[P1]-\bar T[P1]\big)\\
-&+G_{c,2}\big(T[P2]-\bar T[P2]\big)
-+G_{c,3}\big(T[P3]-\bar T[P3]\big)\\
+&+G_{c,0}\big(T[P0]-\bar T[P0]\big) +G_{c,1}\big(T[P1]-\bar T[P1]\big)\\
+&+G_{c,2}\big(T[P2]-\bar T[P2]\big) +G_{c,3}\big(T[P3]-\bar T[P3]\big)\\
 &+G_{c,4}\big(T[P4]-\bar T[P4]\big).
 \end{aligned}
 $$
@@ -211,8 +199,7 @@ $$
 $$
 \delta y_c=
 \begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}
-\begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix}
-=\mathbf h_c^{\mathsf T}\delta\mathbf T_P
+\begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix} =\mathbf h_c^{\mathsf T}\delta\mathbf T_P
 $$
 
 です。 $h_{c,j}$ は「代表点Pjの温度が1 K変わると、そのセンサ値がいくら変わるか」です。温度計ならgappy-PODの復元重み、変位計ならgappy-POD→IDW→FrontISTRの熱弾性応答を合わせた重みです。放熱パラメータ $h_{\mathrm{ROM}}$ とは別の記号です。
@@ -230,16 +217,14 @@ $$
 **この重みを、実際のコードでどう作るか。** POD基底を $\Phi$ 、代表5点の行だけを取り出した行列を $\Phi_P$ とします。PODの時間平均温度場を $\bar{\mathbf T}$ とすると、全セルの温度は
 
 $$
-\mathbf T_{\mathrm{cell}}=\bar{\mathbf T}
-+\underbrace{\Phi\Phi_P^{+}}_{G}
+\mathbf T_{\mathrm{cell}}=\bar{\mathbf T} +\underbrace{\Phi\Phi_P^{+}}_{G}
 (\mathbf T_P-\bar{\mathbf T}_P)
 $$
 
 で復元します。上付き $+$ は擬似逆行列です。コードの `G = U @ UPp` に対応します。セルcに置く温度計の重みは、**Gのc行**です。
 
 $$
-\mathbf h_c^{\mathsf T}=G_{c,:}
-=\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}
+\mathbf h_c^{\mathsf T}=G_{c,:} =\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}
 $$
 
 変位計の場合は、IDWの温度写像行列 $M$ と、FrontISTRの温度→変位応答 $W$ を使うと、PODモードに対する変位応答は $D=WM\Phi$ です。プログラムではW全体を組み立てず、**平均温度場と5モードをFrontISTRに与えた6回の計算**から、平均変位とDを作っています。
@@ -272,8 +257,7 @@ $$
 **① 測る前の温度誤差を書く。** 推定温度を $\hat T_P$ 、未知の正しい温度を $\mathbf T_P$ とし、誤差を
 
 $$
-\mathbf e=\mathbf T_P-\widehat{\mathbf T}_P
-=\begin{bmatrix}e_0\\e_1\\e_2\\e_3\\e_4\end{bmatrix},
+\mathbf e=\mathbf T_P-\widehat{\mathbf T}_P =\begin{bmatrix}e_0\\e_1\\e_2\\e_3\\e_4\end{bmatrix},
 \qquad P_{ij}=\mathbb E[e_i e_j]
 $$
 
@@ -282,17 +266,13 @@ $$
 **② センサの観測値から予報値を引く。** ここで求めるのは、候補センサcについての **「観測値 − 予報値」** です。これを $\Delta y_c$ と書きます。温度計なら単位はK、変位計ならµmです。
 
 $$
-\underbrace{\Delta y_c}_{1\times1}
-=\underbrace{y_c^{\mathrm{obs}}}_{1\times1}
--\underbrace{\widehat y_c}_{1\times1}
+\underbrace{\Delta y_c}_{1\times1} =\underbrace{y_c^{\mathrm{obs}}}_{1\times1} -\underbrace{\widehat y_c}_{1\times1}
 $$
 
 **なぜこの差を5点温度の誤差で書けるのか、順に代入します。** §3-1で使った「代表5点の温度に重みを掛けてセンサ値を計算する式」は、次の形です。
 
 $$
-\underbrace{y_c(\mathbf T_P)}_{1\times1}
-=\underbrace{\bar y_c}_{1\times1}
-+\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{\mathbf h_c^{\mathsf T}:\ 1\times5}
+\underbrace{y_c(\mathbf T_P)}_{1\times1} =\underbrace{\bar y_c}_{1\times1} +\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{\mathbf h_c^{\mathsf T}:\ 1\times5}
 \underbrace{\begin{bmatrix}
 T[P0]-\bar T[P0]\\T[P1]-\bar T[P1]\\T[P2]-\bar T[P2]\\T[P3]-\bar T[P3]\\T[P4]-\bar T[P4]
 \end{bmatrix}}_{5\times1}
@@ -303,13 +283,11 @@ $\bar y_c$ はPODの平均温度場に対応するセンサ値、 $\bar T[Pj]$ �
 **この同じ式へ、正しい温度と推定温度をそれぞれ入れます。** この導出では、正しいセンサ値も同じ復元式で表せると仮定し、観測にだけノイズ $\varepsilon_c$ が加わるとします。
 
 $$
-y_c^{\mathrm{obs}}
-=\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf T}_P)+\varepsilon_c
+y_c^{\mathrm{obs}} =\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf T}_P)+\varepsilon_c
 $$
 
 $$
-\widehat y_c
-=\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf T}_P-\bar{\mathbf T}_P)
+\widehat y_c =\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf T}_P-\bar{\mathbf T}_P)
 $$
 
 両式とも、重みは1×5、括弧内は5×1、結果は1×1です。上の式から下の式を引くと、共通の平均場の項が消えます。
@@ -318,8 +296,7 @@ $$
 \begin{aligned}
 \Delta y_c
 &=y_c^{\mathrm{obs}}-\widehat y_c\\
-&=\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf T}_P)+\varepsilon_c
--\left\{\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf T}_P-\bar{\mathbf T}_P)\right\}\\
+&=\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf T}_P)+\varepsilon_c -\left\{\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf T}_P-\bar{\mathbf T}_P)\right\}\\
 &=\mathbf h_c^{\mathsf T}(\mathbf T_P-\widehat{\mathbf T}_P)+\varepsilon_c.
 \end{aligned}
 $$
@@ -328,12 +305,10 @@ $$
 
 $$
 \boxed{
-\underbrace{\Delta y_c}_{1\times1}
-=\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{1\times5}
+\underbrace{\Delta y_c}_{1\times1} =\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 T[P0]-\widehat T[P0]\\T[P1]-\widehat T[P1]\\T[P2]-\widehat T[P2]\\T[P3]-\widehat T[P3]\\T[P4]-\widehat T[P4]
-\end{bmatrix}}_{\mathbf e:\ 5\times1}
-+\underbrace{\varepsilon_c}_{1\times1}
+\end{bmatrix}}_{\mathbf e:\ 5\times1} +\underbrace{\varepsilon_c}_{1\times1}
 }
 $$
 
@@ -358,8 +333,7 @@ $$
 と置きます。 $a_j$ は「センサが1単位ずれていたら、Pjの推定温度を何K直すか」です。補正後に残る誤差は、
 
 $$
-e_{j,+c}=T[Pj]-\widehat T_{+c}[Pj]
-=e_j-a_j\Delta y_c
+e_{j,+c}=T[Pj]-\widehat T_{+c}[Pj] =e_j-a_j\Delta y_c
 $$
 
 となります。**これをできるだけ小さくする $a_j$ を求めます。**
@@ -395,10 +369,7 @@ $$
 $a_j$ は、平均を取る間は固定した係数です。したがって、
 
 $$
-\mathbb E[e_{j,+c}^2]
-=\underbrace{\mathbb E[e_j^2]}_{(1)}
--2a_j\underbrace{\mathbb E[e_j\Delta y_c]}_{(2)}
-+a_j^2\underbrace{\mathbb E[(\Delta y_c)^2]}_{(3)}
+\mathbb E[e_{j,+c}^2] =\underbrace{\mathbb E[e_j^2]}_{(1)} -2a_j\underbrace{\mathbb E[e_j\Delta y_c]}_{(2)} +a_j^2\underbrace{\mathbb E[(\Delta y_c)^2]}_{(3)}
 $$
 
 （(1) 補正前の誤差の二乗平均、(2) 温度誤差とセンサのずれの積の平均、(3) センサのずれの二乗平均。）
@@ -417,8 +388,7 @@ $$
 
 $$
 \begin{aligned}
-e_j\Delta y_c
-={}&h_{c,0}e_je_0+h_{c,1}e_je_1+h_{c,2}e_je_2\\
+e_j\Delta y_c ={}&h_{c,0}e_je_0+h_{c,1}e_je_1+h_{c,2}e_je_2\\
 &+h_{c,3}e_je_3+h_{c,4}e_je_4+e_j\varepsilon_c.
 \end{aligned}
 $$
@@ -426,22 +396,19 @@ $$
 次に平均します。各重み $h_{c,i}$ は固定値なので平均の外に出せます。 $\mathbb E[e_je_i]=P_{ji}$ であり、ノイズは温度誤差と独立・平均ゼロなので、
 
 $$
-\mathbb E[e_j\varepsilon_c]
-=\mathbb E[e_j]\mathbb E[\varepsilon_c]=0
+\mathbb E[e_j\varepsilon_c] =\mathbb E[e_j]\mathbb E[\varepsilon_c]=0
 $$
 
 です。よって、
 
 $$
-\mathbb E[e_j\Delta y_c]
-=P_{j0}h_{c,0}+P_{j1}h_{c,1}+P_{j2}h_{c,2}+P_{j3}h_{c,3}+P_{j4}h_{c,4}
+\mathbb E[e_j\Delta y_c] =P_{j0}h_{c,0}+P_{j1}h_{c,1}+P_{j2}h_{c,2}+P_{j3}h_{c,3}+P_{j4}h_{c,4}
 $$
 
 となります。**この長い計算結果を、以降は $v_j$ と短く書きます。** 行列では、
 
 $$
-\underbrace{v_j}_{1\times1}
-=\underbrace{\begin{bmatrix}P_{j0}&P_{j1}&P_{j2}&P_{j3}&P_{j4}\end{bmatrix}}_{1\times5}
+\underbrace{v_j}_{1\times1} =\underbrace{\begin{bmatrix}P_{j0}&P_{j1}&P_{j2}&P_{j3}&P_{j4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}h_{c,0}\\h_{c,1}\\h_{c,2}\\h_{c,3}\\h_{c,4}\end{bmatrix}}_{5\times1}
 $$
 
@@ -452,24 +419,19 @@ $$
 同じ $\Delta y_c$ の式を二乗します。 $\sum_i h_{c,i}e_i$ は上の5項を足したものです。
 
 $$
-(\Delta y_c)^2
-=\left(\sum_{i=0}^{4}h_{c,i}e_i\right)^2
-+2\left(\sum_{i=0}^{4}h_{c,i}e_i\right)\varepsilon_c
-+\varepsilon_c^2
+(\Delta y_c)^2 =\left(\sum_{i=0}^{4}h_{c,i}e_i\right)^2 +2\left(\sum_{i=0}^{4}h_{c,i}e_i\right)\varepsilon_c +\varepsilon_c^2
 $$
 
 平均すると、中央の項は独立性とノイズの平均ゼロから消え、最後の項は観測ノイズの分散 $r_c$ になります。
 
 $$
-\mathbb E[(\Delta y_c)^2]
-=\sum_{i=0}^{4}\sum_{\ell=0}^{4}h_{c,i}\underbrace{\mathbb E[e_i e_\ell]}_{P_{i\ell}}h_{c,\ell}+r_c
+\mathbb E[(\Delta y_c)^2] =\sum_{i=0}^{4}\sum_{\ell=0}^{4}h_{c,i}\underbrace{\mathbb E[e_i e_\ell]}_{P_{i\ell}}h_{c,\ell}+r_c
 $$
 
 **この計算結果を $s_c$ と短く書きます。** 行列では、
 
 $$
-\underbrace{s_c}_{1\times1}
-=\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{1\times5}
+\underbrace{s_c}_{1\times1} =\underbrace{\begin{bmatrix}h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 P_{00}&P_{01}&P_{02}&P_{03}&P_{04}\\
 P_{10}&P_{11}&P_{12}&P_{13}&P_{14}\\
@@ -477,8 +439,7 @@ P_{20}&P_{21}&P_{22}&P_{23}&P_{24}\\
 P_{30}&P_{31}&P_{32}&P_{33}&P_{34}\\
 P_{40}&P_{41}&P_{42}&P_{43}&P_{44}
 \end{bmatrix}}_{5\times5}
-\underbrace{\begin{bmatrix}h_{c,0}\\h_{c,1}\\h_{c,2}\\h_{c,3}\\h_{c,4}\end{bmatrix}}_{5\times1}
-+\underbrace{r_c}_{1\times1}
+\underbrace{\begin{bmatrix}h_{c,0}\\h_{c,1}\\h_{c,2}\\h_{c,3}\\h_{c,4}\end{bmatrix}}_{5\times1} +\underbrace{r_c}_{1\times1}
 $$
 
 です。 $s_c$ は、**温度の不確かさによるセンサ予報のばらつきに、観測ノイズの分散を加えたもの**です。温度計ならK²、変位計ならµm²です。
@@ -497,8 +458,7 @@ $$
 
 $$
 \frac{\partial}{\partial a_j}
-\big(P_{jj}-2a_jv_j+a_j^2s_c\big)
-=-2v_j+2a_js_c=0
+\big(P_{jj}-2a_jv_j+a_j^2s_c\big) =-2v_j+2a_js_c=0
 $$
 
 $$
@@ -508,8 +468,7 @@ $$
 これを温度の補正式へ戻すと、
 
 $$
-\boxed{\widehat T_{+c}[Pj]
-=\widehat T[Pj]+\frac{v_j}{s_c}\big(y_c^{\mathrm{obs}}-\widehat y_c\big)}
+\boxed{\widehat T_{+c}[Pj] =\widehat T[Pj]+\frac{v_j}{s_c}\big(y_c^{\mathrm{obs}}-\widehat y_c\big)}
 $$
 
 です。**センサと強く一緒に変わる温度には大きく補正を掛け、関係が弱い温度には小さく掛けます。** ノイズが大きいと $s_c$ が大きくなり、補正を控えます。
@@ -522,8 +481,7 @@ P_{+c,ij}
 &=\mathbb E[e_{i,+c}e_{j,+c}]\\
 &=\mathbb E[(e_i-a_i\Delta y_c)(e_j-a_j\Delta y_c)]\\
 &=P_{ij}-a_jv_i-a_iv_j+a_ia_js_c\\
-&=P_{ij}-\frac{v_iv_j}{s_c}-\frac{v_iv_j}{s_c}
-+\frac{v_iv_j}{s_c}\\
+&=P_{ij}-\frac{v_iv_j}{s_c}-\frac{v_iv_j}{s_c} +\frac{v_iv_j}{s_c}\\
 &=\boxed{P_{ij}-\frac{v_iv_j}{s_c}}.
 \end{aligned}
 $$
@@ -544,15 +502,11 @@ $$
 **⑦ 残る温度誤差を反りに換算する。** $\delta d=\mathbf w^{\mathsf T}\mathbf e_{+c}$ なので、
 
 $$
-\sigma_{+c}^2
-=\sum_{i=0}^{4}\sum_{j=0}^{4}w_iP_{+c,ij}w_j
-=\mathbf w^{\mathsf T}P_{+c}\mathbf w
+\sigma_{+c}^2 =\sum_{i=0}^{4}\sum_{j=0}^{4}w_iP_{+c,ij}w_j =\mathbf w^{\mathsf T}P_{+c}\mathbf w
 $$
 
 $$
-\boxed{\sigma_{+c}^2
-=\mathbf w^{\mathsf T}P\mathbf w
--\frac{(\mathbf w^{\mathsf T}P\mathbf h_c)^2}
+\boxed{\sigma_{+c}^2 =\mathbf w^{\mathsf T}P\mathbf w -\frac{(\mathbf w^{\mathsf T}P\mathbf h_c)^2}
 {\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}}
 $$
 
@@ -582,8 +536,7 @@ $$
 です。 $T_F[n]$ はFEM節点nの温度、 $U_z(A)$ はAの上下変位です。「節点nの温度を1 K変えると、Aの上下変位がどれだけ変わるか」を表します。反り $d=U_z(A)-U_z(O)$ については、
 
 $$
-\underbrace{\delta d}_{1\times1}
-=\underbrace{\left(W_{A,z,:}-W_{O,z,:}\right)}_{1\times N_F}
+\underbrace{\delta d}_{1\times1} =\underbrace{\left(W_{A,z,:}-W_{O,z,:}\right)}_{1\times N_F}
 \underbrace{\delta\mathbf T_F}_{N_F\times1},
 \qquad N_F=5040
 $$
@@ -599,17 +552,14 @@ $$
 候補cを測る前と後の反りの分散は、
 
 $$
-\underbrace{V_{\mathrm{before}}}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
+\underbrace{V_{\mathrm{before}}}_{1\times1} =\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
 \underbrace{P}_{5\times5}
 \underbrace{\mathbf w}_{5\times1}
 $$
 
 $$
 \boxed{
-\underbrace{V_{\mathrm{after},c}}_{1\times1}
-=V_{\mathrm{before}}
--\frac{\left(\mathbf w^{\mathsf T}P\mathbf h_c\right)^2}
+\underbrace{V_{\mathrm{after},c}}_{1\times1} =V_{\mathrm{before}} -\frac{\left(\mathbf w^{\mathsf T}P\mathbf h_c\right)^2}
 {\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}
 }
 $$
@@ -670,16 +620,14 @@ $$
 候補は、ROMの代表5点を除くOpenFOAMの20,691セルです。候補セルの番号をcとします。既に作った温度復元行列は、
 
 $$
-\underbrace{G}_{20696\times5}
-=\underbrace{\Phi}_{20696\times5}
+\underbrace{G}_{20696\times5} =\underbrace{\Phi}_{20696\times5}
 \underbrace{\Phi_P^+}_{5\times5}
 $$
 
 です。 $\Phi$ は全セルのPOD基底、 $\Phi_P$ は代表5点の行を抜き出した行列です。**候補セルcを指定したら、Gのc行を取り出します。**
 
 $$
-\underbrace{\mathbf g_c^{\mathsf T}}_{1\times5}
-=\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}
+\underbrace{\mathbf g_c^{\mathsf T}}_{1\times5} =\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}
 $$
 
 本章では温度センサと分かるようにgと書きます。§3で一般のセンサに使った $\mathbf h_c$ は、温度センサの場合この $\mathbf g_c$ です。 $G_{c,j}$ は「代表点Pjの温度が1 K変わると、復元した候補セルcの温度が何K変わるか」です。
@@ -687,9 +635,7 @@ $$
 候補セルの温度予報は、
 
 $$
-\underbrace{\widehat T[c]}_{1\times1}
-=\bar T[c]
-+\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
+\underbrace{\widehat T[c]}_{1\times1} =\bar T[c] +\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 \widehat T[P0]-\bar T[P0]\\
 \widehat T[P1]-\bar T[P1]\\
@@ -706,8 +652,7 @@ $$
 §3-2と同じく、 $e_j=T[Pj]-\widehat T[Pj]$ は、正しい温度と補正前の推定温度との差です。正しい温度を上の復元式で表せる線形モデル内では、観測値と予報値の差は、
 
 $$
-\underbrace{T^{\mathrm{obs}}[c]-\widehat T[c]}_{\Delta y_c:\ 1\times1}
-=
+\underbrace{T^{\mathrm{obs}}[c]-\widehat T[c]}_{\Delta y_c:\ 1\times1} =
 \underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 T[P0]-\widehat T[P0]\\
@@ -715,8 +660,7 @@ T[P1]-\widehat T[P1]\\
 T[P2]-\widehat T[P2]\\
 T[P3]-\widehat T[P3]\\
 T[P4]-\widehat T[P4]
-\end{bmatrix}}_{\mathbf e:\ 5\times1}
-+\underbrace{\varepsilon_{T,c}}_{1\times1}
+\end{bmatrix}}_{\mathbf e:\ 5\times1} +\underbrace{\varepsilon_{T,c}}_{1\times1}
 $$
 
 です。ノイズ $\varepsilon_{T,c}$ の平均はゼロ、分散は $\sigma_T^2$ 、今回は $\sigma_T=0.3$ Kです。
@@ -724,9 +668,7 @@ $$
 **1本目の選定前にはまだ観測を使っていないので、温度誤差の共分散をBと置きます。** Bは§2で4,000ケースから計算した5×5行列です。§3-2で導いた補正係数をこの候補に使うと、代表5点の補正は、
 
 $$
-\underbrace{\widehat{\mathbf T}_{P,+c}}_{5\times1}
-=\underbrace{\widehat{\mathbf T}_P}_{5\times1}
-+\underbrace{\frac{B\mathbf g_c}{\mathbf g_c^{\mathsf T}B\mathbf g_c+\sigma_T^2}}_{5\times1}
+\underbrace{\widehat{\mathbf T}_{P,+c}}_{5\times1} =\underbrace{\widehat{\mathbf T}_P}_{5\times1} +\underbrace{\frac{B\mathbf g_c}{\mathbf g_c^{\mathsf T}B\mathbf g_c+\sigma_T^2}}_{5\times1}
 \underbrace{\big(T^{\mathrm{obs}}[c]-\widehat T[c]\big)}_{1\times1}
 $$
 
@@ -739,9 +681,7 @@ $$
 候補cを使って補正した後に残る温度誤差の共分散は、
 
 $$
-\underbrace{P_{+c}}_{5\times5}
-=\underbrace{B}_{5\times5}
--\frac{
+\underbrace{P_{+c}}_{5\times5} =\underbrace{B}_{5\times5} -\frac{
 \underbrace{(B\mathbf g_c)}_{5\times1}
 \underbrace{(B\mathbf g_c)^{\mathsf T}}_{1\times5}
 }{\underbrace{\mathbf g_c^{\mathsf T}B\mathbf g_c+\sigma_T^2}_{1\times1}}
@@ -752,16 +692,14 @@ $$
 次に、温度誤差を対象の反りの誤差へ換算します。代表5点から反りへの固定した重みを、
 
 $$
-\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
-=\begin{bmatrix}w_0&w_1&w_2&w_3&w_4\end{bmatrix},
+\underbrace{\mathbf w^{\mathsf T}}_{1\times5} =\begin{bmatrix}w_0&w_1&w_2&w_3&w_4\end{bmatrix},
 \qquad w_j=h_{A,z,j}-h_{O,z,j}
 $$
 
 とします。 $h_{A,z,j},h_{O,z,j}$ は、温度復元・IDW・FrontISTR応答を通じて求めた、代表点Pjの温度からUz(A)・Uz(O)への係数です。反り誤差は $e_d=w_0e_0+\cdots+w_4e_4$ なので、候補cを使った補正後に残る反りの分散は、
 
 $$
-\underbrace{\sigma_{+c}^2(t)}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
+\underbrace{\sigma_{+c}^2(t)}_{1\times1} =\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
 \underbrace{P_{+c}(t)}_{5\times5}
 \underbrace{\mathbf w}_{5\times1}
 $$
@@ -781,9 +719,7 @@ $$
 T1が決まったら、その重み $\mathbf g_{T1}$ を使い、10時刻それぞれで次の共分散を計算します。
 
 $$
-\underbrace{P^{(T1)}}_{5\times5}
-=\underbrace{B}_{5\times5}
--\frac{\underbrace{(B\mathbf g_{T1})(B\mathbf g_{T1})^{\mathsf T}}_{5\times5}}
+\underbrace{P^{(T1)}}_{5\times5} =\underbrace{B}_{5\times5} -\frac{\underbrace{(B\mathbf g_{T1})(B\mathbf g_{T1})^{\mathsf T}}_{5\times5}}
 {\underbrace{\mathbf g_{T1}^{\mathsf T}B\mathbf g_{T1}+\sigma_T^2}_{1\times1}}
 $$
 
@@ -792,9 +728,7 @@ $$
 次の候補cを追加した場合は、BではなくこのPから始めます。
 
 $$
-\underbrace{P^{(T1,+c)}}_{5\times5}
-=\underbrace{P^{(T1)}}_{5\times5}
--\frac{
+\underbrace{P^{(T1,+c)}}_{5\times5} =\underbrace{P^{(T1)}}_{5\times5} -\frac{
 \underbrace{(P^{(T1)}\mathbf g_c)(P^{(T1)}\mathbf g_c)^{\mathsf T}}_{5\times5}
 }{\underbrace{\mathbf g_c^{\mathsf T}P^{(T1)}\mathbf g_c+\sigma_T^2}_{1\times1}}
 $$
@@ -804,14 +738,12 @@ $$
 2本とも決まったときの温度観測行列は、
 
 $$
-\underbrace{H_T}_{2\times5}
-=\begin{bmatrix}
+\underbrace{H_T}_{2\times5} =\begin{bmatrix}
 G_{T1,0}&G_{T1,1}&G_{T1,2}&G_{T1,3}&G_{T1,4}\\
 G_{T2,0}&G_{T2,1}&G_{T2,2}&G_{T2,3}&G_{T2,4}
 \end{bmatrix},
 \qquad
-\underbrace{R_T}_{2\times2}
-=\begin{bmatrix}\sigma_T^2&0\\0&\sigma_T^2\end{bmatrix}
+\underbrace{R_T}_{2\times2} =\begin{bmatrix}\sigma_T^2&0\\0&\sigma_T^2\end{bmatrix}
 $$
 
 です。 $G_{T1,j}$ は選定セルT1のGの行の成分です。このHは、代表点以外の2点を観測する際に、代表5点温度から温度センサ2本の予報を計算するために使います。
@@ -909,8 +841,7 @@ $$
 $$
 \underbrace{\begin{bmatrix}
 T_k^{f,(m)}[P0]\\T_k^{f,(m)}[P1]\\T_k^{f,(m)}[P2]\\T_k^{f,(m)}[P3]\\T_k^{f,(m)}[P4]
-\end{bmatrix}}_{5\times1}
-=\mathcal M_{t_{k-1}\to t_k}\left(
+\end{bmatrix}}_{5\times1} =\mathcal M_{t_{k-1}\to t_k}\left(
 \underbrace{\begin{bmatrix}
 T_{k-1}^{a,(m)}[P0]\\T_{k-1}^{a,(m)}[P1]\\T_{k-1}^{a,(m)}[P2]\\T_{k-1}^{a,(m)}[P3]\\T_{k-1}^{a,(m)}[P4]
 \end{bmatrix}}_{5\times1},
@@ -947,11 +878,10 @@ $$
 \end{bmatrix}
 $$
 
-**$\mathbf y_k^{f,(m)}$ は、実測値ではありません。** 「メンバー $m$ の予報温度が正しいなら、今回の時刻 $t_k$ に4本のセンサが示すはずの値」を並べた **4×1の列ベクトル**です。
+** $\mathbf y_k^{f,(m)}$ は、実測値ではありません。** 「メンバー $m$ の予報温度が正しいなら、今回の時刻 $t_k$ に4本のセンサが示すはずの値」を並べた **4×1の列ベクトル**です。
 
 $$
-\underbrace{\mathbf y_k^{f,(m)}}_{4\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\mathbf y_k^{f,(m)}}_{4\times1} =\underbrace{\begin{bmatrix}
 \theta_{1,k}^{f,(m)}\\\theta_{2,k}^{f,(m)}\\U_{x,k}^{f,(m)}(S1)\\U_{x,k}^{f,(m)}(S2)
 \end{bmatrix}}_{4\times1}
 $$
@@ -959,11 +889,9 @@ $$
 1・2行目は代表点以外のT1・T2の温度 [K]、3・4行目はS1・S2の横方向変位 [µm] です。実際には、次の行列積で計算しています。
 
 $$
-\underbrace{\mathbf y_k^{f,(m)}}_{4\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\mathbf y_k^{f,(m)}}_{4\times1} =\underbrace{\begin{bmatrix}
 \bar T[T1]\\\bar T[T2]\\\bar u_x[S1]\\\bar u_x[S2]
-\end{bmatrix}}_{4\times1}
-+\underbrace{\begin{bmatrix}
+\end{bmatrix}}_{4\times1} +\underbrace{\begin{bmatrix}
 g_{T1,0}&g_{T1,1}&g_{T1,2}&g_{T1,3}&g_{T1,4}\\
 g_{T2,0}&g_{T2,1}&g_{T2,2}&g_{T2,3}&g_{T2,4}\\
 h_{S1x,0}&h_{S1x,1}&h_{S1x,2}&h_{S1x,3}&h_{S1x,4}\\
@@ -982,17 +910,14 @@ $g_{T1,j}$ は「代表点Pjの温度が1 K変わると、復元したT1の温�
 
 $$
 \mathbf y_k^{\mathrm{obs}}=
-\begin{bmatrix}\theta_1^*(t_k)\\\theta_2^*(t_k)\\U_x^*(S1,t_k)\\U_x^*(S2,t_k)\end{bmatrix}
-+\boldsymbol\eta_k,
+\begin{bmatrix}\theta_1^*(t_k)\\\theta_2^*(t_k)\\U_x^*(S1,t_k)\\U_x^*(S2,t_k)\end{bmatrix} +\boldsymbol\eta_k,
 \qquad \boldsymbol\eta_k\sim\mathcal N(\mathbf0,R)
 $$
 
 **この観測値を使う場所は、⑥の「観測と予報の差」です。** 上の4成分を省略せずに更新式へ代入すると、
 
 $$
-\underbrace{\mathbf z_k^{a,(m)}}_{7\times1}
-=\underbrace{\widetilde{\mathbf z}_k^{f,(m)}}_{7\times1}
-+\underbrace{K}_{7\times4}
+\underbrace{\mathbf z_k^{a,(m)}}_{7\times1} =\underbrace{\widetilde{\mathbf z}_k^{f,(m)}}_{7\times1} +\underbrace{K}_{7\times4}
 \underbrace{\begin{bmatrix}
 \theta_1^*(t_k)+\eta_{1,k}+\varepsilon_{1,k}^{(m)}-\widetilde\theta_{1,k}^{f,(m)}\\
 \theta_2^*(t_k)+\eta_{2,k}+\varepsilon_{2,k}^{(m)}-\widetilde\theta_{2,k}^{f,(m)}\\
@@ -1069,11 +994,10 @@ $$
 \Delta\mathbf y_k^{(m)}=\widetilde{\mathbf y}_k^{f,(m)}-\bar{\mathbf y}_k^f
 $$
 
-上の偏差も、成分を省略しない列ベクトルで書くと次のとおりです。ここで引く平均は、**同じ時刻の60メンバー平均**であり、②のPODの時間平均（$\bar T[Pj]$ ）とは異なります。
+上の偏差も、成分を省略しない列ベクトルで書くと次のとおりです。ここで引く平均は、**同じ時刻の60メンバー平均**であり、②のPODの時間平均（ $\bar T[Pj]$ ）とは異なります。
 
 $$
-\underbrace{\Delta\mathbf z_k^{(m)}}_{7\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\Delta\mathbf z_k^{(m)}}_{7\times1} =\underbrace{\begin{bmatrix}
 \widetilde T_k^{f,(m)}[P0]-\overline{T_k^f[P0]}\\
 \widetilde T_k^{f,(m)}[P1]-\overline{T_k^f[P1]}\\
 \widetilde T_k^{f,(m)}[P2]-\overline{T_k^f[P2]}\\
@@ -1085,8 +1009,7 @@ $$
 $$
 
 $$
-\underbrace{\Delta\mathbf y_k^{(m)}}_{4\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\Delta\mathbf y_k^{(m)}}_{4\times1} =\underbrace{\begin{bmatrix}
 \widetilde\theta_{1,k}^{f,(m)}-\overline{\theta_{1,k}^f}\\
 \widetilde\theta_{2,k}^{f,(m)}-\overline{\theta_{2,k}^f}\\
 \widetilde U_{x,k}^{f,(m)}(S1)-\overline{U_{x,k}^f(S1)}\\
@@ -1124,8 +1047,7 @@ $$
 
 $$
 \mathbf r_k^{(m)}=\mathbf y_k^{\mathrm{obs}}+\boldsymbol\varepsilon_k^{(m)}-
-\widetilde{\mathbf y}_k^{f,(m)}
-=\begin{bmatrix}r_1^{(m)}\\r_2^{(m)}\\r_3^{(m)}\\r_4^{(m)}\end{bmatrix}
+\widetilde{\mathbf y}_k^{f,(m)} =\begin{bmatrix}r_1^{(m)}\\r_2^{(m)}\\r_3^{(m)}\\r_4^{(m)}\end{bmatrix}
 $$
 
 $$
@@ -1143,8 +1065,7 @@ $$
 \Delta_{\mathrm{corr}}T[P4]\\
 \Delta_{\mathrm{corr}}q\\
 \Delta_{\mathrm{corr}}h
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 K_{0,1}&K_{0,2}&K_{0,3}&K_{0,4}\\
 K_{1,1}&K_{1,2}&K_{1,3}&K_{1,4}\\
@@ -1177,21 +1098,17 @@ $$
 行ごとに書けば、代表5点温度については、各 $j=0,\ldots,4$ に対して
 
 $$
-T_k^{a,(m)}[Pj]=\widetilde T_k^{f,(m)}[Pj]
-+K_{T[Pj],1}r_1^{(m)}+K_{T[Pj],2}r_2^{(m)}
-+K_{T[Pj],3}r_3^{(m)}+K_{T[Pj],4}r_4^{(m)}
+T_k^{a,(m)}[Pj]=\widetilde T_k^{f,(m)}[Pj] +K_{T[Pj],1}r_1^{(m)}+K_{T[Pj],2}r_2^{(m)} +K_{T[Pj],3}r_3^{(m)}+K_{T[Pj],4}r_4^{(m)}
 $$
 
 発熱倍率・放熱についても同じ4成分のずれを使います。
 
 $$
-q_k^{a,(m)}=\widetilde q_k^{f,(m)}
-+K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)}+K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
+q_k^{a,(m)}=\widetilde q_k^{f,(m)} +K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)}+K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
 $$
 
 $$
-h_k^{a,(m)}=\widetilde h_k^{f,(m)}
-+K_{h,1}r_1^{(m)}+K_{h,2}r_2^{(m)}+K_{h,3}r_3^{(m)}+K_{h,4}r_4^{(m)}
+h_k^{a,(m)}=\widetilde h_k^{f,(m)} +K_{h,1}r_1^{(m)}+K_{h,2}r_2^{(m)}+K_{h,3}r_3^{(m)}+K_{h,4}r_4^{(m)}
 $$
 
 **これが、温度・変位観測から、観測点以外の代表5点温度とQ・hを補正する処理です。** ゲインの3・4列が、変位観測のずれを各状態の補正に変換します。
@@ -1212,11 +1129,8 @@ $$
 発熱量の補正をWで書くと、制限処理の前には
 
 $$
-\Delta_{\mathrm{corr}}Q
-=15\Delta_{\mathrm{corr}}q
-=15\left(
-K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)}
-+K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
+\Delta_{\mathrm{corr}}Q =15\Delta_{\mathrm{corr}}q =15\left(
+K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)} +K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
 \right)
 $$
 
@@ -1278,18 +1192,15 @@ $$
 配置設計の式でも、この関係を確認できます。既に選んだ温度センサの情報を反映した共分散をP、追加するSのUxの重みを $\mathbf h_{S,x}$ とすると、線形推定でUxを1本追加した場合の反りの補正係数は、
 
 $$
-\beta_{d,Sx}
-=\frac{\mathbf w^{\mathsf T}P\mathbf h_{S,x}}
-{\mathbf h_{S,x}^{\mathsf T}P\mathbf h_{S,x}+r_u}
-=\frac{\mathrm{Cov}(d,U_x(S))}
+\beta_{d,Sx} =\frac{\mathbf w^{\mathsf T}P\mathbf h_{S,x}}
+{\mathbf h_{S,x}^{\mathsf T}P\mathbf h_{S,x}+r_u} =\frac{\mathrm{Cov}(d,U_x(S))}
 {\mathrm{Var}(U_x(S))+r_u}
 $$
 
 です。反りの分散が減る量は、
 
 $$
-\boxed{\Delta\sigma_d^2
-=\frac{\mathrm{Cov}(d,U_x(S))^2}
+\boxed{\Delta\sigma_d^2 =\frac{\mathrm{Cov}(d,U_x(S))^2}
 {\mathrm{Var}(U_x(S))+r_u}}
 $$
 
@@ -1391,8 +1302,7 @@ $$
 この4点の温度はROMで独立に時間積分していません。EnKFで補正した代表5点温度から、gappy-PODの復元行列Gを使って計算しています。検証セルcの温度は、
 
 $$
-\widehat T[c]{}(t)=\bar T[c]
-+\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
+\widehat T[c]{}(t)=\bar T[c] +\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 \widehat T[P0]{}(t)-\bar T[P0]\\
 \widehat T[P1]{}(t)-\bar T[P1]\\

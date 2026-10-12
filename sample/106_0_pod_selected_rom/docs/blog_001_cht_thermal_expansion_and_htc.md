@@ -270,7 +270,7 @@ OpenFOAM(CHT) ──温度場 T(x)──▶ FrontISTR(熱弾性) ──▶ 変�
 
 ### 2-2. 熱膨張のしくみ（小学校の理科＋α）
 
-金属は温めると伸びます。伸び具合は **線膨張係数 $\alpha$** で決まり、温度が基準から
+金属は温めると伸びます。伸び具合は **線膨張係数 $\alpha$ ** で決まり、温度が基準から
 $\Delta T = T - T_\mathrm{ref}$ だけ上がると、各方向に
 
 $$\varepsilon_\mathrm{thermal}=\alpha\,\Delta T$$
@@ -295,9 +295,9 @@ $$\varepsilon_\mathrm{thermal}=\alpha\,\Delta T$$
 
 ![OpenFOAMからFrontISTRへの温度マッピング](img/blog001_mapping.png)
 
-*z=50 mm断面で見た様子（t=300 s）。**A**：色付きの点がCFDセル中心、黒丸がFEM節点。
-重ねると**互いにずれている**のが分かる。**B**：1つの節点について、近い8個のセルを距離の近い順に並べ、
-重み $w=1/d$ で加重平均する様子。**C**：こうして全節点に温度が乗った状態。これをFrontISTRへ渡す。*
+> z=50 mm断面で見た様子（t=300 s）。**A**：色付きの点がCFDセル中心、黒丸がFEM節点。
+> 重ねると**互いにずれている**のが分かる。**B**：1つの節点について、近い8個のセルを距離の近い順に並べ、
+> 重み $w=1/d$ で加重平均する様子。**C**：こうして全節点に温度が乗った状態。これをFrontISTRへ渡す。
 
 **Bの中身を数字で**：この節点の近くには2.32〜4.19 mmの距離に8個のセルがあり、
 温度は24.16〜24.63 ℃とばらついています。距離の逆数で重みを付けると
@@ -355,8 +355,8 @@ postProcess -func writeCellCentres -region solid -time 300
 
 ![熱膨張による変位（ヒータ側と反対側の差）](img/fullsolver_displacement_difference.png)
 
-*FrontISTR で計算した熱変形。片側だけ熱いと上面がヒータ側へ「反り」、ヒータ側A と反対側O の
-上向き変位 $U_z$ に差が出る。温度が上がるほど反りが大きくなり、冷却で戻る。（変形は見やすさのため誇張表示）*
+> FrontISTR で計算した熱変形。片側だけ熱いと上面がヒータ側へ「反り」、ヒータ側A と反対側O の
+> 上向き変位 $U_z$ に差が出る。温度が上がるほど反りが大きくなり、冷却で戻る。（変形は見やすさのため誇張表示）
 
 ### 2-4. ここまでの一連の流れ
 
@@ -416,16 +416,13 @@ $$
 一方、「総放熱量を同じにする1個のh」を求めるなら、まず面ごとの熱流束を足します。
 
 $$
-\dot Q_{\mathcal G}=\sum_{i\in\mathcal G}q_i^{\prime\prime}A_i
-=\sum_{i\in\mathcal G}h_i\Delta T_i A_i
-=h_{\rm eff}\sum_{i\in\mathcal G}\Delta T_i A_i.
+\dot Q_{\mathcal G}=\sum_{i\in\mathcal G}q_i^{\prime\prime}A_i =\sum_{i\in\mathcal G}h_i\Delta T_i A_i =h_{\rm eff}\sum_{i\in\mathcal G}\Delta T_i A_i.
 $$
 
 右端を $h_{\rm eff}$ について解くと、
 
 $$
-h_{\rm eff}=\frac{\sum_iq_i^{\prime\prime}A_i}{\sum_i\Delta T_i A_i}
-=\frac{\sum_i h_i\Delta T_i A_i}{\sum_i\Delta T_i A_i}.
+h_{\rm eff}=\frac{\sum_iq_i^{\prime\prime}A_i}{\sum_i\Delta T_i A_i} =\frac{\sum_i h_i\Delta T_i A_i}{\sum_i\Delta T_i A_i}.
 $$
 
 したがって **面積平均と実効値は一般には等しくありません**。例えば同面積2面で $h=(10,20)$ 、 $\Delta T=(1,3)$ なら、面積平均15に対し実効値は $(10+60)/(1+3)=17.5$ W/(m² K)です。次節は後者を集計します。
@@ -491,7 +488,7 @@ ParaView では `solid_to_fluid` パッチだけを表示し、計算した面�
 
 1. **CHT（`chtMultiRegionFoam`）** は固体＋空気を一体で解き、 一定の壁面 $h$ を直接指定せず温度場を出す（流体条件等の仮定は残る）。
 2. その **温度場を FrontISTR に渡す**と、熱ひずみ $\alpha\Delta T$ から熱膨張（変位）が出る。片側加熱で円筒は反る。
-3. CHT の結果から **各面の $q^{\prime\prime}$ と $T_w$** を取り出し、 $h=q^{\prime\prime}/(T_w-T_\mathrm{ref})$ で **熱伝達率の分布・面代表値**を診断できる。
+3. CHT の結果から **各面の $q^{\prime\prime}$ と $T_w$ ** を取り出し、 $h=q^{\prime\prime}/(T_w-T_\mathrm{ref})$ で **熱伝達率の分布・面代表値**を診断できる。
 4. ここで得た温度・変位の時系列が、後続の **OI／EnKF 双子実験の真値**になる。本記事自体は EnKF のデータ同化計算ではない。
 
 次回（blog_002）は、この「温度→変形」を土台に、**少ないセンサから全体を推定するデータ同化（OI）**へ進みます。

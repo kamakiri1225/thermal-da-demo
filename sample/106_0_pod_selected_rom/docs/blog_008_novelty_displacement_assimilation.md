@@ -350,7 +350,7 @@ $J_c$ は「候補cを測った後に残る、反りA−Oの標準偏差を30〜
 |---|---|---|
 | **P2** | (36.5, 6.9, 50.8) ヒータ側・中段 | 温度（4構成すべて共通） |
 | **P0** | (21.3, −1.6, 51.6) 同じヒータ側・中段 | 温度（4構成すべて共通） |
-| **A** | (28.7, 0, 100.5) 上面・ヒータ側 | 構成により **温度** または **変位 $U_z$** |
+| **A** | (28.7, 0, 100.5) 上面・ヒータ側 | 構成により **温度** または **変位 $U_z$ ** |
 | **O** | (−28.7, 0, 100.5) 上面・反対側 | 同上 |
 
 - **変位計**は A・O の FEM 節点そのものに置きます。
@@ -363,7 +363,7 @@ $J_c$ は「候補cを測った後に残る、反りA−Oの標準偏差を30〜
 |---|---|---:|
 | 温度2点のみ | 温度 P2・P0 | 2 |
 | ＋A/O に温度計2本 | 温度 P2・P0・**A・O**（計4点とも温度） | 4 |
-| ＋A/O に変位計2本（本番） | 温度 P2・P0 ＋ **変位 A・O の $U_z$** | 4 |
+| ＋A/O に変位計2本（本番） | 温度 P2・P0 ＋ **変位 A・O の $U_z$ ** | 4 |
 | ＋両方 | 温度 P2・P0・A・O ＋ 変位 A・O | 6 |
 
 ### 4-2. 結果
@@ -435,8 +435,8 @@ seed ごとに対応をとった勝敗（変位計が温度計より良かった
 | 役割 | 場所 | 測るもの |
 |---|---|---|
 | 温度センサ（共通） | P2 (36.5, 6.9, 50.8)、P0 (21.3, −1.6, 51.6) mm | 温度 |
-| **選定した変位1点目** | (9.7, −36.2, 100.5) mm（上面、−y 寄り） | **$U_x$ （半径方向）** |
-| **選定した変位2点目** | (−34.6, 14.4, 100.5) mm（上面、ヒータの反対側） | **$U_z$ （上下方向）** |
+| **選定した変位1点目** | (9.7, −36.2, 100.5) mm（上面、−y 寄り） | ** $U_x$ （半径方向）** |
+| **選定した変位2点目** | (−34.6, 14.4, 100.5) mm（上面、ヒータの反対側） | ** $U_z$ （上下方向）** |
 | **評価点 A・O** | (±28.7, 0, 100.5) mm（上面） | **測らない** |
 
 ### 5-2. 変位の候補はどう選んだか ― 実際にやった作業
@@ -470,7 +470,7 @@ $y_{c,0}$ は温度が基準のときの値（定数）、 $h_{c,j}$ は「代�
 
 ![FrontISTR 6回で重みがそろう理由](img/fem6_superposition.png)
 
-*① 温度分布を6つの型（平均＋POD の型5つ）の足し算で表す。② 型ごとに FrontISTR を1回ずつ解く。③ 型の強さ $a_k$ は代表5点の温度から決まる。②と③を合わせると、どの節点のどの方向の変位も、代表5点の温度の一次式になる（ `run/make_fem6_fig.py` ）。*
+> ① 温度分布を6つの型（平均＋POD の型5つ）の足し算で表す。② 型ごとに FrontISTR を1回ずつ解く。③ 型の強さ $a_k$ は代表5点の温度から決まる。②と③を合わせると、どの節点のどの方向の変位も、代表5点の温度の一次式になる（ `run/make_fem6_fig.py` ）。
 
 1. **温度分布を6つの型の足し算で書く。** OpenFOAM の温度場を POD で分解すると、どの時刻の温度分布も「平均の温度分布 $\bar T(x)$ ＋ 型 $\varphi_1(x),\dots,\varphi_5(x)$ をそれぞれ $a_1,\dots,a_5$ 倍したもの」でほぼ表せます（5つの型で 99.9 % 以上）。
 
@@ -568,19 +568,19 @@ $$
 
 ![熱感度の重み × 温度の時刻歴 ＝ 変位](img/weight_times_temp_anim.gif)
 
-*15 W。① 代表5点の温度（平均の温度分布からの上がり分）。② $U_z(A)$ を「平均の温度分布での変位 3.97 µm ＋ 各点の 重み × 上がり分」で積み上げたもの（○＝FrontISTR の答え）。③ 時刻歴：線＝重み × 温度、点＝FrontISTR。（ `run/make_weight_times_temp_anim.py` ）*
+> 15 W。① 代表5点の温度（平均の温度分布からの上がり分）。② $U_z(A)$ を「平均の温度分布での変位 3.97 µm ＋ 各点の 重み × 上がり分」で積み上げたもの（○＝FrontISTR の答え）。③ 時刻歴：線＝重み × 温度、点＝FrontISTR。（ `run/make_weight_times_temp_anim.py` ）
 
 $$
 U_z(A)\approx \bar u_A+\sum_{j=0}^{4}h_{A,j}\big(T_j-\bar T_j\big)
 $$
 
-**$h_{A,j}$ とは、代表点Pjの温度変化を、Aの上下変位の変化に換算する係数です。** 単位は **µm/K**。Aは「変位を知りたい場所」、jは「代表温度点の番号0〜4」です。ここでのhは感度の記号で、ROMの放熱コンダクタンス $h_{\mathrm{ROM}}$ [W/K]とは別です。
+** $h_{A,j}$ とは、代表点Pjの温度変化を、Aの上下変位の変化に換算する係数です。** 単位は **µm/K**。Aは「変位を知りたい場所」、jは「代表温度点の番号0〜4」です。ここでのhは感度の記号で、ROMの放熱コンダクタンス $h_{\mathrm{ROM}}$ [W/K]とは別です。
 
-**$D$ と熱感度行列 $W$ の関係： $D=W\Phi$ のメッシュを明記する。** $D$ は、PODモードの温度変化を $W$ に入力したときの変位応答を並べた行列です。温度モードがFEM節点上にあれば、ご指摘のとおり $D=W\Phi$ です。
+** $D$ と熱感度行列 $W$ の関係： $D=W\Phi$ のメッシュを明記する。** $D$ は、PODモードの温度変化を $W$ に入力したときの変位応答を並べた行列です。温度モードがFEM節点上にあれば、ご指摘のとおり $D=W\Phi$ です。
 
 本研究でPODから得る $\Phi=U_r$ は、OpenFOAMの**セル中心**にある温度モードです。一方、FrontISTRが必要とする温度は、FEMの**節点**にあります。場所と点数が異なるため、そのまま渡せません。
 
-**$M$ はセル中心の温度をFEM節点へ受け渡すIDW（逆距離加重補間）の行列です。** 各FEM節点から近い8セルを選び、距離の逆数で重み付けして平均します。 $M$ の行はFEM節点、列はOpenFOAMセルで、各行の重みの和は1です。
+** $M$ はセル中心の温度をFEM節点へ受け渡すIDW（逆距離加重補間）の行列です。** 各FEM節点から近い8セルを選び、距離の逆数で重み付けして平均します。 $M$ の行はFEM節点、列はOpenFOAMセルで、各行の重みの和は1です。
 
 節点 $n$ に近い8セルを $\mathcal N_8(n)$ 、距離を $d_{n,i}$ とすると、
 
@@ -619,14 +619,11 @@ Aの上下変位の行だけを取り出すと、次のようにつながりま�
 
 $$
 \boxed{
-\mathbf h_A^{\mathsf T}
-=D_AU_{rP}^{+}
-=W_{A,z}M\Phi U_{rP}^{+}
-=W_{A,z}R_T
+\mathbf h_A^{\mathsf T} =D_AU_{rP}^{+} =W_{A,z}M\Phi U_{rP}^{+} =W_{A,z}R_T
 }
 $$
 
-$D_A$ は $D$ のA・上下方向の1行です。したがって、**$W$ → モードごとの応答 $D$ → 代表5点ごとの係数 $\mathbf h_A$** は、同じ線形熱弾性応答を、入力の表し方に合わせてまとめ直したものです。平均温度場の変位 $\bar u_A$ は別に加えます。
+$D_A$ は $D$ のA・上下方向の1行です。したがって、** $W$ → モードごとの応答 $D$ → 代表5点ごとの係数 $\mathbf h_A$ ** は、同じ線形熱弾性応答を、入力の表し方に合わせてまとめ直したものです。平均温度場の変位 $\bar u_A$ は別に加えます。
 
 **この係数はどこから求めるのか。** 本研究では、FrontISTRで事前計算した「PODモードごとの変位応答」から求めます。 $h_{A,j}$ 自体をEnKFで同定しているわけではありません。
 
@@ -635,8 +632,7 @@ $D_A$ は $D$ のA・上下方向の1行です。したがって、**$W$ → モ
 3. 1の応答を2の行列に掛け、代表点ごとの係数に直します。
 
 $$
-\underbrace{\begin{bmatrix}h_{A,0}&h_{A,1}&h_{A,2}&h_{A,3}&h_{A,4}\end{bmatrix}}_{1\times5}
-=
+\underbrace{\begin{bmatrix}h_{A,0}&h_{A,1}&h_{A,2}&h_{A,3}&h_{A,4}\end{bmatrix}}_{1\times5} =
 \underbrace{\begin{bmatrix}D_{A,1}&D_{A,2}&D_{A,3}&D_{A,4}&D_{A,5}\end{bmatrix}}_{1\times5}
 \underbrace{U_{rP}^{+}}_{5\times5}.
 $$
@@ -647,15 +643,12 @@ $$
 
 $$
 \begin{aligned}
-h_{A,2}={}&D_{A,1}(U_{rP}^{+})_{1,2}
-+D_{A,2}(U_{rP}^{+})_{2,2}\\
-&+D_{A,3}(U_{rP}^{+})_{3,2}
-+D_{A,4}(U_{rP}^{+})_{4,2}
-+D_{A,5}(U_{rP}^{+})_{5,2}
+h_{A,2}={}&D_{A,1}(U_{rP}^{+})_{1,2} +D_{A,2}(U_{rP}^{+})_{2,2}\\
+&+D_{A,3}(U_{rP}^{+})_{3,2} +D_{A,4}(U_{rP}^{+})_{4,2} +D_{A,5}(U_{rP}^{+})_{5,2}
 \end{aligned}
 $$
 
-です。ここでは行のモード番号を1〜5、列の代表点番号を0〜4としています。**P2だけを1 K上げる温度差を、5つのモードの組合せに変換し、その組合せによるAの変位を足した値が $h_{A,2}$** です。
+です。ここでは行のモード番号を1〜5、列の代表点番号を0〜4としています。**P2だけを1 K上げる温度差を、5つのモードの組合せに変換し、その組合せによるAの変位を足した値が $h_{A,2}$ ** です。
 
 実装は `run/build_full_disp_operator.py` の `D[:,:,k]=run_field(Tref+map_temperature(temperature_map, U[:, k]))` でモード応答を作り、`results/dispop_allnodes.npz` に保存します。A/O用の応答を使う `run/trace_displacement_and_Q.py` では、次の計算が上式に対応します。
 
@@ -672,11 +665,8 @@ W = D @ UPp                     # 代表5点への変位係数（2×5）
 $$
 \begin{aligned}
 U_z(A)\approx\bar u_A
-&+h_{A,0}\big(T_0-\bar T_0\big)
-+h_{A,1}\big(T_1-\bar T_1\big)\\
-&+h_{A,2}\big(T_2-\bar T_2\big)
-+h_{A,3}\big(T_3-\bar T_3\big)
-+h_{A,4}\big(T_4-\bar T_4\big)
+&+h_{A,0}\big(T_0-\bar T_0\big) +h_{A,1}\big(T_1-\bar T_1\big)\\
+&+h_{A,2}\big(T_2-\bar T_2\big) +h_{A,3}\big(T_3-\bar T_3\big) +h_{A,4}\big(T_4-\bar T_4\big)
 \end{aligned}
 $$
 
@@ -719,7 +709,7 @@ $$
 
 全節点数を $N=5040$ とし、代表5点温度の基準場からの変化を $\delta\mathbf T_P$ 、全FEM節点温度の変化を $\delta\mathbf T_F$ とします。基準場にはPODの平均温度場を使います。
 
-**$\delta T[P0]$ は「P0点での温度上昇」です。** この式では、PODの平均温度を基準にして、
+** $\delta T[P0]$ は「P0点での温度上昇」です。** この式では、PODの平均温度を基準にして、
 
 $$
 \delta T[P0]=T[P0]-\bar T[P0]
@@ -755,10 +745,8 @@ $$
 \begin{aligned}
 \delta\mathbf T_P&=\mathbf T_P-\bar{\mathbf T}_P,\\
 \mathbf a&=U_{rP}^{+}\delta\mathbf T_P,\\
-\delta\mathbf T_{\mathrm{cell}}&=U_r\mathbf a
-=U_rU_{rP}^{+}\delta\mathbf T_P,\\
-\delta\mathbf T_F&=M\delta\mathbf T_{\mathrm{cell}}
-=\underbrace{M U_rU_{rP}^{+}}_{R_T}\delta\mathbf T_P.
+\delta\mathbf T_{\mathrm{cell}}&=U_r\mathbf a =U_rU_{rP}^{+}\delta\mathbf T_P,\\
+\delta\mathbf T_F&=M\delta\mathbf T_{\mathrm{cell}} =\underbrace{M U_rU_{rP}^{+}}_{R_T}\delta\mathbf T_P.
 \end{aligned}
 $$
 
@@ -786,8 +774,7 @@ $$
 **② 全節点温度から、AとOの上下変位を求める。** WからA・Oの上下方向に対応する2行を取り出します。
 
 $$
-\underbrace{\begin{bmatrix}\delta U_z(A)\\\delta U_z(O)\end{bmatrix}}_{2\times1}
-=
+\underbrace{\begin{bmatrix}\delta U_z(A)\\\delta U_z(O)\end{bmatrix}}_{2\times1} =
 \underbrace{\begin{bmatrix}
 W_{A,z;1}&W_{A,z;2}&\cdots&W_{A,z;N}\\
 W_{O,z;1}&W_{O,z;2}&\cdots&W_{O,z;N}
@@ -802,10 +789,8 @@ $W_{A,z;n}$ は「節点nの温度が1 K変わると、Aの上下変位が何µm
 **③ ①を②に代入すると、代表5点の重みになる。**
 
 $$
-\begin{bmatrix}\delta U_z(A)\\\delta U_z(O)\end{bmatrix}
-=
-\underbrace{W_{AO,z}R_T}_{2\times5}\delta\mathbf T_P
-=
+\begin{bmatrix}\delta U_z(A)\\\delta U_z(O)\end{bmatrix} =
+\underbrace{W_{AO,z}R_T}_{2\times5}\delta\mathbf T_P =
 \underbrace{\begin{bmatrix}
 h_{A,z;0}&h_{A,z;1}&h_{A,z;2}&h_{A,z;3}&h_{A,z;4}\\
 h_{O,z;0}&h_{O,z;1}&h_{O,z;2}&h_{O,z;3}&h_{O,z;4}
@@ -825,8 +810,7 @@ $$
 $$
 \delta d=
 \begin{bmatrix}1&-1\end{bmatrix}
-W_{AO,z}R_T\delta\mathbf T_P
-=
+W_{AO,z}R_T\delta\mathbf T_P =
 \underbrace{\begin{bmatrix}
 h_{A,z;0}-h_{O,z;0}&\cdots&h_{A,z;4}-h_{O,z;4}
 \end{bmatrix}}_{\mathbf w^{\mathsf T}:\ 1\times5}\delta\mathbf T_P
@@ -873,7 +857,7 @@ $$
 |---|---:|---:|---:|---:|---:|---:|
 | $U_z(A)$ （ヒータ側の上面） | 0.33 | −0.13 | 0.26 | 0.64 | 0.12 | 1.21 |
 | $U_z(O)$ （反対側の上面） | −0.14 | 0.52 | −0.34 | 0.60 | 0.57 | 1.21 |
-| **反り $d=U_z(A)-U_z(O)$ の重み $\mathbf w$** | **0.47** | **−0.65** | **0.60** | **0.04** | **−0.46** | **0.00** |
+| **反り $d=U_z(A)-U_z(O)$ の重み $\mathbf w$ ** | **0.47** | **−0.65** | **0.60** | **0.04** | **−0.46** | **0.00** |
 | 変位計 S1（上面、横方向）の重み $\mathbf h_{S1}$ | −0.53 | 0.60 | −0.76 | 0.29 | 0.29 | −0.12 |
 | 底面近くの変位計の重み | −0.09 | −0.07 | −0.38 | 0.74 | −0.15 | 0.06 |
 
@@ -962,15 +946,13 @@ $$
 本節の例は、温度P2・P0を既に測る条件です。候補cを変位計として加えるなら、候補の位置・方向から取り出した重みを3行目に入れます。
 
 $$
-\underbrace{H_c}_{3\times5}
-=\begin{bmatrix}
+\underbrace{H_c}_{3\times5} =\begin{bmatrix}
 0&0&1&0&0\\
 1&0&0&0&0\\
 h_{c,0}&h_{c,1}&h_{c,2}&h_{c,3}&h_{c,4}
 \end{bmatrix},
 \qquad
-\underbrace{R}_{3\times3}
-=\mathrm{diag}(\sigma_T^2,\sigma_T^2,\sigma_u^2)
+\underbrace{R}_{3\times3} =\mathrm{diag}(\sigma_T^2,\sigma_T^2,\sigma_u^2)
 $$
 
 1行目は温度P2、2行目は温度P0、3行目が候補cです。**候補を別の点・方向に変えると3行目が変わり、その結果Pcとσも変わります。** 既に変位1点を選んで2点目を採点する場合は、選定済み変位の行と新しい候補の行を追加し、Hは4×5、Rは4×4になります。
@@ -991,14 +973,11 @@ $$
 正なら推定温度が低すぎ、負なら高すぎる、という符号です。これを5点分、縦に並べたものが $\mathbf e$ です。
 
 $$
-\underbrace{\mathbf e}_{5\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\mathbf e}_{5\times1} =\underbrace{\begin{bmatrix}
 T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]
-\end{bmatrix}}_{5\times1}
--\underbrace{\begin{bmatrix}
+\end{bmatrix}}_{5\times1} -\underbrace{\begin{bmatrix}
 \widehat T[P0]\\\widehat T[P1]\\\widehat T[P2]\\\widehat T[P3]\\\widehat T[P4]
-\end{bmatrix}}_{5\times1}
-=\underbrace{\begin{bmatrix}
+\end{bmatrix}}_{5\times1} =\underbrace{\begin{bmatrix}
 e_0\\e_1\\e_2\\e_3\\e_4
 \end{bmatrix}}_{5\times1}
 $$
@@ -1010,8 +989,7 @@ $$
 実際の配置選定では、正しい温度がまだ分からないため、この誤差ベクトルの実現値も分かりません。そこで、4,000ケースの温度のばらつきを、推定誤差のばらつきBとして使う仮定を置いています。平均誤差をゼロとすると、
 
 $$
-\underbrace{B}_{5\times5}
-=\mathbb E[\mathbf e\mathbf e^{\mathsf T}],
+\underbrace{B}_{5\times5} =\mathbb E[\mathbf e\mathbf e^{\mathsf T}],
 \qquad B_{ij}=\mathbb E[e_i e_j]
 $$
 
@@ -1020,9 +998,7 @@ $$
 この温度誤差がセンサの値にどう現れるかを、先ほどのHを使って書きます。観測ノイズを $\boldsymbol\varepsilon$ （3×1）とすると、観測値と予報値の差は、同じ線形モデル内で
 
 $$
-\underbrace{\Delta\mathbf y}_{3\times1}
-=\underbrace{H_c}_{3\times5}\underbrace{\mathbf e}_{5\times1}
-+\underbrace{\boldsymbol\varepsilon}_{3\times1}
+\underbrace{\Delta\mathbf y}_{3\times1} =\underbrace{H_c}_{3\times5}\underbrace{\mathbf e}_{5\times1} +\underbrace{\boldsymbol\varepsilon}_{3\times1}
 $$
 
 です。
@@ -1032,15 +1008,13 @@ $$
 まず、観測値と予報値は次の3成分です。
 
 $$
-\underbrace{\mathbf y^{\mathrm{obs}}}_{3\times1}
-=\begin{bmatrix}
+\underbrace{\mathbf y^{\mathrm{obs}}}_{3\times1} =\begin{bmatrix}
 T^{\mathrm{obs}}[P2]\\
 T^{\mathrm{obs}}[P0]\\
 U_x^{\mathrm{obs}}(S_c)
 \end{bmatrix},
 \qquad
-\underbrace{\widehat{\mathbf y}}_{3\times1}
-=\begin{bmatrix}
+\underbrace{\widehat{\mathbf y}}_{3\times1} =\begin{bmatrix}
 \widehat T[P2]\\
 \widehat T[P0]\\
 \widehat U_x(S_c)
@@ -1054,8 +1028,7 @@ $$
 T^{\mathrm{obs}}[P2]-\widehat T[P2]\\
 T^{\mathrm{obs}}[P0]-\widehat T[P0]\\
 U_x^{\mathrm{obs}}(S_c)-\widehat U_x(S_c)
-\end{bmatrix}}_{\Delta\mathbf y:\ 3\times1}
-=
+\end{bmatrix}}_{\Delta\mathbf y:\ 3\times1} =
 \underbrace{\begin{bmatrix}
 0&0&1&0&0\\
 1&0&0&0&0\\
@@ -1067,8 +1040,7 @@ T[P1]-\widehat T[P1]\\
 T[P2]-\widehat T[P2]\\
 T[P3]-\widehat T[P3]\\
 T[P4]-\widehat T[P4]
-\end{bmatrix}}_{\mathbf e:\ 5\times1}
-+
+\end{bmatrix}}_{\mathbf e:\ 5\times1} +
 \underbrace{\begin{bmatrix}
 \varepsilon_{T,P2}\\
 \varepsilon_{T,P0}\\
@@ -1079,8 +1051,7 @@ $$
 です。Hの各行と温度誤差の列を掛けると、
 
 $$
-\underbrace{\Delta\mathbf y}_{3\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\Delta\mathbf y}_{3\times1} =\underbrace{\begin{bmatrix}
 e_2+\varepsilon_{T,P2}\\
 e_0+\varepsilon_{T,P0}\\
 h_{c,0}e_0+h_{c,1}e_1+h_{c,2}e_2+h_{c,3}e_3+h_{c,4}e_4+\varepsilon_{u,c}
@@ -1096,9 +1067,7 @@ $$
 ノイズ共分散Rも省略せずに書くと、独立な3本のノイズを仮定して、
 
 $$
-\underbrace{R}_{3\times3}
-=\mathbb E[\boldsymbol\varepsilon\boldsymbol\varepsilon^{\mathsf T}]
-=\begin{bmatrix}
+\underbrace{R}_{3\times3} =\mathbb E[\boldsymbol\varepsilon\boldsymbol\varepsilon^{\mathsf T}] =\begin{bmatrix}
 \sigma_T^2&0&0\\
 0&\sigma_T^2&0\\
 0&0&\sigma_u^2
@@ -1110,25 +1079,19 @@ $$
 温度を $K_c\Delta\mathbf y$ だけ補正すれば、残る誤差は
 
 $$
-\underbrace{\mathbf e_{\mathrm{after}}}_{5\times1}
-=\underbrace{\mathbf e}_{5\times1}
--\underbrace{K_c}_{5\times3}\underbrace{\Delta\mathbf y}_{3\times1}
-=(I-K_cH_c)\mathbf e-K_c\boldsymbol\varepsilon
+\underbrace{\mathbf e_{\mathrm{after}}}_{5\times1} =\underbrace{\mathbf e}_{5\times1} -\underbrace{K_c}_{5\times3}\underbrace{\Delta\mathbf y}_{3\times1} =(I-K_cH_c)\mathbf e-K_c\boldsymbol\varepsilon
 $$
 
 となります。Iは5×5の単位行列です。温度誤差とノイズが独立で平均ゼロなら、残る誤差の共分散は
 
 $$
-\underbrace{P_c}_{5\times5}
-=\mathbb E[\mathbf e_{\mathrm{after}}\mathbf e_{\mathrm{after}}^{\mathsf T}]
-=(I-K_cH_c)B(I-K_cH_c)^{\mathsf T}+K_cRK_c^{\mathsf T}.
+\underbrace{P_c}_{5\times5} =\mathbb E[\mathbf e_{\mathrm{after}}\mathbf e_{\mathrm{after}}^{\mathsf T}] =(I-K_cH_c)B(I-K_cH_c)^{\mathsf T}+K_cRK_c^{\mathsf T}.
 $$
 
 ここで線形補正の誤差を最小にするゲイン
 
 $$
-\underbrace{K_c}_{5\times3}
-=\underbrace{BH_c^{\mathsf T}}_{5\times3}
+\underbrace{K_c}_{5\times3} =\underbrace{BH_c^{\mathsf T}}_{5\times3}
 \underbrace{(H_cBH_c^{\mathsf T}+R)^{-1}}_{3\times3}
 $$
 
@@ -1143,9 +1106,7 @@ $$
 $$
 
 $$
-\boxed{\underbrace{P_c}_{5\times5}
-=\underbrace{B}_{5\times5}
--\underbrace{A_c}_{5\times3}\underbrace{S_c^{-1}}_{3\times3}\underbrace{A_c^{\mathsf T}}_{3\times5}}
+\boxed{\underbrace{P_c}_{5\times5} =\underbrace{B}_{5\times5} -\underbrace{A_c}_{5\times3}\underbrace{S_c^{-1}}_{3\times3}\underbrace{A_c^{\mathsf T}}_{3\times5}}
 $$
 
 Aは温度誤差とセンサ予報誤差の共分散、Sはセンサのずれの共分散です。候補の座標が直接Pcの式に入るのではなく、**座標と方向 → 重みの行 → H → AとS → Pc**という順序です。逆行列を作る必要はなく、線形方程式を解けます。
@@ -1186,9 +1147,7 @@ $$
 3. 補正した5点温度から、反りA−Oを計算し直す。
 
 $$
-\underbrace{\widehat{\mathbf T}_{P,\mathrm{after}}}_{5\times1}
-=\underbrace{\widehat{\mathbf T}_{P,\mathrm{before}}}_{5\times1}
-+\underbrace{K_c}_{5\times3}
+\underbrace{\widehat{\mathbf T}_{P,\mathrm{after}}}_{5\times1} =\underbrace{\widehat{\mathbf T}_{P,\mathrm{before}}}_{5\times1} +\underbrace{K_c}_{5\times3}
 \underbrace{(\mathbf y^{\mathrm{obs}}-\widehat{\mathbf y})}_{3\times1}
 $$
 
@@ -1229,7 +1188,7 @@ $$
 
 | 順位 | 候補 | $\sigma$ |
 |---|---|---:|
-| **1位** | **(9.7, −36.2, 100.5) mm の $U_x$** | **0.347 µm** |
+| **1位** | **(9.7, −36.2, 100.5) mm の $U_x$ ** | **0.347 µm** |
 | 2位 | (9.7, **+36.2**, 100.5) mm の $U_x$ | 0.347 µm |
 | 3位 | (14.4, −34.6, 100.5) mm の $U_x$ | 0.347 µm |
 | …（中央値） | ― | 1.026 µm |
@@ -1248,7 +1207,7 @@ $$
 
 | 順位 | 候補 | $\sigma$ |
 |---|---|---:|
-| **1位** | **(−34.6, 14.4, 100.5) mm の $U_z$** | **0.256 µm** |
+| **1位** | **(−34.6, 14.4, 100.5) mm の $U_z$ ** | **0.256 µm** |
 | 2位 | (−36.2, 9.7, 100.5) mm の $U_z$ | 0.256 µm |
 | …（中央値） | ― | 0.330 µm |
 
@@ -1258,7 +1217,7 @@ $$
 
 ![変位2点の選び方](img/disp_selection_steps.png)
 
-*左＝1点目を選ぶときの採点（色が薄いほど良い）、中＝1点目を測った前提で採点し直したとき、右＝ $\sigma$ が下がる様子。*
+> 左＝1点目を選ぶときの採点（色が薄いほど良い）、中＝1点目を測った前提で採点し直したとき、右＝ $\sigma$ が下がる様子。
 
 左と中を見比べてください。**良い場所（薄い色）が移動しています。**
 
@@ -1270,7 +1229,7 @@ $$
 #### 選んだ2点で、観測していない温度・変位はどう合ったか
 
 選んだ S1・S2 を実際にデータ同化に入れて、**観測していない場所**を見ます。
-反り A−O だけでなく、**A・O それぞれの $U_z$**、**ほかの未観測点の $U_z$**（D・E・F）、**観測していない温度**（代表点 P1・P3・P4 と、代表点以外のセル4点）、**温度場全体**も比べます。
+反り A−O だけでなく、**A・O それぞれの $U_z$ **、**ほかの未観測点の $U_z$ **（D・E・F）、**観測していない温度**（代表点 P1・P3・P4 と、代表点以外のセル4点）、**温度場全体**も比べます。
 
 **条件**：真値＝OpenFOAM（温度場）＋FrontISTR（全節点の変位）、15 W。ROM＋EnKF（60メンバー、30 秒ごと、5 seed）。観測は温度計 P2・P0 ＋ 変位計2点だけで、グラフの点はすべて観測に使っていません（ `run/selected_pair_unobserved_check.py` ）。
 
@@ -1643,8 +1602,8 @@ A最適・D最適は実験計画法の教科書に出てくる基準です。Q-D
 
 ![どこが選ばれたか](img/blog008_method_points_focused.png)
 
-*上面（z=100.5 mm）を真上から見た図。□＝選ばれた変位計、矢印＝測る方向（ $U_z$ は紙面に垂直なので矢印なし）、
-●＝評価点 A・O（測らない）、赤い弧＝ヒータ側。*
+> 上面（z=100.5 mm）を真上から見た図。□＝選ばれた変位計、矢印＝測る方向（ $U_z$ は紙面に垂直なので矢印なし）、
+> ●＝評価点 A・O（測らない）、赤い弧＝ヒータ側。
 
 | 選び方 | 1点目 | 2点目 | **2点の間隔** | 測る前の予測 $\sigma$ |
 |---|---|---|---:|---:|
