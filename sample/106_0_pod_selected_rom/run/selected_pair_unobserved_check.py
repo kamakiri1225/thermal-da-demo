@@ -45,6 +45,16 @@ COMPI = {"Ux": 0, "Uy": 1, "Uz": 2}
 
 
 def configs(setname):
+    if setname == "seq":
+        js = json.load(open(os.path.join(RES, "sequential_selection.json"), encoding="utf-8"))
+        ts = [("xyz", tuple(np.array(p["xyz_m"]))) for p in js["temperature"]]
+        us = [(tuple(p["xyz_m"]), p["component"]) for p in js["displacement"]]
+        return ("温度2点を先に選び、その配置へ変位2点を追加する", [
+            ("同化なし", None, [], "#999999", "--"),
+            ("手動の温度2点 P2・P0", P2P0, [], "#E69F00", "--"),
+            ("選定した温度2点", ts, [], "#0072B2", "-"),
+            ("選定温度2点＋底面変位2点", ts, LOW, "#009E73", "--"),
+            ("選定温度2点＋選定変位2点", ts, us, "#CC3311", "-")])
     if setname == "t2":
         js = json.load(open(os.path.join(RES, "two_nonrep_selection.json"), encoding="utf-8"))
         tsel = [("xyz", tuple(np.array(p["xyz_mm"]) / 1000)) for p in js["modes"]["T2"]]
@@ -242,7 +252,7 @@ def main(setname, case):
 
 
 if __name__ == "__main__":
-    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v", "t2")] or ["s", "n", "v"]
+    sets = [a for a in sys.argv[1:] if a in ("s", "n", "v", "t2", "seq")] or ["s", "n", "v"]
     cases = [a for a in sys.argv[1:] if a in CASES] or list(CASES)
     for s_ in sets:
         for c in cases:

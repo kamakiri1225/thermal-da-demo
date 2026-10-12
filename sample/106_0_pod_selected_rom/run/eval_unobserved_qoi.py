@@ -22,6 +22,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -44,14 +45,14 @@ B_XYZ=np.array([0.028,0,ZUN]); C_XYZ=np.array([-0.028,0,ZUN])
 def build_op_for(targets, U, mean, Cc, tag):
     """targets(list of xyz) の上向き変位演算子を作る。戻り uz_mean(n,), Dmode(n,r) [µm]。"""
     cache=os.path.join(RES,f"dispop_{tag}.npz")
-    if os.path.exists(cache):
+    if mapping_cache_valid(cache):
         d=np.load(cache); return d["uz_mean"], d["Dmode"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([xyz for _n,xyz in mesh["nodes"]]); node_ids=[n for n,_ in mesh["nodes"]]
     qidx=[int(np.linalg.norm(coords-t,axis=1).argmin()) for t in targets]
     for t,q in zip(targets,qidx):
         print(f"[unobs] target {np.round(t*1000,1)}mm -> node {node_ids[q]} at {np.round(coords[q]*1000,1)}mm")
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     work=os.path.join(ROOT,"openfoam",f"dispop_{tag}"); os.makedirs(work,exist_ok=True)
     fistr_case.write_mesh(Path(work),NR,NTH,NZ,R_IN,R_OUT,H,
         young_modulus=MATERIAL["young_modulus_Pa"],poisson_ratio=MATERIAL["poisson_ratio"],
@@ -64,11 +65,11 @@ def build_op_for(targets, U, mean, Cc, tag):
         fistr_case.run_fistr(Path(work)); disp=fistr_case.read_displacement(Path(work))
         return np.array([disp[node_ids[q]][2] for q in qidx])*1e6   # µm, 上向きUz
     r=U.shape[1]
-    uz_mean=run_field(mean[near])
+    uz_mean=run_field(map_temperature(temperature_map, mean))
     Dmode=np.zeros((len(targets),r))
     for k in range(r):
-        Dmode[:,k]=run_field(Tref+U[near,k]); print(f"[unobs] {tag} mode {k+1}/{r} FrontISTR",flush=True)
-    np.savez(cache,uz_mean=uz_mean,Dmode=Dmode)
+        Dmode[:,k]=run_field(Tref+map_temperature(temperature_map, U[:, k])); print(f"[unobs] {tag} mode {k+1}/{r} FrontISTR",flush=True)
+    np.savez(cache,mapping_method=MAPPING_METHOD,uz_mean=uz_mean,Dmode=Dmode)
     return uz_mean, Dmode
 
 

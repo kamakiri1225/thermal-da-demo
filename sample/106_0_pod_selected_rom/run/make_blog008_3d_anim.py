@@ -15,6 +15,7 @@ import numpy as np
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -83,11 +84,11 @@ def main():
     cl=[]
     for _e,conn in mesh["elements"]: cl.append(8); cl.extend(idr[n] for n in conn)
     cells=np.array(cl); ctypes=np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8)
-    _,near=cKDTree(Cc).query(co)
+    temperature_map = build_idw_mapping(Cc, co)  # 近傍8セルのIDW
     clim=[19.5,26.5]
     def shot(T5,title,col,marks):
         f=field(T5)-KC; u=dispall(T5)
-        g=pv.UnstructuredGrid(cells,ctypes,co+u*EXAG); g.point_data["T"]=f[near]
+        g=pv.UnstructuredGrid(cells,ctypes,co+u*EXAG); g.point_data["T"]=map_temperature(temperature_map, f)
         pl=pv.Plotter(off_screen=True,window_size=(620,760))
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=18,show_scalar_bar=False)
         for p0,c0,r0,kind in marks:

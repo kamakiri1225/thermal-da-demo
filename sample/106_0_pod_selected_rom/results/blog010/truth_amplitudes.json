@@ -1,0 +1,14 @@
+{
+  "learned": {
+    "max_abs_truth_new_difference_um": 0.4389749855036142,
+    "peak_to_peak_truth_new_difference_um": 0.7990451585702636
+  },
+  "q25": {
+    "max_abs_truth_new_difference_um": 0.7317045025857893,
+    "peak_to_peak_truth_new_difference_um": 1.3276630071625977
+  },
+  "intermittent": {
+    "max_abs_truth_new_difference_um": 0.4389749855036142,
+    "peak_to_peak_truth_new_difference_um": 0.7690387286284013
+  }
+}

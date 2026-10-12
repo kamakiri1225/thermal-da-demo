@@ -18,6 +18,7 @@ SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"105_0_sensor_placement_sensitivity"))
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
 sys.path.insert(0, ROOT)
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 from dacore import rom_general as rg
 import cylinder_mesh, vtk
@@ -54,14 +55,14 @@ def main():
     conn=[]
     for _e,c in mesh["elements"]: conn.append(8); conn.extend(idr[n] for n in c)
     ug=pv.UnstructuredGrid(np.array(conn),np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     sensors=Cc[idx]                    # 5点の座標
 
     clim=[float(field.min()-K), float(field.max()-K)]
     frames=[]; sub=range(0,len(ts),8)  # 間引いてコマ数を減らす(約38コマ)
     for fi in sub:
         tv=ts[fi]; fld=field[fi]-K      # ℃
-        g=ug.copy(); g.point_data["T"]=fld[near]
+        g=ug.copy(); g.point_data["T"]=map_temperature(temperature_map, fld)
         pl=pv.Plotter(off_screen=True,window_size=(720,760))
         # 5点が透けて見えるよう温度コンタは半透明に
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=16,opacity=0.55,

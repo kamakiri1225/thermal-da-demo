@@ -24,6 +24,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import rom_general as rg
 from dacore.enkf import enkf_update
 from select_points_qdeim import read_foam_field
@@ -47,28 +48,39 @@ def truth(case):
     cdir,_=CASES[case]; cache=os.path.join(RES,f"limit_truth_{case}.npz")
     kv=np.load(os.path.join(RES,"qdeim_points.npz")); Cc=kv["cell_centres"]; pod=kv["cell_idx"]
     times=np.r_[0,np.arange(OBS_DT,T_END+1e-9,OBS_DT)]
-    if os.path.exists(cache):
+    if mapping_cache_valid(cache):
         d=np.load(cache); return d["times"],d["Tfield"],d["uz"]
-    Tf=[]
-    for t in times:
-        p=os.path.join(cdir,"0" if t==0 else f"{t:g}","solid","T")
-        Tf.append(read_foam_field(p,len(Cc)))
-    Tf=np.array(Tf)
+    if os.path.exists(cache):
+        with np.load(cache) as old:
+            times=old["times"].copy(); Tf=old["Tfield"].copy()
+    else:
+        Tf=[]
+        for t in times:
+            p=os.path.join(cdir,"0" if t==0 else f"{t:g}","solid","T")
+            Tf.append(read_foam_field(p,len(Cc)))
+        Tf=np.array(Tf)
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([x for _n,x in mesh["nodes"]]); node_ids=[n for n,_ in mesh["nodes"]]
     qa=int(np.linalg.norm(coords-A_XYZ,axis=1).argmin()); qo=int(np.linalg.norm(coords-O_XYZ,axis=1).argmin())
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    full_cache=os.path.join(RES,f"truth_disp_all_{case}.npz")
+    if mapping_cache_valid(full_cache):
+        with np.load(full_cache) as full:
+            uz=full["u"][:,[qa,qo],2]
+        np.savez(cache,mapping_method=MAPPING_METHOD,times=times,Tfield=Tf,uz=uz)
+        return times,Tf,uz
+
     work=Path(ROOT,"openfoam","limit",f"fistr_{case}"); work.mkdir(parents=True,exist_ok=True)
     fistr_case.write_mesh(work,NR,NTH,NZ,R_IN,R_OUT,H,young_modulus=MATERIAL["young_modulus_Pa"],poisson_ratio=MATERIAL["poisson_ratio"],
         density=MATERIAL["density_kg_m3"],thermal_expansion_coeff=MATERIAL["thermal_expansion_coeff_per_K"])
     fistr_case.write_hecmw_ctrl(work)
     uz=[]
     for k,t in enumerate(times):
-        fistr_case.write_cnt(work,node_ids,Tf[k][near],reference_temperature=Tref,young_modulus=MATERIAL["young_modulus_Pa"],
+        fistr_case.write_cnt(work,node_ids,map_temperature(temperature_map, Tf[k]),reference_temperature=Tref,young_modulus=MATERIAL["young_modulus_Pa"],
             poisson_ratio=MATERIAL["poisson_ratio"],thermal_expansion_coeff=MATERIAL["thermal_expansion_coeff_per_K"])
         fistr_case.run_fistr(work); disp=fistr_case.read_displacement(work)
         uz.append([disp[node_ids[qa]][2]*1e6,disp[node_ids[qo]][2]*1e6]); print(f"[truth:{case}] FrontISTR t={t:g}s",flush=True)
-    uz=np.array(uz); np.savez(cache,times=times,Tfield=Tf,uz=uz); return times,Tf,uz
+    uz=np.array(uz); np.savez(cache,mapping_method=MAPPING_METHOD,times=times,Tfield=Tf,uz=uz); return times,Tf,uz
 
 
 def main(case):

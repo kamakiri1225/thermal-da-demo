@@ -10,6 +10,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 from dacore import rom_general as rg
 import matplotlib.pyplot as plt
@@ -121,8 +122,8 @@ def field300_fig():
     a=np.linalg.pinv(U[pod,:])@(T5-mean[pod])
     field=mean+U@a-KC
     ug,coords=cyl_grid()
-    _,near=cKDTree(Cc).query(coords)
-    ug.point_data["T"]=field[near]
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    ug.point_data["T"]=map_temperature(temperature_map, field)
     pl=pv.Plotter(off_screen=True,window_size=(880,940))
     pl.add_mesh(ug,scalars="T",cmap="turbo",n_colors=16,
                 scalar_bar_args={"title":"T [degC]","fmt":"%.1f"})

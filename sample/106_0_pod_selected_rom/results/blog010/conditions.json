@@ -1,0 +1,68 @@
+{
+  "rotation_deg": 90,
+  "rotation_convention": "counterclockwise viewed from +z (A:+x -> +y, O:-x -> -y)",
+  "A_requested_m": [
+    0.0,
+    0.028,
+    0.1005
+  ],
+  "O_requested_m": [
+    0.0,
+    -0.028,
+    0.1005
+  ],
+  "A_node_index": 4862,
+  "O_node_index": 4982,
+  "A_actual_m": [
+    1.76042977377432e-18,
+    0.028749999999999998,
+    0.1005
+  ],
+  "O_actual_m": [
+    -5.28128932132296e-18,
+    -0.028749999999999998,
+    0.1005
+  ],
+  "heater": "unchanged, +x side",
+  "prior_cases": 4000,
+  "prior_seed": 20260930,
+  "EnKF_members": 60,
+  "EnKF_seeds": [
+    20260913,
+    20260914,
+    20260915,
+    20260916,
+    20260917
+  ],
+  "observation_interval_s": 30,
+  "inflation": 1.02,
+  "sigma_T_K": 0.3,
+  "sigma_u_um": 0.3,
+  "evaluation_interval_s": [
+    30,
+    300
+  ],
+  "displacement_exclusion_radius_m": 0.012,
+  "cases": [
+    "learned",
+    "q25",
+    "intermittent"
+  ],
+  "shared_inputs": [
+    "qdeim_points.npz",
+    "dispop_allnodes.npz",
+    "rom_calibrated_pod.npz",
+    "limit_truth_learned.npz",
+    "truth_disp_all_learned.npz",
+    "limit_truth_q25.npz",
+    "truth_disp_all_q25.npz",
+    "limit_truth_intermittent.npz",
+    "truth_disp_all_intermittent.npz"
+  ],
+  "selection_elapsed_s": 7.339154365006834,
+  "EnKF_elapsed_s": {
+    "learned": 3.5619398979470134,
+    "q25": 3.413221471942961,
+    "intermittent": 3.556513584917411
+  }
+}

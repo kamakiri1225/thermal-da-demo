@@ -14,6 +14,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 import cylinder_mesh, vtk
@@ -40,8 +41,8 @@ def main():
     for _e,c in mesh["elements"]: conn.append(8); conn.extend(idr[n] for n in c)
     ug=pv.UnstructuredGrid(np.array(conn),
         np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
-    _,near=cKDTree(Cc).query(coords)               # CFDセル中心 → FEM節点（IDWの最近傍版）
-    Tn=(X-KC)[near,:]                              # (nnode, ntime) [degC]
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    Tn=map_temperature(temperature_map, X-KC)                              # (nnode, ntime) [degC]
     clim_T=[float(Tn.min()), float(Tn.max())]
 
     m=pv.read(VTU); m.set_active_vectors("U_truth_m")

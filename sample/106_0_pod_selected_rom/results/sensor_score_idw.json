@@ -1,0 +1,77 @@
+{
+  "mapping_method": "idw_k8_p1_v1",
+  "definition": "J_c=mean sigma(A-O) at 30:30:300 s; smaller is better",
+  "fixed_temperature_cells": [
+    7765,
+    7634
+  ],
+  "prior_cases": 4000,
+  "prior_seed": 20260930,
+  "temperature_noise_K": 0.3,
+  "displacement_noise_um": 0.3,
+  "exclusion_radius_mm": 12,
+  "selected": [
+    {
+      "step": 1,
+      "node_index": 4994,
+      "node_id": 4995,
+      "xyz_mm": [
+        9.70571419134451,
+        -36.22221848584006,
+        100.5
+      ],
+      "component": "Ux",
+      "J_c_um": 0.34582750658719075,
+      "J_before_um": 1.191682373871509,
+      "weights": [
+        -0.5218912361351965,
+        0.5864053657749346,
+        -0.7769567939274025,
+        0.28641461451354333,
+        0.3034818399413425
+      ]
+    },
+    {
+      "step": 2,
+      "node_index": 4909,
+      "node_id": 4910,
+      "xyz_mm": [
+        -34.64548246917325,
+        14.35062871369087,
+        100.5
+      ],
+      "component": "Uz",
+      "J_c_um": 0.25628566704808387,
+      "J_before_um": 0.34582750658719075,
+      "weights": [
+        -0.16897974934492183,
+        0.5915665340117955,
+        -0.3135148123249781,
+        0.427064802771018,
+        0.6740332564189907
+      ]
+    }
+  ],
+  "explanation_t150": [
+    {
+      "step": 1,
+      "time_s": 150,
+      "variance_before_um2": 0.9424414176072425,
+      "covariance": -0.8606833548029953,
+      "signal_variance": 0.7908091659450711,
+      "noise_variance": 0.09,
+      "variance_reduction_um2": 0.8410174029468885,
+      "sigma_after_um": 0.3184713718065629
+    },
+    {
+      "step": 2,
+      "time_s": 150,
+      "variance_before_um2": 0.10142401466035382,
+      "covariance": -0.1386948178941023,
+      "signal_variance": 0.26445310067792344,
+      "noise_variance": 0.09,
+      "variance_reduction_um2": 0.05427023342125413,
+      "sigma_after_um": 0.21714921422630037
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 # blog_007：作った ROM はどこまで使えるか ― 適用範囲を実計算で確かめる
 
+> **2026-10-12の更新**：セル→FEM節点の温度写像を近傍8セルのIDWへ統一しました。旧本文の最近傍法による数値・図と、[IDW再計算結果](25_sensor_selection_theory_and_idw.md)を区別してください。
+
+
 > **2026-10-05の読み直し：条件の区別**
 > モデル単体の予測、同化後の推定、全セルの時刻平均誤差は別の評価です。検証済みなのは15 W・25 W・特定の間欠加熱で、任意条件の保証ではありません。0.3 Kは単回観測の標準偏差に基づく比較目安です。
 
@@ -196,6 +199,7 @@ def heater_power_W(t, q_scale=1.0):
 > - **データ同化（問い B）：ヒータの ON/OFF をモデルに教える必要がある。** 教えれば同じ精度、教えないと誤差は約10倍。
 
 ---
+
 
 ## 3. ROM は何から作ったか
 
@@ -680,3 +684,13 @@ $$
 | 復元した温度場が全セルで合うか（§6） | `run/check_all_cells_after_da.py` | `results/check_all_cells_after_da.json` |
 | 観測点は代表5点に限られるか（§10） | `run/obs_points_not_limited_to_rom.py` | `results/obs_points_not_limited_to_rom.json` |
 | 25 W・間欠加熱の OpenFOAM 計算 | `openfoam/limit/q25`、`openfoam/limit/intermittent`（リポジトリには含めていない） | ― |
+
+## 未観測の温度・変位まで復元すると、どこまで合うか
+
+代表点温度をgappy-PODで全場復元し、IDW＋FrontISTR応答で変位を求めて比較しました。温度T1・T2を先に選び、その配置に変位S1・S2を追加した試験です。P1・P3・P4の温度、A・O・E・Fの変位は観測に使っていません。正解はOpenFOAM＋FrontISTR、60メンバー、30秒ごと20更新、5seedです。
+
+![25 W：未観測温度・変位](img/sequential_history_q25.png)
+
+![間欠加熱：未観測温度・変位](img/sequential_history_intermittent.png)
+
+選定温度2点のみ→選定変位2点追加で、全セル温度場RMSE／未観測反りの平均絶対誤差（30〜300秒）は、25 Wでは **0.247→0.206 K／0.242→0.107 µm**、間欠加熱では **0.194→0.167 K／0.161→0.090 µm** でした。全セルRMSEには観測セルも含みます。選定手順と各点の誤差は [blog_009](blog_009_two_sensors_nonrep.md) に記載しました。

@@ -1,0 +1,62 @@
+{
+  "source_K": "/mnt/d/work/002_CAE/openfoam/20260505_datadoka/sample/105_0_sensor_placement_sensitivity/openfoam/dumpw_case/dump_matrix_1_0.mm",
+  "source_H": "/mnt/d/work/002_CAE/openfoam/20260505_datadoka/sample/105_0_sensor_placement_sensitivity/openfoam/dumpw_case/H_matrix.mtx",
+  "adjoint_relative_residual": 1.665780144366823e-11,
+  "W_limit_um_per_K": 0.06971967642488554,
+  "sensor_codes": [
+    {
+      "code": 0,
+      "name": "A（新）",
+      "xyz_mm": [
+        1.7604297737743201e-15,
+        28.749999999999996,
+        100.5
+      ]
+    },
+    {
+      "code": 1,
+      "name": "O（新）",
+      "xyz_mm": [
+        -5.2812893213229596e-15,
+        -28.749999999999996,
+        100.5
+      ]
+    },
+    {
+      "code": 2,
+      "name": "T1",
+      "xyz_mm": [
+        -36.639223,
+        0.78237362,
+        99.297987
+      ]
+    },
+    {
+      "code": 3,
+      "name": "T2",
+      "xyz_mm": [
+        21.081076,
+        0.77582376,
+        0.83808072
+      ]
+    },
+    {
+      "code": 4,
+      "name": "S1 Uy",
+      "xyz_mm": [
+        -17.320508075688778,
+        -9.999999999999995,
+        100.5
+      ]
+    },
+    {
+      "code": 5,
+      "name": "S2 Uy",
+      "xyz_mm": [
+        21.109369217245693,
+        12.187499999999998,
+        100.5
+      ]
+    }
+  ]
+}

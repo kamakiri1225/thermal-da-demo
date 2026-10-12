@@ -23,6 +23,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -42,13 +43,22 @@ def build_disp_operator(U, mean, Cc):
     """gappy-POD場→FrontISTR→上面Uz2点 の演算子を作る.
     戻り: uz_mean(2,), Dmode(2,r)  で uz = uz_mean + Dmode @ a."""
     cache=os.path.join(RES,"disp_operator.npz")
-    if os.path.exists(cache):
+    if mapping_cache_valid(cache):
         d=np.load(cache); return d["uz_mean"], d["Dmode"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([xyz for _n,xyz in mesh["nodes"]]); node_ids=[n for n,_ in mesh["nodes"]]
     qa=int(np.linalg.norm(coords-A_XYZ,axis=1).argmin())
     qo=int(np.linalg.norm(coords-O_XYZ,axis=1).argmin())
-    _,near=cKDTree(Cc).query(coords)          # FEM節点→最寄りOpenFOAMセル
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    full_cache=os.path.join(RES,"dispop_allnodes.npz")
+    if mapping_cache_valid(full_cache):
+        with np.load(full_cache) as full:
+            np.testing.assert_allclose(full["coords"], coords)
+            uz_mean=full["u_mean"][[qa,qo],2]
+            Dmode=full["D"][[qa,qo],2,:]
+        np.savez(cache,mapping_method=MAPPING_METHOD,uz_mean=uz_mean,Dmode=Dmode,qa=qa,qo=qo)
+        return uz_mean,Dmode
+
     work=os.path.join(ROOT,"openfoam","dispop"); os.makedirs(work,exist_ok=True)
     fistr_case.write_mesh(Path(work),NR,NTH,NZ,R_IN,R_OUT,H,
         young_modulus=MATERIAL["young_modulus_Pa"],poisson_ratio=MATERIAL["poisson_ratio"],
@@ -61,12 +71,12 @@ def build_disp_operator(U, mean, Cc):
         fistr_case.run_fistr(Path(work)); disp=fistr_case.read_displacement(Path(work))
         return np.array([disp[node_ids[qa]][2], disp[node_ids[qo]][2]])*1e6  # µm
     r=U.shape[1]
-    uz_mean=run_field(mean[near])                       # 平均場の変位
+    uz_mean=run_field(map_temperature(temperature_map, mean))                       # 平均場の変位
     Dmode=np.zeros((2,r))
     for k in range(r):
-        Dmode[:,k]=run_field(Tref+U[near,k])            # モードkの変位応答
+        Dmode[:,k]=run_field(Tref+map_temperature(temperature_map, U[:, k]))            # モードkの変位応答
         print(f"[disp] mode {k+1}/{r} FrontISTR",flush=True)
-    np.savez(cache,uz_mean=uz_mean,Dmode=Dmode,qa=qa,qo=qo)
+    np.savez(cache,mapping_method=MAPPING_METHOD,uz_mean=uz_mean,Dmode=Dmode,qa=qa,qo=qo)
     return uz_mean, Dmode
 
 

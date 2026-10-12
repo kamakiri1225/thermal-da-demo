@@ -17,6 +17,7 @@ import numpy as np
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -42,10 +43,10 @@ CASES=[("learned","15 W（ROM の係数を決めた計算）"),("q25","25 W（�
        ("intermittent","15 W 間欠加熱（新しく計算した条件）")]
 
 
-def truth_disp_all(case,coords,node_ids,near,Tf,times):
+def truth_disp_all(case,coords,node_ids,temperature_map,Tf,times):
     """OpenFOAM の温度場を各時刻 FrontISTR に入れ、全節点の変位を得る（キャッシュ）"""
     cache=os.path.join(RES,f"truth_disp_all_{case}.npz")
-    if os.path.exists(cache): return np.load(cache)["u"]
+    if mapping_cache_valid(cache): return np.load(cache)["u"]
     work=Path(ROOT,"openfoam","limit",f"fistr_all_{case}"); work.mkdir(parents=True,exist_ok=True)
     fistr_case.write_mesh(work,NR,NTH,NZ,R_IN,R_OUT,H_,young_modulus=MATERIAL["young_modulus_Pa"],
         poisson_ratio=MATERIAL["poisson_ratio"],density=MATERIAL["density_kg_m3"],
@@ -53,13 +54,13 @@ def truth_disp_all(case,coords,node_ids,near,Tf,times):
     fistr_case.write_hecmw_ctrl(work)
     u=np.zeros((len(times),len(node_ids),3))
     for k,t in enumerate(times):
-        fistr_case.write_cnt(work,node_ids,Tf[k][near],reference_temperature=Tref,
+        fistr_case.write_cnt(work,node_ids,map_temperature(temperature_map, Tf[k]),reference_temperature=Tref,
             young_modulus=MATERIAL["young_modulus_Pa"],poisson_ratio=MATERIAL["poisson_ratio"],
             thermal_expansion_coeff=MATERIAL["thermal_expansion_coeff_per_K"])
         fistr_case.run_fistr(work); d=fistr_case.read_displacement(work)
         u[k]=np.array([d[n] for n in node_ids])*1e6
         print(f"  [{case}] FrontISTR t={t:g}s",flush=True)
-    np.savez_compressed(cache,u=u); return u
+    np.savez_compressed(cache,mapping_method=MAPPING_METHOD,u=u); return u
 
 
 def main():
@@ -73,7 +74,7 @@ def main():
     Wall=np.einsum("nck,kj->ncj",Dall,UPp)
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H_)
     node_ids=[n for n,_ in mesh["nodes"]]
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     near_node=lambda x:int(np.linalg.norm(coords-np.array(x),axis=1).argmin())
     iA=near_node(A_XYZ); iO=near_node(O_XYZ)
     sel=[(near_node(x),c) for x,c in SEL]; bc=[(near_node(x),c) for x,c in BC]; low=[(near_node(x),c) for x,c in LOW]
@@ -84,7 +85,7 @@ def main():
     for j,(case,lab) in enumerate(CASES):
         z=np.load(os.path.join(RES,f"limit_truth_{case}.npz"))
         t=z["times"]; Tf=z["Tfield"]; T5=Tf[:,pod]
-        utrue=truth_disp_all(case,coords,node_ids,near,Tf,t)      # (時刻, 節点, 3) µm
+        utrue=truth_disp_all(case,coords,node_ids,temperature_map,Tf,t)      # (時刻, 節点, 3) µm
         aot=utrue[:,iA,2]-utrue[:,iO,2]
         cyc=t[1:]; on=SCHED[case]
         def run(obs,seed):

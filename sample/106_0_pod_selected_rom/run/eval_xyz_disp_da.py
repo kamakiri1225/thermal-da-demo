@@ -19,6 +19,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -41,14 +42,14 @@ COMP=["Ux","Uy","Uz"]
 def build_op(U, mean, Cc):
     """全4点×3成分の変位演算子。 u = u_mean + D @ a   (u: 12成分)"""
     cache=os.path.join(RES,"dispop_xyz_4pts.npz")
-    if os.path.exists(cache):
+    if mapping_cache_valid(cache):
         d=np.load(cache); return d["u_mean"], d["D"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([p for _n,p in mesh["nodes"]]); node_ids=[n for n,_ in mesh["nodes"]]
     idx=[int(np.linalg.norm(coords-np.array(x),axis=1).argmin()) for _l,x,_r in PTS]
     for (lab,x,_r),j in zip(PTS,idx):
         print(f"  {lab} 指定{np.round(np.array(x)*1000,1)} → 最寄節点{np.round(coords[j]*1000,1)} mm")
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     work=os.path.join(ROOT,"openfoam","dispop_xyz"); os.makedirs(work,exist_ok=True)
     fistr_case.write_mesh(Path(work),NR,NTH,NZ,R_IN,R_OUT,H,
         young_modulus=MATERIAL["young_modulus_Pa"],poisson_ratio=MATERIAL["poisson_ratio"],
@@ -63,14 +64,14 @@ def build_op(U, mean, Cc):
         return np.concatenate([np.array(disp[node_ids[j]])*1e6 for j in idx])   # (12,) µm
 
     r=U.shape[1]
-    u_mean=run_field(mean[near]); D=np.zeros((12,r))
+    u_mean=run_field(map_temperature(temperature_map, mean)); D=np.zeros((12,r))
     for k in range(r):
-        D[:,k]=run_field(Tref+U[near,k])-0.0
+        D[:,k]=run_field(Tref+map_temperature(temperature_map, U[:, k]))-0.0
         print(f"  [disp] mode {k+1}/{r} FrontISTR 完了",flush=True)
     # モード応答は「平均場からの増分」ではなく絶対値なので、基準を引く
-    zero=run_field(np.full(len(near),Tref))
+    zero=run_field(np.full(temperature_map.shape[0],Tref))
     D=D-zero[:,None]; u_mean=u_mean-zero
-    np.savez(cache,u_mean=u_mean,D=D,idx=np.array(idx))
+    np.savez(cache,mapping_method=MAPPING_METHOD,u_mean=u_mean,D=D,idx=np.array(idx))
     return u_mean, D
 
 

@@ -13,6 +13,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 import cylinder_mesh, vtk
@@ -46,11 +47,11 @@ def main():
     cells=[]
     for _e,conn in mesh["elements"]: cells.append(8); cells.extend(idr[n] for n in conn)
     ug=pv.UnstructuredGrid(np.array(cells),np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     clim=[float(u.min()-K),float(u.max()-K)]         # 全部共通スケール(真値の範囲)
     CAM=[(0.24,-0.22,0.20),(0,0,0.05),(0,0,1)]; TMP=tempfile.mkdtemp(); shots=[]
     for lab,f in recons:
-        g=ug.copy(); g.point_data["T"]=f[near]-K
+        g=ug.copy(); g.point_data["T"]=map_temperature(temperature_map, f)-K
         pl=pv.Plotter(off_screen=True,window_size=(460,540))
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=14,show_scalar_bar=False)
         pl.camera_position=CAM; pl.set_background("white")

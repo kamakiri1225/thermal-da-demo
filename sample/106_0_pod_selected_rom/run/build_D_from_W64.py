@@ -25,6 +25,7 @@ from scipy.sparse.linalg import splu
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 import cylinder_mesh
@@ -40,8 +41,8 @@ def main():
     U=kv["pod_modes"].astype(np.float64); Cc=kv["cell_centres"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H_)
     coords=np.array([x for _n,x in mesh["nodes"]])
-    _,near=cKDTree(Cc).query(coords)
-    Phi=U[near,:]                                    # (5040,5) モードをFEM節点温度へ
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    Phi=map_temperature(temperature_map, U)                                    # (5040,5) モードをFEM節点温度へ
     t0=time.time()
     K=sio.mmread(os.path.join(CASE,"dump_matrix_1_0.mm")).tocsc()
     Hm=sio.mmread(os.path.join(CASE,"H_matrix.mtx")).tocsc()

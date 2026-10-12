@@ -18,6 +18,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -198,7 +199,7 @@ def main():
     cellsL=[]
     for _e,conn in mesh["elements"]: cellsL.append(8); cellsL.extend(idr[n] for n in conn)
     from scipy.spatial import cKDTree
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     import pyvista as pv
     pv.OFF_SCREEN=True
     try: pv.start_xvfb()
@@ -208,7 +209,7 @@ def main():
           float(max(f.max() for f in (field_init,field_da,field_truth))-K)]
     import tempfile; TMP=tempfile.mkdtemp(); shots=[]
     for lab,fld in [("初期推定 t=0s",field_init),("同化後 t=300s",field_da),("ROM真値の復元 t=300s",field_truth)]:
-        g=ug.copy(); g.point_data["T"]=fld[near]-K
+        g=ug.copy(); g.point_data["T"]=map_temperature(temperature_map, fld)-K
         pl=pv.Plotter(off_screen=True,window_size=(520,560))
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=14,show_scalar_bar=False)
         pl.camera_position=[(0.24,-0.22,0.20),(0,0,0.05),(0,0,1)]; pl.set_background("white")

@@ -16,6 +16,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); SAM
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
 import cylinder_mesh, fistr_case
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from fem.fem_obs import MATERIAL
 from scipy.spatial import cKDTree
 RES=os.path.join(ROOT,"results")
@@ -25,12 +26,12 @@ OUT=os.path.join(RES,"dispop_allnodes.npz")
 
 
 def main():
-    if os.path.exists(OUT): print("already exists:",OUT); return
+    if mapping_cache_valid(OUT): print("already exists:",OUT); return
     kv=np.load(os.path.join(RES,"qdeim_points.npz"))
     U=kv["pod_modes"].astype(float); mean=kv["mean"].astype(float); Cc=kv["cell_centres"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([x for _n,x in mesh["nodes"]]); node_ids=[n for n,_ in mesh["nodes"]]
-    _,near=cKDTree(Cc).query(coords)
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     work=Path(ROOT,"openfoam","dispop_all"); work.mkdir(parents=True,exist_ok=True)
     fistr_case.write_mesh(work,NR,NTH,NZ,R_IN,R_OUT,H,young_modulus=MATERIAL["young_modulus_Pa"],
         poisson_ratio=MATERIAL["poisson_ratio"],density=MATERIAL["density_kg_m3"],
@@ -42,11 +43,11 @@ def main():
             thermal_expansion_coeff=MATERIAL["thermal_expansion_coeff_per_K"])
         fistr_case.run_fistr(work); disp=fistr_case.read_displacement(work)
         return np.array([disp[n] for n in node_ids])*1e6      # (n,3) µm
-    u_mean=run_field(mean[near]); print("[all] mean field done",flush=True)
+    u_mean=run_field(map_temperature(temperature_map, mean)); print("[all] mean field done",flush=True)
     r=U.shape[1]; D=np.zeros((len(node_ids),3,r))
     for k in range(r):
-        D[:,:,k]=run_field(Tref+U[near,k]); print(f"[all] mode {k+1}/{r}",flush=True)
-    np.savez_compressed(OUT,u_mean=u_mean,D=D,coords=coords,node_ids=np.array(node_ids))
+        D[:,:,k]=run_field(Tref+map_temperature(temperature_map, U[:, k])); print(f"[all] mode {k+1}/{r}",flush=True)
+    np.savez_compressed(OUT,mapping_method=MAPPING_METHOD,u_mean=u_mean,D=D,coords=coords,node_ids=np.array(node_ids))
     print("wrote",OUT,u_mean.shape,D.shape)
 
 

@@ -17,6 +17,7 @@ import numpy as np
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE); SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 import cylinder_mesh
@@ -33,11 +34,11 @@ def main():
     U=kv["pod_modes"].astype(float); mean=kv["mean"].astype(float); Cc=kv["cell_centres"]
     mesh=cylinder_mesh.build_cylinder_mesh(NR,NTH,NZ,R_IN,R_OUT,H)
     coords=np.array([x for _n,x in mesh["nodes"]])
-    _,near=cKDTree(Cc).query(coords)                 # FEM節点 → 最寄りOpenFOAMセル
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
     t0=time.time()
     Wz=np.load(W105)                                  # (5040節点, 5040温度) [m/K]
     print(f"W 読み込み {Wz.shape} {time.time()-t0:.1f}s",flush=True)
-    Phi=U[near,:]                                     # (5040, 5) モードをFEM節点へ
+    Phi=map_temperature(temperature_map, U)                                     # (5040, 5) モードをFEM節点へ
     D_W=(Wz@Phi)*1e6                                  # (5040, 5) [µm]
     op=np.load(os.path.join(RES,"dispop_allnodes.npz"))
     D_fem=op["D"][:,2,:]                              # Uz 成分 (5040, 5) [µm]

@@ -15,6 +15,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 from dacore import rom_general as rg
 from dacore.enkf import enkf_update
@@ -76,13 +77,13 @@ def main():
     cells=[]
     for _e,conn in mesh["elements"]: cells.append(8); cells.extend(idr[n] for n in conn)
     grid=pv.UnstructuredGrid(np.array(cells),np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),mco)
-    _,near=cKDTree(Cc).query(mco)
+    temperature_map = build_idw_mapping(Cc, mco)  # 近傍8セルのIDW
     TMP=tempfile.mkdtemp()
 
     # ===== 温度GIF =====
-    fields={"hi":[gappy(da_hi[k])[near] for k in range(len(tgrid))],
-            "lo":[gappy(da_lo[k])[near] for k in range(len(tgrid))],
-            "tr":[gappy(Ttr[k])[near] for k in range(len(tgrid))]}
+    fields={"hi":[map_temperature(temperature_map, gappy(da_hi[k])) for k in range(len(tgrid))],
+            "lo":[map_temperature(temperature_map, gappy(da_lo[k])) for k in range(len(tgrid))],
+            "tr":[map_temperature(temperature_map, gappy(Ttr[k])) for k in range(len(tgrid))]}
     clim=[float(min(f.min() for f in fields["tr"])-K),float(max(f.max() for f in fields["tr"])-K)]
     for k,t in enumerate(tgrid):
         pl=pv.Plotter(off_screen=True,shape=(1,3),window_size=(1500,600))

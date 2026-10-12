@@ -1,0 +1,66 @@
+{
+  "source": "vtk/W_AO.vtu",
+  "note": "A/O rows from FrontISTR dumped K,H; difference verified against native FrontISTR Wdiff",
+  "coordinate_unit": "mm",
+  "sensor_codes": [
+    {
+      "code": 0,
+      "name": "T1",
+      "xyz_mm": [
+        36.688317999999995,
+        0.77941817,
+        49.218700999999996
+      ]
+    },
+    {
+      "code": 1,
+      "name": "T2（背面）",
+      "xyz_mm": [
+        -35.905927,
+        -1.5485803,
+        51.562737999999996
+      ]
+    },
+    {
+      "code": 2,
+      "name": "S1 Ux",
+      "xyz_mm": [
+        4.894732208251923,
+        -37.17918230151789,
+        100.5
+      ]
+    },
+    {
+      "code": 3,
+      "name": "S2 Ux",
+      "xyz_mm": [
+        4.894732208251939,
+        37.17918230151788,
+        100.5
+      ]
+    },
+    {
+      "code": 4,
+      "name": "A",
+      "xyz_mm": [
+        28.75,
+        0.0,
+        100.5
+      ]
+    },
+    {
+      "code": 5,
+      "name": "O",
+      "xyz_mm": [
+        -28.75,
+        0.0,
+        100.5
+      ]
+    }
+  ],
+  "color_scale": "symmetric log, linthresh=0.0003 um/K",
+  "W_range_um_per_K": [
+    -0.0540479986615,
+    0.0540479986615
+  ]
+}

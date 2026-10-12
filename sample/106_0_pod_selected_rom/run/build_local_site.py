@@ -27,7 +27,8 @@ TITLES = {
     "blog_006": "blog_006：温度2点＋変位2点の同化を1ステップずつ追う",
     "blog_007": "blog_007：作った ROM はどこまで使えるか",
     "blog_008": "blog_008：温度だけでなく変位も同化に使う ― 本研究の主張",
-    "blog_009": "blog_009：センサ2本だけで反りを当てる ― 代表点以外から σ で選ぶ",
+    "blog_009": "blog_009：温度2点を選び、次に変位2点を追加する",
+    "blog_010": "blog_010：評価点A・Oを90°回した観測配置の検証",
 }
 LEAD = {
     "blog_001": "中空円筒のCHT解析からFrontISTRの熱膨張まで。熱伝達率の分布も出す。",
@@ -38,7 +39,8 @@ LEAD = {
     "blog_006": "センサの読みから、状態・予報・観測演算子・共分散・ゲイン・更新まで、本番の数値で追う。",
     "blog_007": "発熱量・加熱のしかたが変わっても使えるか。使える条件と作り直しが要る条件を実計算で確かめる。",
     "blog_008": "先行研究を調べたうえで、変位を観測に入れることが研究の主張として成り立つかを整理する。",
-    "blog_009": "代表点以外から2本だけ選ぶ。反りだけを目的にすると、反りしか当たらない配置が選ばれることを理論と計算で示す。",
+    "blog_009": "温度のJ分布で2点を選び、その配置に変位2点を追加する。未観測温度・変位の改善を同条件で比較する。",
+    "blog_010": "ヒータを固定し、評価対象A・Oだけ90°回転。同じ4,000ケース・EnKF条件で温度と変位を選び直す。",
 }
 
 CSS = """
@@ -83,7 +85,7 @@ def fix_links(html: Path) -> None:
         if re.match(r"^(https?:|mailto:|#|img/|pdf/)", href):
             return m.group(0)
         path, _, frag = href.partition("#")
-        mb = re.match(r"^blog_(00[1-8])_[^/]*\.md$", path)
+        mb = re.match(r"^blog_([0-9]{3})_[^/]*\.md$", path)
         if mb:
             return f'href="blog{mb.group(1).replace("00", "00", 1)}.html' + (f"#{frag}" if frag else "") + '"'
         repo_path = posixpath.normpath(posixpath.join(DOCS_IN_REPO, path))
@@ -101,7 +103,7 @@ def build():
     hdr = OUT / "_header.html"
     hdr.write_text(CSS, encoding="utf-8")
 
-    mds = sorted(DOCS.glob("blog_00[1-9]_*.md"))
+    mds = sorted(DOCS.glob("blog_[0-9][0-9][0-9]_*.md"))
     used_imgs: set[str] = set()
     for md in mds:
         stem = md.name[:8]
@@ -110,14 +112,14 @@ def build():
                         "--include-in-header", str(hdr),
                         "--metadata", f"title={TITLES.get(stem, stem)}",
                         "-o", str(html)], check=True)
-        used_imgs |= set(re.findall(r'img/[A-Za-z0-9_\-]+\.(?:png|gif|jpg)', md.read_text(encoding="utf-8")))
+        used_imgs |= set(re.findall(r'img/[A-Za-z0-9_/\-]+\.(?:png|gif|jpg)', md.read_text(encoding="utf-8")))
         fix_links(html)
         print("  built", html.name)
 
     # Markdown向けのブログリンクを、生成したHTML向けに読み替える。
     from bs4 import BeautifulSoup
     page_by_md = {p.name: f"{p.name[:8].replace('_', '')}.html" for p in mds}
-    for page in sorted(OUT.glob("blog00[1-9].html")):
+    for page in sorted(OUT.glob("blog[0-9][0-9][0-9].html")):
         soup = BeautifulSoup(page.read_text(encoding="utf-8"), "html.parser")
         for a in soup.find_all("a", href=True):
             href = a["href"]
@@ -140,6 +142,7 @@ def build():
     for rel in sorted(used_imgs):
         src = DOCS / rel
         if src.exists():
+            (OUT / rel).parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(src, OUT / rel)
     print(f"  copied {len(used_imgs)} images")
 
@@ -154,7 +157,7 @@ def build():
     if ph.exists():
         t = ph.read_text(encoding="utf-8").replace('src="../docs/img/', 'src="img/')
         (OUT / "posters.html").write_text(t, encoding="utf-8")
-        for rel in set(re.findall(r'img/[A-Za-z0-9_\-]+\.(?:png|gif|jpg)', t)):
+        for rel in set(re.findall(r'img/[A-Za-z0-9_/\-]+\.(?:png|gif|jpg)', t)):
             src = DOCS / rel
             if src.exists():
                 shutil.copy2(src, OUT / rel)
@@ -169,7 +172,7 @@ def build():
         f'<p>{LEAD[s]}</p>'
         + (f'<p class="sub">PDF: <a href="pdf/{s}.pdf">{s}.pdf</a></p>' if (DOCS / "pdf" / f"{s}.pdf").exists() else '')
         + '</a>\n'
-        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005", "blog_006", "blog_007", "blog_008", "blog_009"])
+        for s in ["blog_001", "blog_002", "blog_003", "blog_004", "blog_005", "blog_006", "blog_007", "blog_008", "blog_009", "blog_010"])
     (OUT / "index.html").write_text(
         f'<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">'
         f'<title>熱データ同化 研究ノート（ローカル閲覧）</title>{INDEX_CSS}</head><body>'

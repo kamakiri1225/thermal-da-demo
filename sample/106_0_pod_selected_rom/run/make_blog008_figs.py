@@ -66,7 +66,7 @@ def run_da(m,obs,seed,Ttr,cyc,iA,iO):
 def main():
     m=setup(); coords=m["coords"]
     iA=near(m,A_XYZ); iO=near(m,O_XYZ)
-    sel=[(near(m,x),c) for x,c in SEL]; bc=[(near(m,x),c) for x,c in BC]
+    sel=[(near(m,x),c) for x,c in SEL]; bc=[]  # 本文の位置図は選定点と評価点に絞る
     cyc=np.arange(OBS_DT,T_END+1e-9,OBS_DT); tg=np.r_[0,cyc]
     T=np.full(NPT,rg.T_AIR_K); Ttr=[T.copy()]
     for a,b in zip(np.r_[0,cyc[:-1]],cyc):
@@ -74,7 +74,7 @@ def main():
     Ttr=np.array(Ttr); mp=m["mean"][m["pod"]]
     truth=np.array([[m["um"][iA,2]+m["Wall"][iA,2]@(t-mp),m["um"][iO,2]+m["Wall"][iO,2]@(t-mp)] for t in Ttr])
     runs={}
-    for nm,obs in [("変位なし（温度2点のみ）",[]),("B・C（中段 z=75 mm）",bc),("選定2点（上面）",sel)]:
+    for nm,obs in [("変位なし（温度2点のみ）",[]),("選定2点（上面）",sel)]:
         runs[nm]=np.mean([run_da(m,obs,s,Ttr,cyc,iA,iO) for s in SEEDS],axis=0)
         print("[fig]",nm,"done",flush=True)
 
@@ -140,8 +140,8 @@ def main():
         bx.annotate(lab,(p0[0]+dx,p0[1]),textcoords="offset points",xytext=off,fontsize=9,color="#A35200")
     bx.annotate("",xy=(58,-46),xytext=(45,-46),arrowprops=dict(arrowstyle="->")); bx.text(60,-47,"+x",fontsize=11,va="center")
     bx.set_xlim(-56,80); bx.set_ylim(-60,56); bx.set_aspect("equal"); bx.axis("off")
-    bx.set_title("真上から見た図（寸法 mm）\nB・C は中段 z=75 mm、ほかは上面 z=100.5 mm",fontsize=12)
-    fig.suptitle("観測点と評価点　赤＝温度センサ／緑＝選定した変位2点／橙＝B・C／黒＝評価点 A・O（一度も測らない）",fontsize=13)
+    bx.set_title("真上から見た図（寸法 mm）\n上面 z=100.5 mm（温度計P0/P2は高さ約51 mm）",fontsize=12)
+    fig.suptitle("観測点と評価点　赤＝温度センサ／緑＝選定した変位2点／黒＝評価点 A・O（一度も測らない）",fontsize=13)
     fig.savefig(os.path.join(IMG,"blog008_obs_points.png"),dpi=150,bbox_inches="tight",pad_inches=0.12); plt.close(fig)
     print("[fig] 3D done")
 

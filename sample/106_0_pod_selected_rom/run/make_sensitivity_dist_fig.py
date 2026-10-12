@@ -14,6 +14,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 SAMPLE=os.path.dirname(ROOT)
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(SAMPLE,"102_1_frontistr_hollow_cylinder_thermal_expansion","python"))
+from dacore.temperature_mapping import build_idw_mapping, map_temperature, mapping_cache_valid, MAPPING_METHOD
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
@@ -47,8 +48,8 @@ def main():
     cells=[]
     for _e,conn in mesh["elements"]: cells.append(8); cells.extend(idr[n] for n in conn)
     ug=pv.UnstructuredGrid(np.array(cells),np.full(len(mesh["elements"]),vtk.VTK_HEXAHEDRON,np.uint8),coords)
-    _,near=cKDTree(Cc).query(coords)
-    g=ug.copy(); g.point_data["s"]=field[near]
+    temperature_map = build_idw_mapping(Cc, coords)  # 近傍8セルのIDW
+    g=ug.copy(); g.point_data["s"]=map_temperature(temperature_map, field)
     # 表と裏の2アングル
     TMP=tempfile.mkdtemp(); shots=[]
     for cam,lab in [([(0.24,-0.22,0.20),(0,0,0.05),(0,0,1)],"ヒータ側(+X)から"),
