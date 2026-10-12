@@ -2284,6 +2284,70 @@ T}=\big(u_A[\varphi_1],\dots,u_A[\varphi_5]\big)\,\Phi_P^{-1}=(0.329,\,-0.134,\,
 \]</span></p>
 <p>になります。反りの重みは <span class="math inline">\(\mathbf
 w=\mathbf h_{A,z}-\mathbf h_{O,z}\)</span> です。</p>
+<p><strong>記号の対応（blog_002・004・006
+との関係）</strong>：記事ごとに記号が違うので、ここでまとめます。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>中身</th>
+<th>大きさ</th>
+<th>書いた場所</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(W=K_s^{-1}H_T\)</span></td>
+<td>熱感度：FEM の各温度自由度が 1 K 上がると、各変位がいくつ動くか</td>
+<td>15,120 × FEM の温度自由度の数</td>
+<td>blog_002 §4</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_r\)</span></td>
+<td>POD の型5つ（ <span class="math inline">\(\varphi_1,\dots,\varphi_5\)</span>
+を並べたもの）</td>
+<td>場所の数 × 5</td>
+<td>blog_004</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(D=WU_r\)</span></td>
+<td><strong>型1つあたりの変位</strong>（型 <span class="math inline">\(\varphi_k\)</span> を1倍入れたときの変位 <span class="math inline">\(\mathbf u[\varphi_k]\)</span> ）。FrontISTR
+を型ごとに1回ずつ解いて作る</td>
+<td>15,120 × 5</td>
+<td>blog_006 §7</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(U_{rP}\)</span> （＝ <span class="math inline">\(\Phi_P\)</span> ）</td>
+<td>型の、代表5点での値</td>
+<td>5 × 5</td>
+<td>blog_006 は <span class="math inline">\(U_{rP}\)</span> 、この記事は
+<span class="math inline">\(\Phi_P\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf h_c^{\mathsf
+T}=D_c\,U_{rP}^{-1}\)</span></td>
+<td><strong>代表点 1 K あたりの変位</strong>（重み）。 <span class="math inline">\(D_c\)</span> は <span class="math inline">\(D\)</span> の節点 <span class="math inline">\(c\)</span> ・その方向の行</td>
+<td>1 × 5</td>
+<td>blog_008・009</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(D\)</span> は「型1つあたり」、 <span class="math inline">\(\mathbf h_c\)</span> は「代表点 1 K
+あたり」で、同じものを違う単位で表しているだけです。</p>
+<p><span class="math display">\[
+u_c=\bar u_c+D_c\,\mathbf a=\bar u_c+D_c\,U_{rP}^{-1}\big(\mathbf
+T_P-\bar{\mathbf T}_P\big)=\bar u_c+\mathbf h_c^{\mathsf T}\big(\mathbf
+T_P-\bar{\mathbf T}_P\big)
+\]</span></p>
+<p>プログラムでは <code>Wall = einsum(D, pinv(U_rP))</code> が全節点の
+<span class="math inline">\(\mathbf h_c\)</span> をまとめた配列（15,120
+× 5）です。名前は <code>Wall</code> ですが、blog_002 の <span class="math inline">\(W\)</span> とは別物です。</p>
 <p><strong>確かめ：重み × 実際の温度の時刻歴は、FrontISTR
 の答えと合うか。</strong> データ同化を使わずに、OpenFOAM
 の実際の5点の温度の時刻歴に重みを掛け、FrontISTR
