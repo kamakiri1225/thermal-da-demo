@@ -246,6 +246,7 @@
 <li><a href="#blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う" id="toc-blog_008本研究の主張-温度だけでなく変位もデータ同化の観測に使う">blog_008：本研究の主張
 ―「温度だけでなく変位もデータ同化の観測に使う」</a>
 <ul>
+<li><a href="#先に点の名前を整理する" id="toc-先に点の名前を整理する">先に、点の名前を整理する</a></li>
 <li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
 <li><a href="#この記事の構成" id="toc-この記事の構成">この記事の構成</a></li>
 <li><a href="#0-研究全体のまとめ--発表の流れに沿って" id="toc-0-研究全体のまとめ--発表の流れに沿って">0. 研究全体のまとめ ―
@@ -374,7 +375,7 @@ Zurich (2024)</a></li>
 <p><strong>2026-10-05の読み直し：条件の区別</strong>
 研究対象は中空円筒の数値実験。工作機械への応用は将来の位置付けです。ROM双子実験と実ソルバ真値を区別し、温度場の精度と未観測変位の精度を別々に評価します。文献検索で見つからないことは新規性の証明ではありません。</p>
 </blockquote>
-<p>更新日：2026-10-05（条件・評価量・文献確認範囲を再整理）</p>
+<p>更新日：2026-10-12（点の名前・観測条件・代表点で取り出す行列の説明を補足）</p>
 <p>これまでの記事で、温度2点に変位2点を足すと推定が良くなることを示してきました。
 この記事は、<strong>それが研究の主張として成り立つのか</strong>を、先行研究を調べたうえで整理したものです。</p>
 <blockquote>
@@ -420,6 +421,106 @@ Zurich (2024)</a></li>
 </table>
 <p>数値は重複を避け、各記事が担当する検証だけを載せています。</p>
 </blockquote>
+<h2 id="先に点の名前を整理する">先に、点の名前を整理する</h2>
+<p><strong>P0〜P4は、円筒の中で温度を計算する「代表5点」の名前です。5本の温度計を常に置いている、という意味ではありません。</strong>
+ROMは5点すべての温度を計算しますが、実際に観測として使う点は、試験ごとにその一部を選びます。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>点の名前</th>
+<th>どこの点か（概略座標、単位mm）</th>
+<th>何のための点か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0</td>
+<td>ヒータ側・中段 <span class="math inline">\((21.3,-1.6,51.6)\)</span></td>
+<td>ROMの温度代表点。P2と同じ側に温度計を置く比較で使う</td>
+</tr>
+<tr class="even">
+<td>P1</td>
+<td>反対側寄り・中段 <span class="math inline">\((-14.1,33.1,51.6)\)</span></td>
+<td>ROMの温度代表点・温度計の候補</td>
+</tr>
+<tr class="odd">
+<td>P2</td>
+<td>ヒータ側・中段 <span class="math inline">\((36.5,6.9,50.8)\)</span></td>
+<td>ROMの温度代表点。ROMの発熱入力を与える点で、主な温度観測位置</td>
+</tr>
+<tr class="even">
+<td>P3</td>
+<td>ヒータ側・底面近く <span class="math inline">\((35.1,0.8,0.8)\)</span></td>
+<td>ROMの温度代表点・温度計の候補</td>
+</tr>
+<tr class="odd">
+<td>P4</td>
+<td>反対側・底面近く <span class="math inline">\((-35.1,0.8,0.8)\)</span></td>
+<td>ROMの温度代表点。ヒータ側と反対側に分けて温度計を置く比較で使う</td>
+</tr>
+<tr class="even">
+<td>S1・S2</td>
+<td>円筒の上面に選んだ、別々の2点</td>
+<td>変位を観測する位置。S1では横方向 <span class="math inline">\(U_x\)</span> 、S2では上下方向 <span class="math inline">\(U_z\)</span> を測る</td>
+</tr>
+<tr class="odd">
+<td>A・O</td>
+<td>上面のヒータ側と反対側</td>
+<td>推定したい変位差 <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
+の評価位置。§5〜7のS1・S2を使う試験ではA・Oを観測しない</td>
+</tr>
+</tbody>
+</table>
+<p>座標は <span class="math inline">\((x,y,z)\)</span> の順で、 <span class="math inline">\(z\)</span>
+が高さです。P0〜P4はOpenFOAMのセル、S1・S2とA・OはFrontISTRの節点です。A・Oを観測する参考比較もあるため、<strong>点の名前と「観測に使ったかどうか」は分けて読みます。</strong></p>
+<figure>
+<img alt="代表5点と、変位差を評価するA・Oの位置" src="img/sensor_pair_positions.png"/>
+<figcaption aria-hidden="true">代表5点と、変位差を評価するA・Oの位置</figcaption>
+</figure>
+<p>例えば「温度P2＋P4」とは、<strong>ヒータ側の中段と、反対側の底面近くに温度計を1本ずつ置く</strong>ことです。「温度P2＋P0」は、<strong>ヒータ側の中段に2本置く</strong>ことです。どちらもROM内部では、測っていない残り3点を含む5点すべてを計算・補正します。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>本記事で出てくる比較</th>
+<th>温度計の位置</th>
+<th>変位計の位置</th>
+<th>確かめること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計の配置比較（blog_005）</td>
+<td>代表5点から2点を選ぶ全10組</td>
+<td>なし</td>
+<td>同じ側に2本か、両側に1本ずつか</td>
+</tr>
+<tr class="even">
+<td>§0-8の観測の組合せ比較</td>
+<td>P2のみ、またはP2＋P4</td>
+<td>なし、またはS1＋S2</td>
+<td>温度観測に変位観測を加える効果</td>
+</tr>
+<tr class="odd">
+<td>§5〜7の変位計の配置比較</td>
+<td><strong>P2＋P0に固定</strong></td>
+<td>S1＋S2など、置き場所を変える</td>
+<td>同じ温度観測の下で、変位計はどこが良いか</td>
+</tr>
+</tbody>
+</table>
+<p><strong>P2＋P4の結果とP2＋P0の結果は、温度計の位置が違う試験です。</strong>
+数値だけを横並びにして、変位計の効果や配置の優劣を判断しないようにします。</p>
 <h2 id="この記事で確かめること">この記事で確かめること</h2>
 <table>
 <colgroup>
@@ -2039,14 +2140,50 @@ u[\varphi_2]+\cdots+a_5\,\mathbf u[\varphi_5]
 \]</span></p>
 <ol start="4" type="1">
 <li><strong>型の強さ <span class="math inline">\(a_k\)</span>
-は、代表5点の温度から決まる（gappy-POD）。</strong>
-代表5点での型の値を並べた 5×5 の行列を <span class="math inline">\(\Phi_P\)</span> とすると、</li>
+は、代表5点の温度から決まる（gappy-POD）。</strong> ここで添字 <span class="math inline">\(P\)</span>
+は「P0〜P4の代表5点で取り出した値」という目印です。この式の <span class="math inline">\(P\)</span>
+自体が新しい未知数や行列という意味ではありません。</li>
 </ol>
+<p>まず、代表5点の温度を並べます。</p>
+<p><span class="math display">\[
+\mathbf T_P=
+\begin{bmatrix}T(P0)\\T(P1)\\T(P2)\\T(P3)\\T(P4)\end{bmatrix},
+\qquad
+\bar{\mathbf T}_P=
+\begin{bmatrix}\bar T(P0)\\\bar T(P1)\\\bar T(P2)\\\bar T(P3)\\\bar
+T(P4)\end{bmatrix},
+\qquad
+\mathbf a=\begin{bmatrix}a_1\\a_2\\a_3\\a_4\\a_5\end{bmatrix}
+\]</span></p>
+<p><span class="math inline">\(T(Pj)\)</span>
+は今の時刻の代表点Pjの温度、 <span class="math inline">\(\bar
+T(Pj)\)</span>
+はその点での学習データの時間平均温度です。<strong>平均温度も各点で違う5個の値</strong>です。
+<span class="math inline">\(a_k\)</span> はPODの第 <span class="math inline">\(k\)</span> モードを何倍使うかを表します。</p>
+<p>次に、各モードの値を代表5点で取り出して並べます。</p>
+<p><span class="math display">\[
+\Phi_P=
+\begin{bmatrix}
+\varphi_1(P0)&amp;\varphi_2(P0)&amp;\varphi_3(P0)&amp;\varphi_4(P0)&amp;\varphi_5(P0)\\
+\varphi_1(P1)&amp;\varphi_2(P1)&amp;\varphi_3(P1)&amp;\varphi_4(P1)&amp;\varphi_5(P1)\\
+\varphi_1(P2)&amp;\varphi_2(P2)&amp;\varphi_3(P2)&amp;\varphi_4(P2)&amp;\varphi_5(P2)\\
+\varphi_1(P3)&amp;\varphi_2(P3)&amp;\varphi_3(P3)&amp;\varphi_4(P3)&amp;\varphi_5(P3)\\
+\varphi_1(P4)&amp;\varphi_2(P4)&amp;\varphi_3(P4)&amp;\varphi_4(P4)&amp;\varphi_5(P4)
+\end{bmatrix}
+\]</span></p>
+<p><strong>行は場所、列はモード</strong>です。例えば1行目は「P0の温度を、5つのモードでどう表すか」を示し、
+<span class="math inline">\(T(P0)-\bar
+T(P0)=\sum_{k=1}^{5}\varphi_k(P0)a_k\)</span>
+となります。これを5点についてまとめると、次の式になります。</p>
 <p><span class="math display">\[
 \mathbf T_P=\bar{\mathbf T}_P+\Phi_P\,\mathbf
 a\quad\Rightarrow\quad\mathbf a=\Phi_P^{-1}\big(\mathbf T_P-\bar{\mathbf
 T}_P\big)
 \]</span></p>
+<p>ここで <span class="math inline">\(\Phi_P^{-1}\)</span>
+は、5点の温度差から5モードの係数を逆に求める操作です。上式は正則な5×5行列の場合の表記で、コードでは
+<code>np.linalg.pinv()</code>
+による擬似逆行列を使います。<strong>センサの観測値をここに直接代入して同化するのではなく、各メンバーのROMが計算した代表5点の温度から、センサ位置の予測値を作るために使います。</strong></p>
 <ol start="5" type="1">
 <li><strong>3と4を合わせると、重みが出る。</strong> 節点 <span class="math inline">\(c\)</span> のある方向の変位は</li>
 </ol>
