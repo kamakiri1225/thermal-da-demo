@@ -298,6 +298,8 @@ W・間欠加熱でも確かめる</a></li>
 </ul></li>
 <li><a href="#7-結論と再現場所" id="toc-7-結論と再現場所">7.
 結論と再現場所</a></li>
+<li><a href="#8-先行研究温度センサの位置はどこが良いとされているか" id="toc-8-先行研究温度センサの位置はどこが良いとされているか">8.
+先行研究：温度センサの位置は、どこが良いとされているか</a></li>
 </ul></li>
 </ul>
 </nav>
@@ -2274,5 +2276,116 @@ Kになりました。</strong>
 <p>評価対象A・Oだけをz軸まわりに90°回し、同じ手順・3加熱条件で選び直した比較は
 <a href="blog010.html">blog010：評価点を変えた観測配置の検証</a>
 にまとめました。</p>
+<hr/>
+<h2 id="8-先行研究温度センサの位置はどこが良いとされているか">8.
+先行研究：温度センサの位置は、どこが良いとされているか</h2>
+<p>工作機械の熱変形の研究で、温度センサの配置は、ほぼすべて「<strong>熱変位（工具先端のずれ）を推定するための配置</strong>」として選ばれています。結論は大きく3つの流派に分かれます。<strong>共通する答えは「熱源の近く」と「互いに違う情報を持つ点を選ぶ」の2点</strong>で、どの機械にも当てはまる場所の正解はなく、機械や運転条件ごとに決める、という見方で一致しています。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>流派</th>
+<th>代表例</th>
+<th>結論（どこが良いか）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>熱モード（物理モデル）</strong></td>
+<td>Zhu, Ni, Shih（2008、ミシガン大、J. Manuf. Sci. Eng.）</td>
+<td>FEM
+で温度場の「型（熱モード）」を求め、<strong>主要な型の数だけセンサを置く</strong>。一番目の型（ほぼ一様に温まる型）は<strong>熱源のできるだけ近く</strong>、それ以降の型は<strong>温度の振れ幅が最大の場所</strong>に置く。目的は、温度データどうしを独立にして推定を安定させること</td>
+</tr>
+<tr class="even">
+<td><strong>データ駆動（温度感応点）</strong></td>
+<td>ファジィクラスタリング＋灰色関連分析、LASSO など多数。Tanaka,
+Kizaki, Teshima, Sugita（2025、東大、IJAT）は 307 点から LASSO
+で選択</td>
+<td>多数のセンサを仮に付け、<strong>熱変位との相関が高く、互いの相関が低い点</strong>を各グループから1つずつ選ぶ（例：10点→4点）。結果は主軸の軸受・モータなど熱源の近くに集まりやすい。<strong>運転パターンが変わると、重要な点も変わる</strong>（Tanaka
+ら。センサ数を 76 % 減らしても誤差 10 µm 以下）</td>
+</tr>
+<tr class="odd">
+<td><strong>FEM・ROM による事前選定</strong></td>
+<td>Mian ら（2012、ハダースフィールド大）、Teshima ら（2024、CIRP J.
+Manuf. Sci. Technol.）</td>
+<td>FEM
+や縮約モデルで、実験の前に場所を選ぶ枠組み。決まった場所ではなく、<strong>手順として</strong>提案している</td>
+</tr>
+</tbody>
+</table>
+<p><strong>本研究との関係</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>先行研究</th>
+<th>本研究</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>同じところ</td>
+<td>熱モードの数だけ、型をとらえる場所に置く</td>
+<td>Q-DEIM の代表点の選び方は、同じ考え方</td>
+</tr>
+<tr class="even">
+<td>同じところ</td>
+<td>熱変位との相関が高く、互いの相関が低い点を選ぶ</td>
+<td>「ヒータ側と反対側に分ける」「同じことを2回測らない」は同じ結論</td>
+</tr>
+<tr class="odd">
+<td>同じところ</td>
+<td>一番目の型（一様な温まり）をとらえるセンサが要る（Zhu ら）</td>
+<td>「反りだけを目的にすると、全体の温まりが見えないセンサが選ばれる」（§5）を、別の角度から示した</td>
+</tr>
+<tr class="even">
+<td>違うところ</td>
+<td>観測は<strong>温度だけ</strong>。変位は回帰などで出す</td>
+<td><strong>変位計も観測の候補</strong>に入れ、データ同化の分散 σ
+で温度計と変位計の場所を一緒に評価</td>
+</tr>
+<tr class="odd">
+<td>違うところ</td>
+<td>相関や回帰の精度で選ぶ</td>
+<td>目的（反り、 <span class="math inline">\(U_z(A)\)</span>
+、全体の温まり）ごとの σ
+を、測る前に式で計算して選ぶ。目的によって最適な場所が変わり、落とし穴があることを理論で説明</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意</strong>：全文を読んで確かめたのは Zhu
+らの論文だけです。Tanaka ら、Teshima ら、Mian
+らは要旨と書誌の確認だけで、選ばれた具体的な場所（主軸、コラムなど）までは確かめていません。発表で引用するときは、全文を確認する必要があります。</p>
+<p><strong>参考文献</strong></p>
+<ul>
+<li><a href="https://wumrc.engin.umich.edu/wp-content/uploads/sites/51/2013/08/08JMSEZhuMachinetoolthermalerrorcompensation.pdf">Zhu,
+Ni, Shih (2008) Robust machine tool thermal error modeling through
+thermal mode concept, J. Manuf. Sci. Eng.</a></li>
+<li><a href="https://pure.hud.ac.uk/en/publications/an-efficient-offline-method-for-determining-the-thermally-sensiti/">Mian
+et al. (2012) An efficient offline method for determining the thermally
+sensitive points of a machine tool structure</a></li>
+<li><a href="https://www.fujipress.jp/ijat/au/ijate001900050758/">Tanaka,
+Kizaki, Teshima, Sugita (2025) Int. J. Automation Technol.（307
+点の温度センサと LASSO）</a></li>
+<li><a href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima,
+Tanaka, Kizaki, Sugita (2024) Sensor placement strategy based on
+reduced-order models for thermal error estimation in machine tools, CIRP
+JMST 55, 403–410</a></li>
+<li><a href="https://www2.mdpi.com/2075-1702/9/11/286">温度感応点の選定（ファジィクラスタリング＋灰色関連分析）の例：MDPI
+Machines</a></li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9315643/">温度感応点の選定の例（PMC
+掲載論文）</a></li>
+<li><a href="https://eprints.hud.ac.uk/21510/1/Euspen_Thermal_SIG_Extended_abstract_SF_v2.pdf">熱誤差補償とセンサ配置の概説：Euspen
+Thermal SIG</a></li>
+</ul>
 </body>
 </html>
