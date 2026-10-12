@@ -2297,67 +2297,216 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 が必要です。</strong> <span class="math inline">\(B\)</span>
 は「5点の温度がどう一緒にばらつくか」で、そこから「反りと値がどう一緒にばらつくか」が計算できます。4,000
 本の点を候補ごとに描き直す必要はありません。</p>
-<h5 id="b-σ-の式を文字式で1行ずつ導く">(b′) σ
-の式を、文字式で1行ずつ導く</h5>
-<p>記号を平均からのずれで書きます（4,000
-本の平均を引いた値）。センサの値 <span class="math inline">\(y\)</span>
-にはノイズ <span class="math inline">\(\varepsilon\)</span> （分散 <span class="math inline">\(r\)</span> 、温度とは無関係）が乗ります。</p>
+<h5 id="b-σ-の式を省略なしで導く">(b′) σ の式を、省略なしで導く</h5>
+<p><strong>0. 記号を決める。</strong> すべて「4,000
+本の平均からのずれ」で書きます。</p>
+<ul>
+<li><span class="math inline">\(d\)</span> ：反りの、平均からのずれ</li>
+<li><span class="math inline">\(y\)</span>
+：センサの値の、平均からのずれ</li>
+<li><span class="math inline">\(\langle\ \rangle\)</span> ：4,000
+本の平均をとる記号</li>
+</ul>
+<p>平均からのずれなので、分散と共分散は「掛けて平均するだけ」になります。</p>
 <p><span class="math display">\[
-d=\mathbf w^{\mathsf T}\mathbf T,\qquad y=\mathbf h^{\mathsf T}\mathbf
-T+\varepsilon
+\mathrm{Var}(d)=\langle d^2\rangle,\qquad
+\mathrm{Var}(y)=\langle y^2\rangle,\qquad
+\mathrm{Cov}(d,y)=\langle d\,y\rangle
 \]</span></p>
-<p><strong>① センサの値 <span class="math inline">\(y\)</span> から反り
-<span class="math inline">\(d\)</span> を直線で予想する。</strong>
-予想を <span class="math inline">\(\hat d=a\,y\)</span> とし、外れ <span class="math inline">\(d-\hat d\)</span> の二乗の平均を考えます。</p>
+<p><strong>1. センサの値から反りを予想する式を決める。</strong> 傾き
+<span class="math inline">\(a\)</span>
+の直線で予想します（散布図の黒い直線）。</p>
 <p><span class="math display">\[
-E\big[(d-a\,y)^2\big]=\mathrm{Var}(d)-2a\,\mathrm{Cov}(d,y)+a^2\,\mathrm{Var}(y)
+\hat d=a\,y
 \]</span></p>
-<p><strong>② 外れが一番小さくなる傾き <span class="math inline">\(a\)</span> を選ぶ。</strong> <span class="math inline">\(a\)</span> で微分して 0 とおきます。</p>
+<p>予想の外れは</p>
 <p><span class="math display">\[
--2\,\mathrm{Cov}(d,y)+2a\,\mathrm{Var}(y)=0
-\quad\Rightarrow\quad
-a=\frac{\mathrm{Cov}(d,y)}{\mathrm{Var}(y)}
+d-\hat d=d-a\,y
 \]</span></p>
-<p>これが散布図の黒い直線の傾きです。</p>
-<p><strong>③ その <span class="math inline">\(a\)</span>
-を①に戻すと、残る外れが σ²。</strong></p>
+<p><strong>2. 外れを二乗して、展開する。</strong></p>
 <p><span class="math display">\[
-\sigma^2=\mathrm{Var}(d)-2\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}+\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
-=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
+(d-a\,y)^2=d^2-2a\,d\,y+a^2\,y^2
 \]</span></p>
-<p>これが散布図の帯の幅です。相関係数 <span class="math inline">\(\rho=\mathrm{Cov}(d,y)/\sqrt{\mathrm{Var}(d)\mathrm{Var}(y)}\)</span>
-を使うと <span class="math inline">\(\sigma^2=\mathrm{Var}(d)\,(1-\rho^2)\)</span> 。
-<span class="math inline">\(\lvert\rho\rvert\)</span> が 1
-に近い（散布図が細い直線）ほど σ が小さくなります。</p>
-<p><strong>④ 3つの量を、温度の共分散 <span class="math inline">\(B\)</span> と重みで展開する。</strong> <span class="math inline">\(B_{ij}=\mathrm{Cov}(T_i,T_j)\)</span>
-と書くと、</p>
+<p><strong>3. 4,000 本で平均する。</strong> <span class="math inline">\(a\)</span> は定数なので平均の外に出せます。</p>
 <p><span class="math display">\[
-\mathrm{Var}(d)=\sum_{i}\sum_{j}w_i\,w_j\,B_{ij},\qquad
-\mathrm{Cov}(d,y)=\sum_{i}\sum_{j}w_i\,h_j\,B_{ij},\qquad
-\mathrm{Var}(y)=\sum_{i}\sum_{j}h_i\,h_j\,B_{ij}+r
+\langle(d-a\,y)^2\rangle=\langle d^2\rangle-2a\,\langle
+d\,y\rangle+a^2\,\langle y^2\rangle
+=\mathrm{Var}(d)-2a\,\mathrm{Cov}(d,y)+a^2\,\mathrm{Var}(y)
 \]</span></p>
-<p>（ノイズ <span class="math inline">\(\varepsilon\)</span>
-は温度と無関係なので、 <span class="math inline">\(\mathrm{Cov}(d,y)\)</span> には入らず、 <span class="math inline">\(\mathrm{Var}(y)\)</span> に <span class="math inline">\(r\)</span> だけ足されます。）</p>
-<p><strong>⑤ 代表点が2つ（ <span class="math inline">\(T_1,T_2\)</span>
-）だけの場合に、全部書き出すと：</strong></p>
+<p><strong>4. <span class="math inline">\(a\)</span>
+について平方完成する。</strong> 見やすくするため <span class="math inline">\(V_d=\mathrm{Var}(d)\)</span> 、 <span class="math inline">\(C=\mathrm{Cov}(d,y)\)</span> 、 <span class="math inline">\(V_y=\mathrm{Var}(y)\)</span> と書きます。</p>
 <p><span class="math display">\[
-\mathrm{Var}(d)=w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}
+V_d-2aC+a^2V_y
+=V_y\Big(a^2-2a\frac{C}{V_y}\Big)+V_d
+=V_y\Big(a-\frac{C}{V_y}\Big)^2-\frac{C^2}{V_y}+V_d
+\]</span></p>
+<p>（右辺の括弧を展開すると <span class="math inline">\(V_y
+a^2-2aC+C^2/V_y\)</span> なので、 <span class="math inline">\(-C^2/V_y\)</span>
+で打ち消すと左辺に戻ります。）</p>
+<p><strong>5. 外れが一番小さくなる <span class="math inline">\(a\)</span> と、そのときの外れ。</strong> 第1項
+<span class="math inline">\(V_y(a-C/V_y)^2\)</span> は 0 以上で、 <span class="math inline">\(a=C/V_y\)</span> のとき 0 になります。</p>
+<p><span class="math display">\[
+a=\frac{C}{V_y}=\frac{\mathrm{Cov}(d,y)}{\mathrm{Var}(y)}
+\]</span></p>
+<p>これが散布図の黒い直線の傾きです。このときの外れが σ²
+（散布図の帯の幅の二乗）です。</p>
+<p><span class="math display">\[
+\sigma^2=\langle(d-a\,y)^2\rangle_{\min}=V_d-\frac{C^2}{V_y}=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)}
+\]</span></p>
+<p><strong>6. 小さな数値例で確かめる。</strong>
+世界が5つだけ、と考えます（数字は説明用の作り話）。</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">世界</th>
+<th style="text-align: right;">反り</th>
+<th style="text-align: right;">反りのずれ <span class="math inline">\(d\)</span></th>
+<th style="text-align: right;">場所 X の値</th>
+<th style="text-align: right;">X のずれ <span class="math inline">\(y\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(d\,y\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(y^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">−0.8</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">−1.6</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">2.56</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: right;">2.88</td>
+<td style="text-align: right;">5.76</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">−0.8</td>
+<td style="text-align: right;">1.9</td>
+<td style="text-align: right;">−1.7</td>
+<td style="text-align: right;">1.36</td>
+<td style="text-align: right;">2.89</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">平均</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;"><strong>1.14</strong></td>
+<td style="text-align: right;"><strong>2.324</strong></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(d^2\)</span> の平均は <span class="math inline">\((0.64+0.04+1.44+0.04+0.64)/5=0.56\)</span>
+です。よって</p>
+<p><span class="math display">\[
+V_d=0.56,\qquad C=1.14,\qquad V_y=2.324,\qquad
+a=\frac{1.14}{2.324}=0.491
 \]</span></p>
 <p><span class="math display">\[
-\mathrm{Cov}(d,y)=w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}
+\sigma^2=0.56-\frac{1.14^2}{2.324}=0.56-0.559=0.0008,\qquad \sigma=0.03
+\]</span></p>
+<p>測る前の幅 <span class="math inline">\(\sqrt{0.56}=0.75\)</span>
+が、X の値を知ると 0.03 まで縮みます。 同じ計算を、反りと関係のない場所
+Y（値 5.1, 1.3, 4.8, 3.0, 2.2）でやると <span class="math inline">\(C=0.156\)</span> 、 <span class="math inline">\(V_y=2.158\)</span> 、 <span class="math inline">\(\sigma^2=0.56-0.011=0.549\)</span> 、 <span class="math inline">\(\sigma=0.74\)</span> で、ほとんど縮みません。</p>
+<p><strong>7. センサのノイズを入れる。</strong>
+実際の値には、温度とは無関係なノイズ <span class="math inline">\(\varepsilon\)</span> （分散 <span class="math inline">\(r\)</span> ）が乗ります： <span class="math inline">\(y=y_0+\varepsilon\)</span> （ <span class="math inline">\(y_0\)</span> ＝ノイズのない値）。</p>
+<p><span class="math display">\[
+\langle d\,y\rangle=\langle d\,y_0\rangle+\langle
+d\,\varepsilon\rangle=\langle d\,y_0\rangle+0
 \]</span></p>
 <p><span class="math display">\[
-\mathrm{Var}(y)=h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r
+\langle y^2\rangle=\langle y_0^2\rangle+2\langle
+y_0\,\varepsilon\rangle+\langle\varepsilon^2\rangle=\langle
+y_0^2\rangle+0+r
+\]</span></p>
+<p>ノイズは共分散を変えず、分母に <span class="math inline">\(r\)</span>
+を足すだけです。</p>
+<p><span class="math display">\[
+\sigma^2=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y_0)^2}{\mathrm{Var}(y_0)+r}
+\]</span></p>
+<p><strong>8. 反りとセンサの値を、温度で書き直す。</strong>
+代表点が2つ（温度のずれ <span class="math inline">\(\Delta T_1,\Delta
+T_2\)</span> ）の場合で書きます。ステップ1の重みを使うと</p>
+<p><span class="math display">\[
+d=w_1\Delta T_1+w_2\Delta T_2,\qquad y_0=h_1\Delta T_1+h_2\Delta T_2
+\]</span></p>
+<p>温度の分散・共分散を <span class="math inline">\(B_{11}=\langle\Delta
+T_1^2\rangle\)</span> 、 <span class="math inline">\(B_{22}=\langle\Delta T_2^2\rangle\)</span> 、
+<span class="math inline">\(B_{12}=\langle\Delta T_1\Delta
+T_2\rangle\)</span> と書きます。</p>
+<p><strong><span class="math inline">\(\mathrm{Var}(d)\)</span></strong>
+：二乗を展開して平均します。</p>
+<p><span class="math display">\[
+d^2=w_1^2\Delta T_1^2+2w_1w_2\,\Delta T_1\Delta T_2+w_2^2\Delta T_2^2
 \]</span></p>
 <p><span class="math display">\[
-\sigma^2=\big(w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}\big)-\frac{\big(w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}\big)^2}{h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r}
+\mathrm{Var}(d)=\langle d^2\rangle=w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}
+\]</span></p>
+<p><strong><span class="math inline">\(\mathrm{Cov}(d,y_0)\)</span></strong>
+：積を4項に展開して平均します。</p>
+<p><span class="math display">\[
+d\,y_0=w_1h_1\Delta T_1^2+w_1h_2\,\Delta T_1\Delta T_2+w_2h_1\,\Delta
+T_2\Delta T_1+w_2h_2\Delta T_2^2
+\]</span></p>
+<p><span class="math display">\[
+\mathrm{Cov}(d,y_0)=w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}
+\]</span></p>
+<p><strong><span class="math inline">\(\mathrm{Var}(y_0)\)</span></strong> ： <span class="math inline">\(\mathrm{Var}(d)\)</span> の <span class="math inline">\(w\)</span> を <span class="math inline">\(h\)</span> に置き換えたものです。</p>
+<p><span class="math display">\[
+\mathrm{Var}(y_0)=h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}
+\]</span></p>
+<p><strong>9. 7に代入すると、σ が温度の共分散 <span class="math inline">\(B\)</span> と重みだけで書ける。</strong></p>
+<p><span class="math display">\[
+\sigma^2=\big(w_1^2B_{11}+2w_1w_2B_{12}+w_2^2B_{22}\big)
+-\frac{\big(w_1h_1B_{11}+(w_1h_2+w_2h_1)B_{12}+w_2h_2B_{22}\big)^2}{h_1^2B_{11}+2h_1h_2B_{12}+h_2^2B_{22}+r}
 \]</span></p>
 <ul>
-<li><strong>重み <span class="math inline">\(w,h\)</span> は FrontISTR、
-<span class="math inline">\(B\)</span> は ROM 4,000 本、 <span class="math inline">\(r\)</span>
-はセンサの仕様</strong>から決まります。測定値はどこにも出てきません。</li>
-<li>実際は代表点が5つなので、和が 5×5＝25
-項になるだけで、形は同じです。</li>
+<li>重み <span class="math inline">\(w,h\)</span> は FrontISTR、 <span class="math inline">\(B\)</span> は ROM 4,000 本、 <span class="math inline">\(r\)</span>
+はセンサの仕様から決まります。測定値はどこにも出てきません。</li>
+<li>本研究は代表点が5つなので、和が 5×5＝25
+項になるだけで、形は同じです： <span class="math inline">\(\mathrm{Var}(d)=\sum_i\sum_j w_iw_jB_{ij}\)</span>
+、 <span class="math inline">\(\mathrm{Cov}=\sum_i\sum_j
+w_ih_jB_{ij}\)</span> 、 <span class="math inline">\(\mathrm{Var}(y_0)=\sum_i\sum_j
+h_ih_jB_{ij}\)</span> 。</li>
+<li>ここでは平均を「÷本数」で書きました。プログラムは「÷(本数−1)」で計算していますが、4,000
+本では差は 0.03 % で、結果は変わりません。</li>
 </ul>
 <h5 id="c-温度計と一緒に測る場合2本目を選ぶ場合">(c)
 温度計と一緒に測る場合、2本目を選ぶ場合</h5>
