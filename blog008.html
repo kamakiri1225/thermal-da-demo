@@ -1150,7 +1150,7 @@ Kずれたとき、A−Oが何µmずれるか</strong>を表す感度です。</
 <p>候補センサ集合 <span class="math inline">\(S\)</span>
 の値を温度から求める行列を <span class="math inline">\(H_S\)</span>
 、観測ノイズの共分散を <span class="math inline">\(R_S\)</span>
-とします。温度計の行は温度の取り出し・POD復元、変位計の行は温度からその方向の変位への合成感度です。線形・ガウスの仮定では、測った後の温度共分散は、</p>
+とします。温度計の行は温度の取り出し・POD復元、変位計の行は温度からその方向の変位への合成感度です。線形・ガウスの仮定では、センサを付けた後でも残る温度の分からなさの表（共分散）は、</p>
 <p><span class="math display">\[
 B_S^a=B-BH_S^{\mathsf T}
 \left(H_SBH_S^{\mathsf T}+R_S\right)^{-1}H_SB
@@ -2784,7 +2784,93 @@ h_{c,0}&amp;h_{c,1}&amp;h_{c,2}&amp;h_{c,3}&amp;h_{c,4}
 の代表点そのものだからです。代表点以外のセル <span class="math inline">\(j\)</span> に温度計を置く場合は、この行が
 gappy-POD の重み <span class="math inline">\(\boldsymbol\psi_j
 U_{rP}^{-1}\)</span> に変わるだけです（<a href="blog007.html">blog_007 §10</a>）。</p>
-<p>測った後に残る温度の共分散と、反りの σ：</p>
+<p><strong><span class="math inline">\(P_c\)</span>
+を言葉で言うと</strong>：「センサを付けたとしたら、それでもまだ、5点の温度がそれぞれ何
+K くらい分からないまま残るか」の表です。</p>
+<ul>
+<li>測る前の表が <span class="math inline">\(B\)</span>
+、センサを付けた後の表が <span class="math inline">\(P_c\)</span>
+です。形は同じ 5×5 です。</li>
+<li><strong>対角の数の平方根 ＝ その点の温度が、まだ ± 何 K
+分からないか</strong>（下の表の数字）。</li>
+<li>対角以外の数 ＝
+2つの点の温度が「一緒にずれる」かどうか。一緒にずれる点どうしは、片方が分かればもう片方も分かります。</li>
+</ul>
+<p>実際の数字（ <span class="math inline">\(t=150\)</span> 秒、4,000
+本の ROM 計算から）：</p>
+<table>
+<colgroup>
+<col style="width: 11%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+<col style="width: 14%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>付けたセンサ</th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+<th style="text-align: right;">反りの σ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>なし（測る前、 <span class="math inline">\(B\)</span> ）</td>
+<td style="text-align: right;">±2.49 K</td>
+<td style="text-align: right;">±2.23 K</td>
+<td style="text-align: right;">±2.64 K</td>
+<td style="text-align: right;">±2.27 K</td>
+<td style="text-align: right;">±2.25 K</td>
+<td style="text-align: right;">1.20 µm</td>
+</tr>
+<tr class="even">
+<td>温度計 P2・P0</td>
+<td style="text-align: right;">±0.22 K</td>
+<td style="text-align: right;">±0.80 K</td>
+<td style="text-align: right;">±0.23 K</td>
+<td style="text-align: right;">±0.46 K</td>
+<td style="text-align: right;"><strong>±1.05 K</strong></td>
+<td style="text-align: right;">0.97 µm</td>
+</tr>
+<tr class="odd">
+<td>＋変位計 S1</td>
+<td style="text-align: right;">±0.22 K</td>
+<td style="text-align: right;">±0.36 K</td>
+<td style="text-align: right;">±0.22 K</td>
+<td style="text-align: right;">±0.29 K</td>
+<td style="text-align: right;">±0.46 K</td>
+<td style="text-align: right;">0.32 µm</td>
+</tr>
+<tr class="even">
+<td>＋変位計 S2</td>
+<td style="text-align: right;">±0.18 K</td>
+<td style="text-align: right;">±0.24 K</td>
+<td style="text-align: right;">±0.20 K</td>
+<td style="text-align: right;">±0.22 K</td>
+<td style="text-align: right;">±0.26 K</td>
+<td style="text-align: right;">0.22 µm</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>温度計 P2・P0 を付けると、<strong>付けた P0・P2 は ±0.2 K
+まで分かる</strong>ようになります。でも、<strong>反対側の P1・P4 は
+±0.8〜1.05 K
+分からないまま</strong>です。反りは「ヒータ側と反対側の温度差」で決まるので、反りの
+σ はあまり縮みません（1.20 → 0.97 µm）。</li>
+<li>変位計 S1・S2 を足すと、<strong>温度計のない P1・P4 も ±0.2〜0.3 K
+まで分かる</strong>ようになり、反りの σ も 0.22 µm まで縮みます。</li>
+<li>反りの σ は、この表の分からなさを、反りへの重み <span class="math inline">\(\mathbf w\)</span> で反りに換算したものです（
+<span class="math inline">\(\sigma_c^2=\mathbf w^{\mathsf T}P_c\mathbf
+w\)</span> ）。</li>
+</ul>
+<p>式で書くと、センサを付けた後でも残る温度の分からなさの表 <span class="math inline">\(P_c\)</span> と、反りの σ は：</p>
 <p><span class="math display">\[
 P_c=B-BH_c^{\mathsf T}\big(H_cBH_c^{\mathsf T}+R\big)^{-1}H_cB,\qquad
 \sigma_c=\sqrt{\mathbf w^{\mathsf T}P_c\,\mathbf w}
@@ -2887,8 +2973,9 @@ K^*=BH_c^{\mathsf T}\big(H_cBH_c^{\mathsf T}+R\big)^{-1}
 <p><span class="math display">\[
 P_c=B-BH_c^{\mathsf T}\big(H_cBH_c^{\mathsf T}+R\big)^{-1}H_cB
 \]</span></p>
-<p><span class="math inline">\(K^*\)</span> はカルマンゲイン、 <span class="math inline">\(P_c\)</span>
-は「測った後に残る温度の共分散」です。</p>
+<p><span class="math inline">\(K^*\)</span>
+はカルマンゲイン（センサの値から温度を予想する「傾き」）、 <span class="math inline">\(P_c\)</span>
+は「センサを付けた後でも残る、5点の温度の分からなさの表」です。</p>
 <p><strong>6. 反りの σ にする。</strong> 反りは <span class="math inline">\(d=\mathbf w^{\mathsf T}\mathbf T\)</span>
 なので、反りの外れは <span class="math inline">\(\mathbf w^{\mathsf
 T}\mathbf e\)</span> です。</p>
@@ -2910,7 +2997,7 @@ h+r}=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)+r}
 <code>run/disp_elsewhere_predict_AO.py</code> の関数 <code>post</code>
 が5の式をそのまま計算しています。</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a aria-hidden="true" href="#cb2-1" tabindex="-1"></a>K <span class="op">=</span> B <span class="op">@</span> H.T <span class="op">@</span> np.linalg.inv(H <span class="op">@</span> B <span class="op">@</span> H.T <span class="op">+</span> R)   <span class="co"># カルマンゲイン（5×3）</span></span>
-<span id="cb2-2"><a aria-hidden="true" href="#cb2-2" tabindex="-1"></a>P <span class="op">=</span> B <span class="op">-</span> K <span class="op">@</span> H <span class="op">@</span> B                              <span class="co"># 測った後に残る温度の共分散（5×5）</span></span>
+<span id="cb2-2"><a aria-hidden="true" href="#cb2-2" tabindex="-1"></a>P <span class="op">=</span> B <span class="op">-</span> K <span class="op">@</span> H <span class="op">@</span> B                              <span class="co"># センサを付けた後でも残る、5点の温度の分からなさの表（5×5）</span></span>
 <span id="cb2-3"><a aria-hidden="true" href="#cb2-3" tabindex="-1"></a>sigma <span class="op">=</span> np.sqrt(w <span class="op">@</span> P <span class="op">@</span> w)                     <span class="co"># 反りの σ</span></span></code></pre></div>
 <p>これを 30〜300 秒の10時刻の <span class="math inline">\(B(t_k)\)</span>
 それぞれで計算して平均し、点数にしています。
