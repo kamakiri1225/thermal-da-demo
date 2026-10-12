@@ -786,16 +786,14 @@ D\,U_{rP}^{-1}\big(T_P^{(i)} - \bar T_P\big)
 の例（温度計 P2・P0 ＋ 変位計 S1・S2）で書くと</p>
 <p><span class="math display">\[
 \underbrace{\begin{bmatrix}\hat T_{P2}\\ \hat T_{P0}\\ \hat u_{S1}\\
-\hat u_{S2}\end{bmatrix}^{(i)}}_{\hat y^{(i)}\ (4\times1)}
-=
+\hat u_{S2}\end{bmatrix}^{(i)}}_{\hat y^{(i)}\ (4\times1)} =
 \underbrace{\begin{bmatrix}296.938\\ 296.659\\ -1.738\\
-2.505\end{bmatrix}}_{\bar y\ (4\times1)}
-+
+2.505\end{bmatrix}}_{\bar y\ (4\times1)} +
 \underbrace{\begin{bmatrix}
 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0\\
-1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
--0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290\\
--0.169 &amp; 0.595 &amp; -0.309 &amp; 0.427 &amp; 0.666
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ -0.532 &amp; 0.596 &amp; -0.763
+&amp; 0.286 &amp; 0.290\\ -0.169 &amp; 0.595 &amp; -0.309 &amp; 0.427
+&amp; 0.666
 \end{bmatrix}}_{H\ (4\times5)}
 \underbrace{\begin{bmatrix}T_0-296.659\\ T_1-295.698\\ T_2-296.938\\
 T_3-296.146\\ T_4-295.361\end{bmatrix}^{(i)}}_{T_P^{(i)}-\bar T_P\
@@ -852,11 +850,9 @@ FEM 節点）。
 <p>データ同化の補正式を、<strong>4つのセンサ（温度2本・変位2本）を全部書いた形</strong>で示します。</p>
 <p><span class="math display">\[
 \underbrace{\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\
-h\end{bmatrix}^{a}}_{\text{after}\ (7\times1)}
-=
+h\end{bmatrix}^{a}}_{\text{after}\ (7\times1)} =
 \underbrace{\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\
-h\end{bmatrix}^{f}}_{\text{before}\ (7\times1)}
-+
+h\end{bmatrix}^{f}}_{\text{before}\ (7\times1)} +
 \underbrace{\begin{bmatrix}
 K_{T_0,P2} &amp; K_{T_0,P0} &amp; K_{T_0,S1} &amp; K_{T_0,S2}\\
 K_{T_1,P2} &amp; K_{T_1,P0} &amp; K_{T_1,S1} &amp; K_{T_1,S2}\\
@@ -916,22 +912,19 @@ S2</strong>」に対応します。<strong>変位は、右端のずれの3・4�
 秒）の数値を入れると</strong>（60
 メンバーの平均で計算。観測ノイズなし）</p>
 <p><span class="math display">\[
-\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\ h\end{bmatrix}^{a}
-=
+\begin{bmatrix}T_0\\ T_1\\ T_2\\ T_3\\ T_4\\ q\\ h\end{bmatrix}^{a} =
 \begin{bmatrix}298.887\\ 297.770\\ 299.500\\ 298.098\\ 298.026\\
-1.1393\\ 0.0203\end{bmatrix}
-+
+1.1393\\ 0.0203\end{bmatrix} +
 \begin{bmatrix}
 0.2654 &amp; 0.6232 &amp; -0.1104 &amp; 0.0702\\
 1.5794 &amp; 0.5256 &amp; 2.1068 &amp; -0.7433\\
-0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\
--0.8751 &amp; 1.3451 &amp; -0.5407 &amp; 0.4394\\
--0.4006 &amp; -0.9453 &amp; -1.4073 &amp; 1.7919\\
-0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\
--0.0020 &amp; 0.0012 &amp; -0.0006 &amp; -0.0001
+0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\ -0.8751 &amp; 1.3451
+&amp; -0.5407 &amp; 0.4394\\ -0.4006 &amp; -0.9453 &amp; -1.4073 &amp;
+1.7919\\
+0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\ -0.0020 &amp; 0.0012
+&amp; -0.0006 &amp; -0.0001
 \end{bmatrix}
-\begin{bmatrix}-4.690\\ -4.632\\ +0.659\\ -5.622\end{bmatrix}
-=
+\begin{bmatrix}-4.690\\ -4.632\\ +0.659\\ -5.622\end{bmatrix} =
 \begin{bmatrix}294.288\\ 293.495\\ 294.847\\ 293.145\\ 293.282\\
 0.8738\\ 0.0243\end{bmatrix}
 \]</span></p>
@@ -1025,14 +1018,12 @@ R^{-1}(y-Hz)\Big)
 H=
 \begin{bmatrix}
 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
-1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\
--0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290 &amp; 0 &amp;
-0\\
--0.169 &amp; 0.595 &amp; -0.309 &amp; 0.427 &amp; 0.666 &amp; 0 &amp; 0
+1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0\\ -0.532 &amp; 0.596
+&amp; -0.763 &amp; 0.286 &amp; 0.290 &amp; 0 &amp; 0\\ -0.169 &amp;
+0.595 &amp; -0.309 &amp; 0.427 &amp; 0.666 &amp; 0 &amp; 0
 \end{bmatrix}
 \]</span></p>
-<p>（行は上から温度計 P2・温度計 P0・変位計 S1・変位計 S2、列は <span class="math inline">\(T_0\sim T_4,\ q,\ h\)</span> ） <strong><span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> の列が 0 ＝センサは <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> を直接は見ていない。</strong> それでも
-<span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> が直るのは ⑦ の共分散のおかげです。</p>
+<p>（行は上から温度計 P2・温度計 P0・変位計 S1・変位計 S2、列は <span class="math inline">\(T_0\sim T_4,\ q,\ h\)</span> ） ** <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> の列が 0 ＝センサは <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> を直接は見ていない。** それでも <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> が直るのは ⑦ の共分散のおかげです。</p>
 <ul>
 <li><strong>⑤
 掛け合わせる</strong>：ガウス分布どうしの積はガウス分布なので、事後分布もガウス分布になる。指数の中身は</li>
@@ -1042,8 +1033,7 @@ J(z) = \tfrac12\,(z-z^f)^{\mathsf T}\big(P^f\big)^{-1}(z-z^f) +
 \tfrac12\,(y-Hz)^{\mathsf T}R^{-1}(y-Hz)
 \]</span></p>
 <p>で、 <span class="math inline">\(p(z\mid y)\propto e^{-J(z)}\)</span>
-。<strong><span class="math inline">\(J\)</span> を最小にする <span class="math inline">\(z\)</span>
-が、いちばん確からしい状態</strong>です。
+。** <span class="math inline">\(J\)</span> を最小にする <span class="math inline">\(z\)</span> が、いちばん確からしい状態**です。
 第1項は「予報から離れすぎない」、第2項は「センサの読みから離れすぎない」で、それぞれ
 <span class="math inline">\(P^f\)</span> ・ <span class="math inline">\(R\)</span> の逆数で重みをつけた綱引きです。</p>
 <ul>
@@ -1090,8 +1080,8 @@ T}+R\big)^{-1}}_{\mathrm{Cov}(y,\,y)^{-1}}\;\big(y - Hz^f\big)
 \]</span></p>
 <p>で、⑥
 と同じ式になります。<strong>ガウス過程回帰の予測式（「観測点との共分散」×「観測点どうしの共分散の逆行列」×「観測値」）と同じ形</strong>です。
-<strong><span class="math inline">\(P^fH^{\mathsf T}\)</span>
-は「状態とセンサの読みの共分散」</strong>で、 <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> の行は「 <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span>
+** <span class="math inline">\(P^fH^{\mathsf T}\)</span>
+は「状態とセンサの読みの共分散」**で、 <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> の行は「 <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span>
 とセンサの読みが一緒にどう動くか」です。 <span class="math inline">\(H\)</span> の <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span> の列が 0 でも、 <span class="math inline">\(P^f\)</span> の中で <span class="math inline">\(q\)</span> と温度が連動していれば（§3-4 の <span class="math inline">\(\mathrm{Cov}(q,T_4)=0.527\)</span> ）、 <span class="math inline">\(P^fH^{\mathsf T}\)</span> の <span class="math inline">\(q\)</span> の行は 0 にならず、 <span class="math inline">\(q\)</span> が直ります。</p>
 <ul>
 <li><strong>⑧ EnKF での置き換え</strong>： <span class="math inline">\(P^f\)</span> は 7×7
@@ -1499,8 +1489,8 @@ h（放熱）は、どうやって推定されるのか</h4>
 \Delta q &amp;= K_{q,P2}\,r_{P2} + K_{q,P0}\,r_{P0} + K_{q,S1}\,r_{S1} +
 K_{q,S2}\,r_{S2}\\
 &amp;= \underbrace{0.3675\,(-4.690)}_{\text{T at P2}} +
-\underbrace{(-0.5039)(-4.632)}_{\text{T at P0}}
-+ \underbrace{(-0.2011)(+0.659)}_{\text{u at S1}} +
+\underbrace{(-0.5039)(-4.632)}_{\text{T at P0}} +
+\underbrace{(-0.2011)(+0.659)}_{\text{u at S1}} +
 \underbrace{0.1322\,(-5.622)}_{\text{u at S2}}\\
 &amp;= -1.724 + 2.334 - 0.133 - 0.743 = -0.266
 \end{aligned}
@@ -1523,9 +1513,9 @@ K_{q,:} = \mathrm{Cov}\big(q,\ \hat y\big)\,\big(C_{yy}+R\big)^{-1},
 <p><span class="math display">\[
 q\ \xrightarrow{\ \text{ROM 30 s}\ }\ T_P\ \xrightarrow{\ H\ }\ \hat y
 \]</span></p>
-<p><strong><span class="math inline">\(q\)</span>
+<p>** <span class="math inline">\(q\)</span>
 が大きいメンバーはヒータ（P2）の発熱が大きいので、30
-秒後に温度が高くなり、温度計の予想も変位計の予想も大きくなる。</strong>
+秒後に温度が高くなり、温度計の予想も変位計の予想も大きくなる。**
 実測が予想より小さければ「 <span class="math inline">\(q\)</span>
 が大きすぎた」と判断して下げます。</p>
 <p><strong>下の図の読み方</strong></p>
@@ -1543,12 +1533,14 @@ q\ \xrightarrow{\ \text{ROM 30 s}\ }\ T_P\ \xrightarrow{\ H\ }\ \hat y
 <img alt="q と h の推定のしくみ" src="img/explain_q_h_update.png"/>
 <figcaption aria-hidden="true">q と h の推定のしくみ</figcaption>
 </figure>
-<p><em>1点＝1メンバー。黒丸＝60 メンバーの平均、点線＝実測、赤線の傾き＝
+<blockquote>
+<p>1点＝1メンバー。黒丸＝60 メンバーの平均、点線＝実測、赤線の傾き＝
 <span class="math inline">\(\mathrm{Cov}/(\mathrm{Var}+\sigma^2)\)</span>
 、赤い星＝直した後。 上：Q
 と予想は右上がりの関係があり、実測側へ引き寄せられて Q が下がる。下：h
 と予想の関係は弱く、ほとんど動かない。
-（図はセンサ1本だけで直した場合。実際は4本同時なので、上の式のように4本分が足し合わされる。）</em></p>
+（図はセンサ1本だけで直した場合。実際は4本同時なので、上の式のように4本分が足し合わされる。）</p>
+</blockquote>
 <p>センサ1本だけなら、 <span class="math inline">\(K\)</span>
 は割り算になります（温度計 P2 の例）。</p>
 <p><span class="math display">\[
@@ -1951,8 +1943,8 @@ P4 を大きく下げている。</em></p>
 \begin{aligned}
 \Delta T_4 &amp;= \sum_{m} K_{4m}\,r_m \\
 &amp;= \underbrace{(-0.401)(-4.69)}_{\text{P2}} +
-\underbrace{(-0.945)(-4.63)}_{\text{P0}}
-+ \underbrace{(-1.407)(+0.66)}_{\text{S1}} +
+\underbrace{(-0.945)(-4.63)}_{\text{P0}} +
+\underbrace{(-1.407)(+0.66)}_{\text{S1}} +
 \underbrace{(+1.792)(-5.62)}_{\text{S2}} \\
 &amp;= +1.88 + 4.38 - 0.93 - 10.07 \\
 &amp;= -4.74\ \mathrm{K}
@@ -2022,10 +2014,12 @@ P4 を大きく下げている。</em></p>
 <p>5点の温度は真値の近くまで下がり、発熱量も 17.09 W から真値（15
 W）の方向へ動きました。 放熱 <span class="math inline">\(h\)</span>
 は逆に真値から離れています（この観測構成・seedの600秒試験ではhに誤差が残った。<a href="blog003.html">blog_003 §4-0-b</a>）。</p>
-<p><em>発熱量が §3-4 段階3 の −3.98
+<blockquote>
+<p>発熱量が §3-4 段階3 の −3.98
 W（平均だけで計算した値）と少し違うのは、実際の補正ではメンバーごとに観測ノイズ分の乱数を足し、
 <span class="math inline">\(q\)</span> ・ <span class="math inline">\(h\)</span>
-を物理的にありえる範囲に切っているためです。</em></p>
+を物理的にありえる範囲に切っているためです。</p>
+</blockquote>
 <p><strong>② 次の 30 秒で解いた式</strong></p>
 <p>各メンバーについて、5点の熱の出入りの式を <span class="math inline">\(t=30 \to 60\)</span> 秒まで 2 秒刻みで 15
 回解きます（4次のルンゲ・クッタ）。</p>
@@ -2078,10 +2072,12 @@ C_k\,\frac{dT_k}{dt} = \sum_{j} K_{kj}\,\big(T_j - T_k\big) +
 <img alt="補正の前後と、次の30秒" src="img/explain_after_correction.png"/>
 <figcaption aria-hidden="true">補正の前後と、次の30秒</figcaption>
 </figure>
-<p><em>左： <span class="math inline">\(t=30\)</span>
+<blockquote>
+<p>左： <span class="math inline">\(t=30\)</span>
 秒の補正で、5点の温度が真値（黒い線）まで下がった。右：直した値から ROM
 で 30 秒進めた <span class="math inline">\(t=60\)</span>
-秒の予報（赤）と、補正しなかった場合の予報（灰）。</em></p>
+秒の予報（赤）と、補正しなかった場合の予報（灰）。</p>
+</blockquote>
 <table>
 <colgroup>
 <col style="width: 11%"/>
@@ -2279,7 +2275,7 @@ T_4, q, h\)</span> の7つ）</td>
 </tr>
 <tr class="odd">
 <td><strong>60 人の平均 <span class="math inline">\(\langle
-z\rangle\)</span></strong></td>
+z\rangle\)</span> </strong></td>
 <td style="text-align: right;"><strong>298.887</strong></td>
 <td style="text-align: right;"><strong>297.770</strong></td>
 <td style="text-align: right;"><strong>299.500</strong></td>
@@ -2367,23 +2363,23 @@ z_j'^{(i)} = 1.02 \times \big(z_j^{(i)} - \langle z_j\rangle\big)
 <p>成分 <span class="math inline">\(j\)</span> と、代表点 <span class="math inline">\(k\)</span> の温度との共分散は</p>
 <p><span class="math display">\[
 \mathrm{Cov}\big(z_j,\ T_k\big) = \frac{1}{N-1}\sum_{i=1}^{N}
-z_j'^{(i)}\ T_k'^{(i)}
-= \frac{1}{N-1}\sum_{i=1}^{N} \big(z_j^{(i)}-\langle
-z_j\rangle\big)\big(T_k^{(i)}-\langle T_k\rangle\big)\times 1.02^2
+z_j'^{(i)}\ T_k'^{(i)} = \frac{1}{N-1}\sum_{i=1}^{N}
+\big(z_j^{(i)}-\langle z_j\rangle\big)\big(T_k^{(i)}-\langle
+T_k\rangle\big)\times 1.02^2
 \]</span></p>
 <p>です。<strong>「メンバーごとに、2つのずれを掛け、60 人分足して 59
 で割る」</strong>だけです（ <span class="math inline">\(N-1\)</span>
 で割るのは、標本から分散を求めるときの決まり）。</p>
-<p>例として、 <strong><span class="math inline">\(q\)</span> と P4
-の温度の共分散</strong>（下の行列の6行目・5列目）を書き下します。</p>
+<p>例として、 ** <span class="math inline">\(q\)</span> と P4
+の温度の共分散**（下の行列の6行目・5列目）を書き下します。</p>
 <p><span class="math display">\[
 \begin{aligned}
 \mathrm{Cov}(q,\ T_4)
 &amp;= \frac{1}{59}\Big[\underbrace{(+0.553)(-4.109)}_{\text{member 1}}
 + \underbrace{(+0.391)(-1.487)}_{\text{member 2}} + \cdots +
 \underbrace{(+0.461)(+4.610)}_{\text{member 60}}\Big]\\
-&amp;= \frac{1}{59}\Big[-2.270 - 0.581 + \cdots + 2.124\Big]
-= \frac{31.117}{59} = 0.527
+&amp;= \frac{1}{59}\Big[-2.270 - 0.581 + \cdots + 2.124\Big] =
+\frac{31.117}{59} = 0.527
 \end{aligned}
 \]</span></p>
 <p>正なので「 <span class="math inline">\(q\)</span>
@@ -2394,16 +2390,15 @@ z_j\rangle\big)\big(T_k^{(i)}-\langle T_k\rangle\big)\times 1.02^2
 <p>7 × 5 の全部の組み合わせをまとめて計算するのが、行列の掛け算 <span class="math inline">\(Z'^{\mathsf T}T'\)</span> です（ <span class="math inline">\((j,k)\)</span>
 成分が、ちょうど上の和になります）。</p>
 <p><span class="math display">\[
-\mathrm{Cov}(z,\ T_P) = \frac{1}{N-1}\,Z'^{\mathsf T}\,T'
-=
+\mathrm{Cov}(z,\ T_P) = \frac{1}{N-1}\,Z'^{\mathsf T}\,T' =
 \begin{bmatrix}
 4.767 &amp; 3.123 &amp; 4.739 &amp; 5.112 &amp; 3.089\\
 3.123 &amp; 9.784 &amp; 3.452 &amp; 2.700 &amp; 6.160\\
 4.739 &amp; 3.452 &amp; 4.825 &amp; 4.814 &amp; 3.274\\
 5.112 &amp; 2.700 &amp; 4.814 &amp; 6.572 &amp; 4.226\\
 3.089 &amp; 6.160 &amp; 3.274 &amp; 4.226 &amp; 12.632\\
-0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\
--0.003 &amp; -0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
+0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\ -0.003 &amp;
+-0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
 \end{bmatrix}
 \]</span></p>
 <p>（7 × 5。行が <span class="math inline">\(T_0,\dots,T_4,\ q,\
@@ -2416,32 +2411,29 @@ u_{S2}+w^{\mathsf T}(T_P-\bar T_P)\)</span> なので、状態と S2
 の予想の共分散は、上の行列に <span class="math inline">\(w\)</span>
 を掛けたものになります。</p>
 <p><span class="math display">\[
-C_{zy}^{(S2)} = \mathrm{Cov}(z,\ T_P)\;w
-=
+C_{zy}^{(S2)} = \mathrm{Cov}(z,\ T_P)\;w =
 \begin{bmatrix}
 4.767 &amp; 3.123 &amp; 4.739 &amp; 5.112 &amp; 3.089\\
 3.123 &amp; 9.784 &amp; 3.452 &amp; 2.700 &amp; 6.160\\
 4.739 &amp; 3.452 &amp; 4.825 &amp; 4.814 &amp; 3.274\\
 5.112 &amp; 2.700 &amp; 4.814 &amp; 6.572 &amp; 4.226\\
 3.089 &amp; 6.160 &amp; 3.274 &amp; 4.226 &amp; 12.632\\
-0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\
--0.003 &amp; -0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
+0.189 &amp; 0.096 &amp; 0.312 &amp; 0.041 &amp; 0.527\\ -0.003 &amp;
+-0.007 &amp; -0.003 &amp; -0.002 &amp; -0.007
 \end{bmatrix}
-\begin{bmatrix}-0.169\\ 0.595\\ -0.309\\ 0.427\\ 0.666\end{bmatrix}
-=
+\begin{bmatrix}-0.169\\ 0.595\\ -0.309\\ 0.427\\ 0.666\end{bmatrix} =
 \begin{bmatrix}3.829\\ 9.485\\ 3.999\\ 4.875\\ 12.351\\ 0.297\\
 -0.008\end{bmatrix}
 \]</span></p>
 <p>P4 の行（5行目）を書き下すと</p>
 <p><span class="math display">\[
 3.089(-0.169) + 6.160(0.595) + 3.274(-0.309) + 4.226(0.427) +
-12.632(0.666)
-= -0.52 + 3.67 - 1.01 + 1.80 + 8.41 = 12.35
+12.632(0.666) = -0.52 + 3.67 - 1.01 + 1.80 + 8.41 = 12.35
 \]</span></p>
 <p>S2 の重みが大きいのは P4（0.666）なので、P4
-の行がいちばん大きくなります。 <em>検算：各メンバーの S2
+の行がいちばん大きくなります。 &gt; 検算：各メンバーの S2
 の予想を直接計算して、P4 との共分散 <span class="math inline">\(\frac{1}{59}\sum_i (T_{4,i}-\bar T_4)(\hat
-u_{S2,i}-\bar u)\)</span> を取っても 12.351 で一致します。</em></p>
+u_{S2,i}-\bar u)\)</span> を取っても 12.351 で一致します。</p>
 <p><strong>ステップ5：割り算にあたる <span class="math inline">\((C_{yy}+R)^{-1}\)</span> を掛ける</strong></p>
 <p>センサが S2 だけなら、 <span class="math inline">\((C_{yy}+R)^{-1}\)</span> は「S2
 の予想のばらつき＋ノイズ」で割るだけです。</p>
@@ -2465,15 +2457,13 @@ S1</strong>（§3-3）です。</p>
 <h4 id="ステップ13つの量を5点温度の式で縦に並べる">ステップ1：3つの量を「5点温度の式」で縦に並べる</h4>
 <p><span class="math display">\[
 \underbrace{\begin{bmatrix} T_{F1}\\ T_{F2}\\ u_{S1}\end{bmatrix}}_{y\
-(3\times1)}
-=
+(3\times1)} =
 \underbrace{\begin{bmatrix}296.167\\ 295.390\\ -1.738\end{bmatrix}}_{c\
-(3\times1)}
-+
+(3\times1)} +
 \underbrace{\begin{bmatrix}
-0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\
--0.058 &amp; 0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\
--0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290
+0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\ -0.058 &amp;
+0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\ -0.532 &amp; 0.596 &amp;
+-0.763 &amp; 0.286 &amp; 0.290
 \end{bmatrix}}_{L\ (3\times5)}
 \underbrace{\begin{bmatrix}T_0-296.659\\ T_1-295.698\\ T_2-296.938\\
 T_3-296.146\\ T_4-295.361\end{bmatrix}}_{T_P-\bar T_P\ (5\times1)}
@@ -2512,18 +2502,18 @@ T_3-296.146\\ T_4-295.361\end{bmatrix}}_{T_P-\bar T_P\ (5\times1)}
 <p>1回目（ <span class="math inline">\(t=30\)</span> 秒、60
 メンバーの平均。§3-4 段階4 の表）の補正前 <span class="math inline">\(T_P^{f}\)</span> と補正後 <span class="math inline">\(T_P^{a}\)</span> の差です。</p>
 <p><span class="math display">\[
-\Delta T_P = T_P^{a}-T_P^{f}
-=\begin{bmatrix}294.27\\ 293.32\\ 294.83\\ 293.14\\ 293.41\end{bmatrix}
--\begin{bmatrix}298.89\\ 297.77\\ 299.50\\ 298.10\\ 298.03\end{bmatrix}
-=\begin{bmatrix}-4.62\\ -4.45\\ -4.67\\ -4.96\\ -4.62\end{bmatrix}
+\Delta T_P = T_P^{a}-T_P^{f} =\begin{bmatrix}294.27\\ 293.32\\ 294.83\\
+293.14\\ 293.41\end{bmatrix} -\begin{bmatrix}298.89\\ 297.77\\ 299.50\\
+298.10\\ 298.03\end{bmatrix} =\begin{bmatrix}-4.62\\ -4.45\\ -4.67\\
+-4.96\\ -4.62\end{bmatrix}
 \]</span></p>
 <h4 id="ステップ3補正後の5点温度から3つの量を計算し直す">ステップ3：補正後の5点温度から、3つの量を計算し直す</h4>
 <p>ステップ1の式に <span class="math inline">\(T_P^{a}=T_P^{f}+\Delta
 T_P\)</span>
 を入れると、行列の掛け算は足し算に分けられる（分配法則）ので</p>
 <p><span class="math display">\[
-y^{a} = c + L\big(T_P^{f}+\Delta T_P-\bar T_P\big)
-= \underbrace{c + L\big(T_P^{f}-\bar T_P\big)}_{y^{f}} + L\,\Delta T_P
+y^{a} = c + L\big(T_P^{f}+\Delta T_P-\bar T_P\big) = \underbrace{c +
+L\big(T_P^{f}-\bar T_P\big)}_{y^{f}} + L\,\Delta T_P
 \]</span></p>
 <p>になります（ <span class="math inline">\(y^{f}\)</span>
 は予報の5点温度から計算した値）。最後の項 <span class="math inline">\(L\,\Delta T_P\)</span>
@@ -2531,9 +2521,9 @@ y^{a} = c + L\big(T_P^{f}+\Delta T_P-\bar T_P\big)
 <p><span class="math display">\[
 L\,\Delta T_P=
 \begin{bmatrix}
-0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\
--0.058 &amp; 0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\
--0.532 &amp; 0.596 &amp; -0.763 &amp; 0.286 &amp; 0.290
+0.026 &amp; -0.020 &amp; 0.000 &amp; 0.972 &amp; 0.030\\ -0.058 &amp;
+0.406 &amp; 0.012 &amp; -0.071 &amp; 0.713\\ -0.532 &amp; 0.596 &amp;
+-0.763 &amp; 0.286 &amp; 0.290
 \end{bmatrix}
 \begin{bmatrix}-4.62\\ -4.45\\ -4.67\\ -4.96\\ -4.62\end{bmatrix}
 =\begin{bmatrix}-4.99\\ -4.54\\ +0.61\end{bmatrix}
@@ -2541,8 +2531,7 @@ L\,\Delta T_P=
 <p>1行目（F1）を書き下すと</p>
 <p><span class="math display">\[
 0.026(-4.62) + (-0.020)(-4.45) + 0.000(-4.67) + 0.972(-4.96) +
-0.030(-4.62)
-= -0.12 + 0.09 + 0.00 - 4.82 - 0.14 = -4.99\ \mathrm{K}
+0.030(-4.62) = -0.12 + 0.09 + 0.00 - 4.82 - 0.14 = -4.99\ \mathrm{K}
 \]</span></p>
 <p>です。F1 はほぼ P3 に乗っているので（重み 0.972）、P3 の補正 −4.96 K
 がほぼそのまま F1 に効いています。</p>
@@ -2664,7 +2653,9 @@ T_P\)</span> から補正が決まっています。</strong>
 <img alt="観測の作り方と使い方" src="img/obs_pipeline.png"/>
 <figcaption aria-hidden="true">観測の作り方と使い方</figcaption>
 </figure>
-<p><em>参考：①観測データの作り方（双子実験）／②予報観測 <span class="math inline">\(Y_f\)</span> の作り方／③EnKF の更新式。</em></p>
+<blockquote>
+<p>参考：①観測データの作り方（双子実験）／②予報観測 <span class="math inline">\(Y_f\)</span> の作り方／③EnKF の更新式。</p>
+</blockquote>
 <blockquote>
 <p><strong>この節で分かったこと</strong> - 30 秒ごとに「ROM で予報 →
 センサの読みを予想 → ずれを直す量に換算して直す →
@@ -2773,9 +2764,7 @@ K)］ではありません。30秒まで予報した直後なら、この表の�
 とします。代表5点温度 <span class="math inline">\(\mathbf
 T_r^{(m)}\)</span> から、任意の観測セル <span class="math inline">\(s\)</span> の予測温度は、</p>
 <p><span class="math display">\[
-T_{s,f}^{(m)}
-=\overline T_s
-+\Phi_{s,:}(P\Phi)^+
+T_{s,f}^{(m)} =\overline T_s +\Phi_{s,:}(P\Phi)^+
 \left(\mathbf T_r^{(m)}-P\overline{\mathbf T}\right)
 \]</span></p>
 <p>で求めます。上付き <span class="math inline">\(+\)</span>
@@ -2819,10 +2808,9 @@ T_{s,f}^{(m)}
 </tr>
 </tbody>
 </table>
-<p><strong><span class="math inline">\(P\)</span>
-は「取り出し行列」です。</strong> 各行に 1 が1つだけあり、残りはすべて 0
-です。 代表5点はセル番号（0 から数える）7634、7924、7765、859、733
-なので、</p>
+<p>** <span class="math inline">\(P\)</span> は「取り出し行列」です。**
+各行に 1 が1つだけあり、残りはすべて 0 です。 代表5点はセル番号（0
+から数える）7634、7924、7765、859、733 なので、</p>
 <p><span class="math display">\[
 P=
 \overbrace{
@@ -2877,20 +2865,19 @@ P=
 の正方行列で、逆行列を持ちます（このとき擬似逆行列 <span class="math inline">\((P\Phi)^{+}\)</span> は普通の逆行列と同じ）。</p>
 <p><span class="math display">\[
 P\Phi=
-\begin{bmatrix}
--0.00583 &amp; -0.01077 &amp; -0.00111 &amp; -0.03423 &amp; 0.00611\\
--0.00743 &amp; 0.00404 &amp; 0.00157 &amp; -0.00809 &amp; -0.02406\\
--0.00471 &amp; -0.01457 &amp; 0.01089 &amp; 0.00267 &amp; -0.00430\\
--0.00734 &amp; -0.00301 &amp; -0.01475 &amp; 0.00474 &amp; -0.00680\\
--0.00767 &amp; 0.00899 &amp; 0.00768 &amp; -0.00065 &amp; 0.00901
+\begin{bmatrix} -0.00583 &amp; -0.01077 &amp; -0.00111 &amp; -0.03423
+&amp; 0.00611\\ -0.00743 &amp; 0.00404 &amp; 0.00157 &amp; -0.00809
+&amp; -0.02406\\ -0.00471 &amp; -0.01457 &amp; 0.01089 &amp; 0.00267
+&amp; -0.00430\\ -0.00734 &amp; -0.00301 &amp; -0.01475 &amp; 0.00474
+&amp; -0.00680\\ -0.00767 &amp; 0.00899 &amp; 0.00768 &amp; -0.00065
+&amp; 0.00901
 \end{bmatrix},
 \quad
 (P\Phi)^{+}=
-\begin{bmatrix}
--6.07 &amp; -5.79 &amp; -23.65 &amp; -48.48 &amp; -59.24\\
--9.37 &amp; 17.62 &amp; -38.45 &amp; -12.46 &amp; 25.62\\
--6.28 &amp; 10.84 &amp; 25.54 &amp; -39.01 &amp; 15.94\\
--23.63 &amp; -10.71 &amp; 14.85 &amp; 14.41 &amp; 5.41\\
+\begin{bmatrix} -6.07 &amp; -5.79 &amp; -23.65 &amp; -48.48 &amp;
+-59.24\\ -9.37 &amp; 17.62 &amp; -38.45 &amp; -12.46 &amp; 25.62\\ -6.28
+&amp; 10.84 &amp; 25.54 &amp; -39.01 &amp; 15.94\\ -23.63 &amp; -10.71
+&amp; 14.85 &amp; 14.41 &amp; 5.41\\
 7.84 &amp; -32.51 &amp; -2.49 &amp; 5.48 &amp; 21.81
 \end{bmatrix}
 \]</span></p>
@@ -2898,8 +2885,7 @@ P\Phi=
 ＝F1（セル 15481、(35.1, −0.8, 94.6) mm）、メンバー1、 <span class="math inline">\(t=30\)</span> 秒の予報</strong></p>
 <p>① 5点温度のずれから、型の強さを出す（5 × 5 と 5 × 1 の掛け算）</p>
 <p><span class="math display">\[
-(P\Phi)^{+}\big(\mathbf T_r - P\overline{\mathbf T}\big)
-=(P\Phi)^{+}
+(P\Phi)^{+}\big(\mathbf T_r - P\overline{\mathbf T}\big) =(P\Phi)^{+}
 \begin{bmatrix}+0.707\\ -0.394\\ +1.253\\ +0.437\\ -1.364\end{bmatrix}
 =\begin{bmatrix}28.0\\ -102.1\\ -15.5\\ 5.0\\ -12.1\end{bmatrix}
 \]</span></p>
@@ -2911,8 +2897,8 @@ P\Phi=
 \Phi_{s,:}\,a=
 \begin{bmatrix}-0.00737 &amp; -0.00302 &amp; -0.01417 &amp; 0.00385
 &amp; -0.00569\end{bmatrix}
-\begin{bmatrix}28.0\\ -102.1\\ -15.5\\ 5.0\\ -12.1\end{bmatrix}
-= +0.411\ \mathrm{K}
+\begin{bmatrix}28.0\\ -102.1\\ -15.5\\ 5.0\\ -12.1\end{bmatrix} =
++0.411\ \mathrm{K}
 \]</span></p>
 <p>③ 平均に足す</p>
 <p><span class="math display">\[
@@ -2935,8 +2921,7 @@ T_{s,f} = \overline T_s + 0.411 = 296.167 + 0.411 = 296.58\ \mathrm{K}
 観測セル分だけを計算できるので、データ同化のたびに全20,696セルを復元する必要はありません。</p>
 <p>変位のholdout試験では、FrontISTRの事前計算結果 <span class="math inline">\(\mathbf u_0,D\)</span> から、</p>
 <p><span class="math display">\[
-\mathbf u_f^{(m)}
-=\mathbf u_0+D(P\Phi)^+
+\mathbf u_f^{(m)} =\mathbf u_0+D(P\Phi)^+
 \left(\mathbf T_r^{(m)}-P\overline{\mathbf T}\right)
 \]</span></p>
 <p>を作ります。コードではS1/S2の2成分だけを温度P2/P0の予報と並べ、4成分の
@@ -2955,10 +2940,8 @@ T_{s,f} = \overline T_s + 0.411 = 296.167 + 0.411 = 296.58\ \mathrm{K}
 は、それぞれ60メンバー平均からの偏差です。この実験では計算前に、状態・観測予報の平均まわりの偏差を1.02倍しています。以下の更新式の予報値は、その処理後の値です。</p>
 <p>温度2点＋変位2点の場合の大きさは、</p>
 <p><span class="math display">\[
-\underbrace{Z_a}_{60\times7}
-=
-\underbrace{Z_f}_{60\times7}
-+
+\underbrace{Z_a}_{60\times7} =
+\underbrace{Z_f}_{60\times7} +
 \underbrace{\mathrm{innov}}_{60\times4}
 \underbrace{K^{\mathsf T}}_{4\times7}.
 \]</span></p>
@@ -2970,14 +2953,11 @@ T_{s,f} = \overline T_s + 0.411 = 296.167 + 0.411 = 296.58\ \mathrm{K}
 <p><span class="math display">\[
 \mathbf r^{(m)}=
 \begin{bmatrix} r_{T_{P2}}\\ r_{T_{P0}}\\ r_{u_{S1}}\\
-r_{u_{S2}}\end{bmatrix}^{(m)}
-=
+r_{u_{S2}}\end{bmatrix}^{(m)} =
 \underbrace{\begin{bmatrix} y_{T_{P2}}\\ y_{T_{P0}}\\ y_{u_{S1}}\\
-y_{u_{S2}}\end{bmatrix}}_{\text{measured}}
-+
+y_{u_{S2}}\end{bmatrix}}_{\text{measured}} +
 \underbrace{\begin{bmatrix} \varepsilon_1\\ \varepsilon_2\\
-\varepsilon_3\\ \varepsilon_4\end{bmatrix}^{(m)}}_{\text{noise}}
--
+\varepsilon_3\\ \varepsilon_4\end{bmatrix}^{(m)}}_{\text{noise}} -
 \underbrace{\begin{bmatrix} \hat T_{P2}\\ \hat T_{P0}\\ \hat u_{S1}\\
 \hat u_{S2}\end{bmatrix}^{(m)}}_{\text{predicted}}
 \]</span></p>
@@ -2990,8 +2970,7 @@ y_{u_{S2}}\end{bmatrix}}_{\text{measured}}
 \begin{bmatrix}
 \mathbf r^{(1)\mathsf T}\\ \mathbf r^{(2)\mathsf T}\\ \vdots\\ \mathbf
 r^{(60)\mathsf T}
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 r_{T_{P2}}^{(1)} &amp; r_{T_{P0}}^{(1)} &amp; r_{u_{S1}}^{(1)} &amp;
 r_{u_{S2}}^{(1)}\\
@@ -3018,14 +2997,11 @@ r_{u_{S2}}^{(60)}
 <p><span class="math display">\[
 \mathbf r^{(1)}=
 \underbrace{\begin{bmatrix}294.810\\ 294.255\\ -1.652\\
--0.443\end{bmatrix}}_{\text{measured}}
-+
+-0.443\end{bmatrix}}_{\text{measured}} +
 \underbrace{\begin{bmatrix}+0.104\\ +0.246\\ +0.099\\
--0.391\end{bmatrix}}_{\varepsilon^{(1)}}
--
+-0.391\end{bmatrix}}_{\varepsilon^{(1)}} -
 \underbrace{\begin{bmatrix}298.164\\ 297.336\\ -3.601\\
-+0.959\end{bmatrix}}_{\hat y^{(1)}}
-=
++0.959\end{bmatrix}}_{\hat y^{(1)}} =
 \begin{bmatrix}-3.251\\ -2.834\\ +2.048\\ -1.794\end{bmatrix}
 \begin{matrix}\leftarrow\ \text{T at P2 [K]}\\ \leftarrow\ \text{T at P0
 [K]}\\ \leftarrow\ \text{u at S1 [}\mu\text{m]}\\ \leftarrow\ \text{u at
@@ -3034,31 +3010,26 @@ S2 [}\mu\text{m]}\end{matrix}
 <p>これに換算表 <span class="math inline">\(K\)</span> （7 × 4、上の ③
 と同じ）を掛けると、メンバー1の7つの直す量です。</p>
 <p><span class="math display">\[
-\Delta z^{(1)} = K\,\mathbf r^{(1)}
-=
+\Delta z^{(1)} = K\,\mathbf r^{(1)} =
 \begin{bmatrix}
 0.2654 &amp; 0.6232 &amp; -0.1104 &amp; 0.0702\\
 1.5794 &amp; 0.5256 &amp; 2.1068 &amp; -0.7433\\
-0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\
--0.8751 &amp; 1.3451 &amp; -0.5407 &amp; 0.4394\\
--0.4006 &amp; -0.9453 &amp; -1.4073 &amp; 1.7919\\
-0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\
--0.0020 &amp; 0.0012 &amp; -0.0006 &amp; -0.0001
+0.6588 &amp; 0.2654 &amp; -0.0682 &amp; 0.0513\\ -0.8751 &amp; 1.3451
+&amp; -0.5407 &amp; 0.4394\\ -0.4006 &amp; -0.9453 &amp; -1.4073 &amp;
+1.7919\\
+0.3675 &amp; -0.5039 &amp; -0.2011 &amp; 0.1322\\ -0.0020 &amp; 0.0012
+&amp; -0.0006 &amp; -0.0001
 \end{bmatrix}
-\begin{bmatrix}-3.251\\ -2.834\\ +2.048\\ -1.794\end{bmatrix}
-=
+\begin{bmatrix}-3.251\\ -2.834\\ +2.048\\ -1.794\end{bmatrix} =
 \begin{bmatrix}-2.981\\ -0.976\\ -3.126\\ -2.864\\ -2.115\\ -0.415\\
 +0.002\end{bmatrix}
 \]</span></p>
 <p><span class="math display">\[
-z^{(1)a} = z^{(1)f} + \Delta z^{(1)}
-=
+z^{(1)a} = z^{(1)f} + \Delta z^{(1)} =
 \begin{bmatrix}297.336\\ 295.255\\ 298.164\\ 296.553\\ 293.916\\ 1.692\\
-0.0097\end{bmatrix}
-+
+0.0097\end{bmatrix} +
 \begin{bmatrix}-2.981\\ -0.976\\ -3.126\\ -2.864\\ -2.115\\ -0.415\\
-+0.002\end{bmatrix}
-=
++0.002\end{bmatrix} =
 \begin{bmatrix}294.355\\ 294.279\\ 295.039\\ 293.689\\ 291.802\\ 1.276\\
 0.0118\end{bmatrix}
 \]</span></p>
@@ -3080,8 +3051,8 @@ Q・hの補正で、実際に何をしているか</h4>
 <p><span class="math display">\[
 \mathbf r^{(m)}=
 \begin{bmatrix}r_{T_{P2}}^{(m)}&amp;r_{T_{P0}}^{(m)}&amp;r_{u_{S1}}^{(m)}&amp;r_{u_{S2}}^{(m)}\end{bmatrix}^{\mathsf
-T}
-=\mathbf y_{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\mathbf y_f^{(m)}
+T} =\mathbf y_{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\mathbf
+y_f^{(m)}
 \]</span></p>
 <p>とします。カルマンゲインの6行目（Pythonの行番号5）を <span class="math inline">\(K_{q,:}\)</span> 、7行目（行番号6）を <span class="math inline">\(K_{h,:}\)</span> とすると、</p>
 <p><span class="math display">\[
@@ -3091,20 +3062,17 @@ h_a^{(m)}=h_f^{(m)}+\sum_{\ell=1}^{4}K_{h,\ell}r_\ell^{(m)}.
 \]</span></p>
 <p>したがって、範囲制限前の発熱量の修正は、</p>
 <p><span class="math display">\[
-Q_a^{(m)}-Q_f^{(m)}
-=15\sum_{\ell=1}^{4}K_{q,\ell}r_\ell^{(m)}
+Q_a^{(m)}-Q_f^{(m)} =15\sum_{\ell=1}^{4}K_{q,\ell}r_\ell^{(m)}
 \]</span></p>
 <p>です。<strong>温度・変位の観測との差を、共分散で決まる係数に掛けて、発熱量と放熱条件の修正量にしています。</strong>
 熱収支からQ・hを別々に直接逆算する処理でも、毎回最小二乗法でROMを再校正する処理でもありません。</p>
 <p>係数を理解するため、温度センサ <span class="math inline">\(s\)</span>
 が1点だけの場合に限ると、</p>
 <p><span class="math display">\[
-K_{q,s}
-=\frac{\mathrm{cov}(q_f,T_{s,f})}
+K_{q,s} =\frac{\mathrm{cov}(q_f,T_{s,f})}
 {\mathrm{var}(T_{s,f})+\sigma_s^2},
 \qquad
-K_{h,s}
-=\frac{\mathrm{cov}(h_f,T_{s,f})}
+K_{h,s} =\frac{\mathrm{cov}(h_f,T_{s,f})}
 {\mathrm{var}(T_{s,f})+\sigma_s^2}.
 \]</span></p>
 <p><span class="math inline">\(\sigma_s^2\)</span>
@@ -3639,8 +3607,8 @@ u=W\,(T-T_\mathrm{ref})
 </tr>
 </tbody>
 </table>
-<p><strong><span class="math inline">\(W\)</span> の <span class="math inline">\((i,j)\)</span>
-成分の意味は、そのまま読めます。</strong></p>
+<p>** <span class="math inline">\(W\)</span> の <span class="math inline">\((i,j)\)</span>
+成分の意味は、そのまま読めます。**</p>
 <blockquote>
 <p><strong>節点 <span class="math inline">\(j\)</span> の温度が 1 K
 上がると、変位自由度 <span class="math inline">\(i\)</span> が何 µm
@@ -3784,15 +3752,14 @@ T_{\mathrm{all}}=\bar T+U_r\,a,\qquad a=U_{rP}^{+}\big(T_5-\bar T_P\big)
 <h4 id="ステップ42つをつなぐと-d-になる">ステップ4：2つをつなぐと <span class="math inline">\(D\)</span> になる</h4>
 <p>ステップ1の式に、ステップ3の温度を代入します。</p>
 <p><span class="math display">\[
-u=W\big(\bar T+U_r a-T_\mathrm{ref}\big)
-=\underbrace{W(\bar T-T_\mathrm{ref})}_{\bar u}+\underbrace{W
-U_r}_{D}\,a
+u=W\big(\bar T+U_r a-T_\mathrm{ref}\big) =\underbrace{W(\bar
+T-T_\mathrm{ref})}_{\bar u}+\underbrace{W U_r}_{D}\,a
 \]</span></p>
 <p><span class="math display">\[
 \boxed{\ u=\bar u+D\,a,\qquad D=W U_r\ }
 \]</span></p>
-<p><strong><span class="math inline">\(D\)</span> は「 <span class="math inline">\(W\)</span>
-にモードを掛けたもの」</strong>です。モードを足しているのではありません。</p>
+<p>** <span class="math inline">\(D\)</span> は「 <span class="math inline">\(W\)</span>
+にモードを掛けたもの」**です。モードを足しているのではありません。</p>
 <table>
 <thead>
 <tr class="header">
@@ -3908,7 +3875,7 @@ D=WU_r=\big(K_s^{-1}H_T\big)U_r=K_s^{-1}\big(H_T U_r\big)
 </tbody>
 </table>
 <p><strong>理解するときは <span class="math inline">\(W\)</span>
-、実装するときは <span class="math inline">\(D\)</span></strong>
+、実装するときは <span class="math inline">\(D\)</span> </strong>
 と考えると見通しがよくなります。 両者は <span class="math inline">\(D=WU_r\)</span> でつながっています。</p>
 <h4 id="実装上の補足">実装上の補足</h4>
 <ul>
@@ -4340,8 +4307,8 @@ T_{P_i}\)</span>
 <h4 id="実際にどれだけ直ったか">実際にどれだけ直ったか</h4>
 <p>更新の式を「温度計の分」と「変位計の分」に分けた内訳です（§7-5
 の表と同じもの）。</p>
-<p><strong><span class="math inline">\(t=30\)</span>
-秒</strong>（温度計のずれが −4.96 K、−4.86 K と大きい時期）</p>
+<p>** <span class="math inline">\(t=30\)</span> 秒**（温度計のずれが
+−4.96 K、−4.86 K と大きい時期）</p>
 <table>
 <colgroup>
 <col style="width: 13%"/>
@@ -4383,8 +4350,8 @@ T_{P_i}\)</span>
 <p><strong>温度計を置いていない P3・P4 を、変位計が 5〜8 K
 も直しています。</strong> P3・P4
 は底面にあり、温度計（P2・P0、どちらも中段のヒータ側）から遠い点です。</p>
-<p><strong><span class="math inline">\(t=150\)</span>
-秒</strong>（温度計のずれがほぼ 0 になった後）</p>
+<p>** <span class="math inline">\(t=150\)</span>
+秒**（温度計のずれがほぼ 0 になった後）</p>
 <table>
 <colgroup>
 <col style="width: 13%"/>
@@ -4545,12 +4512,12 @@ T_P\big),\qquad w_{(i,c)}=D_{(i,c)}\,U_{rP}^{+}\ }
 </tr>
 </tbody>
 </table>
-<p><strong><span class="math inline">\(w\)</span>
-が5つの数になることが肝心です。</strong>
+<p>** <span class="math inline">\(w\)</span>
+が5つの数になることが肝心です。**
 状態の温度が5つしかないので、観測演算子も5つの係数で書き切れます。</p>
 <h3 id="7-7-4-実際の値blog_008-5-で選んだ2点">7-7-4. 実際の値（blog_008
 §5 で選んだ2点）</h3>
-<p><strong>選定1点目：節点 4994、(9.7, −36.2, 100.5) mm の <span class="math inline">\(U_x\)</span></strong></p>
+<p><strong>選定1点目：節点 4994、(9.7, −36.2, 100.5) mm の <span class="math inline">\(U_x\)</span> </strong></p>
 <table>
 <thead>
 <tr class="header">
@@ -4594,7 +4561,7 @@ T_P\big),\qquad w_{(i,c)}=D_{(i,c)}\,U_{rP}^{+}\ }
 <p><span class="math display">\[
 U_x(4994)=-1.738-0.532\,(T_0-296.659)+0.596\,(T_1-295.698)-0.763\,(T_2-296.938)+0.286\,(T_3-296.146)+0.290\,(T_4-295.361)
 \]</span></p>
-<p><strong>選定2点目：節点 4909、(−34.6, 14.4, 100.5) mm の <span class="math inline">\(U_z\)</span></strong></p>
+<p><strong>選定2点目：節点 4909、(−34.6, 14.4, 100.5) mm の <span class="math inline">\(U_z\)</span> </strong></p>
 <table>
 <thead>
 <tr class="header">
@@ -4971,8 +4938,8 @@ d\)</span></th>
 </table>
 <ul>
 <li>温度のずれはほぼ 0 で、温度の寄与は打ち消し合って 0.00 W。</li>
-<li><strong><span class="math inline">\(Q\)</span>
-を動かしているのは変位のずれだけ</strong>（−0.82 W）で、 <span class="math inline">\(Q\)</span> は 13.15 → 12.47 W。</li>
+<li>** <span class="math inline">\(Q\)</span>
+を動かしているのは変位のずれだけ**（−0.82 W）で、 <span class="math inline">\(Q\)</span> は 13.15 → 12.47 W。</li>
 <li><span class="math inline">\(q\)</span> のばらつき <span class="math inline">\(\mathrm{Var}(q)\)</span> は 0.219（ <span class="math inline">\(t=30\)</span> ）→ 0.0087（ <span class="math inline">\(t=150\)</span> ）に縮み、それに合わせて <span class="math inline">\(K_q\)</span> も小さくなっています。</li>
 </ul>
 <h2 id="13-状態にない-q-がなぜ直るのか">13. 状態にない <span class="math inline">\(Q\)</span> が、なぜ直るのか</h2>
@@ -5102,8 +5069,8 @@ d\)</span></th>
 各回の補正を「真値 15 W
 に近づける向きを＋」として数え直すと（<code>run/q_contribution_seeds.py</code>）、この
 seed で温度センサ +11.56 W、変位計 −0.95 W、5 seed 平均でも温度センサ
-+11.40 W、変位計 −1.57 W でした。 <strong><span class="math inline">\(Q\)</span>
-を真値に近づけているのは主に温度センサです。</strong> 変位計の <span class="math inline">\(Q\)</span>
++11.40 W、変位計 −1.57 W でした。 ** <span class="math inline">\(Q\)</span>
+を真値に近づけているのは主に温度センサです。** 変位計の <span class="math inline">\(Q\)</span>
 への直接の補正は、平均するとむしろ真値から遠ざける向きでした。
 それでも、変位計を入れると最終の <span class="math inline">\(Q\)</span>
 は良くなります（温度2点だけ 14.05 W → 変位計を足して 14.89 W、5 seed

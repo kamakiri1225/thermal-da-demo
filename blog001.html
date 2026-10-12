@@ -775,7 +775,7 @@ STEP で主役</strong>になります。
 <pre><code>OpenFOAM(CHT) ──温度場 T(x)──▶ FrontISTR(熱弾性) ──▶ 変位 u(x)</code></pre>
 <h3 id="2-2-熱膨張のしくみ小学校の理科α">2-2.
 熱膨張のしくみ（小学校の理科＋α）</h3>
-<p>金属は温めると伸びます。伸び具合は <strong>線膨張係数 <span class="math inline">\(\alpha\)</span></strong> で決まり、温度が基準から
+<p>金属は温めると伸びます。伸び具合は <strong>線膨張係数 <span class="math inline">\(\alpha\)</span> </strong> で決まり、温度が基準から
 <span class="math inline">\(\Delta T = T - T_\mathrm{ref}\)</span>
 だけ上がると、各方向に</p>
 <p><span class="math display">\[\varepsilon_\mathrm{thermal}=\alpha\,\Delta
@@ -806,11 +806,13 @@ FEM節点5,040個</strong>です。</p>
 <img alt="OpenFOAMからFrontISTRへの温度マッピング" src="img/blog001_mapping.png"/>
 <figcaption aria-hidden="true">OpenFOAMからFrontISTRへの温度マッピング</figcaption>
 </figure>
-<p><em>z=50 mm断面で見た様子（t=300
+<blockquote>
+<p>z=50 mm断面で見た様子（t=300
 s）。<strong>A</strong>：色付きの点がCFDセル中心、黒丸がFEM節点。
 重ねると<strong>互いにずれている</strong>のが分かる。<strong>B</strong>：1つの節点について、近い8個のセルを距離の近い順に並べ、
 重み <span class="math inline">\(w=1/d\)</span>
-で加重平均する様子。<strong>C</strong>：こうして全節点に温度が乗った状態。これをFrontISTRへ渡す。</em></p>
+で加重平均する様子。<strong>C</strong>：こうして全節点に温度が乗った状態。これをFrontISTRへ渡す。</p>
+</blockquote>
 <p><strong>Bの中身を数字で</strong>：この節点の近くには2.32〜4.19
 mmの距離に8個のセルがあり、 温度は24.16〜24.63
 ℃とばらついています。距離の逆数で重みを付けると
@@ -885,10 +887,12 @@ N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{pc}},
 <img alt="熱膨張による変位（ヒータ側と反対側の差）" src="img/fullsolver_displacement_difference.png"/>
 <figcaption aria-hidden="true">熱膨張による変位（ヒータ側と反対側の差）</figcaption>
 </figure>
-<p><em>FrontISTR
+<blockquote>
+<p>FrontISTR
 で計算した熱変形。片側だけ熱いと上面がヒータ側へ「反り」、ヒータ側A
 と反対側O の 上向き変位 <span class="math inline">\(U_z\)</span>
-に差が出る。温度が上がるほど反りが大きくなり、冷却で戻る。（変形は見やすさのため誇張表示）</em></p>
+に差が出る。温度が上がるほど反りが大きくなり、冷却で戻る。（変形は見やすさのため誇張表示）</p>
+</blockquote>
 <h3 id="2-4-ここまでの一連の流れ">2-4. ここまでの一連の流れ</h3>
 <pre><code>[各時刻]  OpenFOAM: solid/T を計算
    │
@@ -952,8 +956,8 @@ face})\]</span></p>
 <p>一方、「総放熱量を同じにする1個のh」を求めるなら、まず面ごとの熱流束を足します。</p>
 <p><span class="math display">\[
 \dot Q_{\mathcal G}=\sum_{i\in\mathcal G}q_i^{\prime\prime}A_i
-=\sum_{i\in\mathcal G}h_i\Delta T_i A_i
-=h_{\rm eff}\sum_{i\in\mathcal G}\Delta T_i A_i.
+=\sum_{i\in\mathcal G}h_i\Delta T_i A_i =h_{\rm eff}\sum_{i\in\mathcal
+G}\Delta T_i A_i.
 \]</span></p>
 <p>右端を <span class="math inline">\(h_{\rm eff}\)</span>
 について解くと、</p>
@@ -1080,7 +1084,7 @@ K)です。次節は後者を集計します。</p>
 を直接指定せず温度場を出す（流体条件等の仮定は残る）。</li>
 <li>その <strong>温度場を FrontISTR に渡す</strong>と、熱ひずみ <span class="math inline">\(\alpha\Delta T\)</span>
 から熱膨張（変位）が出る。片側加熱で円筒は反る。</li>
-<li>CHT の結果から <strong>各面の <span class="math inline">\(q^{\prime\prime}\)</span> と <span class="math inline">\(T_w\)</span></strong> を取り出し、 <span class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
+<li>CHT の結果から <strong>各面の <span class="math inline">\(q^{\prime\prime}\)</span> と <span class="math inline">\(T_w\)</span> </strong> を取り出し、 <span class="math inline">\(h=q^{\prime\prime}/(T_w-T_\mathrm{ref})\)</span>
 で <strong>熱伝達率の分布・面代表値</strong>を診断できる。</li>
 <li>ここで得た温度・変位の時系列が、後続の <strong>OI／EnKF
 双子実験の真値</strong>になる。本記事自体は EnKF

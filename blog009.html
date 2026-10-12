@@ -423,8 +423,8 @@ B(t)=\frac{1}{3999}\sum_{m=1}^{4000}
 </table>
 <p>4,000ケースの時間発展は、各ケースについて</p>
 <p><span class="math display">\[
-\underbrace{\mathbf T_{P,k}^{(m)}}_{5\times1}
-=\mathcal M\left(\underbrace{\mathbf
+\underbrace{\mathbf T_{P,k}^{(m)}}_{5\times1} =\mathcal
+M\left(\underbrace{\mathbf
 T_{P,k-1}^{(m)}}_{5\times1},\underbrace{q^{(m)}}_{1\times1},\underbrace{h^{(m)}}_{1\times1}\right),
 \quad m=1,\ldots,4000
 \]</span></p>
@@ -454,8 +454,7 @@ z\)</span> は5点温度・発熱倍率q・放熱h、 <span class="math inline">
 OpenFOAMの温度場を列に並べ、セルごとの時間平均を引く。</strong>
 セル数N=20,696、時刻数Nt=121（0〜600秒、5秒ごと）です。</p>
 <p><span class="math display">\[
-\underbrace{X}_{N\times N_t}
-=\begin{bmatrix}
+\underbrace{X}_{N\times N_t} =\begin{bmatrix}
 T_1(0)&amp;T_1(5)&amp;\cdots&amp;T_1(600)\\
 T_2(0)&amp;T_2(5)&amp;\cdots&amp;T_2(600)\\
 \vdots&amp;\vdots&amp;\ddots&amp;\vdots\\
@@ -464,14 +463,12 @@ T_N(0)&amp;T_N(5)&amp;\cdots&amp;T_N(600)
 \qquad \bar T_i=\frac1{121}\sum_{k=0}^{120}T_i(5k)
 \]</span></p>
 <p><span class="math display">\[
-\underbrace{X_c}_{N\times N_t}
-=X-\underbrace{\bar{\mathbf T}}_{N\times1}\underbrace{\mathbf1^{\mathsf
-T}}_{1\times N_t}
+\underbrace{X_c}_{N\times N_t} =X-\underbrace{\bar{\mathbf
+T}}_{N\times1}\underbrace{\mathbf1^{\mathsf T}}_{1\times N_t}
 \]</span></p>
 <p><strong>② SVDで上位5本の空間モードを取り出す。</strong></p>
 <p><span class="math display">\[
-\underbrace{X_c}_{20696\times121}
-=\underbrace{U}_{20696\times121}
+\underbrace{X_c}_{20696\times121} =\underbrace{U}_{20696\times121}
 \underbrace{\Sigma}_{121\times121}
 \underbrace{V^{\mathsf T}}_{121\times121},
 \qquad
@@ -492,8 +489,7 @@ a_{\mathrm{POD}}}_{5\times1}
 <p><strong>④ 選んだ代表5点の温度から、5モードの係数を逆算する。</strong>
 <span class="math inline">\(\Phi\)</span> のP0〜P4の行を抜き出すと、</p>
 <p><span class="math display">\[
-\underbrace{\Phi_P}_{5\times5}
-=\begin{bmatrix}
+\underbrace{\Phi_P}_{5\times5} =\begin{bmatrix}
 \phi_1[P0]&amp;\phi_2[P0]&amp;\phi_3[P0]&amp;\phi_4[P0]&amp;\phi_5[P0]\\
 \phi_1[P1]&amp;\phi_2[P1]&amp;\phi_3[P1]&amp;\phi_4[P1]&amp;\phi_5[P1]\\
 \phi_1[P2]&amp;\phi_2[P2]&amp;\phi_3[P2]&amp;\phi_4[P2]&amp;\phi_5[P2]\\
@@ -532,10 +528,10 @@ a_{\mathrm{POD}}}_{5\times1}
 <p><span class="math display">\[
 \begin{aligned}
 T[c]\approx\bar T[c]
-&amp;+G_{c,0}\big(T[P0]-\bar T[P0]\big)
-+G_{c,1}\big(T[P1]-\bar T[P1]\big)\\
-&amp;+G_{c,2}\big(T[P2]-\bar T[P2]\big)
-+G_{c,3}\big(T[P3]-\bar T[P3]\big)\\
+&amp;+G_{c,0}\big(T[P0]-\bar T[P0]\big) +G_{c,1}\big(T[P1]-\bar
+T[P1]\big)\\
+&amp;+G_{c,2}\big(T[P2]-\bar T[P2]\big) +G_{c,3}\big(T[P3]-\bar
+T[P3]\big)\\
 &amp;+G_{c,4}\big(T[P4]-\bar T[P4]\big).
 \end{aligned}
 \]</span></p>
@@ -561,8 +557,8 @@ G_{c,j}=\sum_{\ell=1}^{5}\phi_\ell[c]{}(\Phi_P^+)_{\ell,j}
 \delta y_c=
 \begin{bmatrix}h_{c,0}&amp;h_{c,1}&amp;h_{c,2}&amp;h_{c,3}&amp;h_{c,4}\end{bmatrix}
 \begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta T[P2]\\\delta
-T[P3]\\\delta T[P4]\end{bmatrix}
-=\mathbf h_c^{\mathsf T}\delta\mathbf T_P
+T[P3]\\\delta T[P4]\end{bmatrix} =\mathbf h_c^{\mathsf T}\delta\mathbf
+T_P
 \]</span></p>
 <p>です。 <span class="math inline">\(h_{c,j}\)</span>
 は「代表点Pjの温度が1
@@ -633,14 +629,14 @@ T}\delta\mathbf T_P\)</span>
 y_c\)</span> と書きます。温度計なら単位はK、変位計ならµmです。</p>
 <p><span class="math display">\[
 \underbrace{\Delta y_c}_{1\times1}
-=\underbrace{y_c^{\mathrm{obs}}}_{1\times1}
--\underbrace{\widehat y_c}_{1\times1}
+=\underbrace{y_c^{\mathrm{obs}}}_{1\times1} -\underbrace{\widehat
+y_c}_{1\times1}
 \]</span></p>
 <p><strong>なぜこの差を5点温度の誤差で書けるのか、順に代入します。</strong>
 §3-1で使った「代表5点の温度に重みを掛けてセンサ値を計算する式」は、次の形です。</p>
 <p><span class="math display">\[
-\underbrace{y_c(\mathbf T_P)}_{1\times1}
-=\underbrace{\bar y_c}_{1\times1}
+\underbrace{y_c(\mathbf T_P)}_{1\times1} =\underbrace{\bar
+y_c}_{1\times1}
 +\underbrace{\begin{bmatrix}h_{c,0}&amp;h_{c,1}&amp;h_{c,2}&amp;h_{c,3}&amp;h_{c,4}\end{bmatrix}}_{\mathbf
 h_c^{\mathsf T}:\ 1\times5}
 \underbrace{\begin{bmatrix}
@@ -658,14 +654,12 @@ K変わったときのセンサ値の変化です。温度計なら温度復元�
 <span class="math inline">\(\varepsilon_c\)</span>
 が加わるとします。</p>
 <p><span class="math display">\[
-y_c^{\mathrm{obs}}
-=\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf
-T}_P)+\varepsilon_c
+y_c^{\mathrm{obs}} =\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf
+T_P-\bar{\mathbf T}_P)+\varepsilon_c
 \]</span></p>
 <p><span class="math display">\[
-\widehat y_c
-=\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf T}_P-\bar{\mathbf
-T}_P)
+\widehat y_c =\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf
+T}_P-\bar{\mathbf T}_P)
 \]</span></p>
 <p>両式とも、重みは1×5、括弧内は5×1、結果は1×1です。上の式から下の式を引くと、共通の平均場の項が消えます。</p>
 <p><span class="math display">\[
@@ -673,9 +667,8 @@ T}_P)
 \Delta y_c
 &amp;=y_c^{\mathrm{obs}}-\widehat y_c\\
 &amp;=\bar y_c+\mathbf h_c^{\mathsf T}(\mathbf T_P-\bar{\mathbf
-T}_P)+\varepsilon_c
--\left\{\bar y_c+\mathbf h_c^{\mathsf T}(\widehat{\mathbf
-T}_P-\bar{\mathbf T}_P)\right\}\\
+T}_P)+\varepsilon_c -\left\{\bar y_c+\mathbf h_c^{\mathsf
+T}(\widehat{\mathbf T}_P-\bar{\mathbf T}_P)\right\}\\
 &amp;=\mathbf h_c^{\mathsf T}(\mathbf T_P-\widehat{\mathbf
 T}_P)+\varepsilon_c.
 \end{aligned}
@@ -716,8 +709,7 @@ y_c=h_{c,0}e_0+h_{c,1}e_1+h_{c,2}e_2+h_{c,3}e_3+h_{c,4}e_4+\varepsilon_c
 <p>と置きます。 <span class="math inline">\(a_j\)</span>
 は「センサが1単位ずれていたら、Pjの推定温度を何K直すか」です。補正後に残る誤差は、</p>
 <p><span class="math display">\[
-e_{j,+c}=T[Pj]-\widehat T_{+c}[Pj]
-=e_j-a_j\Delta y_c
+e_{j,+c}=T[Pj]-\widehat T_{+c}[Pj] =e_j-a_j\Delta y_c
 \]</span></p>
 <p>となります。<strong>これをできるだけ小さくする <span class="math inline">\(a_j\)</span> を求めます。</strong></p>
 <p><strong>④
@@ -777,8 +769,7 @@ e_{j,+c}^2=e_j^2-2a_j e_j\Delta y_c+a_j^2(\Delta y_c)^2
 <p><span class="math inline">\(a_j\)</span>
 は、平均を取る間は固定した係数です。したがって、</p>
 <p><span class="math display">\[
-\mathbb E[e_{j,+c}^2]
-=\underbrace{\mathbb E[e_j^2]}_{(1)}
+\mathbb E[e_{j,+c}^2] =\underbrace{\mathbb E[e_j^2]}_{(1)}
 -2a_j\underbrace{\mathbb E[e_j\Delta y_c]}_{(2)}
 +a_j^2\underbrace{\mathbb E[(\Delta y_c)^2]}_{(3)}
 \]</span></p>
@@ -796,8 +787,7 @@ y_c=h_{c,0}e_0+h_{c,1}e_1+h_{c,2}e_2+h_{c,3}e_3+h_{c,4}e_4+\varepsilon_c
 <p>まず <span class="math inline">\(e_j\)</span> を掛けます。</p>
 <p><span class="math display">\[
 \begin{aligned}
-e_j\Delta y_c
-={}&amp;h_{c,0}e_je_0+h_{c,1}e_je_1+h_{c,2}e_je_2\\
+e_j\Delta y_c ={}&amp;h_{c,0}e_je_0+h_{c,1}e_je_1+h_{c,2}e_je_2\\
 &amp;+h_{c,3}e_je_3+h_{c,4}e_je_4+e_j\varepsilon_c.
 \end{aligned}
 \]</span></p>
@@ -806,8 +796,7 @@ e_j\Delta y_c
 E[e_je_i]=P_{ji}\)</span>
 であり、ノイズは温度誤差と独立・平均ゼロなので、</p>
 <p><span class="math display">\[
-\mathbb E[e_j\varepsilon_c]
-=\mathbb E[e_j]\mathbb E[\varepsilon_c]=0
+\mathbb E[e_j\varepsilon_c] =\mathbb E[e_j]\mathbb E[\varepsilon_c]=0
 \]</span></p>
 <p>です。よって、</p>
 <p><span class="math display">\[
@@ -829,10 +818,8 @@ E[e_je_i]=P_{ji}\)</span>
 の式を二乗します。 <span class="math inline">\(\sum_i
 h_{c,i}e_i\)</span> は上の5項を足したものです。</p>
 <p><span class="math display">\[
-(\Delta y_c)^2
-=\left(\sum_{i=0}^{4}h_{c,i}e_i\right)^2
-+2\left(\sum_{i=0}^{4}h_{c,i}e_i\right)\varepsilon_c
-+\varepsilon_c^2
+(\Delta y_c)^2 =\left(\sum_{i=0}^{4}h_{c,i}e_i\right)^2
++2\left(\sum_{i=0}^{4}h_{c,i}e_i\right)\varepsilon_c +\varepsilon_c^2
 \]</span></p>
 <p>平均すると、中央の項は独立性とノイズの平均ゼロから消え、最後の項は観測ノイズの分散
 <span class="math inline">\(r_c\)</span> になります。</p>
@@ -872,17 +859,15 @@ P_{40}&amp;P_{41}&amp;P_{42}&amp;P_{43}&amp;P_{44}
 <p><strong>⑤ 誤差が最小になる補正係数を求める。</strong> <span class="math inline">\(a_j\)</span> で微分してゼロと置きます。</p>
 <p><span class="math display">\[
 \frac{\partial}{\partial a_j}
-\big(P_{jj}-2a_jv_j+a_j^2s_c\big)
-=-2v_j+2a_js_c=0
+\big(P_{jj}-2a_jv_j+a_j^2s_c\big) =-2v_j+2a_js_c=0
 \]</span></p>
 <p><span class="math display">\[
 \boxed{a_j=\frac{v_j}{s_c}}
 \]</span></p>
 <p>これを温度の補正式へ戻すと、</p>
 <p><span class="math display">\[
-\boxed{\widehat T_{+c}[Pj]
-=\widehat T[Pj]+\frac{v_j}{s_c}\big(y_c^{\mathrm{obs}}-\widehat
-y_c\big)}
+\boxed{\widehat T_{+c}[Pj] =\widehat
+T[Pj]+\frac{v_j}{s_c}\big(y_c^{\mathrm{obs}}-\widehat y_c\big)}
 \]</span></p>
 <p>です。<strong>センサと強く一緒に変わる温度には大きく補正を掛け、関係が弱い温度には小さく掛けます。</strong>
 ノイズが大きいと <span class="math inline">\(s_c\)</span>
@@ -895,8 +880,7 @@ P_{+c,ij}
 &amp;=\mathbb E[e_{i,+c}e_{j,+c}]\\
 &amp;=\mathbb E[(e_i-a_i\Delta y_c)(e_j-a_j\Delta y_c)]\\
 &amp;=P_{ij}-a_jv_i-a_iv_j+a_ia_js_c\\
-&amp;=P_{ij}-\frac{v_iv_j}{s_c}-\frac{v_iv_j}{s_c}
-+\frac{v_iv_j}{s_c}\\
+&amp;=P_{ij}-\frac{v_iv_j}{s_c}-\frac{v_iv_j}{s_c} +\frac{v_iv_j}{s_c}\\
 &amp;=\boxed{P_{ij}-\frac{v_iv_j}{s_c}}.
 \end{aligned}
 \]</span></p>
@@ -915,14 +899,12 @@ P_{+c,ij}
 <p><strong>⑦ 残る温度誤差を反りに換算する。</strong> <span class="math inline">\(\delta d=\mathbf w^{\mathsf T}\mathbf
 e_{+c}\)</span> なので、</p>
 <p><span class="math display">\[
-\sigma_{+c}^2
-=\sum_{i=0}^{4}\sum_{j=0}^{4}w_iP_{+c,ij}w_j
-=\mathbf w^{\mathsf T}P_{+c}\mathbf w
+\sigma_{+c}^2 =\sum_{i=0}^{4}\sum_{j=0}^{4}w_iP_{+c,ij}w_j =\mathbf
+w^{\mathsf T}P_{+c}\mathbf w
 \]</span></p>
 <p><span class="math display">\[
-\boxed{\sigma_{+c}^2
-=\mathbf w^{\mathsf T}P\mathbf w
--\frac{(\mathbf w^{\mathsf T}P\mathbf h_c)^2}
+\boxed{\sigma_{+c}^2 =\mathbf w^{\mathsf T}P\mathbf w -\frac{(\mathbf
+w^{\mathsf T}P\mathbf h_c)^2}
 {\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}}
 \]</span></p>
 <p>右辺の第1項は測る前の反りの分散、第2項は候補cを測ることで減る分散です。平方根を取った
@@ -966,15 +948,14 @@ K変えると、Aの上下変位がどれだけ変わるか」を表します。
 はその観測ノイズの分散（1×1）です。</p>
 <p>候補cを測る前と後の反りの分散は、</p>
 <p><span class="math display">\[
-\underbrace{V_{\mathrm{before}}}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
+\underbrace{V_{\mathrm{before}}}_{1\times1} =\underbrace{\mathbf
+w^{\mathsf T}}_{1\times5}
 \underbrace{P}_{5\times5}
 \underbrace{\mathbf w}_{5\times1}
 \]</span></p>
 <p><span class="math display">\[
 \boxed{
-\underbrace{V_{\mathrm{after},c}}_{1\times1}
-=V_{\mathrm{before}}
+\underbrace{V_{\mathrm{after},c}}_{1\times1} =V_{\mathrm{before}}
 -\frac{\left(\mathbf w^{\mathsf T}P\mathbf h_c\right)^2}
 {\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}
 }
@@ -1086,8 +1067,7 @@ W加熱中、RK4刻み2秒、観測ノイズは温度0.3 K・変位0.3
 <p>ここで決めるのは、<strong>温度を測るセルの位置を2か所</strong>です。温度の値そのものを決める処理ではありません。また、目的は本記事の評価対象である反りA−Oの推定です。温度場RMSEだけを最小にする配置を探しているわけではありません。</p>
 <p>候補は、ROMの代表5点を除くOpenFOAMの20,691セルです。候補セルの番号をcとします。既に作った温度復元行列は、</p>
 <p><span class="math display">\[
-\underbrace{G}_{20696\times5}
-=\underbrace{\Phi}_{20696\times5}
+\underbrace{G}_{20696\times5} =\underbrace{\Phi}_{20696\times5}
 \underbrace{\Phi_P^+}_{5\times5}
 \]</span></p>
 <p>です。 <span class="math inline">\(\Phi\)</span> は全セルのPOD基底、
@@ -1105,8 +1085,7 @@ g_c\)</span> です。 <span class="math inline">\(G_{c,j}\)</span>
 K変わると、復元した候補セルcの温度が何K変わるか」です。</p>
 <p>候補セルの温度予報は、</p>
 <p><span class="math display">\[
-\underbrace{\widehat T[c]}_{1\times1}
-=\bar T[c]
+\underbrace{\widehat T[c]}_{1\times1} =\bar T[c]
 +\underbrace{\begin{bmatrix}G_{c,0}&amp;G_{c,1}&amp;G_{c,2}&amp;G_{c,3}&amp;G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 \widehat T[P0]-\bar T[P0]\\
@@ -1123,8 +1102,7 @@ K変わると、復元した候補セルcの温度が何K変わるか」です�
 T[Pj]\)</span>
 は、正しい温度と補正前の推定温度との差です。正しい温度を上の復元式で表せる線形モデル内では、観測値と予報値の差は、</p>
 <p><span class="math display">\[
-\underbrace{T^{\mathrm{obs}}[c]-\widehat T[c]}_{\Delta y_c:\ 1\times1}
-=
+\underbrace{T^{\mathrm{obs}}[c]-\widehat T[c]}_{\Delta y_c:\ 1\times1} =
 \underbrace{\begin{bmatrix}G_{c,0}&amp;G_{c,1}&amp;G_{c,2}&amp;G_{c,3}&amp;G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 T[P0]-\widehat T[P0]\\
@@ -1153,9 +1131,7 @@ g_c+\sigma_T^2}}_{5\times1}
 1本目は、反りに残る不確かさが最小になるセルを選ぶ</h3>
 <p>候補cを使って補正した後に残る温度誤差の共分散は、</p>
 <p><span class="math display">\[
-\underbrace{P_{+c}}_{5\times5}
-=\underbrace{B}_{5\times5}
--\frac{
+\underbrace{P_{+c}}_{5\times5} =\underbrace{B}_{5\times5} -\frac{
 \underbrace{(B\mathbf g_c)}_{5\times1}
 \underbrace{(B\mathbf g_c)^{\mathsf T}}_{1\times5}
 }{\underbrace{\mathbf g_c^{\mathsf T}B\mathbf
@@ -1173,8 +1149,8 @@ g_c+\sigma_T^2}_{1\times1}}
 <span class="math inline">\(e_d=w_0e_0+\cdots+w_4e_4\)</span>
 なので、候補cを使った補正後に残る反りの分散は、</p>
 <p><span class="math display">\[
-\underbrace{\sigma_{+c}^2(t)}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf T}}_{1\times5}
+\underbrace{\sigma_{+c}^2(t)}_{1\times1} =\underbrace{\mathbf w^{\mathsf
+T}}_{1\times5}
 \underbrace{P_{+c}(t)}_{5\times5}
 \underbrace{\mathbf w}_{5\times1}
 \]</span></p>
@@ -1192,8 +1168,7 @@ T}P_{+c}(30k)\mathbf w}
 <p>T1が決まったら、その重み <span class="math inline">\(\mathbf
 g_{T1}\)</span> を使い、10時刻それぞれで次の共分散を計算します。</p>
 <p><span class="math display">\[
-\underbrace{P^{(T1)}}_{5\times5}
-=\underbrace{B}_{5\times5}
+\underbrace{P^{(T1)}}_{5\times5} =\underbrace{B}_{5\times5}
 -\frac{\underbrace{(B\mathbf g_{T1})(B\mathbf g_{T1})^{\mathsf
 T}}_{5\times5}}
 {\underbrace{\mathbf g_{T1}^{\mathsf T}B\mathbf
@@ -1202,8 +1177,7 @@ g_{T1}+\sigma_T^2}_{1\times1}}
 <p>上付き(T1)は「温度計T1を使って補正したと仮定した場合」の名前です。このPは、<strong>T1を使った後にも残る温度の不確かさ</strong>を表します。時間を先に進めた結果ではありません。</p>
 <p>次の候補cを追加した場合は、BではなくこのPから始めます。</p>
 <p><span class="math display">\[
-\underbrace{P^{(T1,+c)}}_{5\times5}
-=\underbrace{P^{(T1)}}_{5\times5}
+\underbrace{P^{(T1,+c)}}_{5\times5} =\underbrace{P^{(T1)}}_{5\times5}
 -\frac{
 \underbrace{(P^{(T1)}\mathbf g_c)(P^{(T1)}\mathbf g_c)^{\mathsf
 T}}_{5\times5}
@@ -1214,8 +1188,7 @@ g_c+\sigma_T^2}_{1\times1}}
 T1と同じ情報しか持たない候補では、追加して減らせる不確かさが小さくなるためです。</p>
 <p>2本とも決まったときの温度観測行列は、</p>
 <p><span class="math display">\[
-\underbrace{H_T}_{2\times5}
-=\begin{bmatrix}
+\underbrace{H_T}_{2\times5} =\begin{bmatrix}
 G_{T1,0}&amp;G_{T1,1}&amp;G_{T1,2}&amp;G_{T1,3}&amp;G_{T1,4}\\
 G_{T2,0}&amp;G_{T2,1}&amp;G_{T2,2}&amp;G_{T2,3}&amp;G_{T2,4}
 \end{bmatrix},
@@ -1340,8 +1313,7 @@ T}
 <p><span class="math display">\[
 \underbrace{\begin{bmatrix}
 T_k^{f,(m)}[P0]\\T_k^{f,(m)}[P1]\\T_k^{f,(m)}[P2]\\T_k^{f,(m)}[P3]\\T_k^{f,(m)}[P4]
-\end{bmatrix}}_{5\times1}
-=\mathcal M_{t_{k-1}\to t_k}\left(
+\end{bmatrix}}_{5\times1} =\mathcal M_{t_{k-1}\to t_k}\left(
 \underbrace{\begin{bmatrix}
 T_{k-1}^{a,(m)}[P0]\\T_{k-1}^{a,(m)}[P1]\\T_{k-1}^{a,(m)}[P2]\\T_{k-1}^{a,(m)}[P3]\\T_{k-1}^{a,(m)}[P4]
 \end{bmatrix}}_{5\times1},
@@ -1388,25 +1360,22 @@ T_{P,k}^{f,(m)}-\bar{\mathbf T}_P)\\
 T_{P,k}^{f,(m)}-\bar{\mathbf T}_P)
 \end{bmatrix}
 \]</span></p>
-<p><strong><span class="math inline">\(\mathbf y_k^{f,(m)}\)</span>
-は、実測値ではありません。</strong> 「メンバー <span class="math inline">\(m\)</span> の予報温度が正しいなら、今回の時刻
+<p>** <span class="math inline">\(\mathbf y_k^{f,(m)}\)</span>
+は、実測値ではありません。** 「メンバー <span class="math inline">\(m\)</span> の予報温度が正しいなら、今回の時刻
 <span class="math inline">\(t_k\)</span>
 に4本のセンサが示すはずの値」を並べた
 <strong>4×1の列ベクトル</strong>です。</p>
 <p><span class="math display">\[
-\underbrace{\mathbf y_k^{f,(m)}}_{4\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\mathbf y_k^{f,(m)}}_{4\times1} =\underbrace{\begin{bmatrix}
 \theta_{1,k}^{f,(m)}\\\theta_{2,k}^{f,(m)}\\U_{x,k}^{f,(m)}(S1)\\U_{x,k}^{f,(m)}(S2)
 \end{bmatrix}}_{4\times1}
 \]</span></p>
 <p>1・2行目は代表点以外のT1・T2の温度 [K]、3・4行目はS1・S2の横方向変位
 [µm] です。実際には、次の行列積で計算しています。</p>
 <p><span class="math display">\[
-\underbrace{\mathbf y_k^{f,(m)}}_{4\times1}
-=\underbrace{\begin{bmatrix}
+\underbrace{\mathbf y_k^{f,(m)}}_{4\times1} =\underbrace{\begin{bmatrix}
 \bar T[T1]\\\bar T[T2]\\\bar u_x[S1]\\\bar u_x[S2]
-\end{bmatrix}}_{4\times1}
-+\underbrace{\begin{bmatrix}
+\end{bmatrix}}_{4\times1} +\underbrace{\begin{bmatrix}
 g_{T1,0}&amp;g_{T1,1}&amp;g_{T1,2}&amp;g_{T1,3}&amp;g_{T1,4}\\
 g_{T2,0}&amp;g_{T2,1}&amp;g_{T2,2}&amp;g_{T2,3}&amp;g_{T2,4}\\
 h_{S1x,0}&amp;h_{S1x,1}&amp;h_{S1x,2}&amp;h_{S1x,3}&amp;h_{S1x,4}\\
@@ -1563,7 +1532,8 @@ z}_k^f,
 \Delta\mathbf y_k^{(m)}=\widetilde{\mathbf y}_k^{f,(m)}-\bar{\mathbf
 y}_k^f
 \]</span></p>
-<p>上の偏差も、成分を省略しない列ベクトルで書くと次のとおりです。ここで引く平均は、<strong>同じ時刻の60メンバー平均</strong>であり、②のPODの時間平均（<span class="math inline">\(\bar T[Pj]\)</span> ）とは異なります。</p>
+<p>上の偏差も、成分を省略しない列ベクトルで書くと次のとおりです。ここで引く平均は、<strong>同じ時刻の60メンバー平均</strong>であり、②のPODの時間平均（
+<span class="math inline">\(\bar T[Pj]\)</span> ）とは異なります。</p>
 <p><span class="math display">\[
 \underbrace{\Delta\mathbf z_k^{(m)}}_{7\times1}
 =\underbrace{\begin{bmatrix}
@@ -1638,8 +1608,7 @@ r_k^{(m)}}
 \Delta_{\mathrm{corr}}T[P4]\\
 \Delta_{\mathrm{corr}}q\\
 \Delta_{\mathrm{corr}}h
-\end{bmatrix}
-=
+\end{bmatrix} =
 \begin{bmatrix}
 K_{0,1}&amp;K_{0,2}&amp;K_{0,3}&amp;K_{0,4}\\
 K_{1,1}&amp;K_{1,2}&amp;K_{1,3}&amp;K_{1,4}\\
@@ -1729,11 +1698,8 @@ h_k^{a,(m)}=\widetilde h_k^{f,(m)}
 <p>実際の観測との差に、このKを掛けることでq・hを変更します。Q・hを測定した値に置き換えたり、観測ごとに別々の逆解析を解いたりする処理ではありません。</p>
 <p>発熱量の補正をWで書くと、制限処理の前には</p>
 <p><span class="math display">\[
-\Delta_{\mathrm{corr}}Q
-=15\Delta_{\mathrm{corr}}q
-=15\left(
-K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)}
-+K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
+\Delta_{\mathrm{corr}}Q =15\Delta_{\mathrm{corr}}q =15\left(
+K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)} +K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
 \right)
 \]</span></p>
 <p>です。括弧内が正ならQを上げ、負なら下げます。hも同様に、h行と4成分のずれの積の和で上げ下げします。<strong>Uxの符号だけからQ・hの補正方向は決まりません。</strong>
@@ -1794,16 +1760,14 @@ h_{A,z}-\mathbf h_{O,z}\)</span> より、</p>
 <span class="math inline">\(\mathbf h_{S,x}\)</span>
 とすると、線形推定でUxを1本追加した場合の反りの補正係数は、</p>
 <p><span class="math display">\[
-\beta_{d,Sx}
-=\frac{\mathbf w^{\mathsf T}P\mathbf h_{S,x}}
+\beta_{d,Sx} =\frac{\mathbf w^{\mathsf T}P\mathbf h_{S,x}}
 {\mathbf h_{S,x}^{\mathsf T}P\mathbf h_{S,x}+r_u}
 =\frac{\mathrm{Cov}(d,U_x(S))}
 {\mathrm{Var}(U_x(S))+r_u}
 \]</span></p>
 <p>です。反りの分散が減る量は、</p>
 <p><span class="math display">\[
-\boxed{\Delta\sigma_d^2
-=\frac{\mathrm{Cov}(d,U_x(S))^2}
+\boxed{\Delta\sigma_d^2 =\frac{\mathrm{Cov}(d,U_x(S))^2}
 {\mathrm{Var}(U_x(S))+r_u}}
 \]</span></p>
 <p>となります。<strong>測定方向が異なっていても、同じ温度の不確かさを通じて共分散があれば、UxはUzの推定情報になります。</strong>

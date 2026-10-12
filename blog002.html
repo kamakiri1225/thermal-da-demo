@@ -356,8 +356,8 @@ Interpolation, 最適内挿）</strong> を扱います。</p>
 <h3 id="更新式が出てくる理由">更新式が出てくる理由</h3>
 <p>予報と観測の双方から大きく離れない状態を、各誤差の分散で重みづけして求めます。BとRが正定値の場合、</p>
 <p><span class="math display">\[
-J(x)=\frac12(x-x^b)^{\mathsf T}B^{-1}(x-x^b)
-+\frac12(y-Hx)^{\mathsf T}R^{-1}(y-Hx).
+J(x)=\frac12(x-x^b)^{\mathsf T}B^{-1}(x-x^b) +\frac12(y-Hx)^{\mathsf
+T}R^{-1}(y-Hx).
 \]</span></p>
 <p><span class="math inline">\(J\)</span> を最小にする条件は</p>
 <p><span class="math display">\[
@@ -468,8 +468,8 @@ K=\frac{1}{\sigma_{11}+R}\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
 ÷（観測点の分散＋ノイズ）</strong>」。数字を入れると（ <span class="math inline">\(\sigma_{11}=4,\ \sigma_{21}=2,\ \sigma_{31}=0.8,\
 R=0.09\)</span> ）:</p>
 <p><span class="math display">\[K=\frac{1}{4+0.09}\begin{pmatrix}4\\ 2\\
-0.8\end{pmatrix}
-=\begin{pmatrix}0.978\\ 0.489\\ 0.196\end{pmatrix}.\]</span></p>
+0.8\end{pmatrix} =\begin{pmatrix}0.978\\ 0.489\\
+0.196\end{pmatrix}.\]</span></p>
 <p><strong>読み方</strong>：点1（測った点）は重み 0.978
 でほぼ観測を信じる。点2は 0.489、点3は 0.196 と、
 <strong>測っていない点にも <span class="math inline">\(B\)</span>
@@ -477,10 +477,10 @@ R=0.09\)</span> ）:</p>
 <h3 id="3-3-更新answer">3-3. 更新（answer）</h3>
 <p>予報のハズレ： <span class="math inline">\(y-Hx^b=30-25=5\)</span>
 ℃。これをゲインで配分:</p>
-<p><span class="math display">\[x^a=x^b+K\times5
-=\begin{pmatrix}25\\ 25\\ 25\end{pmatrix}
-+\begin{pmatrix}0.978\\ 0.489\\ 0.196\end{pmatrix}\times5
-=\begin{pmatrix}29.89\\ 27.44\\ 25.98\end{pmatrix}\]</span></p>
+<p><span class="math display">\[x^a=x^b+K\times5 =\begin{pmatrix}25\\
+25\\ 25\end{pmatrix} +\begin{pmatrix}0.978\\ 0.489\\
+0.196\end{pmatrix}\times5 =\begin{pmatrix}29.89\\ 27.44\\
+25.98\end{pmatrix}\]</span></p>
 <h3 id="3-4-結果を真値と比べる">3-4. 結果を真値と比べる</h3>
 <table>
 <colgroup>
@@ -557,8 +557,7 @@ T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
 の外積で入れると:</p>
 <p><span class="math display">\[B=\begin{pmatrix}\sigma_T^2 &amp; 0
 &amp; 0\\ 0 &amp; \sigma_T^2 &amp; 0\\ 0 &amp; 0 &amp; 0\end{pmatrix}
-+\sigma_Q^2\,a\,a^{\mathsf T}
-=\begin{pmatrix}
++\sigma_Q^2\,a\,a^{\mathsf T} =\begin{pmatrix}
 \sigma_T^2+\sigma_Q^2 s_1^2 &amp; \sigma_Q^2 s_1 s_2 &amp; \sigma_Q^2
 s_1\\
 \sigma_Q^2 s_1 s_2 &amp; \sigma_T^2+\sigma_Q^2 s_2^2 &amp; \sigma_Q^2
@@ -568,8 +567,7 @@ s_2\\
 <blockquote>
 <p><strong>ここが全ての鍵</strong>：右上・左下の <span class="math inline">\(B_{TQ}=\sigma_Q^2\,(s_1,\ s_2)\)</span> が
 <strong>「温度と <span class="math inline">\(Q\)</span>
-の相関」</strong>。 これがゼロだと、温度や変位をいくら測っても <span class="math inline">\(Q\)</span> は1ミリも動きません。 <strong><span class="math inline">\(Q\)</span> が同定できるのは、この <span class="math inline">\(B_{TQ}\neq0\)</span> のおかげ</strong>（＝温度が
-<span class="math inline">\(Q\)</span> で決まるから）です。</p>
+の相関」</strong>。 これがゼロだと、温度や変位をいくら測っても <span class="math inline">\(Q\)</span> は1ミリも動きません。 ** <span class="math inline">\(Q\)</span> が同定できるのは、この <span class="math inline">\(B_{TQ}\neq0\)</span> のおかげ**（＝温度が <span class="math inline">\(Q\)</span> で決まるから）です。</p>
 </blockquote>
 <h3 id="3-6-温度を測ると-q-が動く文字式">3-6. 温度を測ると <span class="math inline">\(Q\)</span> が動く（文字式）</h3>
 <p>温度計を点1に置くと <span class="math inline">\(H=(1,\ 0,\
@@ -587,9 +585,9 @@ s_1^2+r}
 \ \Rightarrow\
 \boxed{\,K_Q=\frac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2
 s_1^2+r}\,}.\]</span></p>
-<p><strong>点1の温度しか測っていないのにゲインの <span class="math inline">\(Q\)</span> 行 <span class="math inline">\(K_Q\neq0\)</span></strong> 。だから予報のハズレ
+<p><strong>点1の温度しか測っていないのにゲインの <span class="math inline">\(Q\)</span> 行 <span class="math inline">\(K_Q\neq0\)</span> </strong> 。だから予報のハズレ
 <span class="math inline">\(y-Hx^b\)</span> が <span class="math inline">\(Q^a=Q^b+K_Q(y-Hx^b)\)</span> で <span class="math inline">\(Q\)</span> を動かします。分子の <span class="math inline">\(\sigma_Q^2 s_1\)</span> は、まさに <span class="math inline">\(B_{T_1Q}\)</span> 。
-<strong>温度観測の差がQの更新へ伝わる経路は、 <span class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span></strong>
+<strong>温度観測の差がQの更新へ伝わる経路は、 <span class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span> </strong>
 です。Qが動くことと、真値を正しく同定できることは別です。</p>
 <h3 id="3-7-変位を測ると全部動く文字式">3-7.
 変位を測ると全部動く（文字式）</h3>
@@ -629,11 +627,13 @@ T_1+w_2\,\delta T_2+\cdots\]</span></p>
 <img alt="変位観測が温度を直す仕組みの図解" src="img/disp_to_temp_mechanism.png"/>
 <figcaption aria-hidden="true">変位観測が温度を直す仕組みの図解</figcaption>
 </figure>
-<p><em>左：実線＝温度誤差が重み <span class="math inline">\(w\)</span>
+<blockquote>
+<p>左：実線＝温度誤差が重み <span class="math inline">\(w\)</span>
 で変位計へ<strong>射影</strong>される。破線＝変位のハズレが <span class="math inline">\(\mathrm{Cov}(T_i,\ u)\)</span>
 に比例して各温度へ<strong>逆流</strong>する。 右：高W/低Wの差＝信号
-<span class="math inline">\(g\,\sigma_a\)</span> がノイズ <span class="math inline">\(\sqrt r\)</span> を超えるかどうか。</em></p>
-<p><strong>② 温度が動く理由＝共分散 <span class="math inline">\(Bw\)</span></strong> 。 <span class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
+<span class="math inline">\(g\,\sigma_a\)</span> がノイズ <span class="math inline">\(\sqrt r\)</span> を超えるかどうか。</p>
+</blockquote>
+<p><strong>② 温度が動く理由＝共分散 <span class="math inline">\(Bw\)</span> </strong> 。 <span class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
 <p><span class="math display">\[K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
 w^{\mathsf T}Bw=\mathrm{Var}(u).\]</span></p>
 <p><strong>行列を成分まで書き下す</strong>と（2点、 <span class="math inline">\(B\)</span> の成分を <span class="math inline">\(\sigma_{ij}\)</span> とする）:</p>
@@ -648,16 +648,15 @@ T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,\]</span></p>
 <p><span class="math display">\[K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
 \begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
 \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\qquad
-\begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix}
-=\begin{pmatrix}T_1^b\\ T_2^b\end{pmatrix}+K\,d,\quad
+\begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix} =\begin{pmatrix}T_1^b\\
+T_2^b\end{pmatrix}+K\,d,\quad
 d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).\]</span></p>
 <p><strong>読み方</strong>： <span class="math inline">\(K_1\)</span>
 の分子は <span class="math inline">\(\sigma_{11}w_1+\sigma_{12}w_2\)</span>
 ＝「自分の重み <span class="math inline">\(w_1\)</span> 経由」＋「相関
 <span class="math inline">\(\sigma_{12}\)</span> 経由」の2経路。 だから
-<strong><span class="math inline">\(w_2\)</span> が小さい点でも、相関
-<span class="math inline">\(\sigma_{12}\)</span>
-が補正を運んでくる</strong>――これが成分で見た「温度まで直る」仕組みです。</p>
+** <span class="math inline">\(w_2\)</span> が小さい点でも、相関 <span class="math inline">\(\sigma_{12}\)</span>
+が補正を運んでくる**――これが成分で見た「温度まで直る」仕組みです。</p>
 <p>温度 <span class="math inline">\(T_i\)</span> が更新されるのは <span class="math inline">\(\mathrm{Cov}(T_i,\ u)\neq0\)</span> （＝ベクトル
 <span class="math inline">\(Bw\)</span> の第 <span class="math inline">\(i\)</span> 成分がゼロでない）、 つまり「 <span class="math inline">\(T_i\)</span>
 の誤差と変位の誤差が<strong>連動</strong>している」から。変位のハズレが、連動の強さに比例して各温度へ配られます。</p>
@@ -683,7 +682,8 @@ T}\varphi\]</span></p>
 \varphi_1\varphi_2&amp;\varphi_2^2\end{pmatrix},\qquad
 Bw=\sigma_a^2\,g\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix},\qquad
 K=\frac{\sigma_a^2\,g}{g^2\sigma_a^2+r}\begin{pmatrix}\varphi_1\\
-\varphi_2\end{pmatrix}.\]</span> <strong>ゲイン <span class="math inline">\(K\)</span> が型 <span class="math inline">\(\varphi\)</span>
+\varphi_2\end{pmatrix}.\]</span></p>
+<p><strong>ゲイン <span class="math inline">\(K\)</span> が型 <span class="math inline">\(\varphi\)</span>
 に比例</strong>しています。つまり補正は「型の形のまま」全点へ一斉に入る――
 行列で見ると「変位1本で全温度が直る」の正体はこれです。</p>
 <p>つまり<strong>変位計は「型の係数 <span class="math inline">\(a\)</span> をゲイン <span class="math inline">\(g\)</span> で測る器械」</strong>。 <span class="math inline">\(a\)</span> が決まれば <span class="math inline">\(T^a=T^b+\varphi\,\hat a\)</span>
@@ -744,10 +744,9 @@ T}+R)^{-1}}_{=\,K_{Q,:}}\bigl(y-\mathbb E[y]\bigr).\]</span></p>
 T}=\sigma_Q^2\,(s_1,\ s_2,\ 1)\,H^{\mathsf T}\]</span></p>
 <p>で、温度観測なら <span class="math inline">\(\sigma_Q^2 s_1\)</span>
 、変位観測なら <span class="math inline">\(\sigma_Q^2(s\cdot w)\)</span>
-。 <strong><span class="math inline">\(Q\)</span> が観測から動く条件は
-<span class="math inline">\(\mathrm{Cov}(Q,y)\neq0\)</span> 、すなわち「
-<span class="math inline">\(Q\)</span>
-を変えると観測が変わる」こと</strong>です。 温度も変位も <span class="math inline">\(Q\)</span> で変わるので、両方が <span class="math inline">\(Q\)</span> の同定に効きます。</p>
+。 ** <span class="math inline">\(Q\)</span> が観測から動く条件は <span class="math inline">\(\mathrm{Cov}(Q,y)\neq0\)</span> 、すなわち「 <span class="math inline">\(Q\)</span> を変えると観測が変わる」こと**です。
+温度も変位も <span class="math inline">\(Q\)</span> で変わるので、両方が
+<span class="math inline">\(Q\)</span> の同定に効きます。</p>
 <p><strong>3つの入り方まとめ</strong>：</p>
 <table>
 <colgroup>
@@ -768,18 +767,18 @@ T}=\sigma_Q^2\,(s_1,\ s_2,\ 1)\,H^{\mathsf T}\]</span></p>
 <tr class="even">
 <td><strong>変位をデータ同化</strong></td>
 <td><span class="math inline">\(H\)</span> が <strong>温度→変位の感度
-<span class="math inline">\(w\)</span></strong> になる（ <span class="math inline">\(H_u=(w_1,w_2,0)\)</span> ）。</td>
+<span class="math inline">\(w\)</span> </strong> になる（ <span class="math inline">\(H_u=(w_1,w_2,0)\)</span> ）。</td>
 </tr>
 <tr class="odd">
-<td><strong><span class="math inline">\(Q\)</span> を同定</strong></td>
-<td><span class="math inline">\(B\)</span> の <strong>温度と <span class="math inline">\(Q\)</span> の相関 <span class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span></strong> が <span class="math inline">\(\mathrm{Cov}(Q,y)\)</span> を生み、観測が <span class="math inline">\(Q\)</span> を動かす（＝周辺化）。</td>
+<td>** <span class="math inline">\(Q\)</span> を同定**</td>
+<td><span class="math inline">\(B\)</span> の <strong>温度と <span class="math inline">\(Q\)</span> の相関 <span class="math inline">\(B_{TQ}=\sigma_Q^2 s\)</span> </strong> が <span class="math inline">\(\mathrm{Cov}(Q,y)\)</span> を生み、観測が <span class="math inline">\(Q\)</span> を動かす（＝周辺化）。</td>
 </tr>
 </tbody>
 </table>
-<p>すべて更新式の <strong><span class="math inline">\(H\)</span>
+<p>すべて更新式の ** <span class="math inline">\(H\)</span>
 （何を測るか）と <span class="math inline">\(B\)</span>
-（何が連動するか）</strong> に落ちます。本物の 20,697 次元
-（温度20,696セル＋ <span class="math inline">\(Q\)</span>
+（何が連動するか）** に落ちます。本物の 20,697 次元 （温度20,696セル＋
+<span class="math inline">\(Q\)</span>
 ）でも、行列が大きいだけで、やっている計算はこの3×3と同じです。
 ただし決め打ち <span class="math inline">\(B\)</span> の <span class="math inline">\(\sigma_Q\)</span> で <span class="math inline">\(Q\)</span>
 の伸び幅が決まるため、<strong>1回では真値まで届かない</strong>
@@ -792,7 +791,7 @@ EnKF（blog_003）です。</p>
 <p>3点模型では「点1を測る」と決め打ちしましたが、本研究では
 <strong>観測点を感度で設計</strong>します。 特に
 <strong>変位センサ</strong>をどこに置くかは、FrontISTR で求めた
-<strong>熱感度 <span class="math inline">\(W\)</span></strong>
+<strong>熱感度 <span class="math inline">\(W\)</span> </strong>
 の<strong>分布</strong>で決めます。</p>
 <h3 id="4-1-熱感度-wk_s-1h_t-とは">4-1. 熱感度 <span class="math inline">\(W=K_s^{-1}H_T\)</span> とは</h3>
 <p>温度節点ベクトルを <span class="math inline">\(T\)</span>
@@ -812,11 +811,13 @@ W=\frac{\partial u}{\partial T}=K_s^{-1}H_T.\]</span></p>
 <img alt="FrontISTRで求めた熱感度Wの分布と変位観測点A/O" src="img/frontistr_sensitivity.png"/>
 <figcaption aria-hidden="true">FrontISTRで求めた熱感度Wの分布と変位観測点A/O</figcaption>
 </figure>
-<p><em>105のFrontISTR（DUMPWパッチ版）が計算した <span class="math inline">\(W\)</span>
+<blockquote>
+<p>105のFrontISTR（DUMPWパッチ版）が計算した <span class="math inline">\(W\)</span>
 の変位行感度を色で表示（灰色は拘束などで除外した点）。
 <strong>底面固定・上端自由なので、上端（自由端）ほど熱感度が高い</strong>。
 赤球＝変位観測点 A(+X上面)・青球＝O(−X上面)
-は、この高感度域に置かれている。</em></p>
+は、この高感度域に置かれている。</p>
+</blockquote>
 <p>分布から読み取れること：</p>
 <ul>
 <li><strong>上端（自由端）が高感度</strong>：温度が変わると最も大きく動くので、変位を測る価値が高い。</li>
@@ -891,15 +892,17 @@ P1 の温度</strong>、右は<strong>変位差</strong> <span class="math inlin
 <img alt="OIで高W／低W変位点を比べた温度と変位" src="img/blog_oi_disp_selection.png"/>
 <figcaption aria-hidden="true">OIで高W／低W変位点を比べた温度と変位</figcaption>
 </figure>
-<p><em>これは
-<strong>OI（最適内挿）によるデータ同化の結果</strong>（固定 <span class="math inline">\(B\)</span> ・ROM）。
+<blockquote>
+<p>これは <strong>OI（最適内挿）によるデータ同化の結果</strong>（固定
+<span class="math inline">\(B\)</span> ・ROM）。
 <strong>左＝温度の推定誤差</strong>（全5点RMSE）、<strong>右＝変位差
 <span class="math inline">\(U_z(\mathrm A)-U_z(\mathrm O)\)</span>
 の時刻歴</strong>（黒＝真値）。
 <strong>赤（データ同化なし）は補正されないので真値から最も外れたまま</strong>。温度P2でデータ同化すると灰へ改善し、
 <strong>高W（青）は温度も変位も真値に最も近い</strong>。低W（橙）・温度のみ（灰）は温度がなかなか下がらず、
 <strong>変位に至っては真値から大きく外れる</strong>（変位は <span class="math inline">\(W\)</span>
-が温度誤差を増幅するため、悪い温度だと特に外れる）。</em></p>
+が温度誤差を増幅するため、悪い温度だと特に外れる）。</p>
+</blockquote>
 <table>
 <colgroup>
 <col style="width: 33%"/>

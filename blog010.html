@@ -408,8 +408,7 @@ T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix}}_{5\times1},
 Bと温度復元行列G、全節点変位の復元係数はblog009と同じです。</p>
 <p>候補cの重みをh_c、現在残る温度誤差の共分散をPとすると、候補1本を使って補正したと仮定した後の共分散と、反りの標準偏差は、</p>
 <p><span class="math display">\[
-\underbrace{P_{+c}}_{5\times5}
-=\underbrace{P}_{5\times5}
+\underbrace{P_{+c}}_{5\times5} =\underbrace{P}_{5\times5}
 -\frac{\underbrace{(P\mathbf h_c)(P\mathbf h_c)^{\mathsf T}}_{5\times5}}
 {\underbrace{\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}_{1\times1}},
 \qquad
@@ -535,8 +534,8 @@ K変えた場合の対象変位への感度 [µm/K]
 <p>今回のWは、105のFrontISTRが出力した剛性行列K_uと熱荷重行列H_thから、新しい評価自由度について求め直しています。</p>
 <p><span class="math display">\[
 \underbrace{K_u^{\mathsf T}}_{15120\times15120}
-\underbrace{\boldsymbol\lambda_A}_{15120\times1}
-=\underbrace{\mathbf e_{A,z}}_{15120\times1},
+\underbrace{\boldsymbol\lambda_A}_{15120\times1} =\underbrace{\mathbf
+e_{A,z}}_{15120\times1},
 \qquad
 \underbrace{W_{A,z,:}}_{1\times5040}
 =\underbrace{\boldsymbol\lambda_A^{\mathsf T}}_{1\times15120}
@@ -558,8 +557,7 @@ K変えた場合の対象変位への感度 [µm/K]
 <p><span class="math display">\[
 \underbrace{\mathbf y^{f,(m)}}_{4\times1}
 =\begin{bmatrix}\theta_1^{f,(m)}\\\theta_2^{f,(m)}\\U_y^{f,(m)}(S1)\\U_y^{f,(m)}(S2)\end{bmatrix}
-=\underbrace{\bar{\mathbf y}}_{4\times1}
-+\underbrace{\begin{bmatrix}
+=\underbrace{\bar{\mathbf y}}_{4\times1} +\underbrace{\begin{bmatrix}
 g_{T1,0}&amp;g_{T1,1}&amp;g_{T1,2}&amp;g_{T1,3}&amp;g_{T1,4}\\
 g_{T2,0}&amp;g_{T2,1}&amp;g_{T2,2}&amp;g_{T2,3}&amp;g_{T2,4}\\
 h_{S1y,0}&amp;h_{S1y,1}&amp;h_{S1y,2}&amp;h_{S1y,3}&amp;h_{S1y,4}\\
@@ -589,9 +587,8 @@ y}^{f,(m)})}_{4\times1}
 \underbrace{\Delta_{\mathrm{corr}}\mathbf T_P}_{5\times1}
 =\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1},
 \qquad
-\underbrace{\Delta_{\mathrm{corr}}d}_{1\times1}
-=\underbrace{\mathbf w^{\mathsf
-T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf
+\underbrace{\Delta_{\mathrm{corr}}d}_{1\times1} =\underbrace{\mathbf
+w^{\mathsf T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf
 r^{(m)}}_{4\times1}.
 \]</span></p>
 <p>rは観測＋メンバー別摂動−予報の4成分です。<strong>Uyの観測差→5点温度の補正→新A・OのUzを再計算</strong>という経路です。UyがUzを物理的に押し動かすという意味ではありません。</p>

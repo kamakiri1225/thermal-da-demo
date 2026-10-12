@@ -421,8 +421,8 @@ C_{yy}=\frac{dY^{\mathsf T}dY}{N-1}\in\mathbb R^{p\times p}.
 \]</span></p>
 <p>例えば成分ごとに書くと</p>
 <p><span class="math display">\[[C_{zy}]_{ij}=\sum_m\bigl(z_{f,i}^{(m)}-\bar
-z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).\]</span>
-平均を同じ標本から推定するので標本共分散はN−1で割ります。時間方向やセル方向の分散ではありません。
+z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).\]</span></p>
+<p>平均を同じ標本から推定するので標本共分散はN−1で割ります。時間方向やセル方向の分散ではありません。
 106の温度2点＋変位2点なら <span class="math inline">\(Z_f:60\times7\)</span> 、 <span class="math inline">\(Y_f:60\times4\)</span> 、 <span class="math inline">\(C_{zy}:7\times4\)</span> 、 <span class="math inline">\(C_{yy}:4\times4\)</span> です。</p>
 <p><code>dacore/enkf.py</code>の主要計算は次のとおりです（ここでは偏差を拡大するインフレーションを省略）。</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a aria-hidden="true" href="#cb3-1" tabindex="-1"></a>zbar <span class="op">=</span> Zf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
@@ -495,14 +495,16 @@ z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).\]</span>
 <img alt="散布図が共分散とはどういうことか" src="img/covariance_explained.png"/>
 <figcaption aria-hidden="true">散布図が共分散とはどういうことか</figcaption>
 </figure>
-<p><em>「散布図が共分散」というのは比喩ではなく<strong>定義そのもの</strong>です。
+<blockquote>
+<p>「散布図が共分散」というのは比喩ではなく<strong>定義そのもの</strong>です。
 各メンバーについて <span class="math inline">\((T^{(m)}-\bar
 T)\times(Q^{(m)}-\bar Q)\)</span> を計算し、全部足して <span class="math inline">\(N-1\)</span> で割る。
 赤の象限（両方とも平均より上／両方とも下）は積が＋、青の象限（片方だけ上）は積が−。
 <strong>丸い雲なら＋と−が打ち消し合って <span class="math inline">\(\mathrm{Cov}\simeq0\)</span>
-、斜めに伸びれば片方に偏って <span class="math inline">\(\mathrm{Cov}\neq0\)</span></strong>。
+、斜めに伸びれば片方に偏って <span class="math inline">\(\mathrm{Cov}\neq0\)</span> </strong>。
 実データ（サイクル11・60メンバー）で手計算すると <span class="math inline">\(\sum=-6.326\)</span> 、 <span class="math inline">\(\mathrm{Cov}=-6.326/59=-0.1072\)</span> 、相関
-<span class="math inline">\(-0.287\)</span> 。</em></p>
+<span class="math inline">\(-0.287\)</span> 。</p>
+</blockquote>
 <p>平均からのズレ（deviation）:</p>
 <table>
 <thead>
@@ -542,10 +544,9 @@ C=\frac{dZ^{\mathsf T}dZ}{3}.\]</span></p>
 \delta x^{(m)}\,\delta x^{(m)\mathsf T}\)</span> （ <span class="math inline">\(N=4\)</span> なので <span class="math inline">\(1/3\)</span> ）:</p>
 <p><span class="math display">\[C=\frac{1}{3}\begin{pmatrix}(-3)^2+1^2+(-1)^2+3^2
 &amp; (-3)(-2)+\cdots+3\cdot2\\ 14 &amp;
-(-2)^2+1^2+(-1)^2+2^2\end{pmatrix}
-=\frac{1}{3}\begin{pmatrix}20 &amp; 14\\ 14 &amp; 10\end{pmatrix}
-=\begin{pmatrix}6.67 &amp; 4.67\\ 4.67 &amp;
-3.33\end{pmatrix}\]</span></p>
+(-2)^2+1^2+(-1)^2+2^2\end{pmatrix} =\frac{1}{3}\begin{pmatrix}20 &amp;
+14\\ 14 &amp; 10\end{pmatrix} =\begin{pmatrix}6.67 &amp; 4.67\\ 4.67
+&amp; 3.33\end{pmatrix}\]</span></p>
 <p><strong>読み方</strong>： <span class="math inline">\(C_{12}=4.67&gt;0\)</span> 、つまり <strong>「
 <span class="math inline">\(T_1\)</span> が高い分身は <span class="math inline">\(T_2\)</span>
 も高い」</strong>と分身たちが教えている。
@@ -555,13 +556,11 @@ C=\frac{dZ^{\mathsf T}dZ}{3}.\]</span></p>
 ）、観測ノイズ <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
 <ul>
 <li>状態×観測の共分散 <span class="math inline">\(C_{zy}=C H^{\mathsf
-T}\)</span> ＝「 <span class="math inline">\(C\)</span> の1列目」 <span class="math inline">\(=\begin{pmatrix}6.67\\
-4.67\end{pmatrix}\)</span></li>
+T}\)</span> ＝「 <span class="math inline">\(C\)</span> の1列目」 <span class="math inline">\(=(6.67,\ 4.67)^{\mathsf T}\)</span></li>
 <li>観測×観測 <span class="math inline">\(C_{yy}=C_{11}=6.67\)</span></li>
 </ul>
 <p><span class="math display">\[K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\
-4.67\end{pmatrix}
-=\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
+4.67\end{pmatrix} =\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
 =\begin{pmatrix}0.987\\ 0.691\end{pmatrix}\]</span></p>
 <h3 id="3-4-更新平均で見る">3-4. 更新（平均で見る）</h3>
 <p>以下は観測摂動の平均を0とした計算です。有限メンバーの摂動観測法では、実際の平均には
@@ -569,8 +568,8 @@ T}\)</span> ＝「 <span class="math inline">\(C\)</span> の1列目」 <span cl
 <p>観測 <span class="math inline">\(y=30\)</span> （真値 <span class="math inline">\(T_1=30\)</span> 付近）。予報平均のハズレは <span class="math inline">\(30-29=1\)</span> 。平均の更新は</p>
 <p><span class="math display">\[\bar x_a=\bar x_f+K\times1
 =\begin{pmatrix}29\\ 26\end{pmatrix}+\begin{pmatrix}0.987\\
-0.691\end{pmatrix}
-=\begin{pmatrix}29.99\\ 26.69\end{pmatrix}\]</span></p>
+0.691\end{pmatrix} =\begin{pmatrix}29.99\\
+26.69\end{pmatrix}\]</span></p>
 <table>
 <thead>
 <tr class="header">
@@ -644,15 +643,15 @@ T}\]</span></p>
 <p><strong>ステップ3：温度を観測して、状態を丸ごと更新する</strong></p>
 <p><span class="math display">\[z^a=z^b+K\,(y-Hz^b)\]</span></p>
 <p><span class="math inline">\(H\)</span>
-は「どの成分を測ったか」を表す行列です。温度しか測らないので、<strong><span class="math inline">\(H\)</span> の <span class="math inline">\(Q\)</span> 成分も <span class="math inline">\(h\)</span> 成分もゼロ</strong>:</p>
+は「どの成分を測ったか」を表す行列です。温度しか測らないので、** <span class="math inline">\(H\)</span> の <span class="math inline">\(Q\)</span> 成分も <span class="math inline">\(h\)</span> 成分もゼロ**:</p>
 <p><span class="math display">\[H=\begin{pmatrix}0&amp;1&amp;0&amp;0&amp;0&amp;\color{red}{0}&amp;\color{red}{0}\end{pmatrix}\]</span></p>
 <p>（2番目の温度 <span class="math inline">\(T_2\)</span>
 だけ測る場合）</p>
 <p><strong>ステップ4：それでもパラメータが動く</strong></p>
 <p>ここが肝心です。 <span class="math inline">\(H\)</span> の <span class="math inline">\(Q\)</span> 成分がゼロなのに、なぜ <span class="math inline">\(Q\)</span> が更新されるのか。</p>
 <p>ゲインは <span class="math inline">\(K=P H^{\mathsf T}(HPH^{\mathsf
-T}+R)^{-1}\)</span> で、<strong><span class="math inline">\(P\)</span>
-の非対角成分が効きます</strong>。 メンバーを前進させると「 <span class="math inline">\(Q\)</span>
+T}+R)^{-1}\)</span> で、** <span class="math inline">\(P\)</span>
+の非対角成分が効きます**。 メンバーを前進させると「 <span class="math inline">\(Q\)</span>
 が大きいメンバーほど温度が高い」という関係が自然にできるので:</p>
 <p><span class="math display">\[P\simeq\frac{dZ\,dZ^{\mathsf
 T}}{N-1}\quad\Longrightarrow\quad P_{T_2Q}\neq0\]</span></p>
@@ -688,7 +687,7 @@ s）</strong></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(T\)</span>(P2) [K]</td>
+<td><span class="math inline">\(T\)</span> (P2) [K]</td>
 <td>294.542</td>
 <td>299.500</td>
 <td>−4.958</td>
@@ -696,7 +695,7 @@ s）</strong></p>
 <td>−2.1929</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(T\)</span>(P0) [K]</td>
+<td><span class="math inline">\(T\)</span> (P0) [K]</td>
 <td>294.028</td>
 <td>298.887</td>
 <td>−4.859</td>
@@ -704,7 +703,7 @@ s）</strong></p>
 <td>+1.9592</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(U_z\)</span>(A) [µm]</td>
+<td><span class="math inline">\(U_z\)</span> (A) [µm]</td>
 <td>1.321</td>
 <td>6.648</td>
 <td>−5.327</td>
@@ -712,7 +711,7 @@ s）</strong></p>
 <td>−0.0470</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(U_z\)</span>(O) [µm]</td>
+<td><span class="math inline">\(U_z\)</span> (O) [µm]</td>
 <td>0.063</td>
 <td>5.186</td>
 <td>−5.124</td>
@@ -741,7 +740,7 @@ s）</strong></p>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(T\)</span>(P2) [K]</td>
+<td><span class="math inline">\(T\)</span> (P2) [K]</td>
 <td>296.756</td>
 <td>296.769</td>
 <td>−0.013</td>
@@ -749,7 +748,7 @@ s）</strong></p>
 <td>−0.0013</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(T\)</span>(P0) [K]</td>
+<td><span class="math inline">\(T\)</span> (P0) [K]</td>
 <td>296.292</td>
 <td>296.273</td>
 <td>+0.018</td>
@@ -757,7 +756,7 @@ s）</strong></p>
 <td>+0.0013</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(U_z\)</span>(A) [µm]</td>
+<td><span class="math inline">\(U_z\)</span> (A) [µm]</td>
 <td>2.758</td>
 <td>3.287</td>
 <td>−0.530</td>
@@ -765,7 +764,7 @@ s）</strong></p>
 <td><strong>−0.0394</strong></td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(U_z\)</span>(O) [µm]</td>
+<td><span class="math inline">\(U_z\)</span> (O) [µm]</td>
 <td>1.670</td>
 <td>1.057</td>
 <td>+0.613</td>
@@ -788,7 +787,7 @@ W、5シード平均では 14.89 W（真値 15 W）。</p>
 温度が合ってきた後は変位の残差が <span class="math inline">\(Q\)</span>
 を動かしている。 また <span class="math inline">\(K_q\)</span>
 は毎サイクル60メンバーの散らばりから計算し直しているので、サイクルが進むと小さくなる
-（ <span class="math inline">\(T\)</span>(P2) の <span class="math inline">\(K_q\)</span> は 0.4423 → 0.0991 → 0.0224）。</p>
+（ <span class="math inline">\(T\)</span> (P2) の <span class="math inline">\(K_q\)</span> は 0.4423 → 0.0991 → 0.0224）。</p>
 <blockquote>
 <p><strong>要点：測っていない量でも、測った量と相関していれば更新される。</strong>
 OIとの違いは、この相関 <span class="math inline">\(P_{T_2Q}\)</span>
@@ -895,7 +894,7 @@ Wのまわりに収束し、<strong>ばらつき（±1標準偏差）が 6.8 W �
 <td>15.00 W</td>
 </tr>
 <tr class="even">
-<td><strong><span class="math inline">\(h\)</span></strong></td>
+<td>** <span class="math inline">\(h\)</span> **</td>
 <td><strong>0.0251 W/K</strong></td>
 <td><strong>0.0154 W/K</strong>（63%過大）</td>
 </tr>
@@ -905,9 +904,8 @@ Wのまわりに収束し、<strong>ばらつき（±1標準偏差）が 6.8 W �
 0.0135 と<strong>むしろ広がっています</strong>。
 これは、この設定ではアンサンブルが十分に収縮していないことを示します。偏差膨張やQとの相関なども影響するため、情報がゼロである証拠とは言えません。</p>
 <h4 id="hの感度が弱いことを確認したが原因は一つに切り分けていない">hの感度が弱いことを確認したが、原因は一つに切り分けていない</h4>
-<p>データ同化の設定を疑う前に、そもそも<strong><span class="math inline">\(h\)</span>
-が観測に現れているのか</strong>を確かめました。 データ同化を一切かけず、
-<span class="math inline">\(h\)</span> だけを 40%
+<p>データ同化の設定を疑う前に、そもそも** <span class="math inline">\(h\)</span>
+が観測に現れているのか**を確かめました。 データ同化を一切かけず、 <span class="math inline">\(h\)</span> だけを 40%
 変えて600秒まで前進させ、応答の差を測ります:</p>
 <table>
 <thead>
@@ -1068,7 +1066,7 @@ h)\)</span> にします。分身ごとに <span class="math inline">\(Q\)</span
 を少し変えて前進させると、</p>
 <ul>
 <li>「 <span class="math inline">\(Q\)</span>
-が大きい分身は温度も高い」という <strong><span class="math inline">\(Q\)</span> と観測の相関</strong>
+が大きい分身は温度も高い」という ** <span class="math inline">\(Q\)</span> と観測の相関**
 が、標本共分散に自動で現れる。</li>
 <li>しかもその相関は
 <strong>加熱中・冷却中で変わる</strong>（流れ依存）。EnKF
@@ -1079,8 +1077,8 @@ h)\)</span> にします。分身ごとに <span class="math inline">\(Q\)</span
 本研究の実ソルバEnKFでは、でたらめ初期から</p>
 <ul>
 <li>全セル温度RMSE <strong>7.61 K → 0.011 K</strong></li>
-<li>発熱量 <strong><span class="math inline">\(Q\to14.93\)</span>
-W</strong>（真値15 W、誤差約0.5%）</li>
+<li>発熱量 ** <span class="math inline">\(Q\to14.93\)</span> W**（真値15
+W、誤差約0.5%）</li>
 </ul>
 <p>という結果でした。これは<strong>104の実ソルバ・5メンバー・60秒ごと10更新</strong>の実験です。OIとの差には設定の違いも含まれ、手法一般の優劣を証明する比較ではありません。</p>
 <h4 id="相関が育つ様子を実データで見る">相関が育つ様子を実データで見る</h4>
@@ -1167,11 +1165,11 @@ W</strong>（真値15 W、誤差約0.5%）</li>
 <p>この相関のおかげで、<strong>温度をP2の1点測っただけ</strong>でも
 <span class="math inline">\(Q\)</span> に情報が伝わります:</p>
 <pre><code>最終: Q = 15.95 W (真値 15 W) / h = 0.0287 W/K (真値 0.0154) / 温度RMSE = 0.156 K</code></pre>
-<p><span class="math inline">\(Q\)</span> は誤差6
-%まで当たる一方、<strong><span class="math inline">\(h\)</span>
-は約2倍ずれたまま</strong>です。 これは §6 や blog_005 で扱う「 <span class="math inline">\(h\)</span>
+<p><span class="math inline">\(Q\)</span> は誤差6 %まで当たる一方、**
+<span class="math inline">\(h\)</span> は約2倍ずれたまま<strong>です。
+これは §6 や blog_005 で扱う「 <span class="math inline">\(h\)</span>
 は温度応答が小さく、観測ノイズに埋もれる」という問題で、
-<strong>手法の限界として正直に押さえておくべき点</strong>です。</p>
+</strong>手法の限界として正直に押さえておくべき点**です。</p>
 <p><strong>ここから下の2図は別の実験です。</strong>
 106のROM・60メンバー・温度P2のみのデータ同化で、変位観測は使いません。真値も同じROM、seed=20260913、30秒ごと20更新。
 <code>results/da_summary.yaml</code>では最終Q=17.08 W（真値15
@@ -1307,8 +1305,7 @@ ESSは重みから求める指標であり、リサンプリング後に配列�
 OIは<strong>仕組みを理解・説明する</strong>のに向き（更新式1本、3点で手計算できる）、
 同時に<strong>共分散を固定する弊害を示す材料</strong>でもあります
 （実ソルバのOIは温度場RMSE 0.09 Kまで下がるのに <span class="math inline">\(Q\)</span> は8.9 W止まり）。
-EnKFは共分散を毎サイクル作り直すので、<strong><span class="math inline">\(Q\)</span> や <span class="math inline">\(h\)</span>
-を状態に入れて同時推定</strong>できます。</p>
+EnKFは共分散を毎サイクル作り直すので、** <span class="math inline">\(Q\)</span> や <span class="math inline">\(h\)</span> を状態に入れて同時推定**できます。</p>
 <hr/>
 <h2 id="6-観測をどう増やすかいつ入れるか-romenkf-の実験2つ">6.
 観測を「どう増やすか」「いつ入れるか」― ROM＋EnKF の実験2つ</h2>
@@ -1327,9 +1324,11 @@ T2=P4（反対側）。変位は高W＝上端2点（橙）／低W＝底面2点�
 <img alt="観測構成の段階比較" src="img/opencae_sensor_progression.png"/>
 <figcaption aria-hidden="true">観測構成の段階比較</figcaption>
 </figure>
-<p><em>ROM＋EnKF・5seed平均。<strong>温度1点→2点で大きく改善し、変位2点を足すとさらに改善</strong>。
+<blockquote>
+<p>ROM＋EnKF・5seed平均。<strong>温度1点→2点で大きく改善し、変位2点を足すとさらに改善</strong>。
 そして同じ変位2点でも、<strong>熱感度 <span class="math inline">\(W\)</span>
-の高い点に置いた方が効く</strong>（低Wだと効きが半減）。</em></p>
+の高い点に置いた方が効く</strong>（低Wだと効きが半減）。</p>
+</blockquote>
 <p>時系列でも見てみます（<strong>データ同化に使った点と未観測点を分けて</strong>）:</p>
 <figure>
 <img alt="段階比較の時系列" src="img/opencae_progression_timeseries.png"/>
@@ -1378,13 +1377,15 @@ Uz(A)−Uz(O)：温度1点は大きく外れ、観測を増やすほど真値へ
 <img alt="データ同化時間窓の比較" src="img/qh_time_window.png"/>
 <figcaption aria-hidden="true">データ同化時間窓の比較</figcaption>
 </figure>
-<p><em>直接感度 <span class="math inline">\(\partial T/\partial
-Q\)</span> は加熱期に大きく、 <span class="math inline">\(\partial
-T/\partial h\)</span> は冷却期に大きい。実験でも <strong><span class="math inline">\(Q\)</span>
-は加熱期の観測が担い</strong>（加熱のみ0.57 W ≈ 全期間0.58
-W、冷却のみだと4.23 Wと7倍悪化）、 <strong><span class="math inline">\(h\)</span>
-は冷却期を足すと相対的に改善</strong>（7.6→5.3 mW/K）。ただし <span class="math inline">\(h\)</span>
-は温度応答がノイズ以下のため依然難しい。</em></p>
+<blockquote>
+<p>直接感度 <span class="math inline">\(\partial T/\partial Q\)</span>
+は加熱期に大きく、 <span class="math inline">\(\partial T/\partial
+h\)</span> は冷却期に大きい。実験でも ** <span class="math inline">\(Q\)</span>
+は加熱期の観測が担い<strong>（加熱のみ0.57 W ≈ 全期間0.58
+W、冷却のみだと4.23 Wと7倍悪化）、 </strong> <span class="math inline">\(h\)</span> は冷却期を足すと相対的に改善**（7.6→5.3
+mW/K）。ただし <span class="math inline">\(h\)</span>
+は温度応答がノイズ以下のため依然難しい。</p>
+</blockquote>
 <p>まとめると、観測設計は「<strong>どこで（空間）・何を（種類）・いつ（時間）</strong>」の3軸で考える、というのが実験から見えた形です。</p>
 <hr/>
 <h2 id="7-3回のまとめ">7. 3回のまとめ</h2>

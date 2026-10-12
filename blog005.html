@@ -418,8 +418,7 @@ T}Bc\)</span> と <span class="math inline">\(c^{\mathsf T}B^ac\)</span>
 T}}{v^{\mathsf T}Bv+r}\]</span></p>
 <p>と縮みます（ <span class="math inline">\(v\)</span>
 は観測行列の1行を転置した列ベクトル、 <span class="math inline">\(r\)</span>
-は観測ノイズ分散）。いま知りたい量（推定対象）を <span class="math inline">\(X=c^{\mathsf T}x\)</span> と書くと（ <span class="math inline">\(c\)</span>
-は対象を取り出すベクトル）、<strong><span class="math inline">\(X\)</span> の分散がどれだけ減るか</strong>は</p>
+は観測ノイズ分散）。いま知りたい量（推定対象）を <span class="math inline">\(X=c^{\mathsf T}x\)</span> と書くと（ <span class="math inline">\(c\)</span> は対象を取り出すベクトル）、** <span class="math inline">\(X\)</span> の分散がどれだけ減るか**は</p>
 <p><span class="math display">\[\boxed{\ \Delta(X,\
 y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
 =\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{v^{\mathsf T}Bv+r}\ }\]</span></p>
@@ -442,9 +441,11 @@ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
 <img alt="本研究のベイジアンネットワーク表現と相互情報量" src="img/bayes_network.png"/>
 <figcaption aria-hidden="true">本研究のベイジアンネットワーク表現と相互情報量</figcaption>
 </figure>
-<p><em>左：発熱量 <span class="math inline">\(Q\)</span> ・放熱 <span class="math inline">\(h\)</span> が温度場 <span class="math inline">\(T\)</span> を決め、 <span class="math inline">\(T\)</span> が変位 <span class="math inline">\(u\)</span> を決める。観測 <span class="math inline">\(y\)</span> はそこにノイズが乗ったもの。
+<blockquote>
+<p>左：発熱量 <span class="math inline">\(Q\)</span> ・放熱 <span class="math inline">\(h\)</span> が温度場 <span class="math inline">\(T\)</span> を決め、 <span class="math inline">\(T\)</span> が変位 <span class="math inline">\(u\)</span> を決める。観測 <span class="math inline">\(y\)</span> はそこにノイズが乗ったもの。
 データ同化は<strong>この矢印を逆にたどって未知数を絞り込む</strong>操作にあたる。
-右：各観測がもたらす相互情報量。 <span class="math inline">\(\Delta\)</span> の順位と完全に一致する。</em></p>
+右：各観測がもたらす相互情報量。 <span class="math inline">\(\Delta\)</span> の順位と完全に一致する。</p>
+</blockquote>
 <p><strong>なぜ一致するのか</strong>。すべてがガウス分布なら、観測 <span class="math inline">\(y\)</span> を得たときの対象 <span class="math inline">\(X\)</span> の
 情報利得（相互情報量）は分散の比で書けます:</p>
 <p><span class="math display">\[I(X;y_{\mathrm{obs}})=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid
@@ -583,8 +584,7 @@ Q}\right|_{Q_0}.
 N(0,\sigma_{i,k}^2)\)</span> とします。Qの事前分散を <span class="math inline">\(v_Q&gt;0\)</span>
 とすれば、負の対数事後密度は定数を除いて、</p>
 <p><span class="math display">\[
-J(Q)=\frac{(Q-\mu_Q)^2}{2v_Q}
-+\frac12\sum_k
+J(Q)=\frac{(Q-\mu_Q)^2}{2v_Q} +\frac12\sum_k
 \frac{[y_{i,k}-f_i(t_k;Q_0)-s_{i,k}(Q-Q_0)]^2}{\sigma_{i,k}^2}.
 \]</span></p>
 <p><span class="math inline">\(\mu_Q\)</span>
@@ -595,8 +595,7 @@ J(Q)=\frac{(Q-\mu_Q)^2}{2v_Q}
 \]</span></p>
 <p>線形・ガウス問題の事後分散は、この曲率の逆数です。</p>
 <p><span class="math display">\[
-\mathrm{Var}(Q\mid\mathbf y_i)
-=\left(v_Q^{-1}+F_i\right)^{-1},
+\mathrm{Var}(Q\mid\mathbf y_i) =\left(v_Q^{-1}+F_i\right)^{-1},
 \qquad
 \boxed{i^*=\arg\max_i F_i}.
 \]</span></p>
@@ -644,8 +643,7 @@ F_B=\begin{bmatrix}9&amp;0\\0&amp;9\end{bmatrix},
 、候補の観測予報を <span class="math inline">\(y_i=\mathbf v_i^{\mathsf
 T}\mathbf x\)</span> とすれば、</p>
 <p><span class="math display">\[
-\mathrm{Var}(X\mid y_{i,\mathrm{obs}})
-=\mathbf c^{\mathsf T}B\mathbf c
+\mathrm{Var}(X\mid y_{i,\mathrm{obs}}) =\mathbf c^{\mathsf T}B\mathbf c
 -\frac{(\mathbf c^{\mathsf T}B\mathbf v_i)^2}{\mathbf v_i^{\mathsf
 T}B\mathbf v_i+r_i}.
 \]</span></p>
@@ -716,8 +714,8 @@ B\begin{pmatrix}0\\1\\0\end{pmatrix}=\begin{pmatrix}0.12\\ 1.04\\
 0.4\end{pmatrix},\qquad
 B\begin{pmatrix}0.5\\0.2\\0\end{pmatrix}
 =\begin{pmatrix}0.5\cdot1.36+0.2\cdot0.12\\ 0.5\cdot0.12+0.2\cdot1.04\\
-0.5\cdot1.2+0.2\cdot0.4\end{pmatrix}
-=\begin{pmatrix}0.704\\ 0.268\\ 0.68\end{pmatrix}\]</span></p>
+0.5\cdot1.2+0.2\cdot0.4\end{pmatrix} =\begin{pmatrix}0.704\\ 0.268\\
+0.68\end{pmatrix}\]</span></p>
 <p><span class="math display">\[\mathrm{Var}(y_1)+r=1.36+0.09=1.45,\qquad
 \mathrm{Var}(y_2)+r=1.04+0.09=1.13,\]</span></p>
 <p><span class="math display">\[\mathrm{Var}(u)+r=v_u^{\mathsf
@@ -732,15 +730,16 @@ T}Bv\bigr)^2}{1.45}=\frac{1.2^2}{1.45}=0.993\]</span></p>
 <span class="math inline">\(u\)</span> で測る</strong>（分子は <span class="math inline">\(Bw\)</span> の第3成分）</p>
 <p><span class="math display">\[\Delta(Q,\
 u)=\frac{0.68^2}{0.4156}=1.113\ \gt\ 0.993\]</span></p>
-<p>→ <strong><span class="math inline">\(Q\)</span>
-には温度点1より変位の方が価値が高い</strong>。</p>
+<p>→ ** <span class="math inline">\(Q\)</span>
+には温度点1より変位の方が価値が高い**。</p>
 <p><strong>例3：対象＝ <span class="math inline">\(T_2\)</span> を変位
 <span class="math inline">\(u\)</span> で測る</strong>（分子は <span class="math inline">\(Bw\)</span> の第2成分）</p>
 <p><span class="math display">\[\Delta(T_2,\
 u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\
 y_2)=\frac{1.04^2}{1.13}=0.957\]</span></p>
-<p>→ <strong><span class="math inline">\(T_2\)</span>
-には温度点2が最適</strong>（変位は <span class="math inline">\(w_2=0.2\)</span> としか連動しない）。</p>
+<p>→ ** <span class="math inline">\(T_2\)</span>
+には温度点2が最適**（変位は <span class="math inline">\(w_2=0.2\)</span>
+としか連動しない）。</p>
 <h3 id="2-4-全部並べるとが行ごとに動く">2-4.
 全部並べると「★」が行ごとに動く</h3>
 <p>全温度場の行は <span class="math inline">\(\Delta(T_1,y)+\Delta(T_2,y)\)</span>
@@ -808,10 +807,12 @@ y_2)=\frac{1.04^2}{1.13}=0.957\]</span></p>
 <img alt="変位観測が温度を直す仕組み" src="img/disp_to_temp_mechanism.png"/>
 <figcaption aria-hidden="true">変位観測が温度を直す仕組み</figcaption>
 </figure>
-<p><em>変位は複数点の温度誤差の<strong>射影</strong>（左・実線）を1つの数で読み、ハズレが共分散に比例して
+<blockquote>
+<p>変位は複数点の温度誤差の<strong>射影</strong>（左・実線）を1つの数で読み、ハズレが共分散に比例して
 <strong>逆流</strong>する（左・破線）。誤差が「共通の型」で起きるとき、型と重み
 <span class="math inline">\(w\)</span> が揃う高W点は
-信号がノイズを超える（右）。詳しい導出は blog_002 §3-7。</em></p>
+信号がノイズを超える（右）。詳しい導出は blog_002 §3-7。</p>
+</blockquote>
 <hr/>
 <h2 id="3-第3の軸時間-いつ観測するかも対象で変わる">3. 第3の軸「時間」―
 いつ観測するかも対象で変わる</h2>
@@ -957,8 +958,8 @@ h感度：積の微分で項を落とさない</h3>
 T/\partial h\)</span> とします。単位はK/(W/K)＝K²/Wです。
 放熱項にはhが明示的に入り、温度Tもhに依存します。</p>
 <p><span class="math display">\[
-\frac{\partial}{\partial h}[-h(\mathbf T-T_\infty\mathbf1)]
-=-(\mathbf T-T_\infty\mathbf1)-h\mathbf S_h.
+\frac{\partial}{\partial h}[-h(\mathbf T-T_\infty\mathbf1)] =-(\mathbf
+T-T_\infty\mathbf1)-h\mathbf S_h.
 \]</span></p>
 <p>左の積のうち、hを微分した分が第1項、温度を微分した分が第2項です。Q₀を固定すればヒータ項のh微分は0なので、</p>
 <p><span class="math display">\[
@@ -1125,9 +1126,8 @@ u_0+D\mathbf a\)</span> なので、</p>
 <p>変位差 <span class="math inline">\(d=u_{z,A}-u_{z,O}\)</span>
 なら、</p>
 <p><span class="math display">\[
-\frac{\partial d}{\partial p}
-=\frac{\partial u_{z,A}}{\partial p}-\frac{\partial u_{z,O}}{\partial
-p}.
+\frac{\partial d}{\partial p} =\frac{\partial u_{z,A}}{\partial
+p}-\frac{\partial u_{z,O}}{\partial p}.
 \]</span></p>
 <p>AとOが同じだけ動けば差の感度は0です。したがって「大きく動く点」と「目的の変位差を識別できる点」は必ずしも同じではありません。</p>
 <h3 id="3-9-大きな感度でもqhが区別できない場合">3-9.
@@ -1298,9 +1298,11 @@ C\dot S_{h_s}+(K_c+h_sK_h)S_{h_s}=f_h-K_hT.
 <img alt="データ同化時間窓を変えたQ/h推定" src="img/qh_time_window.png"/>
 <figcaption aria-hidden="true">データ同化時間窓を変えたQ/h推定</figcaption>
 </figure>
-<p><em><span class="math inline">\(Q\)</span> ：加熱期のみ0.57 W ≈
+<blockquote>
+<p><span class="math inline">\(Q\)</span> ：加熱期のみ0.57 W ≈
 全期間0.58 W、<strong>冷却期のみだと4.23 W（7倍悪化）</strong>＝ <span class="math inline">\(Q\)</span> は加熱期の観測が担う。 <span class="math inline">\(h\)</span> ：冷却期を足すと7.6→5.3
-mW/Kと相対改善（ただし温度応答＜ノイズで依然難）。</em></p>
+mW/Kと相対改善（ただし温度応答＜ノイズで依然難）。</p>
+</blockquote>
 <p>つまり最適観測は <strong>どこで（空間）× 何を（種類）×
 いつ（時間）</strong> の3軸で、どれも対象依存です。</p>
 <hr/>
@@ -1394,7 +1396,8 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004
 <tr class="header">
 <th></th>
 <th><strong>発熱感度</strong>（基準A）</th>
-<th><strong>熱感度 <span class="math inline">\(W\)</span></strong>（基準B）</th>
+<th><strong>熱感度 <span class="math inline">\(W\)</span>
+</strong>（基準B）</th>
 </tr>
 </thead>
 <tbody>
@@ -1442,7 +1445,7 @@ Q-DEIMが「その方向を差し引いてから次を選ぶ」（blog_004
 <tbody>
 <tr class="odd">
 <td><strong>発熱感度 <span class="math inline">\(\partial T/\partial
-Q\)</span></strong></td>
+Q\)</span> </strong></td>
 <td><strong>−0.835（最良）</strong></td>
 </tr>
 <tr class="even">
@@ -1451,9 +1454,9 @@ Q\)</span></strong></td>
 </tr>
 </tbody>
 </table>
-<p>となりました。<strong><span class="math inline">\(W\)</span>
+<p>となりました。** <span class="math inline">\(W\)</span>
 は「その点の温度を間違えると変位がどれだけずれるか」であって、
-「その点を測ると何が分かるか」ではありません。</strong> <span class="math inline">\(W\)</span>
+「その点を測ると何が分かるか」ではありません。** <span class="math inline">\(W\)</span>
 が高い点＝よく動く点＝固定端から遠い「場の端」で、場全体を代表しないためです。</p>
 <p><strong>2026-10-02
 追記：温度センサの場所を発熱感度の大小で選ぶのもやめました。</strong>
@@ -1468,9 +1471,11 @@ Q\)</span></strong></td>
 <img alt="2つの感度の使い分け" src="img/two_sensitivities.png"/>
 <figcaption aria-hidden="true">2つの感度の使い分け</figcaption>
 </figure>
-<p><em>左：温度センサを発熱感度で選ぶと相関 −0.835＝高いほど良い。
+<blockquote>
+<p>左：温度センサを発熱感度で選ぶと相関 −0.835＝高いほど良い。
 中：同じ温度センサを <span class="math inline">\(W\)</span> で選ぶと
-+0.405＝高いほど悪い。右：使い分けのまとめ。</em></p>
++0.405＝高いほど悪い。右：使い分けのまとめ。</p>
+</blockquote>
 <p>実際に5つの代表点で両方を計算すると、<strong>順位がまったく違います</strong>:</p>
 <table>
 <colgroup>
@@ -1586,9 +1591,9 @@ K）。ただし2本の配置では発熱感度の上位から選ぶと不利に
 <p><strong>なぜか</strong>。§1で見たとおり、観測の価値は感度そのものではなく</p>
 <p><span class="math display">\[\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}\]</span></p>
 <p>で決まるからです。 <span class="math inline">\(\partial u/\partial
-T_i\)</span> が大きいことは 「<span class="math inline">\(T_i\)</span>
+T_i\)</span> が大きいことは 「 <span class="math inline">\(T_i\)</span>
 が <span class="math inline">\(u\)</span>
-を強く動かす」を意味しますが、<strong>推定に効くかは 「<span class="math inline">\(T_i\)</span> を測ると <span class="math inline">\(u\)</span>
+を強く動かす」を意味しますが、<strong>推定に効くかは 「 <span class="math inline">\(T_i\)</span> を測ると <span class="math inline">\(u\)</span>
 の不確かさがどれだけ減るか」</strong>であって、同じではありません。
 実際、 <span class="math inline">\(T_i\)</span> 自身のばらつき <span class="math inline">\(\mathrm{Var}(y)\)</span>
 が大きければ分母で損をします。</p>
@@ -1609,10 +1614,11 @@ T_i\)</span> が大きいことは 「<span class="math inline">\(T_i\)</span>
 <img alt="高W/低W変位点の比較（OI）" src="img/blog_oi_disp_selection.png"/>
 <figcaption aria-hidden="true">高W/低W変位点の比較（OI）</figcaption>
 </figure>
-<p><em>同じ変位2点でも<strong>低感度W点はほぼ効かず（2.43
-K）、高W点は0.86 K</strong>。 §2の言葉では「対象＝変位・温度場」に対し
-<span class="math inline">\(g=w^{\mathsf T}\varphi\)</span>
-が大きい観測を選んだ、ということ。</em></p>
+<blockquote>
+<p>同じ変位2点でも<strong>低感度W点はほぼ効かず（2.43 K）、高W点は0.86
+K</strong>。 §2の言葉では「対象＝変位・温度場」に対し <span class="math inline">\(g=w^{\mathsf T}\varphi\)</span>
+が大きい観測を選んだ、ということ。</p>
+</blockquote>
 <p>さらに個別の変位で見ると、<strong>温度センサだけでは「センサに近い側」しか合いません</strong>:</p>
 <figure>
 <img alt="個別のUz(A)/Uz(O)と差" src="img/blog_disp_timeseries_truth_vs_da_points.png"/>
@@ -1679,9 +1685,11 @@ ROM（双子実験）。<strong>OpenFOAM＋FrontISTR
 <img alt="候補点と評価点の位置" src="img/sensor_pair_positions.png"/>
 <figcaption aria-hidden="true">候補点と評価点の位置</figcaption>
 </figure>
-<p><em>温度の候補点 P0〜P4 と、反りを評価する上面の A・O。赤は <span class="math inline">\(W&gt;0\)</span> （温まると反りが増える）、青は
+<blockquote>
+<p>温度の候補点 P0〜P4 と、反りを評価する上面の A・O。赤は <span class="math inline">\(W&gt;0\)</span> （温まると反りが増える）、青は
 <span class="math inline">\(W&lt;0\)</span> の点。ヒータは P2
-にある。</em></p>
+にある。</p>
+</blockquote>
 <h4 id="①-熱感度-w-の高い点に温度センサを1本置くと">① 熱感度 <span class="math inline">\(W\)</span> の高い点に温度センサを1本置くと？</h4>
 <p>反り <span class="math inline">\(U_z(A)-U_z(O)\)</span>
 は、5点の温度に <span class="math inline">\(W\)</span>
@@ -2015,9 +2023,11 @@ P0・P1・P2・P4 の4点です。</p>
 <img alt="W と測った後に残る温度のずれ" src="img/sensor_pair_residual.png"/>
 <figcaption aria-hidden="true">W と測った後に残る温度のずれ</figcaption>
 </figure>
-<p><em>左：熱感度 <span class="math inline">\(W\)</span> 。P0・P2
-は＋（A 側）、P1・P4 は−（O 側）。右：150
-秒で1回データ同化した後の、推定温度のずれの大きさ（標準偏差）。</em></p>
+<blockquote>
+<p>左：熱感度 <span class="math inline">\(W\)</span> 。P0・P2 は＋（A
+側）、P1・P4 は−（O 側）。右：150
+秒で1回データ同化した後の、推定温度のずれの大きさ（標準偏差）。</p>
+</blockquote>
 <table>
 <colgroup>
 <col style="width: 11%"/>
