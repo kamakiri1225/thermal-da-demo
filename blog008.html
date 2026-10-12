@@ -875,9 +875,12 @@ w\)</span></td>
 <p>感度最大点が最適になる条件の導出は <a href="blog005.html">blog_005 §1-2</a>
 に残しています。<strong>単一パラメータ・局所線形・既知の他パラメータ・同じ観測ノイズ</strong>という条件付きの説明です。複数パラメータや未観測変位には、そのまま一般化しません。</p>
 <figure>
-<img alt="σ の意味" src="img/explain_sigma_meaning.png"/>
-<figcaption aria-hidden="true">σ の意味</figcaption>
+<img alt="σ の意味を散布図で見る" src="img/sigma_scatter.png"/>
+<figcaption aria-hidden="true">σ の意味を散布図で見る</figcaption>
 </figure>
+<p><em>σ ＝
+センサの読みが分かったときに残る、反りの縦の幅（散布図の帯の幅）。読みが反りと一緒に動く（散布図が細い直線）候補ほど
+σ が小さい。詳しい見方と式の導き方は §5-2 ステップ3。</em></p>
 <p><strong>分かったこと</strong></p>
 <ul>
 <li>反り A−O を狙うと、選ばれる変位計の位置は上面（S1・S2）。A・O
@@ -949,6 +952,12 @@ W条件では、温度2点のみから変位2点を追加すると、全温度�
 <h4 id="理論ではwをどう使って配置を考えるか">理論では、Wをどう使って配置を考えるか</h4>
 <p><strong>「大きく動く点」ではなく、「知りたい変位差の不確かさを減らせる点」を選びます。</strong>
 手順は、感度で誤差の伝わり方を表し、候補センサを測った後に残る誤差分散を予測する、というものです。</p>
+<blockquote>
+<p><strong>σ の意味を先に一言で</strong>：4,000 本の ROM
+計算で「センサの読み」と「反り」の散布図を描いたとき、読みが分かった後に残る反りの縦の幅が
+σ です。散布図が細い直線になるセンサほど良い（§5-2
+ステップ3の図）。以下はそれを行列で書いたものです。</p>
+</blockquote>
 <p>代表5点の温度誤差を <span class="math inline">\(\delta\mathbf
 T\in\mathbb R^5\)</span> とします。反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span>
 の誤差は、線形な熱弾性応答と固定したPOD復元を用いると、</p>
@@ -1248,14 +1257,14 @@ A・O（測らない）、赤い弧＝ヒータ側。「よく動く点に置く
 が教えてくれるのは、「<strong>温度の推定がずれると、反りが大きくずれる点はどこか</strong>」＝「<strong>温度を正確に推定しておく必要がある点はどこか</strong>」です。センサを置くべき点そのものではありません。</p>
 <p><strong>段階② <span class="math inline">\(W\)</span> ＋
 温度のばらつきで、測った後に残る誤差 <span class="math inline">\(\sigma\)</span> を計算する</strong></p>
-<p>0-10
-の式です。センサが1本だけの場合に書き直すと、意味が見やすくなります。</p>
+<p>σ は「センサの読みが分かったときに残る、反りの縦の幅」です（§5-2
+ステップ3の散布図）。センサが1本だけなら、</p>
 <p><span class="math display">\[
+\sigma^2=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,\,y)^2}{\mathrm{Var}(y)+r},\qquad
 \Delta\sigma_d^2=\frac{\mathrm{Cov}(d,\,y)^2}{\mathrm{Var}(y)+r}
 \]</span></p>
 <p>（ <span class="math inline">\(\Delta\sigma_d^2\)</span>
-：測ることで減る反りの分散、 <span class="math inline">\(d\)</span>
-：反り、 <span class="math inline">\(y\)</span> ：センサの読み、 <span class="math inline">\(r\)</span> ：センサのノイズの分散）</p>
+：測ることで減る反りの分散。導き方は §5-2 ステップ3 (b′)。 <span class="math inline">\(d\)</span> ：反り、 <span class="math inline">\(y\)</span> ：センサの読み、 <span class="math inline">\(r\)</span> ：センサのノイズの分散）</p>
 <p>効くのは「 <span class="math inline">\(W\)</span>
 が大きいこと」ではなく、<strong>「推定したい反り <span class="math inline">\(d\)</span>
 と一緒に動くこと（共分散が大きい）」</strong>です。2本目以降は、<strong>1本目で分かったことと重ならないこと</strong>も必要です。
