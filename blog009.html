@@ -183,7 +183,10 @@
 ― 代表点以外から選ぶ</a>
 <ul>
 <li><a href="#この記事で分かること" id="toc-この記事で分かること">この記事で分かること</a></li>
-<li><a href="#1-やったこと" id="toc-1-やったこと">1. やったこと</a></li>
+<li><a href="#1-やったこと" id="toc-1-やったこと">1. やったこと</a>
+<ul>
+<li><a href="#センサとは具体的に" id="toc-センサとは具体的に">センサとは（具体的に）</a></li>
+</ul></li>
 <li><a href="#2-どうやって場所を選んだか" id="toc-2-どうやって場所を選んだか">2. どうやって場所を選んだか</a>
 <ul>
 <li><a href="#2-1-考え方" id="toc-2-1-考え方">2-1. 考え方</a></li>
@@ -289,7 +292,7 @@
 </tr>
 <tr class="even">
 <td>センサ</td>
-<td>「ここに温度計（または変位計）を置いたとしたら」という場所。実物は使っていない</td>
+<td>「ここに温度計（または変位計）を置いたとしたら」という場所と種類。実物は使っていない（下の「センサとは」）</td>
 </tr>
 <tr class="odd">
 <td>センサの値</td>
@@ -303,6 +306,112 @@
 </tr>
 </tbody>
 </table>
+<h3 id="センサとは具体的に">センサとは（具体的に）</h3>
+<p><strong>この記事のセンサは、実物ではなく計算の中の「仮のセンサ」です。</strong>
+「この場所に、この種類のセンサを付けたとしたら」と考えて、その場所の真値（OpenFOAM・FrontISTR
+の計算結果）にノイズを足した値を「測った値」として使います。</p>
+<p>実物にするなら、次のようなものを想定しています。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>温度計</th>
+<th>変位計</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>実物の例</td>
+<td>熱電対（例：K 型熱電対＋変換 IC MAX31856。本リポジトリの
+<code>IoT/thermal_expansion_experiment</code> で計画している構成）</td>
+<td>ダイヤルゲージ型の変位計（例：Digimatic
+出力のもの）、または非接触の変位計</td>
+</tr>
+<tr class="even">
+<td>測るもの</td>
+<td>熱電対の先端がある1点の温度 [K]</td>
+<td>測定子を当てた1点の、<strong>決まった1つの向き</strong>の動き
+[µm]</td>
+</tr>
+<tr class="odd">
+<td>付け方</td>
+<td>表面に貼る、または穴をあけて中に埋める</td>
+<td>動かない架台に固定し、測定子を円筒に当てる</td>
+</tr>
+<tr class="even">
+<td>計算の中での測った値</td>
+<td>その点の真の温度 ＋ ノイズ（標準偏差 0.3 K）</td>
+<td>その点・その向きの真の変位 ＋ ノイズ（標準偏差 0.3 µm）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>この記事で使ったセンサの場所</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>座標 [mm]</th>
+<th>位置の説明</th>
+<th>実物で付けるなら</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計1（温度計2本の1本目）</td>
+<td><span class="math inline">\((36.7,\,0.8,\,49.2)\)</span></td>
+<td>ヒータ側・高さの中ほど。外面から約 0.8 mm 内側</td>
+<td>外面に浅い穴をあけて埋める</td>
+</tr>
+<tr class="even">
+<td>温度計2（温度計2本の2本目）</td>
+<td><span class="math inline">\((-32.9,\,1.6,\,51.6)\)</span></td>
+<td>反対側・高さの中ほど。外面から約 4.6 mm 内側（肉厚 17.5 mm
+の中）</td>
+<td>穴をあけて埋める</td>
+</tr>
+<tr class="odd">
+<td>変位計1</td>
+<td><span class="math inline">\((18.8,\,32.5,\,100.5)\)</span> 、 <span class="math inline">\(x\)</span> 方向</td>
+<td>上面の外周の角（+y 側）</td>
+<td>架台から、上端の側面に <span class="math inline">\(x\)</span>
+方向に当てる</td>
+</tr>
+<tr class="even">
+<td>変位計2</td>
+<td><span class="math inline">\((18.8,\,-32.5,\,100.5)\)</span> 、 <span class="math inline">\(x\)</span> 方向</td>
+<td>上面の外周の角（−y 側、1本目の鏡写し）</td>
+<td>同上</td>
+</tr>
+<tr class="odd">
+<td>（A・O：測らない）</td>
+<td><span class="math inline">\((\pm28.7,\,0,\,100.5)\)</span> 、 <span class="math inline">\(z\)</span> 方向</td>
+<td>上面のヒータ側と反対側</td>
+<td>付けない。推定するだけ</td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意（確かめていないこと）</strong></p>
+<ul>
+<li>ノイズ 0.3 K、0.3 µm
+は仮定で、特定の製品の仕様ではありません。熱電対の絶対精度は一般に ±1 K
+程度以上（K 型の JIS クラス1で ±1.5 K）なので、0.3 K
+は楽観的です。ダイヤルゲージ型の変位計は、表示が 1 µm
+単位の製品が多いので、0.3 µm も楽観的な可能性があります。</li>
+<li>変位計1・2は外周の曲面に <span class="math inline">\(x\)</span>
+方向に当てることになり、実物では当て方に工夫が要ります。</li>
+<li>センサの取り付け（穴をあける、架台を置く）が、温度や変形に与える影響は考えていません。</li>
+</ul>
 <hr/>
 <h2 id="2-どうやって場所を選んだか">2. どうやって場所を選んだか</h2>
 <h3 id="2-1-考え方">2-1. 考え方</h3>
