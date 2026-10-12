@@ -3123,7 +3123,73 @@ h+r}=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,y)^2}{\mathrm{Var}(y)+r}
 （§6-4）では、センサを1本ずつ足しながら <span class="math inline">\(P\leftarrow P-(P\mathbf h)(P\mathbf h)^{\mathsf
 T}/(\mathbf h^{\mathsf T}P\mathbf h+r)\)</span>
 を繰り返しています。センサのノイズが互いに無関係なら、まとめて計算した場合と同じ結果になります。</p>
-<h5 id="c-実際の数字で-j_c-を計算する候補-s1-の例">(c″) 実際の数字で J_c
+<h5 id="c-p_c-はデータ同化で温度を直すときの式と同じ">(c″) <span class="math inline">\(P_c\)</span>
+は、データ同化で温度を直すときの式と同じ</h5>
+<p>(c′) で導いた <span class="math inline">\(P_c\)</span>
+の式は、<strong>データ同化（カルマンフィルタ）で1回温度を直すときの式とまったく同じ</strong>です。</p>
+<p><span class="math display">\[
+P_c=B-BH^{\mathsf T}\big(HBH^{\mathsf T}+R\big)^{-1}HB
+\qquad\Longleftrightarrow\qquad
+P^a=P^f-P^fH^{\mathsf T}\big(HP^fH^{\mathsf T}+R\big)^{-1}HP^f
+\]</span></p>
+<p>左が置き場所の採点、右がデータ同化の1回の補正です（ <span class="math inline">\(P^f\)</span> ＝直す前の分からなさ、 <span class="math inline">\(P^a\)</span> ＝直した後の分からなさ）。
+つまり置き場所の採点は、<strong>「このセンサでデータ同化を1回だけしたら、温度の分からなさがどこまで縮むか」を、データ同化を実際に回さずに計算している</strong>ことになります。分からなさを更新する式には測定値が入らないので、センサを付ける前でも計算できます。</p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>置き場所の採点（ <span class="math inline">\(P_c\)</span> ）</th>
+<th>実際のデータ同化（EnKF）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>更新の式</td>
+<td>同じ</td>
+<td>同じ（60メンバーのばらつきで近似）</td>
+</tr>
+<tr class="even">
+<td>測定値</td>
+<td><strong>使わない</strong>（分からなさの更新には要らない）</td>
+<td>使う（温度そのものを直すのに使う）</td>
+</tr>
+<tr class="odd">
+<td>直す前の分からなさ</td>
+<td><span class="math inline">\(B\)</span> ：4,000
+本を<strong>一度も直さずに</strong>進めた計算から作る</td>
+<td><span class="math inline">\(P^f\)</span> ：60メンバーを<strong>30
+秒ごとに直しながら</strong>進めた計算から作る</td>
+</tr>
+<tr class="even">
+<td>更新の回数</td>
+<td>各時刻で<strong>1回だけ</strong>。前の時刻の更新は持ち越さない</td>
+<td>30 秒ごとに<strong>20回、積み重ねる</strong></td>
+</tr>
+<tr class="odd">
+<td>直す量</td>
+<td>5点の温度だけ</td>
+<td>5点の温度＋発熱量＋放熱（7個）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>この違いから分かること</strong></p>
+<ul>
+<li><strong>予測した σ と、実際の誤差の値は合いません。</strong>
+選んだ2点の予測 σ は 0.256 µm、実際にデータ同化した反りの誤差は 0.075 µm
+でした（§7）。実際のデータ同化は補正を積み重ねるので、分からなさがもっと小さくなります。採点は「直す前の状態から1回だけ直す」ので、値が大きめに出ます。</li>
+<li><strong>それでも「どのセンサが効くか」の順位は保たれやすい</strong>ので、置き場所の選択に使えます（予測と実際の順位相関
+0.9〜0.98、§7・<a href="blog005.html">blog_005
+§4-6</a>）。</li>
+<li><strong>ただし順位が外れた例もあります。</strong>
+温度計も代表点以外から選んだ §6-4 では、予測 σ
+では良いはずの配置が、実際のデータ同化では今の配置を超えませんでした。採点は「1回だけ・温度5点だけ・反りだけ」を見ているので、積み重ねの効果や発熱量・放熱の推定、反り以外の量までは見ていません。</li>
+</ul>
+<h5 id="c-実際の数字で-j_c-を計算する候補-s1-の例">(c‴) 実際の数字で J_c
 を計算する（候補 S1 の例）</h5>
 <p>候補 S1（上面 <span class="math inline">\((9.7,-36.2,100.5)\)</span>
 mm の <span class="math inline">\(U_x\)</span> ）の点数 <span class="math inline">\(J_c\)</span>
