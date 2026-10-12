@@ -196,7 +196,9 @@
 <li><a href="#3-1-流れ" id="toc-3-1-流れ">3-1. 流れ</a></li>
 <li><a href="#3-2-変位計の値でどうやって直すのか" id="toc-3-2-変位計の値でどうやって直すのか">3-2.
 変位計の値で、どうやって直すのか</a></li>
-<li><a href="#3-3-1回目の補正で何が起きたか30-秒" id="toc-3-3-1回目の補正で何が起きたか30-秒">3-3.
+<li><a href="#3-3-代表点以外を測ったときのデータ同化の手続き式と数字" id="toc-3-3-代表点以外を測ったときのデータ同化の手続き式と数字">3-3.
+代表点以外を測ったときの、データ同化の手続き（式と数字）</a></li>
+<li><a href="#3-4-1回目の補正で何が起きたか30-秒" id="toc-3-4-1回目の補正で何が起きたか30-秒">3-4.
 1回目の補正で、何が起きたか（30 秒）</a></li>
 </ul></li>
 <li><a href="#4-結果" id="toc-4-結果">4. 結果</a></li>
@@ -551,7 +553,222 @@ K</li>
 <p><strong>大事な点</strong>：この係数は、P1・P4 を上げて P0・P2
 を下げる、つまり「<strong>ヒータ側と反対側の温度差</strong>」を直す向きです。<strong>5点を全部いっしょに上げ下げする向きには、ほとんど直しません。</strong>
 この変位計が、全体の温まりに反応しないからです（§5）。</p>
-<h3 id="3-3-1回目の補正で何が起きたか30-秒">3-3.
+<h3 id="3-3-代表点以外を測ったときのデータ同化の手続き式と数字">3-3.
+代表点以外を測ったときの、データ同化の手続き（式と数字）</h3>
+<p><strong>ポイントは1つです。ROM
+が持っている温度は代表5点（P0〜P4）だけです。センサが代表点以外にあっても、「代表5点の温度
+→
+そのセンサの値」の換算の行を1本作れば、データ同化できます。</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサの種類</th>
+<th>換算の行（代表5点の温度が 1 K
+上がると、センサの値がいくつ変わるか）</th>
+<th>作り方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>代表点にある温度計（例：P2）</td>
+<td><span class="math inline">\((0,\,0,\,1,\,0,\,0)\)</span></td>
+<td>その点の温度そのもの</td>
+</tr>
+<tr class="even">
+<td><strong>代表点以外の温度計</strong>（例：反対側・中段）</td>
+<td><span class="math inline">\((-0.094,\,0.660,\,0.019,\,-0.120,\,0.538)\)</span></td>
+<td>gappy-POD：そのセルの温度を5点の温度の一次式で表した係数</td>
+</tr>
+<tr class="odd">
+<td><strong>代表点以外の変位計</strong>（例：上面 <span class="math inline">\((18.8,\,32.5)\)</span> mm の横方向）</td>
+<td><span class="math inline">\((-0.521,\,0.564,\,-0.774,\,0.405,\,0.313)\)</span></td>
+<td>FrontISTR を6回解いて作った重み（blog_008 §5-2）</td>
+</tr>
+</tbody>
+</table>
+<p>この行を、センサの数だけ縦に並べたものが換算表 <span class="math inline">\(H\)</span>
+です。あとの手続きは、センサの種類によらず同じです。
+以下、<strong>変位計2本（U2）</strong>の場合を、 <span class="math inline">\(t=30\)</span>
+秒の1回目の補正で、メンバー1（60個のうちの1つ）を例に追います（15
+W、seed 20260913）。</p>
+<p><strong>手順0：各メンバーが持つ値（予報した後）</strong></p>
+<p><span class="math display">\[
+\mathbf
+z^{(m)}=\big(T_0^{(m)},\,T_1^{(m)},\,T_2^{(m)},\,T_3^{(m)},\,T_4^{(m)},\,q^{(m)},\,h^{(m)}\big),\qquad
+m=1,\dots,60
+\]</span></p>
+<p>メンバー1：温度 <span class="math inline">\((24.19,\,22.11,\,25.01,\,23.40,\,20.77)\)</span>
+°C、 <span class="math inline">\(q=1.692\)</span> 、 <span class="math inline">\(h=0.0097\)</span> W/K。</p>
+<p><strong>手順1：各メンバーについて、センサの値を予想する</strong></p>
+<p><span class="math display">\[
+y^{f(m)}_k=\bar y_k+\sum_{j=0}^{4}H_{kj}\big(T_j^{(m)}-\bar T_j\big)
+\]</span></p>
+<p><span class="math inline">\(k\)</span> はセンサの番号（1, 2）、 <span class="math inline">\(\bar T_j\)</span>
+は平均の温度分布での代表点の温度、 <span class="math inline">\(\bar
+y_k\)</span> は平均の温度分布のときのセンサの値（ここでは −1.416
+µm）です。メンバー1の上がり分は <span class="math inline">\(T_j-\bar
+T_j=(+0.677,\,-0.444,\,+1.226,\,+0.407,\,-1.445)\)</span> K なので、</p>
+<p><span class="math display">\[
+y^{f(1)}_1=-1.416+(-0.521)(0.677)+(0.564)(-0.444)+(-0.774)(1.226)+(0.405)(0.407)+(0.313)(-1.445)=-3.255\
+\mu\mathrm m
+\]</span></p>
+<p>2本目も同じ重みなので −3.255 µm です。</p>
+<p><strong>手順2：センサの値を測る</strong></p>
+<p>真の変位（FrontISTR）は2本とも −1.626 µm で、ノイズを足した測った値は
+<span class="math inline">\(\mathbf y=(-1.894,\,-1.854)\)</span> µm
+でした。</p>
+<p><strong>手順3：60個のメンバーの平均と、平均からのずれを出す</strong></p>
+<p><span class="math display">\[
+\bar{\mathbf z}=\frac{1}{60}\sum_{m}\mathbf z^{(m)},\qquad \Delta\mathbf
+z^{(m)}=\mathbf z^{(m)}-\bar{\mathbf z},\qquad
+\bar{\mathbf y}^{f}=\frac{1}{60}\sum_{m}\mathbf y^{f(m)},\qquad
+\Delta\mathbf y^{(m)}=\mathbf y^{f(m)}-\bar{\mathbf y}^{f}
+\]</span></p>
+<p>（ばらつきが小さくなりすぎないよう、ずれを 1.02
+倍に広げてから使います。） 平均は、温度 <span class="math inline">\((25.74,\,24.62,\,26.35,\,24.95,\,24.88)\)</span>
+°C、 <span class="math inline">\(q=1.139\)</span> 、予想値 <span class="math inline">\(\bar{\mathbf y}^f=(-1.766,\,-1.766)\)</span> µm。
+メンバー1のずれは <span class="math inline">\(\Delta\mathbf
+z^{(1)}=(-1.55,\,-2.51,\,-1.34,\,-1.55,\,-4.11,\,+0.55,\,-0.01)\)</span>
+、 <span class="math inline">\(\Delta\mathbf
+y^{(1)}=(-1.489,\,-1.489)\)</span> µm です。</p>
+<p><strong>手順4：「持つ値」と「センサの予想値」が、どう一緒にばらつくかを数える</strong></p>
+<p><span class="math display">\[
+C_{zy}=\frac{1}{59}\sum_{m=1}^{60}\Delta\mathbf
+z^{(m)}\big(\Delta\mathbf y^{(m)}\big)^{\mathsf T}\ (7\times2),\qquad
+C_{yy}=\frac{1}{59}\sum_{m=1}^{60}\Delta\mathbf
+y^{(m)}\big(\Delta\mathbf y^{(m)}\big)^{\mathsf T}\ (2\times2)
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">センサ1</th>
+<th style="text-align: right;">センサ2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(C_{zy}\)</span> の <span class="math inline">\(T_0\)</span> の行</td>
+<td style="text-align: right;">−1.353</td>
+<td style="text-align: right;">−1.353</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_1\)</span></td>
+<td style="text-align: right;">4.241</td>
+<td style="text-align: right;">4.240</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T_2\)</span></td>
+<td style="text-align: right;">−1.282</td>
+<td style="text-align: right;">−1.282</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_3\)</span></td>
+<td style="text-align: right;">−0.883</td>
+<td style="text-align: right;">−0.883</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T_4\)</span></td>
+<td style="text-align: right;">4.995</td>
+<td style="text-align: right;">4.996</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span></td>
+<td style="text-align: right;">−0.104</td>
+<td style="text-align: right;">−0.104</td>
+</tr>
+</tbody>
+</table>
+<p><span class="math inline">\(C_{yy}\)</span> は4つとも 5.294 µm²
+でした。2本の予想値が完全に一緒に動いている（同じことを測っている）ということです。</p>
+<p><strong>手順5：カルマンゲインを作る</strong>（センサの値のずれを、持つ値の直し量に換算する表）</p>
+<p><span class="math display">\[
+K=C_{zy}\big(C_{yy}+R\big)^{-1},\qquad
+R=\begin{pmatrix}0.09&amp;0\\0&amp;0.09\end{pmatrix}
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>直す値</th>
+<th style="text-align: right;">センサ1</th>
+<th style="text-align: right;">センサ2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T_0\)</span></td>
+<td style="text-align: right;">−0.127</td>
+<td style="text-align: right;">−0.126</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_1\)</span></td>
+<td style="text-align: right;">0.401</td>
+<td style="text-align: right;">0.393</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T_2\)</span></td>
+<td style="text-align: right;">−0.120</td>
+<td style="text-align: right;">−0.120</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T_3\)</span></td>
+<td style="text-align: right;">−0.085</td>
+<td style="text-align: right;">−0.081</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(T_4\)</span></td>
+<td style="text-align: right;">0.462</td>
+<td style="text-align: right;">0.474</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span></td>
+<td style="text-align: right;">−0.010</td>
+<td style="text-align: right;">−0.009</td>
+</tr>
+</tbody>
+</table>
+<p><strong>手順6：各メンバーを直す</strong></p>
+<p><span class="math display">\[
+\mathbf z^{a(m)}=\mathbf z^{(m)}+K\big(\mathbf
+y+\boldsymbol\varepsilon^{(m)}-\mathbf y^{f(m)}\big)
+\]</span></p>
+<p><span class="math inline">\(\boldsymbol\varepsilon^{(m)}\)</span>
+はメンバーごとに足すノイズ（標準偏差 0.3 µm）で、メンバー1は <span class="math inline">\((-0.532,\,-0.053)\)</span> µm でした。</p>
+<p><span class="math display">\[
+\mathbf y+\boldsymbol\varepsilon^{(1)}-\mathbf
+y^{f(1)}=(-1.894-0.532+3.255,\ -1.854-0.053+3.255)=(0.829,\,1.348)\
+\mu\mathrm m
+\]</span></p>
+<p>これに <span class="math inline">\(K\)</span>
+を掛けると、メンバー1の直し量は</p>
+<p><span class="math display">\[
+\Delta T_1=0.401(0.829)+0.393(1.348)=+0.86\ \mathrm K,\qquad
+\Delta T_4=0.462(0.829)+0.474(1.348)=+1.02\ \mathrm K
+\]</span></p>
+<p>（ <span class="math inline">\(T_0\)</span> は −0.28 K、 <span class="math inline">\(T_2\)</span> は −0.26 K、 <span class="math inline">\(T_3\)</span> は −0.18 K、 <span class="math inline">\(q\)</span> は −0.021。）
+メンバー1は「予想より変位計の値が大きい」ので、反対側（P1・P4）を上げ、ヒータ側（P0・P2）を下げました。直した後の温度は
+<span class="math inline">\((23.91,\,22.97,\,24.75,\,23.22,\,21.79)\)</span>
+°C です。</p>
+<p><strong>手順7：推定値を出す</strong></p>
+<p>60個のメンバーの平均を推定値にします。測っていない A・O
+の変位は、直した5点の温度から重みで計算し直します。</p>
+<p><span class="math display">\[
+\hat U_z(A)=\bar u_A+\sum_{j}h_{A,j}\big(\hat T_j-\bar T_j\big)
+\]</span></p>
+<p>60個の平均で見ると、直し量は温度 <span class="math inline">\((+0.03,\,-0.10,\,+0.03,\,+0.02,\,-0.12)\)</span> K
+と小さく、推定した反りは直す前 1.46 µm → 直した後 1.62 µm（真値 1.41
+µm）でした。1回目はまだ合っていませんが、20回くり返すと 300 秒で 2.75
+µm（真値 2.74 µm）まで合います。 一方、 <span class="math inline">\(U_z(A)\)</span> は直す前も後も約 6.7 µm（真値 0.97
+µm）のままです。変位計2本が「全体の温まり」を直さないためです（§5）。</p>
+<p><strong>温度計2本（T2）の場合も、手順は同じ</strong>です。違うのは手順1の換算の行（温度計は
+gappy-POD の行）と、そこから計算される <span class="math inline">\(K\)</span> の値だけです。T2 の <span class="math inline">\(K\)</span>
+は5点をすべて同じ向きに直す列を持つので、全体の温まりも直せます（付録C）。</p>
+<h3 id="3-4-1回目の補正で何が起きたか30-秒">3-4.
 1回目の補正で、何が起きたか（30 秒）</h3>
 <p>最初の予報は、どのメンバーも真値より<strong>約 4.6 K
 熱すぎ</strong>ました（最初に与えた温度が高めだったため）。</p>
