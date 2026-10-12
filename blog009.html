@@ -183,6 +183,7 @@
 ― 代表点以外から σ で選ぶ</a>
 <ul>
 <li><a href="#この記事で確かめること" id="toc-この記事で確かめること">この記事で確かめること</a></li>
+<li><a href="#この記事に出てくる平均は5種類ある" id="toc-この記事に出てくる平均は5種類ある">この記事に出てくる「平均」は5種類ある</a></li>
 <li><a href="#1-選び方の理論" id="toc-1-選び方の理論">1.
 選び方の理論</a>
 <ul>
@@ -323,6 +324,85 @@ K、変位 0.3 µm</td>
 で選ぶときは、<strong>知りたい量を反りだけにしない</strong>ほうがよい。</p>
 </blockquote>
 <hr/>
+<h2 id="この記事に出てくる平均は5種類ある">この記事に出てくる「平均」は5種類ある</h2>
+<p>「平均」という言葉が、何についての平均かで5種類出てきます。<strong>時間の平均、場所の平均、メンバーの平均は別物</strong>です。</p>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+<col style="width: 16%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>呼び方</th>
+<th>何を平均するか</th>
+<th>時間</th>
+<th>場所</th>
+<th>式</th>
+<th>使う場所</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>60個のメンバーの平均</strong></td>
+<td>同じ時刻・同じ点の、60個のメンバー（ありえる世界）の値</td>
+<td>平均しない（その時刻だけ）</td>
+<td>平均しない（その点だけ）</td>
+<td><span class="math inline">\(\displaystyle
+\frac{1}{60}\sum_{m=1}^{60}T_j^{(m)}(t)\)</span></td>
+<td>データ同化の推定値。§3-3 の表</td>
+</tr>
+<tr class="even">
+<td><strong>平均の温度分布</strong> <span class="math inline">\(\bar
+T\)</span></td>
+<td>OpenFOAM の 121 時刻（0〜600 秒、5 秒ごと）の温度場（15 W、ROM
+を作ったときの計算）</td>
+<td><strong>時間で平均</strong></td>
+<td>平均しない（セルごと）</td>
+<td><span class="math inline">\(\displaystyle \bar
+T(x)=\frac{1}{121}\sum_{k=1}^{121}T(x,t_k)\)</span></td>
+<td>換算表 <span class="math inline">\(H\)</span> の基準（ <span class="math inline">\(\bar T_j\)</span> 、 <span class="math inline">\(\bar y\)</span> ）</td>
+</tr>
+<tr class="odd">
+<td><strong>4,000 本の平均</strong></td>
+<td>同じ時刻の、4,000 本の ROM 計算（ありえる世界）</td>
+<td>平均しない</td>
+<td>平均しない</td>
+<td><span class="math inline">\(\displaystyle \langle
+T_j\rangle=\frac{1}{4000}\sum_{n=1}^{4000}T_j^{(n)}(t)\)</span></td>
+<td>σ の計算（§1）</td>
+</tr>
+<tr class="even">
+<td><strong>30〜300 秒の平均誤差</strong></td>
+<td>各時刻の誤差</td>
+<td><strong>時間で平均</strong>（30, 60, …, 300 秒の10時刻）</td>
+<td>平均しない</td>
+<td><span class="math inline">\(\displaystyle
+\frac{1}{10}\sum_{k=1}^{10}\big\lvert\hat
+d(30k)-d(30k)\big\rvert\)</span></td>
+<td>結果の表（§4）</td>
+</tr>
+<tr class="odd">
+<td><strong>5 seed 平均</strong></td>
+<td>乱数の種を変えた5回のデータ同化</td>
+<td>―</td>
+<td>―</td>
+<td><span class="math inline">\(\displaystyle
+\frac{1}{5}\sum_{s=1}^{5}(\cdots)\)</span></td>
+<td>結果の表（§4）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>場所で平均するのは2か所だけ</strong>です。</p>
+<ul>
+<li>温度場全体の RMSE： <span class="math inline">\(\sqrt{\frac{1}{20696}\sum_i(\hat
+T_i-T_i)^2}\)</span> （全セルで平均。§4 の表）</li>
+<li>§5-1 の「5点の平均 <span class="math inline">\(m\)</span>
+」（代表5点の温度を足して5で割ったもの）</li>
+</ul>
 <h2 id="1-選び方の理論">1. 選び方の理論</h2>
 <h3 id="1-1-何を小さくするか--σ">1-1. 何を小さくするか ― σ</h3>
 <p><strong>σ ＝
@@ -491,8 +571,9 @@ W、seed 20260913）。</p>
 です。センサの値は7つの中に入れず、毎回、温度から計算します。</p>
 <p><strong>初期値</strong>：温度は5点それぞれ 17〜32 °C の一様乱数、
 <span class="math inline">\(q\)</span> は 0.3〜1.8 の一様乱数、 <span class="math inline">\(h\)</span> は平均 0.02・標準偏差 0.01
-の正規乱数です。今回の60個の平均は、温度 <span class="math inline">\((25.3,\,24.3,\,23.2,\,24.6,\,25.0)\)</span> °C、
-<span class="math inline">\(q=1.14\)</span> 、 <span class="math inline">\(h=0.020\)</span> でした（真値は温度 20 °C、 <span class="math inline">\(q=1\)</span> 、 <span class="math inline">\(h=0.0154\)</span> ）。</p>
+の正規乱数です。今回の60個のメンバーの平均（同じ点の60個の値を足して60で割ったもの）は、温度
+<span class="math inline">\((25.3,\,24.3,\,23.2,\,24.6,\,25.0)\)</span>
+°C、 <span class="math inline">\(q=1.14\)</span> 、 <span class="math inline">\(h=0.020\)</span> でした（真値は温度 20 °C、 <span class="math inline">\(q=1\)</span> 、 <span class="math inline">\(h=0.0154\)</span> ）。</p>
 <h3 id="3-2-1サイクルの手順">3-2. 1サイクルの手順</h3>
 <table>
 <colgroup>
@@ -563,8 +644,8 @@ y+\boldsymbol\varepsilon_m-\mathbf y^f_m)\)</span></td>
 は、メンバーごとに足す観測ノイズです（摂動観測）。</li>
 <li>⑥の後、 <span class="math inline">\(q\)</span> は 0〜3、 <span class="math inline">\(h\)</span> は 0.0001〜0.2 の範囲に収めます。</li>
 <li>評価に使う全セルの温度と A・O
-の変位は、直した5点の温度の平均から、gappy-POD と FrontISTR
-の重みで計算します。</li>
+の変位は、直した5点の温度の60個のメンバーの平均から、gappy-POD と
+FrontISTR の重みで計算します。</li>
 </ul>
 <h3 id="3-2b-センサとセンサの値を予想するとは">3-2b.
 「センサ」と「センサの値を予想する」とは</h3>
@@ -759,7 +840,8 @@ y\)</span></th>
 </table>
 <p>温度計1はほぼ P2 の温度、温度計2は P1 と P4
 を混ぜた温度を見ています。U2 の2本は、重みがまったく同じです。</p>
-<p><strong>①〜③ 予報・予想・測定</strong>（60個の平均）</p>
+<p><strong>①〜③ 予報・予想・測定</strong>（60個のメンバーの平均。 <span class="math inline">\(t=30\)</span>
+秒の、その点の値。時間や場所の平均ではない）</p>
 <table>
 <colgroup>
 <col style="width: 33%"/>
@@ -888,7 +970,7 @@ C_{yy}+R=\begin{pmatrix}5.38&amp;5.29\\5.29&amp;5.38\end{pmatrix}
 </table>
 <p>単位は、T2 が K/K（ <span class="math inline">\(q\)</span> は 1/K、
 <span class="math inline">\(h\)</span> は W/K²）、U2 が K/µm（ <span class="math inline">\(q\)</span> は 1/µm）です。</p>
-<p><strong>⑥ 直した量</strong>（60個の平均。 <span class="math inline">\(K\times\)</span> ずれ ）</p>
+<p><strong>⑥ 直した量</strong>（60個のメンバーの平均。 <span class="math inline">\(K\times\)</span> ずれ ）</p>
 <table>
 <colgroup>
 <col style="width: 20%"/>
