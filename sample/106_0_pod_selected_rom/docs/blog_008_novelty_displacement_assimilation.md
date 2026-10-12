@@ -667,7 +667,42 @@ y_c=y_{c,0}+\mathbf h_c^{\mathsf T}\mathbf T,\qquad
 $$
 
 $y_{c,0}$ は温度が基準のときの値（定数）、 $h_{c,j}$ は「代表点 $P_j$ の温度が 1 K 上がると、候補 $c$ の変位が何 µm 動くか」です。
-FrontISTR を**6回だけ**回して作りました（平均の温度場で1回、POD の型5つで1回ずつ）。FEM は1回解くと全節点の変位が出るので、この6回で 15,120 通りすべての重みがそろいます。追加の FEM 計算は要りません。
+この重みは、FrontISTR を**6回だけ**解いて作りました。15,120 通りの候補ごとに FEM を解く必要はありません。理由は「重ね合わせ」です。
+
+![FrontISTR 6回で重みがそろう理由](img/fem6_superposition.png)
+
+*① 温度分布を6つの型（平均＋POD の型5つ）の足し算で表す。② 型ごとに FrontISTR を1回ずつ解く。③ 型の強さ $a_k$ は代表5点の温度から決まる。②と③を合わせると、どの節点のどの方向の変位も、代表5点の温度の一次式になる（ `run/make_fem6_fig.py` ）。*
+
+1. **温度分布を6つの型の足し算で書く。** OpenFOAM の温度場を POD で分解すると、どの時刻の温度分布も「平均の温度分布 $\bar T(x)$ ＋ 型 $\varphi_1(x),\dots,\varphi_5(x)$ をそれぞれ $a_1,\dots,a_5$ 倍したもの」でほぼ表せます（5つの型で 99.9 % 以上）。
+
+$$
+T(x)\approx\bar T(x)+a_1\varphi_1(x)+a_2\varphi_2(x)+\cdots+a_5\varphi_5(x)
+$$
+
+2. **型ごとに FrontISTR を1回ずつ解く（計6回）。** 平均の温度分布を入れた変位 $\mathbf u[\bar T]$ と、型 $\varphi_k$ だけを入れた変位 $\mathbf u[\varphi_k]$ です。FEM は1回解くと**全 5,040 節点 × 3方向の変位が一度に出る**ので、6回で全候補の答えがそろいます。
+
+3. **変位も同じ足し算になる。** 熱弾性の計算は線形（温度が2倍なら変位も2倍、温度の足し算は変位の足し算）なので、
+
+$$
+\mathbf u\approx\mathbf u[\bar T]+a_1\,\mathbf u[\varphi_1]+a_2\,\mathbf u[\varphi_2]+\cdots+a_5\,\mathbf u[\varphi_5]
+$$
+
+4. **型の強さ $a_k$ は、代表5点の温度から決まる（gappy-POD）。** 代表5点での型の値を並べた 5×5 の行列を $\Phi_P$ とすると、
+
+$$
+\mathbf T_P=\bar{\mathbf T}_P+\Phi_P\,\mathbf a\quad\Rightarrow\quad\mathbf a=\Phi_P^{-1}\big(\mathbf T_P-\bar{\mathbf T}_P\big)
+$$
+
+5. **3と4を合わせると、重みが出る。** 節点 $c$ のある方向の変位は
+
+$$
+u_c=u_c[\bar T]+\mathbf h_c^{\mathsf T}\big(\mathbf T_P-\bar{\mathbf T}_P\big),\qquad
+\mathbf h_c^{\mathsf T}=\big(u_c[\varphi_1],\dots,u_c[\varphi_5]\big)\,\Phi_P^{-1}
+$$
+
+つまり重み $\mathbf h_c$ は、6回の FrontISTR の結果のうち節点 $c$ の値を取り出して、5×5 の行列 $\Phi_P^{-1}$ を掛けるだけで出ます。15,120 通りすべてについて、掛け算だけで計算できます。
+
+**近似が入るのは、1の「5つの型で表す」ところ（と、OpenFOAM のセルの温度を FEM の節点へ受け渡すところ）**です。2・3は FEM の線形性そのものなので、近似はありません。
 
 知りたい反り $d=U_z(A)-U_z(O)$ も、同じ形の重み $\mathbf w$ で書けます。
 
