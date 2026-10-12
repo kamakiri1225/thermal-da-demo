@@ -194,7 +194,7 @@ $$
 各係数も、
 
 $$
-G_{c,j}=\sum_{\ell=1}^{5}\phi_\ell[c](\Phi_P^+)_{\ell,j}
+G_{c,j}=\sum_{\ell=1}^{5}\phi_\ell[c]{}(\Phi_P^+)_{\ell,j}
 $$
 
 と計算した値です。これが、代表点以外に置く温度計の重みの出所です。**5点温度から全場を完全に決められるという一般的な性質ではなく、温度場をこの5モードで近似するという仮定の下での復元**です。
@@ -1391,14 +1391,14 @@ $$
 この4点の温度はROMで独立に時間積分していません。EnKFで補正した代表5点温度から、gappy-PODの復元行列Gを使って計算しています。検証セルcの温度は、
 
 $$
-\widehat T[c](t)=\bar T[c]
+\widehat T[c]{}(t)=\bar T[c]
 +\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
-\widehat T[P0](t)-\bar T[P0]\\
-\widehat T[P1](t)-\bar T[P1]\\
-\widehat T[P2](t)-\bar T[P2]\\
-\widehat T[P3](t)-\bar T[P3]\\
-\widehat T[P4](t)-\bar T[P4]
+\widehat T[P0]{}(t)-\bar T[P0]\\
+\widehat T[P1]{}(t)-\bar T[P1]\\
+\widehat T[P2]{}(t)-\bar T[P2]\\
+\widehat T[P3]{}(t)-\bar T[P3]\\
+\widehat T[P4]{}(t)-\bar T[P4]
 \end{bmatrix}}_{5\times1}
 $$
 
@@ -1455,7 +1455,7 @@ $$
 
 $$
 E_c=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
-\left|\widehat T_s[c](30k)-T^*[c](30k)\right|.
+\left|\widehat T_s[c]{}(30k)-T^*[c]{}(30k)\right|.
 $$
 
 星は保存済みOpenFOAM正解です。グラフに描いた5試行平均の線から誤差を求めるのではなく、各試行の誤差を計算してから平均しています。
