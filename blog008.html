@@ -621,10 +621,10 @@ FEM の節点に写して FrontISTR に入れ、熱変形を計算しました�
 </figure>
 <p><em>左：OpenFOAM の温度場、右：FrontISTR
 の熱変形（誇張表示）。</em></p>
-<p><strong>分かったこと</strong>：この温度と変形を「正解」とし、そこから取り出したセンサの読み（＋ノイズ）だけで、どこまで推定できるかを以降で調べます。</p>
+<p><strong>分かったこと</strong>：この温度と変形を「正解」とし、そこから取り出したセンサの値（＋ノイズ）だけで、どこまで推定できるかを以降で調べます。</p>
 <h3 id="0-2-データ同化を行った--oi-と-enkf">0-2. データ同化を行った ― OI
 と EnKF</h3>
-<p><strong>何をしたか</strong>：センサの読みで計算を直す方法として、OI（最適内挿）と
+<p><strong>何をしたか</strong>：センサの値で計算を直す方法として、OI（最適内挿）と
 EnKF（アンサンブルカルマンフィルタ）を実ソルバで試しました。</p>
 <table>
 <colgroup>
@@ -810,13 +810,13 @@ seed平均</strong>です。</p>
 1/4〜1/7、反りの誤差は約 1/8〜1/13 になった</strong>（3条件とも）。</li>
 <li><strong>温度1点＋変位2点は、温度2点よりも、温度場・反りともに良かった</strong>（センサの合計本数は
 3 本 対 2 本なので、本数をそろえた比較ではない）。</li>
-<li>変位計1本の読みは、5点すべての温度に重みを掛けて足したものなので、温度計のない反対側の温度まで直るためです（<a href="blog006.html">blog_006 §3</a>）。</li>
+<li>変位計1本の値は、5点すべての温度に重みを掛けて足したものなので、温度計のない反対側の温度まで直るためです（<a href="blog006.html">blog_006 §3</a>）。</li>
 </ul>
 <h3 id="0-9-何を推定したいかで適切なセンサ位置は変わる">0-9.
 何を推定したいかで、適切なセンサ位置は変わる</h3>
 <p><strong>問い</strong>：「〇〇に対する△△の感度」から、測る前にセンサ位置を決められないか。</p>
 <p><strong>この研究で確認した答え</strong>：反り A−O
-の配置設計には、温度から反りへの感度と、温度からセンサの読みへの感度を使います。どちらも5点温度の線形写像で表せます。ここで使う5点温度の重みは、FrontISTRの熱弾性応答にPOD復元を組み合わせたものです。</p>
+の配置設計には、温度から反りへの感度と、温度からセンサの値への感度を使います。どちらも5点温度の線形写像で表せます。ここで使う5点温度の重みは、FrontISTRの熱弾性応答にPOD復元を組み合わせたものです。</p>
 <p><strong>ただし発熱量Qは、温度に重みを掛けるだけの出力ではありません。</strong>
 Qや放熱コンダクタンス <span class="math inline">\(h_{\mathrm{ROM}}\)</span>
 の配置設計には、熱モデルを微分した <span class="math inline">\(\partial
@@ -879,7 +879,7 @@ w\)</span></td>
 <figcaption aria-hidden="true">σ の意味を散布図で見る</figcaption>
 </figure>
 <p><em>σ ＝
-センサの読みが分かったときに残る、反りの縦の幅（散布図の帯の幅）。読みが反りと一緒に動く（散布図が細い直線）候補ほど
+センサの値が分かったときに残る、反りの縦の幅（散布図の帯の幅）。値が反りと一緒に動く（散布図が細い直線）候補ほど
 σ が小さい。詳しい見方と式の導き方は §5-2 ステップ3。</em></p>
 <p><strong>分かったこと</strong></p>
 <ul>
@@ -954,7 +954,7 @@ W条件では、温度2点のみから変位2点を追加すると、全温度�
 手順は、感度で誤差の伝わり方を表し、候補センサを測った後に残る誤差分散を予測する、というものです。</p>
 <blockquote>
 <p><strong>σ の意味を先に一言で</strong>：4,000 本の ROM
-計算で「センサの読み」と「反り」の散布図を描いたとき、読みが分かった後に残る反りの縦の幅が
+計算で「センサの値」と「反り」の散布図を描いたとき、値が分かった後に残る反りの縦の幅が
 σ です。散布図が細い直線になるセンサほど良い（§5-2
 ステップ3の図）。以下はそれを行列で書いたものです。</p>
 </blockquote>
@@ -983,7 +983,7 @@ Kずれたとき、A−Oが何µmずれるか</strong>を表す感度です。</
 \]</span></p>
 <p>です。したがって、<strong>WだけでなくBも必要</strong>です。Wは「どの温度誤差が変位に効くか」、Bは「どの温度が、どれだけ一緒に不確かになるか」を表します。</p>
 <p>候補センサ集合 <span class="math inline">\(S\)</span>
-の読みを温度から求める行列を <span class="math inline">\(H_S\)</span>
+の値を温度から求める行列を <span class="math inline">\(H_S\)</span>
 、観測ノイズの共分散を <span class="math inline">\(R_S\)</span>
 とします。温度計の行は温度の取り出し・POD復元、変位計の行は温度からその方向の変位への合成感度です。線形・ガウスの仮定では、測った後の温度共分散は、</p>
 <p><span class="math display">\[
@@ -1099,11 +1099,11 @@ K、変位0.30 µmです。</p>
 </tbody>
 </table>
 <p><strong>なぜ観測していない点まで合うのか。</strong>
-データ同化が直しているのは、センサの読みそのものではなく、<strong>ROM
+データ同化が直しているのは、センサの値そのものではなく、<strong>ROM
 の代表5点の温度と発熱量・放熱</strong>です。
 そこから全セルの温度（gappy-POD）と全節点の変位（FrontISTR
 の応答）を計算し直すので、観測していない点も一緒に直ります（<a href="blog006.html">blog_006 §3</a>）。</p>
-<pre><code>センサの読みと予測のずれ
+<pre><code>センサの値と予測のずれ
    ↓ カルマンゲイン（60メンバーの共分散から計算）
 代表5点の温度・発熱量・放熱を直す
    ↓ gappy-POD／FrontISTR の応答
@@ -1257,14 +1257,14 @@ A・O（測らない）、赤い弧＝ヒータ側。「よく動く点に置く
 が教えてくれるのは、「<strong>温度の推定がずれると、反りが大きくずれる点はどこか</strong>」＝「<strong>温度を正確に推定しておく必要がある点はどこか</strong>」です。センサを置くべき点そのものではありません。</p>
 <p><strong>段階② <span class="math inline">\(W\)</span> ＋
 温度のばらつきで、測った後に残る誤差 <span class="math inline">\(\sigma\)</span> を計算する</strong></p>
-<p>σ は「センサの読みが分かったときに残る、反りの縦の幅」です（§5-2
+<p>σ は「センサの値が分かったときに残る、反りの縦の幅」です（§5-2
 ステップ3の散布図）。センサが1本だけなら、</p>
 <p><span class="math display">\[
 \sigma^2=\mathrm{Var}(d)-\frac{\mathrm{Cov}(d,\,y)^2}{\mathrm{Var}(y)+r},\qquad
 \Delta\sigma_d^2=\frac{\mathrm{Cov}(d,\,y)^2}{\mathrm{Var}(y)+r}
 \]</span></p>
 <p>（ <span class="math inline">\(\Delta\sigma_d^2\)</span>
-：測ることで減る反りの分散。導き方は §5-2 ステップ3 (b′)。 <span class="math inline">\(d\)</span> ：反り、 <span class="math inline">\(y\)</span> ：センサの読み、 <span class="math inline">\(r\)</span> ：センサのノイズの分散）</p>
+：測ることで減る反りの分散。導き方は §5-2 ステップ3 (b′)。 <span class="math inline">\(d\)</span> ：反り、 <span class="math inline">\(y\)</span> ：センサの値、 <span class="math inline">\(r\)</span> ：センサのノイズの分散）</p>
 <p>効くのは「 <span class="math inline">\(W\)</span>
 が大きいこと」ではなく、<strong>「推定したい反り <span class="math inline">\(d\)</span>
 と一緒に動くこと（共分散が大きい）」</strong>です。2本目以降は、<strong>1本目で分かったことと重ならないこと</strong>も必要です。
@@ -2105,7 +2105,7 @@ h_{S1}\)</span></td>
 0：全体が一様に温まっても、反りは出ません。反りは「ヒータ側（P0・P2、＋）と反対側（P1・P4、−）の温度差」で決まります。</li>
 <li>S1 の重みは、 <span class="math inline">\(\mathbf w\)</span>
 とほぼ逆向き（符号が逆で形が似ている）です。だから S1
-の読みは反りと強く（逆向きに）一緒に動きます（ステップ3の散布図①）。</li>
+の値は反りと強く（逆向きに）一緒に動きます（ステップ3の散布図①）。</li>
 </ul>
 <h4 id="ステップ25点の温度の分からなさを作る図の②">ステップ2：5点の温度の「分からなさ」を作る（図の②）</h4>
 <p>発熱量や初期温度が分からないので、測る前は5点の温度も分かりません。
@@ -2183,24 +2183,29 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 ― σ とは何か（図の点線の枠）</h4>
 <p>候補を1つ取り出して、こう問います。</p>
 <blockquote>
-<p><strong>「ここにセンサを置いて読みが分かったら、反り A−O
+<p><strong>「ここにセンサを置いて値が分かったら、反り A−O
 の分からなさはどこまで小さくなるか」</strong></p>
 </blockquote>
-<p>この「読んだ後に残る反りの分からなさ」が <span class="math inline">\(\sigma\)</span>
+<blockquote>
+<p><strong>「センサの値」とは</strong>：センサが示す数値のこと。温度計なら温度
+[K]、変位計ならその点・その向きの変位 [µm] です。記号は <span class="math inline">\(y\)</span> 。実際の測定ではノイズ（標準偏差 0.3 K
+または 0.3 µm）が乗ります。</p>
+</blockquote>
+<p>この「測った後に残る反りの分からなさ」が <span class="math inline">\(\sigma\)</span>
 です。<strong>まず絵で見て、次に式にします。</strong></p>
 <h5 id="a-絵で見るσ-は散布図の縦の幅">(a) 絵で見る：σ
 は散布図の「縦の幅」</h5>
 <p>ステップ2の 4,000 本の ROM 計算を、1本ずつ点にして描きます。
-横軸＝その計算でセンサが示すはずの読み（ノイズ 0.3
+横軸＝その計算でセンサが示すはずの値（ノイズ 0.3
 込み）、縦軸＝その計算の反り A−O です。</p>
 <figure>
 <img alt="σ の意味を散布図で見る" src="img/sigma_scatter.png"/>
 <figcaption aria-hidden="true">σ の意味を散布図で見る</figcaption>
 </figure>
 <p><em>4,000 本の ROM 計算（ <span class="math inline">\(t=150\)</span>
-秒）。点1つ＝計算1本。黒い直線＝読みから反りを予想する直線、灰色の帯＝直線から上下にずれる幅（±σ）。測定値もデータ同化も使っていません（
+秒）。点1つ＝計算1本。黒い直線＝値から反りを予想する直線、灰色の帯＝直線から上下にずれる幅（±σ）。測定値もデータ同化も使っていません（
 <code>run/make_sigma_scatter_fig.py</code> ）。</em></p>
-<p>読み方はこうです。<strong>センサの読みが分かると、横軸の位置が決まります。そのとき反りは、黒い直線のまわりの灰色の帯の中にあると分かります。</strong>
+<p>読み方はこうです。<strong>センサの値が分かると、横軸の位置が決まります。そのとき反りは、黒い直線のまわりの灰色の帯の中にあると分かります。</strong>
 この帯の半分の幅が <span class="math inline">\(\sigma\)</span>
 です。</p>
 <table>
@@ -2213,18 +2218,18 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 <tr class="header">
 <th>候補</th>
 <th>散布図の形</th>
-<th style="text-align: right;">読んだ後の σ （測る前は ±1.20 µm）</th>
+<th style="text-align: right;">測った後の σ （測る前は ±1.20 µm）</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>① 変位計 S1（上面、横方向）</td>
-<td>細い右下がりの帯。読みと反りがほぼ1対1</td>
+<td>細い右下がりの帯。値と反りがほぼ1対1</td>
 <td style="text-align: right;"><strong>0.39 µm</strong></td>
 </tr>
 <tr class="even">
 <td>② 変位計 B（中段、上下方向）</td>
-<td>太い帯。読みが同じでも反りがばらつく</td>
+<td>太い帯。値が同じでも反りがばらつく</td>
 <td style="text-align: right;">1.08 µm</td>
 </tr>
 <tr class="odd">
@@ -2234,7 +2239,7 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 </tr>
 <tr class="even">
 <td>④ 温度計 P4（反対側の下部）</td>
-<td>水平。読みと反りが無関係</td>
+<td>水平。値と反りが無関係</td>
 <td style="text-align: right;">1.20 µm（縮まない）</td>
 </tr>
 </tbody>
@@ -2269,18 +2274,17 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 </tr>
 <tr class="even">
 <td><span class="math inline">\(\mathrm{Cov}(d,y)\)</span></td>
-<td>反りと読みが一緒に動く度合い</td>
+<td>反りと値が一緒に動く度合い</td>
 <td>帯の傾き</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\mathrm{Var}(y)+r\)</span></td>
-<td>読みのばらつき（ノイズ <span class="math inline">\(r=0.3^2\)</span>
-込み）</td>
+<td>センサの値のばらつき（ノイズ <span class="math inline">\(r=0.3^2\)</span> 込み）</td>
 <td>横方向の全体の幅</td>
 </tr>
 </tbody>
 </table>
-<p>反り <span class="math inline">\(d\)</span> も読み <span class="math inline">\(y\)</span>
+<p>反り <span class="math inline">\(d\)</span> もセンサの値 <span class="math inline">\(y\)</span>
 も「5点の温度の一次式」（ステップ1）なので、この3つはステップ2の共分散
 <span class="math inline">\(B\)</span>
 と重みから<strong>掛け算だけで</strong>出せます。</p>
@@ -2291,18 +2295,20 @@ w_iw_j\,\mathrm{Cov}(T_i,T_j)
 \]</span></p>
 <p><strong>だから <span class="math inline">\(B\)</span>
 が必要です。</strong> <span class="math inline">\(B\)</span>
-は「5点の温度がどう一緒にばらつくか」で、そこから「反りと読みがどう一緒にばらつくか」が計算できます。4,000
+は「5点の温度がどう一緒にばらつくか」で、そこから「反りと値がどう一緒にばらつくか」が計算できます。4,000
 本の点を候補ごとに描き直す必要はありません。</p>
 <h5 id="b-σ-の式を文字式で1行ずつ導く">(b′) σ
 の式を、文字式で1行ずつ導く</h5>
-<p>記号を平均からのずれで書きます（4,000 本の平均を引いた値）。読み
-<span class="math inline">\(y\)</span> にはノイズ <span class="math inline">\(\varepsilon\)</span> （分散 <span class="math inline">\(r\)</span> 、温度とは無関係）が乗ります。</p>
+<p>記号を平均からのずれで書きます（4,000
+本の平均を引いた値）。センサの値 <span class="math inline">\(y\)</span>
+にはノイズ <span class="math inline">\(\varepsilon\)</span> （分散 <span class="math inline">\(r\)</span> 、温度とは無関係）が乗ります。</p>
 <p><span class="math display">\[
 d=\mathbf w^{\mathsf T}\mathbf T,\qquad y=\mathbf h^{\mathsf T}\mathbf
 T+\varepsilon
 \]</span></p>
-<p><strong>① 読み <span class="math inline">\(y\)</span> から反り <span class="math inline">\(d\)</span> を直線で予想する。</strong> 予想を
-<span class="math inline">\(\hat d=a\,y\)</span> とし、外れ <span class="math inline">\(d-\hat d\)</span> の二乗の平均を考えます。</p>
+<p><strong>① センサの値 <span class="math inline">\(y\)</span> から反り
+<span class="math inline">\(d\)</span> を直線で予想する。</strong>
+予想を <span class="math inline">\(\hat d=a\,y\)</span> とし、外れ <span class="math inline">\(d-\hat d\)</span> の二乗の平均を考えます。</p>
 <p><span class="math display">\[
 E\big[(d-a\,y)^2\big]=\mathrm{Var}(d)-2a\,\mathrm{Cov}(d,y)+a^2\,\mathrm{Var}(y)
 \]</span></p>
@@ -2391,9 +2397,9 @@ J_c=\frac{1}{10}\sum_{k=1}^{10}\sigma_c(t_k)
 <span class="math inline">\(t=150\)</span> 秒の例です。</p>
 <blockquote>
 <p><strong>ここまでのまとめ</strong> - σ ＝
-センサを読んだ後に残る、反りの分からなさ（散布図の帯の幅）。 -
-読みが反りと一緒に動く（散布図が細い直線になる）候補ほど σ が小さい。 -
-σ は、FrontISTR の重みと、ROM 4,000 本から作った <span class="math inline">\(B\)</span>
+センサを測った後に残る、反りの分からなさ（散布図の帯の幅）。 -
+値が反りと一緒に動く（散布図が細い直線になる）候補ほど σ が小さい。 - σ
+は、FrontISTR の重みと、ROM 4,000 本から作った <span class="math inline">\(B\)</span>
 だけで計算できる。<strong>測定値もデータ同化も使わない。</strong></p>
 </blockquote>
 <h4 id="ステップ41位を選ぶ1点目">ステップ4：1位を選ぶ（1点目）</h4>
