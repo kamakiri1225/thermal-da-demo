@@ -202,6 +202,8 @@
 何を直すか（状態）</a></li>
 <li><a href="#3-2-1サイクルの手順" id="toc-3-2-1サイクルの手順">3-2.
 1サイクルの手順</a></li>
+<li><a href="#3-2b-センサとセンサの値を予想するとは" id="toc-3-2b-センサとセンサの値を予想するとは">3-2b.
+「センサ」と「センサの値を予想する」とは</a></li>
 <li><a href="#3-3-1回目の補正を数字で追う-t30-秒" id="toc-3-3-1回目の補正を数字で追う-t30-秒">3-3.
 1回目の補正を数字で追う（ <span class="math inline">\(t=30\)</span>
 秒）</a></li>
@@ -564,6 +566,130 @@ y+\boldsymbol\varepsilon_m-\mathbf y^f_m)\)</span></td>
 の変位は、直した5点の温度の平均から、gappy-POD と FrontISTR
 の重みで計算します。</li>
 </ul>
+<h3 id="3-2b-センサとセンサの値を予想するとは">3-2b.
+「センサ」と「センサの値を予想する」とは</h3>
+<p><strong>センサ</strong>：この研究では実物のセンサは使っていません。「ここに温度計（または変位計）を置いたとしたら」という<strong>場所と種類</strong>のことです。</p>
+<table>
+<colgroup>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+<col style="width: 25%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>置く場所</th>
+<th>示す値</th>
+<th>計算の中での「測った値」</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計</td>
+<td>OpenFOAM のセル1つ（例：T2 の1本目は <span class="math inline">\((36.7,0.8,49.2)\)</span> mm）</td>
+<td>その場所の温度 [K]</td>
+<td>OpenFOAM の真の温度 ＋ ノイズ（標準偏差 0.3 K）</td>
+</tr>
+<tr class="even">
+<td>変位計</td>
+<td>FrontISTR の節点1つと、測る向き1つ（例：U2 の1本目は <span class="math inline">\((18.8,32.5,100.5)\)</span> mm の <span class="math inline">\(U_x\)</span> ）</td>
+<td>その場所・その向きの変位 [µm]</td>
+<td>FrontISTR の真の変位 ＋ ノイズ（標準偏差 0.3 µm）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>センサの値を予想する</strong>：60個のメンバーはそれぞれ「5点の温度はこうだ」という仮説を持っています。その仮説が正しいとしたら、<strong>センサはいくつを示すはずか</strong>を計算することです。換算表
+<span class="math inline">\(H\)</span>
+を使って、次の式で計算します。</p>
+<p><span class="math display">\[
+y^f=\bar y+\sum_{j=0}^{4}H_{j}\,\big(T_j-\bar T_j\big)
+\]</span></p>
+<ul>
+<li><span class="math inline">\(T_j\)</span> ：そのメンバーの代表点
+<span class="math inline">\(P_j\)</span> の温度（ROM で予報した値）</li>
+<li><span class="math inline">\(\bar T_j\)</span> ：平均の温度分布での
+<span class="math inline">\(P_j\)</span> の温度。 <span class="math inline">\((23.51,\,22.55,\,23.79,\,23.00,\,22.21)\)</span>
+°C</li>
+<li><span class="math inline">\(H_j\)</span> ：換算表のそのセンサの行（
+<span class="math inline">\(P_j\)</span> が 1 K
+上がると、センサの値がいくつ変わるか）</li>
+<li><span class="math inline">\(\bar y\)</span>
+：平均の温度分布のとき、そのセンサが示す値</li>
+</ul>
+<p><strong>例：メンバー1、 <span class="math inline">\(t=30\)</span>
+秒</strong></p>
+<p>ROM で予報したメンバー1の温度は <span class="math inline">\((24.22,\,22.15,\,25.04,\,23.43,\,20.85)\)</span>
+°C なので、平均の温度分布からの上がり分は</p>
+<p><span class="math display">\[
+T_j-\bar T_j=(+0.707,\,-0.394,\,+1.252,\,+0.437,\,-1.364)\ \mathrm K
+\]</span></p>
+<p>これに各センサの行を掛けて足します。</p>
+<table>
+<colgroup>
+<col style="width: 8%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+<col style="width: 11%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th style="text-align: right;"><span class="math inline">\(\bar
+y\)</span></th>
+<th style="text-align: right;">P0</th>
+<th style="text-align: right;">P1</th>
+<th style="text-align: right;">P2</th>
+<th style="text-align: right;">P3</th>
+<th style="text-align: right;">P4</th>
+<th style="text-align: right;">合計</th>
+<th style="text-align: right;">予想値 <span class="math inline">\(y^f\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>T2 温度計1</td>
+<td style="text-align: right;">296.94 K</td>
+<td style="text-align: right;"><span class="math inline">\(0.068\times0.707\)</span> <br/>＝0.048</td>
+<td style="text-align: right;"><span class="math inline">\(-0.011\times(-0.394)\)</span> <br/>＝0.004</td>
+<td style="text-align: right;"><span class="math inline">\(0.945\times1.252\)</span> <br/>＝1.183</td>
+<td style="text-align: right;"><span class="math inline">\(0.000\times0.437\)</span> <br/>＝0.000</td>
+<td style="text-align: right;"><span class="math inline">\(-0.002\times(-1.364)\)</span> <br/>＝0.003</td>
+<td style="text-align: right;">1.238</td>
+<td style="text-align: right;"><strong>298.17 K</strong></td>
+</tr>
+<tr class="even">
+<td>T2 温度計2</td>
+<td style="text-align: right;">295.41 K</td>
+<td style="text-align: right;"><span class="math inline">\(-0.094\times0.707\)</span> <br/>＝−0.066</td>
+<td style="text-align: right;"><span class="math inline">\(0.660\times(-0.394)\)</span> <br/>＝−0.260</td>
+<td style="text-align: right;"><span class="math inline">\(0.019\times1.252\)</span> <br/>＝0.023</td>
+<td style="text-align: right;"><span class="math inline">\(-0.120\times0.437\)</span> <br/>＝−0.052</td>
+<td style="text-align: right;"><span class="math inline">\(0.538\times(-1.364)\)</span> <br/>＝−0.734</td>
+<td style="text-align: right;">−1.089</td>
+<td style="text-align: right;"><strong>294.32 K</strong></td>
+</tr>
+<tr class="odd">
+<td>U2 変位計1</td>
+<td style="text-align: right;">−1.416 µm</td>
+<td style="text-align: right;"><span class="math inline">\(-0.521\times0.707\)</span> <br/>＝−0.368</td>
+<td style="text-align: right;"><span class="math inline">\(0.564\times(-0.394)\)</span> <br/>＝−0.222</td>
+<td style="text-align: right;"><span class="math inline">\(-0.774\times1.252\)</span> <br/>＝−0.969</td>
+<td style="text-align: right;"><span class="math inline">\(0.405\times0.437\)</span> <br/>＝0.177</td>
+<td style="text-align: right;"><span class="math inline">\(0.313\times(-1.364)\)</span> <br/>＝−0.427</td>
+<td style="text-align: right;">−1.810</td>
+<td style="text-align: right;"><strong>−3.226 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（U2 の変位計2は、重みが同じなので変位計1と同じ値になります。）</p>
+<p>これを60個すべてのメンバーで計算し、<strong>測った値と比べて</strong>、ずれに応じて温度・発熱量・放熱を直します（3-2
+の⑥）。</p>
 <h3 id="3-3-1回目の補正を数字で追う-t30-秒">3-3.
 1回目の補正を数字で追う（ <span class="math inline">\(t=30\)</span>
 秒）</h3>
