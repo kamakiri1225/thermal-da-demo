@@ -61,7 +61,8 @@ def main():
         p = pv.Plotter(off_screen=True, window_size=(900, 900))
         s = surf.copy(); s.points = surf.points + u[k][oid] * 1e-3 * SCALE; s.point_data["m"] = mag[k][oid]
         p.add_mesh(surf, style="wireframe", color="#AAAAAA", opacity=0.25, line_width=1)
-        p.add_mesh(s, scalars="m", cmap=CMAP, clim=[0, vmax], show_scalar_bar=False, smooth_shading=True)
+        p.add_mesh(s, scalars="m", cmap=CMAP, clim=[0, vmax], show_scalar_bar=False, lighting=False)   # 陰影なし＝カラーバーと同じ色
+        p.add_mesh(s.extract_feature_edges(boundary_edges=True, feature_edges=True, manifold_edges=False, feature_angle=30), color="#333333", line_width=2)
         p.add_point_labels(Pxyz, [f"P{j}" for j in range(5)], font_size=26, text_color="black", shape=None,
                            show_points=True, point_size=14, point_color="black", always_visible=True)
         p.add_point_labels([(R_OUT * 1000 + 18, 0, 50)], ["HEATER"], font_size=26, text_color="#c0392b", shape=None,

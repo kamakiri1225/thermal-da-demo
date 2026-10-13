@@ -125,13 +125,14 @@ def main():
         from PIL import Image
         cache = "/tmp/thermal_W_render_cache"
         os.makedirs(cache, exist_ok=True)
-        digest = hashlib.sha256(np.asarray(scal).tobytes() + repr((name, clim, cmap, title, cam, fmt, "separate-legend-v6-trim")).encode()).hexdigest()
+        digest = hashlib.sha256(np.asarray(scal).tobytes() + repr((name, clim, cmap, title, cam, fmt, "separate-legend-v7-nolight")).encode()).hexdigest()
         cache_file = os.path.join(cache, digest + ".png")
         if os.path.exists(cache_file):
             return np.asarray(Image.open(cache_file).convert("RGB"))
         p = pv.Plotter(off_screen=True, window_size=(700, 600))
         gg = grid.copy(); gg.point_data[name] = scal
-        p.add_mesh(gg, scalars=name, cmap=cmap, clim=clim, show_scalar_bar=False)
+        p.add_mesh(gg, scalars=name, cmap=cmap, clim=clim, show_scalar_bar=False, lighting=False)   # 陰影なし＝カラーバーと同じ色
+        p.add_mesh(gg.extract_surface(algorithm="dataset_surface").extract_feature_edges(boundary_edges=True, feature_edges=True, manifold_edges=False, feature_angle=30), color="#333333", line_width=2)
         p.add_point_labels([coords[iA] * 1000 + [0, 0, 4], coords[iO] * 1000 + [0, 0, 4]], ["A", "O"], font_size=42,
                            text_color="black", shape=None, show_points=True, point_size=14, point_color="black", always_visible=True)
         p.add_point_labels([(R_OUT * 1000 + 14, 0, 50)], ["HEATER"], font_size=34, text_color="#c0392b", shape=None,
