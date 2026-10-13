@@ -1255,6 +1255,18 @@ mmです。片側を測った後、反対側にも残る温度差の不確かさ
 <p>選ばれたのは、<strong>上面の離れた2点での横方向変位Ux</strong>でした。S1＝(4.9,
 −37.2, 100.5) mm、S2＝(4.9, 37.2, 100.5)
 mmです。旧試験の「P2・P0固定時のS1(Ux)・S2(Uz)」とは、温度の前提が異なるため別の配置になります。</p>
+<figure>
+<img alt="代表5点の温度から求めた変形と、blog009 の観測点" src="img/P5_deform_anim_b009.gif"/>
+<figcaption aria-hidden="true">代表5点の温度から求めた変形と、blog009
+の観測点</figcaption>
+</figure>
+<blockquote>
+<p>15 W。代表5点の温度（OpenFOAM
+の真値）から求めた円筒の変形に、選んだ観測点を重ねた。赤＝温度センサ
+T1・T2、青＝変位センサ S1・S2（矢印＝測る向き Ux）、黒＝評価点
+A・O（測らない）。変形は 2000 倍に拡大、色は変位の大きさ。
+<code>run/make_P5_deform_anim.py b009</code> 。</p>
+</blockquote>
 <h3 id="frontistrの熱感度wと選択点を重ねて比較する">FrontISTRの熱感度Wと選択点を重ねて比較する</h3>
 <figure>
 <img alt="ヒータの位置：熱感度図と同じ斜めアングル" src="img/heater_location_oblique.png"/>
