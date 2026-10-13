@@ -19,7 +19,20 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 import pyvista as pv
 import cylinder_mesh
-from make_W_AO_vtk_anim import FixedPaletteWriter
+from matplotlib.animation import PillowWriter
+
+
+class AllFramePaletteWriter(PillowWriter):
+    """GIF の 256 色の表を、全コマを並べた画像から作る（最初のコマだけから作ると後のコマの色が化ける）。"""
+    def finish(self):
+        from PIL import Image
+        rgb = [f.convert("RGB") for f in self._frames]
+        w, h = rgb[0].size
+        mosaic = Image.new("RGB", (w, h * len(rgb)))
+        for i, f in enumerate(rgb): mosaic.paste(f, (0, h * i))
+        pal = mosaic.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+        frames = [f.quantize(palette=pal, dither=Image.Dither.FLOYDSTEINBERG) for f in rgb]
+        frames[0].save(self.outfile, save_all=True, append_images=frames[1:], duration=int(1000 / self.fps), loop=0)
 pv.OFF_SCREEN = True
 
 RES = os.path.join(ROOT, "results"); IMG = os.path.join(ROOT, "docs", "img")
@@ -48,7 +61,7 @@ def main():
         p = pv.Plotter(off_screen=True, window_size=(900, 900))
         s = surf.copy(); s.points = surf.points + u[k][oid] * 1e-3 * SCALE; s.point_data["m"] = mag[k][oid]
         p.add_mesh(surf, style="wireframe", color="#AAAAAA", opacity=0.25, line_width=1)
-        p.add_mesh(s, scalars="m", cmap=CMAP, clim=[0, vmax], show_scalar_bar=False)
+        p.add_mesh(s, scalars="m", cmap=CMAP, clim=[0, vmax], show_scalar_bar=False, smooth_shading=True)
         p.add_point_labels(Pxyz, [f"P{j}" for j in range(5)], font_size=26, text_color="black", shape=None,
                            show_points=True, point_size=14, point_color="black", always_visible=True)
         p.add_point_labels([(R_OUT * 1000 + 18, 0, 50)], ["HEATER"], font_size=26, text_color="#c0392b", shape=None,
@@ -75,7 +88,7 @@ def main():
                     "　　" + "  ".join(f"P{j} {TP[k, j] - 273.15:.1f}℃" for j in range(5)))
         return []
     anim = FuncAnimation(fig, draw, frames=len(t), interval=700)
-    anim.save(os.path.join(IMG, "P5_deform_anim.gif"), writer=FixedPaletteWriter(fps=1.5), dpi=75)
+    anim.save(os.path.join(IMG, "P5_deform_anim.gif"), writer=AllFramePaletteWriter(fps=1.5), dpi=85)
     draw(10); fig.savefig(os.path.join(IMG, "P5_deform_t300.png"), dpi=75, facecolor="white"); plt.close(fig)
     print("wrote gif", os.path.getsize(os.path.join(IMG, "P5_deform_anim.gif")) // 1024, "KB", "max |u|", mag.max())
 

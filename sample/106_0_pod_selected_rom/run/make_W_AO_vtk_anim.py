@@ -42,8 +42,13 @@ class FixedPaletteWriter(PillowWriter):
     def finish(self):
         from PIL import Image
         rgb = [frame.convert("RGB") for frame in self._frames]
-        palette = rgb[0].quantize(colors=256)
-        frames = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in rgb]
+        # 256 色の表は全コマを並べた画像から作る（最初のコマだけだと、後のコマの色が化ける）。
+        # 表は全コマ共通なので、固定した W の色はコマ間で変わらない。
+        w, h = rgb[0].size
+        mosaic = Image.new("RGB", (w, h * len(rgb)))
+        for i, frame in enumerate(rgb): mosaic.paste(frame, (0, h * i))
+        palette = mosaic.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+        frames = [frame.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG) for frame in rgb]
         frames[0].save(self.outfile, save_all=True, append_images=frames[1:],
                        duration=int(1000 / self.fps), loop=0, optimize=False)
 
