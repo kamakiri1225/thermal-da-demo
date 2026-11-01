@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-
-<html lang="" xml:lang="" xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta content="pandoc" name="generator"/>
-<meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
-<title>blog_009：温度2点を選び、次に変位2点を追加する</title>
-<style>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_009：温度2点を選び、次に変位2点を追加する</title>
+  <style>
     html {
       color: #1a1a1a;
       background-color: #fdfdfd;
@@ -227,106 +226,143 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
-<style>
-   html body { max-width: 1120px !important; }
-   body { padding: 0 24px; }
-   img { max-width: 100%; height: auto; }
-   table { font-size: 0.95em; }
-  </style>
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" type="text/javascript"></script>
+  <style>
+     html body { max-width: 1120px !important; }
+     body { padding: 0 24px; }
+     img { max-width: 100%; height: auto; }
+     table { font-size: 0.95em; }
+     pre.mermaid { background: none; text-align: center; }
+    </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">blog_009：温度2点を選び、次に変位2点を追加する</h1>
-</header>
 <nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#blog_009温度2点を選び次に変位2点を追加する" id="toc-blog_009温度2点を選び次に変位2点を追加する">blog_009：温度2点を選び、次に変位2点を追加する</a>
+<li><a href="#blog_009温度2点を選び次に変位2点を追加する"
+id="toc-blog_009温度2点を選び次に変位2点を追加する">blog_009：温度2点を選び、次に変位2点を追加する</a>
 <ul>
-<li><a href="#1-何を推定し何で良し悪しを決めるか" id="toc-1-何を推定し何で良し悪しを決めるか">1.
+<li><a href="#何を推定し何で良し悪しを決めるか"
+id="toc-何を推定し何で良し悪しを決めるか">1.
 何を推定し、何で良し悪しを決めるか</a></li>
-<li><a href="#2-4000ケースで何を変えたか" id="toc-2-4000ケースで何を変えたか">2. 4,000ケースで何を変えたか</a>
+<li><a href="#ケースで何を変えたか" id="toc-ケースで何を変えたか">2.
+4,000ケースで何を変えたか</a>
 <ul>
-<li><a href="#2-1-4000ケースはenkfを4000メンバーで行うことと何が違うのか" id="toc-2-1-4000ケースはenkfを4000メンバーで行うことと何が違うのか">2-1.
+<li><a href="#ケースはenkfを4000メンバーで行うことと何が違うのか"
+id="toc-ケースはenkfを4000メンバーで行うことと何が違うのか">2-1.
 4,000ケースは、EnKFを4,000メンバーで行うことと何が違うのか</a></li>
-<li><a href="#2-2-代表5点はどう選びその温度から全温度場をどう復元するのか" id="toc-2-2-代表5点はどう選びその温度から全温度場をどう復元するのか">2-2.
+<li><a href="#代表5点はどう選びその温度から全温度場をどう復元するのか"
+id="toc-代表5点はどう選びその温度から全温度場をどう復元するのか">2-2.
 代表5点はどう選び、その温度から全温度場をどう復元するのか</a></li>
 </ul></li>
-<li><a href="#3-候補を測ると不確かさはどう減るか" id="toc-3-候補を測ると不確かさはどう減るか">3.
+<li><a href="#候補を測ると不確かさはどう減るか"
+id="toc-候補を測ると不確かさはどう減るか">3.
 候補を測ると、不確かさはどう減るか</a>
 <ul>
-<li><a href="#3-1-センサの値を代表5点の温度から計算する" id="toc-3-1-センサの値を代表5点の温度から計算する">3-1.
+<li><a href="#センサの値を代表5点の温度から計算する"
+id="toc-センサの値を代表5点の温度から計算する">3-1.
 センサの値を、代表5点の温度から計算する</a></li>
-<li><a href="#3-2-センサで温度を直した後誤差はどれだけ残るか" id="toc-3-2-センサで温度を直した後誤差はどれだけ残るか">3-2.
+<li><a href="#センサで温度を直した後誤差はどれだけ残るか"
+id="toc-センサで温度を直した後誤差はどれだけ残るか">3-2.
 センサで温度を直した後、誤差はどれだけ残るか</a></li>
-<li><a href="#3-3-なぜ熱感度wや温度分布だけでは観測位置を決められないのか" id="toc-3-3-なぜ熱感度wや温度分布だけでは観測位置を決められないのか">3-3.
+<li><a href="#なぜ熱感度wや温度分布だけでは観測位置を決められないのか"
+id="toc-なぜ熱感度wや温度分布だけでは観測位置を決められないのか">3-3.
 なぜ熱感度Wや温度分布だけでは観測位置を決められないのか</a></li>
-<li><a href="#3-4-150秒で再計算すると観測の追加で分散はどう減るか" id="toc-3-4-150秒で再計算すると観測の追加で分散はどう減るか">3-4.
+<li><a href="#秒で再計算すると観測の追加で分散はどう減るか"
+id="toc-秒で再計算すると観測の追加で分散はどう減るか">3-4.
 150秒で再計算すると、観測の追加で分散はどう減るか</a></li>
 </ul></li>
-<li><a href="#4-まず温度センサ2点を選ぶ" id="toc-4-まず温度センサ2点を選ぶ">4. まず温度センサ2点を選ぶ</a>
+<li><a href="#まず温度センサ2点を選ぶ"
+id="toc-まず温度センサ2点を選ぶ">4. まず温度センサ2点を選ぶ</a>
 <ul>
-<li><a href="#4-1-温度センサの候補位置から観測の重みを取り出す" id="toc-4-1-温度センサの候補位置から観測の重みを取り出す">4-1.
+<li><a href="#温度センサの候補位置から観測の重みを取り出す"
+id="toc-温度センサの候補位置から観測の重みを取り出す">4-1.
 温度センサの候補位置から、観測の重みを取り出す</a></li>
-<li><a href="#4-2-その温度を測ったら代表5点をどう補正できるか" id="toc-4-2-その温度を測ったら代表5点をどう補正できるか">4-2.
+<li><a href="#その温度を測ったら代表5点をどう補正できるか"
+id="toc-その温度を測ったら代表5点をどう補正できるか">4-2.
 その温度を測ったら、代表5点をどう補正できるか</a></li>
-<li><a href="#4-3-1本目は反りに残る不確かさが最小になるセルを選ぶ" id="toc-4-3-1本目は反りに残る不確かさが最小になるセルを選ぶ">4-3.
+<li><a href="#本目は反りに残る不確かさが最小になるセルを選ぶ"
+id="toc-本目は反りに残る不確かさが最小になるセルを選ぶ">4-3.
 1本目は、反りに残る不確かさが最小になるセルを選ぶ</a></li>
-<li><a href="#4-4-2本目はt1で分かる情報を除いてから選ぶ" id="toc-4-4-2本目はt1で分かる情報を除いてから選ぶ">4-4.
+<li><a href="#本目はt1で分かる情報を除いてから選ぶ"
+id="toc-本目はt1で分かる情報を除いてから選ぶ">4-4.
 2本目は、T1で分かる情報を除いてから選ぶ</a></li>
-<li><a href="#4-5-実際のコードと今回選ばれた温度位置" id="toc-4-5-実際のコードと今回選ばれた温度位置">4-5.
+<li><a href="#実際のコードと今回選ばれた温度位置"
+id="toc-実際のコードと今回選ばれた温度位置">4-5.
 実際のコードと、今回選ばれた温度位置</a></li>
 </ul></li>
-<li><a href="#5-その温度2点を固定し変位2点を選ぶ" id="toc-5-その温度2点を固定し変位2点を選ぶ">5.
+<li><a href="#その温度2点を固定し変位2点を選ぶ"
+id="toc-その温度2点を固定し変位2点を選ぶ">5.
 その温度2点を固定し、変位2点を選ぶ</a>
 <ul>
-<li><a href="#frontistrの熱感度wと選択点を重ねて比較する" id="toc-frontistrの熱感度wと選択点を重ねて比較する">FrontISTRの熱感度Wと選択点を重ねて比較する</a></li>
+<li><a href="#frontistrの熱感度wと選択点を重ねて比較する"
+id="toc-frontistrの熱感度wと選択点を重ねて比較する">FrontISTRの熱感度Wと選択点を重ねて比較する</a></li>
 </ul></li>
-<li><a href="#6-選んだ位置でenkfを実行する" id="toc-6-選んだ位置でenkfを実行する">6. 選んだ位置でEnKFを実行する</a>
+<li><a href="#選んだ位置でenkfを実行する"
+id="toc-選んだ位置でenkfを実行する">6. 選んだ位置でEnKFを実行する</a>
 <ul>
-<li><a href="#6-0-今回のプログラムが7変数を補正する式" id="toc-6-0-今回のプログラムが7変数を補正する式">6-0.
+<li><a href="#今回のプログラムが7変数を補正する式"
+id="toc-今回のプログラムが7変数を補正する式">6-0.
 今回のプログラムが7変数を補正する式</a></li>
-<li><a href="#6-1-ux観測が未観測uzを直す数学的な経路" id="toc-6-1-ux観測が未観測uzを直す数学的な経路">6-1.
+<li><a href="#ux観測が未観測uzを直す数学的な経路"
+id="toc-ux観測が未観測uzを直す数学的な経路">6-1.
 Ux観測が、未観測Uzを直す数学的な経路</a></li>
-<li><a href="#6-2-15-wの結果温度配置を選び変位配置を追加する" id="toc-6-2-15-wの結果温度配置を選び変位配置を追加する">6-2. 15
+<li><a href="#wの結果温度配置を選び変位配置を追加する"
+id="toc-wの結果温度配置を選び変位配置を追加する">6-2. 15
 Wの結果：温度配置を選び、変位配置を追加する</a></li>
-<li><a href="#6-3-25-w間欠加熱でも確かめる" id="toc-6-3-25-w間欠加熱でも確かめる">6-3. 25
-W・間欠加熱でも確かめる</a></li>
-<li><a href="#6-4-代表点以外の未観測温度も同化で正解に近づくか" id="toc-6-4-代表点以外の未観測温度も同化で正解に近づくか">6-4.
+<li><a href="#w間欠加熱でも確かめる" id="toc-w間欠加熱でも確かめる">6-3.
+25 W・間欠加熱でも確かめる</a></li>
+<li><a href="#代表点以外の未観測温度も同化で正解に近づくか"
+id="toc-代表点以外の未観測温度も同化で正解に近づくか">6-4.
 代表点以外の未観測温度も、同化で正解に近づくか</a></li>
 </ul></li>
-<li><a href="#7-結論と再現場所" id="toc-7-結論と再現場所">7.
+<li><a href="#結論と再現場所" id="toc-結論と再現場所">7.
 結論と再現場所</a></li>
-<li><a href="#8-4000-本の総当たりではなく理論から最適位置を求める" id="toc-8-4000-本の総当たりではなく理論から最適位置を求める">8. 4,000
+<li><a href="#本の総当たりではなく理論から最適位置を求める"
+id="toc-本の総当たりではなく理論から最適位置を求める">8. 4,000
 本の総当たりではなく、理論から最適位置を求める</a>
 <ul>
-<li><a href="#8-1-センサ1本の-σ-は閉じた式で書ける" id="toc-8-1-センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
+<li><a href="#センサ1本の-σ-は閉じた式で書ける"
+id="toc-センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
 は、閉じた式で書ける</a></li>
-<li><a href="#8-2-候補を全体の温まりと温度差の2軸で見る" id="toc-8-2-候補を全体の温まりと温度差の2軸で見る">8-2.
+<li><a href="#候補を全体の温まりと温度差の2軸で見る"
+id="toc-候補を全体の温まりと温度差の2軸で見る">8-2.
 候補を「全体の温まり」と「温度差」の2軸で見る</a></li>
-<li><a href="#8-3-2本の全組み合わせを厳密に評価する" id="toc-8-3-2本の全組み合わせを厳密に評価する">8-3.
+<li><a href="#本の全組み合わせを厳密に評価する"
+id="toc-本の全組み合わせを厳密に評価する">8-3.
 2本の全組み合わせを、厳密に評価する</a></li>
-<li><a href="#8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ" id="toc-8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
+<li><a href="#目的を反り-u_za-平均温度にして2本を厳密に選ぶ"
+id="toc-目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
 目的を「反り＋ <span class="math inline">\(U_z(A)\)</span>
 ＋平均温度」にして、2本を厳密に選ぶ</a></li>
-<li><a href="#8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ" id="toc-8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
+<li><a href="#補正を積み重ねた後の-σ-も式で計算できる逐次-σ"
+id="toc-補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
 補正を積み重ねた後の σ も、式で計算できる（逐次 σ）</a></li>
-<li><a href="#8-6-理論で選んだ配置をenkf-で確かめる" id="toc-8-6-理論で選んだ配置をenkf-で確かめる">8-6.
-理論で選んだ配置を、EnKF で確かめる</a></li>
-<li><a href="#8-7-まとめ4000-本の総当たりは何に置き換わるか" id="toc-8-7-まとめ4000-本の総当たりは何に置き換わるか">8-7.
-まとめ：4,000 本の総当たりは何に置き換わるか</a></li>
+<li><a href="#理論で選んだ配置をenkf-で確かめる"
+id="toc-理論で選んだ配置をenkf-で確かめる">8-6. 理論で選んだ配置を、EnKF
+で確かめる</a></li>
+<li><a href="#まとめ4000-本の総当たりは何に置き換わるか"
+id="toc-まとめ4000-本の総当たりは何に置き換わるか">8-7. まとめ：4,000
+本の総当たりは何に置き換わるか</a></li>
 </ul></li>
-<li><a href="#9-先行研究温度センサの位置はどこが良いとされているか" id="toc-9-先行研究温度センサの位置はどこが良いとされているか">9.
+<li><a href="#先行研究温度センサの位置はどこが良いとされているか"
+id="toc-先行研究温度センサの位置はどこが良いとされているか">9.
 先行研究：温度センサの位置は、どこが良いとされているか</a></li>
 </ul></li>
 </ul>
 </nav>
-<h1 id="blog_009温度2点を選び次に変位2点を追加する">blog_009：温度2点を選び、次に変位2点を追加する</h1>
+<h1
+id="blog_009温度2点を選び次に変位2点を追加する">blog_009：温度2点を選び、次に変位2点を追加する</h1>
 <p><strong>知りたいことは、測る位置を選ぶことで、観測していない温度と変位がどこまで正解に近づくか、です。</strong>
 まず温度センサ2点を選び、人が決めた2点と比較します。次に、その温度配置を固定して変位センサ2点を追加します。</p>
 <p>更新日：2026-10-12。本文の数値と図は、セル→FEM節点の温度写像を近傍8セルのIDWに統一した結果です。</p>
-<h2 id="1-何を推定し何で良し悪しを決めるか">1.
+<h2 id="何を推定し何で良し悪しを決めるか">1.
 何を推定し、何で良し悪しを決めるか</h2>
 <p>対象は、片側から加熱する中空円筒です。OpenFOAMで温度、FrontISTRで熱変位を計算した結果を正解とします。実機計測ではありません。</p>
 <p>今回、配置を選ぶ目的は<strong>未観測の反り</strong>です。</p>
@@ -336,19 +372,19 @@ d(t)=U_z(A,t)-U_z(O,t)
 <p>A・Oは上面のヒータ側・反対側の評価点です。A・O自身と、その12
 mm以内の変位は観測候補から除外します。</p>
 <figure>
-<img alt="形状と評価点A・O" src="img/sensor_pair_positions.png"/>
+<img src="img/sensor_pair_positions.png" alt="形状と評価点A・O" />
 <figcaption aria-hidden="true">形状と評価点A・O</figcaption>
 </figure>
 <p>ROMは、Q-DEIMで選んだOpenFOAMセル5点P0〜P4の温度を進めます。<strong>この代表5点を変更するのではなく、観測センサを置く場所を選びます。</strong>
 温度候補は代表5点を除く20,691セル、変位候補は除外領域を除くFEM節点のUx・Uy・Uz、計14,754成分です。</p>
 <p>配置の採点は「反りの不確かさ」を使います。その後にEnKFを実行し、反りだけでなく全温度場、各点の温度、A・Oそれぞれの変位も評価します。</p>
-<h2 id="2-4000ケースで何を変えたか">2. 4,000ケースで何を変えたか</h2>
+<h2 id="ケースで何を変えたか">2. 4,000ケースで何を変えたか</h2>
 <p>代表5点の温度がまだ分からない状態を、4,000本のROM計算で表します。<strong>4,000はセンサ配置数ではありません。</strong>
 各ケースで、次の初期温度・発熱・放熱を選びます。</p>
 <table>
 <colgroup>
-<col style="width: 50%"/>
-<col style="width: 50%"/>
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -363,7 +399,8 @@ mm以内の変位は観測候補から除外します。</p>
 </tr>
 <tr class="even">
 <td>加熱中の発熱量 <span class="math inline">\(Q\)</span></td>
-<td>4.5〜27 Wの一様分布。実装は <span class="math inline">\(Q=15q_{\mathrm{scale}}\)</span></td>
+<td>4.5〜27 Wの一様分布。実装は <span
+class="math inline">\(Q=15q_{\mathrm{scale}}\)</span></td>
 </tr>
 <tr class="odd">
 <td>放熱 <span class="math inline">\(h_{\mathrm{ROM}}\)</span></td>
@@ -397,15 +434,15 @@ B(t)=\frac{1}{3999}\sum_{m=1}^{4000}
 \]</span></p>
 <p><span class="math inline">\(B\)</span>
 は5×5行列です。対角は各代表点温度の分散、非対角は2点の温度が一緒に変わる関係です。この平均は<strong>同時刻のケース方向平均</strong>で、POD作成時の時間平均温度場とは別です。</p>
-<h3 id="2-1-4000ケースはenkfを4000メンバーで行うことと何が違うのか">2-1.
+<h3 id="ケースはenkfを4000メンバーで行うことと何が違うのか">2-1.
 4,000ケースは、EnKFを4,000メンバーで行うことと何が違うのか</h3>
 <p><strong>どちらも異なる温度・パラメータを持つROMを多数進めますが、観測による補正を繰り返すかどうかが違います。</strong>
 今回は、4,000ケースを配置設計に、60メンバーを実際のEnKFに使っています。</p>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -462,12 +499,16 @@ y_k^{\mathrm{obs}}+\boldsymbol\varepsilon_k^{(m)}-\widetilde{\mathbf
 y}_k^{f,(m)}\right)}_{n_y\times1}
 \]</span></p>
 <p>と補正してから次へ進みます。 <span class="math inline">\(\mathbf
-z\)</span> は5点温度・発熱倍率q・放熱h、 <span class="math inline">\(n_y\)</span>
-は観測成分数です。温度2点＋変位2点なら <span class="math inline">\(n_y=4\)</span> です。 <span class="math inline">\(f\)</span> は予報、 <span class="math inline">\(a\)</span>
+z\)</span> は5点温度・発熱倍率q・放熱h、 <span
+class="math inline">\(n_y\)</span>
+は観測成分数です。温度2点＋変位2点なら <span
+class="math inline">\(n_y=4\)</span> です。 <span
+class="math inline">\(f\)</span> は予報、 <span
+class="math inline">\(a\)</span>
 は補正後、チルダはインフレーション後です。詳しい全成分の展開は§6-0に示します。</p>
 <p><strong>EnKFそのものを4,000メンバーに増やすことはできますが、その場合は4,000メンバー全てを観測で毎回補正するので、今回の配置設計とは別の計算です。</strong>
 また、4,000ケースの方が多いから、60メンバーのEnKFより推定が正確という比較にもなりません。今回の4,000は設計上の設定値で、必要最小ケース数を確認した結果ではありません。</p>
-<h3 id="2-2-代表5点はどう選びその温度から全温度場をどう復元するのか">2-2.
+<h3 id="代表5点はどう選びその温度から全温度場をどう復元するのか">2-2.
 代表5点はどう選び、その温度から全温度場をどう復元するのか</h3>
 <p><strong>ROMの代表5点P0〜P4は、センサ配置の採点より前にPOD/Q-DEIMで決めておきます。</strong>
 4,000ケースから選ぶ温度センサT1・T2とは役割が違います。blog009とblog010では代表点と復元行列を固定し、観測点だけを選び直します。</p>
@@ -495,8 +536,10 @@ T}}_{N\times1}\underbrace{\mathbf1^{\mathsf T}}_{1\times N_t}
 \qquad
 \underbrace{\Phi}_{20696\times5}=U_{:,1:5}
 \]</span></p>
-<p>ここでは上位5列という意味で <span class="math inline">\(U_{:,1:5}\)</span> と書いています。Pythonでは
-<code>U[:, :5]</code> です。各モードの強さを5成分の係数 <span class="math inline">\(\mathbf a_{\mathrm{POD}}\)</span> とすると、</p>
+<p>ここでは上位5列という意味で <span
+class="math inline">\(U_{:,1:5}\)</span> と書いています。Pythonでは
+<code>U[:, :5]</code> です。各モードの強さを5成分の係数 <span
+class="math inline">\(\mathbf a_{\mathrm{POD}}\)</span> とすると、</p>
 <p><span class="math display">\[
 \underbrace{\mathbf T_{\mathrm{cell}}}_{20696\times1}
 \approx\underbrace{\bar{\mathbf T}}_{20696\times1}
@@ -566,10 +609,11 @@ G_{c,j}=\sum_{\ell=1}^{5}\phi_\ell[c]{}(\Phi_P^+)_{\ell,j}
 <code>qr(U[:, :5].T, pivoting=True)</code>、同化時の復元は
 <code>run/selected_pair_unobserved_check.py</code> の
 <code>UPp = np.linalg.pinv(U[pod, :])</code> と <code>G = U @ UPp</code>
-に対応します。図を含むPOD/Q-DEIMの詳細は <a href="blog004.html">blog004</a> を参照してください。</p>
-<h2 id="3-候補を測ると不確かさはどう減るか">3.
+に対応します。図を含むPOD/Q-DEIMの詳細は <a
+href="blog004.html">blog004</a> を参照してください。</p>
+<h2 id="候補を測ると不確かさはどう減るか">3.
 候補を測ると、不確かさはどう減るか</h2>
-<h3 id="3-1-センサの値を代表5点の温度から計算する">3-1.
+<h3 id="センサの値を代表5点の温度から計算する">3-1.
 センサの値を、代表5点の温度から計算する</h3>
 <p>代表点温度のずれを <span class="math inline">\(\delta T[Pj]\)</span>
 と書きます。ここでは4,000ケースの同時刻平均からのずれです。候補センサ
@@ -594,7 +638,8 @@ K変わると、そのセンサ値がいくら変わるか」です。温度計�
 <p>と表せます。したがって、温度の共分散から「反りとセンサ値が一緒に変わる関係」を計算できます。</p>
 <p><strong>この重みを、実際のコードでどう作るか。</strong> POD基底を
 <span class="math inline">\(\Phi\)</span>
-、代表5点の行だけを取り出した行列を <span class="math inline">\(\Phi_P\)</span> とします。PODの時間平均温度場を
+、代表5点の行だけを取り出した行列を <span
+class="math inline">\(\Phi_P\)</span> とします。PODの時間平均温度場を
 <span class="math inline">\(\bar{\mathbf T}\)</span>
 とすると、全セルの温度は</p>
 <p><span class="math display">\[
@@ -609,7 +654,9 @@ K変わると、そのセンサ値がいくら変わるか」です。温度計�
 \mathbf h_c^{\mathsf T}=G_{c,:}
 =\begin{bmatrix}G_{c,0}&amp;G_{c,1}&amp;G_{c,2}&amp;G_{c,3}&amp;G_{c,4}\end{bmatrix}
 \]</span></p>
-<p>変位計の場合は、IDWの温度写像行列 <span class="math inline">\(M\)</span> と、FrontISTRの温度→変位応答 <span class="math inline">\(W\)</span> を使うと、PODモードに対する変位応答は
+<p>変位計の場合は、IDWの温度写像行列 <span
+class="math inline">\(M\)</span> と、FrontISTRの温度→変位応答 <span
+class="math inline">\(W\)</span> を使うと、PODモードに対する変位応答は
 <span class="math inline">\(D=WM\Phi\)</span>
 です。プログラムではW全体を組み立てず、<strong>平均温度場と5モードをFrontISTRに与えた6回の計算</strong>から、平均変位とDを作っています。</p>
 <p><span class="math display">\[
@@ -630,11 +677,13 @@ h_{S,x,j}=\sum_{\ell=1}^{5}D_{S,x,\ell}(\Phi_P^+)_{\ell,j}
 <span class="math inline">\(\delta y_c=\mathbf h_c^{\mathsf
 T}\delta\mathbf T_P\)</span>
 になります。このため、共分散の計算には重みだけを使えます。</p>
-<h3 id="3-2-センサで温度を直した後誤差はどれだけ残るか">3-2.
+<h3 id="センサで温度を直した後誤差はどれだけ残るか">3-2.
 センサで温度を直した後、誤差はどれだけ残るか</h3>
 <p>ここでは、<strong>温度の補正式を先に作り、その補正後の誤差を計算して、共分散の更新式を導きます。</strong>
 最初から共分散の式を仮定するわけではありません。</p>
-<p><strong>① 測る前の温度誤差を書く。</strong> 推定温度を <span class="math inline">\(\hat T_P\)</span> 、未知の正しい温度を <span class="math inline">\(\mathbf T_P\)</span> とし、誤差を</p>
+<p><strong>① 測る前の温度誤差を書く。</strong> 推定温度を <span
+class="math inline">\(\hat T_P\)</span> 、未知の正しい温度を <span
+class="math inline">\(\mathbf T_P\)</span> とし、誤差を</p>
 <p><span class="math display">\[
 \mathbf e=\mathbf T_P-\widehat{\mathbf T}_P
 =\begin{bmatrix}e_0\\e_1\\e_2\\e_3\\e_4\end{bmatrix},
@@ -643,7 +692,8 @@ T}\delta\mathbf T_P\)</span>
 <p>とします。 <span class="math inline">\(\mathbb E\)</span>
 は仮定した不確かさに対する平均です。平均誤差をゼロとして扱う線形推定です。最初の
 <span class="math inline">\(P\)</span>
-は、4,000ケースの温度のばらつきから計算した <span class="math inline">\(B\)</span> を使います。</p>
+は、4,000ケースの温度のばらつきから計算した <span
+class="math inline">\(B\)</span> を使います。</p>
 <p><strong>② センサの観測値から予報値を引く。</strong>
 ここで求めるのは、候補センサcについての <strong>「観測値 −
 予報値」</strong> です。これを <span class="math inline">\(\Delta
@@ -667,7 +717,8 @@ T[P3]\\T[P4]-\bar T[P4]
 \]</span></p>
 <p><span class="math inline">\(\bar y_c\)</span>
 はPODの平均温度場に対応するセンサ値、 <span class="math inline">\(\bar
-T[Pj]\)</span> はその平均場の代表点温度です。 <span class="math inline">\(h_{c,j}\)</span> は、代表点Pjの温度が1
+T[Pj]\)</span> はその平均場の代表点温度です。 <span
+class="math inline">\(h_{c,j}\)</span> は、代表点Pjの温度が1
 K変わったときのセンサ値の変化です。温度計なら温度復元の重み、変位計なら温度復元とFrontISTR応答を組み合わせた重みです。放熱パラメータ
 <span class="math inline">\(h_{\mathrm{ROM}}\)</span> とは別です。</p>
 <p><strong>この同じ式へ、正しい温度と推定温度をそれぞれ入れます。</strong>
@@ -716,10 +767,13 @@ y_c=h_{c,0}e_0+h_{c,1}e_1+h_{c,2}e_2+h_{c,3}e_3+h_{c,4}e_4+\varepsilon_c
 <p>です。つまり、<strong>センサの「観測値−予報値」には、5点温度の誤差がセンサに現れた分と、観測ノイズが含まれます。</strong>
 次の③では、この差に補正係数を掛けて代表点の温度を直します。</p>
 <p><span class="math inline">\(\varepsilon_c\)</span>
-は温度誤差とは独立な平均ゼロの観測ノイズで、 <span class="math inline">\(\mathbb E[\varepsilon_c^2]=r_c\)</span> です。
+は温度誤差とは独立な平均ゼロの観測ノイズで、 <span
+class="math inline">\(\mathbb E[\varepsilon_c^2]=r_c\)</span> です。
 <span class="math inline">\(\Delta y_c\)</span>
-は観測との差であり、§3-1のケース平均からのずれ <span class="math inline">\(\delta y_c\)</span>
-とは区別します。ここでは小文字の <span class="math inline">\(h_{c,j}\)</span> はセンサへの復元係数です。</p>
+は観測との差であり、§3-1のケース平均からのずれ <span
+class="math inline">\(\delta y_c\)</span>
+とは区別します。ここでは小文字の <span
+class="math inline">\(h_{c,j}\)</span> はセンサへの復元係数です。</p>
 <p>この関係は配置の採点に使う線形モデル内での関係です。実際のOpenFOAM・FrontISTRの正解とROMの復元にはモデル誤差があるため、その場合の観測差には復元誤差も含まれます。実際の有効性は§6のEnKF比較で確認します。</p>
 <p><strong>③ センサのずれを使って、温度を直す。</strong>
 代表点Pjの補正係数を <span class="math inline">\(a_j\)</span>
@@ -732,17 +786,20 @@ y_c=h_{c,0}e_0+h_{c,1}e_1+h_{c,2}e_2+h_{c,3}e_3+h_{c,4}e_4+\varepsilon_c
 <p><span class="math display">\[
 e_{j,+c}=T[Pj]-\widehat T_{+c}[Pj] =e_j-a_j\Delta y_c
 \]</span></p>
-<p>となります。<strong>これをできるだけ小さくする <span class="math inline">\(a_j\)</span> を求めます。</strong></p>
+<p>となります。<strong>これをできるだけ小さくする <span
+class="math inline">\(a_j\)</span> を求めます。</strong></p>
 <p><strong>④
 補正した後、温度の誤差がどれだけ残るかを計算する。</strong></p>
-<p>ここでの目的は、<strong>センサのずれ <span class="math inline">\(\Delta y_c\)</span>
-を何倍して温度を直すとよいか、つまり補正係数 <span class="math inline">\(a_j\)</span>
+<p>ここでの目的は、<strong>センサのずれ <span
+class="math inline">\(\Delta y_c\)</span>
+を何倍して温度を直すとよいか、つまり補正係数 <span
+class="math inline">\(a_j\)</span>
 を決めること</strong>です。その準備として、補正後の温度誤差を二乗して平均します。</p>
 <p>記号を確認します。</p>
 <table>
 <colgroup>
-<col style="width: 50%"/>
-<col style="width: 50%"/>
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -796,7 +853,8 @@ e_{j,+c}^2=e_j^2-2a_j e_j\Delta y_c+a_j^2(\Delta y_c)^2
 \]</span></p>
 <p>（(1) 補正前の誤差の二乗平均、(2)
 温度誤差とセンサのずれの積の平均、(3) センサのずれの二乗平均。）</p>
-<p>となります。最初の項は、共分散の定義から <span class="math inline">\(\mathbb E[e_j^2]=P_{jj}\)</span>
+<p>となります。最初の項は、共分散の定義から <span
+class="math inline">\(\mathbb E[e_j^2]=P_{jj}\)</span>
 です。残りの2つを順に求めます。</p>
 <h4 id="b-温度誤差とセンサのずれの積の平均を求める">(b)
 温度誤差とセンサのずれの「積の平均」を求める</h4>
@@ -824,7 +882,8 @@ E[e_je_i]=P_{ji}\)</span>
 \mathbb E[e_j\Delta y_c]
 =P_{j0}h_{c,0}+P_{j1}h_{c,1}+P_{j2}h_{c,2}+P_{j3}h_{c,3}+P_{j4}h_{c,4}
 \]</span></p>
-<p>となります。<strong>この長い計算結果を、以降は <span class="math inline">\(v_j\)</span> と短く書きます。</strong>
+<p>となります。<strong>この長い計算結果を、以降は <span
+class="math inline">\(v_j\)</span> と短く書きます。</strong>
 行列では、</p>
 <p><span class="math display">\[
 \underbrace{v_j}_{1\times1}
@@ -876,8 +935,10 @@ P_{40}&amp;P_{41}&amp;P_{42}&amp;P_{43}&amp;P_{44}
 <p>となります。 <span class="math inline">\(P_{jj},v_j,s_c\)</span>
 は共分散・復元重み・ノイズ分散から計算できる値です。<strong>残る選択は
 <span class="math inline">\(a_j\)</span>
-だけなので、次の⑤でこの式が最小になる <span class="math inline">\(a_j\)</span> を求めます。</strong></p>
-<p><strong>⑤ 誤差が最小になる補正係数を求める。</strong> <span class="math inline">\(a_j\)</span> で微分してゼロと置きます。</p>
+だけなので、次の⑤でこの式が最小になる <span
+class="math inline">\(a_j\)</span> を求めます。</strong></p>
+<p><strong>⑤ 誤差が最小になる補正係数を求める。</strong> <span
+class="math inline">\(a_j\)</span> で微分してゼロと置きます。</p>
 <p><span class="math display">\[
 \frac{\partial}{\partial a_j}
 \big(P_{jj}-2a_jv_j+a_j^2s_c\big) =-2v_j+2a_js_c=0
@@ -913,11 +974,14 @@ P_{+c,ij}
 <p><span class="math display">\[
 \boxed{P_{+c}=P-\frac{\mathbf v\mathbf v^{\mathsf T}}{s_c}}
 \]</span></p>
-<p>例えば対角成分は <span class="math inline">\(P_{+c,jj}=P_{jj}-v_j^2/s_c\)</span>
-です。測ったことで、Pjの温度の分散が <span class="math inline">\(v_j^2/s_c\)</span>
+<p>例えば対角成分は <span
+class="math inline">\(P_{+c,jj}=P_{jj}-v_j^2/s_c\)</span>
+です。測ったことで、Pjの温度の分散が <span
+class="math inline">\(v_j^2/s_c\)</span>
 だけ減ると予測します。ここまでの導出には、実際の測定値は残っていません。<strong>だから、測定前に候補を採点できます。</strong>
 ガウス分布なら条件付き共分散と一致し、一般の分布では最適な線形補正で残る誤差の共分散を表します。</p>
-<p><strong>⑦ 残る温度誤差を反りに換算する。</strong> <span class="math inline">\(\delta d=\mathbf w^{\mathsf T}\mathbf
+<p><strong>⑦ 残る温度誤差を反りに換算する。</strong> <span
+class="math inline">\(\delta d=\mathbf w^{\mathsf T}\mathbf
 e_{+c}\)</span> なので、</p>
 <p><span class="math display">\[
 \sigma_{+c}^2 =\sum_{i=0}^{4}\sum_{j=0}^{4}w_iP_{+c,ij}w_j =\mathbf
@@ -935,15 +999,18 @@ w^{\mathsf T}P\mathbf h_c)^2}
 \boxed{J_c=\frac{1}{10}\sum_{k=1}^{10}\sigma_{+c}(30k)}
 \]</span></p>
 <p><span class="math inline">\(J_c\)</span>
-が小さい候補を1本選び、各時刻の共分散を <span class="math inline">\(P\leftarrow P_{+c}\)</span>
-に更新して、次の候補を採点し直します。この <span class="math inline">\(P\)</span>
+が小さい候補を1本選び、各時刻の共分散を <span
+class="math inline">\(P\leftarrow P_{+c}\)</span>
+に更新して、次の候補を採点し直します。この <span
+class="math inline">\(P\)</span>
 の更新は<strong>同じ時刻で観測センサを増やす計算</strong>で、30秒先へ進めるROM時間積分とは別です。全ペアの大域最適解を求める総当たりではありません。</p>
-<h3 id="3-3-なぜ熱感度wや温度分布だけでは観測位置を決められないのか">3-3.
+<h3 id="なぜ熱感度wや温度分布だけでは観測位置を決められないのか">3-3.
 なぜ熱感度Wや温度分布だけでは観測位置を決められないのか</h3>
 <p><strong>熱感度Wや温度分布は配置を考える根拠になります。しかし、それだけでは「そこを測ると、未観測の反りの推定誤差が最も減る」とは言えません。</strong>
 データ同化では、対象に影響する温度のうち、まだ分かっていない違いを捉える観測が有効だからです。</p>
 <p>例えば、ヒータ側を既に1本測っているとします。その近くに2本目を置けば、温度は大きく変化していても、1本目と似た情報しか得られない場合があります。反対側を測る方が、左右の温度差を把握でき、反りの推定に役立つ可能性があります。これは温度の高さや熱感度の大きさだけでは判断できません。</p>
-<h4 id="熱感度wは温める場所と対象の変位の関係を示す">熱感度Wは「温める場所」と「対象の変位」の関係を示す</h4>
+<h4
+id="熱感度wは温める場所と対象の変位の関係を示す">熱感度Wは「温める場所」と「対象の変位」の関係を示す</h4>
 <p>FrontISTRの熱感度の成分は、</p>
 <p><span class="math display">\[
 W_{A,z,n}=\frac{\partial U_z(A)}{\partial T_F[n]}
@@ -951,7 +1018,8 @@ W_{A,z,n}=\frac{\partial U_z(A)}{\partial T_F[n]}
 <p>です。 <span class="math inline">\(T_F[n]\)</span> はFEM節点nの温度、
 <span class="math inline">\(U_z(A)\)</span>
 はAの上下変位です。「節点nの温度を1
-K変えると、Aの上下変位がどれだけ変わるか」を表します。反り <span class="math inline">\(d=U_z(A)-U_z(O)\)</span> については、</p>
+K変えると、Aの上下変位がどれだけ変わるか」を表します。反り <span
+class="math inline">\(d=U_z(A)-U_z(O)\)</span> については、</p>
 <p><span class="math display">\[
 \underbrace{\delta d}_{1\times1}
 =\underbrace{\left(W_{A,z,:}-W_{O,z,:}\right)}_{1\times N_F}
@@ -961,10 +1029,14 @@ K変えると、Aの上下変位がどれだけ変わるか」を表します。
 <p>となります。コロンは全節点に対応する列を取り出す記号です。この温度変化は線形化の基準からの変化で、§3-1のケース平均からのずれとは基準が異なりますが、線形写像の重みは同じです。</p>
 <p><strong>Wが大きい場所でも、その温度が既に他の観測から十分分かっていれば、追加して測る効果は小さくなります。</strong>
 また、正解の温度分布が1枚あるだけでは、どこが不確かか、別のセンサと情報が重複するかは分かりません。</p>
-<h4 id="今回は測った後に残る反りの不確かさで選ぶ">今回は「測った後に残る反りの不確かさ」で選ぶ</h4>
-<p>§3-2の式を、配置を選ぶ理由として読み直します。 <span class="math inline">\(P\)</span>
-は現在残っている代表5点温度の誤差共分散（5×5）、 <span class="math inline">\(\mathbf w\)</span>
-は代表5点温度から反りへの重み（5×1）、 <span class="math inline">\(\mathbf h_c\)</span> は候補センサへの重み（5×1）、
+<h4
+id="今回は測った後に残る反りの不確かさで選ぶ">今回は「測った後に残る反りの不確かさ」で選ぶ</h4>
+<p>§3-2の式を、配置を選ぶ理由として読み直します。 <span
+class="math inline">\(P\)</span>
+は現在残っている代表5点温度の誤差共分散（5×5）、 <span
+class="math inline">\(\mathbf w\)</span>
+は代表5点温度から反りへの重み（5×1）、 <span
+class="math inline">\(\mathbf h_c\)</span> は候補センサへの重み（5×1）、
 <span class="math inline">\(r_c\)</span>
 はその観測ノイズの分散（1×1）です。</p>
 <p>候補cを測る前と後の反りの分散は、</p>
@@ -989,8 +1061,8 @@ h_c\)</span>
 は、<strong>反りの推定誤差と、候補センサの予報誤差が、どれだけ一緒に変わるか</strong>を表します。この関係が強ければ、センサの予報と観測のずれから反りのずれも推測できます。分母には観測ノイズが入るため、信号がノイズに埋もれる候補は効果が小さくなります。</p>
 <table>
 <colgroup>
-<col style="width: 50%"/>
-<col style="width: 50%"/>
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1015,8 +1087,10 @@ h_c\)</span>
 </table>
 <p><strong>4,000ケースは「適当な点では同化できない」ことを示すためではありません。</strong>
 想定する初期温度・発熱量・放熱条件の違いから温度の不確かさを作り、同じ本数ならどの配置が反りの推定に役立つかを、測定前に予測するために使っています。実際のEnKFは別の60メンバーで行います。</p>
-<h4 id="今回どこまで最適と言えるのか">今回、どこまで「最適」と言えるのか</h4>
-<p>今回のコードは、測定後に残る反りの標準偏差を30〜300秒で平均した <span class="math inline">\(J_c\)</span>
+<h4
+id="今回どこまで最適と言えるのか">今回、どこまで「最適」と言えるのか</h4>
+<p>今回のコードは、測定後に残る反りの標準偏差を30〜300秒で平均した <span
+class="math inline">\(J_c\)</span>
 が最小となる候補を、1本ずつ選びます。2本目は、1本目を測った後に残る共分散で再採点します。</p>
 <p>したがって、本研究での表現は、<strong>「設定した不確かさ・観測ノイズ・候補位置の下で、反りA−Oの予測不確かさを最も減らす候補を逐次選定した」</strong>です。全センサ組合せの大域的最適性や、任意の運転条件での最適性を証明したわけではありません。</p>
 <p>さらに実際のEnKFで、手動温度2点の反り誤差0.775
@@ -1024,7 +1098,7 @@ h_c\)</span>
 µmになったことを確認しました（条件と指標は§6-2）。これは比較した配置での有効性を示します。<strong>Wは物理的な関係を説明し、共分散による採点は配置の選定根拠を与え、EnKFの比較試験で実際の効果を確認する</strong>、という順序です。</p>
 <p>なお、<strong>Wの大きさだけで選んだ配置との直接比較は、この試験ではまだ行っていません。</strong>
 その比較を追加すれば、温度の不確かさや情報の重複まで考慮することの効果を、さらに明確に検証できます。</p>
-<h3 id="3-4-150秒で再計算すると観測の追加で分散はどう減るか">3-4.
+<h3 id="秒で再計算すると観測の追加で分散はどう減るか">3-4.
 150秒で再計算すると、観測の追加で分散はどう減るか</h3>
 <p>4,000ケースを同じ事前分布から0〜150秒まで再計算し、150秒のBから各段階の残存共分散Pcを求めました。<strong>位置は既存の30〜300秒平均による選定結果を使い、150秒だけで選び直してはいません。</strong></p>
 <table>
@@ -1064,8 +1138,10 @@ h_c\)</span>
 </tbody>
 </table>
 <figure>
-<img alt="150秒で再計算した観測追加後の分散：選定温度と変位" src="img/posterior_t150_seq.png"/>
-<figcaption aria-hidden="true">150秒で再計算した観測追加後の分散：選定温度と変位</figcaption>
+<img src="img/posterior_t150_seq.png"
+alt="150秒で再計算した観測追加後の分散：選定温度と変位" />
+<figcaption
+aria-hidden="true">150秒で再計算した観測追加後の分散：選定温度と変位</figcaption>
 </figure>
 <p><em>左：未観測の反りA−Oの残存分散σ²と標準偏差σ。右：Pcの対角成分（P0〜P4の温度に残る分散）。4,000ケース、seed=20260930、15
 W加熱中、RK4刻み2秒、観測ノイズは温度0.3 K・変位0.3
@@ -1081,9 +1157,9 @@ W加熱中、RK4刻み2秒、観測ノイズは温度0.3 K・変位0.3
 <code>results/posterior_t150.json</code> と
 <code>results/posterior_t150.npz</code>
 です。前者には各段階のB・H・R・Pc・σを、後者には150秒の4,000ケース温度と共分散を保存しています。計算時間は結果JSONに記録しています。</p>
-<h2 id="4-まず温度センサ2点を選ぶ">4. まず温度センサ2点を選ぶ</h2>
+<h2 id="まず温度センサ2点を選ぶ">4. まず温度センサ2点を選ぶ</h2>
 <p>温度計だけを候補にして、1本目、2本目を選びます。最初からP2・P0を観測する前提は置きません。</p>
-<h3 id="4-1-温度センサの候補位置から観測の重みを取り出す">4-1.
+<h3 id="温度センサの候補位置から観測の重みを取り出す">4-1.
 温度センサの候補位置から、観測の重みを取り出す</h3>
 <p>ここで決めるのは、<strong>温度を測るセルの位置を2か所</strong>です。温度の値そのものを決める処理ではありません。また、目的は本記事の評価対象である反りA−Oの推定です。温度場RMSEだけを最小にする配置を探しているわけではありません。</p>
 <p>候補は、ROMの代表5点を除くOpenFOAMの20,691セルです。候補セルの番号をcとします。既に作った温度復元行列は、</p>
@@ -1117,7 +1193,7 @@ K変わると、復元した候補セルcの温度が何K変わるか」です�
 \end{bmatrix}}_{5\times1}
 \]</span></p>
 <p>です。バーはPODの時間平均温度場、ハットは補正前の推定温度です。候補は代表点以外なので、<strong>この1行は「1か所だけ1」の行ではなく、5点温度を組み合わせる重み</strong>になります。</p>
-<h3 id="4-2-その温度を測ったら代表5点をどう補正できるか">4-2.
+<h3 id="その温度を測ったら代表5点をどう補正できるか">4-2.
 その温度を測ったら、代表5点をどう補正できるか</h3>
 <p>§3-2と同じく、 <span class="math inline">\(e_j=T[Pj]-\widehat
 T[Pj]\)</span>
@@ -1148,7 +1224,7 @@ g_c+\sigma_T^2}}_{5\times1}
 \]</span></p>
 <p>となります。<strong>代表点以外の温度計1本のずれが、5点それぞれへの補正量に変換される</strong>ことが、この5×1の係数に表れています。</p>
 <p>配置選定中は、この式に実測値を入れて温度を補正しません。次に示す「もしこの補正をしたら、どれだけ温度誤差が残るか」を計算します。</p>
-<h3 id="4-3-1本目は反りに残る不確かさが最小になるセルを選ぶ">4-3.
+<h3 id="本目は反りに残る不確かさが最小になるセルを選ぶ">4-3.
 1本目は、反りに残る不確かさが最小になるセルを選ぶ</h3>
 <p>候補cを使って補正した後に残る温度誤差の共分散は、</p>
 <p><span class="math display">\[
@@ -1184,7 +1260,7 @@ T}P_{+c}(30k)\mathbf w}
 \]</span></p>
 <p>です。<strong>全20,691候補のJを比較して、一番小さい候補を温度センサT1にします。</strong>
 カラーマップの色はこのJであり、候補の温度そのものやWそのものではありません。</p>
-<h3 id="4-4-2本目はt1で分かる情報を除いてから選ぶ">4-4.
+<h3 id="本目はt1で分かる情報を除いてから選ぶ">4-4.
 2本目は、T1で分かる情報を除いてから選ぶ</h3>
 <p>T1が決まったら、その重み <span class="math inline">\(\mathbf
 g_{T1}\)</span> を使い、10時刻それぞれで次の共分散を計算します。</p>
@@ -1219,28 +1295,31 @@ G_{T2,0}&amp;G_{T2,1}&amp;G_{T2,2}&amp;G_{T2,3}&amp;G_{T2,4}
 \]</span></p>
 <p>です。 <span class="math inline">\(G_{T1,j}\)</span>
 は選定セルT1のGの行の成分です。このHは、代表点以外の2点を観測する際に、代表5点温度から温度センサ2本の予報を計算するために使います。</p>
-<h3 id="4-5-実際のコードと今回選ばれた温度位置">4-5.
+<h3 id="実際のコードと今回選ばれた温度位置">4-5.
 実際のコードと、今回選ばれた温度位置</h3>
 <p><code>run/sequential_sensor_study.py</code>
 が候補全セルを採点し、<code>run/select_nonrep_temp_disp.py</code> の
 <code>score()</code> と <code>add_row()</code>
 が上の計算を行います。温度2点を選ぶ部分を、処理が分かる形に書き直すと、</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a aria-hidden="true" href="#cb1-1" tabindex="-1"></a><span class="co"># G: (20696, 5)、w: (5,)、Ps: 各時刻の共分散10個、各(5, 5)</span></span>
-<span id="cb1-2"><a aria-hidden="true" href="#cb1-2" tabindex="-1"></a><span class="co"># 最初のPsは、4,000ケースから作ったB(t)を並べたもの</span></span>
-<span id="cb1-3"><a aria-hidden="true" href="#cb1-3" tabindex="-1"></a><span class="cf">for</span> sensor_number <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb1-4"><a aria-hidden="true" href="#cb1-4" tabindex="-1"></a>    J <span class="op">=</span> score(Ps, w, G, <span class="fl">0.3</span><span class="op">**</span><span class="dv">2</span>)  <span class="co"># 全候補の平均標準偏差</span></span>
-<span id="cb1-5"><a aria-hidden="true" href="#cb1-5" tabindex="-1"></a>    c <span class="op">=</span> <span class="bu">int</span>(np.where(validT, J, np.inf).argmin())</span>
-<span id="cb1-6"><a aria-hidden="true" href="#cb1-6" tabindex="-1"></a>    g <span class="op">=</span> G[c]                    <span class="co"># 選定セルの復元重み (5,)</span></span>
-<span id="cb1-7"><a aria-hidden="true" href="#cb1-7" tabindex="-1"></a>    Ps <span class="op">=</span> [add_row(P, g, <span class="fl">0.3</span><span class="op">**</span><span class="dv">2</span>) <span class="cf">for</span> P <span class="kw">in</span> Ps]  <span class="co"># 残存共分散に更新</span></span>
-<span id="cb1-8"><a aria-hidden="true" href="#cb1-8" tabindex="-1"></a>    validT[c] <span class="op">=</span> <span class="va">False</span>            <span class="co"># 同じセルは再選択しない</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># G: (20696, 5)、w: (5,)、Ps: 各時刻の共分散10個、各(5, 5)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 最初のPsは、4,000ケースから作ったB(t)を並べたもの</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sensor_number <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    J <span class="op">=</span> score(Ps, w, G, <span class="fl">0.3</span><span class="op">**</span><span class="dv">2</span>)  <span class="co"># 全候補の平均標準偏差</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    c <span class="op">=</span> <span class="bu">int</span>(np.where(validT, J, np.inf).argmin())</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> G[c]                    <span class="co"># 選定セルの復元重み (5,)</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    Ps <span class="op">=</span> [add_row(P, g, <span class="fl">0.3</span><span class="op">**</span><span class="dv">2</span>) <span class="cf">for</span> P <span class="kw">in</span> Ps]  <span class="co"># 残存共分散に更新</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    validT[c] <span class="op">=</span> <span class="va">False</span>            <span class="co"># 同じセルは再選択しない</span></span></code></pre></div>
 <p>となります。<code>validT</code>
 は代表5点と選定済みセルを候補から除くマスクです。結果は
 <code>results/sequential_selection.json</code>、全候補の採点値は
 <code>results/sequential_scores.npz</code>
 に保存しています。ここでは実測値を使っておらず、配置設計の計算です。</p>
 <figure>
-<img alt="温度2点から変位2点までの選定を1枚で見る" src="img/sequential_selection_overview.png"/>
-<figcaption aria-hidden="true">温度2点から変位2点までの選定を1枚で見る</figcaption>
+<img src="img/sequential_selection_overview.png"
+alt="温度2点から変位2点までの選定を1枚で見る" />
+<figcaption
+aria-hidden="true">温度2点から変位2点までの選定を1枚で見る</figcaption>
 </figure>
 <p><em>左からT1 → T2 → S1 →
 S2の選択。各段階の前提条件とカラーバーを図中に表示。変位候補は3方向すべてを採点し、ここでは選ばれたUxの分布を表示します。紫球が選択点、太い矢印が測定方向です。温度の採点はセルで行い、表示時だけIDWでメッシュに写しています。</em></p>
@@ -1248,15 +1327,18 @@ S2の選択。各段階の前提条件とカラーバーを図中に表示。変
 0.8, 49.2) mm、T2＝(−35.9, −1.5, 51.6)
 mmです。片側を測った後、反対側にも残る温度差の不確かさを減らす配置です。</p>
 <p>比較対象は、人が決めた代表点P2・P0の温度2本です。これは一組の手動配置との比較で、あらゆるランダム配置を代表するものではありません。</p>
-<h2 id="5-その温度2点を固定し変位2点を選ぶ">5.
+<h2 id="その温度2点を固定し変位2点を選ぶ">5.
 その温度2点を固定し、変位2点を選ぶ</h2>
 <p>T1・T2を観測する条件で残る共分散から、変位候補のUx・Uy・Uzを採点します。変位2本目も、1本目を追加した後に再採点します。</p>
-<p>上の1枚の図の③・④が、この手順です。各段階の全方向の比較は、<a href="img/sequential_displacement_1.png">変位1本目のUx・Uy・Uz分布</a>、<a href="img/sequential_displacement_2.png">変位2本目のUx・Uy・Uz分布</a>で確認できます。</p>
+<p>上の1枚の図の③・④が、この手順です。各段階の全方向の比較は、<a
+href="img/sequential_displacement_1.png">変位1本目のUx・Uy・Uz分布</a>、<a
+href="img/sequential_displacement_2.png">変位2本目のUx・Uy・Uz分布</a>で確認できます。</p>
 <p>選ばれたのは、<strong>上面の離れた2点での横方向変位Ux</strong>でした。S1＝(4.9,
 −37.2, 100.5) mm、S2＝(4.9, 37.2, 100.5)
 mmです。旧試験の「P2・P0固定時のS1(Ux)・S2(Uz)」とは、温度の前提が異なるため別の配置になります。</p>
 <figure>
-<img alt="代表5点の温度から求めた変形と、blog009 の観測点" src="img/P5_deform_anim_b009.gif"/>
+<img src="img/P5_deform_anim_b009.gif"
+alt="代表5点の温度から求めた変形と、blog009 の観測点" />
 <figcaption aria-hidden="true">代表5点の温度から求めた変形と、blog009
 の観測点</figcaption>
 </figure>
@@ -1267,16 +1349,21 @@ T1・T2、青＝変位センサ S1・S2（矢印＝測る向き Ux）、黒＝�
 A・O（測らない）。変形は 2000 倍に拡大、色は変位の大きさ。
 <code>run/make_P5_deform_anim.py b009</code> 。</p>
 </blockquote>
-<h3 id="frontistrの熱感度wと選択点を重ねて比較する">FrontISTRの熱感度Wと選択点を重ねて比較する</h3>
+<h3
+id="frontistrの熱感度wと選択点を重ねて比較する">FrontISTRの熱感度Wと選択点を重ねて比較する</h3>
 <figure>
-<img alt="ヒータの位置：熱感度図と同じ斜めアングル" src="img/heater_location_oblique.png"/>
-<figcaption aria-hidden="true">ヒータの位置：熱感度図と同じ斜めアングル</figcaption>
+<img src="img/heater_location_oblique.png"
+alt="ヒータの位置：熱感度図と同じ斜めアングル" />
+<figcaption
+aria-hidden="true">ヒータの位置：熱感度図と同じ斜めアングル</figcaption>
 </figure>
 <p><em>赤い領域がヒータです。外周の＋x側、周方向約±80°、高さ24.75〜75.75
 mmを加熱します。この赤は温度や熱感度の値ではありません。下の熱感度図も同じ向きから見ています。</em></p>
 <figure>
-<img alt="FrontISTRのA・Oの熱感度分布と選択点：斜め表示" src="img/W_AO_selected_sensors_oblique.png"/>
-<figcaption aria-hidden="true">FrontISTRのA・Oの熱感度分布と選択点：斜め表示</figcaption>
+<img src="img/W_AO_selected_sensors_oblique.png"
+alt="FrontISTRのA・Oの熱感度分布と選択点：斜め表示" />
+<figcaption
+aria-hidden="true">FrontISTRのA・Oの熱感度分布と選択点：斜め表示</figcaption>
 </figure>
 <p><em>色はFEM節点温度を1 K変えたときのUz(A)、Uz(O)、その差への感度
 [µm/K]。紫は温度T1・T2、緑は変位S1・S2、矢印は測定方向Uxです。Wは時間不変です。レインボー配色で、青は負、緑付近はゼロ、赤は正の感度を表します。小さい値も見えるよう、3図共通の対称対数スケールを使い、ゼロ近傍だけ線形表示しています。</em></p>
@@ -1316,7 +1403,7 @@ mmを加熱します。この赤は温度や熱感度の値ではありません
 </tbody>
 </table>
 <p>この表は<strong>採点による予測</strong>です。次に実際のEnKFで確かめます。</p>
-<h2 id="6-選んだ位置でenkfを実行する">6. 選んだ位置でEnKFを実行する</h2>
+<h2 id="選んだ位置でenkfを実行する">6. 選んだ位置でEnKFを実行する</h2>
 <p>60メンバー、30秒ごと20回更新、0〜600秒を計算します。乱数seedは20260913〜20260917の5個、線は5試行それぞれのアンサンブル平均をさらに平均したものです。観測ノイズの標準偏差は温度0.3
 K・変位0.3 µmです。</p>
 <p>EnKFが補正する状態は、代表5点温度と発熱倍率・放熱の7変数です。</p>
@@ -1326,17 +1413,21 @@ z=[T[P0],T[P1],T[P2],T[P3],T[P4],q_{\mathrm{scale}},h_{\mathrm{ROM}}]^{\mathsf
 T}
 \]</span></p>
 <p>ROMで次の観測時刻へ進め、各メンバーの温度からセンサ値を予報します。観測値との差を、状態とセンサ予報の標本共分散から求めたカルマンゲインで7変数の補正に変換します。補正した5点温度を次のROM初期値に使います。<strong>変位は観測に使いますが、独立した状態として積分しません。</strong>
-数式とコードの詳しい対応は <a href="blog006.html">blog_006</a>
+数式とコードの詳しい対応は <a
+href="blog006.html">blog_006</a>
 を参照してください。</p>
 <p>温度場は補正後の5点温度からgappy-PODで復元し、変位はIDW＋FrontISTRの事前計算した応答から復元します。</p>
-<h3 id="6-0-今回のプログラムが7変数を補正する式">6-0.
+<h3 id="今回のプログラムが7変数を補正する式">6-0.
 今回のプログラムが7変数を補正する式</h3>
 <p>以下は <code>run/selected_pair_unobserved_check.py</code> の
 <code>seq</code> 配置と、<code>dacore/enkf.py</code> の
 <code>enkf_update</code>
 に対応します。配置選定用の4,000ケースとは別に、<strong>実際の同化では60メンバー</strong>を使います。温度T1・T2と変位S1・S2の4観測を使う場合を展開します。</p>
-<p><strong>① 各メンバーをROMで30秒進める。</strong> メンバー番号を <span class="math inline">\(m=1,\ldots,60\)</span> 、観測時刻を <span class="math inline">\(t_k=30k\)</span> 秒とします。前回の補正後を上付き
-<span class="math inline">\(a\)</span> 、今回の予報を <span class="math inline">\(f\)</span> と書きます。</p>
+<p><strong>① 各メンバーをROMで30秒進める。</strong> メンバー番号を <span
+class="math inline">\(m=1,\ldots,60\)</span> 、観測時刻を <span
+class="math inline">\(t_k=30k\)</span> 秒とします。前回の補正後を上付き
+<span class="math inline">\(a\)</span> 、今回の予報を <span
+class="math inline">\(f\)</span> と書きます。</p>
 <p><span class="math display">\[
 \mathbf T_{P,k}^{f,(m)}=
 \mathcal M_{t_{k-1}\to t_k}
@@ -1357,7 +1448,9 @@ T_{k-1}^{a,(m)}[P0]\\T_{k-1}^{a,(m)}[P1]\\T_{k-1}^{a,(m)}[P2]\\T_{k-1}^{a,(m)}[P
 <span class="math inline">\(\mathcal M\)</span>
 は行列の名前ではなく、熱方程式を時間積分する処理の名前です。5点温度と2パラメータを受け取り、次時刻の5点温度を返します。</p>
 <p><span class="math inline">\(\mathcal M\)</span>
-はRK4で熱ROMを積分する処理です。この30秒の予報中、 <span class="math inline">\(q=q_{\mathrm{scale}}\)</span> と <span class="math inline">\(h=h_{\mathrm{ROM}}\)</span>
+はRK4で熱ROMを積分する処理です。この30秒の予報中、 <span
+class="math inline">\(q=q_{\mathrm{scale}}\)</span> と <span
+class="math inline">\(h=h_{\mathrm{ROM}}\)</span>
 は各メンバー内で固定します。</p>
 <p><span class="math display">\[
 \mathbf z_k^{f,(m)}=
@@ -1371,9 +1464,12 @@ z_k^{f,(m)}\)</span> の大きさは <strong>7×1</strong>
 です。最後の2成分は次の意味です。</p>
 <ul>
 <li><span class="math inline">\(q=q_{\mathrm{scale}}\)</span>
-：発熱倍率（無次元）。ON時の発熱量は <span class="math inline">\(Q=15q\)</span> Wです。予報中は前回補正した <span class="math inline">\(q_{k-1}^{a,(m)}\)</span> をそのまま使います。</li>
+：発熱倍率（無次元）。ON時の発熱量は <span
+class="math inline">\(Q=15q\)</span> Wです。予報中は前回補正した <span
+class="math inline">\(q_{k-1}^{a,(m)}\)</span> をそのまま使います。</li>
 <li><span class="math inline">\(h=h_{\mathrm{ROM}}\)</span>
-：ROMの放熱コンダクタンス [W/K]。外気への放熱項 <span class="math inline">\(-h(T_i-T_{\mathrm{air}})\)</span>
+：ROMの放熱コンダクタンス [W/K]。外気への放熱項 <span
+class="math inline">\(-h(T_i-T_{\mathrm{air}})\)</span>
 の係数です。表面熱伝達率 [W/(m² K)]
 とは区別します。これも予報中は前回補正値を使います。</li>
 </ul>
@@ -1394,7 +1490,8 @@ T_{P,k}^{f,(m)}-\bar{\mathbf T}_P)
 \end{bmatrix}
 \]</span></p>
 <p>** <span class="math inline">\(\mathbf y_k^{f,(m)}\)</span>
-は、実測値ではありません。** 「メンバー <span class="math inline">\(m\)</span> の予報温度が正しいなら、今回の時刻
+は、実測値ではありません。** 「メンバー <span
+class="math inline">\(m\)</span> の予報温度が正しいなら、今回の時刻
 <span class="math inline">\(t_k\)</span>
 に4本のセンサが示すはずの値」を並べた
 <strong>4×1の列ベクトル</strong>です。</p>
@@ -1422,12 +1519,17 @@ T[P3]\\T_k^{f,(m)}[P4]-\bar T[P4]
 \]</span></p>
 <p><span class="math inline">\(g_{T1,j}\)</span> は「代表点Pjの温度が1
 K変わると、復元したT1の温度が何
-K変わるか」という温度復元の係数（無次元）です。 <span class="math inline">\(h_{S1x,j}\)</span> は「同じ1 Kの変化で、S1のUxが何
+K変わるか」という温度復元の係数（無次元）です。 <span
+class="math inline">\(h_{S1x,j}\)</span> は「同じ1 Kの変化で、S1のUxが何
 µm変わるか」という変位復元の係数 [µm/K]
-です。T2・S2も同様です。<strong>ここでの <span class="math inline">\(g,h_{S1x,j}\)</span>
-は固定した復元係数であり、状態として推定する <span class="math inline">\(q,h_{\mathrm{ROM}}\)</span>
+です。T2・S2も同様です。<strong>ここでの <span
+class="math inline">\(g,h_{S1x,j}\)</span>
+は固定した復元係数であり、状態として推定する <span
+class="math inline">\(q,h_{\mathrm{ROM}}\)</span>
 とは別物です。</strong></p>
-<p>ここでバーはPODの時間平均場とその変位応答です。 <span class="math inline">\(\mathbf g\)</span> は温度復元の重み、 <span class="math inline">\(\mathbf h\)</span>
+<p>ここでバーはPODの時間平均場とその変位応答です。 <span
+class="math inline">\(\mathbf g\)</span> は温度復元の重み、 <span
+class="math inline">\(\mathbf h\)</span>
 は変位の重みです。S1・S2は今回いずれもUxを測ります。A・OのUzは観測ベクトルに入りません。</p>
 <p>比較する観測ベクトルは、保存済みOpenFOAM・FrontISTRの正解に観測ノイズ
 <span class="math inline">\(\boldsymbol\eta_k\)</span>
@@ -1462,26 +1564,28 @@ U_{x,k}^{f,(m)}(S2)
 <p>実際のコードでは、ηを加えた値を変数 <code>y</code>
 に保存しているので、更新関数でηという名前は再登場しません。<strong>ηは既に
 <code>y</code> に含まれており、消えたわけではありません。</strong></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a aria-hidden="true" href="#cb2-1" tabindex="-1"></a><span class="co"># run/selected_pair_unobserved_check.py</span></span>
-<span id="cb2-2"><a aria-hidden="true" href="#cb2-2" tabindex="-1"></a><span class="co"># yv: 正解の温度2成分と変位2成分 (4,)</span></span>
-<span id="cb2-3"><a aria-hidden="true" href="#cb2-3" tabindex="-1"></a>y <span class="op">=</span> np.array(yv) <span class="op">+</span> ro.normal(<span class="dv">0</span>, np.sqrt(np.diag(Rd)))  <span class="co"># 正解＋η</span></span>
-<span id="cb2-4"><a aria-hidden="true" href="#cb2-4" tabindex="-1"></a>Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span>
-<span id="cb2-5"><a aria-hidden="true" href="#cb2-5" tabindex="-1"></a></span>
-<span id="cb2-6"><a aria-hidden="true" href="#cb2-6" tabindex="-1"></a><span class="co"># dacore/enkf.py 内（Zf, Yf はインフレーション後）</span></span>
-<span id="cb2-7"><a aria-hidden="true" href="#cb2-7" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span>n_ens)  <span class="co"># (60, 4)</span></span>
-<span id="cb2-8"><a aria-hidden="true" href="#cb2-8" tabindex="-1"></a>innov <span class="op">=</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps) <span class="op">-</span> Yf  <span class="co"># (60, 4)：上の差を60行並べる</span></span>
-<span id="cb2-9"><a aria-hidden="true" href="#cb2-9" tabindex="-1"></a>gain_T <span class="op">=</span> np.linalg.solve(S, C_zy.T)  <span class="co"># (4, 7)：Kの転置</span></span>
-<span id="cb2-10"><a aria-hidden="true" href="#cb2-10" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> innov <span class="op">@</span> gain_T  <span class="co"># (60, 7)：全メンバーの7変数を補正</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run/selected_pair_unobserved_check.py</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># yv: 正解の温度2成分と変位2成分 (4,)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array(yv) <span class="op">+</span> ro.normal(<span class="dv">0</span>, np.sqrt(np.diag(Rd)))  <span class="co"># 正解＋η</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># dacore/enkf.py 内（Zf, Yf はインフレーション後）</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span>n_ens)  <span class="co"># (60, 4)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>innov <span class="op">=</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps) <span class="op">-</span> Yf  <span class="co"># (60, 4)：上の差を60行並べる</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>gain_T <span class="op">=</span> np.linalg.solve(S, C_zy.T)  <span class="co"># (4, 7)：Kの転置</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> innov <span class="op">@</span> gain_T  <span class="co"># (60, 7)：全メンバーの7変数を補正</span></span></code></pre></div>
 <p>Kを求める④・⑤では60メンバーの予報とRを使い、<strong>実際の観測値は⑥で補正量を求めるときに使います。</strong></p>
-<p><span class="math inline">\(R\)</span> は温度2成分の分散 <span class="math inline">\((0.3\ \mathrm K)^2\)</span> と変位2成分の分散
+<p><span class="math inline">\(R\)</span> は温度2成分の分散 <span
+class="math inline">\((0.3\ \mathrm K)^2\)</span> と変位2成分の分散
 <span class="math inline">\((0.3\ \mathrm{µm})^2\)</span>
 を対角に並べた4×4行列です。</p>
 <p><strong>ここからの行列の大きさ</strong>：数式ではメンバー1個を列ベクトルで書き、コードではメンバーを行に並べます。</p>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1508,7 +1612,8 @@ U_{x,k}^{f,(m)}(S2)
 60×4</td>
 </tr>
 <tr class="even">
-<td>状態とセンサ予報の共分散 <span class="math inline">\(C_{zy}\)</span></td>
+<td>状態とセンサ予報の共分散 <span
+class="math inline">\(C_{zy}\)</span></td>
 <td>7×4</td>
 <td><code>C_zy</code>: 7×4</td>
 </tr>
@@ -1531,7 +1636,8 @@ U_{x,k}^{f,(m)}(S2)
 </tbody>
 </table>
 <p><strong>③ 60メンバーのばらつきを1.02倍にする。</strong>
-実装のインフレーション係数は <span class="math inline">\(\rho=1.02\)</span>
+実装のインフレーション係数は <span
+class="math inline">\(\rho=1.02\)</span>
 です。状態とセンサ予報の両方を、それぞれの60メンバー平均の周りで広げます。</p>
 <p><span class="math display">\[
 \bar{\mathbf z}_k^f=\frac1{60}\sum_m\mathbf z_k^{f,(m)},
@@ -1546,9 +1652,12 @@ y_k^{f,(m)}-\bar{\mathbf y}_k^f)
 \]</span></p>
 <p><strong>インフレーションとは、平均からのずれを少し広げる操作です。</strong>
 今回1.02倍にするものは、各メンバーの値そのものではなく、平均からの偏差です。温度・q・hの7状態と、4成分のセンサ予報に同じ係数を使います。</p>
-<p>例えば平均20 ℃でメンバーが21 ℃なら、 <span class="math inline">\(20+1.02(21-20)=21.02\)</span> ℃になります。19
-℃のメンバーなら <span class="math inline">\(20+1.02(19-20)=18.98\)</span>
-℃です。平均は変わらず、標準偏差は1.02倍、分散・共分散は <span class="math inline">\(1.02^2=1.0404\)</span> 倍になります。</p>
+<p>例えば平均20 ℃でメンバーが21 ℃なら、 <span
+class="math inline">\(20+1.02(21-20)=21.02\)</span> ℃になります。19
+℃のメンバーなら <span
+class="math inline">\(20+1.02(19-20)=18.98\)</span>
+℃です。平均は変わらず、標準偏差は1.02倍、分散・共分散は <span
+class="math inline">\(1.02^2=1.0404\)</span> 倍になります。</p>
 <p><span class="math display">\[
 \mathrm{Cov}(\widetilde{\mathbf z}^f)=\rho^2\mathrm{Cov}(\mathbf z^f),
 \qquad \rho=1.02
@@ -1588,7 +1697,8 @@ y}_k^f
 \widetilde U_{x,k}^{f,(m)}(S2)-\overline{U_{x,k}^f(S2)}
 \end{bmatrix}}_{4\times1}
 \]</span></p>
-<p>例えば <span class="math inline">\(\overline{T_k^f[P0]}=\frac1{60}\sum_{m=1}^{60}T_k^{f,(m)}[P0]\)</span>
+<p>例えば <span
+class="math inline">\(\overline{T_k^f[P0]}=\frac1{60}\sum_{m=1}^{60}T_k^{f,(m)}[P0]\)</span>
 です。他の成分もそれぞれ60個から平均します。偏差は観測との差ではなく、<strong>各メンバーとメンバー平均との差</strong>です。</p>
 <p><span class="math display">\[
 \underbrace{C_{zy}}_{7\times4}=\frac1{59}\sum_{m=1}^{60}\underbrace{\Delta\mathbf
@@ -1599,7 +1709,9 @@ T}}_{1\times4},
 y_k^{(m)}}_{4\times1}\underbrace{\Delta\mathbf y_k^{(m)\mathsf
 T}}_{1\times4}
 \]</span></p>
-<p><span class="math inline">\(C_{zy}\)</span> は7×4、 <span class="math inline">\(C_{yy}\)</span> は4×4です。たとえば <span class="math inline">\(C_{zy}\)</span> の発熱倍率の行は、</p>
+<p><span class="math inline">\(C_{zy}\)</span> は7×4、 <span
+class="math inline">\(C_{yy}\)</span> は4×4です。たとえば <span
+class="math inline">\(C_{zy}\)</span> の発熱倍率の行は、</p>
 <p><span class="math display">\[
 [C_{zy}]_{q,:}=\frac1{59}\sum_m
 \Delta q_k^{(m)}
@@ -1607,17 +1719,21 @@ T}}_{1\times4}
 U_x^{(m)}(S1)&amp;\Delta U_x^{(m)}(S2)\end{bmatrix}
 \]</span></p>
 <p>です。<strong>発熱倍率が違うメンバーでセンサ値がどう変わったか</strong>を使います。放熱の行も
-<span class="math inline">\(\Delta q\)</span> を <span class="math inline">\(\Delta h\)</span>
+<span class="math inline">\(\Delta q\)</span> を <span
+class="math inline">\(\Delta h\)</span>
 に置き換えて計算します。センサの式にQ・hが直接現れなくても、ROMの時間発展を通じて共分散が生まれます。</p>
 <p><strong>⑤ カルマンゲインを求める。</strong></p>
 <p><span class="math display">\[
 \underbrace{K}_{7\times4}=\underbrace{C_{zy}}_{7\times4}\underbrace{(C_{yy}+R)^{-1}}_{4\times4}
 \]</span></p>
-<p>これは7×4行列です。コードは逆行列を作らず、 <span class="math inline">\((C_{yy}+R)K^{\mathsf T}=C_{zy}^{\mathsf
+<p>これは7×4行列です。コードは逆行列を作らず、 <span
+class="math inline">\((C_{yy}+R)K^{\mathsf T}=C_{zy}^{\mathsf
 T}\)</span> を <code>np.linalg.solve</code> で解きます。</p>
 <p><strong>⑥ 観測との差を7変数の補正量に変換する。</strong>
-各メンバーに独立な観測摂動 <span class="math inline">\(\boldsymbol\varepsilon_k^{(m)}\sim\mathcal
-N(\mathbf0,R)\)</span> を与えます。これは②で作った観測ノイズ <span class="math inline">\(\boldsymbol\eta_k\)</span> とは別です。</p>
+各メンバーに独立な観測摂動 <span
+class="math inline">\(\boldsymbol\varepsilon_k^{(m)}\sim\mathcal
+N(\mathbf0,R)\)</span> を与えます。これは②で作った観測ノイズ <span
+class="math inline">\(\boldsymbol\eta_k\)</span> とは別です。</p>
 <p><span class="math display">\[
 \mathbf r_k^{(m)}=\mathbf
 y_k^{\mathrm{obs}}+\boldsymbol\varepsilon_k^{(m)}-
@@ -1655,7 +1771,9 @@ K_{h,1}&amp;K_{h,2}&amp;K_{h,3}&amp;K_{h,4}
 r_1^{(m)}\\r_2^{(m)}\\r_3^{(m)}\\r_4^{(m)}
 \end{bmatrix}
 \]</span></p>
-<p>左辺は同じ時刻k・メンバーmでの補正量です。上5行の <span class="math inline">\(K_{j,\ell}\)</span> は、下の成分式の <span class="math inline">\(K_{T[Pj],\ell}\)</span> と同じ係数です。</p>
+<p>左辺は同じ時刻k・メンバーmでの補正量です。上5行の <span
+class="math inline">\(K_{j,\ell}\)</span> は、下の成分式の <span
+class="math inline">\(K_{T[Pj],\ell}\)</span> と同じ係数です。</p>
 <table>
 <thead>
 <tr class="header">
@@ -1698,9 +1816,11 @@ r_1^{(m)}\\r_2^{(m)}\\r_3^{(m)}\\r_4^{(m)}
 </table>
 <p>例えば <span class="math inline">\(K_{q,3}\)</span>
 は、<strong>S1のUxが予報から1
-µmずれたとき、発熱倍率qをどれだけ直すか</strong>を表します。 <span class="math inline">\(K_{h,3}\)</span>
+µmずれたとき、発熱倍率qをどれだけ直すか</strong>を表します。 <span
+class="math inline">\(K_{h,3}\)</span>
 は同じずれをhの補正へ換算します。温度観測の列と変位観測の列では単位が異なりますが、ゲインがそれぞれの状態の単位へ換算します。</p>
-<p>行ごとに書けば、代表5点温度については、各 <span class="math inline">\(j=0,\ldots,4\)</span> に対して</p>
+<p>行ごとに書けば、代表5点温度については、各 <span
+class="math inline">\(j=0,\ldots,4\)</span> に対して</p>
 <p><span class="math display">\[
 T_k^{a,(m)}[Pj]=\widetilde T_k^{f,(m)}[Pj]
 +K_{T[Pj],1}r_1^{(m)}+K_{T[Pj],2}r_2^{(m)}
@@ -1741,14 +1861,18 @@ K_{q,1}r_1^{(m)}+K_{q,2}r_2^{(m)} +K_{q,3}r_3^{(m)}+K_{q,4}r_4^{(m)}
 <span class="math inline">\(\mathbf g,\mathbf h\)</span>
 は事前計算した固定値ですが、Kは各観測時刻の60メンバーから毎回求め直します。
 <span class="math inline">\(C_{yy}+R\)</span>
-の逆作用で4観測の相互関係も考慮するため、 <span class="math inline">\(K_{q,3}\)</span> を単に <span class="math inline">\(\mathrm{Cov}(q,U_x(S1))\)</span>
+の逆作用で4観測の相互関係も考慮するため、 <span
+class="math inline">\(K_{q,3}\)</span> を単に <span
+class="math inline">\(\mathrm{Cov}(q,U_x(S1))\)</span>
 だけから決めているわけではありません。</p>
-<p>実装は補正後の <span class="math inline">\(q\)</span> を0〜3、 <span class="math inline">\(h\)</span> を0.0001〜0.2
-W/Kに制限します。発熱量への換算は <span class="math inline">\(Q=15q\)</span>
+<p>実装は補正後の <span class="math inline">\(q\)</span> を0〜3、 <span
+class="math inline">\(h\)</span> を0.0001〜0.2
+W/Kに制限します。発熱量への換算は <span
+class="math inline">\(Q=15q\)</span>
 Wです。このQはON時の発熱量で、OFF中の熱入力はゼロです。</p>
 <p><strong>⑦ 補正した各メンバーの7変数を次の30秒の予報に渡す。</strong>
 平均値1組だけを次へ渡すのではありません。60組を維持して繰り返し、表示時に平均します。補正後温度からUz(A)・Uz(O)を再計算します。変位の独立状態を保存して次時刻へ積分する処理ではありません。</p>
-<h3 id="6-1-ux観測が未観測uzを直す数学的な経路">6-1.
+<h3 id="ux観測が未観測uzを直す数学的な経路">6-1.
 Ux観測が、未観測Uzを直す数学的な経路</h3>
 <p>「UxがUzを物理的に押し動かす」という意味ではありません。同じ温度場がUxとUzに現れることを使って、温度の推定を直す処理です。</p>
 <p>Kの上5行を <span class="math inline">\(K_T\)</span>
@@ -1778,14 +1902,16 @@ h_{A,z}-\mathbf h_{O,z}\)</span> より、</p>
 <p><span class="math display">\[
 \boxed{\Delta_{\mathrm{corr}}d=\mathbf w^{\mathsf T}K_T\mathbf r^{(m)}}
 \]</span></p>
-<p>です。たとえばS1のUx観測差 <span class="math inline">\(r_3^{(m)}\)</span>
+<p>です。たとえばS1のUx観測差 <span
+class="math inline">\(r_3^{(m)}\)</span>
 が反りの補正に寄与する項は、</p>
 <p><span class="math display">\[
 \underbrace{\left[\sum_{j=0}^{4}
 (h_{A,z,j}-h_{O,z,j})K_{T[Pj],3}\right]}_{\beta}
 \ r_3^{(m)}
 \]</span></p>
-<p>（ <span class="math inline">\(eta\)</span> ：S1 の <span class="math inline">\(U_x\)</span>
+<p>（ <span class="math inline">\(eta\)</span> ：S1 の <span
+class="math inline">\(U_x\)</span>
 のずれを、反りの補正へ換算する係数。）</p>
 <p>です。<strong>Ux観測のずれ → Kの3列目による5点温度の補正 →
 温度からUz(A)・Uz(O)を再計算</strong>という経路が、上の積にそのまま表れています。S2のUxは4列目を通ります。A・OのUzは観測に使わず、補正後温度から出力しています。</p>
@@ -1809,10 +1935,14 @@ h_{A,z}-\mathbf h_{O,z}\)</span> より、</p>
 Wで <strong>0.198→0.103 µm</strong>、25 Wで <strong>0.242→0.107
 µm</strong>、間欠加熱で <strong>0.161→0.090 µm</strong>
 に減りました。したがって、<strong>今回の3条件ではUx観測が未観測反りの推定に有効だった</strong>と言えます。すべてのUz出力で最良になることや、実機での有効性まで示した結果ではありません。</p>
-<h3 id="6-2-15-wの結果温度配置を選び変位配置を追加する">6-2. 15
+<h3 id="wの結果温度配置を選び変位配置を追加する">6-2. 15
 Wの結果：温度配置を選び、変位配置を追加する</h3>
 <p><strong>この図で比較する未観測量は8つです。</strong>
-温度はP1・P3・P4の3点、変位は反り <span class="math inline">\(U_z(A)-U_z(O)\)</span> 、A単体の <span class="math inline">\(U_z(A)\)</span> 、O単体の <span class="math inline">\(U_z(O)\)</span> 、別の2点E・Fの <span class="math inline">\(U_z\)</span>
+温度はP1・P3・P4の3点、変位は反り <span
+class="math inline">\(U_z(A)-U_z(O)\)</span> 、A単体の <span
+class="math inline">\(U_z(A)\)</span> 、O単体の <span
+class="math inline">\(U_z(O)\)</span> 、別の2点E・Fの <span
+class="math inline">\(U_z\)</span>
 です。<strong>いずれも図の比較配置では観測に使っていません。</strong>
 E・Fは上面の選定変位点とは異なる、中段の節点です。</p>
 <table>
@@ -1864,13 +1994,16 @@ E・Fは上面の選定変位点とは異なる、中段の節点です。</p>
 </table>
 <p>黒線は正解、色線は同化なし・手動温度2点・選定温度2点・底面変位追加・選定変位追加です。線は各試行の60メンバー平均をさらに5試行で平均しています。表示は最初の更新時刻30秒から600秒までです。</p>
 <figure>
-<img alt="15Wの未観測温度・変位の時刻歴" src="img/sequential_history_learned.png"/>
-<figcaption aria-hidden="true">15Wの未観測温度・変位の時刻歴</figcaption>
+<img src="img/sequential_history_learned.png"
+alt="15Wの未観測温度・変位の時刻歴" />
+<figcaption
+aria-hidden="true">15Wの未観測温度・変位の時刻歴</figcaption>
 </figure>
 <p><em>正解はOpenFOAM温度＋IDWで温度を渡したFrontISTR変位。P1・P3・P4は温度観測に使わない代表点。A・O・E・Fも観測に使いません。橙帯は加熱中。</em></p>
 <p>以下の誤差は30〜300秒、10時刻、5試行で平均しました。温度場は全セルRMSEの時間平均、変位は平均絶対誤差です。</p>
 <p>計算式では、試行数 <span class="math inline">\(S=5\)</span>
-、評価時刻数 <span class="math inline">\(K=10\)</span> 、セル数 <span class="math inline">\(N=20696\)</span> として、</p>
+、評価時刻数 <span class="math inline">\(K=10\)</span> 、セル数 <span
+class="math inline">\(N=20696\)</span> として、</p>
 <p><span class="math display">\[
 E_T=\frac{1}{SK}\sum_{s=1}^{S}\sum_{k=1}^{K}
 \sqrt{\frac{1}{N}\sum_{i=1}^{N}(\widehat T_{s,i}(t_k)-T_i^*(t_k))^2},
@@ -1922,8 +2055,10 @@ E_d=\frac{1}{SK}\sum_{s=1}^{S}\sum_{k=1}^{K}|\widehat d_s(t_k)-d^*(t_k)|
 </tbody>
 </table>
 <figure>
-<img alt="観測配置ごとの温度場・反り・各点変位の誤差" src="img/sequential_error_bars_learned.png"/>
-<figcaption aria-hidden="true">観測配置ごとの温度場・反り・各点変位の誤差</figcaption>
+<img src="img/sequential_error_bars_learned.png"
+alt="観測配置ごとの温度場・反り・各点変位の誤差" />
+<figcaption
+aria-hidden="true">観測配置ごとの温度場・反り・各点変位の誤差</figcaption>
 </figure>
 <p><em>上の表と同じ数値を棒グラフにしたものです。温度場は全セルRMSEの時間平均、変位は平均絶対誤差で、いずれも小さいほど良い指標です。</em></p>
 <p><strong>なぜ手動のP0・P2では誤差が大きかったか。</strong>
@@ -1940,23 +2075,24 @@ mmで、どちらもヒータ側の中段です。ヒータ側を2点測って�
 <p>同化なしの反り誤差は0.239
 µmですが、Uz(A)・Uz(O)はそれぞれ5.604・5.365
 µm外れます。同じ向きの誤差が差を取ると打ち消されるため、反りだけで推定全体を評価できません。</p>
-<h3 id="6-3-25-w間欠加熱でも確かめる">6-3. 25
-W・間欠加熱でも確かめる</h3>
+<h3 id="w間欠加熱でも確かめる">6-3. 25 W・間欠加熱でも確かめる</h3>
 <p>センサ位置とROM係数を変えずに、加熱条件を変えます。</p>
 <figure>
-<img alt="25Wの未観測温度・変位" src="img/sequential_history_q25.png"/>
+<img src="img/sequential_history_q25.png" alt="25Wの未観測温度・変位" />
 <figcaption aria-hidden="true">25Wの未観測温度・変位</figcaption>
 </figure>
 <figure>
-<img alt="15W間欠加熱の未観測温度・変位" src="img/sequential_history_intermittent.png"/>
-<figcaption aria-hidden="true">15W間欠加熱の未観測温度・変位</figcaption>
+<img src="img/sequential_history_intermittent.png"
+alt="15W間欠加熱の未観測温度・変位" />
+<figcaption
+aria-hidden="true">15W間欠加熱の未観測温度・変位</figcaption>
 </figure>
 <table>
 <colgroup>
-<col style="width: 20%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1982,27 +2118,31 @@ W・間欠加熱でも確かめる</h3>
 </tbody>
 </table>
 <figure>
-<img alt="25Wと間欠加熱の配置別反り誤差：棒グラフ" src="img/sequential_error_bars_other_conditions.png"/>
-<figcaption aria-hidden="true">25Wと間欠加熱の配置別反り誤差：棒グラフ</figcaption>
+<img src="img/sequential_error_bars_other_conditions.png"
+alt="25Wと間欠加熱の配置別反り誤差：棒グラフ" />
+<figcaption
+aria-hidden="true">25Wと間欠加熱の配置別反り誤差：棒グラフ</figcaption>
 </figure>
 <p><em>直前の表と同じ値です。各加熱条件で、手動温度2点、選定温度2点、選定温度＋選定変位の3構成を比較します。</em></p>
 <p>どちらも評価区間は30〜300秒です。25
 Wでは底面変位を追加した方が温度場RMSEは小さく、選定変位を追加した方が反り誤差は小さくなりました。<strong>今回のJは反りを目的にした採点値</strong>であることを、結果でも区別します。</p>
-<h3 id="6-4-代表点以外の未観測温度も同化で正解に近づくか">6-4.
+<h3 id="代表点以外の未観測温度も同化で正解に近づくか">6-4.
 代表点以外の未観測温度も、同化で正解に近づくか</h3>
 <p><strong>P1・P3・P4は未観測でもROMの代表点です。ここではさらに、代表点P0〜P4に含まれず、温度観測にも使っていない別の4セルで確認します。</strong>
 既存検証コードで固定している4点を全て掲載し、blog009・010の両方で同じ検証点を使います。観測に使った温度へ合うかだけでなく、復元した別の場所の温度にも合うかを比較します。</p>
 <figure>
-<img alt="代表点以外の未観測温度の検証位置" src="img/nonrep_temperature_positions.png"/>
-<figcaption aria-hidden="true">代表点以外の未観測温度の検証位置</figcaption>
+<img src="img/nonrep_temperature_positions.png"
+alt="代表点以外の未観測温度の検証位置" />
+<figcaption
+aria-hidden="true">代表点以外の未観測温度の検証位置</figcaption>
 </figure>
 <p><em>青は温度を確かめる4つの未観測セル。赤はヒータ、右図の紫は選定温度センサT1・T2、灰はROM代表点です。上から重なって見える点も、高さやセル番号は異なります。検証点は温度センサにもROM代表点にも含まれないことをセル番号で確認しています。</em></p>
 <table>
 <colgroup>
-<col style="width: 23%"/>
-<col style="width: 23%"/>
-<col style="width: 23%"/>
-<col style="width: 30%"/>
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 30%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2054,9 +2194,10 @@ Wでは底面変位を追加した方が温度場RMSEは小さく、選定変位
 <p>です。バーはPODの時間平均場、ハットは同化後の推定値です。<strong>観測のずれで代表5点を補正した影響が、この復元式を通して、観測していないセルの温度にも反映されます。</strong>
 同化なしでは、観測で補正せずに進めた代表5点から、同じGで復元します。</p>
 <p>以下は、既存の同一EnKF比較で保存した全7温度点のうち、代表点以外の4点を抜き出した図です。新しく異なる条件のEnKFを計算した結果ではありません。</p>
-<h4 id="15-w0300秒加熱での比較">15 W：0〜300秒加熱での比較</h4>
+<h4 id="w0300秒加熱での比較">15 W：0〜300秒加熱での比較</h4>
 <figure>
-<img alt="代表点以外の未観測4点温度：15 W：0〜300秒加熱" src="img/nonrep_temperature_learned.png"/>
+<img src="img/nonrep_temperature_learned.png"
+alt="代表点以外の未観測4点温度：15 W：0〜300秒加熱" />
 <figcaption aria-hidden="true">代表点以外の未観測4点温度：15
 W：0〜300秒加熱</figcaption>
 </figure>
@@ -2065,12 +2206,12 @@ W：0〜300秒加熱</figcaption>
 [K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
 <table>
 <colgroup>
-<col style="width: 13%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2117,9 +2258,10 @@ W：0〜300秒加熱</figcaption>
 </tr>
 </tbody>
 </table>
-<h4 id="25-w0300秒加熱での比較">25 W：0〜300秒加熱での比較</h4>
+<h4 id="w0300秒加熱での比較-1">25 W：0〜300秒加熱での比較</h4>
 <figure>
-<img alt="代表点以外の未観測4点温度：25 W：0〜300秒加熱" src="img/nonrep_temperature_q25.png"/>
+<img src="img/nonrep_temperature_q25.png"
+alt="代表点以外の未観測4点温度：25 W：0〜300秒加熱" />
 <figcaption aria-hidden="true">代表点以外の未観測4点温度：25
 W：0〜300秒加熱</figcaption>
 </figure>
@@ -2128,12 +2270,12 @@ W：0〜300秒加熱</figcaption>
 [K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
 <table>
 <colgroup>
-<col style="width: 13%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2180,10 +2322,11 @@ W：0〜300秒加熱</figcaption>
 </tr>
 </tbody>
 </table>
-<h4 id="15-w0150秒300450秒の間欠加熱での比較">15
+<h4 id="w0150秒300450秒の間欠加熱での比較">15
 W：0〜150秒・300〜450秒の間欠加熱での比較</h4>
 <figure>
-<img alt="代表点以外の未観測4点温度：15 W：0〜150秒・300〜450秒の間欠加熱" src="img/nonrep_temperature_intermittent.png"/>
+<img src="img/nonrep_temperature_intermittent.png"
+alt="代表点以外の未観測4点温度：15 W：0〜150秒・300〜450秒の間欠加熱" />
 <figcaption aria-hidden="true">代表点以外の未観測4点温度：15
 W：0〜150秒・300〜450秒の間欠加熱</figcaption>
 </figure>
@@ -2192,12 +2335,12 @@ W：0〜150秒・300〜450秒の間欠加熱</figcaption>
 [K]</strong>です。評価区間は30〜300秒の10時刻、5試行で、全セルRMSEとは異なります。</p>
 <table>
 <colgroup>
-<col style="width: 13%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
-<col style="width: 17%"/>
+<col style="width: 13%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
+<col style="width: 17%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2258,13 +2401,13 @@ Kになりました。</strong>
 <p>図の作成：<code>run/make_nonrep_temperature_validation.py</code>。点のセル番号・座標・観測との非重複確認・誤差一覧は
 <code>results/nonrep_temperature_validation.json</code>
 に保存しています。</p>
-<h2 id="7-結論と再現場所">7. 結論と再現場所</h2>
+<h2 id="結論と再現場所">7. 結論と再現場所</h2>
 <p>温度2点を先に選び、その配置に変位2点を追加すると、今回の3条件では未観測の反りの推定誤差が段階的に改善しました。位置を選ぶ理由は、単なる熱感度の大きさではなく、<strong>既に選んだセンサで残る不確かさを、追加候補がどれだけ減らせるか</strong>です。</p>
 <p>代表5点温度が完全に既知なら、固定した復元式の範囲では温度由来の不確かさはゼロです。ただしPODの復元誤差、モデル誤差、未知Q/hによる将来の予測誤差は別に残ります。</p>
 <table>
 <colgroup>
-<col style="width: 50%"/>
-<col style="width: 50%"/>
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2305,22 +2448,27 @@ Kになりました。</strong>
 <p>すべて <code>sample/106_0_pod_selected_rom/</code>
 内です。正解のOpenFOAM温度場は既存データを利用し、IDWに変更したFrontISTR変位とROMのEnKFを再計算しました。旧試験の「センサ種類を問わず2本だけ選ぶ結果」と、今回の「温度2本を先に選んでから変位2本を足す結果」は混ぜていません。</p>
 <p>評価対象A・Oだけをz軸まわりに90°回し、同じ手順・3加熱条件で選び直した比較は
-<a href="blog010.html">blog010：評価点を変えた観測配置の検証</a>
+<a
+href="blog010.html">blog010：評価点を変えた観測配置の検証</a>
 にまとめました。</p>
-<hr/>
-<h2 id="8-4000-本の総当たりではなく理論から最適位置を求める">8. 4,000
+<hr />
+<h2 id="本の総当たりではなく理論から最適位置を求める">8. 4,000
 本の総当たりではなく、理論から最適位置を求める</h2>
-<p>ここまでの選び方は「ROM を 4,000 本回してばらつき <span class="math inline">\(B\)</span>
+<p>ここまでの選び方は「ROM を 4,000 本回してばらつき <span
+class="math inline">\(B\)</span>
 を作り、候補を1本ずつ総当たりで採点する」ものでした。同じ答えを、<strong>もっと理論的に、短い計算で</strong>出せるかを確かめました（
-<code>run/theory_based_selection.py</code> ）。 <span class="math inline">\(B\)</span>
+<code>run/theory_based_selection.py</code> ）。 <span
+class="math inline">\(B\)</span>
 は乱数ではなく式で計算したもの（blog_008 §5-2
 の「共分散の伝播」）を使っています。</p>
 <p><span class="math inline">\(B\)</span>
-を熱方程式から求める部分（固定した放熱条件での線形応答＋放熱条件の数値積分、および接線近似）は、<a href="blog011.html">blog_011</a>
-で別に詳しく扱っています。この節では、 <span class="math inline">\(B\)</span>
+を熱方程式から求める部分（固定した放熱条件での線形応答＋放熱条件の数値積分、および接線近似）は、<a
+href="blog011.html">blog_011</a>
+で別に詳しく扱っています。この節では、 <span
+class="math inline">\(B\)</span>
 が手に入った後の「候補の選び方」を理論的にする部分（閉じた式、2軸の見方、全ペアの厳密評価、複数目的、逐次
 σ）を扱います。</p>
-<h3 id="8-1-センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
+<h3 id="センサ1本の-σ-は閉じた式で書ける">8-1. センサ1本の σ
 は、閉じた式で書ける</h3>
 <p>センサ1本（重み <span class="math inline">\(\mathbf h\)</span>
 ）を付けた後の反りの σ
@@ -2338,13 +2486,14 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <li><span class="math inline">\(\mathrm{SNR}\)</span>
 ：センサの値のばらつき ÷ ノイズ。<strong>値がよく動くか</strong>。</li>
 </ul>
-<p><strong>理想のセンサは、重みが反りの重みと同じ向きで（ <span class="math inline">\(\cos\theta_B\to\pm1\)</span> ）、値が大きく動く（
+<p><strong>理想のセンサは、重みが反りの重みと同じ向きで（ <span
+class="math inline">\(\cos\theta_B\to\pm1\)</span> ）、値が大きく動く（
 <span class="math inline">\(\mathrm{SNR}\gg1\)</span>
 ）もの</strong>です。この式で全候補を並べた結果は、総当たりの σ
 と一致しました（差 <span class="math inline">\(10^{-16}\)</span>
 µm、計算 0.03
 秒）。総当たりが要らないのではなく、「総当たりの採点が、この2つの量に分解できる」ということです。</p>
-<h3 id="8-2-候補を全体の温まりと温度差の2軸で見る">8-2.
+<h3 id="候補を全体の温まりと温度差の2軸で見る">8-2.
 候補を「全体の温まり」と「温度差」の2軸で見る</h3>
 <p>温度のばらつき <span class="math inline">\(B\)</span>
 を固有値分解すると、<strong>90 %
@@ -2352,7 +2501,7 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 が「ヒータ側⇔反対側」の方向（温度差）</strong>で、残りは 3 %
 です。各候補の重みをこの2方向に射影し、ノイズで割ると、候補は平面上の点になります。</p>
 <figure>
-<img alt="候補を2軸で見る" src="img/two_axis_plane.png"/>
+<img src="img/two_axis_plane.png" alt="候補を2軸で見る" />
 <figcaption aria-hidden="true">候補を2軸で見る</figcaption>
 </figure>
 <p><em>横軸＝全体の温まりがどれだけ見えるか、縦軸＝温度差がどれだけ見えるか（どちらも信号÷ノイズ、30〜300
@@ -2363,8 +2512,10 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <li><strong>反り（★）は縦軸の上</strong>にあります。横軸（全体の温まり）には反応しません。</li>
 <li><strong>温度計は全部、右側（横軸
 7〜9）</strong>にあります。温度計はどこに置いても全体の温まりが見えます。縦軸の位置はヒータ側（＋）か反対側（−）かで決まります。</li>
-<li><strong>変位計は広く散らばります</strong>。上面の横方向（ <span class="math inline">\(U_x\)</span> ）の候補は横軸がほぼ 0
-で、温度差だけを見ます。上面の上下方向（ <span class="math inline">\(U_z\)</span> 、S2
+<li><strong>変位計は広く散らばります</strong>。上面の横方向（ <span
+class="math inline">\(U_x\)</span> ）の候補は横軸がほぼ 0
+で、温度差だけを見ます。上面の上下方向（ <span
+class="math inline">\(U_z\)</span> 、S2
 など）は右下にあり、全体の温まりも見えます。</li>
 <li><strong>blog_009
 の鏡写しの変位計2本（◆）は、縦軸の近くの同じ場所</strong>にあります。反りと同じ軸しか見ていないので反りは当たり、全体の温まりが見えないので温度は当たらない、ということが一目で分かります。</li>
@@ -2375,7 +2526,7 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <span class="math inline">\(B\)</span> で評価し直すと、変位2本で
 0.32、温度2本で 0.54 µm と、貪欲法より悪い）。残り 3 %
 の方向も2本目の選定には効きます。図は説明のために使い、選定は5次元のままで行います。</p>
-<h3 id="8-3-2本の全組み合わせを厳密に評価する">8-3.
+<h3 id="本の全組み合わせを厳密に評価する">8-3.
 2本の全組み合わせを、厳密に評価する</h3>
 <p>2本の σ は、1本足すごとの更新式（付録B）を2回使うと、<strong>2×2
 の式で閉じます</strong>。そのため、候補の全組み合わせ（変位2本：約1.1億組、温度2本：約2.1億組）を、近似なしで評価できます（各時刻の
@@ -2383,10 +2534,10 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 2×2 の行列の計算だけ）。</p>
 <table style="width:100%;">
 <colgroup>
-<col style="width: 21%"/>
-<col style="width: 21%"/>
-<col style="width: 28%"/>
-<col style="width: 28%"/>
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 28%" />
+<col style="width: 28%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2399,13 +2550,16 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <tbody>
 <tr class="odd">
 <td>変位2本・貪欲法（§2）</td>
-<td>上面 <span class="math inline">\(U_x\)</span> の鏡写し <span class="math inline">\((18.8,\,\pm32.5)\)</span></td>
+<td>上面 <span class="math inline">\(U_x\)</span> の鏡写し <span
+class="math inline">\((18.8,\,\pm32.5)\)</span></td>
 <td style="text-align: right;">0.296 µm</td>
 <td style="text-align: right;">数秒</td>
 </tr>
 <tr class="even">
 <td><strong>変位2本・全ペア厳密</strong></td>
-<td>上面 <span class="math inline">\(U_x\)</span> <span class="math inline">\((26.5,\,26.5)\)</span> ＋ <span class="math inline">\((9.7,\,-36.2)\)</span></td>
+<td>上面 <span class="math inline">\(U_x\)</span> <span
+class="math inline">\((26.5,\,26.5)\)</span> ＋ <span
+class="math inline">\((9.7,\,-36.2)\)</span></td>
 <td style="text-align: right;"><strong>0.293 µm</strong></td>
 <td style="text-align: right;">81 秒</td>
 </tr>
@@ -2424,7 +2578,8 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <tr class="odd">
 <td><strong>温度1本＋変位1本・全ペア厳密</strong></td>
 <td>温度：反対側 <span class="math inline">\(z=80\)</span> mm ＋ 変位
-<span class="math inline">\(U_x\)</span> 上面 <span class="math inline">\((-4.9,\,-37.2)\)</span></td>
+<span class="math inline">\(U_x\)</span> 上面 <span
+class="math inline">\((-4.9,\,-37.2)\)</span></td>
 <td style="text-align: right;"><strong>0.286 µm</strong></td>
 <td style="text-align: right;">124 秒</td>
 </tr>
@@ -2434,15 +2589,17 @@ w^{\mathsf T}B\,\mathbf w)(\mathbf h^{\mathsf T}B\,\mathbf h)}},\qquad
 <li><strong>貪欲法は、厳密な最適解の 1 % 以内でした。</strong>
 1本ずつ選ぶ方法で十分だったことが、厳密解で確かめられました。</li>
 <li>反りだけを目的にすると、種類を問わない最良は「温度1本＋変位1本」（0.286
-µm）です。ただし温度計1本では <span class="math inline">\(U_z(A)\)</span> の σ が 0.51 µm（§8-4
+µm）です。ただし温度計1本では <span
+class="math inline">\(U_z(A)\)</span> の σ が 0.51 µm（§8-4
 の表）で、全体の温まりは半分しか直りません。</li>
 </ul>
-<h3 id="8-4-目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
+<h3 id="目的を反り-u_za-平均温度にして2本を厳密に選ぶ">8-4.
 目的を「反り＋ <span class="math inline">\(U_z(A)\)</span>
 ＋平均温度」にして、2本を厳密に選ぶ</h3>
 <p>§5
 の落とし穴（反りだけを目的にすると全体の温まりが見えない）を避けるため、知りたい量を3つにして、「それぞれの
-σ が測る前の何割残るか」の二乗の和 <span class="math inline">\(J\)</span>
+σ が測る前の何割残るか」の二乗の和 <span
+class="math inline">\(J\)</span>
 を最小にする2本を、全組み合わせから厳密に選びました。</p>
 <p><span class="math display">\[
 J=\Big(\frac{\sigma_{A-O}}{\sigma_{A-O,0}}\Big)^2+\Big(\frac{\sigma_{U_z(A)}}{\sigma_{U_z(A),0}}\Big)^2+\Big(\frac{\sigma_{\bar
@@ -2450,16 +2607,17 @@ T}}{\sigma_{\bar T,0}}\Big)^2
 \]</span></p>
 <table>
 <colgroup>
-<col style="width: 20%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>2本の配置</th>
 <th style="text-align: right;">反り A−O の σ</th>
-<th style="text-align: right;"><span class="math inline">\(U_z(A)\)</span> の σ</th>
+<th style="text-align: right;"><span
+class="math inline">\(U_z(A)\)</span> の σ</th>
 <th style="text-align: right;">5点の平均温度の σ</th>
 </tr>
 </thead>
@@ -2471,7 +2629,8 @@ T}}{\sigma_{\bar T,0}}\Big)^2
 <td style="text-align: right;">2.39 K</td>
 </tr>
 <tr class="even">
-<td>変位2本（反りだけ、§2 の鏡写し <span class="math inline">\(U_x\)</span> ）</td>
+<td>変位2本（反りだけ、§2 の鏡写し <span
+class="math inline">\(U_x\)</span> ）</td>
 <td style="text-align: right;"><strong>0.30 µm</strong></td>
 <td style="text-align: right;">2.58 µm</td>
 <td style="text-align: right;">2.14 K</td>
@@ -2483,19 +2642,26 @@ T}}{\sigma_{\bar T,0}}\Big)^2
 <td style="text-align: right;">0.40 K</td>
 </tr>
 <tr class="even">
-<td><strong>変位2本（3つの目的、厳密）</strong>：上面 <span class="math inline">\(U_z\)</span> の鏡写し <span class="math inline">\((\mp36.2,\,\pm9.7)\)</span></td>
+<td><strong>変位2本（3つの目的、厳密）</strong>：上面 <span
+class="math inline">\(U_z\)</span> の鏡写し <span
+class="math inline">\((\mp36.2,\,\pm9.7)\)</span></td>
 <td style="text-align: right;">0.33 µm</td>
 <td style="text-align: right;"><strong>0.27 µm</strong></td>
 <td style="text-align: right;"><strong>0.24 K</strong></td>
 </tr>
 <tr class="odd">
-<td>温度2本（3つの目的、厳密）：ヒータ側 <span class="math inline">\(z=48\)</span> ＋ 反対側 <span class="math inline">\(z=67\)</span> mm</td>
+<td>温度2本（3つの目的、厳密）：ヒータ側 <span
+class="math inline">\(z=48\)</span> ＋ 反対側 <span
+class="math inline">\(z=67\)</span> mm</td>
 <td style="text-align: right;">0.38 µm</td>
 <td style="text-align: right;">0.38 µm</td>
 <td style="text-align: right;">0.24 K</td>
 </tr>
 <tr class="even">
-<td>温度1本＋変位1本（3つの目的、厳密）：温度 ヒータ側 <span class="math inline">\(z=36\)</span> ＋ 変位 <span class="math inline">\(U_z\)</span> 上面 <span class="math inline">\((-36.2,\,9.7)\)</span></td>
+<td>温度1本＋変位1本（3つの目的、厳密）：温度 ヒータ側 <span
+class="math inline">\(z=36\)</span> ＋ 変位 <span
+class="math inline">\(U_z\)</span> 上面 <span
+class="math inline">\((-36.2,\,9.7)\)</span></td>
 <td style="text-align: right;">0.36 µm</td>
 <td style="text-align: right;">0.35 µm</td>
 <td style="text-align: right;">0.23 K</td>
@@ -2503,7 +2669,9 @@ T}}{\sigma_{\bar T,0}}\Big)^2
 </tbody>
 </table>
 <ul>
-<li>目的を3つにすると、<strong>変位2本でも「上面の上下方向 <span class="math inline">\(U_z\)</span> 」が選ばれ</strong>、反り・ <span class="math inline">\(U_z(A)\)</span> ・平均温度のすべてが測る前の
+<li>目的を3つにすると、<strong>変位2本でも「上面の上下方向 <span
+class="math inline">\(U_z\)</span> 」が選ばれ</strong>、反り・ <span
+class="math inline">\(U_z(A)\)</span> ・平均温度のすべてが測る前の
 1/4〜1/10 になります。反りは 0.30 → 0.33 µm
 とわずかに譲るだけです。</li>
 <li>2軸の図で言うと、上下方向の変位計は右下（全体の温まりも温度差も見える）にあるので、2本で両方の軸を押さえられます。</li>
@@ -2511,7 +2679,7 @@ T}}{\sigma_{\bar T,0}}\Big)^2
 EnKF（真値＝OpenFOAM＋FrontISTR、3条件）で確かめた結果は、§8-6
 にあります。</li>
 </ul>
-<h3 id="8-5-補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
+<h3 id="補正を積み重ねた後の-σ-も式で計算できる逐次-σ">8-5.
 補正を積み重ねた後の σ も、式で計算できる（逐次 σ）</h3>
 <p>σ は「直す前の状態から1回だけ直したら」の値なので、30
 秒ごとに20回直す実際のデータ同化より大きめに出ます（blog_008 §5-2
@@ -2527,10 +2695,10 @@ T}+R\big)^{-1}HP^f_{k+1}
 ）で、平均の軌道のまわりの一次近似。モデル誤差は入れていない。）</p>
 <table>
 <colgroup>
-<col style="width: 20%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
-<col style="width: 26%"/>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2586,31 +2754,35 @@ T}+R\big)^{-1}HP^f_{k+1}
 <li>逐次 σ のほうが、値が実際に近づきます。それでもまだ 1.5〜2
 倍大きいのは、モデル誤差を入れていないことと、一次近似のためと考えられます（確かめていません）。</li>
 </ul>
-<h3 id="8-6-理論で選んだ配置をenkf-で確かめる">8-6.
-理論で選んだ配置を、EnKF で確かめる</h3>
+<h3 id="理論で選んだ配置をenkf-で確かめる">8-6. 理論で選んだ配置を、EnKF
+で確かめる</h3>
 <p>§8-3・§8-4 で選んだ配置を、真値＝OpenFOAM＋FrontISTR の3条件で EnKF
 にかけ、測っていない量の誤差を比べました（
 <code>run/selected_pair_unobserved_check.py mo</code> ）。</p>
 <figure>
-<img alt="理論で選んだ2本と、反りだけで選んだ2本" src="img/unobserved_mo_learned.png"/>
-<figcaption aria-hidden="true">理論で選んだ2本と、反りだけで選んだ2本</figcaption>
+<img src="img/unobserved_mo_learned.png"
+alt="理論で選んだ2本と、反りだけで選んだ2本" />
+<figcaption
+aria-hidden="true">理論で選んだ2本と、反りだけで選んだ2本</figcaption>
 </figure>
 <blockquote>
 <p>15
 W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的3つで選んだ変位2本（上面
 <span class="math inline">\(U_z\)</span>
 の鏡写し）、緑＝目的3つで選んだ温度1本＋変位1本、紫＝反りだけで厳密に選んだ温度1本＋変位1本。見方は
-§4 の図と同じ。25 W と間欠加熱の図：<a href="img/unobserved_mo_q25.png">unobserved_mo_q25.png</a>、<a href="img/unobserved_mo_intermittent.png">unobserved_mo_intermittent.png</a></p>
+§4 の図と同じ。25 W と間欠加熱の図：<a
+href="img/unobserved_mo_q25.png">unobserved_mo_q25.png</a>、<a
+href="img/unobserved_mo_intermittent.png">unobserved_mo_intermittent.png</a></p>
 </blockquote>
 <p><strong>測っていない量の誤差</strong>（30〜300
 秒の平均、5回の平均。15 W／25 W／間欠）</p>
 <table>
 <colgroup>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
-<col style="width: 20%"/>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2630,7 +2802,8 @@ W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的
 <td>5.37／4.59／5.35 µm</td>
 </tr>
 <tr class="even">
-<td>変位2本（反りだけ、§2 の鏡写し <span class="math inline">\(U_x\)</span> ）</td>
+<td>変位2本（反りだけ、§2 の鏡写し <span
+class="math inline">\(U_x\)</span> ）</td>
 <td><strong>0.12／0.13／0.09 µm</strong></td>
 <td>4.44／4.58／4.42 K</td>
 <td>5.32／5.54／5.29 µm</td>
@@ -2665,9 +2838,11 @@ W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的
 が同じ向きにずれて打ち消し合うため、データ同化なしでも反りだけは小さく見えます（§4）。</p>
 <ul>
 <li><strong>目的を3つにして選んだ変位2本（上面の上下方向）は、2本だけで温度場
-0.14 K、 <span class="math inline">\(U_z(A)\)</span> 0.15 µm、 <span class="math inline">\(U_z(O)\)</span> 0.10 µm まで直りました。</strong>
+0.14 K、 <span class="math inline">\(U_z(A)\)</span> 0.15 µm、 <span
+class="math inline">\(U_z(O)\)</span> 0.10 µm まで直りました。</strong>
 反りは 0.12 → 0.16 µm
-とわずかに譲るだけです。反りだけで選んだ2本（温度場 4.4 K、 <span class="math inline">\(U_z\)</span> 5 µm 以上のまま）との違いは、§5
+とわずかに譲るだけです。反りだけで選んだ2本（温度場 4.4 K、 <span
+class="math inline">\(U_z\)</span> 5 µm 以上のまま）との違いは、§5
 の理論どおりです。</li>
 <li>反りだけを目的に「温度1本＋変位1本」を厳密に選ぶと、反りは変位2本とほぼ同じ（0.13
 µm）で、温度場も 0.23 K
@@ -2677,13 +2852,13 @@ W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的
 を作っていない条件）でも同じ傾向です。</li>
 <li>2本で温度場・個別の変位・反りをすべて当てたいなら、この中では「目的3つで選んだ変位2本（上面の上下方向の鏡写し）」が一番良い結果でした。</li>
 </ul>
-<h3 id="8-7-まとめ4000-本の総当たりは何に置き換わるか">8-7.
-まとめ：4,000 本の総当たりは何に置き換わるか</h3>
+<h3 id="まとめ4000-本の総当たりは何に置き換わるか">8-7. まとめ：4,000
+本の総当たりは何に置き換わるか</h3>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2724,14 +2899,14 @@ W。灰色の破線＝反りだけで選んだ変位2本（§2）、赤＝目的
 <p><strong>やっていないこと</strong>：3本以上の厳密解（組み合わせが多すぎるので、貪欲法か凸緩和が必要）、モデル誤差
 <span class="math inline">\(Q\)</span> を入れた逐次
 σ、ノイズを実物並み（1 K、1 µm）にした場合。</p>
-<h2 id="9-先行研究温度センサの位置はどこが良いとされているか">9.
+<h2 id="先行研究温度センサの位置はどこが良いとされているか">9.
 先行研究：温度センサの位置は、どこが良いとされているか</h2>
 <p>工作機械の熱変形の研究で、温度センサの配置は、ほぼすべて「<strong>熱変位（工具先端のずれ）を推定するための配置</strong>」として選ばれています。結論は大きく3つの流派に分かれます。<strong>共通する答えは「熱源の近く」と「互いに違う情報を持つ点を選ぶ」の2点</strong>で、どの機械にも当てはまる場所の正解はなく、機械や運転条件ごとに決める、という見方で一致しています。</p>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2771,9 +2946,9 @@ Kizaki, Teshima, Sugita（2025、東大、IJAT）は 307 点から LASSO
 <p><strong>本研究との関係</strong></p>
 <table>
 <colgroup>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
-<col style="width: 33%"/>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2819,24 +2994,30 @@ Kizaki, Teshima, Sugita（2025、東大、IJAT）は 307 点から LASSO
 ら（2025）は要旨までです。この2件は本文が取れず、選ばれた具体的な場所（主軸頭、コラムなど）は確かめていません。発表で引用するときは、本文を確認する必要があります。</p>
 <p><strong>参考文献</strong></p>
 <ul>
-<li><a href="https://wumrc.engin.umich.edu/wp-content/uploads/sites/51/2013/08/08JMSEZhuMachinetoolthermalerrorcompensation.pdf">Zhu,
+<li><a
+href="https://wumrc.engin.umich.edu/wp-content/uploads/sites/51/2013/08/08JMSEZhuMachinetoolthermalerrorcompensation.pdf">Zhu,
 Ni, Shih (2008) Robust machine tool thermal error modeling through
 thermal mode concept, J. Manuf. Sci. Eng.</a></li>
-<li><a href="https://pure.hud.ac.uk/en/publications/an-efficient-offline-method-for-determining-the-thermally-sensiti/">Mian
+<li><a
+href="https://pure.hud.ac.uk/en/publications/an-efficient-offline-method-for-determining-the-thermally-sensiti/">Mian
 et al. (2012) An efficient offline method for determining the thermally
 sensitive points of a machine tool structure</a></li>
-<li><a href="https://www.fujipress.jp/ijat/au/ijate001900050758/">Tanaka,
+<li><a
+href="https://www.fujipress.jp/ijat/au/ijate001900050758/">Tanaka,
 Kizaki, Teshima, Sugita (2025) Int. J. Automation Technol.（307
 点の温度センサと LASSO）</a></li>
 <li><a href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima,
 Tanaka, Kizaki, Sugita (2024) Sensor placement strategy based on
 reduced-order models for thermal error estimation in machine tools, CIRP
 JMST 55, 403–410</a></li>
-<li><a href="https://www2.mdpi.com/2075-1702/9/11/286">温度感応点の選定（ファジィクラスタリング＋灰色関連分析）の例：MDPI
+<li><a
+href="https://www2.mdpi.com/2075-1702/9/11/286">温度感応点の選定（ファジィクラスタリング＋灰色関連分析）の例：MDPI
 Machines</a></li>
-<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9315643/">温度感応点の選定の例（PMC
+<li><a
+href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9315643/">温度感応点の選定の例（PMC
 掲載論文）</a></li>
-<li><a href="https://eprints.hud.ac.uk/21510/1/Euspen_Thermal_SIG_Extended_abstract_SF_v2.pdf">熱誤差補償とセンサ配置の概説：Euspen
+<li><a
+href="https://eprints.hud.ac.uk/21510/1/Euspen_Thermal_SIG_Extended_abstract_SF_v2.pdf">熱誤差補償とセンサ配置の概説：Euspen
 Thermal SIG</a></li>
 </ul>
 </body>
