@@ -1,4 +1,8 @@
-"""PODで出た「型（モード）」を絵にする（平均場＋モード1〜5）."""
+"""PODで出た「型（モード）」を絵にする（平均場＋モード1〜5）.
+
+  python3 run/make_pod_modes_fig.py         → docs/img/pod_modes.png（2 行 × 3 列、注記つき）
+  python3 run/make_pod_modes_fig.py --wide  → docs/img/pod_modes_wide.png（スライド用：1 行 × 6 列、字を大きく、注記なし）
+"""
 from __future__ import annotations
 import os, sys, tempfile
 import numpy as np
@@ -53,6 +57,8 @@ def main():
         pl.camera_position=CAM; pl.set_background("white")
         pl.camera.zoom(1.18)      # 少し引いて上下の見切れ（円柱が枠に接する）を防ぐ
         p=os.path.join(TMP,f"m{i}.png"); pl.screenshot(p); pl.close(); shots.append((p,lab,clim,cmap,sym))
+    if "--wide" in sys.argv:
+        wide(shots); return
     fig,axes=plt.subplots(2,3,figsize=(13,10))
     axes=axes.ravel()
     tt=["実際の温度[℃]","全体が同じだけ昇温(一様→全面が同じ暖色)","ヒータ側(赤)↔反対側(青)","高次の細部", "高次の細部", "高次の細部"]
@@ -68,6 +74,31 @@ def main():
              "モードの符号は任意で、ここでは昇温を暖色に揃えた。",ha="center",fontsize=10.5,color="dimgray")
     fig.tight_layout(rect=[0,0.06,1,0.93]); fig.savefig(os.path.join(IMG,"pod_modes.png"),dpi=130); plt.close(fig)
     print("[modes] wrote docs/img/pod_modes.png")
+
+
+def wide(shots):
+    """スライド用：横 1 列に 6 枚。白い余白を切り、字を大きくする（幅 16 インチで目盛り 15 pt 以上）。"""
+    fig,axes=plt.subplots(1,6,figsize=(18,5.2))
+    for ax,(p,lab,clim,cmap,sym) in zip(axes,shots):
+        im=plt.imread(p)[:,:,:3]; nz=np.where((im<0.96).any(axis=2))
+        im=im[max(nz[0].min()-5,0):nz[0].max()+5, max(nz[1].min()-5,0):nz[1].max()+5]
+        ax.imshow(im); ax.axis("off")
+        name,_,pct=lab.partition(" ")
+        if pct:   # 9.42e-05% のような指数表記をやめ、0.0000942% と書く
+            pct="("+np.format_float_positional(float(pct.strip("()%")),precision=3,unique=True,fractional=False,trim="-")+"%)"
+        ax.set_title(name+("\n"+pct if pct else "\n "),fontsize=20,pad=4)
+        cb=fig.colorbar(plt.cm.ScalarMappable(norm=plt.Normalize(*clim),cmap=cmap),ax=ax,orientation="horizontal",
+                        fraction=.06,pad=.04,aspect=10,shrink=.8)
+        if sym:
+            cb.set_ticks([0.8*clim[0],0,0.8*clim[1]]); cb.set_ticklabels(["−","0","＋"])   # 端に置くと隣の図の記号とくっつくので内側に
+            cb.set_label("型の成分",fontsize=16)
+        else:
+            lo,hi=clim; cb.set_ticks([np.ceil(lo*2)/2,np.floor(hi*2)/2]); cb.ax.xaxis.set_major_formatter(plt.FormatStrFormatter("%.1f"))
+            cb.set_label("平均温度 [°C]",fontsize=16)
+        cb.ax.tick_params(labelsize=16)
+    fig.subplots_adjust(left=.02,right=.98,top=.84,bottom=.04,wspace=1.2)   # 図どうしの間に「＋ a_{i,k} ×」を書き込めるだけあける
+    out=os.path.join(IMG,"pod_modes_wide.png"); fig.savefig(out,dpi=130,bbox_inches="tight",facecolor="white"); plt.close(fig)
+    print("[modes] wrote",out)
 
 
 if __name__=="__main__": main()

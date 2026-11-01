@@ -5,7 +5,8 @@ ROM は 15 W・0〜300 s の CHT 1本から作ったもの（results/rom_calibra
 間欠加熱では「0〜300 s に一定と仮定」した場合も重ねる。
 
 出力: docs/img/rom_applicability.png, results/rom_applicability.json
-再現: OMP_NUM_THREADS=4 python3 run/make_rom_applicability_fig.py
+     --heater を付けると docs/img/rom_applicability_heater.png（上段の温度にヒータの発熱を重ね、字を大きくした発表用）
+再現: OMP_NUM_THREADS=4 python3 run/make_rom_applicability_fig.py [--heater]
 """
 from __future__ import annotations
 import os, sys, json
@@ -15,12 +16,58 @@ sys.path.insert(0, ROOT); sys.path.insert(0, HERE)
 from dacore import plots as _p
 import matplotlib.pyplot as plt
 from dacore import rom_general as rg
-from improve_heating_schedule import integrate, SCHED
+from improve_heating_schedule import integrate, SCHED, QTRUE
 RES=os.path.join(ROOT,"results"); IMG=os.path.join(ROOT,"docs","img")
 CASES=[("learned",1.0,"15 W・0〜300 s（ROM の係数を決めた計算）"),("q25",25/15,"25 W・0〜300 s（新しく計算した条件）"),("intermittent",1.0,"15 W 間欠加熱（新しく計算した条件）")]
 
 
+def heater_fig():
+    """温度（OpenFOAM と ROM）の後ろにヒータの発熱を重ねる。下段は差。字は幅 16 インチで 15 pt 以上。"""
+    d=np.load(os.path.join(RES,"rom_calibrated_pod.npz")); C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],5); h=float(d["h"]); heat=int(d["heat_node"])
+    pod=np.load(os.path.join(RES,"qdeim_points.npz"))["cell_idx"]
+    cols=["#1f77b4","#ff7f0e","#C0392B","#2ca02c","#9467bd"]
+    titles={"learned":"15 W・0〜300 s\n（ROM を作った条件）","q25":"25 W・0〜300 s\n（新しい条件）","intermittent":"15 W 間欠加熱\n（新しい条件）"}
+    plt.rcParams.update({"font.size":16,"axes.titlesize":19,"axes.labelsize":18,"xtick.labelsize":16,"ytick.labelsize":16,"legend.fontsize":16})
+    fig,axs=plt.subplots(2,3,figsize=(16,9.6),sharex=True,gridspec_kw=dict(height_ratios=[1.6,1],hspace=0.12,wspace=0.42))
+    tq=np.linspace(0,600,1201)
+    for j,(case,q,_) in enumerate(CASES):
+        z=np.load(os.path.join(RES,f"limit_truth_{case}.npz")); t=z["times"]; T5=z["Tfield"][:,pod]
+        T=np.full((1,5),rg.T_AIR_K); tr=[T[0].copy()]
+        for k in range(1,len(t)): T=integrate(T,C,Km,np.array([h]),np.array([q]),heat,SCHED[case],t[k-1],t[k]); tr.append(T[0].copy())
+        R=np.array(tr); e=R-T5
+        ax=axs[0,j]; ax2=ax.twinx(); ax.set_zorder(ax2.get_zorder()+1); ax.patch.set_visible(False)
+        P=np.array([QTRUE[case](x) for x in tq],float)
+        ax2.fill_between(tq,P,step="post",color="#FFF4B8",lw=0); ax2.step(tq,P,where="post",color="#D4A800",lw=2.5)   # ヒータは黄色（P1 のオレンジと区別）
+        ax2.set_ylim(0,40); ax2.set_yticks([0,15,25]); ax2.tick_params(axis="y",colors="#9A7B00")
+        if j==2: ax2.set_ylabel("ヒータの発熱 [W]",color="#9A7B00")
+        for i in range(5):
+            ax.plot(t,T5[:,i]-273.15,"-",color=cols[i],lw=9,alpha=.28,solid_capstyle="round")
+            ax.plot(t,R[:,i]-273.15,"--",color=cols[i],lw=2.2,label=f"P{i}")
+        ax.set_title(titles[case],pad=8); ax.grid(alpha=.3)
+        top=np.ceil(T5.max()-273.15+0.5); ax.set_ylim(19.5,top)
+        ax=axs[1,j]
+        ax.axhspan(-0.30,0.30,color="#E6E6E6",zorder=0)   # 下段の帯は灰色
+        for i in range(5): ax.plot(t,e[:,i],"-",color=cols[i],lw=2)
+        ax.axhline(0,color="k",lw=.8); ax.set_ylim(-0.45,0.45); ax.set_yticks([-0.3,0,0.3]); ax.grid(alpha=.3)
+        ax.set_xlabel("時刻 [s]"); ax.set_xticks([0,200,400,600])
+        ax.text(0.97,0.06,f"最大 {np.abs(e).max():.2f} K",transform=ax.transAxes,ha="right",va="bottom",fontsize=16,
+                bbox=dict(fc="white",ec="#bbb"))
+    axs[0,0].set_ylabel("温度 [°C]"); axs[1,0].set_ylabel("ROM − OpenFOAM [K]")
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+    h_,l_=axs[0,0].get_legend_handles_labels()
+    style=[Line2D([0],[0],color="#555",lw=9,alpha=.28,label="OpenFOAM"),Line2D([0],[0],color="#555",lw=2.2,ls="--",label="ROM"),
+           Patch(fc="#FFF4B8",ec="#D4A800",label="ヒータの発熱"),Patch(fc="#E6E6E6",label="温度計のノイズ ±0.3 K")]
+    fig.legend(h_[:5]+style,l_[:5]+[x.get_label() for x in style],loc="lower center",ncol=9,bbox_to_anchor=(0.5,0.0),
+               frameon=False,columnspacing=1.0,handlelength=1.8)
+    fig.subplots_adjust(left=.07,right=.93,top=.90,bottom=.13)
+    out=os.path.join(IMG,"rom_applicability_heater.png"); fig.savefig(out,dpi=130,bbox_inches="tight",facecolor="white"); plt.close(fig)
+    print("wrote",out)
+
+
 def main():
+    if "--heater" in sys.argv:
+        heater_fig(); return
     d=np.load(os.path.join(RES,"rom_calibrated_pod.npz")); C=d["C"]; Km=rg.tri_to_matrix(d["K_upper"],5); h=float(d["h"]); heat=int(d["heat_node"])
     pod=np.load(os.path.join(RES,"qdeim_points.npz"))["cell_idx"]
     fig,axs=plt.subplots(2,3,figsize=(16,8.6),gridspec_kw=dict(height_ratios=[1.25,1],hspace=0.30))

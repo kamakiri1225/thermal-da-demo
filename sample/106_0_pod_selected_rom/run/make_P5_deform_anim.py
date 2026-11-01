@@ -103,23 +103,37 @@ def main():
         return np.ascontiguousarray(img[max(nz[0].min() - 10, 0):nz[0].max() + 10, max(nz[1].min() - 10, 0):nz[1].max() + 10, :3])
 
     frames = [render(k) for k in range(len(t))]
-    plt.rcParams.update({"font.size": 16})
-    fig = plt.figure(figsize=(9, 10.5))
-    ax = fig.add_axes([0.02, 0.15, 0.96, 0.69]); ax.axis("off"); im = ax.imshow(frames[0])
-    fig.text(0.5, 0.955, "代表点5点の温度から求めた変形" + (f"（{cfg['title']}）" if cfg else ""), ha="center", fontsize=22, weight="bold")
-    if cfg:
+    if cfg is None:
+        # 余白を減らす：全コマを同じ大きさにそろえ、図の大きさを絵の縦横比に合わせる
+        fh = max(f.shape[0] for f in frames); fw = max(f.shape[1] for f in frames)
+        frames = [np.pad(f, ((0, fh - f.shape[0]), (0, fw - f.shape[1]), (0, 0)), constant_values=255) for f in frames]
+        W = 7.6; imgW = 7.2; imgH = imgW * fh / fw; top = 1.75; bot = 1.25; H = top + imgH + bot
+        plt.rcParams.update({"font.size": 16})
+        fig = plt.figure(figsize=(W, H))
+        ax = fig.add_axes([(W - imgW) / 2 / W, bot / H, imgW / W, imgH / H]); ax.axis("off"); im = ax.imshow(frames[0])
+        fig.text(0.5, 1 - 0.40 / H, "代表点5点の温度から求めた変形", ha="center", fontsize=22, weight="bold")
+        fig.text(0.5, 1 - 0.75 / H, f"15 W。変形は {SCALE:.0f} 倍に拡大（灰色の線＝変形前）", ha="center", fontsize=15, color="#444")
+        tx = fig.text(0.5, 1 - 1.55 / H, "", ha="center", fontsize=17, linespacing=1.4)
+        cax = fig.add_axes([0.15, 0.78 / H, 0.70, 0.18 / H])
+        two_lines = True
+    else:
+        plt.rcParams.update({"font.size": 16})
+        fig = plt.figure(figsize=(9, 10.5))
+        ax = fig.add_axes([0.02, 0.15, 0.96, 0.69]); ax.axis("off"); im = ax.imshow(frames[0])
+        fig.text(0.5, 0.955, "代表点5点の温度から求めた変形" + (f"（{cfg['title']}）" if cfg else ""), ha="center", fontsize=22, weight="bold")
         fig.text(0.5, 0.135, "赤＝温度センサ T1・T2　青＝変位センサ S1・S2（矢印＝測る向き）\n黒＝評価点 A・O（測らない）　灰＝代表点 P0〜P4　（裏側・内側の点は文字だけ見える）",
                  ha="center", va="top", fontsize=13, color="#333")
-    fig.text(0.5, 0.915, f"15 W。変形は {SCALE:.0f} 倍に拡大（灰色の線＝変形前）", ha="center", fontsize=14, color="#444")
-    tx = fig.text(0.5, 0.875, "", ha="center", fontsize=17)
-    cax = fig.add_axes([0.15, 0.07, 0.70, 0.025])
+        fig.text(0.5, 0.915, f"15 W。変形は {SCALE:.0f} 倍に拡大（灰色の線＝変形前）", ha="center", fontsize=14, color="#444")
+        tx = fig.text(0.5, 0.875, "", ha="center", fontsize=17)
+        cax = fig.add_axes([0.15, 0.07, 0.70, 0.025])
+        two_lines = False
     cb = fig.colorbar(ScalarMappable(norm=Normalize(0, vmax), cmap=CMAP), cax=cax, orientation="horizontal")
     cb.set_label("変位の大きさ [µm]", fontsize=15)
 
     def draw(k):
         im.set_data(frames[k])
         tx.set_text(f"t = {t[k]:.0f} 秒" + ("（加熱中）" if t[k] <= 300 else "（加熱停止後）") +
-                    "　　" + "  ".join(f"P{j} {TP[k, j] - 273.15:.1f}℃" for j in range(5)))
+                    ("\n" if two_lines else "　　") + "  ".join(f"P{j} {TP[k, j] - 273.15:.1f}℃" for j in range(5)))
         return []
     anim = FuncAnimation(fig, draw, frames=len(t), interval=700)
     suf = f"_{key}" if cfg else ""

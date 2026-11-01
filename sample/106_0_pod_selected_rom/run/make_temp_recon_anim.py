@@ -66,19 +66,31 @@ def main():
         pl=pv.Plotter(off_screen=True,window_size=(720,760))
         # 5点が透けて見えるよう温度コンタは半透明に
         pl.add_mesh(g,scalars="T",cmap="turbo",clim=clim,n_colors=16,opacity=0.55,
-                    scalar_bar_args={"title":"T [degC]","fmt":"%.1f"})
+                    scalar_bar_args={"title":"T [degC]","fmt":"%.1f","vertical":True,"position_x":0.80,"position_y":0.18,
+                                     "height":0.62,"width":0.07,"title_font_size":22,"label_font_size":20,"color":"black"})
         # 復元に使った5点（マゼンタ球＝turboに無い色で目立たせる、少し大きめ）
         for s in sensors:
             pl.add_mesh(pv.Sphere(radius=0.0038,center=s),color="magenta")
         phase="heating (heater ON)" if tv<=300 else "cooling (heater OFF)"
         pl.add_text(f"t = {tv:4.0f} s   ({phase})\n5 sensors -> full field (POD)",
-                    position="upper_left",font_size=11,color="black")
+                    position="upper_left",font_size=14,color="black")
         pl.camera_position=[(0.26,-0.24,0.20),(0,0,0.05),(0,0,1)]
-        pl.set_background("white"); pl.camera.zoom(0.85)
+        pl.set_background("white"); pl.camera.zoom(1.25)
         frames.append(pl.screenshot(return_img=True)); pl.close()
 
+    # 白い余白を切る（全コマ共通の枠で切るので、コマごとに位置がずれない）
+    box=np.zeros(4,int); box[:2]=10**6
+    for f in frames:
+        nz=np.where((f[:,:,:3]<245).any(axis=2))
+        box=[min(box[0],nz[0].min()),min(box[1],nz[1].min()),max(box[2],nz[0].max()),max(box[3],nz[1].max())]
+    frames=[f[max(box[0]-12,0):box[2]+12, max(box[1]-12,0):box[3]+12] for f in frames]
     from PIL import Image
-    ims=[Image.fromarray(f) for f in frames]
+    ims=[Image.fromarray(np.ascontiguousarray(f[:,:,:3])) for f in frames]
+    # 256 色の表を全コマから作る（コマごとに作ると色がカラーバーとずれる）
+    h0,w0=frames[0].shape[:2]; mosaic=Image.new("RGB",(w0,h0*len(ims)))
+    for i,f in enumerate(ims): mosaic.paste(f,(0,h0*i))
+    pal=mosaic.quantize(colors=256,method=Image.Quantize.MEDIANCUT)
+    ims=[f.quantize(palette=pal,dither=Image.Dither.FLOYDSTEINBERG) for f in ims]
     out=os.path.join(IMG,"blog_temp_recon_anim.gif")
     ims[0].save(out,save_all=True,append_images=ims[1:],duration=140,loop=0,disposal=2)
     print("wrote",out,"frames",len(ims),"clim",np.round(clim,2))

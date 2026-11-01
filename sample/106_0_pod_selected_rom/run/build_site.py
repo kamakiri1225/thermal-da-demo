@@ -52,7 +52,7 @@ def main():
         title = re.search(r'^# (.+)$', text, re.M).group(1).strip()
         used |= set(re.findall(r'\]\((img/[^)\s]+)\)', text)) | set(re.findall(r'src="(img/[^"]+)"', text))
         out = SITE / f'blog{num}.html'
-        subprocess.run(['pandoc', str(md), '--standalone', '--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+        subprocess.run(['pandoc', str(md), '-f', 'markdown+autolink_bare_uris', '--standalone', '--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
                         '--toc', '--metadata', f'pagetitle={title}', '--metadata', 'lang=ja',
                         f'--include-in-header={head}', '-o', str(out)], check=True, cwd=DOCS)
         h = out.read_text(encoding='utf-8')
