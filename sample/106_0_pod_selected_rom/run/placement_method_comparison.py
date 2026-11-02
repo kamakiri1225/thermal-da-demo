@@ -189,35 +189,38 @@ def make_figs(out):
     # ---- 図1：どこが選ばれたか（上面を真上から見る）----
     panels=["よく動く点に置く","Q-DEIM（QR列ピボット）","A最適（温度の trace 最小）",
             "D最適（温度の det 最小）","A・O 自身（循環・参考）","目的指向（本研究）"]
-    fig,axs=plt.subplots(2,3,figsize=(18.0,8.6))
+    fig,axs=plt.subplots(2,3,figsize=(16.0,10.6))
     th=np.linspace(0,2*np.pi,241)
     for ax,nm in zip(axs.ravel(),panels):
         ax.plot(37.5*np.cos(th),37.5*np.sin(th),color="#8696a7",lw=1.4)
         ax.plot(20.0*np.cos(th),20.0*np.sin(th),color="#8696a7",lw=1.4)
         hs=np.linspace(-np.radians(76),np.radians(76),80)
         ax.plot(38.6*np.cos(hs),38.6*np.sin(hs),color="#C0392B",lw=5,solid_capstyle="butt")
-        ax.text(44,0,"ヒータ側",color="#C0392B",fontsize=10,ha="center",va="center",rotation=-90)
+        ax.text(45,0,"ヒータ側",color="#C0392B",fontsize=15,ha="center",va="center",rotation=-90)
         ax.plot([28.7,-28.7],[0,0],"o",color="k",ms=9)
-        ax.text(28.7,5.5,"A",fontsize=11,ha="center",fontweight="bold")
-        ax.text(-28.7,5.5,"O",fontsize=11,ha="center",fontweight="bold")
+        ax.text(28.7,6,"A",fontsize=16,ha="center",fontweight="bold")
+        ax.text(-28.7,6,"O",fontsize=16,ha="center",fontweight="bold")
         col="#C0392B" if nm.startswith("目的指向") else ("#8E6FB0" if nm.startswith("よく動く") else "#2E6FD8")
         for (x,y,_),c in zip(m[nm]["xyz_mm"],m[nm]["comp"]):
-            ax.plot(x,y,"s",color=col,ms=11,mec="w",mew=1.3,zorder=5)
+            ax.plot(x,y,"s",color=col,ms=13,mec="w",mew=1.3,zorder=5)
             d={"Ux":(1,0),"Uy":(0,1),"Uz":(0,0)}[c]
             if d!=(0,0):
                 ax.annotate("",xy=(x+13*d[0],y+13*d[1]),xytext=(x,y),
                             arrowprops=dict(arrowstyle="-|>",color=col,lw=2.2))
-            ax.text(x,y-7.5,c,color=col,fontsize=10,ha="center",va="top",fontweight="bold")
+            P2=np.array(m[nm]["xyz_mm"])[:,:2]; close=np.linalg.norm(P2[0]-P2[1])<10
+            if close and (x,y)!=tuple(P2[0]): continue          # 近すぎる 2 点は名前を 1 つにまとめる
+            rr=np.hypot(x,y); ux,uy=(x/rr,y/rr) if rr>1 else (0,-1)
+            if rr<30: ux,uy=0,-1                                 # 内側（A・O の上）の点は下に書く
+            if close: ux,uy=1.6,0.2                               # 矢印と重ならないよう右に
+            ax.text(x+10*ux,y+10*uy,c+("×2" if close else ""),color=col,fontsize=15,ha="center",va="center",fontweight="bold")
         e15=m[nm]["AO_um"].get("learned")
         P=np.array(m[nm]["xyz_mm"]); gap=float(np.linalg.norm(P[0]-P[1]))
-        ax.set_title(f"{nm}\n2点の間隔 {gap:.0f} mm\n"
-                     f"測る前の予測 σ={m[nm]['sigma_pred_um']:.3f} µm\n"
-                     f"→ 実際の誤差 {e15:.3f} µm（15 W）",fontsize=10)
-        ax.set_aspect("equal"); ax.set_xlim(-56,56); ax.set_ylim(-46,46); ax.axis("off")
-    fig.suptitle("どこが選ばれたか ― 上面（z=100.5 mm）を真上から見る。□＝選ばれた変位計、矢印＝測る方向、●＝評価点 A・O（測らない）",
-                 fontsize=12.5)
-    fig.tight_layout(rect=(0,0,1,0.945),h_pad=2.4)
-    fig.savefig(os.path.join(IMG,"placement_method_points.png"),dpi=150); plt.close(fig)
+        ax.set_title(f"{nm}\n間隔 {gap:.0f} mm、予測 σ {m[nm]['sigma_pred_um']:.2f} µm\n"
+                     f"→ 実際の誤差 {e15:.3f} µm（15 W）",fontsize=16)
+        ax.set_aspect("equal"); ax.set_xlim(-54,54); ax.set_ylim(-54,52); ax.axis("off")
+    fig.suptitle("選ばれた変位計 2 本の位置（上面を真上から。□＝変位計、矢印＝測る向き、●＝評価点 A・O）",fontsize=19)
+    fig.tight_layout(rect=(0,0,1,0.955),h_pad=1.0,w_pad=0.5)
+    fig.savefig(os.path.join(IMG,"placement_method_points.png"),dpi=120,bbox_inches="tight",facecolor="white"); plt.close(fig)
     print("wrote docs/img/placement_method_points.png")
 
     # ---- 図1b：発表用に3つだけ大きく（よく動く点 / A最適 / 目的指向）----
