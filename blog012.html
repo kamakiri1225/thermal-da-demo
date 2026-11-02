@@ -439,6 +439,25 @@ Fisher 情報行列で、最適な温度センサと変位センサの位置が�
 id="toc-ページ目で言うこと約-1-分-30-秒-2">12-7. 11
 ページ目で言うこと（約 1 分 30 秒）</a></li>
 </ul></li>
+<li><a href="#ページ目今後の研究どこで優位性を出せるか"
+id="toc-ページ目今後の研究どこで優位性を出せるか">13. 12
+ページ目「今後の研究：どこで優位性を出せるか」</a>
+<ul>
+<li><a href="#今回の研究で言えること今の優位性"
+id="toc-今回の研究で言えること今の優位性">13-1.
+今回の研究で言えること（今の優位性）</a></li>
+<li><a href="#このままでは優位性が狭まる理由"
+id="toc-このままでは優位性が狭まる理由">13-2.
+このままでは優位性が狭まる理由</a></li>
+<li><a href="#これから優位性を出せる所"
+id="toc-これから優位性を出せる所">13-3.
+これから優位性を出せる所</a></li>
+<li><a href="#気をつけること" id="toc-気をつけること">13-4.
+気をつけること</a></li>
+<li><a href="#ページ目で言うこと約-1-分-4"
+id="toc-ページ目で言うこと約-1-分-4">13-5. 12 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -528,10 +547,13 @@ overall machining errors”。</li>
 arXiv:2306.12736) も同じ数字を Mayr から引いています。</li>
 </ul></li>
 <li>これは上限の値で、どの機械でも 75 % という意味ではありません。</li>
-<li>スライドの「約 40〜70 %」は、よく引用される数字です（Bryan (1990) や
-Ramesh ほか (2000) が出典としてよく挙がる）。ただし<strong>この 2
+<li>スライドの「約 40〜70 %」は、よく引用される数字です（<a
+href="https://doi.org/10.1016/S0007-8506(07)63001-7">Bryan (1990)</a> や
+<a href="https://doi.org/10.1016/S0890-6955(00)00010-9">Ramesh ほか
+(2000)</a> が出典としてよく挙がる）。ただし<strong>この 2
 本の原文は確認していません</strong>。そのまま使うなら原文を確かめるか、原文を確認済みの「最大
-75 %［Mayr 2012］」に置きかえることを勧めます。</li>
+75 %［<a href="https://doi.org/10.1016/j.cirp.2012.05.008">Mayr
+2012</a>］」に置きかえることを勧めます。</li>
 </ul>
 <figure>
 <img src="img/intro_machine_deform.gif"
@@ -546,7 +568,9 @@ W）。左：運転すると主軸頭とコラムが温まって変形し、工�
 65 µm
 ずれ、止めると時間をかけて戻る。実機ではなく、工作機械を想定した形での計算。計算ケース：<code>sample/107_machining_center_rom/01_openfoam_thermal/cases/S1_run4h_stop4h</code>（OpenFOAM）、<code>sample/107_machining_center_rom/02_frontistr_thermal_deform/work/S1_run4h_stop4h</code>（FrontISTR）。作図：<code>presentation/make_intro_machine_gif.py</code>。</em></p>
 <h4 id="対策は回避と補正">(2) 対策は「回避」と「補正」</h4>
-<p>Li ら (2024) は、熱誤差の対策を 2 つに分けています。</p>
+<p><a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">Li
+ら (2024)</a> は、熱誤差の対策を 2 つに分けています。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -585,13 +609,13 @@ href="blog001.html">blog_001
 解析モデルの条件が分からない</h4>
 <p>熱解析には、発熱量、表面の熱伝達率、初期の温度分布などの条件が必要です。これらは運転のしかたや組み立てで変わり、事前に正しく決めるのは困難です。</p>
 <ul>
-<li>Bünger ら (2023)
+<li><a href="https://arxiv.org/abs/2306.12736">Bünger ら (2023)</a>
 は、TCP（工具先端）の予測精度は「熱交換のパラメータや初期温度などのモデルパラメータの精度に大きく依存する」と書いています（<a
 href="https://arxiv.org/abs/2306.12736"
 class="uri">https://arxiv.org/abs/2306.12736</a>）。</li>
-<li>熱伝達率は、熱流束・壁の温度・基準の温度から求める量で、それを直接読む計測器はありません（2025
-年の論文、<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/"
-class="uri">https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/</a>。本文は検索結果からの要約で、原文の確認が必要）。</li>
+<li>熱伝達率は、熱流束・壁の温度・基準の温度から求める量で、それを直接読む計測器はありません（<a
+href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/">2025
+年の論文</a>。本文は検索結果からの要約で、原文の確認が必要）。</li>
 </ul>
 <h4 id="温度の傾向が合っても変形は合うとは限らない">(2)
 温度の傾向が合っても、変形は合うとは限らない</h4>
@@ -668,9 +692,11 @@ EnKF を回すと、一連の計算に約 13 時間かかりました。</p>
 5 回・日本語 1 回の検索で、網羅的な調査ではありません。<a
 href="blog008.html">blog_008
 §3・§8</a>）。</p>
-<p>センサの置き場所を ROM と感度で決める研究（Teshima ら 2024
-など）や、熱モデルとベイズ推定で配置を評価する研究（Bünger ら
-2023）はすでにあります。本研究は置き場所の考え方そのものではなく、<strong>変位も観測に入れたときに、推定したい量に合わせて置き場所を選び、実際のデータ同化で確かめる</strong>点に取り組みます。</p>
+<p>センサの置き場所を ROM と感度で決める研究（<a
+href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima ら 2024</a>
+など）や、熱モデルとベイズ推定で配置を評価する研究（<a
+href="https://arxiv.org/abs/2306.12736">Bünger ら
+2023</a>）はすでにあります。本研究は置き場所の考え方そのものではなく、<strong>変位も観測に入れたときに、推定したい量に合わせて置き場所を選び、実際のデータ同化で確かめる</strong>点に取り組みます。</p>
 <h3 id="目的">3-2. 目的</h3>
 <blockquote>
 <p><strong>少ない温度・変位の測定を解析モデルとデータ同化で組み合わせ、測れない場所の熱変形を推定する。そのために、どこで何を測ればよいかを、測る前に計算で決める。</strong></p>
@@ -834,7 +860,7 @@ CAE・実験のどちらより狭い。作図：<code>presentation/make_da_image
 <p>正規分布どうしを混ぜると、データ同化の平均 <span
 class="math inline">\(\mu_a\)</span> とばらつき <span
 class="math inline">\(\sigma_a\)</span> は次のようになります（<span
-class="math inline">\(f\)</span>：CAE、<span
+class="math inline">\(f\)</span><code>：CAE、</code><span
 class="math inline">\(o\)</span>：実験）。</p>
 <p><span class="math display">\[
 \mu_a = \frac{\sigma_o^2\,\mu_f + \sigma_f^2\,\mu_o}{\sigma_f^2 +
@@ -899,13 +925,15 @@ K = P_f H^{\mathsf T}\left(H P_f H^{\mathsf T} + R\right)^{-1}
 \]</span></p>
 <ul>
 <li><span class="math inline">\(\mathbf
-x_f\)</span>：予報した状態、<span class="math inline">\(\mathbf
-x_a\)</span>：修正した状態、<span class="math inline">\(\mathbf
-y\)</span>：観測、<span class="math inline">\(H\mathbf
+x_f\)</span><code>：予報した状態、</code><span
+class="math inline">\(\mathbf
+x_a\)</span><code>：修正した状態、</code><span
+class="math inline">\(\mathbf y\)</span><code>：観測、</code><span
+class="math inline">\(H\mathbf
 x_f\)</span>：予報から求めた観測の予想</li>
 <li><span
-class="math inline">\(P_f\)</span>：予報の不確かさ（共分散）、<span
-class="math inline">\(R\)</span>：観測の誤差の大きさ、<span
+class="math inline">\(P_f\)</span><code>：予報の不確かさ（共分散）、</code><span
+class="math inline">\(R\)</span><code>：観測の誤差の大きさ、</code><span
 class="math inline">\(K\)</span>：重み（カルマンゲイン）</li>
 <li>予報が不確かなほど（<span class="math inline">\(P_f\)</span>
 が大きいほど）、観測を強く信じて大きく直す。</li>
@@ -1396,8 +1424,9 @@ class="math inline">\(\Phi^{\mathsf T}\)</span> の一部の列（1 列 = 1
 点の熱回路を作り、OpenFOAM に合わせる</h3>
 <p>代表 5
 点をノードにして、熱容量と熱コンダクタンスでつないだ熱回路（集中定数モデル）を作ります。ノード
-<span class="math inline">\(i\)</span>（<span class="math inline">\(i =
-0, \dots, 4\)</span>）の式は次のとおりです。</p>
+<span class="math inline">\(i\)</span><code>（</code><span
+class="math inline">\(i = 0, \dots,
+4\)</span>）の式は次のとおりです。</p>
 <p><span class="math display">\[
 C_i\,\frac{dT_i}{dt} = \sum_{j \ne i} K_{ij}\,(T_j - T_i) + q_i(t) -
 h\,(T_i - T_{\mathrm{air}})
@@ -2481,14 +2510,15 @@ class="math inline">\(Q = 15\,q\)</span> [W]）</li>
 <tr class="odd">
 <td>③ EnKF で補正</td>
 <td>予想と実測のずれに、重み（カルマンゲイン）を掛けて、5
-点の温度・<span class="math inline">\(q\)</span>・<span
+点の温度・<span class="math inline">\(q\)</span><code>・</code><span
 class="math inline">\(h\)</span> を直す</td>
 </tr>
 <tr class="even">
 <td>④ 次の予報へ</td>
 <td>直した 5 点の温度を次の初期値、直した <span
-class="math inline">\(q\)</span>・<span class="math inline">\(h\)</span>
-を次の発熱・放熱の条件にして、次の 30 秒を予報する</td>
+class="math inline">\(q\)</span><code>・</code><span
+class="math inline">\(h\)</span> を次の発熱・放熱の条件にして、次の 30
+秒を予報する</td>
 </tr>
 </tbody>
 </table>
@@ -2525,16 +2555,16 @@ K = P_{zy}\left(P_{yy} + R\right)^{-1}
 \]</span></p>
 <ul>
 <li><span class="math inline">\(\mathbf
-z_f\)</span>：補正前（予報）、<span class="math inline">\(\mathbf
-z_a\)</span>：補正後</li>
+z_f\)</span><code>：補正前（予報）、</code><span
+class="math inline">\(\mathbf z_a\)</span>：補正後</li>
 <li><span class="math inline">\(\mathbf
-y_f\)</span>：センサの値の予想、<span class="math inline">\(\mathbf
-y_{\mathrm{obs}}\)</span>：実測、<span
+y_f\)</span><code>：センサの値の予想、</code><span
+class="math inline">\(\mathbf
+y_{\mathrm{obs}}\)</span><code>：実測、</code><span
 class="math inline">\(\boldsymbol\varepsilon^{(m)}\)</span>：メンバーごとに足す観測の乱数</li>
 <li><span
-class="math inline">\(P_{zy}\)</span>：「状態」と「センサの予想」が 60
-メンバーの中で一緒に動く度合い（共分散）、<span
-class="math inline">\(P_{yy}\)</span>：センサの予想のばらつき、<span
+class="math inline">\(P_{zy}\)</span><code>：「状態」と「センサの予想」が 60 メンバーの中で一緒に動く度合い（共分散）、</code><span
+class="math inline">\(P_{yy}\)</span><code>：センサの予想のばらつき、</code><span
 class="math inline">\(R\)</span>：センサの誤差</li>
 </ul>
 <p><span class="math inline">\(P_{zy}\)</span> の中には、<span
@@ -2881,9 +2911,10 @@ W・間欠加熱でも同じ。</li>
 \mathbf T_{\text{全体}} = \bar{\mathbf u} +
 \Phi\,\Phi_P^{+}\,\big(\mathbf T_P - \bar{\mathbf u}_P\big)
 \]</span></p>
-<p>（<span class="math inline">\(\Phi\)</span>：POD の型、<span
-class="math inline">\(\Phi_P\)</span>：その代表 5 点の行、<span
-class="math inline">\(^{+}\)</span>：擬似逆行列、<span
+<p>（<span
+class="math inline">\(\Phi\)</span><code>：POD の型、</code><span
+class="math inline">\(\Phi_P\)</span><code>：その代表 5 点の行、</code><span
+class="math inline">\(^{+}\)</span><code>：擬似逆行列、</code><span
 class="math inline">\(\mathbf T_P\)</span>：直した代表 5 点の温度。5
 回の乱数の平均）</p>
 <p>比べた場所は、温度計のある P2・P0 とは別の 4
@@ -3440,6 +3471,162 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a h
 <li>既存の選び方（A 最適・D 最適・Q-DEIM）と同じ条件で比べ、3
 条件とも一番よかった（0.076 µm）。</li>
 <li>ただし、知りたい量が変われば最適な位置も変わる。選んだ後はデータ同化で確かめる。</li>
+</ul>
+<hr />
+<h2 id="ページ目今後の研究どこで優位性を出せるか">13. 12
+ページ目「今後の研究：どこで優位性を出せるか」</h2>
+<p>先行研究の調査（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/26_研究テーマ再検討_先行研究との比較.md">docs/26</a>）をもとに、今回の研究で言えることと、これから優位性を出せる所をまとめます。発表では最後の
+1 枚（今後の展開）にします。</p>
+<h3 id="今回の研究で言えること今の優位性">13-1.
+今回の研究で言えること（今の優位性）</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>言えること</th>
+<th>根拠（この記事の結果）</th>
+<th>近い先行研究との違い</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度と変位を<strong>同じデータ同化の観測</strong>に入れ、測らない反り（工具とワークのずれに当たる量）を直せる</td>
+<td>変位 2 点を足すと、測っていない場所の温度も全セルで 0.12〜0.14
+K（温度だけでは 0.53〜0.88 K）。§10・§11</td>
+<td>工作機械の熱変位の逐次推定（<a
+href="https://doi.org/10.1016/j.mfglet.2024.09.025">論文 A：Lang ら
+2024</a>、<a href="https://doi.org/10.1007/978-3-032-01194-7_25">論文
+B：Lang ら 2026</a>）は温度だけを観測に使い、変位は検証用</td>
+</tr>
+<tr class="even">
+<td>知りたい反りに合わせて、<strong>変位計の位置と向き</strong>まで選べる</td>
+<td>目的指向で選んだ配置が 3 条件とも一番よかった（0.076 µm。A 最適
+0.089、D 最適 0.108 µm）。§12</td>
+<td>目的を指定した配置（<a
+href="https://doi.org/10.1007/s11081-018-9391-8">Herzog ら
+2018</a>）は温度センサが対象。それを変位計に広げた</td>
+</tr>
+<tr class="odd">
+<td>すべて<strong>公開ソルバ</strong>（OpenFOAM＋FrontISTR）で、手順を追える</td>
+<td>プログラムを各章に載せた</td>
+<td><a
+href="https://blogs.sw.siemens.com/simcenter/simcenter-3d-smart-virtual-sensing-unveiling-the-magic/">Siemens
+Smart Virtual Sensing</a>
+は同じ枠組み（縮約モデル＋カルマンフィルタ＋配置設計）を構造で製品化している</td>
+</tr>
+</tbody>
+</table>
+<p>一方で、次のものは<strong>すでにあり、本研究の新しさではありません</strong>。</p>
+<ul>
+<li>縮約モデル＋カルマンフィルタ（論文 A、Siemens）</li>
+<li>発熱や熱伝達率を状態に加えて一緒に推定すること（<a
+href="https://doi.org/10.1109/THERMINIC65879.2025.11216915">Depaola ら
+2025</a>：電子基板で熱伝達率と発熱を推定）</li>
+<li>目的を指定した配置（Herzog らの系列、<a
+href="https://doi.org/10.1007/978-3-658-45180-6_12">Naumann ら
+2025</a>）</li>
+<li>変位から温度を求めること（<a
+href="https://arxiv.org/abs/2411.18118">Ansari ら 2025</a>）</li>
+</ul>
+<h3 id="このままでは優位性が狭まる理由">13-2.
+このままでは優位性が狭まる理由</h3>
+<ol type="1">
+<li><strong>競合が近い</strong>。論文 B
+のチーム（ETH）は熱入力の推定を次の課題に挙げ、ドイツの SFB/TR 96
+は変位の追加を目標にしています。Siemens
+は熱でも、発熱と熱伝達率の推定を研究段階まで進めています（Depaola ら
+2025）。手法の組み合わせだけで勝つ余地は小さく、狭まっています。</li>
+<li><strong>実機がない</strong>。比べる相手（論文
+A・B）は実機で示しています。今回は数値実験（双子実験）だけです。</li>
+<li><strong>差が小さい</strong>。目的指向と A 最適の差は、反りで 0.076
+と 0.089 µm（約 15 %）です。</li>
+</ol>
+<h3 id="これから優位性を出せる所">13-3. これから優位性を出せる所</h3>
+<p>論文 A・B
+の著者自身が「今後の課題」に挙げているのは、<strong>熱入力（発熱）の実時間推定</strong>と、<strong>熱伝達率などの境界条件を運転中に動かすこと</strong>です。ここはまだ空いており、工作機械を使う側（NC
+の回転数・電力が手に入り、実機で運転を変えられる）の立場が直接効きます。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>方向</th>
+<th>すること</th>
+<th>優位性が出る理由</th>
+<th>今ある資産</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A：運転・冷却の変化に追従する</strong></td>
+<td>主軸・送りの発熱やクーラントの流量が変わる運転で、発熱と冷却（熱伝達率）を同化で追い、熱変位を推定する</td>
+<td>論文 A は熱入力を 0、論文 B
+は既知として与え、境界条件は運転中に直さない</td>
+<td>106 の ROM＋EnKF（発熱 <span class="math inline">\(q\)</span> と放熱
+<span class="math inline">\(h\)</span> を状態に入れている）、25
+W・間欠加熱の真値</td>
+</tr>
+<tr class="even">
+<td><strong>B：流体と固体の熱連成（CHT）から ROM を作る</strong></td>
+<td>流れ（流量）が変わっても使える熱の ROM を、CHT の計算から作る</td>
+<td>論文 B は CFD を熱伝達率の範囲を決めるためだけに使う。Siemens の熱の
+ROM は熱伝導だけ</td>
+<td>OpenFOAM の CHT。108
+のクーラントタンク（ポンプを止めると流れが変わり、ROM
+が合わなくなることを確認済み）</td>
+</tr>
+<tr class="odd">
+<td><strong>理論：何を測れば何が分かるか</strong></td>
+<td>① 発熱 <span class="math inline">\(Q\)</span> と放熱 <span
+class="math inline">\(h\)</span>
+を見分けられる条件（観測期間・運転のしかた）、②
+変位の観測が温度場について持つ情報</td>
+<td>①「600 秒では <span class="math inline">\(h\)</span>
+が決まらない」、②「変位 2 点で測っていない場所の温度まで直る」の 2
+つの結果に、なぜそうなるかを式で示せる</td>
+<td>Fisher 情報の式、変位の換算行列 <span
+class="math inline">\(W\)</span>、POD の型</td>
+</tr>
+<tr class="even">
+<td><strong>実機での検証（必須）</strong></td>
+<td>社内の機械で、温度・主軸の伸び・クーラントの流量と温度・NC
+の回転数と電力を記録し、推定に使わないセンサで確かめる</td>
+<td>比べる相手はすべて実機。実機がないと評価されにくい</td>
+<td>社内の機械で測れる見込み</td>
+</tr>
+</tbody>
+</table>
+<h3 id="気をつけること">13-4. 気をつけること</h3>
+<ul>
+<li>変位を観測に入れる方向（13-1 の 1 行目）は、SFB/TR 96
+が目標に掲げ、Ansari ら（<a
+href="https://arxiv.org/abs/2603.09526">2026</a>）も温度＋変位に進んでいます。<strong>数年以内に近い成果が出る可能性があるので、早めに学会・論文で出す</strong>のがよいと考えます。</li>
+<li>理論（13-3 の ①）は、1
+点モデルなら教科書の範囲（感度の議論）に収まり、<strong>理論そのものの新しさは大きくない可能性</strong>があります。新しさは「工作機械の熱変位」「変位の観測」「観測期間と運転の設計」「流れで変わる
+<span
+class="math inline">\(h\)</span>」を組み合わせた所に置きます。</li>
+<li>ここでの「まだ空いている」は、英語の検索（約 30
+回）で見つからなかった、という意味です。日本語の文献と、SFB/TR 96
+の最新の成果は、まだ原文で確かめていません（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/26_研究テーマ再検討_先行研究との比較.md#7-確認すべき文献と調べ方">docs/26
+§7</a>）。</li>
+</ul>
+<h3 id="ページ目で言うこと約-1-分-4">13-5. 12 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>今回：温度と変位を同じデータ同化に入れ、測らない反りを直せた。置き場所も変位計の向きまで選べた。ただし数値実験だけ。</li>
+<li>今後：運転や冷却が変わる工作機械で、発熱と冷却を同化で追う。流れが変わっても使える
+ROM を CHT から作る。どちらも先行研究が「今後の課題」に残した所。</li>
+<li>社内の機械での実測で確かめる。</li>
 </ul>
 </body>
 </html>
