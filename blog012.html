@@ -795,6 +795,92 @@ alt="2 次元の不確かさの楕円" />
 <p><span class="math inline">\(\Delta_c\)</span>
 は、候補ごとにベクトルの掛け算をするだけなので、14,754
 通りでもすぐ計算できます。</p>
+<h4 id="図-3-の描き方手順">図 3 の描き方（手順）</h4>
+<ol type="1">
+<li><strong>温度計 P2・P0 で測った後の不確かさ <span
+class="math inline">\(P\)</span> を 1 つ決める</strong>（§4-2 の 2×2
+の行列。どの候補でも同じものを使う）。</li>
+<li><strong>表面の節点 1 つずつ、変位の向き Ux・Uy・Uz の 3
+つについて、感度 <span class="math inline">\(\mathbf h_c\)</span>
+を取り出す</strong>（型 1・型 2 だけの温度を FrontISTR
+に入れて解いた、その節点・その向きの変位）。</li>
+<li><strong>それぞれ <span class="math inline">\(\Delta_c\)</span>
+を計算する</strong>（6-1 の式。<span class="math inline">\(\mathbf
+w\)</span>、<span class="math inline">\(P\)</span>、<span
+class="math inline">\(r = 0.09\)</span> は共通）。</li>
+<li><strong>節点ごとに、3 つの向きのうち一番大きい <span
+class="math inline">\(\Delta_c\)</span>
+を残す</strong>（その節点に置くなら、一番効く向きで置く、という意味）。</li>
+<li><strong>全節点の中の最大値（0.746）で割って、0〜1
+にそろえ、色にする</strong>。A・O から 12 mm
+以内の節点は候補から外したので 0（濃い紫）にした。</li>
+</ol>
+<p>数字で見ると、次のとおりです。</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 13%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>節点 [mm]</th>
+<th style="text-align: right;">Ux の <span
+class="math inline">\(\Delta_c\)</span></th>
+<th style="text-align: right;">Uy</th>
+<th style="text-align: right;">Uz</th>
+<th>一番大きい向き</th>
+<th style="text-align: right;">図 3 の色の値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(36.2, −9.7, 100.5)：目的指向で選んだ点</td>
+<td style="text-align: right;"><strong>0.746</strong></td>
+<td style="text-align: right;">0.083</td>
+<td style="text-align: right;">0.145</td>
+<td>Ux</td>
+<td style="text-align: right;">0.746 / 0.746 =
+<strong>1.00</strong></td>
+</tr>
+<tr class="even">
+<td>(37.2, 4.9, 80.4)：外周のヒータ側の上の方</td>
+<td style="text-align: right;"><strong>0.658</strong></td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.009</td>
+<td>Ux</td>
+<td style="text-align: right;">0.658 / 0.746 =
+<strong>0.88</strong></td>
+</tr>
+<tr class="odd">
+<td>(37.5, 0.0, 50.2)：ヒータ側の中段（P2 の近く）</td>
+<td style="text-align: right;"><strong>0.154</strong></td>
+<td style="text-align: right;">0.049</td>
+<td style="text-align: right;">0.037</td>
+<td>Ux</td>
+<td style="text-align: right;"><strong>0.21</strong></td>
+</tr>
+<tr class="even">
+<td>(−37.5, 0.0, 50.2)：反対側の中段</td>
+<td style="text-align: right;">0.322</td>
+<td style="text-align: right;">0.049</td>
+<td style="text-align: right;"><strong>0.678</strong></td>
+<td>Uz</td>
+<td style="text-align: right;"><strong>0.91</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>注意</strong>：2 行目の節点は、§6-2
+の「よく動くが反りに効かない点」と同じ場所です。そこで Uz を測ると <span
+class="math inline">\(\Delta_c\)</span> = 0.009
+でほとんど効きませんが、<strong>同じ場所で Ux を測れば 0.658
+と効きます</strong>。図 3
+は向きの中で一番よいものを描いているので、この場所は黄緑（0.88）に見えます。図
+3
+の色は「その場所に、一番よい向きで置いたとき」の値で、<strong>向きを変えると効き方が大きく変わる</strong>ことに気をつけてください。</p>
 <figure>
 <img src="img/blog012_fisher_score_map.png" alt="目的指向の得の分布" />
 <figcaption aria-hidden="true">目的指向の得の分布</figcaption>
@@ -802,7 +888,9 @@ alt="2 次元の不確かさの楕円" />
 <p><em>図 3　表面の各点に変位計を 1 本置いたときの、反りの分散の減り
 <span class="math inline">\(\Delta_c\)</span>（3
 方向のうち一番大きいもの、最大を 1
-にそろえた）。黄色ほど反りに効く。A・O の近く（12 mm
+にそろえた。描き方は下の手順）。青い球の点は、図の色は Ux
+で置いたときの値で、球が表す Uz
+で置くとほとんど効かない。黄色ほど反りに効く。A・O の近く（12 mm
 以内）は候補から外したので 0（濃い紫）。</em></p>
 <ul>
 <li>上面と、ヒータから離れた側の側面が効きます。ヒータ側の側面の中ほどから下（温度計
