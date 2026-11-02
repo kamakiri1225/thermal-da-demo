@@ -1,6 +1,6 @@
-"""blog_001〜012（docs/blog_0NN_*.md）を、ブラウザで読む HTML にする（GitHub Pages の gh-pages 用）。
+"""ブログ（docs/blog_0NN_*.md）と発表資料（docs/presen_0NN_*.md）を、ブラウザで読む HTML にする（GitHub Pages の gh-pages 用）。
 
-  出力：site/blog0NN.html と site/img/（記事が使う図だけを docs/img から写す）
+  出力：site/blog0NN.html・site/presen0NN.html と site/img/（記事が使う図だけを docs/img から写す）
   - 数式：MathJax（CDN）、目次つき、本文の幅 1120px。原稿の数式は GitHub 用の書き方（```math、$`…`$、run/gfm_math.py）なので、pandoc 用に戻してから変換する
   - ```mermaid のブロックは mermaid.js で図にする
   - 記事どうしのリンク blog_0NN_*.md → blog0NN.html、そのほかの .md やプログラムへのリンクは GitHub のページへ
@@ -39,9 +39,9 @@ def fix_link(m):
     if href.startswith(('http', '#', 'mailto:')):
         return m.group(0)
     path, _, anchor = href.partition('#')
-    b = re.match(r'blog_(\d{3})_.*\.md$', Path(path).name)
+    b = re.match(r'(blog|presen)_(\d{3})_.*\.md$', Path(path).name)
     if b and '/' not in path:
-        new = f'blog{b.group(1)}.html'
+        new = f'{b.group(1)}{b.group(2)}.html'
     elif path.startswith('img/'):
         return m.group(0)
     else:
@@ -52,12 +52,12 @@ def fix_link(m):
 def main():
     head = SITE / '_head.html'; head.write_text(HEAD, encoding='utf-8')
     used = set()
-    for md in sorted(DOCS.glob('blog_0[0-9][0-9]_*.md')):
-        num = md.name[5:8]
+    for md in sorted(DOCS.glob('blog_0[0-9][0-9]_*.md')) + sorted(DOCS.glob('presen_0[0-9][0-9]_*.md')):
+        kind, num = md.name.split('_')[0], md.name.split('_')[1]
         text = md.read_text(encoding='utf-8')
         title = re.search(r'^# (.+)$', text, re.M).group(1).strip()
         used |= set(re.findall(r'\]\((img/[^)\s]+)\)', text)) | set(re.findall(r'src="(img/[^"]+)"', text))
-        out = SITE / f'blog{num}.html'
+        out = SITE / f'{kind}{num}.html'
         subprocess.run(['pandoc', '-', '-f', 'markdown+autolink_bare_uris', '--standalone', '--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
                         '--toc', '--metadata', f'pagetitle={title}', '--metadata', 'lang=ja',
                         f'--include-in-header={head}', '-o', str(out)], check=True, cwd=DOCS, input=to_pandoc(text), text=True)
