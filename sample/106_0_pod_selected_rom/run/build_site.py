@@ -1,7 +1,7 @@
 """blog_001〜012（docs/blog_0NN_*.md）を、ブラウザで読む HTML にする（GitHub Pages の gh-pages 用）。
 
   出力：site/blog0NN.html と site/img/（記事が使う図だけを docs/img から写す）
-  - 数式：MathJax（CDN）、目次つき、本文の幅 1120px
+  - 数式：MathJax（CDN）、目次つき、本文の幅 1120px。原稿の数式は GitHub 用の書き方（```math、$`…`$、run/gfm_math.py）なので、pandoc 用に戻してから変換する
   - ```mermaid のブロックは mermaid.js で図にする
   - 記事どうしのリンク blog_0NN_*.md → blog0NN.html、そのほかの .md やプログラムへのリンクは GitHub のページへ
   再現：python3 run/build_site.py
@@ -28,6 +28,12 @@ HEAD = """<style>
 """
 
 
+def to_pandoc(text):
+    """GitHub 用の数式の書き方（```math、$`…`$）を、pandoc が読める $$ … $$、$ … $ に戻す（run/gfm_math.py の逆）。"""
+    text = re.sub(r'^([ \t>]*)```math[ \t]*\n(.*?)\n\1```[ \t]*$', lambda m: f'{m.group(1)}$$\n{m.group(2)}\n{m.group(1)}$$', text, flags=re.S | re.M)
+    return re.sub(r'\$`(.+?)`\$', r'$\1$', text)
+
+
 def fix_link(m):
     href = m.group(1)
     if href.startswith(('http', '#', 'mailto:')):
@@ -52,9 +58,9 @@ def main():
         title = re.search(r'^# (.+)$', text, re.M).group(1).strip()
         used |= set(re.findall(r'\]\((img/[^)\s]+)\)', text)) | set(re.findall(r'src="(img/[^"]+)"', text))
         out = SITE / f'blog{num}.html'
-        subprocess.run(['pandoc', str(md), '-f', 'markdown+autolink_bare_uris', '--standalone', '--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
+        subprocess.run(['pandoc', '-', '-f', 'markdown+autolink_bare_uris', '--standalone', '--mathjax=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js',
                         '--toc', '--metadata', f'pagetitle={title}', '--metadata', 'lang=ja',
-                        f'--include-in-header={head}', '-o', str(out)], check=True, cwd=DOCS)
+                        f'--include-in-header={head}', '-o', str(out)], check=True, cwd=DOCS, input=to_pandoc(text), text=True)
         h = out.read_text(encoding='utf-8')
         h = re.sub(r'<pre class="mermaid"><code>(.*?)</code></pre>', r'<pre class="mermaid">\1</pre>', h, flags=re.S)
         h = re.sub(r'href="([^"]+)"', fix_link, h)

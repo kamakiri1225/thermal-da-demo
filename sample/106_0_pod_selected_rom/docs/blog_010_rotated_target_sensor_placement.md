@@ -12,10 +12,10 @@
 
 回転は＋zから見て反時計回りです。回転行列を明示すると、
 
-$$
+```math
 \underbrace{\begin{bmatrix}x'\\y'\\z'\end{bmatrix}}_{3\times1} =\underbrace{\begin{bmatrix}0&-1&0\\1&0&0\\0&0&1\end{bmatrix}}_{3\times3}
 \underbrace{\begin{bmatrix}x\\y\\z\end{bmatrix}}_{3\times1}.
-$$
+```
 
 | 評価点 | blog009の実際のFEM節点 [mm] | blog010の実際のFEM節点 [mm] |
 |---|---|---|
@@ -50,34 +50,34 @@ $$
 
 新しい対象は、
 
-$$
+```math
 d=U_z(A_{\mathrm{new}})-U_z(O_{\mathrm{new}})
-$$
+```
 
 です。代表5点温度から変位への重みを使うと、
 
-$$
+```math
 \underbrace{\delta d}_{1\times1} =\underbrace{\begin{bmatrix}w_0&w_1&w_2&w_3&w_4\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}\delta T[P0]\\\delta T[P1]\\\delta T[P2]\\\delta T[P3]\\\delta T[P4]\end{bmatrix}}_{5\times1},
 \qquad w_j=h_{A_{\mathrm{new}},z,j}-h_{O_{\mathrm{new}},z,j}.
-$$
+```
 
 **A・Oが変わるので、対象の重みwを新しく取り出します。** Bと温度復元行列G、全節点変位の復元係数はblog009と同じです。
 
 候補cの重みをh_c、現在残る温度誤差の共分散をPとすると、候補1本を使って補正したと仮定した後の共分散と、反りの標準偏差は、
 
-$$
+```math
 \underbrace{P_{+c}}_{5\times5} =\underbrace{P}_{5\times5} -\frac{\underbrace{(P\mathbf h_c)(P\mathbf h_c)^{\mathsf T}}_{5\times5}}
 {\underbrace{\mathbf h_c^{\mathsf T}P\mathbf h_c+r_c}_{1\times1}},
 \qquad
 \sigma_{+c}=\sqrt{\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\underbrace{P_{+c}}_{5\times5}\underbrace{\mathbf w}_{5\times1}}.
-$$
+```
 
 最初はP=Bです。候補を使った線形補正後にどれだけ誤差が残るかを、実測値を入れずに予測します。σを30〜300秒の10時刻で平均したJが最小となる候補を選びます。
 
-$$
+```math
 J_c=\frac1{10}\sum_{k=1}^{10}\sigma_{+c}(30k)
-$$
+```
 
 温度1点目→共分散更新→温度2点目→共分散更新→変位1点目→共分散更新→変位2点目、の順序もblog009と同じです。全センサ組合せの総当たり最適化ではありません。
 
@@ -129,13 +129,13 @@ $$
 
 今回のWは、105のFrontISTRが出力した剛性行列K_uと熱荷重行列H_thから、新しい評価自由度について求め直しています。
 
-$$
+```math
 \underbrace{K_u^{\mathsf T}}_{15120\times15120}
 \underbrace{\boldsymbol\lambda_A}_{15120\times1} =\underbrace{\mathbf e_{A,z}}_{15120\times1},
 \qquad
 \underbrace{W_{A,z,:}}_{1\times5040} =\underbrace{\boldsymbol\lambda_A^{\mathsf T}}_{1\times15120}
 \underbrace{H_{\mathrm{th}}}_{15120\times5040}.
-$$
+```
 
 e_A,zは新Aのz自由度だけ1、ほかは0の選択ベクトルで、温度誤差eとは別です。Oも同様に求め、差W_A−W_Oを描きます。**旧A・Oに対するFrontISTR直接出力Wdiffを、新A・Oの感度として流用していません。** 随伴方程式の相対残差は `results/blog010/W_metadata.json` に保存しています。
 
@@ -147,13 +147,13 @@ e_A,zは新Aのz自由度だけ1、ほかは0の選択ベクトルで、温度�
 
 状態はblog009と同じ7変数で、変位は独立した状態変数ではありません。
 
-$$
+```math
 \underbrace{\mathbf z}_{7\times1} =\begin{bmatrix}T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]\\q_{\mathrm{scale}}\\h_{\mathrm{ROM}}\end{bmatrix}
-$$
+```
 
 温度2点＋選定変位2点の場合、観測予報は今回はUyです。
 
-$$
+```math
 \underbrace{\mathbf y^{f,(m)}}_{4\times1} =\begin{bmatrix}\theta_1^{f,(m)}\\\theta_2^{f,(m)}\\U_y^{f,(m)}(S1)\\U_y^{f,(m)}(S2)\end{bmatrix} =\underbrace{\bar{\mathbf y}}_{4\times1} +\underbrace{\begin{bmatrix}
 g_{T1,0}&g_{T1,1}&g_{T1,2}&g_{T1,3}&g_{T1,4}\\
 g_{T2,0}&g_{T2,1}&g_{T2,2}&g_{T2,3}&g_{T2,4}\\
@@ -161,15 +161,15 @@ h_{S1y,0}&h_{S1y,1}&h_{S1y,2}&h_{S1y,3}&h_{S1y,4}\\
 h_{S2y,0}&h_{S2y,1}&h_{S2y,2}&h_{S2y,3}&h_{S2y,4}
 \end{bmatrix}}_{4\times5}
 \underbrace{(\mathbf T_P^{f,(m)}-\bar{\mathbf T}_P)}_{5\times1}.
-$$
+```
 
 θは選定した温度センサの予報、gはGの該当行、h_SiyはUyへの変位復元の重み、バーはPOD平均場とその応答です。60メンバーの状態・観測予報からCzyとCyyを計算し、
 
-$$
+```math
 \underbrace{K}_{7\times4} =\underbrace{C_{zy}}_{7\times4}\underbrace{(C_{yy}+R)^{-1}}_{4\times4},
 \qquad
 \underbrace{\mathbf z^{a,(m)}}_{7\times1} =\underbrace{\widetilde{\mathbf z}^{f,(m)}}_{7\times1} +\underbrace{K}_{7\times4}\underbrace{(\mathbf y^{\mathrm{obs}}+\boldsymbol\varepsilon^{(m)}-\widetilde{\mathbf y}^{f,(m)})}_{4\times1}
-$$
+```
 
 と補正します。チルダは1.02倍のインフレーション後、aは補正後です。観測値はOpenFOAM・FrontISTRの正解にノイズを加えた4成分、εは更新時のメンバー別観測摂動です。実装は逆行列を作らず `np.linalg.solve()` を使います。
 
@@ -179,11 +179,11 @@ $$
 
 Kの温度5行をK_Tとすると、
 
-$$
+```math
 \underbrace{\Delta_{\mathrm{corr}}\mathbf T_P}_{5\times1} =\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1},
 \qquad
 \underbrace{\Delta_{\mathrm{corr}}d}_{1\times1} =\underbrace{\mathbf w^{\mathsf T}}_{1\times5}\underbrace{K_T}_{5\times4}\underbrace{\mathbf r^{(m)}}_{4\times1}.
-$$
+```
 
 rは観測＋メンバー別摂動−予報の4成分です。**Uyの観測差→5点温度の補正→新A・OのUzを再計算**という経路です。UyがUzを物理的に押し動かすという意味ではありません。
 
@@ -197,17 +197,17 @@ rは観測＋メンバー別摂動−予報の4成分です。**Uyの観測差�
 
 温度場は全20,696セルRMSEの時間平均、変位は平均絶対誤差で、いずれも30〜300秒の10時刻・5試行で平均します。反りについては、
 
-$$
+```math
 E_d=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
 \left|\widehat d_s(30k)-d^*(30k)\right|
-$$
+```
 
 です。ハットはその試行の同化後60メンバー平均、星は正解です。温度場は、
 
-$$
+```math
 E_T=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
 \sqrt{\frac1{20696}\sum_{i=1}^{20696}\left(\widehat T_{s,i}(30k)-T_i^*(30k)\right)^2}
-$$
+```
 
 です。5試行平均の線と正解との差を取ってから誤差を計算した値ではありません。
 
@@ -261,7 +261,7 @@ $$
 
 この4点の温度はROMで独立に時間積分していません。EnKFで補正した代表5点温度から、gappy-PODの復元行列Gを使って計算しています。検証セルcの温度は、
 
-$$
+```math
 \widehat T[c]{}(t)=\bar T[c] +\underbrace{\begin{bmatrix}G_{c,0}&G_{c,1}&G_{c,2}&G_{c,3}&G_{c,4}\end{bmatrix}}_{1\times5}
 \underbrace{\begin{bmatrix}
 \widehat T[P0]{}(t)-\bar T[P0]\\
@@ -270,7 +270,7 @@ $$
 \widehat T[P3]{}(t)-\bar T[P3]\\
 \widehat T[P4]{}(t)-\bar T[P4]
 \end{bmatrix}}_{5\times1}
-$$
+```
 
 です。バーはPODの時間平均場、ハットは同化後の推定値です。**観測のずれで代表5点を補正した影響が、この復元式を通して、観測していないセルの温度にも反映されます。** 同化なしでは、観測で補正せずに進めた代表5点から、同じGで復元します。
 
@@ -323,10 +323,10 @@ $$
 
 各点cの誤差は、試行sの60メンバー平均を使い、次式で計算しています。
 
-$$
+```math
 E_c=\frac1{5\cdot10}\sum_{s=1}^{5}\sum_{k=1}^{10}
 \left|\widehat T_s[c]{}(30k)-T^*[c]{}(30k)\right|.
-$$
+```
 
 星は保存済みOpenFOAM正解です。グラフに描いた5試行平均の線から誤差を求めるのではなく、各試行の誤差を計算してから平均しています。
 
