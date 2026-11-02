@@ -695,12 +695,14 @@ class="math inline">\(m\)</span> 枚くれます。 この写真を
 class="math inline">\(u_i(t_k)\)</span> ＝セル <span
 class="math inline">\(i\)</span> の時刻 <span
 class="math inline">\(t_k\)</span> の温度）:</p>
-<p><span class="math display">\[S=\begin{pmatrix}
+<p><span class="math display">\[
+S=\begin{pmatrix}
 u_1(t_1) &amp; u_1(t_2) &amp; \cdots &amp; u_1(t_m)\\
 u_2(t_1) &amp; u_2(t_2) &amp; \cdots &amp; u_2(t_m)\\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
 u_N(t_1) &amp; u_N(t_2) &amp; \cdots &amp; u_N(t_m)
-\end{pmatrix}\]</span></p>
+\end{pmatrix}
+\]</span></p>
 <p>（横に読むと <strong>各行が1セルの時間履歴</strong>、縦に読むと
 <strong>各列が1時刻の温度場（1枚の写真）</strong>）</p>
 <ul>
@@ -718,9 +720,10 @@ T}\)</span> … その時刻の温度場まるごと（1枚の写真）。</li>
 class="math inline">\(\bar u_i=\frac1m\sum_k u_i(t_k)\)</span>
 とし、これを各行から引いた行列を <span class="math inline">\(X\)</span>
 と書きます:</p>
-<p><span class="math display">\[X=\bigl[\,u(t_1)-\bar u,\ \dots,\
-u(t_m)-\bar u\,\bigr],\qquad
-X_{ik}=u_i(t_k)-\bar u_i.\]</span></p>
+<p><span class="math display">\[
+X=\bigl[\,u(t_1)-\bar u,\ \dots,\ u(t_m)-\bar u\,\bigr],\qquad
+X_{ik}=u_i(t_k)-\bar u_i.
+\]</span></p>
 <ul>
 <li><span class="math inline">\(\bar u=(\bar u_1,\dots,\bar
 u_N)^{\mathsf T}\)</span> …
@@ -738,10 +741,11 @@ u_N)^{\mathsf T}\)</span> …
 ）で最もよく表す、とは <strong>各スナップショットの <span
 class="math inline">\(\varphi\)</span>
 方向成分の二乗和を最大化</strong>すること:</p>
-<p><span class="math display">\[\max_{\lVert\varphi\rVert=1}\
-\sum_{k=1}^{m}\bigl|\varphi^{\mathsf T}(u(t_k)-\bar u)\bigr|^2
-=\max_{\lVert\varphi\rVert=1}\ \varphi^{\mathsf T}\bigl(XX^{\mathsf
-T}\bigr)\varphi.\]</span></p>
+<p><span class="math display">\[
+\max_{\lVert\varphi\rVert=1}\ \sum_{k=1}^{m}\bigl|\varphi^{\mathsf
+T}(u(t_k)-\bar u)\bigr|^2 =\max_{\lVert\varphi\rVert=1}\
+\varphi^{\mathsf T}\bigl(XX^{\mathsf T}\bigr)\varphi.
+\]</span></p>
 <p>制約 <span class="math inline">\(\varphi^{\mathsf
 T}\varphi=1\)</span> をラグランジュ乗数 <span
 class="math inline">\(\lambda\)</span> で組み込みます。</p>
@@ -757,8 +761,9 @@ T}A\varphi)/\partial\varphi=2A\varphi\)</span> なので、</p>
 T}\varphi-2\lambda\varphi=0.
 \]</span></p>
 <p>両辺を2で割って移項すると、次の固有値問題になります:</p>
-<p><span class="math display">\[\boxed{\ (XX^{\mathsf
-T})\,\varphi=\lambda\,\varphi\ }\]</span></p>
+<p><span class="math display">\[
+\boxed{\ (XX^{\mathsf T})\,\varphi=\lambda\,\varphi\ }
+\]</span></p>
 <ul>
 <li>固有ベクトル <span class="math inline">\(\varphi_k\)</span> ＝
 <strong>PODモード（場の型）</strong></li>
@@ -988,9 +993,11 @@ SVD の <span class="math inline">\(U\)</span> が POD のモードになり、
 class="math inline">\(X=U\Sigma V^{\mathsf T}\)</span> して、§2-2
 の固有値問題に出てきた <span class="math inline">\(XX^{\mathsf
 T}\)</span> を計算すると</p>
-<p><span class="math display">\[XX^{\mathsf T}=U\Sigma V^{\mathsf
-T}\,(U\Sigma V^{\mathsf T})^{\mathsf T}=U\Sigma \underbrace{V^{\mathsf
-T}V}_{I}\Sigma U^{\mathsf T}=U\,\Sigma^2\,U^{\mathsf T}.\]</span></p>
+<p><span class="math display">\[
+XX^{\mathsf T}=U\Sigma V^{\mathsf T}\,(U\Sigma V^{\mathsf T})^{\mathsf
+T}=U\Sigma \underbrace{V^{\mathsf T}V}_{I}\Sigma U^{\mathsf
+T}=U\,\Sigma^2\,U^{\mathsf T}.
+\]</span></p>
 <p>（ <span class="math inline">\(V\)</span> の列が直交なので <span
 class="math inline">\(V^{\mathsf T}V=I\)</span> ）。両辺に右から <span
 class="math inline">\(U\)</span> を掛けると、 <span
@@ -1080,9 +1087,10 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a hr
 class="math inline">\(U\)</span>
 を作らず、意味のある121列だけ計算する」という指定です。</p>
 <p><strong>中でやっていること</strong>を一言でいうと、行列を次のように<strong>足し算へ分解</strong>しています:</p>
-<p><span class="math display">\[X=\sigma_1\,u_1v_1^{\mathsf
-T}+\sigma_2\,u_2v_2^{\mathsf T}+\cdots+\sigma_r\,u_rv_r^{\mathsf
-T}\]</span></p>
+<p><span class="math display">\[
+X=\sigma_1\,u_1v_1^{\mathsf T}+\sigma_2\,u_2v_2^{\mathsf
+T}+\cdots+\sigma_r\,u_rv_r^{\mathsf T}
+\]</span></p>
 <p>各項が「<strong>空間の型 <span class="math inline">\(u_k\)</span>
 </strong> × <strong>時間の動き <span class="math inline">\(v_k\)</span>
 </strong> × <strong>大きさ <span class="math inline">\(\sigma_k\)</span>
@@ -1158,9 +1166,9 @@ class="math inline">\(t\)</span> の係数」）</p>
 class="math inline">\(N\)</span> ＝セル数、 <span
 class="math inline">\(m\)</span> ＝時刻数、 <span
 class="math inline">\(r\)</span> ＝モード数）:</p>
-<p><span class="math display">\[\underbrace{X}_{N\times
-m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\
-\underbrace{V^{\mathsf T}}_{r\times m}
+<p><span class="math display">\[
+\underbrace{X}_{N\times m}=\underbrace{U}_{N\times r}\
+\underbrace{\Sigma}_{r\times r}\ \underbrace{V^{\mathsf T}}_{r\times m}
 =\begin{pmatrix}|&amp;|&amp;&amp;|\\ u_1&amp;u_2&amp;\cdots&amp;u_r\\
 |&amp;|&amp;&amp;|\end{pmatrix}
 \begin{pmatrix}\sigma_1&amp;0&amp;\cdots&amp;0\\
@@ -1168,7 +1176,8 @@ m}=\underbrace{U}_{N\times r}\ \underbrace{\Sigma}_{r\times r}\
 \vdots&amp;\vdots&amp;\ddots&amp;\vdots\\
 0&amp;0&amp;\cdots&amp;\sigma_r\end{pmatrix}
 \begin{pmatrix}-\ v_1^{\mathsf T}\ -\\ -\ v_2^{\mathsf T}\ -\\ \vdots\\
--\ v_r^{\mathsf T}\ -\end{pmatrix}\]</span></p>
+-\ v_r^{\mathsf T}\ -\end{pmatrix}
+\]</span></p>
 <ul>
 <li><span class="math inline">\(u_k\)</span>
 は<strong>縦ベクトル</strong>（長さ <span
@@ -1325,25 +1334,26 @@ class="math inline">\(\sigma\)</span>
 <p><strong>入力</strong>（温度、単位は℃）と、各行から時間平均 <span
 class="math inline">\(m\)</span> を引いた <span
 class="math inline">\(X\)</span> :</p>
-<p><span
-class="math display">\[\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
+<p><span class="math display">\[
+\begin{pmatrix}22.182&amp;23.867&amp;25.742&amp;23.664\\
 21.615&amp;23.307&amp;25.239&amp;23.667\\
 20.097&amp;20.922&amp;22.648&amp;23.573\end{pmatrix}
 -\begin{pmatrix}23.864\\ 23.457\\ 21.810\end{pmatrix}
 =\underbrace{\begin{pmatrix}-1.682&amp;0.003&amp;1.879&amp;-0.199\\
 -1.842&amp;-0.150&amp;1.782&amp;0.210\\
--1.712&amp;-0.888&amp;0.838&amp;1.763\end{pmatrix}}_{X\
-(3\times4)}\]</span></p>
+-1.712&amp;-0.888&amp;0.838&amp;1.763\end{pmatrix}}_{X\ (3\times4)}
+\]</span></p>
 <p>これを <code>np.linalg.svd</code> にかけると、次の3つが返ります:</p>
-<p><span
-class="math display">\[U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
+<p><span class="math display">\[
+U=\begin{pmatrix}0.566&amp;0.513&amp;0.646\\
 0.608&amp;0.269&amp;-0.747\\
 0.557&amp;-0.815&amp;0.159\end{pmatrix},\quad
 \Sigma=\begin{pmatrix}4.161&amp;0&amp;0\\ 0&amp;1.802&amp;0\\
 0&amp;0&amp;0.036\end{pmatrix},\quad
 V^{\mathsf T}=\begin{pmatrix}-0.727&amp;-0.140&amp;0.628&amp;0.240\\
 0.020&amp;0.380&amp;0.422&amp;-0.823\\
-0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}\]</span></p>
+0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}
+\]</span></p>
 <p><strong>ここからが本題です。</strong> 各項 <span
 class="math inline">\(\sigma_k u_kv_k^{\mathsf T}\)</span>
 を実際に計算すると、 どれも <span class="math inline">\(X\)</span>
@@ -1352,39 +1362,46 @@ class="math inline">\(\sigma_k u_kv_k^{\mathsf T}\)</span>
 class="math inline">\(\sigma_1=4.161\)</span> 、エネルギー84.20 %）―
 <span class="math inline">\(u_1\)</span>
 は3成分とも同符号・同程度なので「<strong>全体が一緒に上下する型</strong>」:</p>
-<p><span class="math display">\[4.161\begin{pmatrix}0.566\\ 0.608\\
+<p><span class="math display">\[
+4.161\begin{pmatrix}0.566\\ 0.608\\
 0.557\end{pmatrix}\begin{pmatrix}-0.727&amp;-0.140&amp;0.628&amp;0.240\end{pmatrix}
 =\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
 -1.839&amp;-0.355&amp;1.589&amp;0.606\\
--1.685&amp;-0.326&amp;1.456&amp;0.555\end{pmatrix}\]</span></p>
+-1.685&amp;-0.326&amp;1.456&amp;0.555\end{pmatrix}
+\]</span></p>
 <p><strong>第2項</strong>（ <span
 class="math inline">\(\sigma_2=1.802\)</span> 、15.79 %）― <span
 class="math inline">\(u_2\)</span>
 は上2点が正・底面が負なので「<strong>上下の偏りの型</strong>」:</p>
-<p><span class="math display">\[1.802\begin{pmatrix}0.513\\ 0.269\\
+<p><span class="math display">\[
+1.802\begin{pmatrix}0.513\\ 0.269\\
 -0.815\end{pmatrix}\begin{pmatrix}0.020&amp;0.380&amp;0.422&amp;-0.823\end{pmatrix}
 =\begin{pmatrix}0.019&amp;0.351&amp;0.390&amp;-0.760\\
 0.010&amp;0.184&amp;0.205&amp;-0.399\\
--0.030&amp;-0.558&amp;-0.620&amp;1.208\end{pmatrix}\]</span></p>
+-0.030&amp;-0.558&amp;-0.620&amp;1.208\end{pmatrix}
+\]</span></p>
 <p><strong>第3項</strong>（ <span
 class="math inline">\(\sigma_3=0.036\)</span> 、0.01 %）―
 成分がすべて0.02以下の「<strong>ほぼ何もない項</strong>」:</p>
-<p><span class="math display">\[0.036\begin{pmatrix}0.646\\ -0.747\\
+<p><span class="math display">\[
+0.036\begin{pmatrix}0.646\\ -0.747\\
 0.159\end{pmatrix}\begin{pmatrix}0.470&amp;-0.765&amp;0.421&amp;-0.126\end{pmatrix}
 =\begin{pmatrix}0.011&amp;-0.018&amp;0.010&amp;-0.003\\
 -0.013&amp;0.020&amp;-0.011&amp;0.003\\
-0.003&amp;-0.004&amp;0.002&amp;-0.001\end{pmatrix}\]</span></p>
+0.003&amp;-0.004&amp;0.002&amp;-0.001\end{pmatrix}
+\]</span></p>
 <p><strong>3項を足すと元に戻ります</strong>（差の最大値 <span
 class="math inline">\(1.1\times10^{-15}\)</span> ）:</p>
-<p><span
-class="math display">\[\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
+<p><span class="math display">\[
+\begin{pmatrix}-1.712&amp;-0.331&amp;1.478&amp;0.564\\
 \vdots\end{pmatrix}
 +\begin{pmatrix}0.019&amp;0.351&amp;0.390&amp;-0.760\\
 \vdots\end{pmatrix}
 +\begin{pmatrix}0.011&amp;-0.018&amp;0.010&amp;-0.003\\
 \vdots\end{pmatrix}
 =\begin{pmatrix}-1.682&amp;0.003&amp;1.879&amp;-0.199\\
-\vdots\end{pmatrix}=X\]</span></p>
+\vdots\end{pmatrix}=X
+\]</span></p>
 <p><strong>打ち切ったときの誤差</strong>は:</p>
 <table>
 <thead>
@@ -1746,8 +1763,9 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a h
 <p>上のコードは各行（セル）を<strong>等しく</strong>扱っています。しかし本来のPOD（連続体のエネルギー最大化）は、
 体積重み <span class="math inline">\(\sqrt{V_i}\)</span>
 を掛けた行列</p>
-<p><span class="math display">\[\tilde
-X_{ik}=\sqrt{V_i}\;X_{ik}\]</span></p>
+<p><span class="math display">\[
+\tilde X_{ik}=\sqrt{V_i}\;X_{ik}
+\]</span></p>
 <p>を分解するのが正しい定義です。等重みだと<strong>細かいセルが密集した領域が実質的に重く</strong>なります。</p>
 <p>「本ケースのメッシュはそこまで不均一ではないだろう」と考えていたのですが、
 <strong>実際に測ったら違いました</strong>。OpenFOAMでセル体積を書き出して確認すると:</p>
@@ -1938,21 +1956,24 @@ id="そもそもクリロフ部分空間とは何か-3ノードの手計算で">
 <p>名前は難しいですが、定義は1行です。行列 <span
 class="math inline">\(A\)</span> と入力ベクトル <span
 class="math inline">\(b\)</span> から作る</p>
-<p><span class="math display">\[\mathcal K_r(A,b)=\mathrm{span}\{\,b,\
-Ab,\ A^2b,\ \dots,\ A^{r-1}b\,\}\]</span></p>
+<p><span class="math display">\[
+\mathcal K_r(A,b)=\mathrm{span}\{\,b,\ Ab,\ A^2b,\ \dots,\ A^{r-1}b\,\}
+\]</span></p>
 <p>＝「 <span class="math inline">\(b\)</span> に <span
 class="math inline">\(A\)</span>
 を繰り返し掛けてできる方向を集めた空間」。これだけです。
 <strong>物理的な意味は「入力の影響が系の中を伝わっていく順番」</strong>。3ノードの熱伝導（ヒータは端の節点1）で確かめます:</p>
-<p><span class="math display">\[A=\begin{pmatrix}-1&amp;1&amp;0\\
-1&amp;-2&amp;1\\ 0&amp;1&amp;-1\end{pmatrix},\qquad
-b=\begin{pmatrix}1\\ 0\\ 0\end{pmatrix}\quad(\text{node 1
-heated}).\]</span></p>
+<p><span class="math display">\[
+A=\begin{pmatrix}-1&amp;1&amp;0\\ 1&amp;-2&amp;1\\
+0&amp;1&amp;-1\end{pmatrix},\qquad
+b=\begin{pmatrix}1\\ 0\\ 0\end{pmatrix}\quad(\text{node 1 heated}).
+\]</span></p>
 <p><span class="math inline">\(A\)</span> を順に掛けると:</p>
-<p><span class="math display">\[b=\begin{pmatrix}1\\ 0\\
-0\end{pmatrix},\qquad
+<p><span class="math display">\[
+b=\begin{pmatrix}1\\ 0\\ 0\end{pmatrix},\qquad
 Ab=\begin{pmatrix}-1\\ 1\\ 0\end{pmatrix},\qquad
-A^2b=\begin{pmatrix}2\\ -3\\ 1\end{pmatrix}.\]</span></p>
+A^2b=\begin{pmatrix}2\\ -3\\ 1\end{pmatrix}.
+\]</span></p>
 <ul>
 <li><span class="math inline">\(b\)</span> ：熱はまだ
 <strong>節点1だけ</strong></li>
@@ -1965,8 +1986,9 @@ A^2b=\begin{pmatrix}2\\ -3\\ 1\end{pmatrix}.\]</span></p>
 を1回掛ける＝熱が隣へ1ステップ伝わる**。クリロフ基底は「ヒータの影響が届く順」に空間を張っていきます。
 これが解と直結する理由は、熱方程式 <span class="math inline">\(\dot
 T=AT+bQ\)</span> の解に出てくる行列指数関数のテイラー級数</p>
-<p><span
-class="math display">\[e^{At}b=b+tAb+\frac{t^2}{2}A^2b+\cdots\]</span></p>
+<p><span class="math display">\[
+e^{At}b=b+tAb+\frac{t^2}{2}A^2b+\cdots
+\]</span></p>
 <p>が <strong>まさにクリロフ方向の和</strong>
 だから。早い項ほど支配的なので、<strong>最初の <span
 class="math inline">\(r\)</span>
@@ -2016,8 +2038,9 @@ POD を手計算する（3セル × 4時刻・文字式）</h2>
 <p>言葉だけでは腑に落ちないので、<strong>3セル(A,B,C) ×
 4時刻</strong>の最小例で最後まで計算します。
 数字だと構造が見えにくいので、<strong>文字式</strong>で進めます。ポイントは、各セルの温度を</p>
-<p><span class="math display">\[u_i(t_k)=\bar u_i+a_i\,g_k,\qquad
-\sum_{k=1}^4 g_k=0\]</span></p>
+<p><span class="math display">\[
+u_i(t_k)=\bar u_i+a_i\,g_k,\qquad \sum_{k=1}^4 g_k=0
+\]</span></p>
 <p>と置くこと。ここで <span class="math inline">\(\bar u_i\)</span> は
 <strong>下地（時間平均）</strong>、 <span
 class="math inline">\(a_i\)</span> は
@@ -2103,12 +2126,13 @@ class="math inline">\(a_A&gt;a_B&gt;a_C&gt;0\)</span>
 <strong>場所ベクトル <span class="math inline">\(a\)</span> と
 時間ベクトル <span class="math inline">\(g\)</span> の外積</strong>
 になります:</p>
-<p><span class="math display">\[X=\begin{pmatrix}a_A g_1 &amp; a_A g_2
-&amp; a_A g_3 &amp; a_A g_4\\
+<p><span class="math display">\[
+X=\begin{pmatrix}a_A g_1 &amp; a_A g_2 &amp; a_A g_3 &amp; a_A g_4\\
 a_B g_1 &amp; a_B g_2 &amp; a_B g_3 &amp; a_B g_4\\
 a_C g_1 &amp; a_C g_2 &amp; a_C g_3 &amp; a_C g_4\end{pmatrix}
 =\begin{pmatrix}a_A\\ a_B\\ a_C\end{pmatrix}\bigl(g_1,\ g_2,\ g_3,\
-g_4\bigr) =a\,g^{\mathsf T}.\]</span></p>
+g_4\bigr) =a\,g^{\mathsf T}.
+\]</span></p>
 <p><strong>この時点で <span class="math inline">\(X=a\,g^{\mathsf
 T}\)</span> ＝ランク1</strong>（1つの空間パターン ×
 1つの時間プロファイル）。
@@ -2118,9 +2142,11 @@ class="math inline">\(XX^{\mathsf T}\)</span> を作る</h3>
 <p><span class="math inline">\(X=a\,g^{\mathsf T}\)</span>
 を代入するだけです。 <span class="math inline">\(g^{\mathsf T}g=\lVert
 g\rVert^2\)</span> はただのスカラーなので、</p>
-<p><span class="math display">\[XX^{\mathsf T}=a\,g^{\mathsf
-T}\,g\,a^{\mathsf T}=\lVert g\rVert^2\,a\,a^{\mathsf T},\qquad
-\lVert g\rVert^2=\sum_{k=1}^4 g_k^2.\]</span></p>
+<p><span class="math display">\[
+XX^{\mathsf T}=a\,g^{\mathsf T}\,g\,a^{\mathsf T}=\lVert
+g\rVert^2\,a\,a^{\mathsf T},\qquad
+\lVert g\rVert^2=\sum_{k=1}^4 g_k^2.
+\]</span></p>
 <p>右辺は <strong>場所ベクトル <span class="math inline">\(a\)</span>
 の外積 <span class="math inline">\(a a^{\mathsf T}\)</span>
 の定数倍</strong> ＝ やはり <strong>ランク1</strong>。 時間プロファイル
@@ -2135,13 +2161,15 @@ g\rVert^2\,a a^{\mathsf T}\)</span> の非ゼロ固有ベクトルは <span
 class="math inline">\(a\)</span> の向き、固有値はその係数です。
 PODモード <span class="math inline">\(\varphi_1\)</span> とエネルギー
 <span class="math inline">\(\lambda_1\)</span> は</p>
-<p><span class="math display">\[\varphi_1=\frac{a}{\lVert
-a\rVert},\qquad
-\lambda_1=\sigma_1^2=\lVert g\rVert^2\,\lVert a\rVert^2.\]</span></p>
+<p><span class="math display">\[
+\varphi_1=\frac{a}{\lVert a\rVert},\qquad
+\lambda_1=\sigma_1^2=\lVert g\rVert^2\,\lVert a\rVert^2.
+\]</span></p>
 <p>他の固有値はすべて0なので、エネルギー比は</p>
-<p><span class="math display">\[\frac{\lambda_1}{\mathrm{tr}(XX^{\mathsf
-T})}=\frac{\lVert g\rVert^2\lVert a\rVert^2}{\lVert g\rVert^2\lVert
-a\rVert^2}=1,\]</span></p>
+<p><span class="math display">\[
+\frac{\lambda_1}{\mathrm{tr}(XX^{\mathsf T})}=\frac{\lVert
+g\rVert^2\lVert a\rVert^2}{\lVert g\rVert^2\lVert a\rVert^2}=1,
+\]</span></p>
 <p>すなわち <strong>モード1だけで100％</strong>。 モード <span
 class="math inline">\(\varphi_1=a/\lVert a\rVert\)</span>
 の中身は「<strong>各セルの変動の強さの比 <span
@@ -2244,8 +2272,9 @@ id="なぜ穴だらけでも復元できるのか">なぜ「穴だらけ」で�
 できるのは、<strong>POD
 が先に「答えの形」を教えてくれている</strong>からです。</p>
 <p>§3 で見たとおり、温度場は</p>
-<p><span class="math display">\[\hat T=\bar
-T+a_1\varphi_1+a_2\varphi_2+\dots+a_5\varphi_5\]</span></p>
+<p><span class="math display">\[
+\hat T=\bar T+a_1\varphi_1+a_2\varphi_2+\dots+a_5\varphi_5
+\]</span></p>
 <p>と書けました。 <span class="math inline">\(\bar T\)</span> も <span
 class="math inline">\(\varphi_k\)</span>
 も<strong>計算済みで固定</strong>。時刻ごとに変わるのは <span
@@ -2327,8 +2356,9 @@ class="math inline">\(U_r\)</span>
 <p><strong>1点測るごとに式が1本立つ。</strong>
 未知が5個なので、5点でちょうど解ける形になります。</p>
 <p>③をセル <span class="math inline">\(c\)</span> 1個について書くと:</p>
-<p><span class="math display">\[\hat T_c=\bar
-T_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\dots+a_5\varphi_5[c]\]</span></p>
+<p><span class="math display">\[
+\hat T_c=\bar T_c+a_1\varphi_1[c]+a_2\varphi_2[c]+\dots+a_5\varphi_5[c]
+\]</span></p>
 <p><span class="math inline">\(\varphi_k[c]\)</span> は<strong>セル
 <span class="math inline">\(c\)</span>
 が測定点でなくても持っている値</strong>（モードは全セル分そろっている）。
@@ -2388,9 +2418,10 @@ Q-DEIMの価値は「いつも最良」ではなく、<strong>大外れを確実
 <h3 id="まずなぜ点の選び方が問題になるか">4-1.
 まず「なぜ点の選び方が問題になるか」</h3>
 <p>§3で見たように、温度場は「平均場＋モードの足し合わせ」で表せます:</p>
-<p><span class="math display">\[\hat u=\bar
-u+a_1\varphi_1+a_2\varphi_2+\dots+a_r\varphi_r=\bar
-u+U_r\,a.\]</span></p>
+<p><span class="math display">\[
+\hat u=\bar u+a_1\varphi_1+a_2\varphi_2+\dots+a_r\varphi_r=\bar
+u+U_r\,a.
+\]</span></p>
 <p>ここで未知は <strong>モードの混ぜ具合 <span
 class="math inline">\(a=(a_1,\dots,a_r)\)</span> </strong> の <span
 class="math inline">\(r\)</span> 個だけ。 <span
@@ -2403,9 +2434,10 @@ class="math inline">\(P\)</span>
 で測ると、その点でのモードの値だけを並べた <span
 class="math inline">\(r\times r\)</span> 行列 <span
 class="math inline">\(U_{r,P}\)</span> を使って、連立方程式</p>
-<p><span class="math display">\[U_{r,P}\,a=u_P-\bar
-u_P\quad\Rightarrow\quad a=\bigl(U_{r,P}\bigr)^{-1}\bigl(u_P-\bar
-u_P\bigr)\]</span></p>
+<p><span class="math display">\[
+U_{r,P}\,a=u_P-\bar u_P\quad\Rightarrow\quad
+a=\bigl(U_{r,P}\bigr)^{-1}\bigl(u_P-\bar u_P\bigr)
+\]</span></p>
 <p>を解くだけ（ <span class="math inline">\(u_P\)</span>
 ＝選んだ点の測定値）。<strong>問題は、この連立が「ちゃんと解けるか」</strong>。</p>
 <ul>
@@ -2647,18 +2679,20 @@ class="math inline">\(a_A&gt;a_B&gt;a_C\)</span> より選ばれるのは
 class="math inline">\(u_A(t_k)-\bar u_A=a_A g_k\)</span> 。選点行は
 <span class="math inline">\(U_{1,A}=\varphi_1[A]=a_A/\lVert
 a\rVert\)</span> なので、係数は</p>
-<p><span
-class="math display">\[\alpha=\bigl(U_{1,A}\bigr)^{+}\bigl(u_A-\bar
-u_A\bigr) =\frac{\lVert a\rVert}{a_A}\times a_A g_k=\lVert
-a\rVert\,g_k.\]</span></p>
+<p><span class="math display">\[
+\alpha=\bigl(U_{1,A}\bigr)^{+}\bigl(u_A-\bar u_A\bigr) =\frac{\lVert
+a\rVert}{a_A}\times a_A g_k=\lVert a\rVert\,g_k.
+\]</span></p>
 <p>これを全場に伸ばすと、</p>
-<p><span class="math display">\[\hat u=\bar u+\varphi_1\,\alpha =\bar
-u+\frac{a}{\lVert a\rVert}\times\lVert a\rVert\,g_k =\bar
-u+a\,g_k.\]</span></p>
+<p><span class="math display">\[
+\hat u=\bar u+\varphi_1\,\alpha =\bar u+\frac{a}{\lVert
+a\rVert}\times\lVert a\rVert\,g_k =\bar u+a\,g_k.
+\]</span></p>
 <p>一方、真値は §3 の定義そのまま <span
 class="math inline">\(u(t_k)=\bar u+a\,g_k\)</span> 。つまり</p>
-<p><span class="math display">\[\boxed{\ \hat u=\bar u+a\,g_k=u(t_k)\
-}\]</span></p>
+<p><span class="math display">\[
+\boxed{\ \hat u=\bar u+a\,g_k=u(t_k)\ }
+\]</span></p>
 <p><strong>測っていない B・C まで、真値にピタリ一致</strong>。 <span
 class="math inline">\(\lVert a\rVert\)</span>
 がきれいに約分して消えるのがミソで、
@@ -2975,8 +3009,9 @@ class="math inline">\(\varphi_k\)</span>
 class="math inline">\(a=(a_A,a_B,a_C)\)</span>
 を、3セルから20,696セルへ拡張したものです。 そして温度場は「平均場 ＋
 モード分布の足し合わせ」で表せます:</p>
-<p><span class="math display">\[\hat u(t)=\bar
-u+a_1(t)\,\varphi_1+a_2(t)\,\varphi_2+\dots\]</span></p>
+<p><span class="math display">\[
+\hat u(t)=\bar u+a_1(t)\,\varphi_1+a_2(t)\,\varphi_2+\dots
+\]</span></p>
 <p>（ <span class="math inline">\(\varphi_k\)</span>
 ＝時間によらない空間の型、 <span class="math inline">\(a_k(t)\)</span>
 ＝その型が時刻ごとにどれだけ混ざるか）。</p>
@@ -3126,12 +3161,15 @@ class="math inline">\(\varphi_{k,i}\)</span> ）の合計</strong>」。
 5点で「今どのスライダーがどれだけ上がっているか」を読み取れば、あとは各セルが自分の感度でその音を受け取るだけです。</p>
 <p><strong>1セルで確認</strong>（上のCで、割合が <span
 class="math inline">\(a=(1,\ 0.5)\)</span> のとき）:</p>
-<p><span class="math display">\[\hat T_C=\bar
-u_C+a_1\,\varphi_{1,C}+a_2\,\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4.\]</span></p>
+<p><span class="math display">\[
+\hat T_C=\bar
+u_C+a_1\,\varphi_{1,C}+a_2\,\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4.
+\]</span></p>
 <p>もし別の時刻で割合が <span class="math inline">\(a=(2,\ 0.3)\)</span>
 に変われば、<strong>同じC</strong>でも</p>
-<p><span class="math display">\[\hat
-T_C=20.75+2\times0.3+0.3\times0.7=21.56\]</span></p>
+<p><span class="math display">\[
+\hat T_C=20.75+2\times0.3+0.3\times0.7=21.56
+\]</span></p>
 <p>と変わります。つまり <strong>温度の時間変化は「割合 <span
 class="math inline">\(a(t)\)</span>
 の変化」で表される</strong>（下地とモードの形は固定、動くのは割合だけ）。
@@ -3147,34 +3185,41 @@ class="math inline">\(\varphi_{k,i}\)</span> に掛けて計算します。
 だから「5点から遠い反対側のセル」も、モードの形を通じてちゃんと値が決まります。</p>
 <p><strong>具体例（2モードで確認）</strong>：3セルA,B,C、平均 <span
 class="math inline">\(\bar u=(23,\ 21.5,\ 20.75)\)</span> 、モード</p>
-<p><span class="math display">\[\varphi_1=(0.8,\ 0.5,\ 0.3),\qquad
-\varphi_2=(0.1,\ -0.6,\ 0.7).\]</span></p>
+<p><span class="math display">\[
+\varphi_1=(0.8,\ 0.5,\ 0.3),\qquad \varphi_2=(0.1,\ -0.6,\ 0.7).
+\]</span></p>
 <p>真の混ぜ具合を <span class="math inline">\(a=(1,\ 0.5)\)</span>
 とすると、真の温度は <span class="math inline">\(u=\bar
 u+a_1\varphi_1+a_2\varphi_2\)</span> ＝</p>
-<p><span class="math display">\[u_A=23.85,\quad u_B=21.7,\quad
-u_C=21.4.\]</span></p>
+<p><span class="math display">\[
+u_A=23.85,\quad u_B=21.7,\quad u_C=21.4.
+\]</span></p>
 <p>いま
 <strong>A・Bだけ測り、Cは遠くて測らない</strong>とします。選点行列と測定値は</p>
-<p><span class="math display">\[U_{2,P}=\begin{pmatrix}0.8 &amp; 0.1\\
-0.5 &amp; -0.6\end{pmatrix},\qquad
+<p><span class="math display">\[
+U_{2,P}=\begin{pmatrix}0.8 &amp; 0.1\\ 0.5 &amp;
+-0.6\end{pmatrix},\qquad
 u_P-\bar u_P=\begin{pmatrix}23.85-23\\
-21.7-21.5\end{pmatrix}=\begin{pmatrix}0.85\\
-0.2\end{pmatrix}.\]</span></p>
+21.7-21.5\end{pmatrix}=\begin{pmatrix}0.85\\ 0.2\end{pmatrix}.
+\]</span></p>
 <p>逆行列（ <span
 class="math inline">\(\det=0.8\cdot(-0.6)-0.1\cdot0.5=-0.53\)</span>
 ）を掛けて混ぜ具合を復元:</p>
-<p><span class="math display">\[a=U_{2,P}^{-1}\begin{pmatrix}0.85\\
-0.2\end{pmatrix} =\frac{1}{-0.53}\begin{pmatrix}-0.6 &amp; -0.1\\ -0.5
-&amp; 0.8\end{pmatrix}\begin{pmatrix}0.85\\ 0.2\end{pmatrix}
+<p><span class="math display">\[
+a=U_{2,P}^{-1}\begin{pmatrix}0.85\\ 0.2\end{pmatrix}
+=\frac{1}{-0.53}\begin{pmatrix}-0.6 &amp; -0.1\\ -0.5 &amp;
+0.8\end{pmatrix}\begin{pmatrix}0.85\\ 0.2\end{pmatrix}
 =\frac{1}{-0.53}\begin{pmatrix}-0.53\\ -0.265\end{pmatrix}
-=\begin{pmatrix}1\\ 0.5\end{pmatrix}.\]</span></p>
+=\begin{pmatrix}1\\ 0.5\end{pmatrix}.
+\]</span></p>
 <p>この <span class="math inline">\(a=(1,0.5)\)</span>
 を、<strong>一度も測っていないC</strong> の行ベクトル <span
 class="math inline">\(\varphi_{\cdot,C}=(0.3,\ 0.7)\)</span>
 に掛けると:</p>
-<p><span class="math display">\[\hat T_C=\bar
-u_C+a_1\varphi_{1,C}+a_2\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4=u_C.\]</span></p>
+<p><span class="math display">\[
+\hat T_C=\bar
+u_C+a_1\varphi_{1,C}+a_2\varphi_{2,C}=20.75+1\times0.3+0.5\times0.7=21.4=u_C.
+\]</span></p>
 <p><strong>遠いCが、測らずにピタリ復元できました。</strong>
 距離で内挿したのではなく、 「5点で決めた <span
 class="math inline">\(a\)</span> ×Cのモード値」で決まっている ――
@@ -3200,8 +3245,10 @@ alt="5点→全温度場の復元アニメ" />
 class="math inline">\(i\)</span> について、次の1本を立てます （ <span
 class="math inline">\(i=0,1,2,3,4\)</span>
 の<strong>5本</strong>の連立式）:</p>
-<p><span class="math display">\[C_i\frac{dT_i}{dt}=\sum_{j\ne
-i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\mathrm{air}).\]</span></p>
+<p><span class="math display">\[
+C_i\frac{dT_i}{dt}=\sum_{j\ne
+i}K_{ij}(T_j-T_i)+q_i(t)-h\,(T_i-T_\mathrm{air}).
+\]</span></p>
 <p>右辺は左から「<strong>他ノードからの熱流入</strong>」「<strong>発熱</strong>」「<strong>空気への放熱</strong>」の3項です。</p>
 <ul>
 <li><span class="math inline">\(C_i\)</span> … ノード <span
@@ -3356,10 +3403,10 @@ class="math inline">\(K_{ij}\)</span> はどう決める？ ―
 class="math inline">\(K=kA/L\)</span>
 では計算しません。<strong>「5点のROM温度履歴が、OpenFOAMの5点温度履歴に一致するように」</strong>
 未知パラメータをまとめて逆算（同定）します。未知は</p>
-<p><span
-class="math display">\[\theta=[\,\underbrace{C_1,\dots,C_5}_{5},\
-\underbrace{K_{12},K_{13},\dots,K_{45}}_{10},\
-\underbrace{h}_{1}\,],\]</span></p>
+<p><span class="math display">\[
+\theta=[\,\underbrace{C_1,\dots,C_5}_{5},\
+\underbrace{K_{12},K_{13},\dots,K_{45}}_{10},\ \underbrace{h}_{1}\,],
+\]</span></p>
 <p>の <strong>合計16個</strong>。</p>
 <p>ROMを <span class="math inline">\(\theta\)</span>
 で前進積分して5点温度 <span
@@ -3368,8 +3415,10 @@ class="math inline">\(T_p^{\mathrm{ROM}}(t;\theta)\)</span>
 class="math inline">\(T_p^{\mathrm{OF}}(t)\)</span> との差を最小化します
 （ <span class="math inline">\(C,K,h\ge0\)</span>
 の範囲制約つき、<code>scipy.optimize.least_squares</code>）:</p>
-<p><span class="math display">\[\hat\theta=\arg\min_{\theta}\
-\sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.\]</span></p>
+<p><span class="math display">\[
+\hat\theta=\arg\min_{\theta}\
+\sum_{p=1}^{5}\sum_{t}\bigl(T_p^{\mathrm{ROM}}(t;\theta)-T_p^{\mathrm{OF}}(t)\bigr)^2.
+\]</span></p>
 <p><strong>実際のコードはこれだけ</strong>です（<code>run/build_calibrate_rom.py</code>
 の要点）:</p>
 <div class="sourceCode" id="cb17"><pre
@@ -3503,16 +3552,18 @@ T}\)</span> の7次元のままです。
 <h4 id="手続き4ステップ">手続き（4ステップ）</h4>
 <p>EnKFの各サイクルで、<strong>60メンバーそれぞれについて</strong>次を実行します。</p>
 <p><strong>ステップ1：そのメンバーの5点温度を取り出す</strong></p>
-<p><span
-class="math display">\[T_5^{(m)}=(T_1^{(m)},\dots,T_5^{(m)})\qquad
-m=1,\dots,60\]</span></p>
+<p><span class="math display">\[
+T_5^{(m)}=(T_1^{(m)},\dots,T_5^{(m)})\qquad m=1,\dots,60
+\]</span></p>
 <p><strong>ステップ2：gappy-POD でモード係数にする</strong>（§4-0
 と同じ計算）</p>
-<p><span class="math display">\[a^{(m)}=U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
-T_P\bigr)\quad(5\times1)\]</span></p>
+<p><span class="math display">\[
+a^{(m)}=U_{r,P}^{+}\bigl(T_5^{(m)}-\bar T_P\bigr)\quad(5\times1)
+\]</span></p>
 <p><strong>ステップ3：モード係数から変位を出す</strong></p>
-<p><span
-class="math display">\[u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)\]</span></p>
+<p><span class="math display">\[
+u^{(m)}=u_{\mathrm{mean}}+D\,a^{(m)}\quad(2\times1)
+\]</span></p>
 <p>ここで <span class="math inline">\(D\)</span> は <strong>FrontISTR
 で事前に作った定数行列</strong>です（ <span
 class="math inline">\(2\times5\)</span> ）。</p>
@@ -3550,9 +3601,10 @@ class="math inline">\(2\times5\)</span>
 <p><strong>ステップ4：観測予報 <span class="math inline">\(Y_f\)</span>
 に並べる</strong></p>
 <p>温度2点と変位2点を観測するなら、メンバーごとに4つの値を並べます:</p>
-<p><span
-class="math display">\[Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{T},\
-\underbrace{u_1^{(m)},\,u_2^{(m)}}_{u}\bigr)\]</span></p>
+<p><span class="math display">\[
+Y_f^{(m)}=\bigl(\underbrace{T_{i_1}^{(m)},\,T_{i_2}^{(m)}}_{T},\
+\underbrace{u_1^{(m)},\,u_2^{(m)}}_{u}\bigr)
+\]</span></p>
 <p>（ <span class="math inline">\(T\)</span> ＝温度2点、 <span
 class="math inline">\(u\)</span> ＝変位2点）</p>
 <p>実装はこれだけです:</p>
@@ -3568,22 +3620,25 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a h
 <h4 id="なぜこれで温度が直るのか">なぜこれで温度が直るのか</h4>
 <p>EnKF
 の更新式は<strong>温度だけを観測したときとまったく同じ</strong>です:</p>
-<p><span class="math display">\[z^a=z^b+K\,(y-Y_f),\qquad
-K=C_{zy}\,(C_{yy}+R)^{-1}\]</span></p>
+<p><span class="math display">\[
+z^a=z^b+K\,(y-Y_f),\qquad K=C_{zy}\,(C_{yy}+R)^{-1}
+\]</span></p>
 <p>変わるのは <span
 class="math inline">\(C_{zy}=\mathrm{Cov}(z,Y_f)\)</span> の中身だけ。
 <span class="math inline">\(Y_f\)</span>
 に変位が入っているので、<strong>温度と変位の共分散 <span
 class="math inline">\(\mathrm{Cov}(T_i,u_j)\)</span> が
 アンサンブルから自動的に計算されます</strong>。</p>
-<p><span class="math display">\[C_{zy}=\begin{pmatrix}
+<p><span class="math display">\[
+C_{zy}=\begin{pmatrix}
 \mathrm{Cov}(T_1,T_{i_1}) &amp; \cdots &amp;
 \color{red}{\mathrm{Cov}(T_1,u_1)} &amp;
 \color{red}{\mathrm{Cov}(T_1,u_2)}\\
 \vdots &amp; &amp; \vdots &amp; \vdots\\
 \mathrm{Cov}(Q,T_{i_1}) &amp; \cdots &amp;
 \color{red}{\mathrm{Cov}(Q,u_1)} &amp; \color{red}{\mathrm{Cov}(Q,u_2)}
-\end{pmatrix}\]</span></p>
+\end{pmatrix}
+\]</span></p>
 <p><strong>赤い列があるから、変位の残差 <span
 class="math inline">\(y_u-u^b\)</span>
 が温度と発熱量を引っぱります。</strong> 仕組みは blog_003 §4-0
@@ -3620,9 +3675,11 @@ class="math inline">\(x_c\)</span> </strong> の値。いっぽう FrontISTR
 </strong> の温度です。 そこで各節点に、近い <span
 class="math inline">\(k\)</span> 個のセルから
 <strong>逆距離加重（IDW）</strong> で内挿します:</p>
-<p><span class="math display">\[T_p=\frac{\sum_{c\in\mathcal N_k(p)}
-w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)} w_{pc}},\qquad
-w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}.\]</span></p>
+<p><span class="math display">\[
+T_p=\frac{\sum_{c\in\mathcal N_k(p)} w_{pc}\,T_c}{\sum_{c\in\mathcal
+N_k(p)} w_{pc}},\qquad
+w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}.
+\]</span></p>
 <p>近いセルほど重み <span class="math inline">\(w_{pc}\)</span>
 が大きい、という素直な加重平均です（節点がセル中心と一致したらそのセル値をそのまま採用）。
 <span class="math inline">\(\mathcal N_k(p)\)</span> は節点 <span
@@ -3635,12 +3692,16 @@ class="math inline">\(k\)</span> 個のセル。これで
 d_2=2,\ d_3=4\)</span> mm、温度が <span class="math inline">\(T_1=25,\
 T_2=23,\ T_3=21\)</span> ℃ だったとします。
 まず重みは距離の逆数（<strong>近いほど大きい／半分の距離なら2倍の重み</strong>）:</p>
-<p><span class="math display">\[w_1=\frac{1}{d_1}=1,\qquad
-w_2=\frac{1}{d_2}=0.5,\qquad w_3=\frac{1}{d_3}=0.25.\]</span></p>
+<p><span class="math display">\[
+w_1=\frac{1}{d_1}=1,\qquad w_2=\frac{1}{d_2}=0.5,\qquad
+w_3=\frac{1}{d_3}=0.25.
+\]</span></p>
 <p>これを式に入れて、分子（重み付き和）と分母（重みの和）を計算すると:</p>
-<p><span class="math display">\[T_p=\frac{w_1 T_1+w_2 T_2+w_3
-T_3}{w_1+w_2+w_3} =\frac{1\times 25+0.5\times 23+0.25\times
-21}{1+0.5+0.25} =\frac{41.75}{1.75}\approx 23.9.\]</span></p>
+<p><span class="math display">\[
+T_p=\frac{w_1 T_1+w_2 T_2+w_3 T_3}{w_1+w_2+w_3} =\frac{1\times
+25+0.5\times 23+0.25\times 21}{1+0.5+0.25} =\frac{41.75}{1.75}\approx
+23.9.
+\]</span></p>
 <p>つまり <span class="math inline">\(T_p\approx23.9\)</span>
 ℃。<strong>一番近いセル（25℃,
 重み1）に最も引っ張られ、遠いセルほど効きが弱い</strong>のが数字で見えます。
@@ -3675,18 +3736,21 @@ class="math inline">\(u\)</span> ）。</p>
 </blockquote>
 <p>節点温度が入ると、各要素に
 <strong>熱ひずみ</strong>（等方・線膨張）が生じます:</p>
-<p><span
-class="math display">\[\varepsilon_\mathrm{th}=\alpha\,(T-T_\mathrm{ref})\,\mathbf
-I.\]</span></p>
+<p><span class="math display">\[
+\varepsilon_\mathrm{th}=\alpha\,(T-T_\mathrm{ref})\,\mathbf I.
+\]</span></p>
 <p>これは「温めると各要素がこれだけ伸びたい」という量。FrontISTR
 はこれを <strong>等価節点熱荷重</strong> に変換し、</p>
-<p><span class="math display">\[f_\mathrm{th}=\sum_e\int_{\Omega_e}
-B^{\mathsf T} D\,\varepsilon_\mathrm{th}\,dV\]</span></p>
+<p><span class="math display">\[
+f_\mathrm{th}=\sum_e\int_{\Omega_e} B^{\mathsf T}
+D\,\varepsilon_\mathrm{th}\,dV
+\]</span></p>
 <p>（ <span class="math inline">\(B\)</span> ＝ひずみ-変位行列、 <span
 class="math inline">\(D\)</span>
 ＝弾性行列）、<strong>底面固定</strong>の拘束のもとで線形弾性のつり合いを解きます:</p>
-<p><span class="math display">\[\boxed{\ K_s\,u=f_\mathrm{th}\
-}\]</span></p>
+<p><span class="math display">\[
+\boxed{\ K_s\,u=f_\mathrm{th}\ }
+\]</span></p>
 <p>得られる <span class="math inline">\(u=(u_x,u_y,u_z)\)</span>
 が各節点の変位です。要するに 「<strong>伸びたい量 <span
 class="math inline">\(\alpha\Delta T\)</span>
@@ -3994,8 +4058,9 @@ id="なぜ反りを知る必要があるのか-工具長で補正量が変わる
 文献で確かめたところ、<strong>半分正しく、半分違います</strong>。</p>
 <p><strong>正しい部分</strong>：工具の<strong>姿勢</strong>（傾きそのもの）は3軸機では変えられません。</p>
 <p><strong>違う部分</strong>：傾き角は<strong>工具先端では並進の位置ずれに化ける</strong>ので、NCオフセットで補正できます。</p>
-<p><span class="math display">\[\delta \;\simeq\; \theta \times
-L\]</span></p>
+<p><span class="math display">\[
+\delta \;\simeq\; \theta \times L
+\]</span></p>
 <p>（ <span class="math inline">\(\theta\)</span> ：傾き角、 <span
 class="math inline">\(L\)</span> ：工具長）</p>
 <p>Yang らはまさにこれを指摘しています。</p>
@@ -4011,9 +4076,10 @@ href="https://doi.org/10.1177/0954405414556499">doi:10.1177/0954405414556499</a>
 <p>彼らはヨー角・ピッチ角・伸びの3モデルを立て、<strong>傾き角と工具長に基づいて補正</strong>しています。</p>
 <h4 id="本ケースで具体的に計算すると">本ケースで具体的に計算すると</h4>
 <p>A と O は 57.4 mm 離れているので、反り 2.735 µm は傾き角に直すと</p>
-<p><span
-class="math display">\[\theta=\frac{2.735\times10^{-6}}{57.4\times10^{-3}}=4.77\times10^{-5}\
-\mathrm{rad}=0.0027^\circ\]</span></p>
+<p><span class="math display">\[
+\theta=\frac{2.735\times10^{-6}}{57.4\times10^{-3}}=4.77\times10^{-5}\
+\mathrm{rad}=0.0027^\circ
+\]</span></p>
 <p>これを工具長で工具先端の位置ずれに換算します。<strong>工具先端の変位そのものは解析していません</strong>。下の表は上面の反りから
 <span class="math inline">\(\delta=\theta L\)</span>
 で換算した値です。</p>
@@ -4526,10 +4592,12 @@ class="math inline">\(C_{yy}\)</span> を59で割って計算する。</li>
 カルマンゲインで4成分の残差を7未知数へ配り、次の予測に使う。</li>
 </ol>
 <p>例えば温度P0と発熱倍率qの補正は、コードの添字で書くと</p>
-<p><span
-class="math display">\[T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},\]</span></p>
-<p><span
-class="math display">\[q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.\]</span></p>
+<p><span class="math display">\[
+T_0^a=T_0^f+K_{0,0}d_{T2}+K_{0,1}d_{T0}+K_{0,2}d_{S1}+K_{0,3}d_{S2},
+\]</span></p>
+<p><span class="math display">\[
+q^a=q^f+K_{5,0}d_{T2}+K_{5,1}d_{T0}+K_{5,2}d_{S1}+K_{5,3}d_{S2}.
+\]</span></p>
 <p>ここでfは偏差膨張後の予報、aはデータ同化後、dは「観測＋メンバー別の観測摂動−予報観測」です。
 <strong>各式の最後の2項が、変位観測から温度や発熱倍率へ入る補正</strong>です。補正したqを15倍するとQ
 [W]になります。</p>
@@ -4551,8 +4619,9 @@ class="math inline">\(Q=15\)</span> W（ヒータ点 P2）、放熱 <span
 class="math inline">\(h=0.01535\)</span> W/K、 0–300 s 加熱・300–600 s
 冷却で時間積分したものを真値とする。</p>
 <p><strong>状態ベクトル</strong>（7次元）</p>
-<p><span class="math display">\[z=(T_1,\dots,T_5,\ q,\ h),\qquad
-Q=15\,q\ [\mathrm W]\]</span></p>
+<p><span class="math display">\[
+z=(T_1,\dots,T_5,\ q,\ h),\qquad Q=15\,q\ [\mathrm W]
+\]</span></p>
 <p><span class="math inline">\(q\)</span> は発熱の倍率（真値 <span
 class="math inline">\(q=1\)</span> ）。変位は状態に入れない。</p>
 <p><strong>観測</strong>（30 s ごと、計20回）　温度2点（P2,
@@ -4560,10 +4629,11 @@ P0。この計算では発熱感度 <span class="math inline">\(\partial T/\part
 Q\)</span> の上位2点として選んだ。どちらも A 側）と、 上面 A・O の <span
 class="math inline">\(U_z\)</span>
 の計4個。真値にノイズを足して作る。</p>
-<p><span class="math display">\[y=\bigl(T_{P2},\ T_{P0},\ U_z(A),\
+<p><span class="math display">\[
+y=\bigl(T_{P2},\ T_{P0},\ U_z(A),\
 U_z(O)\bigr)^{\mathrm{true}}+\varepsilon,\qquad
-\varepsilon\sim N(0,R),\quad
-R=\mathrm{diag}(0.3^2,0.3^2,0.3^2,0.3^2)\]</span></p>
+\varepsilon\sim N(0,R),\quad R=\mathrm{diag}(0.3^2,0.3^2,0.3^2,0.3^2)
+\]</span></p>
 <p>（温度は K、変位は µm）</p>
 <p><strong>初期アンサンブル</strong>（60メンバー）　真値を知らない状態から始めるため、広くばらつかせる。</p>
 <table>
@@ -4603,23 +4673,25 @@ class="math inline">\(q,h\)</span> を使ってROMで30 s
 <li><strong>予報観測</strong> <span class="math inline">\(Y_f\)</span>
 （ <span class="math inline">\(60\times4\)</span>
 ）　各メンバーについて、温度2点はそのまま取り出し、
-変位2点は温度から計算する（§7-0）。 <span
-class="math display">\[u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar
-T_P\bigr)\]</span></li>
+変位2点は温度から計算する（§7-0）。 <span class="math display">\[
+u^{(m)}=u_\mathrm{mean}+D\,U_{r,P}^{+}\bigl(T_5^{(m)}-\bar T_P\bigr)
+\]</span></li>
 <li><strong>共分散膨張</strong>　メンバーの平均からのずれを1.02倍に広げる（標本数不足で分散が縮みすぎるのを防ぐ）。</li>
 <li><strong>ゲイン</strong>　60メンバーの偏差 <span
 class="math inline">\(dZ\)</span> （ <span
 class="math inline">\(60\times7\)</span> ）、 <span
 class="math inline">\(dY\)</span> （ <span
 class="math inline">\(60\times4\)</span> ）から <span
-class="math display">\[C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\
-(7\times4),\quad C_{yy}=\frac{dY^{\mathsf T}dY}{59}\ (4\times4),\quad
-K=C_{zy}\,(C_{yy}+R)^{-1}\ (7\times4)\]</span></li>
+class="math display">\[
+C_{zy}=\frac{dZ^{\mathsf T}dY}{59}\ (7\times4),\quad
+C_{yy}=\frac{dY^{\mathsf T}dY}{59}\ (4\times4),\quad
+K=C_{zy}\,(C_{yy}+R)^{-1}\ (7\times4)
+\]</span></li>
 <li><strong>更新</strong>　メンバーごとに観測ノイズ <span
 class="math inline">\(\varepsilon^{(m)}\sim N(0,R)\)</span>
-を足して更新する（摂動観測法）。 <span
-class="math display">\[z^{(m)}\leftarrow
-z^{(m)}+K\bigl(y+\varepsilon^{(m)}-Y_f^{(m)}\bigr)\]</span></li>
+を足して更新する（摂動観測法）。 <span class="math display">\[
+z^{(m)}\leftarrow z^{(m)}+K\bigl(y+\varepsilon^{(m)}-Y_f^{(m)}\bigr)
+\]</span></li>
 <li><strong>制約</strong>　 <span
 class="math inline">\(q\in[0,3]\)</span> 、 <span
 class="math inline">\(h\in[10^{-4},0.2]\)</span> に収める。</li>
@@ -4631,8 +4703,9 @@ class="math inline">\(z\)</span> の7成分すべてであり、 <span
 class="math inline">\(q\)</span> はその6番目の成分である。 <span
 class="math inline">\(q\)</span> の更新量は <span
 class="math inline">\(K\)</span> の6行目</p>
-<p><span class="math display">\[K_{q,:}=\mathrm{Cov}(q,\
-Y_f)\,(C_{yy}+R)^{-1}\]</span></p>
+<p><span class="math display">\[
+K_{q,:}=\mathrm{Cov}(q,\ Y_f)\,(C_{yy}+R)^{-1}
+\]</span></p>
 <p>で決まる。手順1で <span class="math inline">\(q\)</span>
 の大きいメンバーほど温度が上がり、手順2でその温度から計算される変位も大きくなるため、
 <span class="math inline">\(\mathrm{Cov}(q,T)\)</span> と <span
@@ -4655,18 +4728,22 @@ class="math inline">\(m=1,\ldots,60\)</span>
 がEnKFメンバーです。<strong>5 seed
 は再試行の数であり、60メンバーとは別物</strong>です。</p>
 <p>まず各時刻のデータ同化後アンサンブルから、点ごとの推定温度を出します:</p>
-<p><span class="math display">\[\hat
-T_{s,i}(t_k)=\frac{1}{60}\sum_{m=1}^{60}T^a_{s,m,i}(t_k)\]</span></p>
+<p><span class="math display">\[
+\hat T_{s,i}(t_k)=\frac{1}{60}\sum_{m=1}^{60}T^a_{s,m,i}(t_k)
+\]</span></p>
 <p>（データ同化なしの場合は、同じ初期アンサンブルを更新せずに時間発展させた平均を使います）</p>
 <p>次に、観測点だけでなく<strong>全5点（未観測点を含む）</strong>で真値との差を取ります:</p>
-<p><span class="math display">\[e_{s,i,k}=\hat
-T_{s,i}(t_k)-T_i^{\mathrm{true}}(t_k),\qquad
-r_{s,k}=\sqrt{\frac{1}{5}\sum_{i=0}^{4}e_{s,i,k}^2}\]</span></p>
+<p><span class="math display">\[
+e_{s,i,k}=\hat T_{s,i}(t_k)-T_i^{\mathrm{true}}(t_k),\qquad
+r_{s,k}=\sqrt{\frac{1}{5}\sum_{i=0}^{4}e_{s,i,k}^2}
+\]</span></p>
 <p>表の「加熱期の平均RMSE」は、この空間RMSEを<strong>時刻とseedで平均</strong>した値です:</p>
-<p><span class="math display">\[\overline{\mathrm{RMSE}}_T=
+<p><span class="math display">\[
+\overline{\mathrm{RMSE}}_T=
 \frac{1}{5}\sum_{s=1}^{5}\left[\frac{1}{10}\sum_{k=1}^{10}r_{s,k}\right]\
 [\mathrm K],
-\qquad t_k=30k\ \mathrm{s}\]</span></p>
+\qquad t_k=30k\ \mathrm{s}
+\]</span></p>
 <p>集計は <strong>30, 60, …,
 300秒の10回のデータ同化後</strong>です。0秒は初期誤差が全構成で共通なので除外しています。</p>
 <blockquote>

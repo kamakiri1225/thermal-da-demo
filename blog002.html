@@ -451,8 +451,10 @@ OI では <strong>これを事前に決め打ちして固定</strong>します�
 </strong>：温度計のノイズの大きさ（分散）。</li>
 </ol>
 <p>これらから、更新式は <strong>たった1本</strong>です：</p>
-<p><span class="math display">\[\boxed{\,x^a=x^b+K\,(y-Hx^b)\,}\qquad
-K=BH^{\mathsf T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
+<p><span class="math display">\[
+\boxed{\,x^a=x^b+K\,(y-Hx^b)\,}\qquad K=BH^{\mathsf T}\bigl(HBH^{\mathsf
+T}+R\bigr)^{-1}
+\]</span></p>
 <ul>
 <li><span class="math inline">\(x^a\)</span>
 ：<strong>データ同化後</strong>（analysis）の温度。これが答え。</li>
@@ -480,11 +482,13 @@ class="math inline">\(B\)</span>
 の中身</strong>：いきなり数字にせず、まず記号で書くと構造が見えます。
 <span class="math inline">\(B\)</span> の
 <strong>対角は各点の分散、非対角は点どうしの共分散</strong>です:</p>
-<p><span class="math display">\[B=\begin{pmatrix}
+<p><span class="math display">\[
+B=\begin{pmatrix}
 \sigma_{11} &amp; \sigma_{12} &amp; \sigma_{13}\\
 \sigma_{21} &amp; \sigma_{22} &amp; \sigma_{23}\\
 \sigma_{31} &amp; \sigma_{32} &amp; \sigma_{33}
-\end{pmatrix}\]</span></p>
+\end{pmatrix}
+\]</span></p>
 <p>ここで <span class="math inline">\(\sigma_i\)</span> は点 <span
 class="math inline">\(i\)</span> の予報の標準偏差、 <span
 class="math inline">\(\rho_{ij}\)</span> は点 <span
@@ -506,13 +510,14 @@ class="math inline">\(\sigma_i^2=4\)</span> ）、相関は 隣どうし <span
 class="math inline">\(\rho_{12}=\rho_{23}=0.5\)</span>
 （連動大）、離れた <span class="math inline">\(\rho_{13}=0.2\)</span>
 （連動小）:</p>
-<p><span
-class="math display">\[\sigma_{11}=\sigma_{22}=\sigma_{33}=4,\quad
+<p><span class="math display">\[
+\sigma_{11}=\sigma_{22}=\sigma_{33}=4,\quad
 \sigma_{12}=\sigma_{23}=0.5\times2\times2=2,\quad
 \sigma_{13}=0.2\times2\times2=0.8
 \;\Rightarrow\;
 B=\begin{pmatrix}4 &amp; 2 &amp; 0.8\\ 2 &amp; 4 &amp; 2\\ 0.8 &amp; 2
-&amp; 4\end{pmatrix}.\]</span></p>
+&amp; 4\end{pmatrix}.
+\]</span></p>
 <p><strong>観測演算子</strong> <span class="math inline">\(H=(1,\ 0,\
 0)\)</span> 。<strong>観測ノイズ</strong> 温度計の標準偏差 0.3 ℃ なので
 <span class="math inline">\(R=0.3^2=0.09\)</span> 。</p>
@@ -524,19 +529,21 @@ T}\)</span> ＝「 <span class="math inline">\(B\)</span> の1列目」、
 <span class="math inline">\(HBH^{\mathsf T}\)</span> ＝「 <span
 class="math inline">\(B\)</span> の (1,1) 成分」。 まず
 <strong>記号のまま</strong>書くと、ゲインの構造が見えます:</p>
-<p><span class="math display">\[BH^{\mathsf
-T}=\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
+<p><span class="math display">\[
+BH^{\mathsf T}=\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
 \sigma_{31}\end{pmatrix},\qquad
 HBH^{\mathsf T}+R=\sigma_{11}+R,\qquad
 K=\frac{1}{\sigma_{11}+R}\begin{pmatrix}\sigma_{11}\\ \sigma_{21}\\
-\sigma_{31}\end{pmatrix}.\]</span></p>
+\sigma_{31}\end{pmatrix}.
+\]</span></p>
 <p>＝「<strong>観測点との共分散
 ÷（観測点の分散＋ノイズ）</strong>」。数字を入れると（ <span
 class="math inline">\(\sigma_{11}=4,\ \sigma_{21}=2,\ \sigma_{31}=0.8,\
 R=0.09\)</span> ）:</p>
-<p><span class="math display">\[K=\frac{1}{4+0.09}\begin{pmatrix}4\\ 2\\
-0.8\end{pmatrix} =\begin{pmatrix}0.978\\ 0.489\\
-0.196\end{pmatrix}.\]</span></p>
+<p><span class="math display">\[
+K=\frac{1}{4+0.09}\begin{pmatrix}4\\ 2\\ 0.8\end{pmatrix}
+=\begin{pmatrix}0.978\\ 0.489\\ 0.196\end{pmatrix}.
+\]</span></p>
 <p><strong>読み方</strong>：点1（測った点）は重み 0.978
 でほぼ観測を信じる。点2は 0.489、点3は 0.196 と、
 <strong>測っていない点にも <span class="math inline">\(B\)</span>
@@ -544,10 +551,11 @@ R=0.09\)</span> ）:</p>
 <h3 id="更新answer">3-3. 更新（answer）</h3>
 <p>予報のハズレ： <span class="math inline">\(y-Hx^b=30-25=5\)</span>
 ℃。これをゲインで配分:</p>
-<p><span class="math display">\[x^a=x^b+K\times5 =\begin{pmatrix}25\\
-25\\ 25\end{pmatrix} +\begin{pmatrix}0.978\\ 0.489\\
-0.196\end{pmatrix}\times5 =\begin{pmatrix}29.89\\ 27.44\\
-25.98\end{pmatrix}\]</span></p>
+<p><span class="math display">\[
+x^a=x^b+K\times5 =\begin{pmatrix}25\\ 25\\ 25\end{pmatrix}
++\begin{pmatrix}0.978\\ 0.489\\ 0.196\end{pmatrix}\times5
+=\begin{pmatrix}29.89\\ 27.44\\ 25.98\end{pmatrix}
+\]</span></p>
 <h3 id="結果を真値と比べる">3-4. 結果を真値と比べる</h3>
 <table>
 <colgroup>
@@ -608,11 +616,15 @@ class="math inline">\(B\)</span>
 まで当てる</strong>ことです。 「温度を測る」「変位を測る」「 <span
 class="math inline">\(Q\)</span>
 を同定する」――この3つが、同じ1本の更新式</p>
-<p><span class="math display">\[x^a=x^b+K\,(y-Hx^b),\qquad K=BH^{\mathsf
-T}\bigl(HBH^{\mathsf T}+R\bigr)^{-1}\]</span></p>
+<p><span class="math display">\[
+x^a=x^b+K\,(y-Hx^b),\qquad K=BH^{\mathsf T}\bigl(HBH^{\mathsf
+T}+R\bigr)^{-1}
+\]</span></p>
 <p>の <strong>どこに入るか</strong>を、数字を入れずに
 <strong>文字式のまま</strong>追うと本質がはっきりします。状態を3変数</p>
-<p><span class="math display">\[x=(T_1,\ T_2,\ Q)\]</span></p>
+<p><span class="math display">\[
+x=(T_1,\ T_2,\ Q)
+\]</span></p>
 <p>に絞ります。物理の仮定は2つだけ:</p>
 <ul>
 <li><strong>固定した時刻・条件で、Qに対する温度応答を線形近似する</strong>:
@@ -631,15 +643,17 @@ class="math inline">\(Q\)</span> で決まるので温度と <span
 class="math inline">\(Q\)</span> は必ず連動</strong>します。この連動を
 <span class="math inline">\(a=(s_1,\ s_2,\ 1)^{\mathsf T}\)</span>
 の外積で入れると:</p>
-<p><span class="math display">\[B=\begin{pmatrix}\sigma_T^2 &amp; 0
-&amp; 0\\ 0 &amp; \sigma_T^2 &amp; 0\\ 0 &amp; 0 &amp; 0\end{pmatrix}
-+\sigma_Q^2\,a\,a^{\mathsf T} =\begin{pmatrix}
+<p><span class="math display">\[
+B=\begin{pmatrix}\sigma_T^2 &amp; 0 &amp; 0\\ 0 &amp; \sigma_T^2 &amp;
+0\\ 0 &amp; 0 &amp; 0\end{pmatrix} +\sigma_Q^2\,a\,a^{\mathsf T}
+=\begin{pmatrix}
 \sigma_T^2+\sigma_Q^2 s_1^2 &amp; \sigma_Q^2 s_1 s_2 &amp; \sigma_Q^2
 s_1\\
 \sigma_Q^2 s_1 s_2 &amp; \sigma_T^2+\sigma_Q^2 s_2^2 &amp; \sigma_Q^2
 s_2\\
 \sigma_Q^2 s_1 &amp; \sigma_Q^2 s_2 &amp; \sigma_Q^2
-\end{pmatrix}.\]</span></p>
+\end{pmatrix}.
+\]</span></p>
 <blockquote>
 <p><strong>ここが全ての鍵</strong>：右上・左下の <span
 class="math inline">\(B_{TQ}=\sigma_Q^2\,(s_1,\ s_2)\)</span> が
@@ -656,17 +670,18 @@ class="math inline">\(Q\)</span> が動く（文字式）</h3>
 0)\)</span> 、観測ノイズ分散を <span class="math inline">\(R=r\)</span>
 とします。 <span class="math inline">\(BH^{\mathsf T}\)</span> は「
 <span class="math inline">\(B\)</span> の1列目」なので</p>
-<p><span class="math display">\[BH^{\mathsf
-T}=\begin{pmatrix}\sigma_T^2+\sigma_Q^2 s_1^2\\ \sigma_Q^2 s_1 s_2\\
-\sigma_Q^2 s_1\end{pmatrix},\qquad
-HBH^{\mathsf T}+R=\sigma_T^2+\sigma_Q^2 s_1^2+r,\]</span></p>
-<p><span class="math display">\[K=\frac{1}{\sigma_T^2+\sigma_Q^2
-s_1^2+r}
+<p><span class="math display">\[
+BH^{\mathsf T}=\begin{pmatrix}\sigma_T^2+\sigma_Q^2 s_1^2\\ \sigma_Q^2
+s_1 s_2\\ \sigma_Q^2 s_1\end{pmatrix},\qquad
+HBH^{\mathsf T}+R=\sigma_T^2+\sigma_Q^2 s_1^2+r,
+\]</span></p>
+<p><span class="math display">\[
+K=\frac{1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}
 \begin{pmatrix}\sigma_T^2+\sigma_Q^2 s_1^2\\ \sigma_Q^2 s_1 s_2\\
 \sigma_Q^2 s_1\end{pmatrix}
 \ \Rightarrow\
-\boxed{\,K_Q=\frac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2
-s_1^2+r}\,}.\]</span></p>
+\boxed{\,K_Q=\frac{\sigma_Q^2 s_1}{\sigma_T^2+\sigma_Q^2 s_1^2+r}\,}.
+\]</span></p>
 <p><strong>点1の温度しか測っていないのにゲインの <span
 class="math inline">\(Q\)</span> 行 <span
 class="math inline">\(K_Q\neq0\)</span> </strong> 。だから予報のハズレ
@@ -685,7 +700,9 @@ class="math inline">\(B_{T_1Q}=\sigma_Q^2 s_1\)</span> </strong>
 class="math inline">\(w\)</span> そのもの</strong>になります
 （これが本研究の <span class="math inline">\(W=K_s^{-1}H_T\)</span>
 の1行版）:</p>
-<p><span class="math display">\[H_u=(w_1,\ w_2,\ 0).\]</span></p>
+<p><span class="math display">\[
+H_u=(w_1,\ w_2,\ 0).
+\]</span></p>
 <p>絶対温度を状態に使う場合、変位予報には切片が必要です。</p>
 <p><span class="math display">\[
 y_u^b=H_u x^b+c_u,\qquad c_u=-(w_1+w_2)T_{\rm air}.
@@ -695,9 +712,10 @@ y_u^b=H_u x^b+c_u,\qquad c_u=-(w_1+w_2)T_{\rm air}.
 <p><span class="math inline">\(Q\)</span>
 に効くのはゲインの3行目だけ見れば十分で、 <span
 class="math inline">\(BH_u^{\mathsf T}\)</span> の第3成分は</p>
-<p><span class="math display">\[\bigl(BH_u^{\mathsf
-T}\bigr)_Q=\sigma_Q^2 s_1 w_1+\sigma_Q^2 s_2 w_2=\sigma_Q^2\,(s\cdot
-w).\]</span></p>
+<p><span class="math display">\[
+\bigl(BH_u^{\mathsf T}\bigr)_Q=\sigma_Q^2 s_1 w_1+\sigma_Q^2 s_2
+w_2=\sigma_Q^2\,(s\cdot w).
+\]</span></p>
 <p>ただし <span class="math inline">\(s\cdot w=0\)</span>
 ならQへのゲインは0です。符号が異なる寄与が相殺される場合もあります。</p>
 <p>温度と違い、変位は
@@ -719,8 +737,9 @@ class="math inline">\(\delta T=T-T^b\)</span> （共分散 <span
 class="math inline">\(B\)</span> ）とすると、 この段落のBは温度部分
 <span class="math inline">\(B_{TT}\)</span>
 を表し、拡大状態全体のBとは大きさが異なります。変位は温度の線形写像なので</p>
-<p><span class="math display">\[u-u^b=w^{\mathsf T}\delta T=w_1\,\delta
-T_1+w_2\,\delta T_2+\cdots\]</span></p>
+<p><span class="math display">\[
+u-u^b=w^{\mathsf T}\delta T=w_1\,\delta T_1+w_2\,\delta T_2+\cdots
+\]</span></p>
 <p>変位計は「温度誤差の <span class="math inline">\(w\)</span>
 方向成分」を1つの数として読む器械です。</p>
 <figure>
@@ -740,27 +759,30 @@ class="math inline">\(\sqrt r\)</span> を超えるかどうか。</p>
 <p><strong>② 温度が動く理由＝共分散 <span
 class="math inline">\(Bw\)</span> </strong> 。 <span
 class="math inline">\(H=w^{\mathsf T}\)</span> をゲインに入れると</p>
-<p><span class="math display">\[K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
-w^{\mathsf T}Bw=\mathrm{Var}(u).\]</span></p>
+<p><span class="math display">\[
+K=\frac{Bw}{w^{\mathsf T}Bw+r},\qquad
+w^{\mathsf T}Bw=\mathrm{Var}(u).
+\]</span></p>
 <p><strong>行列を成分まで書き下す</strong>と（2点、 <span
 class="math inline">\(B\)</span> の成分を <span
 class="math inline">\(\sigma_{ij}\)</span> とする）:</p>
-<p><span
-class="math display">\[B=\begin{pmatrix}\sigma_{11}&amp;\sigma_{12}\\
+<p><span class="math display">\[
+B=\begin{pmatrix}\sigma_{11}&amp;\sigma_{12}\\
 \sigma_{12}&amp;\sigma_{22}\end{pmatrix},\quad
 w=\begin{pmatrix}w_1\\ w_2\end{pmatrix}
 \ \Rightarrow\
 Bw=\begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
 \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\quad
-w^{\mathsf
-T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,\]</span></p>
-<p><span
-class="math display">\[K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
+w^{\mathsf T}Bw=\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2,
+\]</span></p>
+<p><span class="math display">\[
+K=\frac{1}{\sigma_{11}w_1^2+2\sigma_{12}w_1w_2+\sigma_{22}w_2^2+r}
 \begin{pmatrix}\sigma_{11}w_1+\sigma_{12}w_2\\
 \sigma_{12}w_1+\sigma_{22}w_2\end{pmatrix},\qquad
 \begin{pmatrix}T_1^a\\ T_2^a\end{pmatrix} =\begin{pmatrix}T_1^b\\
 T_2^b\end{pmatrix}+K\,d,\quad
-d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).\]</span></p>
+d=y_u-\bigl(w_1T_1^b+w_2T_2^b\bigr).
+\]</span></p>
 <p><strong>読み方</strong>： <span class="math inline">\(K_1\)</span>
 の分子は <span
 class="math inline">\(\sigma_{11}w_1+\sigma_{12}w_2\)</span>
@@ -776,10 +798,11 @@ class="math inline">\(i\)</span> 成分がゼロでない）、 つまり「 <sp
 class="math inline">\(T_i\)</span>
 の誤差と変位の誤差が<strong>連動</strong>している」から。変位のハズレが、連動の強さに比例して各温度へ配られます。</p>
 <p><strong>③ どれだけ良くなるか（事後分散）</strong>：</p>
-<p><span class="math display">\[B^a=B-\frac{(Bw)(Bw)^{\mathsf
-T}}{w^{\mathsf T}Bw+r},\qquad
+<p><span class="math display">\[
+B^a=B-\frac{(Bw)(Bw)^{\mathsf T}}{w^{\mathsf T}Bw+r},\qquad
 \Delta=\mathrm{tr}\,B-\mathrm{tr}\,B^a=\frac{\lVert
-Bw\rVert^2}{w^{\mathsf T}Bw+r}.\]</span></p>
+Bw\rVert^2}{w^{\mathsf T}Bw+r}.
+\]</span></p>
 <p>これは「変位から見える温度パターン <span
 class="math inline">\(Bw\)</span>
 の方向」の分散が減る式です。観測ノイズがあれば一般には残り、丸ごと消えるわけではありません。</p>
@@ -793,18 +816,20 @@ class="math inline">\(\delta T\approx a\,\varphi\)</span> （ <span
 class="math inline">\(a\)</span> はスカラー係数、 <span
 class="math inline">\(\mathrm{Var}(a)=\sigma_a^2\)</span>
 ）。このとき</p>
-<p><span class="math display">\[u-u^b=g\,a,\qquad g\equiv w^{\mathsf
-T}\varphi\]</span></p>
+<p><span class="math display">\[
+u-u^b=g\,a,\qquad g\equiv w^{\mathsf T}\varphi
+\]</span></p>
 <p>型 <span class="math inline">\(\varphi=(\varphi_1,\
 \varphi_2)^{\mathsf T}\)</span> のとき <span
 class="math inline">\(B=\sigma_a^2\,\varphi\varphi^{\mathsf T}\)</span>
 。これを行列で書き下すと</p>
-<p><span
-class="math display">\[B=\sigma_a^2\begin{pmatrix}\varphi_1^2&amp;\varphi_1\varphi_2\\
+<p><span class="math display">\[
+B=\sigma_a^2\begin{pmatrix}\varphi_1^2&amp;\varphi_1\varphi_2\\
 \varphi_1\varphi_2&amp;\varphi_2^2\end{pmatrix},\qquad
 Bw=\sigma_a^2\,g\begin{pmatrix}\varphi_1\\ \varphi_2\end{pmatrix},\qquad
 K=\frac{\sigma_a^2\,g}{g^2\sigma_a^2+r}\begin{pmatrix}\varphi_1\\
-\varphi_2\end{pmatrix}.\]</span></p>
+\varphi_2\end{pmatrix}.
+\]</span></p>
 <p><strong>ゲイン <span class="math inline">\(K\)</span> が型 <span
 class="math inline">\(\varphi\)</span>
 に比例</strong>しています。つまり補正は「型の形のまま」全点へ一斉に入る――
@@ -815,8 +840,9 @@ class="math inline">\(g\)</span> で測る器械」</strong>。 <span
 class="math inline">\(a\)</span> が決まれば <span
 class="math inline">\(T^a=T^b+\varphi\,\hat a\)</span>
 で<strong>全点の温度が一斉に</strong>直ります（未観測点まで直る理由もこれ）。係数の事後分散は</p>
-<p><span class="math display">\[\mathrm{Var}(a\mid
-u)=\frac{\sigma_a^2\,r}{g^2\sigma_a^2+r}.\]</span></p>
+<p><span class="math display">\[
+\mathrm{Var}(a\mid u)=\frac{\sigma_a^2\,r}{g^2\sigma_a^2+r}.
+\]</span></p>
 <p>ここに高W/低Wの答えが全部入っています：</p>
 <ul>
 <li><strong>高W点</strong>（ <span class="math inline">\(\lVert
@@ -834,11 +860,12 @@ class="math inline">\(\sqrt r\)</span> に埋もれる）</li>
 <p><strong>⑤ 数値で確認</strong>（2点、 <span
 class="math inline">\(\sigma=1,\ \rho=0.9,\ w=(0.5,\ 0.2),\
 r=0.01\)</span> ）：</p>
-<p><span class="math display">\[w^{\mathsf
-T}Bw=0.25+0.04+2(0.9)(0.1)=0.47,\qquad Bw=\begin{pmatrix}0.68\\
-0.65\end{pmatrix},\qquad
+<p><span class="math display">\[
+w^{\mathsf T}Bw=0.25+0.04+2(0.9)(0.1)=0.47,\qquad
+Bw=\begin{pmatrix}0.68\\ 0.65\end{pmatrix},\qquad
 K=\frac{1}{0.48}\begin{pmatrix}0.68\\
-0.65\end{pmatrix}=\begin{pmatrix}1.42\\ 1.35\end{pmatrix}.\]</span></p>
+0.65\end{pmatrix}=\begin{pmatrix}1.42\\ 1.35\end{pmatrix}.
+\]</span></p>
 <p>分散減少 <span
 class="math inline">\(\Delta=0.8849/0.48\approx1.844\)</span> →
 温度の総分散 <span class="math inline">\(2\to0.16\)</span>
@@ -869,20 +896,26 @@ class="math inline">\(Q\)</span>
 が同定できる」＝周辺化（積分）の正体</h3>
 <p><span class="math inline">\(Q\)</span> の更新だけ取り出すと、ゲインの
 <span class="math inline">\(Q\)</span> 行を使って</p>
-<p><span class="math display">\[Q^a=Q^b+K_{Q,:}\,(y-Hx^b).\]</span></p>
+<p><span class="math display">\[
+Q^a=Q^b+K_{Q,:}\,(y-Hx^b).
+\]</span></p>
 <p>線形観測・ガウス事前分布・独立なガウス観測誤差を仮定すると、これは確率の言葉では、同時分布
 <span class="math inline">\(p(T,Q\mid y)\)</span> から温度を
 <strong>積分して消す（周辺化）</strong> した後の <span
 class="math inline">\(Q\)</span> の事後平均そのものです:</p>
-<p><span class="math display">\[p(Q\mid y)=\int p(T,Q\mid y)\,dT,\qquad
+<p><span class="math display">\[
+p(Q\mid y)=\int p(T,Q\mid y)\,dT,\qquad
 \mathbb E[Q\mid y]=\underbrace{\mathbb E[Q]}_{Q^b}
 +\underbrace{B_{Q,:}H^{\mathsf T}(HBH^{\mathsf
-T}+R)^{-1}}_{=\,K_{Q,:}}\bigl(y-\mathbb E[y]\bigr).\]</span></p>
+T}+R)^{-1}}_{=\,K_{Q,:}}\bigl(y-\mathbb E[y]\bigr).
+\]</span></p>
 <p>この式の <span class="math inline">\(y\)</span>
 はノイズを含む観測値です。線形・ガウス仮定のもとで、<strong>周辺事後分布の平均を、カルマン更新のQ行として解析的に計算できます</strong>。コードで温度に関する数値積分を実行しているわけではなく、周辺化と状態更新を同じ操作として定義しているわけでもありません。そして
 <span class="math inline">\(Q\)</span> と観測の共分散は</p>
-<p><span class="math display">\[\mathrm{Cov}(Q,y)=B_{Q,:}\,H^{\mathsf
-T}=\sigma_Q^2\,(s_1,\ s_2,\ 1)\,H^{\mathsf T}\]</span></p>
+<p><span class="math display">\[
+\mathrm{Cov}(Q,y)=B_{Q,:}\,H^{\mathsf T}=\sigma_Q^2\,(s_1,\ s_2,\
+1)\,H^{\mathsf T}
+\]</span></p>
 <p>で、温度観測なら <span class="math inline">\(\sigma_Q^2 s_1\)</span>
 、変位観測なら <span class="math inline">\(\sigma_Q^2(s\cdot w)\)</span>
 。 ** <span class="math inline">\(Q\)</span> が観測から動く条件は <span
@@ -951,8 +984,9 @@ class="math inline">\(W=K_s^{-1}H_T\)</span> とは</h3>
 ref}\mathbf1\)</span> 、熱荷重行列を <span
 class="math inline">\(H_T\)</span> 、構造剛性行列を <span
 class="math inline">\(K_s\)</span> とすると、線形熱弾性では</p>
-<p><span class="math display">\[K_s u=H_T\Delta T,\qquad
-W=\frac{\partial u}{\partial T}=K_s^{-1}H_T.\]</span></p>
+<p><span class="math display">\[
+K_s u=H_T\Delta T,\qquad W=\frac{\partial u}{\partial T}=K_s^{-1}H_T.
+\]</span></p>
 <p><span class="math inline">\(W_{ij}\)</span> は「温度節点 <span
 class="math inline">\(j\)</span> を1 K変えたとき、変位自由度 <span
 class="math inline">\(i\)</span> がどれだけ変わるか（m/K）」です。

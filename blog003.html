@@ -426,8 +426,9 @@ class="math inline">\(C_{zy}\)</span> =状態と観測の共分散、 <span
 class="math inline">\(C_{yy}\)</span> =観測どうし）。</li>
 <li><strong>更新（analysis）</strong>：各分身を観測へ寄せる（観測には分身ごとに少しノイズを足す＝摂動観測法）。</li>
 </ol>
-<p><span
-class="math display">\[x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bigr)\qquad(m=1,\ldots,N)\]</span></p>
+<p><span class="math display">\[
+x_a^{(m)}=x_f^{(m)}+K\bigl(y+\epsilon^{(m)}-Hx_f^{(m)}\bigr)\qquad(m=1,\ldots,N)
+\]</span></p>
 <p>更新後の分身の
 <strong>平均</strong>が推定値、<strong>散らばり</strong>が不確かさです。</p>
 <hr />
@@ -461,9 +462,10 @@ C_{zy}=\frac{dZ^{\mathsf T}dY}{N-1}\in\mathbb R^{n\times p},\qquad
 C_{yy}=\frac{dY^{\mathsf T}dY}{N-1}\in\mathbb R^{p\times p}.
 \]</span></p>
 <p>例えば成分ごとに書くと</p>
-<p><span
-class="math display">\[[C_{zy}]_{ij}=\sum_m\bigl(z_{f,i}^{(m)}-\bar
-z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).\]</span></p>
+<p><span class="math display">\[
+[C_{zy}]_{ij}=\sum_m\bigl(z_{f,i}^{(m)}-\bar
+z_{f,i}\bigr)\bigl(y_{f,j}^{(m)}-\bar y_{f,j}\bigr)/(N-1).
+\]</span></p>
 <p>平均を同じ標本から推定するので標本共分散はN−1で割ります。時間方向やセル方向の分散ではありません。
 106の温度2点＋変位2点なら <span
 class="math inline">\(Z_f:60\times7\)</span> 、 <span
@@ -594,19 +596,20 @@ class="math inline">\(\mathrm{Cov}=-6.326/59=-0.1072\)</span> 、相関
 </tbody>
 </table>
 <p>この手計算のCは温度2点の共分散（熱容量のCとは別）です。偏差行列は</p>
-<p><span
-class="math display">\[dZ=\begin{pmatrix}-3&amp;-2\\1&amp;1\\-1&amp;-1\\3&amp;2\end{pmatrix},\qquad
-C=\frac{dZ^{\mathsf T}dZ}{3}.\]</span></p>
+<p><span class="math display">\[
+dZ=\begin{pmatrix}-3&amp;-2\\1&amp;1\\-1&amp;-1\\3&amp;2\end{pmatrix},\qquad
+C=\frac{dZ^{\mathsf T}dZ}{3}.
+\]</span></p>
 <p>標本共分散は <span class="math inline">\(C=\dfrac{1}{N-1}\sum_m
 \delta x^{(m)}\,\delta x^{(m)\mathsf T}\)</span> （ <span
 class="math inline">\(N=4\)</span> なので <span
 class="math inline">\(1/3\)</span> ）:</p>
-<p><span
-class="math display">\[C=\frac{1}{3}\begin{pmatrix}(-3)^2+1^2+(-1)^2+3^2
-&amp; (-3)(-2)+\cdots+3\cdot2\\ 14 &amp;
-(-2)^2+1^2+(-1)^2+2^2\end{pmatrix} =\frac{1}{3}\begin{pmatrix}20 &amp;
-14\\ 14 &amp; 10\end{pmatrix} =\begin{pmatrix}6.67 &amp; 4.67\\ 4.67
-&amp; 3.33\end{pmatrix}\]</span></p>
+<p><span class="math display">\[
+C=\frac{1}{3}\begin{pmatrix}(-3)^2+1^2+(-1)^2+3^2 &amp;
+(-3)(-2)+\cdots+3\cdot2\\ 14 &amp; (-2)^2+1^2+(-1)^2+2^2\end{pmatrix}
+=\frac{1}{3}\begin{pmatrix}20 &amp; 14\\ 14 &amp; 10\end{pmatrix}
+=\begin{pmatrix}6.67 &amp; 4.67\\ 4.67 &amp; 3.33\end{pmatrix}
+\]</span></p>
 <p><strong>読み方</strong>： <span
 class="math inline">\(C_{12}=4.67&gt;0\)</span> 、つまり <strong>「
 <span class="math inline">\(T_1\)</span> が高い分身は <span
@@ -623,20 +626,22 @@ class="math inline">\(=(6.67,\ 4.67)^{\mathsf T}\)</span></li>
 <li>観測×観測 <span
 class="math inline">\(C_{yy}=C_{11}=6.67\)</span></li>
 </ul>
-<p><span
-class="math display">\[K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\
-4.67\end{pmatrix} =\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
-=\begin{pmatrix}0.987\\ 0.691\end{pmatrix}\]</span></p>
+<p><span class="math display">\[
+K=\frac{1}{C_{yy}+R}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
+=\frac{1}{6.76}\begin{pmatrix}6.67\\ 4.67\end{pmatrix}
+=\begin{pmatrix}0.987\\ 0.691\end{pmatrix}
+\]</span></p>
 <h3 id="更新平均で見る">3-4. 更新（平均で見る）</h3>
 <p>以下は観測摂動の平均を0とした計算です。有限メンバーの摂動観測法では、実際の平均には
 <span class="math inline">\(K\bar\epsilon\)</span> が加わります。</p>
 <p>観測 <span class="math inline">\(y=30\)</span> （真値 <span
 class="math inline">\(T_1=30\)</span> 付近）。予報平均のハズレは <span
 class="math inline">\(30-29=1\)</span> 。平均の更新は</p>
-<p><span class="math display">\[\bar x_a=\bar x_f+K\times1
-=\begin{pmatrix}29\\ 26\end{pmatrix}+\begin{pmatrix}0.987\\
-0.691\end{pmatrix} =\begin{pmatrix}29.99\\
-26.69\end{pmatrix}\]</span></p>
+<p><span class="math display">\[
+\bar x_a=\bar x_f+K\times1 =\begin{pmatrix}29\\
+26\end{pmatrix}+\begin{pmatrix}0.987\\ 0.691\end{pmatrix}
+=\begin{pmatrix}29.99\\ 26.69\end{pmatrix}
+\]</span></p>
 <table>
 <thead>
 <tr class="header">
@@ -693,12 +698,15 @@ alt="パラメータ同定の手順と結果" />
 <h4 id="手順4ステップ">手順（4ステップ）</h4>
 <p><strong>ステップ1：状態を拡大する</strong></p>
 <p>ふつうは温度だけを状態にします:</p>
-<p><span class="math display">\[z=(T_1,T_2,T_3,T_4,T_5)^{\mathsf
-T}\]</span></p>
+<p><span class="math display">\[
+z=(T_1,T_2,T_3,T_4,T_5)^{\mathsf T}
+\]</span></p>
 <p>（5次元）</p>
 <p>ここに推定したいパラメータを<strong>継ぎ足します</strong>:</p>
-<p><span class="math display">\[z=(\underbrace{T_1,\dots,T_5}_{T},\
-\underbrace{Q,\ h}_{\theta})^{\mathsf T}\]</span></p>
+<p><span class="math display">\[
+z=(\underbrace{T_1,\dots,T_5}_{T},\ \underbrace{Q,\
+h}_{\theta})^{\mathsf T}
+\]</span></p>
 <p>（7次元。前の5個が物理量＝温度、後ろの2個がパラメータ）</p>
 <p>これだけで、あとは何も変えません。EnKFのコードは「7次元の状態」として扱うだけです。</p>
 <p><strong>ステップ2：メンバーごとに違うパラメータを持たせる</strong></p>
@@ -714,14 +722,17 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a hr
 温度だけがそのメンバー自身の <span class="math inline">\(Q,h\)</span>
 に従って動きます。</p>
 <p><strong>ステップ3：温度を観測して、状態を丸ごと更新する</strong></p>
-<p><span class="math display">\[z^a=z^b+K\,(y-Hz^b)\]</span></p>
+<p><span class="math display">\[
+z^a=z^b+K\,(y-Hz^b)
+\]</span></p>
 <p><span class="math inline">\(H\)</span>
 は「どの成分を測ったか」を表す行列です。温度しか測らないので、** <span
 class="math inline">\(H\)</span> の <span
 class="math inline">\(Q\)</span> 成分も <span
 class="math inline">\(h\)</span> 成分もゼロ**:</p>
-<p><span
-class="math display">\[H=\begin{pmatrix}0&amp;1&amp;0&amp;0&amp;0&amp;\color{red}{0}&amp;\color{red}{0}\end{pmatrix}\]</span></p>
+<p><span class="math display">\[
+H=\begin{pmatrix}0&amp;1&amp;0&amp;0&amp;0&amp;\color{red}{0}&amp;\color{red}{0}\end{pmatrix}
+\]</span></p>
 <p>（2番目の温度 <span class="math inline">\(T_2\)</span>
 だけ測る場合）</p>
 <p><strong>ステップ4：それでもパラメータが動く</strong></p>
@@ -733,15 +744,20 @@ T}+R)^{-1}\)</span> で、** <span class="math inline">\(P\)</span>
 の非対角成分が効きます**。 メンバーを前進させると「 <span
 class="math inline">\(Q\)</span>
 が大きいメンバーほど温度が高い」という関係が自然にできるので:</p>
-<p><span class="math display">\[P\simeq\frac{dZ\,dZ^{\mathsf
-T}}{N-1}\quad\Longrightarrow\quad P_{T_2Q}\neq0\]</span></p>
+<p><span class="math display">\[
+P\simeq\frac{dZ\,dZ^{\mathsf T}}{N-1}\quad\Longrightarrow\quad
+P_{T_2Q}\neq0
+\]</span></p>
 <p>したがってゲインの <span class="math inline">\(Q\)</span> 行は</p>
-<p><span class="math display">\[K_Q=\frac{P_{T_2Q}}{P_{T_2T_2}+r}\;\neq
-0\]</span></p>
+<p><span class="math display">\[
+K_Q=\frac{P_{T_2Q}}{P_{T_2T_2}+r}\;\neq 0
+\]</span></p>
 <p>となり、<strong>温度の残差 <span
 class="math inline">\(y-Hz^b\)</span> が <span
 class="math inline">\(Q\)</span> を引っぱります</strong>:</p>
-<p><span class="math display">\[Q^a=Q^b+K_Q\,(y-Hz^b)\]</span></p>
+<p><span class="math display">\[
+Q^a=Q^b+K_Q\,(y-Hz^b)
+\]</span></p>
 <h4
 id="本番の計算で実際に使われた数値">本番の計算で実際に使われた数値</h4>
 <p>本研究の本番の計算（観測＝温度 P2・P0 ＋ 上面 A・O の <span
@@ -1116,9 +1132,10 @@ class="math inline">\(h\)</span> を入れて回し、温度の差を見まし�
 <p>さらに<strong>定常状態</strong>まで行くと決定的です。定常温度上昇は
 <span class="math inline">\(\Delta T_{ss}\propto Q/h\)</span>
 なので、</p>
-<p><span class="math display">\[\frac{\Delta
-T_{ss}^{\mathrm{est}}}{\Delta
-T_{ss}^{\mathrm{true}}}=\frac{h_{\mathrm{true}}}{h_{\mathrm{est}}}=\frac{0.0154}{0.0251}=0.61\]</span></p>
+<p><span class="math display">\[
+\frac{\Delta T_{ss}^{\mathrm{est}}}{\Delta
+T_{ss}^{\mathrm{true}}}=\frac{h_{\mathrm{true}}}{h_{\mathrm{est}}}=\frac{0.0154}{0.0251}=0.61
+\]</span></p>
 <p>（est＝推定値、true＝真値）</p>
 <p><strong>定常温度を39%も取り違えます。</strong>
 工作機械の暖機運転のように数時間の挙動を予測したいなら、 <span

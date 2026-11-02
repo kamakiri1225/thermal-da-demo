@@ -839,9 +839,9 @@ aria-hidden="true">CHTで計算した各点の温度の時刻歴</figcaption>
 class="math inline">\(\alpha\)</span> </strong> で決まり、温度が基準から
 <span class="math inline">\(\Delta T = T - T_\mathrm{ref}\)</span>
 だけ上がると、各方向に</p>
-<p><span
-class="math display">\[\varepsilon_\mathrm{thermal}=\alpha\,\Delta
-T\]</span></p>
+<p><span class="math display">\[
+\varepsilon_\mathrm{thermal}=\alpha\,\Delta T
+\]</span></p>
 <p>だけ伸びようとします（ <span
 class="math inline">\(\varepsilon\)</span>
 はひずみ＝伸び率）。片側だけ熱いと、熱い側だけ伸びるので
@@ -887,9 +887,11 @@ mmの距離に8個のセルがあり、 温度は24.16〜24.63
 ℃とばらついています。距離の逆数で重みを付けると
 1番近いセルが0.186、8番目が0.102の重みになり、加重平均は <strong>24.413
 ℃</strong>。 これがこの節点の温度になります。式で書くと:</p>
-<p><span class="math display">\[T_p=\frac{\sum_{c\in\mathcal
-N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal N_k(p)}w_{pc}},
-\qquad w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}\]</span></p>
+<p><span class="math display">\[
+T_p=\frac{\sum_{c\in\mathcal N_k(p)}w_{pc}\,T_c}{\sum_{c\in\mathcal
+N_k(p)}w_{pc}},
+\qquad w_{pc}=\frac{1}{\lVert x_p-x_c\rVert}
+\]</span></p>
 <p><strong>実装はここにあります</strong>：
 <code>102_1_frontistr_hollow_cylinder_thermal_expansion/python/openfoam_temperature.py</code>（別サンプル。リポジトリには未公開）</p>
 <table>
@@ -995,10 +997,11 @@ class="math inline">\(q^{\prime\prime}\)</span> [W/m²] は、 壁の温度
 class="math inline">\(T_\mathrm{ref}\)</span>
 の差に比例するとみなせて、その比例係数が熱伝達率 <span
 class="math inline">\(h\)</span> です。</p>
-<p><span
-class="math display">\[q^{\prime\prime}=h\,(T_w-T_\mathrm{ref})\quad\Longrightarrow\quad
+<p><span class="math display">\[
+q^{\prime\prime}=h\,(T_w-T_\mathrm{ref})\quad\Longrightarrow\quad
 h=\frac{q^{\prime\prime}}{\,T_w-T_\mathrm{ref}\,}\ \
-[\mathrm{W/(m^2\,K)}].\]</span></p>
+[\mathrm{W/(m^2\,K)}].
+\]</span></p>
 <ul>
 <li><span class="math inline">\(q^{\prime\prime}\)</span>
 が大きい（よく熱が逃げる）ほど <span class="math inline">\(h\)</span>
@@ -1025,9 +1028,10 @@ class="math inline">\(T_\mathrm{ref}\)</span> ：ここでは周囲空気の 20
 </ul>
 <p>これらは全部
 <strong>面（face）ごとに配列で得られる</strong>ので、面ごとに割り算すれば</p>
-<p><span
-class="math display">\[h_i=\frac{q^{\prime\prime}_i}{\,T_{w,i}-T_\mathrm{ref}\,}\qquad(i=\text{each
-face})\]</span></p>
+<p><span class="math display">\[
+h_i=\frac{q^{\prime\prime}_i}{\,T_{w,i}-T_\mathrm{ref}\,}\qquad(i=\text{each
+face})
+\]</span></p>
 <p>で <strong>「 <span class="math inline">\(h\)</span>
 の面分布」</strong> が作れます。ParaView で <span
 class="math inline">\(h\)</span> をコンター表示すれば、
@@ -1073,9 +1077,10 @@ class="math inline">\(t=300\)</span>
 <span class="math inline">\(T_w\)</span> を取り出し</strong>、 <span
 class="math inline">\(T_\mathrm{ref}=20\)</span> ℃
 として面グループごとに実効熱伝達率</p>
-<p><span class="math display">\[h=\frac{\sum_i
-|q^{\prime\prime}_i|\,A_i}{\sum_i
-(T_{w,i}-T_\mathrm{ref})\,A_i}\]</span></p>
+<p><span class="math display">\[
+h=\frac{\sum_i |q^{\prime\prime}_i|\,A_i}{\sum_i
+(T_{w,i}-T_\mathrm{ref})\,A_i}
+\]</span></p>
 <p>を集計しました（結果を図と表に）。</p>
 <figure>
 <img src="img/blog_htc_per_face.png"

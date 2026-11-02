@@ -473,8 +473,9 @@ T}Bc\)</span> と <span class="math inline">\(c^{\mathsf T}B^ac\)</span>
 なので、差を取ると次のΔが得られます。</p>
 <p>データ同化の更新式（blog_002）から出発します。観測 <span
 class="math inline">\(y\)</span> を1つ入れると、状態の共分散は</p>
-<p><span class="math display">\[B^a=B-\frac{(Bv)(Bv)^{\mathsf
-T}}{v^{\mathsf T}Bv+r}\]</span></p>
+<p><span class="math display">\[
+B^a=B-\frac{(Bv)(Bv)^{\mathsf T}}{v^{\mathsf T}Bv+r}
+\]</span></p>
 <p>と縮みます（ <span class="math inline">\(v\)</span>
 は観測行列の1行を転置した列ベクトル、 <span
 class="math inline">\(r\)</span>
@@ -482,9 +483,10 @@ class="math inline">\(r\)</span>
 class="math inline">\(X=c^{\mathsf T}x\)</span> と書くと（ <span
 class="math inline">\(c\)</span> は対象を取り出すベクトル）、** <span
 class="math inline">\(X\)</span> の分散がどれだけ減るか**は</p>
-<p><span class="math display">\[\boxed{\ \Delta(X,\
-y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
-=\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{v^{\mathsf T}Bv+r}\ }\]</span></p>
+<p><span class="math display">\[
+\boxed{\ \Delta(X,\ y)=\frac{\mathrm{Cov}(X,\ y)^2}{\mathrm{Var}(y)+r}
+=\frac{\bigl(c^{\mathsf T}Bv\bigr)^2}{v^{\mathsf T}Bv+r}\ }
+\]</span></p>
 <p>これが<strong>観測の価値</strong>です。読み方は簡単で、</p>
 <ul>
 <li>分子 <span class="math inline">\(\mathrm{Cov}(X,y)^2\)</span>
@@ -523,10 +525,11 @@ class="math inline">\(\Delta\)</span> の順位と完全に一致する。</p>
 class="math inline">\(y\)</span> を得たときの対象 <span
 class="math inline">\(X\)</span> の
 情報利得（相互情報量）は分散の比で書けます:</p>
-<p><span
-class="math display">\[I(X;y_{\mathrm{obs}})=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid
+<p><span class="math display">\[
+I(X;y_{\mathrm{obs}})=\frac{1}{2}\ln\frac{\mathrm{Var}(X)}{\mathrm{Var}(X\mid
 y_{\mathrm{obs}})}
-=-\frac{1}{2}\ln\Bigl(1-\frac{\Delta(X,y)}{\mathrm{Var}(X)}\Bigr)\]</span></p>
+=-\frac{1}{2}\ln\Bigl(1-\frac{\Delta(X,y)}{\mathrm{Var}(X)}\Bigr)
+\]</span></p>
 <p><span class="math inline">\(\Delta\)</span> が大きいほど <span
 class="math inline">\(I\)</span> も大きい
 <strong>単調な関係</strong>なので、<strong>同じスカラー対象・同じ事前分布なら観測の順位は変わりません</strong>。ここでの
@@ -760,13 +763,15 @@ class="math inline">\(s=(0.3,\ 0.1)\)</span> ）、変位は温度で決まる
 （感度 <span class="math inline">\(w=(0.5,\ 0.2)\)</span>
 ）。背景共分散は <span class="math inline">\(\sigma_T=1,\
 \sigma_Q=2\)</span> として</p>
-<p><span class="math display">\[B=\begin{pmatrix}
+<p><span class="math display">\[
+B=\begin{pmatrix}
 1.36 &amp; 0.12 &amp; 1.2\\
 0.12 &amp; 1.04 &amp; 0.4\\
 1.2 &amp; 0.4 &amp; 4
 \end{pmatrix},\qquad
 B=\mathrm{diag}(\sigma_T^2,\ \sigma_T^2,\ 0)+\sigma_Q^2\,a\,a^{\mathsf
-T},\quad a=(s_1,\ s_2,\ 1)^{\mathsf T}.\]</span></p>
+T},\quad a=(s_1,\ s_2,\ 1)^{\mathsf T}.
+\]</span></p>
 <p>（成分の出どころ：対角 <span
 class="math inline">\(\sigma_T^2+\sigma_Q^2 s_i^2\)</span> 、温度と
 <span class="math inline">\(Q\)</span> の相関 <span
@@ -813,40 +818,48 @@ class="math inline">\(v_u=(w_1,w_2,0)^{\mathsf T}\)</span>
 <p>まず各候補の <span class="math inline">\(Bv\)</span>
 （＝「その観測と各変数の共分散」の列）と <span
 class="math inline">\(\mathrm{Var}(y)+r\)</span> :</p>
-<p><span
-class="math display">\[B\begin{pmatrix}1\\0\\0\end{pmatrix}=\begin{pmatrix}1.36\\
-0.12\\ 1.2\end{pmatrix},\qquad
+<p><span class="math display">\[
+B\begin{pmatrix}1\\0\\0\end{pmatrix}=\begin{pmatrix}1.36\\ 0.12\\
+1.2\end{pmatrix},\qquad
 B\begin{pmatrix}0\\1\\0\end{pmatrix}=\begin{pmatrix}0.12\\ 1.04\\
 0.4\end{pmatrix},\qquad
 B\begin{pmatrix}0.5\\0.2\\0\end{pmatrix}
 =\begin{pmatrix}0.5\cdot1.36+0.2\cdot0.12\\ 0.5\cdot0.12+0.2\cdot1.04\\
 0.5\cdot1.2+0.2\cdot0.4\end{pmatrix} =\begin{pmatrix}0.704\\ 0.268\\
-0.68\end{pmatrix}\]</span></p>
-<p><span
-class="math display">\[\mathrm{Var}(y_1)+r=1.36+0.09=1.45,\qquad
-\mathrm{Var}(y_2)+r=1.04+0.09=1.13,\]</span></p>
-<p><span class="math display">\[\mathrm{Var}(u)+r=v_u^{\mathsf
-T}Bv_u+r=0.5\cdot0.704+0.2\cdot0.268+0.01=0.4156.\]</span></p>
+0.68\end{pmatrix}
+\]</span></p>
+<p><span class="math display">\[
+\mathrm{Var}(y_1)+r=1.36+0.09=1.45,\qquad
+\mathrm{Var}(y_2)+r=1.04+0.09=1.13,
+\]</span></p>
+<p><span class="math display">\[
+\mathrm{Var}(u)+r=v_u^{\mathsf
+T}Bv_u+r=0.5\cdot0.704+0.2\cdot0.268+0.01=0.4156.
+\]</span></p>
 <h3 id="価値-delta-を対象ごとに計算例を3つ">2-3. 価値 <span
 class="math inline">\(\Delta\)</span> を対象ごとに計算（例を3つ）</h3>
 <p><strong>例1：対象＝発熱量 <span class="math inline">\(Q\)</span> （
 <span class="math inline">\(c=(0,0,1)\)</span>
 ）を温度点1で測る</strong></p>
-<p><span class="math display">\[\Delta(Q,\ y_1)=\frac{\bigl(c^{\mathsf
-T}Bv\bigr)^2}{1.45}=\frac{1.2^2}{1.45}=0.993\]</span></p>
+<p><span class="math display">\[
+\Delta(Q,\ y_1)=\frac{\bigl(c^{\mathsf
+T}Bv\bigr)^2}{1.45}=\frac{1.2^2}{1.45}=0.993
+\]</span></p>
 <p><strong>例2：対象＝ <span class="math inline">\(Q\)</span> を変位
 <span class="math inline">\(u\)</span> で測る</strong>（分子は <span
 class="math inline">\(Bw\)</span> の第3成分）</p>
-<p><span class="math display">\[\Delta(Q,\
-u)=\frac{0.68^2}{0.4156}=1.113\ \gt\ 0.993\]</span></p>
+<p><span class="math display">\[
+\Delta(Q,\ u)=\frac{0.68^2}{0.4156}=1.113\ \gt\ 0.993
+\]</span></p>
 <p>→ ** <span class="math inline">\(Q\)</span>
 には温度点1より変位の方が価値が高い**。</p>
 <p><strong>例3：対象＝ <span class="math inline">\(T_2\)</span> を変位
 <span class="math inline">\(u\)</span> で測る</strong>（分子は <span
 class="math inline">\(Bw\)</span> の第2成分）</p>
-<p><span class="math display">\[\Delta(T_2,\
-u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\
-y_2)=\frac{1.04^2}{1.13}=0.957\]</span></p>
+<p><span class="math display">\[
+\Delta(T_2,\ u)=\frac{0.268^2}{0.4156}=0.173\ \ll\ \Delta(T_2,\
+y_2)=\frac{1.04^2}{1.13}=0.957
+\]</span></p>
 <p>→ ** <span class="math inline">\(T_2\)</span>
 には温度点2が最適**（変位は <span class="math inline">\(w_2=0.2\)</span>
 としか連動しない）。</p>
@@ -1751,8 +1764,9 @@ class="math inline">\(W\)</span>
 µm）より良い</li>
 </ul>
 <p><strong>なぜか</strong>。§1で見たとおり、観測の価値は感度そのものではなく</p>
-<p><span
-class="math display">\[\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}\]</span></p>
+<p><span class="math display">\[
+\Delta(X,y)=\frac{\mathrm{Cov}(X,y)^2}{\mathrm{Var}(y)+r}
+\]</span></p>
 <p>で決まるからです。 <span class="math inline">\(\partial u/\partial
 T_i\)</span> が大きいことは 「 <span class="math inline">\(T_i\)</span>
 が <span class="math inline">\(u\)</span>
