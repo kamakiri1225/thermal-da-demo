@@ -449,7 +449,7 @@ y_c\equiv T^{\mathrm{obs}}[c]-\overline T[c]
 <h3 id="変位計の式">2-3. 変位計の式</h3>
 <p>線形熱弾性では、同じ係数から変位も復元できます。節点 <span
 class="math inline">\(S\)</span> の方向 <span
-class="math inline">\(\alpha\)</span>（<span
+class="math inline">\(\alpha\)</span><code>（</code><span
 class="math inline">\(x,y,z\)</span>）の変位は、</p>
 <p><span class="math display">\[
 U_\alpha(S)\approx\overline u_{S,\alpha}
@@ -487,10 +487,11 @@ T_{P2}=\overline T_{P2}+\varphi_1[P2]\,a_1+\varepsilon .
 <ul>
 <li><span
 class="math inline">\(a_1\)</span>：未知量。その時刻の温度分布が、時間平均の温度分布からモード1の形にどれだけずれているか</li>
-<li><span class="math inline">\(T_{P2}\)</span>：P2の読み、<span
+<li><span
+class="math inline">\(T_{P2}\)</span><code>：P2の読み、</code><span
 class="math inline">\(\overline T_{P2}\)</span>：P2の時間平均温度</li>
 <li><span
-class="math inline">\(\varphi_1[P2]\)</span>：モード1のP2での値。<span
+class="math inline">\(\varphi_1[P2]\)</span><code>：モード1のP2での値。</code><span
 class="math inline">\(a_1\)</span>
 が1増えたときに、P2の読みが変わる量（感度）</li>
 <li><span
@@ -498,8 +499,8 @@ class="math inline">\(\varepsilon\)</span>：温度計のノイズ。平均0、�
 <span class="math inline">\(r\)</span></li>
 </ul>
 <p>記号を短くするため、<span class="math inline">\(y=T_{P2}-\overline
-T_{P2}\)</span>、<span
-class="math inline">\(h=\varphi_1[P2]\)</span>、<span
+T_{P2}\)</span><code>、</code><span
+class="math inline">\(h=\varphi_1[P2]\)</span><code>、</code><span
 class="math inline">\(a=a_1\)</span> と書くと、</p>
 <p><span class="math display">\[
 y=ha+\varepsilon .
@@ -795,7 +796,7 @@ class="math inline">\(\Phi_P\)</span>
 \approx\underbrace{D\Phi_P^+}_{L_u:\ 3N_F\times5}\mathbf x.
 \]</span></p>
 <p><span class="math inline">\(N_F\)</span> はFEM節点数、<span
-class="math inline">\(+\)</span>は擬似逆行列です。<span
+class="math inline">\(+\)</span><code>は擬似逆行列です。</code><span
 class="math inline">\(D\)</span>
 はFEM節点への温度写像とFrontISTR応答を含みます。</p>
 <p>候補の感度は、温度なら <span class="math inline">\(G\)</span>
@@ -1383,7 +1384,7 @@ w\)</span></td>
 <td>同上</td>
 <td><code>post()</code></td>
 <td><span class="math inline">\(F=\sum_c\mathbf h_c\mathbf h_c^{\mathsf
-T}/r_c\)</span>、<span
+T}/r_c\)</span><code>、</code><span
 class="math inline">\(P=(B^{-1}+F)^{-1}\)</span></td>
 </tr>
 <tr class="odd">
