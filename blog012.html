@@ -261,9 +261,9 @@ id="toc-言葉の準備未知数感度ノイズ">2.
 <li><a href="#未知数この記事では型-1型-2-の重み"
 id="toc-未知数この記事では型-1型-2-の重み">2-1. 未知数：この記事では「型
 1・型 2 の重み」</a></li>
-<li><a href="#感度センサの値が未知数でどう変わるか"
-id="toc-感度センサの値が未知数でどう変わるか">2-2.
-感度：センサの値が、未知数でどう変わるか</a></li>
+<li><a href="#センサの読みは型の重みでどう決まるか感度"
+id="toc-センサの読みは型の重みでどう決まるか感度">2-2.
+センサの読みは、型の重みでどう決まるか（感度）</a></li>
 <li><a href="#ノイズ" id="toc-ノイズ">2-3. ノイズ</a></li>
 </ul></li>
 <li><a href="#未知数が-1-つのときfisher-情報とは"
@@ -384,19 +384,68 @@ a_2\)</span>：その時刻の<strong>型の重み</strong>。ここが分かれ
 1」になるようにそろえました。そうすると、重み <span
 class="math inline">\(a_1, a_2\)</span> の単位が K になり、「型 1
 の重みが 1 K 増える＝一番変わるセルで 1 K 上がる」と読めます。</p>
-<h3 id="感度センサの値が未知数でどう変わるか">2-2.
-感度：センサの値が、未知数でどう変わるか</h3>
-<p>センサの値 <span class="math inline">\(y\)</span>
-は、未知数の一次式で書けます（ノイズ <span
-class="math inline">\(\varepsilon\)</span> 付き）。</p>
+<h3 id="センサの読みは型の重みでどう決まるか感度">2-2.
+センサの読みは、型の重みでどう決まるか（感度）</h3>
+<p><strong>温度計の読み。</strong> 2-1 の式で、温度計 P2
+の場所だけを見ると、P2 の読みは「P2 の平均の温度」に「型 1 の重み × 型 1
+の P2 での値」と「型 2 の重み × 型 2 の P2
+での値」を足したものです。</p>
 <p><span class="math display">\[
-y = \mathbf h^{\mathsf T} \mathbf a + \varepsilon, \qquad \mathbf a =
-\begin{pmatrix} a_1 \\ a_2 \end{pmatrix}
+T_{P2} = \bar T_{P2} + a_1\,\varphi_1(P2) + a_2\,\varphi_2(P2)
 \]</span></p>
-<p>この <span class="math inline">\(\mathbf h\)</span>
-を<strong>感度</strong>と呼びます。「<span
-class="math inline">\(a_1\)</span> が 1
-増えると、センサの値がどれだけ変わるか」です。</p>
+<p>型 1・型 2 の P2・P0 での値は、図 0 のとおりです。</p>
+<figure>
+<img src="img/blog012_sensitivity.png"
+alt="型 1・型 2 と温度計の場所" />
+<figcaption aria-hidden="true">型 1・型 2 と温度計の場所</figcaption>
+</figure>
+<p><em>図 0　型 1（左）と型 2（右）。色は型の値（一番大きく変わるセルで
+±1 にそろえた）、黒い球が温度計
+P2・P0。数字は、その場所での型の値。</em></p>
+<ul>
+<li>型 1 の P2 での値は −0.61、型 2 の P2 での値は −1.00 です。</li>
+<li>つまり、<strong>型 1 の重み <span class="math inline">\(a_1\)</span>
+が 1 K 増えると P2 の読みは 0.61 K 下がり、型 2 の重み <span
+class="math inline">\(a_2\)</span> が 1 K 増えると 1.00 K
+下がります。</strong>（マイナスなのは、POD
+が型の向きをそう決めたからで、意味はありません。重み <span
+class="math inline">\(a\)</span>
+の側も同じ向きで測るので、温度は正しく出ます。）</li>
+</ul>
+<p>本番の数字で確かめます。OpenFOAM の 150 秒では、<span
+class="math inline">\(a_1 = 0.91\)</span> K、<span
+class="math inline">\(a_2 = -0.65\)</span> K でした。P2 の平均の温度は
+23.79 °C なので、</p>
+<p><span class="math display">\[
+T_{P2} = 23.79 + 0.91 \times (-0.61) + (-0.65) \times (-1.00) = 23.88\
+^\circ\mathrm C
+\]</span></p>
+<p>OpenFOAM の P2 の温度は 23.86 °C で、0.02 K の差で合います（差は、型
+3〜5 を省いたため）。</p>
+<p><strong>感度とは。</strong> この「重みが 1
+増えたときに、読みがいくつ変わるか」の数を並べたものを、<strong>感度</strong>
+<span class="math inline">\(\mathbf h\)</span> と呼びます。P2 なら <span
+class="math inline">\(\mathbf h_{P2} = (-0.61,\ -1.00)\)</span>
+です。読みのずれ（平均からのずれ）は、感度と重みの掛け算の和で書けます。測ったときのノイズ
+<span class="math inline">\(\varepsilon\)</span> も足します。</p>
+<p><span class="math display">\[
+y = T_{P2} - \bar T_{P2} = h_1 a_1 + h_2 a_2 + \varepsilon = \mathbf
+h^{\mathsf T}\mathbf a + \varepsilon,
+\qquad \mathbf a = \begin{pmatrix} a_1 \\ a_2 \end{pmatrix}
+\]</span></p>
+<p>この式は説明のための例ではなく、<strong>この記事の計算（図
+1〜3、表の数字）で実際に使った式</strong>です。本番のデータ同化（<a
+href="presen001.html">presen_001
+§9-3</a>）でも、センサの読みを「未知の数の一次式」で書く点は同じで、未知の数が代表
+5 点の温度になっているだけです。</p>
+<p><strong>変位計の読み。</strong>
+変位計も同じ形です。違うのは感度の求め方で、「型 1
+だけの温度分布」と「型 2 だけの温度分布」をそれぞれ FrontISTR
+に入れて解き、その場所・その向きの変位を感度にします（単位
+µm/K）。例えば、上面のヒータ側（36.2, −9.7, 100.5 mm）の Ux なら <span
+class="math inline">\(\mathbf h = (-0.58,\ 1.32)\)</span> µm/K
+です。<span class="math inline">\(a_2\)</span> が 1 K 増えると、そこは
++x 向きに 1.32 µm 動く、という意味です。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -406,42 +455,39 @@ class="math inline">\(a_1\)</span> が 1
 <thead>
 <tr class="header">
 <th>センサ</th>
-<th>感度 <span class="math inline">\(\mathbf h\)</span> の中身</th>
-<th>本番の値</th>
+<th>感度 <span class="math inline">\(\mathbf h = (h_1,\
+h_2)\)</span></th>
+<th>求め方</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>温度計 P2</td>
-<td>その場所の型 1・型 2 の値</td>
-<td><span class="math inline">\((-0.609,\ -1.000)\)</span></td>
+<td><span class="math inline">\((-0.61,\ -1.00)\)</span> K/K</td>
+<td>その場所での型 1・型 2 の値（図 0）</td>
 </tr>
 <tr class="even">
 <td>温度計 P0</td>
+<td><span class="math inline">\((-0.75,\ -0.74)\)</span> K/K</td>
 <td>同上</td>
-<td><span class="math inline">\((-0.754,\ -0.739)\)</span></td>
 </tr>
 <tr class="odd">
 <td>変位計</td>
-<td>FrontISTR で前もって解いた「型 1・型 2
-だけの温度のときの変位」[µm/K]</td>
 <td>場所と向きで変わる（§6）</td>
+<td>型 1・型 2 だけの温度を FrontISTR に入れて解いた変位 [µm/K]</td>
 </tr>
 </tbody>
 </table>
-<p>符号がマイナスなのは、型の向き（符号）を POD
-がそう決めたからで、意味はありません。<span
-class="math inline">\(a\)</span>
-の側も同じ向きで測るので、温度は正しく出ます。</p>
-<p><strong>知りたい反り</strong>も、同じく一次式です。</p>
+<p><strong>知りたい反りも同じ形。</strong> 反り（A の上下の変位 − O
+の上下の変位）も、重みの一次式です。</p>
 <p><span class="math display">\[
 d = \mathbf w^{\mathsf T} \mathbf a, \qquad \mathbf w = (0.327,\
 -1.431)\ \ \mu\mathrm m/\mathrm K
 \]</span></p>
-<p><span class="math inline">\(\mathbf w\)</span> は、A の上下の変位から
-O の上下の変位を引いたもの（FrontISTR の結果から）です。<strong>反りは型
-2（ヒータ側と反対側の差）でほぼ決まる</strong>ことが、<span
-class="math inline">\(|w_2| \gg |w_1|\)</span> から読み取れます。</p>
+<p><span class="math inline">\(\mathbf w\)</span>
+は反りの「感度」にあたります（測れないので、センサではない）。<span
+class="math inline">\(|w_2| \gg |w_1|\)</span> なので、<strong>反りは型
+2（ヒータ側と反対側の差）でほぼ決まります</strong>。</p>
 <h3 id="ノイズ">2-3. ノイズ</h3>
 <p>センサのノイズの大きさ（標準偏差）は、本番と同じく、温度計 0.3
 K、変位計 0.3 µm とします。分散は <span class="math inline">\(r = 0.3^2
@@ -458,10 +504,15 @@ class="math inline">\(a_1\)</span> だけ、センサが温度計 P2 の 1
 \varepsilon\)</span>、<span class="math inline">\(h =
 -0.609\)</span>、ノイズの分散 <span class="math inline">\(r =
 0.09\)</span> です。</p>
-<p><span class="math inline">\(a_1\)</span> が <span
-class="math inline">\(\delta\)</span> だけずれると、P2 の値は <span
-class="math inline">\(h\,\delta\)</span> だけずれます。これがノイズ（±
-0.3 K）より大きければ、そのずれは「見える」。見えやすさを測るのが
+<p>例えば <span class="math inline">\(a_1\)</span> が 1 K 違うと、P2
+の読みは <span class="math inline">\(h \times 1 = -0.61\)</span> K
+違います。温度計のノイズは ± 0.3 K なので、0.61 K
+の違いはノイズより大きく、P2 の読みから「<span
+class="math inline">\(a_1\)</span> が違う」と気づけます。一方、<span
+class="math inline">\(a_1\)</span> が 0.2 K
+しか違わなければ、読みの違いは 0.12 K
+で、ノイズに隠れて気づけません。</p>
+<p>このように、<strong>未知数の違いが、ノイズに比べてどれだけ大きくセンサの読みに表れるか</strong>を表す数が
 <strong>Fisher 情報</strong> <span class="math inline">\(F\)</span>
 です。</p>
 <p><span class="math display">\[
@@ -469,9 +520,9 @@ F = \frac{h^2}{r} = \frac{(-0.609)^2}{0.09} = 4.12\ \ [1/\mathrm K^2]
 \]</span></p>
 <ul>
 <li><strong>感度 <span class="math inline">\(h\)</span>
-が大きいほど</strong>、未知数のずれがセンサに大きく出るので、情報が多い。</li>
+が大きいほど</strong>、未知数の違いがセンサの読みに大きく表れるので、情報が多い。</li>
 <li><strong>ノイズ <span class="math inline">\(r\)</span>
-が小さいほど</strong>、小さなずれでも見えるので、情報が多い。</li>
+が小さいほど</strong>、未知数の小さな違いでもノイズに隠れずに読みに表れるので、情報が多い。</li>
 <li><span class="math inline">\(1/F = 0.24\)</span> は、「P2
 の温度計だけから <span class="math inline">\(a_1\)</span>
 を求めたときのばらつき（分散）」です。標準偏差にすると <span
@@ -486,10 +537,16 @@ class="math inline">\(h^2/r\)</span> なのか（出どころ）</h4>
 p(y \mid a_1) \propto \exp\!\left(-\frac{(y - h\,a_1)^2}{2r}\right)
 \]</span></p>
 <p>です。<span class="math inline">\(a_1\)</span>
-を横軸にしてこれを描くと、山の形になります。<strong>山が鋭いほど</strong>、<span
+を横軸にしてこれを描くと、山の形になります。山の頂上は、測った読み <span
+class="math inline">\(y\)</span> を一番よく説明する <span
 class="math inline">\(a_1\)</span>
-が少し違うだけで「その値は出にくい」と分かる＝情報が多い。山の鋭さは、対数をとって
-2 回微分した値で測ります。</p>
+です。<strong>山が鋭いほど</strong>、<span
+class="math inline">\(a_1\)</span>
+が頂上から少し離れただけで、その読みが出る確率が大きく下がります。つまり、読みから
+<span class="math inline">\(a_1\)</span>
+を狭い範囲に絞り込めます。これが「情報が多い」ということです。山の鋭さは、尤度の対数を
+<span class="math inline">\(a_1\)</span> で 2
+回微分した値（にマイナスを付けたもの）で測ります。</p>
 <p><span class="math display">\[
 F = -\frac{\partial^2 \ln p}{\partial a_1^2} = \frac{h^2}{r}
 \]</span></p>
