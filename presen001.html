@@ -417,26 +417,21 @@ id="toc-ページ目で言うこと約-1-分-3">11-4. 10 ページ目で言う�
 id="toc-ページ目センサの置き場所fisher-情報行列">12. 11
 ページ目「センサの置き場所：Fisher 情報行列」</a>
 <ul>
-<li><a href="#fisher-情報行列その観測で知りたいものがどれだけ分かるか"
-id="toc-fisher-情報行列その観測で知りたいものがどれだけ分かるか">12-1.
-Fisher 情報行列：その観測で、知りたいものがどれだけ分かるか</a></li>
-<li><a href="#測る前の不確かさと合わせる測った後に残る不確かさ"
-id="toc-測る前の不確かさと合わせる測った後に残る不確かさ">12-2.
-測る前の不確かさと合わせる：測った後に残る不確かさ</a></li>
-<li><a href="#本研究で使った基準反りに対する目的指向"
-id="toc-本研究で使った基準反りに対する目的指向">12-3.
-本研究で使った基準：反りに対する目的指向</a></li>
+<li><a href="#fisher-情報行列と測った後に残る不確かさ"
+id="toc-fisher-情報行列と測った後に残る不確かさ">12-1. Fisher
+情報行列と、測った後に残る不確かさ</a></li>
+<li><a href="#本研究の基準反りに対する目的指向"
+id="toc-本研究の基準反りに対する目的指向">12-2.
+本研究の基準：反りに対する目的指向</a></li>
 <li><a href="#結果既存の選び方と比べる"
-id="toc-結果既存の選び方と比べる">12-4.
+id="toc-結果既存の選び方と比べる">12-3.
 結果：既存の選び方と比べる</a></li>
-<li><a
-href="#fisher-情報行列で最適な温度センサと変位センサの位置が分かるか"
-id="toc-fisher-情報行列で最適な温度センサと変位センサの位置が分かるか">12-5.
-Fisher 情報行列で、最適な温度センサと変位センサの位置が分かるか</a></li>
-<li><a href="#使ったプログラム-7" id="toc-使ったプログラム-7">12-6.
+<li><a href="#言えること注意" id="toc-言えること注意">12-4.
+言えること・注意</a></li>
+<li><a href="#使ったプログラム-7" id="toc-使ったプログラム-7">12-5.
 使ったプログラム</a></li>
 <li><a href="#ページ目で言うこと約-1-分-30-秒-2"
-id="toc-ページ目で言うこと約-1-分-30-秒-2">12-7. 11
+id="toc-ページ目で言うこと約-1-分-30-秒-2">12-6. 11
 ページ目で言うこと（約 1 分 30 秒）</a></li>
 </ul></li>
 <li><a href="#ページ目今後の研究どこで優位性を出せるか"
@@ -3175,268 +3170,75 @@ W・間欠加熱でも同じ。</li>
 <hr />
 <h2 id="ページ目センサの置き場所fisher-情報行列">12. 11
 ページ目「センサの置き場所：Fisher 情報行列」</h2>
-<p>ここ（12-1〜12-5）を、発表の 11 ページ目に載せます。12-6
-は使ったプログラム、12-7 は話す内容です。9
+<p>ここ（12-1〜12-4）を、発表の 11 ページ目に載せます。9
 ページ目で「置き場所が悪いと効かない」ことが分かりました。どこに置けばよいかを、<strong>Fisher
-情報行列</strong>の考え方で示します。</p>
-<h3 id="fisher-情報行列その観測で知りたいものがどれだけ分かるか">12-1.
-Fisher 情報行列：その観測で、知りたいものがどれだけ分かるか</h3>
-<p>推定したいもの（未知の数）を <span
-class="math inline">\(\boldsymbol\theta\)</span>、センサの値を <span
-class="math inline">\(\mathbf y\)</span>
-とします。センサの値が未知の数でどれだけ変わるか（感度）を <span
-class="math inline">\(G = \partial \mathbf y / \partial
-\boldsymbol\theta\)</span>、センサの誤差の大きさを <span
-class="math inline">\(R\)</span> とすると、Fisher
-情報行列は次の式です。</p>
+情報行列</strong>で選びます。式の意味と手計算は <a
+href="blog012.html">blog_012</a>
+で丁寧に解説しています。</p>
+<h3 id="fisher-情報行列と測った後に残る不確かさ">12-1. Fisher
+情報行列と、測った後に残る不確かさ</h3>
+<p>センサ <span class="math inline">\(c\)</span> の値が未知の数 <span
+class="math inline">\(\boldsymbol\theta\)</span>（代表 5
+点の温度）でどれだけ変わるか（感度）を <span
+class="math inline">\(\mathbf h_c\)</span>、ノイズの分散を <span
+class="math inline">\(r_c\)</span> とすると、</p>
 <p><span class="math display">\[
-F = \sum_{k} G_k^{\mathsf T}\, R^{-1}\, G_k
+F = \sum_{c}\sum_{k} \frac{\mathbf h_{c,k}\,\mathbf h_{c,k}^{\mathsf
+T}}{r_c}, \qquad P = \left(B^{-1} + F\right)^{-1}
 \]</span></p>
 <ul>
-<li><span class="math inline">\(k\)</span>
-は観測の時刻。時刻ごとの情報を足し合わせます。</li>
-<li><strong>感度が大きく、誤差が小さいほど、情報が多い</strong>（<span
-class="math inline">\(F\)</span> が大きい）。</li>
-<li><span class="math inline">\(R^{-1}\)</span>
-で割るので、温度（K）と変位（µm）の単位がそろい、<strong>温度計と変位計を同じものさしで比べられます</strong>。</li>
-<li>独立なセンサを足すと、<span class="math inline">\(F\)</span>
-は足し算になります（<span
-class="math inline">\(F_{\text{温度}+\text{変位}} = F_{\text{温度}} +
-F_{\text{変位}}\)</span>）。</li>
+<li><span class="math inline">\(F\)</span>（Fisher
+情報行列）：感度をノイズで割った情報量。センサを足すと足し算。<strong>温度計と変位計を同じものさしで比べられる</strong>。</li>
+<li><span class="math inline">\(P\)</span>：測る前の不確かさ <span
+class="math inline">\(B\)</span>
+と合わせた、測った後に残る不確かさ。<strong>センサの値を使わないので、置く前に計算できる</strong>。</li>
 </ul>
-<h4 id="fisher-情報量のイメージと上の式の出どころ">Fisher
-情報量のイメージと、上の式の出どころ</h4>
-<p>参考：<a
-href="https://qiita.com/nekokaitaiyo_ne/items/aee3f7152b984b3644bf">Fisher情報量と共分散行列（Qiita）</a>、<a
-href="https://note.com/kimukimucitrus/n/nace8ba84d129">フィッシャー情報量、どんなイメージ？（note）</a></p>
-<ol type="1">
-<li><strong>尤度</strong>：未知の数が <span
-class="math inline">\(\boldsymbol\theta\)</span> のとき、センサの値
-<span class="math inline">\(\mathbf y\)</span> が出る確からしさ <span
-class="math inline">\(p(\mathbf y \mid
-\boldsymbol\theta)\)</span>。</li>
-<li><strong>スコア関数</strong>：対数尤度を <span
-class="math inline">\(\boldsymbol\theta\)</span> で微分したもの <span
-class="math inline">\(\mathbf s = \partial \ln p / \partial
-\boldsymbol\theta\)</span>。正しい <span
-class="math inline">\(\boldsymbol\theta\)</span> では、平均は 0
-になる。</li>
-<li><strong>Fisher
-情報量</strong>：スコア関数のばらつき（分散）。対数尤度の 2
-階微分（山のとがり具合）の期待値にマイナスを付けたものと等しい。</li>
-</ol>
+<h3 id="本研究の基準反りに対する目的指向">12-2.
+本研究の基準：反りに対する目的指向</h3>
+<p>知りたいのは反り <span class="math inline">\(d = \mathbf w^{\mathsf
+T}\boldsymbol\theta\)</span> なので、反りの不確かさ <span
+class="math inline">\(\mathbf w^{\mathsf T}P\,\mathbf w\)</span>
+を一番減らすセンサを、1 本ずつ選びます。センサ <span
+class="math inline">\(c\)</span> を 1 本足したときの減りは</p>
 <p><span class="math display">\[
-F = \mathrm E\!\left[\mathbf s\,\mathbf s^{\mathsf T}\right] =
--\,\mathrm E\!\left[\frac{\partial^2 \ln p}{\partial
-\boldsymbol\theta\,\partial \boldsymbol\theta^{\mathsf T}}\right]
+\Delta_c = \frac{\big(\mathbf w^{\mathsf T} P\, \mathbf
+h_c\big)^2}{\mathbf h_c^{\mathsf T} P\, \mathbf h_c + r_c}
 \]</span></p>
-<p>尤度の山が鋭いほど（少し <span
-class="math inline">\(\boldsymbol\theta\)</span>
-がずれただけで、その観測が出にくくなるほど）、情報が多い。</p>
-<p><strong>センサの誤差が正規分布のとき</strong>：センサの値を <span
-class="math inline">\(\mathbf y = \mathbf g(\boldsymbol\theta) +
-\boldsymbol\varepsilon\)</span>（誤差 <span
-class="math inline">\(\boldsymbol\varepsilon\)</span> の共分散 <span
-class="math inline">\(R\)</span>）とすると、</p>
-<p><span class="math display">\[
-\ln p = -\tfrac12\,\big(\mathbf y - \mathbf
-g(\boldsymbol\theta)\big)^{\mathsf T} R^{-1} \big(\mathbf y - \mathbf
-g(\boldsymbol\theta)\big) + \text{定数}
-\]</span></p>
-<p>これを 2 回微分して期待値をとると、感度 <span class="math inline">\(G
-= \partial \mathbf g / \partial \boldsymbol\theta\)</span> を使って
-<span class="math inline">\(F = G^{\mathsf T} R^{-1} G\)</span>
-になります。これが上の式です。</p>
-<p><strong>推定のばらつきとの関係</strong>：どんな（偏りのない）推定でも、推定のばらつき（共分散）<span
-class="math inline">\(C\)</span> は <span
-class="math inline">\(F^{-1}\)</span>
-より小さくできません（クラメール・ラオの下限、<span
-class="math inline">\(C \succeq
-F^{-1}\)</span>）。データが多ければ、最尤推定のばらつきは <span
-class="math inline">\(F^{-1}\)</span>
-に近づきます。つまり、<strong><span class="math inline">\(F\)</span>
-を大きくする置き場所ほど、推定のばらつきを小さくできる</strong>。</p>
-<p>次の 12-2 は、これに「測る前の不確かさ」を加えたものです（<span
-class="math inline">\(F^{-1}\)</span> が <span
-class="math inline">\((B^{-1}+F)^{-1}\)</span> になる）。</p>
-<h3 id="測る前の不確かさと合わせる測った後に残る不確かさ">12-2.
-測る前の不確かさと合わせる：測った後に残る不確かさ</h3>
-<p>データ同化では、測る前にも「だいたいこのくらい」という不確かさ（事前の共分散
-<span
-class="math inline">\(B\)</span>）があります。モデルと観測の関係が線形で誤差が正規分布なら、測った後に残る不確かさは</p>
-<p><span class="math display">\[
-P = \left(B^{-1} + F\right)^{-1}
-\]</span></p>
-<p>です。置き場所の良し悪しは、この <span
-class="math inline">\(P\)</span>
-を何の基準で小さくするかで決まります。</p>
+<ul>
+<li>分子：そのセンサが、反りの分からない向きを測っているか</li>
+<li>分母：すでに分かっている向きを測っていないか（分かっている向きなら
+<span class="math inline">\(\mathbf h_c^{\mathsf T}P\mathbf h_c\)</span>
+が小さく、得も小さい）</li>
+</ul>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 50%" />
+<col style="width: 50%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th>基準</th>
 <th>小さくするもの</th>
-<th>意味</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>A 最適</td>
-<td><span class="math inline">\(\operatorname{tr} P\)</span></td>
-<td>5 点の温度の不確かさの合計</td>
+<td><span class="math inline">\(\operatorname{tr} P\)</span>（5
+点の温度の不確かさの合計）</td>
 </tr>
 <tr class="even">
 <td>D 最適</td>
-<td><span class="math inline">\(\det P\)</span></td>
-<td>不確かさの体積</td>
+<td><span class="math inline">\(\det P\)</span>（不確かさの体積）</td>
 </tr>
 <tr class="odd">
-<td>E 最適</td>
-<td><span class="math inline">\(F\)</span> の最小固有値を大きく</td>
-<td>一番分かりにくい方向をなくす（発熱量と放熱の見分けなど）</td>
-</tr>
-<tr class="even">
-<td><strong>目的指向</strong></td>
+<td><strong>目的指向（本研究）</strong></td>
 <td><span class="math inline">\(\mathbf w^{\mathsf T} P\, \mathbf
-w\)</span></td>
-<td><strong>知りたい量（反り <span class="math inline">\(d = \mathbf
-w^{\mathsf T}\delta\mathbf T_P\)</span>）の不確かさ</strong></td>
+w\)</span>（<strong>知りたい反りの不確かさ</strong>）</td>
 </tr>
 </tbody>
 </table>
-<h3 id="本研究で使った基準反りに対する目的指向">12-3.
-本研究で使った基準：反りに対する目的指向</h3>
-<p>本研究は、知りたいのが<strong>反り A−O</strong>
-なので、目的指向の基準を使いました。センサ <span
-class="math inline">\(c\)</span>（感度 <span
-class="math inline">\(\mathbf h_c\)</span>、誤差 <span
-class="math inline">\(r_c\)</span>）を 1 本足すと、情報は <span
-class="math inline">\(F\)</span> に <span class="math inline">\(\mathbf
-h_c \mathbf h_c^{\mathsf T}/r_c\)</span> が足され、反りの分散は</p>
-<p><span class="math display">\[
-\Delta_c = \frac{\big(\mathbf w^{\mathsf T} P_S\, \mathbf
-h_c\big)^2}{\mathbf h_c^{\mathsf T} P_S\, \mathbf h_c + r_c}
-\]</span></p>
-<p>だけ減ります（<span class="math inline">\(P_S\)</span>
-はすでに選んだセンサで測った後の不確かさ）。30〜300
-秒で平均した「残る反りの標準偏差」<span
-class="math inline">\(J_c\)</span> が最小の点を、1 本ずつ選びました（<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/25_sensor_selection_theory_and_idw.md">docs/25</a>）。</p>
-<ul>
-<li>分子：その観測が、反りを変える温度の動きを捉えているか</li>
-<li>分母：観測の信号が、誤差に埋もれないか</li>
-<li>2 本目は、1 本目で測った後の <span
-class="math inline">\(P_S\)</span> で採点し直すので、1
-本目と同じ情報しか持たない点は選ばれにくい</li>
-</ul>
-<p>これは、12-2 の式（<span class="math inline">\(B^{-1} +
-F\)</span>）に 1 本ずつ情報を足していく計算そのものです。</p>
-<h4 id="理論式fisher-情報から最適なセンサを選ぶ手順">理論式：Fisher
-情報から最適なセンサを選ぶ手順</h4>
-<p><strong>できます。</strong> Fisher 情報は「センサ 1
-本ごとの情報の足し算」なので、候補を 1 本ずつ足したときの <span
-class="math inline">\(P\)</span>
-の変化を式で書け、それを基準にして選べます。</p>
-<p><strong>① センサ 1 本の情報。</strong> 候補 <span
-class="math inline">\(c\)</span> の値が <span class="math inline">\(y_c
-= \mathbf h_c^{\mathsf T}\boldsymbol\theta +
-\varepsilon_c\)</span>（誤差の分散 <span
-class="math inline">\(r_c\)</span>）なら、その Fisher 情報は 1
-階（ランク 1）の行列です。時刻 <span class="math inline">\(k\)</span>
-ごとに足すと、</p>
-<p><span class="math display">\[
-F_c = \sum_k \frac{\mathbf h_{c,k}\,\mathbf h_{c,k}^{\mathsf T}}{r_c}
-\]</span></p>
-<ul>
-<li>温度計なら <span class="math inline">\(\mathbf h_c\)</span>
-は「その場所の温度が代表 5 点の温度でどう表されるか」（gappy-POD の行
-<span
-class="math inline">\(\Phi_c\Phi_P^{-1}\)</span>）、変位計なら「その場所・向きの変位の感度」（<span
-class="math inline">\(D_c\Phi_P^{-1}\)</span>、§7-4）です。</li>
-</ul>
-<p><strong>② 1 本足したときの、測った後の不確かさ。</strong>
-すでに選んだセンサの集合 <span class="math inline">\(S\)</span>
-で測った後の不確かさを <span class="math inline">\(P_S = (B^{-1} +
-\sum_{s\in S}F_s)^{-1}\)</span> とします。1 時刻ぶんの <span
-class="math inline">\(c\)</span>
-を足すと、逆行列の補題（シャーマン・モリソンの式）から</p>
-<p><span class="math display">\[
-P_{S\cup c} = \big(P_S^{-1} + \mathbf h_c \mathbf h_c^{\mathsf
-T}/r_c\big)^{-1}
-= P_S - \frac{P_S\,\mathbf h_c\,\mathbf h_c^{\mathsf T} P_S}{\mathbf
-h_c^{\mathsf T} P_S\,\mathbf h_c + r_c}
-\]</span></p>
-<p>逆行列を計算し直さずに、ベクトルの掛け算だけで更新できます。</p>
-<p><strong>③ 基準ごとの「1 本足したときの得」。</strong> ②
-をそれぞれの基準に入れると、</p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>基準</th>
-<th>1 本足したときの得（大きいほどよい）</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>A 最適（<span class="math inline">\(\operatorname{tr}P\)</span>
-を減らす）</td>
-<td><span class="math inline">\(\dfrac{\mathbf h_c^{\mathsf T}
-P_S^{2}\,\mathbf h_c}{\mathbf h_c^{\mathsf T} P_S\,\mathbf h_c +
-r_c}\)</span></td>
-</tr>
-<tr class="even">
-<td>D 最適（<span class="math inline">\(\ln\det P\)</span>
-を減らす）</td>
-<td><span class="math inline">\(\ln\!\Big(1 + \dfrac{\mathbf
-h_c^{\mathsf T} P_S\,\mathbf h_c}{r_c}\Big)\)</span></td>
-</tr>
-<tr class="odd">
-<td><strong>目的指向</strong>（<span class="math inline">\(\mathbf
-w^{\mathsf T}P\mathbf w\)</span> を減らす）</td>
-<td><span class="math inline">\(\Delta_c = \dfrac{\big(\mathbf
-w^{\mathsf T} P_S\,\mathbf h_c\big)^2}{\mathbf h_c^{\mathsf T}
-P_S\,\mathbf h_c + r_c}\)</span>（12-3 の式）</td>
-</tr>
-<tr class="even">
-<td>E 最適（<span class="math inline">\(F\)</span>
-の最小固有値を大きく）</td>
-<td>式は閉じた形にならないので、候補ごとに固有値を計算し直す</td>
-</tr>
-</tbody>
-</table>
-<p>どれも分母に <span class="math inline">\(\mathbf h_c^{\mathsf T}
-P_S\,\mathbf h_c +
-r_c\)</span>（そのセンサの値の予想のばらつき＋誤差）があり、「すでに分かっている方向を測っても得が小さい」ことを表します。</p>
-<p><strong>④ 選ぶ手順（貪欲法）。</strong></p>
-<ol type="1">
-<li><span class="math inline">\(P \leftarrow
-B\)</span>（何も測っていない状態）から始める。</li>
-<li>すべての候補 <span class="math inline">\(c\)</span> について ③
-の得を計算し、一番大きい候補を選ぶ。</li>
-<li>② の式で <span class="math inline">\(P\)</span> を更新し、2
-に戻る。決めた本数になったら終わり。</li>
-</ol>
-<ul>
-<li>候補 14,754 通りでも、1
-本あたりベクトルの掛け算だけなので、データ同化を回すより十分速く選べます。</li>
-<li>D 最適の得（<span
-class="math inline">\(\ln\det\)</span>）は、足すほど得が減る性質（劣モジュラ性）を持つので、貪欲法でも、全組み合わせの最適の
-<span class="math inline">\((1-1/e)\approx 63\,\%\)</span>
-以上の得が保証されます。A
-最適・目的指向には一般にこの保証がありません。</li>
-<li>本研究の 12-4 の比較（A 最適・D
-最適・目的指向）は、この手順で選んだものです。E
-最適で選ぶ計算はまだしていません（未実施）。</li>
-</ul>
-<h3 id="結果既存の選び方と比べる">12-4. 結果：既存の選び方と比べる</h3>
+<h3 id="結果既存の選び方と比べる">12-3. 結果：既存の選び方と比べる</h3>
 <p>同じ候補（変位 14,754 通り）から、選び方だけを変えて 2 点を選び、9
 ページ目と同じデータ同化で比べました（真値は
 OpenFOAM＋FrontISTR、温度計は
@@ -3511,63 +3313,14 @@ P2・P0、<code>results/placement_method_comparison.json</code>）。</p>
 <li>予測した不確かさの順番と、実際の誤差の順番がおおむねそろっています（D
 最適と Q-DEIM の順は入れ替わる）。</li>
 </ul>
-<h3
-id="fisher-情報行列で最適な温度センサと変位センサの位置が分かるか">12-5.
-Fisher 情報行列で、最適な温度センサと変位センサの位置が分かるか</h3>
-<p><strong>分かります。ただし「何を知りたいか」「測る前の不確かさ」「センサの誤差」を決めたうえでの、近似の最適です。</strong></p>
-<p>分かること：</p>
+<h3 id="言えること注意">12-4. 言えること・注意</h3>
 <ul>
-<li>温度計と変位計を、同じものさし（誤差で割った情報量）で比べ、組み合わせて選べる。</li>
-<li>知りたい量を決めれば、それに合った置き場所を、データ同化を回す前に計算で選べる。本研究では、反りに対して選んだ
-2 点が、実際のデータ同化でも一番よかった。</li>
+<li>知りたい量を決めれば、データ同化をまわす前に、計算で置き場所を選べる。選んだ
+2 点は、実際のデータ同化でも一番よかった。</li>
+<li>ただし、知りたい量が変われば最適な位置も変わる（確かめたのは反りだけ）。線形・正規分布の近似なので、選んだ後はデータ同化で確かめる。E
+最適（発熱と放熱の見分け）で選ぶ計算は未実施。</li>
 </ul>
-<p>気をつけること：</p>
-<table>
-<colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>注意</th>
-<th>中身</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>知りたい量で答えが変わる</td>
-<td>反りに最適な点と、温度場全体・発熱量に最適な点は違う。本研究で確かめたのは<strong>反り</strong>に対する配置だけ</td>
-</tr>
-<tr class="even">
-<td>Fisher だけでは状態は決まらない</td>
-<td><span class="math inline">\(F\)</span>
-は観測からの情報だけ。温度場（状態）を推定するには、測る前の不確かさ
-<span class="math inline">\(B\)</span> と合わせた <span
-class="math inline">\(P = (B^{-1}+F)^{-1}\)</span> で評価する</td>
-</tr>
-<tr class="odd">
-<td>線形・正規分布の近似</td>
-<td>実際の EnKF は非線形で、メンバーは有限。1 回の補正の分散減少と、20
-回補正した後の誤差の順位は一致しないことがある（<a
-href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">docs/19
-§4-1</a>）。選んだ後に必ずデータ同化で確かめる</td>
-</tr>
-<tr class="even">
-<td>1 本ずつ選ぶ方法</td>
-<td>全部の組み合わせの中での最適（大域最適）は保証しない</td>
-</tr>
-<tr class="odd">
-<td>発熱量と放熱の見分け</td>
-<td><span class="math inline">\(F\)</span> の最小固有値（E
-最適）で、発熱量 <span class="math inline">\(Q\)</span> と放熱 <span
-class="math inline">\(h\)</span>
-を見分けられる位置・時間を選ぶ考え方は整理済み（<a
-href="blog005.html">blog_005
-§3</a>）。<strong>実際に計算して選んだことはまだない（未実施）</strong></td>
-</tr>
-</tbody>
-</table>
-<h3 id="使ったプログラム-7">12-6. 使ったプログラム</h3>
+<h3 id="使ったプログラム-7">12-5. 使ったプログラム</h3>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -3624,7 +3377,7 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a h
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>sigma_AO <span class="op">=</span> np.sqrt(w_AO <span class="op">@</span> P <span class="op">@</span> w_AO)   <span class="co"># 目的指向（反りの不確かさ）</span></span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>trace    <span class="op">=</span> np.trace(P)                <span class="co"># A 最適</span></span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>logdet   <span class="op">=</span> np.linalg.slogdet(P)[<span class="dv">1</span>]    <span class="co"># D 最適</span></span></code></pre></div>
-<h3 id="ページ目で言うこと約-1-分-30-秒-2">12-7. 11
+<h3 id="ページ目で言うこと約-1-分-30-秒-2">12-6. 11
 ページ目で言うこと（約 1 分 30 秒）</h3>
 <ul>
 <li>置き場所は、Fisher

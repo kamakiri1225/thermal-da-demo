@@ -1,1 +1,1097 @@
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=presen001.html"><title>移動しました</title><p>このページは <a href="presen001.html">presen001.html</a> に移動しました。</p>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_012：Fisher 情報行列でセンサの置き場所を選ぶ ― 温度計 1
+本の手計算から、反りに効く変位計の選び方まで</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+     html body { max-width: 1120px !important; }
+     body { padding: 0 24px; }
+     img { max-width: 100%; height: auto; }
+     table { font-size: 0.95em; }
+     pre.mermaid { background: none; text-align: center; }
+    </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_012fisher-情報行列でセンサの置き場所を選ぶ-温度計-1-本の手計算から反りに効く変位計の選び方まで"
+id="toc-blog_012fisher-情報行列でセンサの置き場所を選ぶ-温度計-1-本の手計算から反りに効く変位計の選び方まで">blog_012：Fisher
+情報行列でセンサの置き場所を選ぶ ― 温度計 1
+本の手計算から、反りに効く変位計の選び方まで</a>
+<ul>
+<li><a href="#何を決めたいか" id="toc-何を決めたいか">1.
+何を決めたいか</a></li>
+<li><a href="#言葉の準備未知数感度ノイズ"
+id="toc-言葉の準備未知数感度ノイズ">2.
+言葉の準備：未知数・感度・ノイズ</a>
+<ul>
+<li><a href="#未知数この記事では型-1型-2-の重み"
+id="toc-未知数この記事では型-1型-2-の重み">2-1. 未知数：この記事では「型
+1・型 2 の重み」</a></li>
+<li><a href="#感度センサの値が未知数でどう変わるか"
+id="toc-感度センサの値が未知数でどう変わるか">2-2.
+感度：センサの値が、未知数でどう変わるか</a></li>
+<li><a href="#ノイズ" id="toc-ノイズ">2-3. ノイズ</a></li>
+</ul></li>
+<li><a href="#未知数が-1-つのときfisher-情報とは"
+id="toc-未知数が-1-つのときfisher-情報とは">3. 未知数が 1
+つのとき：Fisher 情報とは</a>
+<ul>
+<li><a href="#式" id="toc-式">3-1. 式</a></li>
+<li><a href="#測る前の不確かさと合わせる"
+id="toc-測る前の不確かさと合わせる">3-2.
+測る前の不確かさと合わせる</a></li>
+</ul></li>
+<li><a href="#未知数が-2-つのとき不確かさは楕円になる"
+id="toc-未知数が-2-つのとき不確かさは楕円になる">4. 未知数が 2
+つのとき：不確かさは楕円になる</a>
+<ul>
+<li><a href="#fisher-情報行列" id="toc-fisher-情報行列">4-1. Fisher
+情報行列</a></li>
+<li><a href="#測った後の不確かさ" id="toc-測った後の不確かさ">4-2.
+測った後の不確かさ</a></li>
+</ul></li>
+<li><a href="#知りたいのは反りmathbf-wmathsf-tpmathbf-w"
+id="toc-知りたいのは反りmathbf-wmathsf-tpmathbf-w">5.
+知りたいのは反り：<span class="math inline">\(\mathbf w^{\mathsf
+T}P\,\mathbf w\)</span></a></li>
+<li><a href="#変位計を-1-本足すとどこが効くか"
+id="toc-変位計を-1-本足すとどこが効くか">6. 変位計を 1
+本足すと：どこが効くか</a>
+<ul>
+<li><a href="#本足したときの式" id="toc-本足したときの式">6-1. 1
+本足したときの式</a></li>
+<li><a href="#つの候補で手計算" id="toc-つの候補で手計算">6-2. 2
+つの候補で手計算</a></li>
+<li><a href="#全部の候補を採点する" id="toc-全部の候補を採点する">6-3.
+全部の候補を採点する</a></li>
+</ul></li>
+<li><a href="#ここまでの式を一般の形に"
+id="toc-ここまでの式を一般の形に">7. ここまでの式を一般の形に</a></li>
+<li><a href="#本番未知数-5-つ変位計-2-本時刻の平均"
+id="toc-本番未知数-5-つ変位計-2-本時刻の平均">8. 本番：未知数 5
+つ、変位計 2 本、時刻の平均</a>
+<ul>
+<li><a href="#本ずつ選ぶ手順貪欲法" id="toc-本ずつ選ぶ手順貪欲法">8-1. 1
+本ずつ選ぶ手順（貪欲法）</a></li>
+<li><a href="#選び方による違い" id="toc-選び方による違い">8-2.
+選び方による違い</a></li>
+</ul></li>
+<li><a href="#基準の違いa-最適d-最適e-最適目的指向"
+id="toc-基準の違いa-最適d-最適e-最適目的指向">9. 基準の違い：A 最適・D
+最適・E 最適・目的指向</a></li>
+<li><a href="#気をつけること" id="toc-気をつけること">10.
+気をつけること</a></li>
+<li><a href="#まとめ" id="toc-まとめ">11. まとめ</a></li>
+<li><a href="#使ったプログラム"
+id="toc-使ったプログラム">使ったプログラム</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_012fisher-情報行列でセンサの置き場所を選ぶ-温度計-1-本の手計算から反りに効く変位計の選び方まで">blog_012：Fisher
+情報行列でセンサの置き場所を選ぶ ― 温度計 1
+本の手計算から、反りに効く変位計の選び方まで</h1>
+<p>発表資料 <a
+href="presen001.html#12-11-ページ目センサの置き場所fisher-情報行列">presen_001
+§12</a> の「センサの置き場所：Fisher 情報行列」は、式が多く、1
+ページでは分かりにくい所です。この記事では、そこを順を追って、本番の計算の数字で確かめながら解説します。</p>
+<p><strong>この記事で分かること</strong></p>
+<ol type="1">
+<li>Fisher 情報とは何か（温度計 1 本、未知数 1 つの手計算）</li>
+<li>「測る前の不確かさ」と合わせると、測った後の不確かさがどうなるか</li>
+<li>未知数が 2 つになると、不確かさは楕円になる</li>
+<li>知りたいのが「反り」のとき、どの変位計がよいかを式で決める方法</li>
+<li>本番（未知数 5 つ、変位計 2 本）での選び方と、その結果</li>
+</ol>
+<p>数字はすべて、本研究の本番のデータ（OpenFOAM の温度、POD
+の型、FrontISTR
+で解いた型ごとの変位、ROM）から計算しました（<code>run/make_blog012_fisher_figs.py</code>、<code>results/blog012_fisher.json</code>）。</p>
+<hr />
+<h2 id="何を決めたいか">1. 何を決めたいか</h2>
+<p>中空円筒の外周の片側（+x
+側）にヒータがあり、温めると円筒が反ります。知りたいのは、上面の 2 点
+A・O の高さの差（<strong>反り</strong> A−O）です。A・O
+には何も置けない（測れない）とします。</p>
+<ul>
+<li>温度計は、すでに <strong>P2・P0</strong>（ヒータ側の中段）の 2
+本があります。</li>
+<li>そこに
+<strong>変位計を足す</strong>なら、どこに、どの向き（Ux・Uy・Uz）に置けばよいか。候補は、表面の節点
+× 3 方向で 14,754 通りあります。</li>
+</ul>
+<p>データ同化を 14,754
+回まわして比べることもできますが、時間がかかります。<strong>データ同化をまわす前に、計算だけで良い場所を選べないか</strong>。そのための道具が
+Fisher 情報行列です。</p>
+<hr />
+<h2 id="言葉の準備未知数感度ノイズ">2.
+言葉の準備：未知数・感度・ノイズ</h2>
+<h3 id="未知数この記事では型-1型-2-の重み">2-1. 未知数：この記事では「型
+1・型 2 の重み」</h3>
+<p>温度分布は、POD の型の足し合わせで表せます（<a
+href="blog004.html">blog_004</a>）。</p>
+<p><span class="math display">\[
+\mathbf T(t) \approx \bar{\mathbf T} + a_1(t)\,\boldsymbol\varphi_1 +
+a_2(t)\,\boldsymbol\varphi_2 + \cdots
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\bar{\mathbf
+T}\)</span>：平均の温度分布</li>
+<li><span class="math inline">\(\boldsymbol\varphi_1,
+\boldsymbol\varphi_2\)</span>：型 1（全体が温まる）、型
+2（ヒータ側と反対側の差）</li>
+<li><span class="math inline">\(a_1,
+a_2\)</span>：その時刻の<strong>型の重み</strong>。ここが分かれば、温度分布全体が分かる</li>
+</ul>
+<p>型 1・2 で、温度の変化の 99.89 %
+を表せます。そこでこの記事では、説明を簡単にするため、<strong>未知数を
+<span class="math inline">\(a_1, a_2\)</span> の 2
+つ</strong>に絞ります（本番は 5 つ。§8）。</p>
+<p>型の大きさは、私が「一番大きく変わるセルで
+1」になるようにそろえました。そうすると、重み <span
+class="math inline">\(a_1, a_2\)</span> の単位が K になり、「型 1
+の重みが 1 K 増える＝一番変わるセルで 1 K 上がる」と読めます。</p>
+<h3 id="感度センサの値が未知数でどう変わるか">2-2.
+感度：センサの値が、未知数でどう変わるか</h3>
+<p>センサの値 <span class="math inline">\(y\)</span>
+は、未知数の一次式で書けます（ノイズ <span
+class="math inline">\(\varepsilon\)</span> 付き）。</p>
+<p><span class="math display">\[
+y = \mathbf h^{\mathsf T} \mathbf a + \varepsilon, \qquad \mathbf a =
+\begin{pmatrix} a_1 \\ a_2 \end{pmatrix}
+\]</span></p>
+<p>この <span class="math inline">\(\mathbf h\)</span>
+を<strong>感度</strong>と呼びます。「<span
+class="math inline">\(a_1\)</span> が 1
+増えると、センサの値がどれだけ変わるか」です。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>センサ</th>
+<th>感度 <span class="math inline">\(\mathbf h\)</span> の中身</th>
+<th>本番の値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度計 P2</td>
+<td>その場所の型 1・型 2 の値</td>
+<td><span class="math inline">\((-0.609,\ -1.000)\)</span></td>
+</tr>
+<tr class="even">
+<td>温度計 P0</td>
+<td>同上</td>
+<td><span class="math inline">\((-0.754,\ -0.739)\)</span></td>
+</tr>
+<tr class="odd">
+<td>変位計</td>
+<td>FrontISTR で前もって解いた「型 1・型 2
+だけの温度のときの変位」[µm/K]</td>
+<td>場所と向きで変わる（§6）</td>
+</tr>
+</tbody>
+</table>
+<p>符号がマイナスなのは、型の向き（符号）を POD
+がそう決めたからで、意味はありません。<span
+class="math inline">\(a\)</span>
+の側も同じ向きで測るので、温度は正しく出ます。</p>
+<p><strong>知りたい反り</strong>も、同じく一次式です。</p>
+<p><span class="math display">\[
+d = \mathbf w^{\mathsf T} \mathbf a, \qquad \mathbf w = (0.327,\
+-1.431)\ \ \mu\mathrm m/\mathrm K
+\]</span></p>
+<p><span class="math inline">\(\mathbf w\)</span> は、A の上下の変位から
+O の上下の変位を引いたもの（FrontISTR の結果から）です。<strong>反りは型
+2（ヒータ側と反対側の差）でほぼ決まる</strong>ことが、<span
+class="math inline">\(|w_2| \gg |w_1|\)</span> から読み取れます。</p>
+<h3 id="ノイズ">2-3. ノイズ</h3>
+<p>センサのノイズの大きさ（標準偏差）は、本番と同じく、温度計 0.3
+K、変位計 0.3 µm とします。分散は <span class="math inline">\(r = 0.3^2
+= 0.09\)</span> です。</p>
+<hr />
+<h2 id="未知数が-1-つのときfisher-情報とは">3. 未知数が 1
+つのとき：Fisher 情報とは</h2>
+<p>まず一番簡単な場合、<strong>未知数が <span
+class="math inline">\(a_1\)</span> だけ、センサが温度計 P2 の 1
+本だけ</strong>で考えます（<span class="math inline">\(a_2\)</span>
+は無視。説明のため）。</p>
+<h3 id="式">3-1. 式</h3>
+<p>P2 の値は <span class="math inline">\(y = h\,a_1 +
+\varepsilon\)</span>、<span class="math inline">\(h =
+-0.609\)</span>、ノイズの分散 <span class="math inline">\(r =
+0.09\)</span> です。</p>
+<p><span class="math inline">\(a_1\)</span> が <span
+class="math inline">\(\delta\)</span> だけずれると、P2 の値は <span
+class="math inline">\(h\,\delta\)</span> だけずれます。これがノイズ（±
+0.3 K）より大きければ、そのずれは「見える」。見えやすさを測るのが
+<strong>Fisher 情報</strong> <span class="math inline">\(F\)</span>
+です。</p>
+<p><span class="math display">\[
+F = \frac{h^2}{r} = \frac{(-0.609)^2}{0.09} = 4.12\ \ [1/\mathrm K^2]
+\]</span></p>
+<ul>
+<li><strong>感度 <span class="math inline">\(h\)</span>
+が大きいほど</strong>、未知数のずれがセンサに大きく出るので、情報が多い。</li>
+<li><strong>ノイズ <span class="math inline">\(r\)</span>
+が小さいほど</strong>、小さなずれでも見えるので、情報が多い。</li>
+<li><span class="math inline">\(1/F = 0.24\)</span> は、「P2
+の温度計だけから <span class="math inline">\(a_1\)</span>
+を求めたときのばらつき（分散）」です。標準偏差にすると <span
+class="math inline">\(\sqrt{0.24} = 0.49\)</span> K。</li>
+</ul>
+<h4 id="なぜ-h2r-なのか出どころ">なぜ <span
+class="math inline">\(h^2/r\)</span> なのか（出どころ）</h4>
+<p><span class="math inline">\(a_1\)</span> が分かっているとき、P2 の値
+<span class="math inline">\(y\)</span>
+が出る確からしさ（<strong>尤度</strong>）は、ノイズが正規分布なら</p>
+<p><span class="math display">\[
+p(y \mid a_1) \propto \exp\!\left(-\frac{(y - h\,a_1)^2}{2r}\right)
+\]</span></p>
+<p>です。<span class="math inline">\(a_1\)</span>
+を横軸にしてこれを描くと、山の形になります。<strong>山が鋭いほど</strong>、<span
+class="math inline">\(a_1\)</span>
+が少し違うだけで「その値は出にくい」と分かる＝情報が多い。山の鋭さは、対数をとって
+2 回微分した値で測ります。</p>
+<p><span class="math display">\[
+F = -\frac{\partial^2 \ln p}{\partial a_1^2} = \frac{h^2}{r}
+\]</span></p>
+<p>これが Fisher
+情報の定義です（一般には期待値をとるが、この一次式では値が 1
+つに決まる）。どんな推定方法でも、ばらつきは <span
+class="math inline">\(1/F\)</span>
+より小さくできません（クラメール・ラオの下限）。</p>
+<p>参考：<a
+href="https://qiita.com/nekokaitaiyo_ne/items/aee3f7152b984b3644bf">Fisher情報量と共分散行列（Qiita）</a>、<a
+href="https://note.com/kimukimucitrus/n/nace8ba84d129">フィッシャー情報量、どんなイメージ？（note）</a></p>
+<h3 id="測る前の不確かさと合わせる">3-2. 測る前の不確かさと合わせる</h3>
+<p>データ同化では、測る前にも「<span class="math inline">\(a_1\)</span>
+はだいたいこのくらい」という見込みがあります。本番と同じ方法で、初期温度・発熱・放熱をばらつかせた
+4,000 本の ROM を 150 秒まで進め、その散らばりから決めました。</p>
+<ul>
+<li>測る前の分散 <span class="math inline">\(B = 6.36\)</span>（標準偏差
+2.52 K）</li>
+</ul>
+<p>測った後の分散 <span class="math inline">\(P\)</span>
+は、「情報の足し算」で求まります（分散の逆数を情報と見る）。</p>
+<p><span class="math display">\[
+\frac{1}{P} = \frac{1}{B} + F = \frac{1}{6.36} + 4.12 = 4.28, \qquad P =
+0.234
+\]</span></p>
+<figure>
+<img src="img/blog012_fisher_1d.png" alt="1 次元の例" />
+<figcaption aria-hidden="true">1 次元の例</figcaption>
+</figure>
+<p><em>図 1　型 1 の重み <span class="math inline">\(a_1\)</span>
+の不確かさ。点線が測る前（標準偏差 2.52 K）、緑が P2
+の温度計だけから（0.49 K）、赤が両方を合わせた後（0.48
+K）。幅を比べるため、中心を 0 にそろえて描いた。</em></p>
+<ul>
+<li>温度計 1 本で、<span class="math inline">\(a_1\)</span> の幅が 2.52
+K → 0.48 K に絞れました。</li>
+<li>測る前の見込み（<span class="math inline">\(1/B =
+0.16\)</span>）より、温度計の情報（<span class="math inline">\(F =
+4.12\)</span>）の方がずっと大きいので、合わせた後はほぼ温度計で決まっています。</li>
+</ul>
+<p><strong>ここまでのまとめ</strong>：情報は <span
+class="math inline">\(F = h^2/r\)</span>。測る前の情報 <span
+class="math inline">\(1/B\)</span> に足すと、測った後の不確かさ <span
+class="math inline">\(P\)</span> が出る。</p>
+<hr />
+<h2 id="未知数が-2-つのとき不確かさは楕円になる">4. 未知数が 2
+つのとき：不確かさは楕円になる</h2>
+<p>次に、未知数を <span class="math inline">\(a_1, a_2\)</span> の 2
+つ、温度計を P2・P0 の 2 本にします。式は 3
+章と同じ形で、数が行列になるだけです。</p>
+<h3 id="fisher-情報行列">4-1. Fisher 情報行列</h3>
+<p>センサ 1 本の情報は、感度のベクトル <span
+class="math inline">\(\mathbf h\)</span> から作る 2×2 の行列 <span
+class="math inline">\(\mathbf h\mathbf h^{\mathsf T}/r\)</span> です。2
+本あれば足し算します。</p>
+<p><span class="math display">\[
+F = \frac{\mathbf h_{P2}\mathbf h_{P2}^{\mathsf T}}{r} + \frac{\mathbf
+h_{P0}\mathbf h_{P0}^{\mathsf T}}{r}
+= \frac{1}{0.09}\left[\begin{pmatrix}0.371 &amp; 0.609\\ 0.609 &amp;
+1.000\end{pmatrix} + \begin{pmatrix}0.568 &amp; 0.557\\ 0.557 &amp;
+0.546\end{pmatrix}\right]
+= \begin{pmatrix}10.43 &amp; 12.95\\ 12.95 &amp; 17.17\end{pmatrix}
+\]</span></p>
+<p>（P2 の行列の 1 行目は <span class="math inline">\((-0.609)^2 =
+0.371\)</span>、<span class="math inline">\((-0.609)(-1.000) =
+0.609\)</span> のように計算します。）</p>
+<h3 id="測った後の不確かさ">4-2. 測った後の不確かさ</h3>
+<p>測る前の不確かさ（4,000 本の散らばり、150 秒）は</p>
+<p><span class="math display">\[
+B = \begin{pmatrix} 6.36 &amp; 1.93 \\ 1.93 &amp; 1.26 \end{pmatrix}
+\]</span></p>
+<p>で、測った後は 3 章と同じく「情報の足し算」の逆数です。</p>
+<p><span class="math display">\[
+P = \left(B^{-1} + F\right)^{-1} = \begin{pmatrix} 0.427 &amp; -0.286 \\
+-0.286 &amp; 0.246 \end{pmatrix}
+\]</span></p>
+<p><span class="math inline">\(P\)</span> の対角は、<span
+class="math inline">\(a_1\)</span>・<span
+class="math inline">\(a_2\)</span>
+それぞれの分散です。非対角（−0.286）は、「<span
+class="math inline">\(a_1\)</span> が大きめなら <span
+class="math inline">\(a_2\)</span>
+は小さめ」という組み合わせのばらつきを表します。2
+つの未知数の不確かさは、<strong>楕円</strong>で描けます（図 2
+の緑）。</p>
+<p>楕円が斜めに細長いのは、温度計 2 本の感度 <span
+class="math inline">\(\mathbf h_{P2} = (-0.61, -1.00)\)</span> と <span
+class="math inline">\(\mathbf h_{P0} = (-0.75, -0.74)\)</span>
+が似た向きだからです。温度計は「<span class="math inline">\(\mathbf
+h\)</span> の向き」の組み合わせはよく測れますが、それと直角の向き（<span
+class="math inline">\(a_1\)</span> を増やして <span
+class="math inline">\(a_2\)</span>
+を減らす向き）はあまり測れません。</p>
+<hr />
+<h2 id="知りたいのは反りmathbf-wmathsf-tpmathbf-w">5.
+知りたいのは反り：<span class="math inline">\(\mathbf w^{\mathsf
+T}P\,\mathbf w\)</span></h2>
+<p>反りは <span class="math inline">\(d = \mathbf w^{\mathsf T}\mathbf
+a\)</span> なので、反りの分散は</p>
+<p><span class="math display">\[
+\sigma_d^2 = \mathbf w^{\mathsf T} P\, \mathbf w
+\]</span></p>
+<p>です。手で計算すると、</p>
+<p><span class="math display">\[
+P\mathbf w = \begin{pmatrix} 0.427 \times 0.327 + (-0.286)(-1.431) \\
+(-0.286)(0.327) + 0.246 \times (-1.431) \end{pmatrix} = \begin{pmatrix}
+0.549 \\ -0.445 \end{pmatrix},
+\qquad
+\mathbf w^{\mathsf T} P\mathbf w = 0.327 \times 0.549 + (-1.431)(-0.445)
+= 0.816
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">反りの不確かさ（標準偏差）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>測る前（<span class="math inline">\(B\)</span>）</td>
+<td style="text-align: right;">1.21 µm</td>
+</tr>
+<tr class="even">
+<td>温度計 P2・P0 で測った後（<span
+class="math inline">\(P\)</span>）</td>
+<td style="text-align: right;"><strong>0.90 µm</strong></td>
+</tr>
+</tbody>
+</table>
+<p>温度計 2 本だけでは、反りは ± 0.90 µm までしか絞れません。図 2
+で見ると、反りが増える向き（矢印、<span class="math inline">\(\mathbf
+w\)</span>
+の向き）が、緑の楕円の<strong>長い方向に近い</strong>からです。温度計が苦手な向きと、反りが変わる向きが重なっています。</p>
+<hr />
+<h2 id="変位計を-1-本足すとどこが効くか">6. 変位計を 1
+本足すと：どこが効くか</h2>
+<h3 id="本足したときの式">6-1. 1 本足したときの式</h3>
+<p>候補の変位計（感度 <span class="math inline">\(\mathbf
+h_c\)</span>、ノイズ <span class="math inline">\(r\)</span>）を 1
+本足すと、情報は <span class="math inline">\(F + \mathbf h_c\mathbf
+h_c^{\mathsf T}/r\)</span>
+になります。逆行列を計算し直さなくても、次の式（シャーマン・モリソンの式）で更新できます。</p>
+<p><span class="math display">\[
+P_{\text{新}} = P - \frac{P\mathbf h_c\,\mathbf h_c^{\mathsf
+T}P}{\mathbf h_c^{\mathsf T}P\,\mathbf h_c + r}
+\]</span></p>
+<p>これに <span class="math inline">\(\mathbf w\)</span>
+を両側から掛けると、<strong>反りの分散がどれだけ減るか</strong>が出ます。</p>
+<p><span class="math display">\[
+\Delta_c = \mathbf w^{\mathsf T}P\mathbf w - \mathbf w^{\mathsf
+T}P_{\text{新}}\mathbf w = \frac{\big(\mathbf w^{\mathsf T} P\,\mathbf
+h_c\big)^2}{\mathbf h_c^{\mathsf T} P\,\mathbf h_c + r}
+\]</span></p>
+<ul>
+<li><strong>分子</strong> <span class="math inline">\((\mathbf
+w^{\mathsf T}P\mathbf h_c)^2\)</span>：その変位計が測るもの（<span
+class="math inline">\(\mathbf h_c\)</span>）と、反りの分からなさ（<span
+class="math inline">\(P\mathbf w\)</span>）が、どれだけ同じ向きか。</li>
+<li><strong>分母</strong> <span class="math inline">\(\mathbf
+h_c^{\mathsf T}P\mathbf h_c +
+r\)</span>：その変位計の値の予想のばらつき＋ノイズ。<span
+class="math inline">\(\mathbf h_c^{\mathsf T}P\mathbf h_c\)</span>
+が小さい＝<strong>もう温度計で分かっている向きを測っている</strong>。</li>
+</ul>
+<p><span class="math inline">\(\Delta_c\)</span>
+が一番大きい候補を選べば、反りが一番よく分かる配置になります。これを<strong>目的指向</strong>の選び方と呼びます（知りたい量＝目的を指定するから）。</p>
+<h3 id="つの候補で手計算">6-2. 2 つの候補で手計算</h3>
+<p>本番の候補から、2 つを取り出して比べます。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>目的指向で選んだ点</th>
+<th>よく動くが反りに効かない点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>場所 [mm]・向き</td>
+<td>(36.2, −9.7, 100.5)・Ux（上面のヒータ側）</td>
+<td>(37.2, 4.9, 80.4)・Uz（外周のヒータ側の上の方）</td>
+</tr>
+<tr class="even">
+<td>感度 <span class="math inline">\(\mathbf h_c\)</span> [µm/K]</td>
+<td><span class="math inline">\((-0.577,\ 1.324)\)</span></td>
+<td><span class="math inline">\((-0.693,\ -0.776)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P\mathbf h_c\)</span></td>
+<td><span class="math inline">\((-0.626,\ 0.491)\)</span></td>
+<td><span class="math inline">\((-0.074,\ 0.008)\)</span></td>
+</tr>
+<tr class="even">
+<td>分母 <span class="math inline">\(\mathbf h_c^{\mathsf T}P\mathbf h_c
++ r\)</span></td>
+<td><span class="math inline">\(1.010 + 0.09 = 1.100\)</span></td>
+<td><span class="math inline">\(0.045 + 0.09 = 0.135\)</span></td>
+</tr>
+<tr class="odd">
+<td>分子 <span class="math inline">\((\mathbf w^{\mathsf T}P\mathbf
+h_c)^2\)</span></td>
+<td><span class="math inline">\((-0.906)^2 = 0.821\)</span></td>
+<td><span class="math inline">\((-0.035)^2 = 0.0013\)</span></td>
+</tr>
+<tr class="even">
+<td>反りの分散の減り <span class="math inline">\(\Delta_c\)</span></td>
+<td><strong>0.746</strong></td>
+<td>0.009</td>
+</tr>
+<tr class="odd">
+<td>足した後の反りの不確かさ</td>
+<td><span class="math inline">\(\sqrt{0.816 - 0.746}\)</span> =
+<strong>0.26 µm</strong></td>
+<td><span class="math inline">\(\sqrt{0.816 - 0.009}\)</span> = 0.90
+µm</td>
+</tr>
+</tbody>
+</table>
+<p>右の点は、感度の大きさは左とあまり変わらない（よく動く点の上位 10 %
+に入る）のに、反りはほとんど絞れません。理由は感度の<strong>向き</strong>です。右の点の
+<span class="math inline">\(\mathbf h_c = (-0.69, -0.78)\)</span>
+は、温度計 P0 の <span class="math inline">\((-0.75, -0.74)\)</span>
+とほぼ同じ向きで、<strong>温度計がすでに測った情報を、もう一度測っているだけ</strong>です。そのため分母の
+<span class="math inline">\(\mathbf h_c^{\mathsf T}P\mathbf h_c\)</span>
+が 0.045 と小さく、分子も小さくなります。</p>
+<figure>
+<img src="img/blog012_fisher_ellipse.png"
+alt="2 次元の不確かさの楕円" />
+<figcaption aria-hidden="true">2 次元の不確かさの楕円</figcaption>
+</figure>
+<p><em>図 2　型 1・型 2 の重みの不確かさ（1
+標準偏差の楕円）。点線が測る前、緑が温度計 P2・P0
+で測った後、赤が目的指向の変位計を 1
+本足した後、青が「よく動くが反りに効かない点」を足した後。灰の点線は反りが一定の線、矢印は反りが増える向き。右は左の中心を拡大したもの。</em></p>
+<ul>
+<li>赤の楕円は、矢印（反りの向き）の方向に短くなっています。反りが一番分からなかった向きを、変位計が測ったからです。</li>
+<li>青の楕円は、緑とほとんど同じです。</li>
+</ul>
+<h3 id="全部の候補を採点する">6-3. 全部の候補を採点する</h3>
+<p><span class="math inline">\(\Delta_c\)</span>
+は、候補ごとにベクトルの掛け算をするだけなので、14,754
+通りでもすぐ計算できます。</p>
+<figure>
+<img src="img/blog012_fisher_score_map.png" alt="目的指向の得の分布" />
+<figcaption aria-hidden="true">目的指向の得の分布</figcaption>
+</figure>
+<p><em>図 3　表面の各点に変位計を 1 本置いたときの、反りの分散の減り
+<span class="math inline">\(\Delta_c\)</span>（3
+方向のうち一番大きいもの、最大を 1
+にそろえた）。黄色ほど反りに効く。A・O の近く（12 mm
+以内）は候補から外したので 0（濃い紫）。</em></p>
+<ul>
+<li>上面と、ヒータから離れた側の側面が効きます。ヒータ側の側面の中ほどから下（温度計
+P2 の近く）は効きません。温度計と同じ情報になるからです。</li>
+<li>この 2 次元の例で、変位計 1 本だけを選ぶ場合は、A 最適・D
+最適（§9）や「一番よく動く点」で選んでも、反りの不確かさは 0.27 µm
+で、目的指向（0.26
+µm）とほぼ同じでした。<strong>違いがはっきり出るのは、未知数が多く、2
+本目を選ぶとき</strong>です（§8）。</li>
+</ul>
+<hr />
+<h2 id="ここまでの式を一般の形に">7. ここまでの式を一般の形に</h2>
+<p>未知数を <span
+class="math inline">\(\boldsymbol\theta\)</span>（本番では代表 5
+点の温度）、センサ <span class="math inline">\(c\)</span> の感度を <span
+class="math inline">\(\mathbf h_c\)</span>、ノイズの分散を <span
+class="math inline">\(r_c\)</span>、観測する時刻を <span
+class="math inline">\(k\)</span> とすると、</p>
+<p><span class="math display">\[
+F = \sum_{c}\sum_{k} \frac{\mathbf h_{c,k}\,\mathbf h_{c,k}^{\mathsf
+T}}{r_c}, \qquad P = \left(B^{-1} + F\right)^{-1}, \qquad \sigma_d^2 =
+\mathbf w^{\mathsf T} P\,\mathbf w
+\]</span></p>
+<ul>
+<li><strong>センサを足すと、<span class="math inline">\(F\)</span>
+は足し算</strong>。温度計も変位計も、ノイズで割るので同じものさしで足せる（温度は
+K、変位は µm でも単位がそろう）。</li>
+<li>測った後の不確かさ <span class="math inline">\(P\)</span>
+は、測る前の <span class="math inline">\(B\)</span> と、センサの情報
+<span class="math inline">\(F\)</span> で決まる。<strong><span
+class="math inline">\(P\)</span>
+はセンサの値そのものを使わない</strong>（置く前に計算できる）。</li>
+<li><span class="math inline">\(B^{-1}+F\)</span>
+の形は、カルマンフィルタの補正後の共分散 <span class="math inline">\((I
+- KH)B\)</span>
+と同じです（線形・正規分布の場合）。だから、データ同化をまわす前に、補正後の不確かさが予想できます。</li>
+</ul>
+<hr />
+<h2 id="本番未知数-5-つ変位計-2-本時刻の平均">8. 本番：未知数 5
+つ、変位計 2 本、時刻の平均</h2>
+<p>本番（<a
+href="presen001.html#12-3-結果既存の選び方と比べる">presen_001
+§12-4</a>）は、この記事の例と次の点が違います。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>この記事の例</th>
+<th>本番</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>未知数</td>
+<td>型 1・2 の重み（2 つ）</td>
+<td>代表 5 点の温度（5 つ）</td>
+</tr>
+<tr class="even">
+<td>測る前の不確かさ <span class="math inline">\(B\)</span></td>
+<td>150 秒の 1 時刻</td>
+<td>30〜300 秒の 10 時刻</td>
+</tr>
+<tr class="odd">
+<td>採点</td>
+<td>反りの分散の減り <span class="math inline">\(\Delta_c\)</span></td>
+<td>10 時刻で平均した「残る反りの標準偏差」<span
+class="math inline">\(J_c\)</span></td>
+</tr>
+<tr class="even">
+<td>変位計の本数</td>
+<td>1 本</td>
+<td>2 本（1 本ずつ選ぶ）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="本ずつ選ぶ手順貪欲法">8-1. 1 本ずつ選ぶ手順（貪欲法）</h3>
+<ol type="1">
+<li>温度計 P2・P0 で測った後の <span class="math inline">\(P\)</span>
+から始める。</li>
+<li>すべての候補を採点し、一番よい候補を選ぶ。</li>
+<li>6-1 の式で <span class="math inline">\(P\)</span>
+を更新する（選んだ変位計で測った後にする）。</li>
+<li>2 に戻って 2 本目を選ぶ。</li>
+</ol>
+<p>3 で <span class="math inline">\(P\)</span> を更新するのが大事です。1
+本目と同じ情報を持つ候補は、2
+本目の採点で分母が小さくなり、選ばれにくくなります。</p>
+<h3 id="選び方による違い">8-2. 選び方による違い</h3>
+<p>同じ候補 14,754 通りから、選び方だけを変えて 2
+本を選び、データ同化（EnKF）をまわして実際の反りの誤差を比べました（<code>results/placement_method_comparison.json</code>）。</p>
+<figure>
+<img src="img/placement_method_points.png" alt="選ばれた位置" />
+<figcaption aria-hidden="true">選ばれた位置</figcaption>
+</figure>
+<p><em>図 4　選び方ごとに選ばれた変位計 2
+本の位置（上面を真上から見た図）。</em></p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>選び方</th>
+<th style="text-align: right;">予測した反りの不確かさ [µm]</th>
+<th style="text-align: right;">実際の反りの誤差 15 W [µm]</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位なし（温度 2 点のみ）</td>
+<td style="text-align: right;">1.19</td>
+<td style="text-align: right;">0.775</td>
+<td style="text-align: right;">1.417</td>
+<td style="text-align: right;">0.635</td>
+</tr>
+<tr class="even">
+<td>よく動く点に置く</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">0.569</td>
+<td style="text-align: right;">1.079</td>
+<td style="text-align: right;">0.453</td>
+</tr>
+<tr class="odd">
+<td>Q-DEIM</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">0.105</td>
+</tr>
+<tr class="even">
+<td>D 最適</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">0.095</td>
+</tr>
+<tr class="odd">
+<td>A 最適</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.089</td>
+<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.078</td>
+</tr>
+<tr class="even">
+<td><strong>目的指向</strong></td>
+<td style="text-align: right;"><strong>0.26</strong></td>
+<td style="text-align: right;"><strong>0.076</strong></td>
+<td style="text-align: right;"><strong>0.083</strong></td>
+<td style="text-align: right;"><strong>0.072</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>よく動く点に置く</strong>は、2 本が 5 mm
+しか離れず、同じ情報を 2 回測っていました。6-2
+の「よく動くが反りに効かない点」と同じ理由で、効きません。</li>
+<li>目的指向が 3 条件とも一番小さくなりました。ただし A 最適との差は
+8〜15 % です。</li>
+<li>予測した不確かさ（<span class="math inline">\(P\)</span>
+から計算、データ同化はしていない）の順番と、実際の誤差の順番は、おおむねそろっています。</li>
+</ul>
+<hr />
+<h2 id="基準の違いa-最適d-最適e-最適目的指向">9. 基準の違い：A 最適・D
+最適・E 最適・目的指向</h2>
+<p>「<span class="math inline">\(P\)</span>
+を小さくする」と言っても、何を小さくするかで選ぶ場所が変わります。1
+本足したときの得は、6-1 の式から次のように書けます。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>基準</th>
+<th>小さくするもの</th>
+<th>1 本足したときの得（大きいほどよい）</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A 最適</td>
+<td><span
+class="math inline">\(\operatorname{tr}P\)</span>（対角の和）</td>
+<td><span class="math inline">\(\dfrac{\mathbf h_c^{\mathsf T}P^2\mathbf
+h_c}{\mathbf h_c^{\mathsf T}P\mathbf h_c + r}\)</span></td>
+<td>すべての未知数を平均的によく知る</td>
+</tr>
+<tr class="even">
+<td>D 最適</td>
+<td><span class="math inline">\(\det P\)</span>（楕円の面積）</td>
+<td><span class="math inline">\(\ln\!\Big(1 + \dfrac{\mathbf
+h_c^{\mathsf T}P\mathbf h_c}{r}\Big)\)</span></td>
+<td>楕円の面積（体積）を小さくする</td>
+</tr>
+<tr class="odd">
+<td>E 最適</td>
+<td><span class="math inline">\(F\)</span> の最小固有値を大きく</td>
+<td>閉じた式にならない（候補ごとに固有値を計算）</td>
+<td>一番分からない向きをなくす</td>
+</tr>
+<tr class="even">
+<td><strong>目的指向</strong></td>
+<td><span class="math inline">\(\mathbf w^{\mathsf T}P\mathbf
+w\)</span></td>
+<td><span class="math inline">\(\dfrac{(\mathbf w^{\mathsf T}P\mathbf
+h_c)^2}{\mathbf h_c^{\mathsf T}P\mathbf h_c + r}\)</span></td>
+<td><strong>知りたい量（反り）だけ</strong>をよく知る</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>どれも分母に <span class="math inline">\(\mathbf h_c^{\mathsf
+T}P\mathbf h_c + r\)</span>
+があり、「すでに分かっている向きを測っても得が小さい」ことは共通です。</li>
+<li>D 最適の得は、足すほど小さくなる性質（劣モジュラ性）を持つので、1
+本ずつ選んでも、全部の組み合わせの最適の 63 % 以上の得が保証されます。A
+最適と目的指向には、一般にこの保証はありません。</li>
+<li>本研究の比較（§8-2）の A 最適・D
+最適・目的指向は、この手順で選んだものです。<strong>E
+最適で選ぶ計算はしていません（未実施）</strong>。E
+最適は、発熱量と放熱のように見分けにくい 2
+つの未知数を見分けたいときに向いています（<a
+href="blog005.html">blog_005 §3</a>）。</li>
+</ul>
+<hr />
+<h2 id="気をつけること">10. 気をつけること</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>注意</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>知りたい量で答えが変わる</td>
+<td>反りに最適な点と、温度場全体・発熱量に最適な点は違う。本研究で確かめたのは<strong>反り</strong>に対する配置だけ</td>
+</tr>
+<tr class="even">
+<td>線形・正規分布の近似</td>
+<td><span class="math inline">\(P = (B^{-1}+F)^{-1}\)</span>
+は、モデルが一次式でノイズが正規分布のときの式。実際の EnKF
+は、発熱・放熱も推定するので少し非線形で、メンバーの数も有限。選んだ後に必ずデータ同化で確かめる（§8-2
+で確かめた）</td>
+</tr>
+<tr class="odd">
+<td>1 本ずつ選ぶ方法</td>
+<td>全部の組み合わせの中での最適は保証しない</td>
+</tr>
+<tr class="even">
+<td>測る前の不確かさ <span class="math inline">\(B\)</span>
+の決め方</td>
+<td><span class="math inline">\(B\)</span>
+を変えると選ぶ場所も変わりうる。本研究は、初期温度・発熱・放熱をばらつかせた
+4,000 本の ROM から決めた</td>
+</tr>
+<tr class="odd">
+<td>この記事の 2 次元の例</td>
+<td>説明のため、未知数を型 1・2 に絞った。本番の 5
+次元とは数字が違う（§8）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="まとめ">11. まとめ</h2>
+<ul>
+<li><strong>Fisher 情報</strong> <span class="math inline">\(F = \mathbf
+h\mathbf h^{\mathsf T}/r\)</span>
+は、「未知数のずれが、ノイズに比べてどれだけセンサに出るか」。センサを足すと足し算になる。</li>
+<li>測る前の不確かさ <span class="math inline">\(B\)</span>
+と合わせると、<strong>測った後の不確かさ</strong> <span
+class="math inline">\(P = (B^{-1}+F)^{-1}\)</span>
+が、センサを置く前に計算できる。</li>
+<li>知りたいのが反り <span class="math inline">\(d = \mathbf w^{\mathsf
+T}\boldsymbol\theta\)</span> なら、<span class="math inline">\(\mathbf
+w^{\mathsf T}P\mathbf w\)</span> を一番減らすセンサを選ぶ（目的指向）。1
+本足したときの減り <span class="math inline">\(\Delta_c\)</span>
+は、ベクトルの掛け算だけで出る。</li>
+<li>感度が大きくても、<strong>温度計がすでに測った向きを測るセンサは効かない</strong>（6-2
+の例：反りの不確かさ 0.90 → 0.90
+µm）。反りが分からない向きを測るセンサが効く（0.90 → 0.26 µm）。</li>
+<li>本番（未知数 5、変位計 2 本）では、目的指向が既存の選び方（A 最適・D
+最適・Q-DEIM）より少しよかった（反りの誤差 0.076 µm、A 最適 0.089
+µm）。</li>
+</ul>
+<hr />
+<h2 id="使ったプログラム">使ったプログラム</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/make_blog012_fisher_figs.py</code></td>
+<td>この記事の図 1〜3
+と数字（<code>results/blog012_fisher.json</code>）。型 1・2
+に絞った例</td>
+</tr>
+<tr class="even">
+<td><code>run/placement_method_comparison.py</code></td>
+<td>本番の比較（未知数 5、2 本、6 つの選び方、EnKF での確認）</td>
+</tr>
+<tr class="odd">
+<td><code>run/select_nonrep_temp_disp.py</code></td>
+<td>本番の目的指向の採点（<code>add_row</code>・<code>score</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>1
+本足したときの更新と採点（<code>run/make_blog012_fisher_figs.py</code>
+から）：</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(Bm, hs, rs):                                  <span class="co"># 測った後の不確かさ P = (B⁻¹ + F)⁻¹</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    F <span class="op">=</span> <span class="bu">sum</span>(np.outer(h, h) <span class="op">/</span> r <span class="cf">for</span> h, r <span class="kw">in</span> <span class="bu">zip</span>(hs, rs))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.linalg.inv(np.linalg.inv(Bm) <span class="op">+</span> F), F</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>PT, FT <span class="op">=</span> post(B, hT, [SIG_T<span class="op">**</span><span class="dv">2</span>] <span class="op">*</span> <span class="dv">2</span>)                   <span class="co"># 温度計 P2・P0 で測った後</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>q    <span class="op">=</span> np.einsum(<span class="st">&quot;ij,jk,ik-&gt;i&quot;</span>, H, PT, H)              <span class="co"># 候補ごとの hᵀ P h</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>goal <span class="op">=</span> (H <span class="op">@</span> PT <span class="op">@</span> w)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (q <span class="op">+</span> r)                       <span class="co"># 目的指向の得 Δ_c（反りの分散の減り）</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Aopt <span class="op">=</span> np.einsum(<span class="st">&quot;ij,jk,ik-&gt;i&quot;</span>, H, PT <span class="op">@</span> PT, H) <span class="op">/</span> (q <span class="op">+</span> r)   <span class="co"># A 最適の得</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Dopt <span class="op">=</span> np.log(<span class="dv">1</span> <span class="op">+</span> q <span class="op">/</span> r)                               <span class="co"># D 最適の得</span></span></code></pre></div>
+</body>
+</html>
