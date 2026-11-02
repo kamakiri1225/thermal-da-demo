@@ -1,0 +1,3794 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>presen_001：はじめに ―
+この研究の立ち位置（何が問題で、何が課題で、何に取り組んだか）</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+     html body { max-width: 1120px !important; }
+     body { padding: 0 24px; }
+     img { max-width: 100%; height: auto; }
+     table { font-size: 0.95em; }
+     pre.mermaid { background: none; text-align: center; }
+    </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#presen_001はじめに-この研究の立ち位置何が問題で何が課題で何に取り組んだか"
+id="toc-presen_001はじめに-この研究の立ち位置何が問題で何が課題で何に取り組んだか">presen_001：はじめに
+― この研究の立ち位置（何が問題で、何が課題で、何に取り組んだか）</a>
+<ul>
+<li><a href="#表で見る立ち位置" id="toc-表で見る立ち位置">1.
+表で見る立ち位置</a></li>
+<li><a href="#ページ目はじめに問題と課題"
+id="toc-ページ目はじめに問題と課題">2. 1
+ページ目「はじめに」：問題と課題</a>
+<ul>
+<li><a href="#問題熱変位は加工誤差の大きな原因"
+id="toc-問題熱変位は加工誤差の大きな原因">2-1.
+問題：熱変位は加工誤差の大きな原因</a></li>
+<li><a href="#課題なぜ熱変形の予測は難しいのか"
+id="toc-課題なぜ熱変形の予測は難しいのか">2-2.
+課題：なぜ熱変形の予測は難しいのか</a></li>
+</ul></li>
+<li><a href="#ページ目目的既存の取り組みとこの研究の目的"
+id="toc-ページ目目的既存の取り組みとこの研究の目的">3. 2
+ページ目「目的」：既存の取り組みと、この研究の目的</a>
+<ul>
+<li><a href="#既存の取り組みと空いている所"
+id="toc-既存の取り組みと空いている所">3-1.
+既存の取り組みと、空いている所</a></li>
+<li><a href="#目的" id="toc-目的">3-2. 目的</a></li>
+<li><a href="#この研究でしたこと" id="toc-この研究でしたこと">3-3.
+この研究でしたこと</a></li>
+<li><a href="#範囲言えること言えないこと"
+id="toc-範囲言えること言えないこと">3-4.
+範囲（言えること・言えないこと）</a></li>
+</ul></li>
+<li><a href="#ページ目全体の流れ" id="toc-ページ目全体の流れ">4. 3
+ページ目「全体の流れ」</a></li>
+<li><a href="#ページ目データ同化とは" id="toc-ページ目データ同化とは">5.
+4 ページ目「データ同化とは」</a>
+<ul>
+<li><a href="#データ同化とは" id="toc-データ同化とは">5-1.
+データ同化とは</a></li>
+<li><a href="#つの型逐次型と変分型" id="toc-つの型逐次型と変分型">5-2. 2
+つの型：逐次型と変分型</a></li>
+<li><a href="#一般的に使われるデータ同化の方法"
+id="toc-一般的に使われるデータ同化の方法">5-3.
+一般的に使われるデータ同化の方法</a></li>
+<li><a href="#本研究は逐次型enkfを使う"
+id="toc-本研究は逐次型enkfを使う">5-4.
+本研究は逐次型（EnKF）を使う</a></li>
+<li><a href="#使ったプログラム" id="toc-使ったプログラム">5-5.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分"
+id="toc-ページ目で言うこと約-1-分">5-6. 4 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
+<li><a href="#ページ目データ同化による課題"
+id="toc-ページ目データ同化による課題">6. 5
+ページ目「データ同化による課題」</a>
+<ul>
+<li><a href="#正解を作る双子実験" id="toc-正解を作る双子実験">6-1.
+正解を作る：双子実験</a></li>
+<li><a href="#oi-では発熱量が当たらない"
+id="toc-oi-では発熱量が当たらない">6-2. OI
+では発熱量が当たらない</a></li>
+<li><a href="#enkf-は当たるが計算に時間がかかる"
+id="toc-enkf-は当たるが計算に時間がかかる">6-3. EnKF
+は当たるが、計算に時間がかかる</a></li>
+<li><a href="#どこを測ればよいかが分からない"
+id="toc-どこを測ればよいかが分からない">6-4.
+どこを測ればよいかが分からない</a></li>
+<li><a href="#使ったプログラム-1" id="toc-使ったプログラム-1">6-5.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-1"
+id="toc-ページ目で言うこと約-1-分-1">6-6. 5 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
+<li><a href="#ページ目低次元モデル化rom"
+id="toc-ページ目低次元モデル化rom">7. 6
+ページ目「低次元モデル化（ROM）」</a>
+<ul>
+<li><a href="#材料openfoam-の温度の写真121-枚"
+id="toc-材料openfoam-の温度の写真121-枚">7-1. 材料：OpenFOAM
+の温度の「写真」121 枚</a></li>
+<li><a href="#特異値分解pod温度分布の型を取り出す"
+id="toc-特異値分解pod温度分布の型を取り出す">7-2.
+特異値分解（POD）：温度分布の「型」を取り出す</a></li>
+<li><a href="#q-deim型を見分けるのに一番よい-5-点を選ぶ"
+id="toc-q-deim型を見分けるのに一番よい-5-点を選ぶ">7-3.
+Q-DEIM：型を見分けるのに一番よい 5 点を選ぶ</a></li>
+<li><a href="#rom代表-5-点の熱回路を作りopenfoam-に合わせる"
+id="toc-rom代表-5-点の熱回路を作りopenfoam-に合わせる">7-4. ROM：代表 5
+点の熱回路を作り、OpenFOAM に合わせる</a></li>
+<li><a href="#一般的な-rom-の作り方との違い"
+id="toc-一般的な-rom-の作り方との違い">7-5. 一般的な ROM
+の作り方との違い</a></li>
+<li><a href="#使ったプログラム-2" id="toc-使ったプログラム-2">7-6.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-30-秒"
+id="toc-ページ目で言うこと約-1-分-30-秒">7-7. 6 ページ目で言うこと（約 1
+分 30 秒）</a></li>
+</ul></li>
+<li><a href="#ページ目rom-の適用範囲" id="toc-ページ目rom-の適用範囲">8.
+7 ページ目「ROM の適用範囲」</a>
+<ul>
+<li><a href="#比べた-3-つの条件" id="toc-比べた-3-つの条件">8-1. 比べた
+3 つの条件</a></li>
+<li><a href="#結果発熱量や加熱のしかたが変わっても使える"
+id="toc-結果発熱量や加熱のしかたが変わっても使える">8-2.
+結果：発熱量や加熱のしかたが変わっても使える</a></li>
+<li><a href="#使えるかどうかの決め手温度分布の型が変わるかどうか"
+id="toc-使えるかどうかの決め手温度分布の型が変わるかどうか">8-3.
+使えるかどうかの決め手：温度分布の「型」が変わるかどうか</a></li>
+<li><a href="#作り直しが必要なもの" id="toc-作り直しが必要なもの">8-4.
+作り直しが必要なもの</a></li>
+<li><a href="#使ったプログラム-3" id="toc-使ったプログラム-3">8-5.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-2"
+id="toc-ページ目で言うこと約-1-分-2">8-6. 7 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
+<li><a href="#ページ目データ同化の流れ"
+id="toc-ページ目データ同化の流れ">9. 8 ページ目「データ同化の流れ」</a>
+<ul>
+<li><a href="#推定するもの状態7-つの数"
+id="toc-推定するもの状態7-つの数">9-1. 推定するもの（状態）：7
+つの数</a></li>
+<li><a href="#サイクルの-4-ステップ" id="toc-サイクルの-4-ステップ">9-2.
+1 サイクルの 4 ステップ</a></li>
+<li><a href="#センサの値の予想観測演算子どれも5-点の温度の一次式"
+id="toc-センサの値の予想観測演算子どれも5-点の温度の一次式">9-3.
+センサの値の予想（観測演算子）：どれも「5 点の温度の一次式」</a></li>
+<li><a href="#補正の式" id="toc-補正の式">9-4. 補正の式</a></li>
+<li><a href="#使ったプログラム-4" id="toc-使ったプログラム-4">9-5.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-30-秒-1"
+id="toc-ページ目で言うこと約-1-分-30-秒-1">9-6. 8 ページ目で言うこと（約
+1 分 30 秒）</a></li>
+</ul></li>
+<li><a href="#ページ目データ同化で試したこと"
+id="toc-ページ目データ同化で試したこと">10. 9
+ページ目「データ同化で試したこと」</a>
+<ul>
+<li><a href="#種類の点代表点観測点未観測点"
+id="toc-種類の点代表点観測点未観測点">10-1. 3
+種類の点：代表点・観測点・未観測点</a></li>
+<li><a href="#計算ケース" id="toc-計算ケース">10-2. 計算ケース</a></li>
+<li><a href="#計算結果" id="toc-計算結果">10-3. 計算結果</a></li>
+<li><a href="#分かったこと" id="toc-分かったこと">10-4.
+分かったこと</a></li>
+<li><a href="#使ったプログラム-5" id="toc-使ったプログラム-5">10-5.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-2-分"
+id="toc-ページ目で言うこと約-2-分">10-6. 9 ページ目で言うこと（約 2
+分）</a></li>
+</ul></li>
+<li><a href="#ページ目未観測点の温度データ同化で測っていない場所も合う"
+id="toc-ページ目未観測点の温度データ同化で測っていない場所も合う">11. 10
+ページ目「未観測点の温度：データ同化で、測っていない場所も合う」</a>
+<ul>
+<li><a href="#やり方データ同化-gappy-pod-で全体の温度を戻す"
+id="toc-やり方データ同化-gappy-pod-で全体の温度を戻す">11-1.
+やり方：データ同化 → gappy-POD で全体の温度を戻す</a></li>
+<li><a href="#結果" id="toc-結果">11-2. 結果</a></li>
+<li><a href="#使ったプログラム-6" id="toc-使ったプログラム-6">11-3.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-3"
+id="toc-ページ目で言うこと約-1-分-3">11-4. 10 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
+<li><a href="#ページ目センサの置き場所fisher-情報行列"
+id="toc-ページ目センサの置き場所fisher-情報行列">12. 11
+ページ目「センサの置き場所：Fisher 情報行列」</a>
+<ul>
+<li><a href="#fisher-情報行列その観測で知りたいものがどれだけ分かるか"
+id="toc-fisher-情報行列その観測で知りたいものがどれだけ分かるか">12-1.
+Fisher 情報行列：その観測で、知りたいものがどれだけ分かるか</a></li>
+<li><a href="#測る前の不確かさと合わせる測った後に残る不確かさ"
+id="toc-測る前の不確かさと合わせる測った後に残る不確かさ">12-2.
+測る前の不確かさと合わせる：測った後に残る不確かさ</a></li>
+<li><a href="#本研究で使った基準反りに対する目的指向"
+id="toc-本研究で使った基準反りに対する目的指向">12-3.
+本研究で使った基準：反りに対する目的指向</a></li>
+<li><a href="#結果既存の選び方と比べる"
+id="toc-結果既存の選び方と比べる">12-4.
+結果：既存の選び方と比べる</a></li>
+<li><a
+href="#fisher-情報行列で最適な温度センサと変位センサの位置が分かるか"
+id="toc-fisher-情報行列で最適な温度センサと変位センサの位置が分かるか">12-5.
+Fisher 情報行列で、最適な温度センサと変位センサの位置が分かるか</a></li>
+<li><a href="#使ったプログラム-7" id="toc-使ったプログラム-7">12-6.
+使ったプログラム</a></li>
+<li><a href="#ページ目で言うこと約-1-分-30-秒-2"
+id="toc-ページ目で言うこと約-1-分-30-秒-2">12-7. 11
+ページ目で言うこと（約 1 分 30 秒）</a></li>
+</ul></li>
+<li><a href="#ページ目今後の研究どこで優位性を出せるか"
+id="toc-ページ目今後の研究どこで優位性を出せるか">13. 12
+ページ目「今後の研究：どこで優位性を出せるか」</a>
+<ul>
+<li><a href="#今回の研究で言えること今の優位性"
+id="toc-今回の研究で言えること今の優位性">13-1.
+今回の研究で言えること（今の優位性）</a></li>
+<li><a href="#このままでは優位性が狭まる理由"
+id="toc-このままでは優位性が狭まる理由">13-2.
+このままでは優位性が狭まる理由</a></li>
+<li><a href="#これから優位性を出せる所"
+id="toc-これから優位性を出せる所">13-3.
+これから優位性を出せる所</a></li>
+<li><a href="#気をつけること" id="toc-気をつけること">13-4.
+気をつけること</a></li>
+<li><a href="#ページ目で言うこと約-1-分-4"
+id="toc-ページ目で言うこと約-1-分-4">13-5. 12 ページ目で言うこと（約 1
+分）</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="presen_001はじめに-この研究の立ち位置何が問題で何が課題で何に取り組んだか">presen_001：はじめに
+― この研究の立ち位置（何が問題で、何が課題で、何に取り組んだか）</h1>
+<p>更新日：2026-10-28</p>
+<p>オープンCAE学会（B-16、2026-11-12）の発表の「はじめに」と「目的」のスライドに載せる情報を、1
+か所に整理した記事です。 最初の表（§1）で全体を見渡せるようにし、§2
+以降でその根拠を順に説明します。 発表のページとの対応は、§2 が 1
+ページ目「はじめに」、§3 が 2 ページ目「目的」、§4 が 3
+ページ目「全体の流れ」、§5 が 4 ページ目「データ同化とは」、§6 が 5
+ページ目「データ同化による課題」、§7 が 6
+ページ目「低次元モデル化（ROM）」、§8 が 7 ページ目「ROM
+の適用範囲」、§9 が 8 ページ目「データ同化の流れ」、§10 が 9
+ページ目「データ同化で試したこと」、§11 が 10
+ページ目「未観測点の温度」、§12 が 11 ページ目「センサの置き場所：Fisher
+情報行列」です。</p>
+<blockquote>
+<p><strong>この記事の対象</strong>：本研究は、工作機械を想定した<strong>中空円筒の数値実験</strong>です。真値はすべて計算（OpenFOAM＋FrontISTR、または
+ROM）で、実機では確かめていません。</p>
+</blockquote>
+<hr />
+<h2 id="表で見る立ち位置">1. 表で見る立ち位置</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>問題</strong>（何に困っているか）</td>
+<td>工作機械の加工誤差の大きな部分は、熱による変形（熱変位）である。補正するには、熱変形を正しく予測する必要がある</td>
+</tr>
+<tr class="even">
+<td><strong>課題</strong>（なぜ難しいか）</td>
+<td>①
+解析モデルの条件（発熱量、熱伝達率、初期温度）が分からず、解析だけでは合わない<br>②
+温度の傾向が合っても、変形が合うとは限らない<br>③
+本当に知りたい工具先端の変位は、加工中に測れない<br>④
+詳しい解析を測定のたびに何十回も回すのは重い</td>
+</tr>
+<tr class="odd">
+<td><strong>既存の取り組み</strong></td>
+<td>温度を測って回帰で変位を予測する／FEM で計算する／ROM
+とカルマンフィルタで温度場を推定する／変位を直接測って補正する。どれも<strong>変位を「出力」か「補正の対象」として扱い</strong>、推定の入力（観測）には使っていない</td>
+</tr>
+<tr class="even">
+<td><strong>本研究のアプローチ</strong></td>
+<td>少ない温度・変位の測定を、解析モデルと<strong>データ同化</strong>で組み合わせ、温度場・発熱量・熱変形を逐次推定する。<strong>変位も観測に入れる</strong>。軽いモデル（ROM）で回し、センサの置き場所は推定したい量に合わせて<strong>測る前に計算で選ぶ</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>やったこと</strong></td>
+<td>中空円筒の片側加熱を題材に、OpenFOAM → FrontISTR
+で正解を作り、POD・Q-DEIM の ROM と EnKF
+で、測っていない場所の熱変形を推定した。すべてオープンソース</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ページ目はじめに問題と課題">2. 1
+ページ目「はじめに」：問題と課題</h2>
+<p>ここ（2-1 の問題と 2-2 の課題）までを、発表の 1
+ページ目に載せます。</p>
+<h3 id="問題熱変位は加工誤差の大きな原因">2-1.
+問題：熱変位は加工誤差の大きな原因</h3>
+<h4 id="どのくらい大きいか">(1) どのくらい大きいか</h4>
+<ul>
+<li>熱による誤差は、加工した部品の誤差全体の<strong>最大 75 %</strong>
+を占めることがある、と報告されています。
+<ul>
+<li>Li, Z. et al. (2024) “Machine Tool Thermal Error Measurement and
+Prediction via Wireless Microscope”, <em>Manufacturing Letters</em>
+41（全文無料：<a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076"
+class="uri">https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076</a>）の
+“Thermal errors can contribute <strong>up to 75 percent</strong> of the
+overall machining errors”。</li>
+<li>元は Mayr, J. et al. (2012) “Thermal issues in machine tools”,
+<em>CIRP Annals</em> 61(2)（有料）。Bünger, A. et al. (2023,
+arXiv:2306.12736) も同じ数字を Mayr から引いています。</li>
+</ul></li>
+<li>これは上限の値で、どの機械でも 75 % という意味ではありません。</li>
+<li>スライドの「約 40〜70 %」は、よく引用される数字です（<a
+href="https://doi.org/10.1016/S0007-8506(07)63001-7">Bryan (1990)</a> や
+<a href="https://doi.org/10.1016/S0890-6955(00)00010-9">Ramesh ほか
+(2000)</a> が出典としてよく挙がる）。ただし<strong>この 2
+本の原文は確認していません</strong>。そのまま使うなら原文を確かめるか、原文を確認済みの「最大
+75 %［<a href="https://doi.org/10.1016/j.cirp.2012.05.008">Mayr
+2012</a>］」に置きかえることを勧めます。</li>
+</ul>
+<figure>
+<img src="img/intro_machine_deform.gif"
+alt="立形マシニングセンタの熱変形" />
+<figcaption aria-hidden="true">立形マシニングセンタの熱変形</figcaption>
+</figure>
+<p><em>図 0　立形マシニングセンタの熱変形（107 の S1：4 時間運転 → 4
+時間停止。温度は OpenFOAM、熱変形は FrontISTR で計算した結果。変形を
+2000 倍）。黒い箱が発熱源（主軸モータ 250 W、主軸の軸受 150 W、Z
+軸の送り 40 W、Y 軸の送り 40
+W）。左：運転すると主軸頭とコラムが温まって変形し、工具の位置がずれる。右：工具とワークのずれ。運転中に上下（Z）で約
+65 µm
+ずれ、止めると時間をかけて戻る。実機ではなく、工作機械を想定した形での計算。計算ケース：<code>sample/107_machining_center_rom/01_openfoam_thermal/cases/S1_run4h_stop4h</code>（OpenFOAM）、<code>sample/107_machining_center_rom/02_frontistr_thermal_deform/work/S1_run4h_stop4h</code>（FrontISTR）。作図：<code>presentation/make_intro_machine_gif.py</code>。</em></p>
+<h4 id="対策は回避と補正">(2) 対策は「回避」と「補正」</h4>
+<p><a
+href="https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=957076">Li
+ら (2024)</a> は、熱誤差の対策を 2 つに分けています。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>対策</th>
+<th>中身</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>回避</strong></td>
+<td>温度変化や変形を起こしにくくする</td>
+<td>低膨張材、構造の工夫、冷却</td>
+</tr>
+<tr class="even">
+<td><strong>補正</strong></td>
+<td>熱変形を予測して、位置指令を直す</td>
+<td>温度からの回帰、FEM、学習モデル</td>
+</tr>
+</tbody>
+</table>
+<p>Li
+らは、回避は補正より費用がかかることが多い、と述べています。補正では、<strong>熱変形を正しく予測できること</strong>が前提になります。</p>
+<p>メーカー各社も補正の機能を出しています（オークマのサーモフレンドリーコンセプト、マザックの
+AI Thermal Shield、DMG MORI の Spindle Growth Sensor など。詳しくは <a
+href="blog001.html">blog_001
+§0-3</a>）。</p>
+<h3 id="課題なぜ熱変形の予測は難しいのか">2-2.
+課題：なぜ熱変形の予測は難しいのか</h3>
+<h4 id="解析モデルの条件が分からない">(1)
+解析モデルの条件が分からない</h4>
+<p>熱解析には、発熱量、表面の熱伝達率、初期の温度分布などの条件が必要です。これらは運転のしかたや組み立てで変わり、事前に正しく決めるのは困難です。</p>
+<ul>
+<li><a href="https://arxiv.org/abs/2306.12736">Bünger ら (2023)</a>
+は、TCP（工具先端）の予測精度は「熱交換のパラメータや初期温度などのモデルパラメータの精度に大きく依存する」と書いています（<a
+href="https://arxiv.org/abs/2306.12736"
+class="uri">https://arxiv.org/abs/2306.12736</a>）。</li>
+<li>熱伝達率は、熱流束・壁の温度・基準の温度から求める量で、それを直接読む計測器はありません（<a
+href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12473924/">2025
+年の論文</a>。本文は検索結果からの要約で、原文の確認が必要）。</li>
+</ul>
+<h4 id="温度の傾向が合っても変形は合うとは限らない">(2)
+温度の傾向が合っても、変形は合うとは限らない</h4>
+<p>熱変形は、温度の上がり方の<strong>空間分布</strong>と、構造の拘束で決まります。数点の温度や平均温度が合っても、変形が合う保証はありません。</p>
+<p>本研究の題材（中空円筒の片側加熱）でも、温度計 2
+点だけでデータ同化をすると、測っていない上面の 2 点 A・O
+の変位の差（反り）は 0.77 µm ずれました（真値は
+OpenFOAM＋FrontISTR、2026-10-12 の IDW
+版、<code>results/holdout_AO_realsolver.json</code>）。</p>
+<figure>
+<img src="img/intro_temp_history.png" alt="測温点の温度" />
+<figcaption aria-hidden="true">測温点の温度</figcaption>
+</figure>
+<p><em>図 1　中空円筒の片側を 0〜300
+秒加熱したときの、熱源側と反対側の温度（OpenFOAM）。加熱の終わりに 2.9 K
+の差がつく。</em></p>
+<figure>
+<img src="img/intro_deform_anim.gif" alt="熱変形" />
+<figcaption aria-hidden="true">熱変形</figcaption>
+</figure>
+<p><em>図
+2　同じ計算の熱変形（FrontISTR、変形を拡大）。温度の差によって円筒が反る。</em></p>
+<h4 id="本当に知りたい場所は加工中に測れない">(3)
+本当に知りたい場所は、加工中に測れない</h4>
+<p>知りたいのは工具先端とワークの位置のずれです。しかし加工中の工具先端は、切粉やクーラント、工具交換があり、センサを置けません。タッチプローブなどで直接測る方法は、測るたびに加工を止める必要があります（<a
+href="blog001.html">blog_001
+§0-5</a>）。</p>
+<h4 id="詳しい解析は重い">(4) 詳しい解析は重い</h4>
+<p>測定のたびに解析モデルを直すには、データ同化が使えます。ただし、詳しい解析（OpenFOAM＋FrontISTR）をそのまま使うと重くなります。本研究の前段（104）では、実ソルバで
+EnKF を回すと、一連の計算に約 13 時間かかりました。</p>
+<hr />
+<h2 id="ページ目目的既存の取り組みとこの研究の目的">3. 2
+ページ目「目的」：既存の取り組みと、この研究の目的</h2>
+<p>ここ（3-1〜3-4）を、発表の 2 ページ目に載せます。</p>
+<h3 id="既存の取り組みと空いている所">3-1.
+既存の取り組みと、空いている所</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>流派</th>
+<th>やり方</th>
+<th>弱いところ</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① 回帰・機械学習</td>
+<td>温度を多点で測り、変位を回帰や学習で予測</td>
+<td>学習した運転条件の外で外れやすい</td>
+</tr>
+<tr class="even">
+<td>② FEM による補正</td>
+<td>詳しい FEM で、温度から変位を計算</td>
+<td>条件（熱伝達率、発熱量）が合わないと外れる</td>
+</tr>
+<tr class="odd">
+<td>③ 低次元化＋状態推定</td>
+<td>ROM とカルマンフィルタで温度場を推定（ETH 2024 など）</td>
+<td>観測は温度だけ。変位は出力</td>
+</tr>
+<tr class="even">
+<td>④ 直接測定による補正</td>
+<td>変位を測って直接補正</td>
+<td>加工中は測れない。状態の推定には戻さない</td>
+</tr>
+</tbody>
+</table>
+<p>③は変位を「出力」、④は変位を「補正の対象」として扱っています。<strong>変位を「観測」として状態推定に戻す取り組みは、調べた範囲では見当たりませんでした</strong>（英語
+5 回・日本語 1 回の検索で、網羅的な調査ではありません。<a
+href="blog008.html">blog_008
+§3・§8</a>）。</p>
+<p>センサの置き場所を ROM と感度で決める研究（<a
+href="https://doi.org/10.1016/j.cirpj.2024.10.015">Teshima ら 2024</a>
+など）や、熱モデルとベイズ推定で配置を評価する研究（<a
+href="https://arxiv.org/abs/2306.12736">Bünger ら
+2023</a>）はすでにあります。本研究は置き場所の考え方そのものではなく、<strong>変位も観測に入れたときに、推定したい量に合わせて置き場所を選び、実際のデータ同化で確かめる</strong>点に取り組みます。</p>
+<h3 id="目的">3-2. 目的</h3>
+<blockquote>
+<p><strong>少ない温度・変位の測定を解析モデルとデータ同化で組み合わせ、測れない場所の熱変形を推定する。そのために、どこで何を測ればよいかを、測る前に計算で決める。</strong></p>
+</blockquote>
+<h3 id="この研究でしたこと">3-3. この研究でしたこと</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>したこと</th>
+<th>結果（数値）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><strong>正解を作る</strong>：中空円筒の片側加熱を、OpenFOAM（流体と固体の熱連成）→
+FrontISTR（熱変形）で計算</td>
+<td>双子実験の「本物」とする</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><strong>実ソルバでデータ同化</strong>：OI と EnKF</td>
+<td>EnKF は温度 7.61 → 0.011 K、発熱量 14.93 W（真値 15 W）。ただし約 13
+時間。OI は軽いが発熱量が約 9 W 止まり</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>軽いモデルを作る</strong>：POD
+で温度分布の型を取り出し、Q-DEIM で代表 5 点を選んで ROM にする</td>
+<td>2 つの型で 99.9 %。0〜600 秒が 31 ms</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><strong>変位も観測に入れる</strong>：ROM と EnKF に、温度 2 点＋変位
+2 点を入れる</td>
+<td>一度も測らない A・O の反りの誤差 0.076 µm（A・O を直接測ると 0.137
+µm、温度 2 点だけだと 0.77 µm）</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><strong>置き場所を計算で選ぶ</strong>：反りの「測った後に残る不確かさ」が最小になる点を選ぶ</td>
+<td>既存の選び方と同じ条件で比べて最小（0.076 µm。A最適 0.089、D最適
+0.108 µm）</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><strong>条件を変えて確かめる</strong>：発熱量 25
+W、間欠加熱（作るのに使っていない条件）</td>
+<td>反りの誤差 0.07〜0.08 µm（上の 4 と同じ置き方）</td>
+</tr>
+</tbody>
+</table>
+<p>4〜6 の数値は、真値を OpenFOAM＋FrontISTR にし、2026-10-12 に IDW
+で計算し直した結果です（加熱期 30〜300 秒、5
+回の乱数の平均。<code>results/holdout_AO_realsolver.json</code>、<code>results/placement_method_comparison.json</code>）。</p>
+<h3 id="範囲言えること言えないこと">3-4.
+範囲（言えること・言えないこと）</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>言えること</th>
+<th>言えないこと</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>オープンソース（OpenFOAM＋FrontISTR＋Python）だけで、解析からデータ同化までつないだ</td>
+<td>実機で同じ精度が出ること（実機は未検証）</td>
+</tr>
+<tr class="even">
+<td>この題材と条件で、測っていない場所の反りを当てられた</td>
+<td>「初めて提案した」こと（調査は網羅的ではない）</td>
+</tr>
+<tr class="odd">
+<td>置き場所を事前の計算で選べた</td>
+<td>どの機械にもそのまま通用すること（熱源の位置が変わると ROM
+も配置も作り直し）</td>
+</tr>
+<tr class="even">
+<td>発熱量も推定できた</td>
+<td>放熱（熱伝達）の条件まで正しく同定できたこと（600
+秒では当たらない。<a href="blog003.html">blog_003
+§4-0-b</a>）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ページ目全体の流れ">4. 3 ページ目「全体の流れ」</h2>
+<figure>
+<img src="img/overall_flow.png" alt="全体の流れ" />
+<figcaption aria-hidden="true">全体の流れ</figcaption>
+</figure>
+<p><em>図 3　研究全体の流れ。①〜③で道具（正解データ、データ同化、軽い
+ROM）をそろえ、④・⑤が本研究の中心（変位も観測に入れる、置き場所を計算で選ぶ）。作図：<code>presentation/make_flow_figure.py</code>。</em></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>段階</th>
+<th>言うこと（各 10 秒ほど）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① 正解を作る</td>
+<td>OpenFOAM で温度、FrontISTR
+で熱変形を計算し、これを「本物」とする</td>
+</tr>
+<tr class="even">
+<td>② 実ソルバで同化</td>
+<td>データ同化で発熱量まで当たるが、実ソルバでは約 13 時間かかる</td>
+</tr>
+<tr class="odd">
+<td>③ 軽いモデル</td>
+<td>POD と Q-DEIM で代表 5 点の ROM にし、600 秒を 31 ms で計算する</td>
+</tr>
+<tr class="even">
+<td>④ 変位も観測に</td>
+<td>温度だけでなく変位も測ってデータ同化し、測っていない場所の反りを当てる</td>
+</tr>
+<tr class="odd">
+<td>⑤ 置き場所を選ぶ</td>
+<td>どこを測ればよいかを、知りたい量（反り）に合わせて測る前に計算で選ぶ</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="ページ目データ同化とは">5. 4 ページ目「データ同化とは」</h2>
+<p>ここ（5-1〜5-4）を、発表の 4 ページ目に載せます。5-5
+は使ったプログラム、5-6 は話す内容です。</p>
+<h3 id="データ同化とは">5-1. データ同化とは</h3>
+<p><strong>データ同化</strong>は、数値モデルの計算（予報）と、測った値（観測）を、それぞれの不確かさに応じて混ぜ合わせ、今の状態と未知のパラメータを推定する方法です。天気予報で発達した方法です。</p>
+<ul>
+<li>モデルだけでは、初期の状態や条件（発熱量、熱伝達率など）が分からず、ずれていく。</li>
+<li>観測だけでは、測った点の値しか分からない。</li>
+<li>2
+つを合わせると、<strong>測っていない場所の状態</strong>や、<strong>直接は測れない条件</strong>まで推定できる。</li>
+</ul>
+<figure>
+<img src="img/da_image.png" alt="データ同化のイメージ" />
+<figcaption aria-hidden="true">データ同化のイメージ</figcaption>
+</figure>
+<p><em>図
+4a　データ同化のイメージ（模式図。計算結果ではない）。左：CAE（解析だけ、青）は発熱や放熱の条件が分からず、波の大きさも時刻もずれ、ばらつき（帯）も広がる。実験（赤）はときどき測った値で、誤差がある。両方を混ぜたデータ同化（緑）は本当の温度（灰）に近づき、ばらつきも狭い。右：時刻
+440 s
+での確からしさの分布。データ同化の平均は、ばらつきの小さい実験の側に寄り、幅は
+CAE・実験のどちらより狭い。作図：<code>presentation/make_da_image_figure.py</code>。</em></p>
+<p>正規分布どうしを混ぜると、データ同化の平均 <span
+class="math inline">\(\mu_a\)</span> とばらつき <span
+class="math inline">\(\sigma_a\)</span> は次のようになります（<span
+class="math inline">\(f\)</span><code>：CAE、</code><span
+class="math inline">\(o\)</span>：実験）。</p>
+<p><span class="math display">\[
+\mu_a = \frac{\sigma_o^2\,\mu_f + \sigma_f^2\,\mu_o}{\sigma_f^2 +
+\sigma_o^2},\qquad
+\frac{1}{\sigma_a^2} = \frac{1}{\sigma_f^2} + \frac{1}{\sigma_o^2}
+\]</span></p>
+<p>ばらつきの小さいほうを強く信じ、情報（<span
+class="math inline">\(1/\sigma^2\)</span>）は足し算になります。</p>
+<h3 id="つの型逐次型と変分型">5-2. 2 つの型：逐次型と変分型</h3>
+<figure>
+<img src="img/da_sequential_vs_variational.png" alt="逐次型と変分型" />
+<figcaption aria-hidden="true">逐次型と変分型</figcaption>
+</figure>
+<p><em>図 4　データ同化の 2
+つの型（模式図。計算結果ではない）。左の逐次型は、予報し、観測が来るたびに修正して、次を予報する。右の変分型は、ある期間（窓）の観測すべてに合うように、期間の初めの状態などを変えて軌道全体を合わせる。作図：<code>presentation/make_da_types_figure.py</code>。</em></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>逐次型（フィルタ）</th>
+<th>変分型</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>考え方</td>
+<td>観測が来るたびに、その時刻の状態を修正する</td>
+<td>ある期間の観測すべてに合うように、初めの状態などを最適化する</td>
+</tr>
+<tr class="even">
+<td>代表的な方法</td>
+<td>カルマンフィルタ、<strong>最適内挿（OI）</strong>、<strong>アンサンブルカルマンフィルタ（EnKF）</strong>、粒子フィルタ</td>
+<td>3 次元変分法（3D-Var）、4 次元変分法（4D-Var）</td>
+</tr>
+<tr class="odd">
+<td>計算の中身</td>
+<td>予報と観測の差に、重み（カルマンゲイン）を掛けて足す</td>
+<td>「予報からのずれ」と「観測とのずれ」の和を最小にする</td>
+</tr>
+<tr class="even">
+<td>必要なもの</td>
+<td>予報の不確かさ（共分散）。EnKF
+は複数の予報（アンサンブル）から作る</td>
+<td>4D-Var では、モデルを逆向きにたどる式（アジョイント）が必要</td>
+</tr>
+<tr class="odd">
+<td>向いている使い方</td>
+<td>測りながら、その場で推定し続ける</td>
+<td>過去の期間をまとめて、よく合う状態・条件を求める</td>
+</tr>
+</tbody>
+</table>
+<p><strong>逐次型の 1 回の修正</strong>（EnKF・OI）：</p>
+<p><span class="math display">\[
+\mathbf x_a = \mathbf x_f + K\,(\mathbf y - H\mathbf x_f),\qquad
+K = P_f H^{\mathsf T}\left(H P_f H^{\mathsf T} + R\right)^{-1}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathbf
+x_f\)</span><code>：予報した状態、</code><span
+class="math inline">\(\mathbf
+x_a\)</span><code>：修正した状態、</code><span
+class="math inline">\(\mathbf y\)</span><code>：観測、</code><span
+class="math inline">\(H\mathbf
+x_f\)</span>：予報から求めた観測の予想</li>
+<li><span
+class="math inline">\(P_f\)</span><code>：予報の不確かさ（共分散）、</code><span
+class="math inline">\(R\)</span><code>：観測の誤差の大きさ、</code><span
+class="math inline">\(K\)</span>：重み（カルマンゲイン）</li>
+<li>予報が不確かなほど（<span class="math inline">\(P_f\)</span>
+が大きいほど）、観測を強く信じて大きく直す。</li>
+</ul>
+<p><strong>変分型（3D-Var）で最小にする量</strong>：</p>
+<p><span class="math display">\[
+J(\mathbf x) = (\mathbf x - \mathbf x_b)^{\mathsf T} B^{-1} (\mathbf x -
+\mathbf x_b) + (\mathbf y - H\mathbf x)^{\mathsf T} R^{-1} (\mathbf y -
+H\mathbf x)
+\]</span></p>
+<ul>
+<li>第 1 項が「予報（背景 <span class="math inline">\(\mathbf
+x_b\)</span>）からのずれ」、第 2 項が「観測とのずれ」です。</li>
+<li>4D-Var
+は、これを期間内のすべての時刻の観測に広げ、モデルの式に従う軌道の中で最小を探します。</li>
+<li>モデルと観測の関係が線形で、誤差が正規分布なら、3D-Var の答えは OI
+と同じになります。</li>
+</ul>
+<h3 id="一般的に使われるデータ同化の方法">5-3.
+一般的に使われるデータ同化の方法</h3>
+<p>データ同化は天気予報で発達し、いまは海洋・地下水・燃焼・構造などにも使われています。よく使われる方法を整理します。</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>型</th>
+<th>方法</th>
+<th>中身</th>
+<th>長所</th>
+<th>短所</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>逐次型</td>
+<td><strong>OI</strong>（最適内挿）</td>
+<td>予報の不確かさ <span class="math inline">\(B\)</span>
+を<strong>固定</strong>して、観測のたびに直す</td>
+<td>軽い（予報は 1 本）</td>
+<td><span class="math inline">\(B\)</span>
+が固定なので、パラメータ（発熱量など）は当たりにくい</td>
+</tr>
+<tr class="even">
+<td>逐次型</td>
+<td><strong>カルマンフィルタ（KF・EKF）</strong></td>
+<td>予報の不確かさ <span class="math inline">\(P\)</span>
+も、モデルの式で時間発展させる</td>
+<td>線形なら最適</td>
+<td><span class="math inline">\(P\)</span>
+が（状態の数）×（状態の数）で大きい。非線形には線形化（EKF）が必要</td>
+</tr>
+<tr class="odd">
+<td>逐次型</td>
+<td><strong>EnKF</strong>（アンサンブルカルマンフィルタ）</td>
+<td>少しずつ違う予報を何本も回し、そのばらつきから <span
+class="math inline">\(P\)</span> を作る</td>
+<td>モデルの微分がいらない。パラメータも状態に加えて推定できる</td>
+<td>予報を本数分回すので重い。本数が少ないと、関係のない遠くの点どうしに見かけの相関が出る</td>
+</tr>
+<tr class="even">
+<td>逐次型</td>
+<td><strong>LETKF</strong>（局所アンサンブル変換カルマンフィルタ）</td>
+<td>EnKF
+の一種。観測に乱数を足さず、<strong>場所ごとに近くの観測だけ</strong>で直す（局所化）</td>
+<td>見かけの相関が出にくい。場所ごとに独立に計算でき、並列で速い</td>
+<td>局所化の範囲を決める必要がある</td>
+</tr>
+<tr class="odd">
+<td>逐次型</td>
+<td><strong>粒子フィルタ</strong></td>
+<td>予報を「粒子」として回し、観測に合う粒子ほど重みを大きくする</td>
+<td>正規分布を仮定しない（非線形・多峰に強い）</td>
+<td>状態の数が多いと、膨大な粒子が必要</td>
+</tr>
+<tr class="even">
+<td>変分型</td>
+<td><strong>3D-Var</strong>（3 次元変分法）</td>
+<td>ある時刻で、「予報からのずれ」と「観測とのずれ」の和 <span
+class="math inline">\(J\)</span> を最小にする</td>
+<td>大きな問題でも解ける</td>
+<td><span class="math inline">\(B\)</span> が固定（OI
+と同じ答えになる）</td>
+</tr>
+<tr class="odd">
+<td>変分型</td>
+<td><strong>4D-Var</strong>（4 次元変分法）</td>
+<td>一定の期間（窓）の<strong>全時刻の観測</strong>に合うように、期間の初めの状態を最適化する。モデルの式に従う軌道の中で探す</td>
+<td>期間内の観測を、モデルと矛盾なく使える。精度が高い</td>
+<td>モデルを逆向きにたどる式（<strong>アジョイント</strong>）が必要で、作るのが大変</td>
+</tr>
+<tr class="even">
+<td>両方</td>
+<td><strong>ハイブリッド（En-Var、4DEnVar など）</strong></td>
+<td>変分型の <span class="math inline">\(B\)</span>
+に、アンサンブルのばらつきを混ぜる</td>
+<td>両方の長所を合わせる</td>
+<td>仕組みが複雑</td>
+</tr>
+<tr class="odd">
+<td>期間でまとめる</td>
+<td><strong>ES-MDA</strong>（多段アンサンブルスムーザ）</td>
+<td>期間全体の観測を、同じデータで数回に分けて取り込む</td>
+<td>非線形の逆問題（パラメータ推定）に強い。地下水・油田で使われる</td>
+<td>期間の途中の推定には向かない</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4D-Var と LETKF</strong>（天気予報の現場でよく使われる 2
+つ）</p>
+<ul>
+<li><strong>4D-Var</strong>：「6 時間なら 6
+時間の間の観測すべてに、モデルの計算が一番よく合う初期状態」を探す方法です。合わせる量
+<span class="math inline">\(J\)</span> は、3D-Var の <span
+class="math inline">\(J\)</span> を期間内の全時刻に広げたものです。<span
+class="math inline">\(J\)</span>
+の初期状態についての微分（勾配）を、モデルを逆向きにたどる式（アジョイント）で一度に計算して、最小を探します。精度は高いですが、アジョイントを作るのがとても大変です。</li>
+<li><strong>LETKF</strong>：EnKF
+の仲間です。各場所（格子点）で、その近くの観測だけを使って、アンサンブルの重みを決め直します。補正はアンサンブルの本数ぶん（例：60
+×
+60）の小さな行列の計算で済み、場所ごとに独立なので並列にできます。大きなモデルでも速く回せます。</li>
+</ul>
+<p>本研究で使ったのは
+<strong>EnKF</strong>（観測に乱数を足す型）です。状態が 7 つ（代表 5
+点の温度、発熱量、放熱）と少ないので、局所化（LETKF）は使っていません。</p>
+<h3 id="本研究は逐次型enkfを使う">5-4. 本研究は逐次型（EnKF）を使う</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>理由</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>測りながら推定したい</td>
+<td>加工中の補正では、観測が来るたびに今の状態を知りたい。本研究は 30
+秒ごとに修正する</td>
+</tr>
+<tr class="even">
+<td>アジョイントがいらない</td>
+<td>OpenFOAM と FrontISTR
+を組み合わせたモデルを逆向きにたどる式は用意されていない。EnKF
+は予報を何本か回すだけでよい</td>
+</tr>
+<tr class="odd">
+<td>発熱量も一緒に推定できる</td>
+<td>発熱量 <span class="math inline">\(Q\)</span> と放熱 <span
+class="math inline">\(h\)</span>
+を状態に加えると、アンサンブルの共分散を通して、温度・変位の観測から
+<span class="math inline">\(Q\)</span> も直せる</td>
+</tr>
+</tbody>
+</table>
+<p>実際に試した結果と、そこで見えた課題は次のページ（§6）で示します。</p>
+<h3 id="使ったプログラム">5-5. 使ったプログラム</h3>
+<table>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dacore/oi.py</code></td>
+<td>OI の補正（共分散 <span class="math inline">\(B\)</span>
+を固定）</td>
+</tr>
+<tr class="even">
+<td><code>dacore/enkf.py</code></td>
+<td>EnKF の補正（共分散を 60 メンバーから数える）</td>
+</tr>
+</tbody>
+</table>
+<p>OI（<code>dacore/oi.py</code>）：重み <span class="math inline">\(K =
+BH^{\mathsf T}(HBH^{\mathsf T}+R)^{-1}\)</span> を 1
+回だけ計算し、毎回同じ重みで直します。</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oi_gain(H, B, R):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    HB <span class="op">=</span> H <span class="op">@</span> B</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> HB <span class="op">@</span> H.T <span class="op">+</span> R</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> np.linalg.solve(S, HB).T    <span class="co"># K = B Hᵀ S⁻¹</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> K</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> oi_update(z_b, y, y_pred, K):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> z_b <span class="op">+</span> K <span class="op">@</span> (y <span class="op">-</span> y_pred)   <span class="co"># z_a = z_b + K (y - y_pred)</span></span></code></pre></div>
+<p>EnKF（<code>dacore/enkf.py</code> の
+<code>enkf_update</code>）：共分散を 60
+メンバーのばらつきから毎回数え直します。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>zbar <span class="op">=</span> Zf.mean(axis<span class="op">=</span><span class="dv">0</span>)<span class="op">;</span> ybar <span class="op">=</span> Yf.mean(axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dZ <span class="op">=</span> Zf <span class="op">-</span> zbar                       <span class="co"># 状態のばらつき（メンバー × 7）</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dY <span class="op">=</span> Yf <span class="op">-</span> ybar                       <span class="co"># センサの予想のばらつき</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>C_zy <span class="op">=</span> dZ.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)       <span class="co"># 状態とセンサの共分散</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>C_yy <span class="op">=</span> dY.T <span class="op">@</span> dY <span class="op">/</span> (n_ens <span class="op">-</span> <span class="dv">1</span>)       <span class="co"># センサの予想の分散</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>S <span class="op">=</span> C_yy <span class="op">+</span> R</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>eps <span class="op">=</span> rng.multivariate_normal(np.zeros(<span class="bu">len</span>(y)), R, size<span class="op">=</span>n_ens)   <span class="co"># 観測の乱数</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>innov <span class="op">=</span> (y[<span class="va">None</span>, :] <span class="op">+</span> eps) <span class="op">-</span> Yf      <span class="co"># 実測 − 予想</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>gain_T <span class="op">=</span> np.linalg.solve(S, C_zy.T)  <span class="co"># Kᵀ = S⁻¹ C_zyᵀ</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Za <span class="op">=</span> Zf <span class="op">+</span> innov <span class="op">@</span> gain_T             <span class="co"># z_a = z_f + K (y + ε − y_f)</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分">5-6. 4 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>データ同化は、モデルの予報と観測を、不確かさに応じて混ぜて、状態と条件を推定する方法。</li>
+<li>逐次型（観測のたびに修正）と変分型（期間全体を合わせる）がある。</li>
+<li>本研究は、測りながら推定でき、アジョイントがいらない<strong>逐次型の
+EnKF</strong> を使う。</li>
+</ul>
+<hr />
+<h2 id="ページ目データ同化による課題">6. 5
+ページ目「データ同化による課題」</h2>
+<p>ここ（6-1〜6-4）を、発表の 5 ページ目に載せます。6-5
+は使ったプログラム、6-6 は話す内容です。4
+ページ目の方法を、熱流体・熱解析の実ソルバでそのまま回すと何が困るかを示します。</p>
+<h3 id="正解を作る双子実験">6-1. 正解を作る：双子実験</h3>
+<p>実機の測定はまだないので、<strong>双子実験</strong>で確かめます。</p>
+<ol type="1">
+<li>OpenFOAM（流体と固体の熱連成）で温度を、FrontISTR（熱弾性）で変位を計算し、これを「本物」とする。</li>
+<li>本物の温度・変位の一部の点に、測定の誤差を乱数で足して「観測」を作る。</li>
+<li>条件（初期温度、発熱量）を外したモデルから始めて、観測でどこまで本物に近づけるかを見る。</li>
+</ol>
+<h3 id="oi-では発熱量が当たらない">6-2. OI では発熱量が当たらない</h3>
+<p>OI（最適内挿）は、予報の不確かさ（共分散）を固定して、予報 1
+本だけで修正します。実ソルバ（OpenFOAM＋FrontISTR）で試した結果です（104）。</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>OI</th>
+<th>EnKF</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全セルの温度の誤差</td>
+<td>5.0 → 0.11 K</td>
+<td>7.61 → 0.011 K</td>
+</tr>
+<tr class="even">
+<td>発熱量 Q（真値 15 W）</td>
+<td><strong>約 9 W 止まり</strong></td>
+<td><strong>14.93 W</strong></td>
+</tr>
+<tr class="odd">
+<td>計算時間</td>
+<td>約 1.2〜1.6 時間</td>
+<td><strong>約 13 時間</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>OI は温度・変位を本物に寄せられますが、<strong>発熱量は約 9 W
+で止まりました</strong>。共分散を固定しているため、温度のずれを発熱量の修正に結びつけられません。</li>
+<li>予報の不確かさの大きさ <span class="math inline">\(\sigma_Q\)</span>
+を 0.5 → 50 W と 100 倍に振っても、発熱量の推定は 8.8〜9.0 W
+でほとんど変わりませんでした。</li>
+</ul>
+<h3 id="enkf-は当たるが計算に時間がかかる">6-3. EnKF
+は当たるが、計算に時間がかかる</h3>
+<p>EnKF
+は、条件を少しずつ変えた予報を何本も（アンサンブル）回し、そのばらつきから共分散を作ります。発熱量まで当たりましたが、</p>
+<ul>
+<li>予報 1 本が OpenFOAM（熱連成）＋FrontISTR
+の計算そのもので、重い。</li>
+<li>104 では 5 本・60 秒ごとに 10 回の修正で、一連の計算に<strong>約 13
+時間</strong>かかりました（作業記録からの概算）。</li>
+<li>5 本はアンサンブルとしては少なく、106 の ROM では 60
+本を使っています。実ソルバで 60 本にすると、単純に比べて約 12
+倍の計算になる見込みです（見積もりで、実行していません）。</li>
+</ul>
+<p><strong>熱流体・熱解析の計算時間が、データ同化のネックになります。</strong>
+現象の 600
+秒を推定するのに、何時間もかかっていては、加工しながら補正することはできません。</p>
+<h3 id="どこを測ればよいかが分からない">6-4.
+どこを測ればよいかが分からない</h3>
+<p>計算時間に加えて、<strong>どこの温度（や変位）を測るか</strong>も結果を左右します。</p>
+<ul>
+<li>測る場所によって、推定がよく当たる場合と外れる場合があります。たとえば温度
+2 点だけでは、測っていない上面 A・O の反りは 0.77 µm
+ずれました（§2-2）。</li>
+<li>実ソルバのデータ同化が重いので、置き場所を何通りも試して比べることができません。</li>
+</ul>
+<h3 id="使ったプログラム-1">6-5. 使ったプログラム</h3>
+<p>実ソルバでのデータ同化は 104
+のフォルダにあります（<code>sample/104_0_openfoam_frontistr_da_enkf/</code>）。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/run_openfoam_fem_enkf.py</code></td>
+<td>実ソルバの EnKF を実行する（設定は
+<code>openfoam/da_openfoam_config.yaml</code>）</td>
+</tr>
+<tr class="even">
+<td><code>daof/of_fem_twin.py</code> の <code>run_fem_twin</code></td>
+<td>真値の計算、メンバーごとの OpenFOAM・FrontISTR、EnKF の補正を 1
+サイクルずつ回す</td>
+</tr>
+<tr class="odd">
+<td><code>run/run_openfoam_fem_oi.py</code></td>
+<td>実ソルバの OI</td>
+</tr>
+</tbody>
+</table>
+<p>1
+サイクルの中身（<code>daof/of_fem_twin.py</code>、抜粋）：メンバーの数だけ
+OpenFOAM と FrontISTR を回すので重くなります。</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ci, t1 <span class="kw">in</span> <span class="bu">enumerate</span>(times):                 <span class="co"># 60 秒ごとの補正</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(members):             <span class="co"># メンバーごとに</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        ok, log <span class="op">=</span> of_case.run_window(m, t0, t1) <span class="co"># ← OpenFOAM（熱連成）を t0→t1 まで回す</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        yv, Tm <span class="op">=</span> member_obs(m, t1, ...)         <span class="co"># ← FrontISTR で変位を計算し、センサの値を作る</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        Z[i, :Nc] <span class="op">=</span> Tm                          <span class="co"># 状態 = 固体 20,696 セルの温度 + 発熱量</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        Z[i, iQ] <span class="op">=</span> Q[i]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        Yf[i] <span class="op">=</span> yv</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    Za <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, R, rng, inflation<span class="op">=</span>..., Yf<span class="op">=</span>Yf)   <span class="co"># 補正</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(members):</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        of_case.set_solid_state(m, t1, Za[i, :Nc], <span class="bu">float</span>(Za[i, iQ]))  <span class="co"># 直した温度を OpenFOAM に書き戻す</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-1">6-6. 5 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>OpenFOAM と FrontISTR
+で正解の温度と変位を作り、双子実験でデータ同化を確かめた。</li>
+<li>OI は軽いが発熱量が当たらない（約 9 W、真値 15 W）。EnKF
+は当たるが約 13 時間かかる。</li>
+<li>熱流体・熱解析の計算時間がネックになり、どこを測ればよいかも試して決められない。→
+次のページから、軽いモデル（ROM）で解決する。</li>
+</ul>
+<hr />
+<h2 id="ページ目低次元モデル化rom">7. 6
+ページ目「低次元モデル化（ROM）」</h2>
+<p>ここ（7-1〜7-4）を、発表の 6 ページ目に載せます。7-5 は一般的な ROM
+との違い（補足）、7-6 は使ったプログラム、7-7 は話す内容です。5
+ページ目の「実ソルバでは重い」を、OpenFOAM
+の結果から作る軽いモデル（ROM）で解決します。手順は
+<strong>特異値分解（POD）→ Q-DEIM → ROM</strong> の 3 段です。</p>
+<h3 id="材料openfoam-の温度の写真121-枚">7-1. 材料：OpenFOAM
+の温度の「写真」121 枚</h3>
+<ul>
+<li>OpenFOAM（熱連成）の固体 <strong>20,696
+セル</strong>の温度を、0〜600 秒で 5 秒ごとに <strong>121
+枚</strong>残します。</li>
+<li>1 枚（ある時刻の全セルの温度）を 1 列にし、121
+列を横に並べた行列を作ります。各セルの時間平均 <span
+class="math inline">\(\bar{\mathbf u}\)</span> を引いたものを <span
+class="math inline">\(X\)</span> とします。</li>
+</ul>
+<p><span class="math display">\[
+X = \big[\,\mathbf u(t_1)-\bar{\mathbf u},\ \mathbf u(t_2)-\bar{\mathbf
+u},\ \dots,\ \mathbf u(t_{121})-\bar{\mathbf u}\,\big]\qquad(20{,}696
+\times 121)
+\]</span></p>
+<p>ROM を作るために OpenFOAM を回すのは、この 1
+回だけです。データ同化の本番では OpenFOAM も FrontISTR
+も回しません。</p>
+<h3 id="特異値分解pod温度分布の型を取り出す">7-2.
+特異値分解（POD）：温度分布の「型」を取り出す</h3>
+<p><span class="math inline">\(X\)</span> を特異値分解します。</p>
+<p><span class="math display">\[
+X = U\,\Sigma\,V^{\mathsf T}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(U\)</span> の列 <span
+class="math inline">\(\boldsymbol\varphi_1, \boldsymbol\varphi_2,
+\dots\)</span> が、温度分布の<strong>型（POD
+モード）</strong>です。</li>
+<li>特異値 <span class="math inline">\(\sigma_k\)</span> の 2 乗の割合
+<span class="math inline">\(\sigma_k^2 / \sum_j \sigma_j^2\)</span>
+が、その型で温度の変化の何割を表せるか（寄与率）です。</li>
+<li>どの時刻の温度も、型の足し合わせで <span
+class="math inline">\(\mathbf u(t) \approx \bar{\mathbf u} +
+a_1(t)\,\boldsymbol\varphi_1 + a_2(t)\,\boldsymbol\varphi_2 +
+\cdots\)</span> と書けます。</li>
+</ul>
+<figure>
+<img src="img/pod_modes.png" alt="POD モード" />
+<figcaption aria-hidden="true">POD モード</figcaption>
+</figure>
+<p><em>図 5　平均の温度と POD モード 1〜5。モード 1（91.8
+%）は全体が温まる型、モード 2（8.08
+%）はヒータ側と反対側の偏りの型。</em></p>
+<p><strong>2 つの型で 99.89 %</strong> を表せました。2
+万セルの温度でも、ほとんどは 2 つの数 <span class="math inline">\(a_1,
+a_2\)</span> で決まるということです。</p>
+<h3 id="q-deim型を見分けるのに一番よい-5-点を選ぶ">7-3.
+Q-DEIM：型を見分けるのに一番よい 5 点を選ぶ</h3>
+<p>型の重み <span class="math inline">\(a_1, a_2, \dots\)</span>
+を知るには、どこかの点の温度が分かればよいはずです。ただ、点の選び方が悪いと（たとえば型がどれも
+0 に近い点や、似た点ばかり）重みを正しく決められません。</p>
+<p><strong>Q-DEIM</strong> は、型の行列 <span
+class="math inline">\(\Phi_r = [\boldsymbol\varphi_1, \dots,
+\boldsymbol\varphi_r]\)</span> の転置に、列の入れ替え付きの QR
+分解をかけて、点を選びます。</p>
+<p><span class="math display">\[
+\Phi_r^{\mathsf T}\,\Pi = Q\,R
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\Pi\)</span>（列の入れ替え）の最初の
+<span class="math inline">\(r\)</span> 列が、選ぶ点です。</li>
+<li>「型の値が大きく、すでに選んだ点と似ていない点」を、1
+点ずつ貪欲に選んでいくことに当たります。</li>
+<li>モード 5 本を使い、<strong>代表 5
+点</strong>（P0〜P4）を選びました。</li>
+</ul>
+<h4 id="行列で見る列の入れ替え付き-qr-分解">行列で見る：列の入れ替え付き
+QR 分解</h4>
+<p>型の行列を横にした <span class="math inline">\(\Phi_r^{\mathsf
+T}\)</span>（5 行 × 20,696 列）を考えます。<strong>1 列が 1
+セル</strong>で、その列には「そのセルでの 5
+つの型の値」が縦に並んでいます。</p>
+<p><span class="math display">\[
+\Phi_r^{\mathsf T} =
+\begin{pmatrix}
+\varphi_1(1) &amp; \varphi_1(2) &amp; \cdots &amp; \varphi_1(N)\\
+\vdots &amp; \vdots &amp; &amp; \vdots\\
+\varphi_5(1) &amp; \varphi_5(2) &amp; \cdots &amp; \varphi_5(N)
+\end{pmatrix}
+= \big[\,\mathbf c_1,\ \mathbf c_2,\ \dots,\ \mathbf c_N\,\big],\qquad N
+= 20{,}696
+\]</span></p>
+<p>列の入れ替え付き QR 分解 <span class="math inline">\(\Phi_r^{\mathsf
+T}\,\Pi = Q\,R\)</span> は、次の手順を 5 回くりかえすのと同じです。</p>
+<ol type="1">
+<li><strong>一番長い列を選ぶ</strong>：残っている列の中で、長さ <span
+class="math inline">\(|\mathbf c_i|\)</span>
+が最大の列（セル）を選び、先頭へ入れ替える（これが <span
+class="math inline">\(\Pi\)</span>）。</li>
+<li><strong>その向きを、全部の列から引く</strong>：選んだ列の向き <span
+class="math inline">\(\mathbf q = \mathbf c_{\text{選}}/|\mathbf
+c_{\text{選}}|\)</span> の成分を、ほかの列から引く（<span
+class="math inline">\(\mathbf c_i \leftarrow \mathbf c_i - (\mathbf
+q^{\mathsf T}\mathbf c_i)\,\mathbf q\)</span>）。これが <span
+class="math inline">\(Q\)</span> の 1 列を作ることに当たり、引いた量が
+<span class="math inline">\(R\)</span> に入る。</li>
+<li>引いた後の長さで、次の列を選ぶ。</li>
+</ol>
+<ul>
+<li>1 回目は、型の値が大きいセル（列が長いセル）が選ばれます。</li>
+<li>2
+回目からは、すでに選んだセルと同じ向きの成分が引かれるので、<strong>似たセルは短くなり、選ばれにくくなります</strong>。</li>
+<li>その結果、5 点で取り出した 5 × 5 の行列 <span
+class="math inline">\(\Phi_P\)</span>
+が、つぶれにくい（逆行列が安定に求まる）組になります。gappy-POD で 5
+点から 5 つの型の重みを決めるとき、この <span
+class="math inline">\(\Phi_P\)</span> の逆行列を使います。</li>
+</ul>
+<figure>
+<img src="img/qdeim_animation.gif" alt="Q-DEIM のアニメーション" />
+<figcaption aria-hidden="true">Q-DEIM のアニメーション</figcaption>
+</figure>
+<p><em>図 6a　Q-DEIM の選び方（実際の円筒、モード 5
+本）。左：各セル（点）の色が、その時点の列の長さ（最大で
+1）。赤い球が今回選んだ点、白い球がすでに選んだ点。右上：行列 <span
+class="math inline">\(\Phi^{\mathsf T}\)</span> の一部の列（1 列 = 1
+セル、赤枠が選んだ列）。右中：列の長さ。選んだ列の向きを引くと、選んだ列は
+0 になり、似た列も短くなる。P0 → P1 → P2 → P3 → P4
+の順に選ばれ、<code>scipy.linalg.qr(..., pivoting=True)</code>
+の結果と同じ順であることを確かめた。きれいに見るなら
+<code>img/qdeim_animation.mp4</code>。作図：<code>run/make_qdeim_animation.py</code>。</em></p>
+<figure>
+<img src="img/qdeim_points.png" alt="代表 5 点" />
+<figcaption aria-hidden="true">代表 5 点</figcaption>
+</figure>
+<p><em>図 6　Q-DEIM で選んだ代表 5
+点（P0〜P4）。ヒータ側の中段（P0・P2）、反対側寄りの中段（P1）、底面近くの両側（P3・P4）が選ばれた。</em></p>
+<p>5 点の温度が分かれば、全セルの温度は gappy-POD で戻せます（型の重みを
+5 点の温度から最小二乗で求め、型を足し合わせる）。</p>
+<h3 id="rom代表-5-点の熱回路を作りopenfoam-に合わせる">7-4. ROM：代表 5
+点の熱回路を作り、OpenFOAM に合わせる</h3>
+<p>代表 5
+点をノードにして、熱容量と熱コンダクタンスでつないだ熱回路（集中定数モデル）を作ります。ノード
+<span class="math inline">\(i\)</span><code>（</code><span
+class="math inline">\(i = 0, \dots,
+4\)</span>）の式は次のとおりです。</p>
+<p><span class="math display">\[
+C_i\,\frac{dT_i}{dt} = \sum_{j \ne i} K_{ij}\,(T_j - T_i) + q_i(t) -
+h\,(T_i - T_{\mathrm{air}})
+\]</span></p>
+<ul>
+<li><span class="math inline">\(C_i\)</span>：ノード <span
+class="math inline">\(i\)</span> の熱容量 [J/K]</li>
+<li><span class="math inline">\(K_{ij}\)</span>：ノード <span
+class="math inline">\(i\)</span> と <span
+class="math inline">\(j\)</span> の間の熱コンダクタンス [W/K]（5 点なら
+10 本）</li>
+<li><span class="math inline">\(q_i\)</span>：発熱。ヒータに一番近い P2
+だけに入れる</li>
+<li><span class="math inline">\(h\)</span>：空気への放熱 [W/K]</li>
+</ul>
+<p>未知の 16 個（<span class="math inline">\(C\)</span> 5 個、<span
+class="math inline">\(K\)</span> 10 個、<span
+class="math inline">\(h\)</span> 1 個）を、5 点の温度の時刻歴が OpenFOAM
+と一致するように最小二乗で合わせました。</p>
+<h4 id="合わせ方最適化">合わせ方（最適化）</h4>
+<ul>
+<li><strong>目的</strong>：5 点 × 121 時刻（0〜600 秒、5 秒ごと）の「ROM
+の温度 − OpenFOAM の温度」の 2 乗の和を最小にする。</li>
+</ul>
+<p><span class="math display">\[
+\hat{\boldsymbol\theta} = \arg\min_{\boldsymbol\theta}\
+\sum_{p=0}^{4}\sum_{k=1}^{121}\Big(T_p^{\mathrm{ROM}}(t_k;\boldsymbol\theta)
+- T_p^{\mathrm{OF}}(t_k)\Big)^2,\qquad
+\boldsymbol\theta = (C_0,\dots,C_4,\ K_{01},\dots,K_{34},\ h)
+\]</span></p>
+<ul>
+<li><strong>解き方</strong>：<code>scipy.optimize.least_squares</code>（非線形最小二乗、範囲の制約つき）。<span
+class="math inline">\(\boldsymbol\theta\)</span> を決めるたびに ROM を
+0〜600 秒計算し直す。</li>
+<li><strong>初めの値と範囲</strong>：<span
+class="math inline">\(C\)</span> は 120 J/K から（1〜5000）、<span
+class="math inline">\(K\)</span> は 1.5 W/K から（0.0001〜200）、<span
+class="math inline">\(h\)</span> は 0.3 W/K から（0.0001〜50）。どれも 0
+より大きく制約。</li>
+<li><strong>前提</strong>：初期温度は 5 点とも室温、発熱 15 W
+はヒータに一番近い P2 だけに入れる、合わせるのに使ったのは 15 W・0〜300
+秒加熱の 1 本だけ。</li>
+<li><strong>結果</strong>：残差（RMSE）0.014 K。</li>
+<li><strong>かかった時間</strong>：最適化は約 <strong>14
+秒</strong>（2026-11-01 にこの PC で計り直した値。ROM を 0〜600
+秒計算した回数 590 回、1 回あたり約 23 ms。反復 46
+回）。このほかに、OpenFOAM の温度 121 枚の読み込みに約 14
+秒。計り直した係数は保存してある値と同じでした。</li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>係数</th>
+<th>合わせた値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱容量 <span class="math inline">\(C_0 \ldots C_4\)</span>
+[J/K]</td>
+<td>P0 136、P1 323、P2 93、P3 243、P4 416（合計 1,211）</td>
+</tr>
+<tr class="even">
+<td>熱コンダクタンス <span class="math inline">\(K_{ij}\)</span>
+[W/K]</td>
+<td>P0–P2 17.5、P0–P3 6.21、P1–P4 2.60、P3–P4 2.11、P1–P2 1.62、P0–P1
+0.84。P0–P4・P1–P3・P2–P3・P2–P4 は下限の 0.0001（ほぼ 0）</td>
+</tr>
+<tr class="odd">
+<td>放熱 <span class="math inline">\(h\)</span> [W/K]</td>
+<td>0.0154（5 点それぞれに掛かるので、全体で 5 × 0.0154 = 0.077
+W/K）</td>
+</tr>
+</tbody>
+</table>
+<p>（<code>results/rom_calibrated_pod.npz</code>、<code>run/build_calibrate_rom.py</code>）</p>
+<h4
+id="局所最適になっていないか初期値を変えて-40-回やり直した">局所最適になっていないか（初期値を変えて
+40 回やり直した）</h4>
+<p>最小二乗は、初期値によっては近くの谷（局所最適）で止まります。そこで、16
+個の係数の初期値を範囲の中からばらばらに選び（対数で一様、40
+通り）、同じ計算をやり直しました（<code>run/calib_multistart.py</code>、<code>results/calib_multistart.json</code>、計算
+13 分）。</p>
+<figure>
+<img src="img/calib_multistart.png" alt="多スタートの結果" />
+<figcaption aria-hidden="true">多スタートの結果</figcaption>
+</figure>
+<p><em>図 7a　左：40
+通りの初期値から合わせた後の残差。緑は保存してある解と同じ解に着いたもの、橙は別の局所最適、灰は時間刻み
+2
+秒で計算が発散する係数から出られなかったもの。右：保存してある解での、残差の係数についての感度の特異値。</em></p>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>結果</th>
+<th style="text-align: right;">数</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>保存してある解と同じ解に着いた</td>
+<td style="text-align: right;">14</td>
+<td>残差 0.0142 K。16 個の係数がすべて 0.05 % 以内で一致</td>
+</tr>
+<tr class="even">
+<td>別の局所最適で止まった</td>
+<td style="text-align: right;">16</td>
+<td>残差 0.025〜3.0 K（保存してある解より悪い）</td>
+</tr>
+<tr class="odd">
+<td>計算が発散する所から出られなかった</td>
+<td style="text-align: right;">10</td>
+<td>初期値の熱容量が小さすぎ、時間刻み 2 秒の計算が発散</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>局所最適はある</strong>：40 回のうち 26
+回は、保存してある解より悪い所で止まりました。初期値 1
+つで合わせると、たまたま悪い谷に落ちることがあります。</li>
+<li><strong>一番よい解は 1 つだった</strong>：残差が一番小さい 14
+回は、すべて同じ係数の組に着きました。「違う係数の組で同じくらい合う」解は、今回は見つかりませんでした（40
+通りで調べた範囲）。</li>
+<li><strong>0 になった 4 本の <span class="math inline">\(K\)</span>
+は決まらない</strong>：右の図で、特異値が 4 つほぼ 0
+です。これは下限（0.0001）に張り付いた <span
+class="math inline">\(K_{04}, K_{13}, K_{23}, K_{24}\)</span> で、0
+の近くで少し変えても温度はほとんど変わりません。「この 4
+本は熱を流さなくても温度が再現できる」という意味です。</li>
+</ul>
+<h4
+id="合わせた値は物理的に妥当か物性と距離からの見積もり">合わせた値は物理的に妥当か（物性と距離からの見積もり）</h4>
+<p>円筒の物性は炭素鋼相当（密度 7,850 kg/m³、比熱 480 J/(kg K)、熱伝導率
+50 W/(m K)）、大きさは内半径 20 mm・外半径 37.5 mm・高さ 100.5 mm
+です。</p>
+<p><strong>① 熱容量：合計は物性からの値とほぼ同じ（妥当）</strong></p>
+<p><span class="math display">\[
+\rho\,c\,V = 7850 \times 480 \times \pi\,(0.0375^2 - 0.020^2) \times
+0.1005 \approx 1{,}197\ \mathrm{J/K}
+\]</span></p>
+<p>ROM の合計 1,211 J/K との差は約 1 % です。5
+点は円筒をいくつかの領域に分けて受け持っていて、その熱容量の合計が、円筒全体の熱容量と合っています。ヒータの
+P2 が一番小さい（93
+J/K）のは、温度がすぐ上がる狭い範囲を受け持っているためと考えられます。</p>
+<p><strong>② 熱コンダクタンス：大きさはおおむね妥当。ただし 1
+本ずつは物理の熱の通り道と一致しない</strong></p>
+<p>棒の熱伝導 <span class="math inline">\(K = k A / L\)</span>
+から、合わせた <span class="math inline">\(K\)</span>
+を「同じ熱を流すのに必要な断面積」<span class="math inline">\(A = K L /
+k\)</span> に直して比べます。円筒の壁の断面積は、周方向に流れるなら 厚さ
+17.5 mm × 高さ 100.5 mm ≈ 18 cm²、上下に流れるなら 円環 ≈ 32 cm²
+です。</p>
+<table>
+<thead>
+<tr class="header">
+<th>2 点</th>
+<th style="text-align: right;">距離 <span
+class="math inline">\(L\)</span></th>
+<th style="text-align: right;">合わせた <span
+class="math inline">\(K\)</span></th>
+<th style="text-align: right;">断面積に直すと <span
+class="math inline">\(A = KL/k\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P0–P2（どちらもヒータ側の中段）</td>
+<td style="text-align: right;">17 mm</td>
+<td style="text-align: right;">17.5 W/K</td>
+<td style="text-align: right;">61 cm²</td>
+</tr>
+<tr class="even">
+<td>P0–P3（ヒータ側、中段と底面近く）</td>
+<td style="text-align: right;">53 mm</td>
+<td style="text-align: right;">6.21 W/K</td>
+<td style="text-align: right;">65 cm²</td>
+</tr>
+<tr class="odd">
+<td>P1–P4</td>
+<td style="text-align: right;">64 mm</td>
+<td style="text-align: right;">2.60 W/K</td>
+<td style="text-align: right;">33 cm²</td>
+</tr>
+<tr class="even">
+<td>P3–P4（底面近くの両側）</td>
+<td style="text-align: right;">70 mm</td>
+<td style="text-align: right;">2.11 W/K</td>
+<td style="text-align: right;">30 cm²</td>
+</tr>
+<tr class="odd">
+<td>P1–P2</td>
+<td style="text-align: right;">57 mm</td>
+<td style="text-align: right;">1.62 W/K</td>
+<td style="text-align: right;">18 cm²</td>
+</tr>
+<tr class="even">
+<td>P0–P1</td>
+<td style="text-align: right;">50 mm</td>
+<td style="text-align: right;">0.84 W/K</td>
+<td style="text-align: right;">8 cm²</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>断面積に直すと 8〜65 cm² で、壁の断面積（18〜32
+cm²）と<strong>同じ桁</strong>です。ノードは点ではなく領域を受け持つので、2〜3
+倍大きいのは不自然ではありません。</li>
+<li>ただし、<strong>P2–P3（同じヒータ側で 50 mm 上下）が 0</strong>
+になりました。物理的には、上下につながった同じ側の 2
+点の間には、はっきり熱が流れるはずです。合わせた結果では、この熱を P2 →
+P0 → P3 と回り道で流しています。</li>
+<li>初期値を変えて合わせ直しても、同じ値に着きました（上の図
+7a）。つまり、この ROM の形（発熱は P2 だけ、ノード 5
+つ）の中では、<strong><span class="math inline">\(K\)</span>
+の値は一意に決まっている</strong>。それでも P2–P3 が 0 なのは、ROM
+の形の仮定（発熱を 1 点に入れる、5
+点で全体を代表させる）に合わせた結果で、物理の熱の通り道とは一致しないということです。1
+本ずつの <span class="math inline">\(K\)</span>
+を、そのまま物体の熱伝導として読むのは無理があります。</li>
+</ul>
+<p><strong>③ 放熱 <span
+class="math inline">\(h\)</span>：物理からの値よりかなり小さい（妥当とは言えない）</strong></p>
+<p>OpenFOAM から求めた表面の熱伝達率は全面平均で 13.4 W/(m² K)（<a
+href="blog001.html">blog_001
+§3-4</a>）、表面積は約 0.043 m² なので、</p>
+<p><span class="math display">\[
+h_{\text{物理}} \approx 13.4 \times 0.043 \approx 0.57\ \mathrm{W/K}
+\]</span></p>
+<p>です。ROM の全体の放熱 0.077 W/K は、その約 1/7 です。</p>
+<ul>
+<li>理由：0〜600
+秒では、放熱の効きが小さいためです。円筒が空気へ熱を逃がす時定数は <span
+class="math inline">\(\rho c V / h_{\text{物理}} \approx 1197 / 0.57
+\approx 2{,}100\)</span> 秒で、600
+秒の計算ではまだ温まる途中です。温度の時刻歴は「熱容量に熱がたまる」ことでほぼ決まり、<span
+class="math inline">\(h\)</span>
+を変えても温度はあまり変わりません。そのため、最小二乗で <span
+class="math inline">\(h\)</span>
+を決めても、物理の値には寄りません。</li>
+<li>これは、データ同化で放熱 <span class="math inline">\(h\)</span> が
+600 秒では当たらなかったこと（5,000
+秒まで延ばすと当たる）と同じ理由です。</li>
+<li>600 秒の範囲では ROM
+の温度は合っていますが、<strong>もっと長い時間（温度が落ち着くまで）の予測では、放熱が小さすぎて温度を高く出すおそれがあります</strong>（OpenFOAM
+との比較は未実施）。</li>
+</ul>
+<p><strong>まとめ</strong>：熱容量の合計は物理と合う。熱コンダクタンスは大きさは合い、値も一意に決まったが、ROM
+の形の仮定のため 1 本ずつは物理の通り道と一致しない（0 になった 4
+本は決まらない）。放熱は物理の値より小さく、600
+秒の計算では決まらない。ROM
+は「この範囲の温度を再現する」ためのモデルで、係数 1 つ 1
+つを物性として読むのは注意が必要です。</p>
+<figure>
+<img src="img/rom_network.png" alt="ROM の熱回路" />
+<figcaption aria-hidden="true">ROM の熱回路</figcaption>
+</figure>
+<p><em>図 7　代表 5
+点の熱回路。線の太さが合わせた熱コンダクタンス。オレンジの P2
+に発熱を入れる。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>結果</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>OpenFOAM との差（5 点の温度、合わせた後の残差）</td>
+<td><strong>0.014 K</strong></td>
+</tr>
+<tr class="even">
+<td>0〜600 秒の計算時間（ROM 1 本）</td>
+<td><strong>約 31 ms</strong></td>
+</tr>
+</tbody>
+</table>
+<p>この熱回路は 1D-CAE（Modelica
+などの熱回路網）と同じ形です。違いは、<strong>ノードの場所を POD・Q-DEIM
+でデータから選び、係数を 3D の計算に合わせた</strong>ことです。</p>
+<h4 id="rom-を解いて全体の温度と変形に戻すgappy-pod">ROM
+を解いて、全体の温度と変形に戻す（gappy-POD）</h4>
+<p>ROM が出すのは代表 5 点の温度だけです。そこで、5 点の温度から
+gappy-POD で全体に戻しました。データ同化は使っていません。</p>
+<ol type="1">
+<li>ROM を 0〜600 秒解く（15 W、0〜300 秒加熱、初期 20 °C）→ 代表 5
+点の温度 <span class="math inline">\(\boldsymbol T_P(t)\)</span></li>
+<li>型の重み <span class="math inline">\(\boldsymbol a =
+\Phi_P^{-1}(\boldsymbol T_P - \bar{\boldsymbol T}_P)\)</span> を求め、全
+20,696 セルの温度を <span class="math inline">\(\boldsymbol T =
+\bar{\boldsymbol T} + \Phi\,\boldsymbol a\)</span> で戻す（色）</li>
+<li>変位は、型ごとに FrontISTR で前もって解いておいた変位 <span
+class="math inline">\(D\)</span> を同じ重みで足す：<span
+class="math inline">\(\boldsymbol u = \bar{\boldsymbol u} +
+D\,\boldsymbol a\)</span>（形）</li>
+</ol>
+<figure>
+<img src="img/temp_deform_anim_rom.gif"
+alt="ROM から戻した温度と熱変形" />
+<figcaption aria-hidden="true">ROM から戻した温度と熱変形</figcaption>
+</figure>
+<p><em>図 7b　ROM を解き、代表 5 点の温度から gappy-POD
+で戻した温度（色）と熱変形（形、2000
+倍）。色の範囲・向き・倍率は正解（OpenFOAM → FrontISTR）の
+<code>img/temp_deform_anim.gif</code> とそろえてある。300
+秒のコマ：<code>img/temp_deform_t300_rom.png</code>。作図：<code>run/make_temp_deform_anim.py rom</code>。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>正解（OpenFOAM → FrontISTR）との差（0〜600 秒、30 秒ごと）</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>節点温度の RMSE（全時刻の最大）</td>
+<td>0.025 K</td>
+</tr>
+<tr class="even">
+<td>変位の最大値の差（全時刻の最大）</td>
+<td>0.037 µm</td>
+</tr>
+<tr class="odd">
+<td>300 秒の最高温度・変位の最大（ROM）</td>
+<td>25.7 °C、6.5 µm</td>
+</tr>
+</tbody>
+</table>
+<p>ROM は同じ 15 W
+の計算に合わせたものなので、よく合うのは当然です。別の発熱条件で使えるかは
+8 章で確かめます。</p>
+<h3 id="一般的な-rom-の作り方との違い">7-5. 一般的な ROM
+の作り方との違い</h3>
+<p>ROM（低次元モデル）の作り方はいくつかあります。本研究の ROM
+は、よく使われる方法と少し違います。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>作り方</th>
+<th>中身</th>
+<th>必要なもの</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>クリロフ部分空間法</strong>（モーメント合わせ）</td>
+<td>有限要素の式 <span class="math inline">\(C\dot T + KT = Fq\)</span>
+の行列から、入力（発熱）から出力（見たい点）への伝わり方が元と合うように縮める。構造・熱の
+FEM でよく使われる</td>
+<td>解析ソルバーの行列（<span class="math inline">\(C\)</span>, <span
+class="math inline">\(K\)</span>, <span
+class="math inline">\(F\)</span>）</td>
+</tr>
+<tr class="even">
+<td><strong>POD–ガラーキン</strong></td>
+<td>POD の型を使って、元の式（行列）を型の数まで縮める</td>
+<td>結果（スナップショット）と、元の式の行列</td>
+</tr>
+<tr class="odd">
+<td><strong>本研究（POD・Q-DEIM＋熱回路）</strong></td>
+<td>POD の型から代表 5 点を選び、5 点の熱回路の係数を OpenFOAM
+の結果に合わせる</td>
+<td><strong>結果（スナップショット）だけ</strong></td>
+</tr>
+</tbody>
+</table>
+<p>商用ソフトの ROM
+の機能とも比べておきます（各社の公開資料の範囲。バージョンで変わるので、使うときは各社の資料で確かめてください）。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ソフト</th>
+<th>ROM の機能</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>COMSOL Multiphysics</strong></td>
+<td>Model Reduction（モデル縮約）のスタディ</td>
+<td>方法は 3
+つ。<strong>Modal</strong>（固有モードで縮約、既定。入力と出力を持ち、縮約した行列を書き出せる）、<strong>AWE</strong>（周波数応答を速く掃引する）、<strong>POD</strong>（計算結果から型を取り出す）。学習用の計算と、ROM
+の作成の 2 段で作る</td>
+</tr>
+<tr class="even">
+<td><strong>Ansys Twin Builder</strong></td>
+<td>ROM Builder</td>
+<td><strong>Static ROM</strong>（定常の結果から作る）、<strong>LTI
+ROM</strong>（線形・時不変。流れを固定した熱伝導など）、<strong>LPV
+ROM</strong>（冷却の流量などが変わる場合）、<strong>Nonlinear Dynamic
+ROM</strong>（放射・自然対流などの非線形）。Fluent・Icepak・Mechanical
+の結果から作り、デジタルツインに使う</td>
+</tr>
+<tr class="odd">
+<td><strong>Siemens Simcenter Reduced Order Modeling</strong></td>
+<td>ROM の作成・確かめ・書き出しの専用ソフト</td>
+<td>計算と試験のデータから ROM を作る。熱では、<strong>Simcenter
+3D（NX）の熱の行列を読み込み、クリロフ部分空間法（多周波数）で縮める</strong>ことができる（2504
+版）。ほかに平衡打ち切りなど。境界条件が変わる表面のモデルは POD
+で縮める。Simcenter Amesim・Flomaster（1D）で使う</td>
+</tr>
+<tr class="even">
+<td><strong>Siemens Simcenter FLOEFD・Flotherm</strong></td>
+<td>BCI-ROM</td>
+<td>熱伝導だけの 3D モデルから、境界条件によらない ROM
+を作り、行列・VHDL-AMS・FMU で書き出す（電子機器の熱）</td>
+</tr>
+<tr class="odd">
+<td><strong>本研究</strong></td>
+<td>自作（Python）</td>
+<td>POD・Q-DEIM で代表 5 点を選び、熱回路の係数を OpenFOAM
+の結果に合わせる</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>本研究の ROM は、考え方としては Ansys の <strong>LTI ROM</strong>
+に近い（流れを固定した、線形・時不変の熱の ROM）。違いは、状態が「代表 5
+点の温度」で、係数が熱容量・熱コンダクタンスの形をしていることです。</li>
+<li>COMSOL の <strong>POD</strong>
+による縮約も、計算結果から型を取り出す点は同じです。本研究は、そこに
+Q-DEIM の代表点と熱回路を組み合わせています。</li>
+<li>商用ソフトの ROM は、作成と書き出し（FMU
+など）までがそろっています。本研究は、すべてオープンソースで、<strong>データ同化（EnKF）の中で使う</strong>ところまでつないでいる点が違います。</li>
+</ul>
+<p><strong>NX（Simcenter 3D）の縮約モデルとの違い</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>NX（Simcenter 3D）の縮約</th>
+<th>本研究の ROM</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>構造</td>
+<td><strong>スーパーエレメント</strong>（部品ごとに、境界の自由度だけを残す静縮約・Craig–Bampton
+法）。大和研の「部品ごとに縮約してつなぐ」と同じ考え方</td>
+<td>構造は縮約していない。FrontISTR で「POD
+の型ごとの変位」を前もって計算し、足し合わせる</td>
+</tr>
+<tr class="even">
+<td>熱</td>
+<td>FEM の熱の行列（<span class="math inline">\(C\)</span>, <span
+class="math inline">\(K\)</span>）をそのまま縮める（クリロフ部分空間法など）。元の式と物理がつながっている</td>
+<td>行列は使わず、OpenFOAM の温度の結果だけから、5
+点の熱回路の係数を合わせる</td>
+</tr>
+<tr class="odd">
+<td>必要なもの</td>
+<td>NX の FEM モデル（行列）</td>
+<td>計算結果のファイル（OpenFOAM でも何でもよい）</td>
+</tr>
+<tr class="even">
+<td>流体を含む熱</td>
+<td>流体（CFD）の熱連成は、そのままでは行列にしにくい</td>
+<td>流体と固体の熱連成（CHT）の結果からでも作れる</td>
+</tr>
+<tr class="odd">
+<td>係数の物理の意味</td>
+<td>元の行列から作るので保たれる</td>
+<td>熱容量の合計は物理と合う。熱コンダクタンスは一意に決まるが物理の通り道とは一致しない。放熱は
+600 秒では決まらない（7-4）</td>
+</tr>
+</tbody>
+</table>
+<h4 id="rom-の枠組みオフライン作るとオンライン使う">ROM
+の枠組み：オフライン（作る）とオンライン（使う）</h4>
+<p>ROM は、どのソフトでも次の 2 段で使います。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>段</th>
+<th>すること</th>
+<th>本研究では</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>オフライン（前もって 1 回）</strong></td>
+<td>詳しい解析（FEM・CFD）を回す →
+縮める（POD、クリロフ、モード縮約など）→ 元の解析と比べて確かめる →
+書き出す</td>
+<td>OpenFOAM → POD・Q-DEIM → 熱回路の係数合わせ → FrontISTR
+で型ごとの変位（約 1 時間＋数十秒）</td>
+</tr>
+<tr class="even">
+<td><strong>オンライン（現場で何度も）</strong></td>
+<td>ROM
+で速く予測する。センサの値と混ぜて（データ同化・カルマンフィルタ）、測れない場所の値を推定し、画面に出す（<strong>仮想センサ</strong>）</td>
+<td>ROM＋EnKF で 30 秒ごとに補正（600 秒が 31
+ms）。画面表示・実機接続は未実施</td>
+</tr>
+</tbody>
+</table>
+<h4
+id="リアルタイムの仮想センサの製品siemens-simcenter-3d-smart-virtual-sensing">リアルタイムの仮想センサの製品：Siemens
+Simcenter 3D Smart Virtual Sensing</h4>
+<p>Siemens の公式ブログ（<a
+href="https://blogs.sw.siemens.com/simcenter/simcenter-3d-smart-virtual-sensing-unveiling-the-magic/">仕組み</a>、<a
+href="https://blogs.sw.siemens.com/simcenter/the-new-revolution-in-testing-simcenter-3d-smart-virtual-sensing-and-model-based-system-testing/">リアルタイムの構成</a>）から読み取れる範囲です。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>項目</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>すること</td>
+<td>少ない実測と<strong>縮約 FEM</strong>
+を組み合わせ、センサを置けない場所の荷重・ひずみ・加速度・速度・変位を推定する（仮想センサ）</td>
+</tr>
+<tr class="even">
+<td>実測との融合</td>
+<td><strong>カルマンフィルタ</strong>（種類は記事に書かれていない）。モデルの誤差と測定の誤差の両方を補う</td>
+</tr>
+<tr class="odd">
+<td>リアルタイム表示</td>
+<td>Simcenter Testlab
+RT（リアルタイム対応のハードとソフト）で動かし、推定結果を可視化ツールに流して、全体の応力・変形を画面で見る</td>
+</tr>
+<tr class="even">
+<td>書き出し</td>
+<td><strong>実行可能デジタルツイン（xDT）</strong>として書き出し、現場の機器（エッジ）・リアルタイム機器・クラウドで動かす。オフラインでは
+FMU として配置する</td>
+</tr>
+<tr class="odd">
+<td>対象</td>
+<td>この 2
+つの記事では<strong>構造</strong>（風車のブレード、車両の部品など）。熱は書かれていない</td>
+</tr>
+</tbody>
+</table>
+<p>本研究との関係：考え方（縮約モデル＋カルマンフィルタ＋少ないセンサで測れない場所を推定）は、本研究と同じです。違いは、Siemens
+の記事の対象が構造（荷重・ひずみ）であることと、本研究が熱（流体と固体の熱連成の結果から作った
+ROM）で、温度と変位の両方を観測に使い、発熱量も推定していることです。ただし、Siemens
+は熱の
+ROM（Flotherm）とカルマンフィルタを組み合わせた研究も出していて、熱への広がりは十分ありえます（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/26_研究テーマ再検討_先行研究との比較.md">docs/26</a>
+§2・§6）。本研究の ROM も、600 秒を 31 ms
+で計算でき、リアルタイムに使える速さはありますが、実機のセンサとつないで画面に出すところまでは試していません（未実施）。</p>
+<h4 id="fmu-とは">FMU とは</h4>
+<p><strong>FMU（Functional Mock-up
+Unit）</strong>は、計算モデルを「部品」として、ほかのソフトに持っていくための共通の形式です。規格は
+<strong>FMI（Functional Mock-up Interface）</strong>で、Modelica
+Association が決めています。</p>
+<ul>
+<li><p><strong>中身</strong>：1 つの zip
+ファイルに、入力・出力・パラメータの説明（<code>modelDescription.xml</code>）と、計算の本体（コンパイルした実行ファイル、またはソースコード）が入っている。</p></li>
+<li><p><strong>2 つの型</strong>：</p>
+<ul>
+<li>Model
+Exchange：式（微分方程式）だけを渡し、時間積分は使う側のソフトが行う。</li>
+<li>Co-Simulation：時間積分のやり方も中に入れて渡す。使う側は「入力を渡して、時間を進めて、出力を受け取る」だけ。</li>
+</ul></li>
+<li><p><strong>使い道</strong>：COMSOL・Ansys・Siemens などで作った ROM
+を FMU
+で書き出すと、Simulink、Amesim、OpenModelica、Python（FMPy）など、別のソフトで動かせる。1D-CAE（システムのモデル）に、3D
+解析から作った ROM を部品として入れられる。</p></li>
+<li><p><strong>本研究との関係</strong>：本研究の ROM は Python
+のままで、FMU にはしていません。5 点の熱回路は Modelica
+で書ける形（熱容量と熱コンダクタンス）なので、FMU にして OpenModelica の
+1D-CAE に入れることはできるはずです（未実施）。</p></li>
+<li><p>クリロフ部分空間法や
+POD–ガラーキンは、元の式（行列）を数学的に縮めるので、物理との対応がはっきりしています。ただし、OpenFOAM
+の流体と固体の熱連成から行列を取り出すのは大変です。</p></li>
+<li><p>本研究は、OpenFOAM
+の温度の結果ファイルだけから作れます。その代わり、熱回路の係数は合わせ込んだ値で、元の式から決まるわけではありません。作った条件から外れたときの精度は、7
+ページ目のように確かめる必要があります。</p></li>
+<li><p>1D-CAE（熱回路網）と同じ形なので、係数の意味（熱容量・熱コンダクタンス）は読み取れます。</p></li>
+</ul>
+<h3 id="使ったプログラム-2">7-6. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/select_points_qdeim.py</code></td>
+<td>121 枚の温度の特異値分解（POD）と、Q-DEIM で代表 5 点を選ぶ</td>
+</tr>
+<tr class="even">
+<td><code>run/make_qdeim_animation.py</code></td>
+<td>Q-DEIM の選び方のアニメーション（図 6a）。「一番長い列を選ぶ →
+その向きを引く」を 5 回くりかえし、QR
+分解と同じ点になることを確かめる</td>
+</tr>
+<tr class="odd">
+<td><code>run/build_calibrate_rom.py</code></td>
+<td>熱回路の 16 個の係数を、OpenFOAM の 5
+点の温度に最小二乗で合わせる</td>
+</tr>
+<tr class="even">
+<td><code>dacore/rom_general.py</code></td>
+<td>熱回路を時間積分する（4 次のルンゲ・クッタ、2 秒刻み）</td>
+</tr>
+<tr class="odd">
+<td><code>run/make_temp_deform_anim.py rom</code></td>
+<td>ROM を解き、gappy-POD で全体の温度と変位に戻した GIF（図
+7b）。引数なしなら正解の GIF</td>
+</tr>
+</tbody>
+</table>
+<p>POD と Q-DEIM（<code>run/select_points_qdeim.py</code>）：</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)<span class="op">;</span> Xc <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]           <span class="co"># 各セルの時間平均を引く</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)        <span class="co"># 特異値分解 X = U Σ Vᵀ</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()                             <span class="co"># 寄与率</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :RMODE].T, pivoting<span class="op">=</span><span class="va">True</span>)            <span class="co"># Q-DEIM：Φᵀ に列の入れ替え付き QR</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> <span class="bu">list</span>(piv[:NPT])                                    <span class="co"># 入れ替えの先頭 5 列 = 代表 5 点</span></span></code></pre></div>
+<p>係数の合わせ込み（<code>run/build_calibrate_rom.py</code>）：</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(vec):                      <span class="co"># 係数 vec = [C 5 個, K 10 個, h 1 個] で ROM を計算</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> vec[:NPT]<span class="op">;</span> K <span class="op">=</span> rg.tri_to_matrix(vec[NPT:NPT<span class="op">+</span>ne], NPT)<span class="op">;</span> h <span class="op">=</span> vec[NPT<span class="op">+</span>ne]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ...                                <span class="co"># 0〜600 秒を積分して 5 点の温度の時刻歴を返す</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(vec):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(vec) <span class="op">-</span> Yobs).ravel()   <span class="co"># ROM − OpenFOAM（5 点 × 全時刻）</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))   <span class="co"># 差の 2 乗和を最小にする</span></span></code></pre></div>
+<p>熱回路の時間積分（<code>dacore/rom_general.py</code> の
+<code>integrate_ensemble</code>）：<span class="math inline">\(C\,dT/dt
+= -(\sum K + h)T + KT + hT_{\mathrm{air}} + q\)</span> を行列で書き、60
+メンバーを一度に進めます。</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> Kmat <span class="op">/</span> C[:, <span class="va">None</span>]                          <span class="co"># 他ノードからの熱流入</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>M[idx, idx] <span class="op">=</span> <span class="op">-</span>(Ksum <span class="op">+</span> h) <span class="op">/</span> C                  <span class="co"># 対角：自分から出ていく熱と放熱</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deriv(Tv, t):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    heat[:, heat_node] <span class="op">=</span> heater_power_W(t, q_scale) <span class="op">/</span> C[heat_node]   <span class="co"># P2 だけに発熱</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> M <span class="op">@</span> Tv <span class="op">+</span> h <span class="op">*</span> T_AIR <span class="op">/</span> C <span class="op">+</span> heat</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>k1 <span class="op">=</span> deriv(T, t)<span class="op">;</span> k2 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k1, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)            <span class="co"># 4 次のルンゲ・クッタ</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>k3 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k2, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)<span class="op">;</span> k4 <span class="op">=</span> deriv(T <span class="op">+</span> dt<span class="op">*</span>k3, t <span class="op">+</span> dt)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> T <span class="op">+</span> dt<span class="op">/</span><span class="dv">6</span> <span class="op">*</span> (k1 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k3 <span class="op">+</span> k4)</span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-30-秒">7-7. 6 ページ目で言うこと（約 1
+分 30 秒）</h3>
+<ul>
+<li>OpenFOAM の温度 121 枚を特異値分解すると、温度分布は 2 つの型で
+99.89 % 表せる。</li>
+<li>Q-DEIM で、型を見分けるのに一番よい代表 5 点を自動で選ぶ。</li>
+<li>5 点の熱回路を OpenFOAM に合わせて ROM にした（差 0.014 K）。600
+秒が 31 ms で計算でき、データ同化を何十本でも回せる。</li>
+</ul>
+<hr />
+<h2 id="ページ目rom-の適用範囲">8. 7 ページ目「ROM の適用範囲」</h2>
+<p>ここ（8-1〜8-4）を、発表の 7 ページ目に載せます。8-5
+は使ったプログラム、8-6 は話す内容です。6 ページ目の ROM は、OpenFOAM
+の計算 <strong>1 本</strong>（15 W を 0〜300 秒入れ、300〜600
+秒は切る）から作りました。そこで「作ったときと違う条件でも使えるか」を、OpenFOAM
+で新しく計算した条件と比べて確かめました（詳しくは <a
+href="blog007.html">blog_007</a>）。</p>
+<h3 id="比べた-3-つの条件">8-1. 比べた 3 つの条件</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>ヒータ</th>
+<th>ROM を作るときに見たか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W・0〜300 秒</td>
+<td>15 W を 0〜300 秒</td>
+<td><strong>見た</strong>（この計算から作った）</td>
+</tr>
+<tr class="even">
+<td>25 W・0〜300 秒</td>
+<td>発熱量だけ 25 W</td>
+<td>見ていない（新しく計算）</td>
+</tr>
+<tr class="odd">
+<td>15 W 間欠加熱</td>
+<td>0〜150 秒と 300〜450 秒に 15 W</td>
+<td>見ていない（新しく計算）</td>
+</tr>
+</tbody>
+</table>
+<p>どれも、データ同化はせず、発熱量と ON/OFF を OpenFOAM
+と同じに与えて、ROM を 0 → 600 秒まで計算しました。</p>
+<h3 id="結果発熱量や加熱のしかたが変わっても使える">8-2.
+結果：発熱量や加熱のしかたが変わっても使える</h3>
+<figure>
+<img src="img/rom_applicability.png" alt="ROM の適用範囲" />
+<figcaption aria-hidden="true">ROM の適用範囲</figcaption>
+</figure>
+<p><em>図 8　OpenFOAM（太い薄い線）と ROM（細い破線）の代表 5
+点の温度（上）と、その差（下）。下の帯は温度計のノイズ ±0.30
+K。左から、ROM を作った条件、25 W、間欠加熱。右の点線は参考で、ON/OFF
+を与えず「0〜300 秒ずっと発熱」と決め打ちした ROM。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">最大の温度上昇</th>
+<th style="text-align: right;">ROM の誤差（5 点の最大）</th>
+<th style="text-align: right;">温度上昇に対する比</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（作った条件）</td>
+<td style="text-align: right;">5.8 K</td>
+<td style="text-align: right;">0.038 K</td>
+<td style="text-align: right;">0.7 %</td>
+</tr>
+<tr class="even">
+<td><strong>25 W</strong></td>
+<td style="text-align: right;">9.6 K</td>
+<td style="text-align: right;"><strong>0.109 K</strong></td>
+<td style="text-align: right;">1.1 %</td>
+</tr>
+<tr class="odd">
+<td><strong>間欠加熱</strong>（ON/OFF を与える）</td>
+<td style="text-align: right;">5.7 K</td>
+<td style="text-align: right;"><strong>0.038 K</strong></td>
+<td style="text-align: right;">0.7 %</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>どの条件でも、ROM の誤差は温度計のノイズ（0.3
+K）より小さく収まりました。</li>
+<li>間欠加熱では、<strong>ヒータがいつ入っているかを ROM
+に教える</strong>必要があります。教えずに「0〜300
+秒ずっと発熱」のままにすると、最大 3.8 K 外れます（図 8
+の右の点線）。</li>
+</ul>
+<p>同じ結果に、ヒータの発熱（灰色の面、右の目盛り）を重ねて、字を大きくしたのが図
+8b
+です（発表用）。ヒータが入っている間に温度が上がり、切れると下がる様子と、ROM
+がそれに付いていく様子が 1 枚で見えます。</p>
+<figure>
+<img src="img/rom_applicability_heater.png"
+alt="ROM の適用範囲（ヒータの発熱を重ねた版）" />
+<figcaption aria-hidden="true">ROM
+の適用範囲（ヒータの発熱を重ねた版）</figcaption>
+</figure>
+<p><em>図 8b　図 8
+の上段にヒータの発熱を重ねた版。灰色の面がヒータの発熱（右の目盛り、W）。下段は
+ROM − OpenFOAM、帯は温度計のノイズ ±0.3 K。図 8 の右の点線（ON/OFF
+を与えない ROM）は載せていない。</em></p>
+<h4
+id="代表点以外の場所rom-から戻した温度分布も-openfoam-と合う">代表点以外の場所：ROM
+から戻した温度分布も OpenFOAM と合う</h4>
+<p>上の比較は代表 5 点の温度だけです。そこで、ROM の 5 点の温度から
+gappy-POD で全 20,696 セルの温度を戻し（<span
+class="math inline">\(\mathbf T = \bar{\mathbf T} +
+\Phi\,\Phi_P^{-1}(\mathbf T_P - \bar{\mathbf T}_P)\)</span>、§7-4
+と同じ）、<strong>代表 5 点以外の 20,691 セル</strong>で OpenFOAM
+と比べました。データ同化はしていません。</p>
+<figure>
+<img src="img/rom_field_vs_openfoam.png"
+alt="ROM から戻した温度分布と OpenFOAM（代表点以外）" />
+<figcaption aria-hidden="true">ROM から戻した温度分布と
+OpenFOAM（代表点以外）</figcaption>
+</figure>
+<p><em>図 8c　上：代表点以外の 3 か所の温度。T2（上面・ヒータ側、(26.6,
+−1.6, 98.8) mm）、T4（上面・横の +y 側、(1.6, 26.6, 98.8)
+mm）、T3（上面・反対側、(−26.6, −1.6, 98.8) mm）で、上面をヒータ側から
+0°・90°・180° 回った 3 か所（場所は図 8d）。T2・T3 は §11 と同じセル、T4
+は §11 の T4（反対側・中段）とは別の場所。太い薄い線が OpenFOAM、破線が
+ROM
+から戻した温度、黄色の面がヒータの発熱（右の目盛り、W）。ヒータから離れるほど（T2
+→ T4 →
+T3）温度の上がり方が遅い。下：代表点以外の全セルでの差（紫＝RMSE、灰＝最大の差、紫の点線＝OpenFOAM
+の温度を 5 つの型で一番よく表したときの RMSE）。</em></p>
+<figure>
+<img src="img/rom_field_points.png" alt="図 8c で温度を比べた場所" />
+<figcaption aria-hidden="true">図 8c で温度を比べた場所</figcaption>
+</figure>
+<p><em>図 8d　図 8c で代表点以外の温度を比べた 3 か所（T2 赤・T3 青・T4
+緑、図 8c の線と同じ色）と、代表点
+P0〜P4（灰）、代表点どうしをつなぐ熱回路の熱コンダクタンス
+K（灰の線、太いほど K が大きい。§7-4 の図 7 と同じ 6
+本）、ヒータ（薄い赤、外周の +x 側、高さ 25〜75 mm）。斜めから見た図。3
+か所とも上面で、ヒータからの向きだけが違う（T2 0°、T4 90°、T3
+180°）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">RMSE の最大</th>
+<th style="text-align: right;">最大の差</th>
+<th style="text-align: right;">5 つの型で表せる限界（RMSE）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（作った条件）</td>
+<td style="text-align: right;">0.03 K</td>
+<td style="text-align: right;">0.04 K</td>
+<td style="text-align: right;">0.003 K</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">0.08 K</td>
+<td style="text-align: right;">0.11 K</td>
+<td style="text-align: right;">0.005 K</td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td style="text-align: right;">0.02 K</td>
+<td style="text-align: right;">0.05 K</td>
+<td style="text-align: right;">0.004 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>代表点以外のどの場所でも、差は温度計のノイズ（0.3
+K）より小さく収まりました。5
+点の温度が合えば、温度分布全体も合います。</li>
+<li>「5 つの型で表せる限界」は 0.005 K
+以下です。残っている差のほとんどは、型が 5
+つしかないことではなく、ROM（熱回路）が出す 5
+点の温度のずれから来ています。</li>
+<li>25 W では、600 秒に向かって差が大きくなります。§7-4 で見た「ROM
+の放熱 <span class="math inline">\(h\)</span>
+が物理の値より小さい」ことと合っていますが、原因かどうかは確かめていません。</li>
+</ul>
+<h3 id="使えるかどうかの決め手温度分布の型が変わるかどうか">8-3.
+使えるかどうかの決め手：温度分布の「型」が変わるかどうか</h3>
+<p>ROM の温度は、POD の型（固定）の足し合わせ <span
+class="math inline">\(\mathbf u(t) \approx \bar{\mathbf u} + \sum_k
+a_k(t)\,\boldsymbol\varphi_k\)</span>
+で表しています。条件が変わって動くのは混ぜ具合 <span
+class="math inline">\(a_k(t)\)</span> だけで、型 <span
+class="math inline">\(\boldsymbol\varphi_k\)</span> は変わりません。</p>
+<p>新しい条件の OpenFOAM の温度を、5
+つの型で最も近く表したときに残る誤差（全 20,696
+セル）は次のとおりで、どれも型で表せました。</p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">型で表したときに残る誤差</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（作った条件）</td>
+<td style="text-align: right;">0.0007 K</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">0.0029 K</td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td style="text-align: right;">0.0019 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>型の組み合わせで表せる変化</strong>（全体の温まり方が強い・弱い、ON/OFF
+の時間が違う）→ 使える</li>
+<li><strong>型そのものが変わる変化</strong>（熱い場所が移る、冷え方の分布が変わる）→
+使えない（作り直し）</li>
+</ul>
+<h3 id="作り直しが必要なもの">8-4. 作り直しが必要なもの</h3>
+<table>
+<thead>
+<tr class="header">
+<th>変わるもの</th>
+<th>作り直しが必要な理由</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>熱源の位置・数</td>
+<td>熱い場所が変わり、温度分布の型が変わる</td>
+</tr>
+<tr class="even">
+<td>形状・メッシュ</td>
+<td>型がセルに結び付いている</td>
+</tr>
+<tr class="odd">
+<td>材料（熱伝導率・熱容量）</td>
+<td>ROM の係数が変わる</td>
+</tr>
+<tr class="even">
+<td>拘束（固定のしかた）</td>
+<td>温度から変位への換算が変わる</td>
+</tr>
+</tbody>
+</table>
+<p>作り直すには、OpenFOAM の計算（1 本あたり約 1〜3
+時間）からやり直します。手順はスクリプトにしてあります。</p>
+<p>確かめていない条件：25 W より大きく外れた発熱量、ランプ状の発熱や 30
+秒より短い ON/OFF、600 秒より長い運転（OpenFOAM
+との比較）、周囲温度の変化、実機。</p>
+<h3 id="使ったプログラム-3">8-5. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/limit_realsolver_truth.py</code></td>
+<td>25 W・間欠加熱の OpenFOAM の結果を読み、ROM と比べる。5
+つの型で表したときに残る誤差も計算</td>
+</tr>
+<tr class="even">
+<td><code>run/rom_alone_intermittent.py</code></td>
+<td>間欠加熱で、ON/OFF を与えた ROM と与えない ROM を比べる（図 8
+の右の列）</td>
+</tr>
+<tr class="odd">
+<td><code>dacore/rom_general.py</code> の
+<code>heater_power_W</code></td>
+<td>ヒータの発熱の時間変化。間欠加熱ではこの関数を差し替える</td>
+</tr>
+<tr class="even">
+<td><code>run/make_rom_applicability_fig.py --heater</code></td>
+<td>図 8b（ヒータの発熱を重ねた版）。<code>--heater</code> なしで図
+8</td>
+</tr>
+<tr class="odd">
+<td><code>run/rom_field_vs_openfoam.py</code></td>
+<td>図 8c。ROM → gappy-POD で全セルの温度を戻し、代表点以外で OpenFOAM
+と比べる（<code>results/rom_field_vs_openfoam.json</code>）</td>
+</tr>
+<tr class="even">
+<td><code>run/make_rom_field_points_fig.py</code></td>
+<td>図 8d。図 8c で温度を比べた場所・代表点・ヒータの図</td>
+</tr>
+</tbody>
+</table>
+<p>最初の ROM では、ヒータの時間変化が「0〜300
+秒だけ発熱」と書き込まれていました（<code>dacore/rom_general.py</code>）。間欠加熱ではここを実際の
+ON/OFF に差し替えます。</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>HEATER_ON_S <span class="op">=</span> <span class="fl">300.0</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-2">8-6. 7 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>ROM は OpenFOAM の計算 1 本から作ったが、発熱量（25
+W）や加熱のしかた（間欠加熱）が変わっても、作り直さずに使えた（誤差
+0.04〜0.11 K、温度計のノイズ以下）。</li>
+<li>間欠加熱では、ヒータがいつ入っているかを ROM
+に与える必要がある。</li>
+<li>5 点の温度から戻した温度分布も、代表点以外の場所で OpenFOAM
+と合った（RMSE 0.02〜0.08 K）。</li>
+<li>使えるかどうかは、温度分布の「型」が変わるかどうかで決まる。熱源の位置や形が変わったら作り直し。</li>
+</ul>
+<hr />
+<h2 id="ページ目データ同化の流れ">9. 8 ページ目「データ同化の流れ」</h2>
+<p>ここ（9-1〜9-4）を、発表の 8 ページ目に載せます。9-5
+は使ったプログラム、9-6 は話す内容です。6・7 ページ目の ROM
+を予報のモデルにして、EnKF で 30 秒ごとに観測を取り込みます（詳しくは <a
+href="blog006.html">blog_006 §3</a>）。</p>
+<h3 id="推定するもの状態7-つの数">9-1. 推定するもの（状態）：7
+つの数</h3>
+<p><span class="math display">\[
+\mathbf z = \big(T_0,\ T_1,\ T_2,\ T_3,\ T_4,\ q,\ h\big)^{\mathsf T}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(T_0 \ldots T_4\)</span>：代表 5
+点（P0〜P4）の温度</li>
+<li><span class="math inline">\(q\)</span>：発熱の倍率（発熱量 <span
+class="math inline">\(Q = 15\,q\)</span> [W]）</li>
+<li><span class="math inline">\(h\)</span>：空気への放熱 [W/K]</li>
+<li><strong>変位は状態に入れません。</strong> 変位は 5
+点の温度から計算できるからです（9-3）。</li>
+</ul>
+<p>最初は、7 つの数を少しずつ変えた 60
+通り（メンバー）を用意します。</p>
+<table>
+<thead>
+<tr class="header">
+<th>成分</th>
+<th>最初のばらつかせ方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度</td>
+<td>気温 20 ℃ から −3〜+12 K（一様乱数）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span></td>
+<td>0.3〜1.8（発熱量 4.5〜27 W）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(h\)</span></td>
+<td>平均 0.02、標準偏差 0.01 W/K</td>
+</tr>
+</tbody>
+</table>
+<h3 id="サイクルの-4-ステップ">9-2. 1 サイクルの 4 ステップ</h3>
+<figure>
+<img src="img/slide_da_cycle.png" alt="データ同化の 1 サイクル" />
+<figcaption aria-hidden="true">データ同化の 1 サイクル</figcaption>
+</figure>
+<p><em>図 9　データ同化の 1 サイクル。ROM は 2 秒刻みで進め、30
+秒ごとに補正する（600 秒で 20 回）。</em></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>ステップ</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>① ROM で予報</td>
+<td>60 メンバーそれぞれを、ROM で 30 秒進める（2 秒刻み × 15
+回）。計算するのは代表 5 点の温度だけ</td>
+</tr>
+<tr class="even">
+<td>② センサの値を予想</td>
+<td>各メンバーについて「このメンバーの状態が正しいなら、センサは何を示すはずか」を計算する</td>
+</tr>
+<tr class="odd">
+<td>③ EnKF で補正</td>
+<td>予想と実測のずれに、重み（カルマンゲイン）を掛けて、5
+点の温度・<span class="math inline">\(q\)</span><code>・</code><span
+class="math inline">\(h\)</span> を直す</td>
+</tr>
+<tr class="even">
+<td>④ 次の予報へ</td>
+<td>直した 5 点の温度を次の初期値、直した <span
+class="math inline">\(q\)</span><code>・</code><span
+class="math inline">\(h\)</span> を次の発熱・放熱の条件にして、次の 30
+秒を予報する</td>
+</tr>
+</tbody>
+</table>
+<p>予報している 30
+秒の間はセンサを使わず、補正する瞬間は時間を進めません。この 2
+つを交互にくりかえします。</p>
+<h4 id="enkf-の計算のイメージ本番の計算から">EnKF
+の計算のイメージ（本番の計算から）</h4>
+<p>下の図は、上の 4 ステップを実際に回したときの、60
+メンバーの動きです（15 W の正解、温度計 P2・P0、ノイズ 0.3 K、§9
+と同じ設定）。描いているのは P2 の温度だけです。</p>
+<figure>
+<img src="img/enkf_image.png" alt="EnKF の計算のイメージ" />
+<figcaption aria-hidden="true">EnKF の計算のイメージ</figcaption>
+</figure>
+<p><em>図 9b　左：各時刻での散らばり。点線と白丸が予報（ROM で 30
+秒進めた 60
+メンバー）、緑のひし形が観測、実線と赤丸が補正後。青い破線は、補正後の各メンバーを
+ROM で次の時刻まで進める「1 期先予測」（6 本に 1
+本だけ描いた）。右：メンバーの時刻歴（灰、30 本）と平均（赤）。30
+秒ごとに、観測に寄せられて縦に跳ぶ。作図：<code>presentation/make_enkf_image_figure.py</code>。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>時刻</th>
+<th>予報の平均・幅</th>
+<th>観測</th>
+<th>補正後の平均・幅</th>
+<th>正解</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>30 秒</td>
+<td>26.35 °C ± 2.14 K</td>
+<td>21.39 °C</td>
+<td>21.43 °C ± 0.30 K</td>
+<td>21.66 °C</td>
+</tr>
+<tr class="even">
+<td>60 秒</td>
+<td>22.19 °C ± 0.88 K</td>
+<td>22.74 °C</td>
+<td>22.83 °C ± 0.28 K</td>
+<td>22.40 °C</td>
+</tr>
+<tr class="odd">
+<td>90 秒</td>
+<td>23.75 °C ± 0.47 K</td>
+<td>22.63 °C</td>
+<td>22.86 °C ± 0.24 K</td>
+<td>22.95 °C</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>最初は、発熱 <span class="math inline">\(q\)</span>
+や初期温度が分からないので、予報が大きく散らばっています（± 2.1 K）。1
+回目の補正で、観測の近くに寄ります。</li>
+<li>補正後の幅は、温度計のノイズ（0.3
+K）と同じくらいになります。予報の幅は、<span
+class="math inline">\(q\)</span>・<span class="math inline">\(h\)</span>
+が絞られるにつれて小さくなります（2.1 → 0.9 → 0.5 K）。</li>
+<li>補正後の平均は、観測そのものではなく、予報と観測の間に入ります（90
+秒：予報 23.75、観測 22.63 → 補正後 22.86
+°C）。どちらをどれだけ信じるかを、散らばりの大きさから決めるのがカルマンゲインです。</li>
+</ul>
+<h3 id="センサの値の予想観測演算子どれも5-点の温度の一次式">9-3.
+センサの値の予想（観測演算子）：どれも「5 点の温度の一次式」</h3>
+<p>センサは代表 5 点に置かなくてかまいません。どのセンサの値も、5
+点の温度に重みを掛けて足した形で予想できるからです。</p>
+<p><span class="math display">\[
+y_c = \mathbf h_c^{\mathsf T}\,\delta\mathbf T_P
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\delta\mathbf T_P\)</span>：代表 5
+点の温度（基準からの差）</li>
+<li><strong>温度計</strong>：<span class="math inline">\(\mathbf
+h_c^{\mathsf T}\)</span> は、5 点の温度から全セルを戻す gappy-POD
+の、その場所の行</li>
+<li><strong>変位計</strong>：<span class="math inline">\(\mathbf
+h_c^{\mathsf T}\)</span> は、POD の型ごとに FrontISTR
+で前もって計算しておいた変位（熱感度）の、その場所・向きの行</li>
+</ul>
+<p>重みはデータ同化を始める前に 1
+回計算しておくので、<strong>データ同化の中で OpenFOAM も FrontISTR
+も回しません</strong>。</p>
+<h3 id="補正の式">9-4. 補正の式</h3>
+<p>メンバー <span class="math inline">\(m\)</span> ごとに、次の 1
+式で直します。</p>
+<p><span class="math display">\[
+\mathbf z_a^{(m)} = \mathbf z_f^{(m)} + K\left(\mathbf y_{\mathrm{obs}}
++ \boldsymbol\varepsilon^{(m)} - \mathbf y_f^{(m)}\right),\qquad
+K = P_{zy}\left(P_{yy} + R\right)^{-1}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(\mathbf
+z_f\)</span><code>：補正前（予報）、</code><span
+class="math inline">\(\mathbf z_a\)</span>：補正後</li>
+<li><span class="math inline">\(\mathbf
+y_f\)</span><code>：センサの値の予想、</code><span
+class="math inline">\(\mathbf
+y_{\mathrm{obs}}\)</span><code>：実測、</code><span
+class="math inline">\(\boldsymbol\varepsilon^{(m)}\)</span>：メンバーごとに足す観測の乱数</li>
+<li><span
+class="math inline">\(P_{zy}\)</span><code>：「状態」と「センサの予想」が 60 メンバーの中で一緒に動く度合い（共分散）、</code><span
+class="math inline">\(P_{yy}\)</span><code>：センサの予想のばらつき、</code><span
+class="math inline">\(R\)</span>：センサの誤差</li>
+</ul>
+<p><span class="math inline">\(P_{zy}\)</span> の中には、<span
+class="math inline">\(q\)</span>
+とセンサの予想の関係も入っています。そのため、温度や変位のずれから<strong>発熱量も直せます</strong>。</p>
+<table>
+<thead>
+<tr class="header">
+<th>設定</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>メンバー数</td>
+<td>60</td>
+</tr>
+<tr class="even">
+<td>補正の間隔・回数</td>
+<td>30 秒ごと、600 秒で 20 回</td>
+</tr>
+<tr class="odd">
+<td>センサの誤差（乱数の大きさ）</td>
+<td>温度 0.30 K、変位 0.30 µm</td>
+</tr>
+<tr class="even">
+<td>ばらつきを保つための膨張</td>
+<td>1.02 倍</td>
+</tr>
+<tr class="odd">
+<td>乱数を変えた計算</td>
+<td>5 回（seed 20260913〜17）の平均で評価</td>
+</tr>
+</tbody>
+</table>
+<h3 id="使ったプログラム-4">9-5. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dacore/rom_general.py</code></td>
+<td>① ROM で 60 メンバーを 30 秒進める</td>
+</tr>
+<tr class="even">
+<td><code>run/holdout_AO_realsolver.py</code></td>
+<td>② センサの値の予想（5 点の温度の一次式）、③
+<code>dacore/enkf.py</code> で補正、④ 次へ、を 20 回</td>
+</tr>
+<tr class="odd">
+<td><code>run/build_full_disp_operator.py</code></td>
+<td>変位計の重み（POD の型ごとの FrontISTR
+の変位）を前もって計算する</td>
+</tr>
+</tbody>
+</table>
+<p>1 サイクル（<code>run/holdout_AO_realsolver.py</code>、抜粋）：</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ci, tb <span class="kw">in</span> <span class="bu">enumerate</span>(cyc, <span class="dv">1</span>):                    <span class="co"># 30 秒ごとに 20 回</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Z[:, :NPT] <span class="op">=</span> integ_on(Z[:, :NPT], C, Km, Z[:, IH], Z[:, IQ], heat, on, tp, tb)   <span class="co"># ① ROM で予報</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    yv <span class="op">=</span> <span class="bu">list</span>(T5[ci][TN])<span class="op">;</span> Yf <span class="op">=</span> Z[:, TN]            <span class="co"># ② 温度計の予想 = その代表点の温度</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i, c), w, b0 <span class="kw">in</span> <span class="bu">zip</span>(obs, ws, u0):          <span class="co">#    変位計の予想 = 5 点の温度の一次式</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        yv.append(utrue[ci, i, c])</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> np.column_stack([Yf, b0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mp) <span class="op">@</span> w])</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.array(yv) <span class="op">+</span> ro.normal(<span class="dv">0</span>, np.sqrt(np.diag(Rd)))   <span class="co"># 実測（正解 + 誤差）</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)   <span class="co"># ③ 補正（5 点の温度・q・h）</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-30-秒-1">9-6. 8 ページ目で言うこと（約
+1 分 30 秒）</h3>
+<ul>
+<li>ROM が持つのは、代表 5 点の温度と、発熱・放熱の 7 つの数。これを 60
+通り同時に回す。</li>
+<li>30 秒ごとに、センサの値を予想し、実測とのずれで 7
+つの数を直して、次の予報に渡す。</li>
+<li>センサは代表 5 点でなくてよい。温度も変位も「5
+点の温度の一次式」で予想できるので、データ同化の中で OpenFOAM・FrontISTR
+は回さない。</li>
+<li>状態とセンサの関係から、温度や変位のずれで発熱量まで直せる。</li>
+</ul>
+<hr />
+<h2 id="ページ目データ同化で試したこと">10. 9
+ページ目「データ同化で試したこと」</h2>
+<p>ここ（10-1〜10-4）を、発表の 9 ページ目に載せます。10-5
+は使ったプログラム、10-6 は話す内容です。8
+ページ目の流れで、<strong>一度も測らない場所の反りを当てられるか</strong>を試しました（詳しくは
+<a href="blog008.html">blog_008
+§6</a>、数値は 2026-10-12 に IDW で計算し直したもの）。</p>
+<h3 id="種類の点代表点観測点未観測点">10-1. 3
+種類の点：代表点・観測点・未観測点</h3>
+<figure>
+<img src="img/blog008_obs_points.png" alt="観測点と評価点" />
+<figcaption aria-hidden="true">観測点と評価点</figcaption>
+</figure>
+<p><em>図 10　点の場所。赤＝温度計（P2・P0）、緑＝選んだ変位計 2
+点（S1・S2）、黒＝評価点
+A・O（一度も測らない）。左は斜めから、右は真上から見た図。</em></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>種類</th>
+<th>点</th>
+<th>何のための点か</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>代表点</strong></td>
+<td>P0〜P4（Q-DEIM で選んだ 5 セル）</td>
+<td>ROM が温度を計算する点。センサを置く点ではない</td>
+</tr>
+<tr class="even">
+<td><strong>観測点</strong></td>
+<td>温度計 P2・P0（ヒータ側の中段）／変位計 S1・S2（上面、S1 は横方向
+<span class="math inline">\(U_x\)</span>、S2 は上下方向 <span
+class="math inline">\(U_z\)</span>）</td>
+<td>実際に測って、データ同化に使う点</td>
+</tr>
+<tr class="odd">
+<td><strong>未観測点（評価点）</strong></td>
+<td>上面のヒータ側 A と反対側 O</td>
+<td><strong>一度も測らない</strong>。推定した反り <span
+class="math inline">\(U_z(A) - U_z(O)\)</span>
+を、正解と比べるためだけに使う</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>代表点のうち P1・P3・P4
+には温度計がありません。それでもデータ同化で温度が直るかを見ます。</li>
+<li>評価点 A・O
+は工具先端の代わりです。「測れない場所」を、測れる場所の観測から当てられるかを見ます。</li>
+</ul>
+<h3 id="計算ケース">10-2. 計算ケース</h3>
+<p><strong>正解</strong>は OpenFOAM＋FrontISTR
+で計算した温度と変位です（ROM とは別の計算）。3
+つの加熱の条件で試しました。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>ヒータ</th>
+<th>ROM を作るときに見たか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td>15 W を 0〜300 秒</td>
+<td>見た</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td>25 W を 0〜300 秒</td>
+<td>見ていない</td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td>15 W を 0〜150 秒と 300〜450 秒</td>
+<td>見ていない（ON/OFF の時刻は与える）</td>
+</tr>
+</tbody>
+</table>
+<p>温度計はどれも P2・P0 の 2
+本で、変位計の置き方を変えて比べました。</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>観測の組み合わせ</th>
+<th>変位計の置き方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度 2 点のみ</td>
+<td>なし</td>
+</tr>
+<tr class="even">
+<td>＋A・O 自身を測る（参考）</td>
+<td>評価点 A・O に変位計を置く（測れない場所を測った場合）</td>
+</tr>
+<tr class="odd">
+<td>＋中段の 2 点（B・C）</td>
+<td>中段（高さ 75 mm）の 2 点</td>
+</tr>
+<tr class="even">
+<td>＋底面近くの 2 点（悪い例）</td>
+<td>底面近く（高さ 5 mm）の 2 点</td>
+</tr>
+<tr class="odd">
+<td><strong>＋選んだ 2 点（本研究）</strong></td>
+<td><strong>上面の S1・S2</strong>（選び方は次のページ）</td>
+</tr>
+</tbody>
+</table>
+<p>EnKF の設定は 8 ページ目のとおりです（60 メンバー、30 秒ごと、5
+回の乱数の平均）。誤差は、加熱している 30〜300 秒の平均です。</p>
+<h3 id="計算結果">10-3. 計算結果</h3>
+<figure>
+<img src="img/ver3_slide.png" alt="反りと温度の時刻歴" />
+<figcaption aria-hidden="true">反りと温度の時刻歴</figcaption>
+</figure>
+<p><em>図 11　上：温度計のない代表点 P4 の温度。下：一度も測らない反り
+A−O。黒が正解（OpenFOAM＋FrontISTR）、灰が温度 2 点だけ、青が A・O
+自身を測った場合（参考）、赤が選んだ 2 点（本研究）。</em></p>
+<p><strong>一度も測らない反り A−O の誤差 [µm]</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>観測の組み合わせ</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度 2 点のみ</td>
+<td style="text-align: right;">0.775</td>
+<td style="text-align: right;">1.417</td>
+<td style="text-align: right;">0.635</td>
+</tr>
+<tr class="even">
+<td>＋A・O 自身を測る（参考）</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.154</td>
+<td style="text-align: right;">0.100</td>
+</tr>
+<tr class="odd">
+<td>＋中段の 2 点（B・C）</td>
+<td style="text-align: right;">0.186</td>
+<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.142</td>
+</tr>
+<tr class="even">
+<td>＋底面近くの 2 点（悪い例）</td>
+<td style="text-align: right;">0.587</td>
+<td style="text-align: right;">1.100</td>
+<td style="text-align: right;">0.487</td>
+</tr>
+<tr class="odd">
+<td><strong>＋選んだ 2 点（本研究）</strong></td>
+<td style="text-align: right;"><strong>0.076</strong></td>
+<td style="text-align: right;"><strong>0.083</strong></td>
+<td style="text-align: right;"><strong>0.072</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（<code>results/holdout_AO_realsolver.json</code>）</p>
+<ul>
+<li><strong>温度 2 点だけでは、反りが合わない</strong>（0.6〜1.4
+µm）。温度計のない P4 の温度も、加熱の初めに 1.5 K 以上ずれます（図 11
+上の灰）。</li>
+<li><strong>変位を 2 点足すと、測っていない反りが当たる</strong>。選んだ
+2 点では 0.07〜0.08 µm で、3 条件とも同じ結果でした。</li>
+<li><strong>A・O を直接測るより、選んだ別の 2
+点のほうが正確</strong>（0.076 対 0.137 µm）。</li>
+<li><strong>置き場所が悪いと効かない</strong>。底面近くでは 0.5〜1.1 µm
+で、温度 2 点だけとあまり変わりません。</li>
+</ul>
+<h3 id="分かったこと">10-4. 分かったこと</h3>
+<ul>
+<li>変位は温度場全体の重み付き和なので、変位計 1
+本が温度計のない場所の温度まで直します（図 11 上の P4）。</li>
+<li>ただし、<strong>どこに置くかで結果が大きく変わる</strong>（0.076 〜
+0.587 µm）。置き場所の選び方が大事になります（11 ページ目）。</li>
+</ul>
+<h3 id="使ったプログラム-5">10-5. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/holdout_AO_realsolver.py</code></td>
+<td>3 条件 × 5 通りの観測 × 5 回の乱数でデータ同化し、一度も測らない反り
+A−O の誤差を計算（<code>results/holdout_AO_realsolver.json</code>）</td>
+</tr>
+<tr class="even">
+<td><code>dacore/temperature_mapping.py</code></td>
+<td>正解の OpenFOAM の温度を、FrontISTR の節点へ IDW で渡す（近い 8
+セルを距離の逆数で重み付け）</td>
+</tr>
+</tbody>
+</table>
+<p>反りの推定（同じスクリプト、抜粋）：直した 5 点の温度の平均から、A・O
+の変位を一次式で計算します。</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Z[:, :NPT].mean(<span class="dv">0</span>)<span class="op">;</span> dm <span class="op">=</span> m <span class="op">-</span> mp                  <span class="co"># 直した 5 点の温度（平均）の、基準からの差</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>est <span class="op">=</span> (aA <span class="op">+</span> wA <span class="op">@</span> dm) <span class="op">-</span> (aO <span class="op">+</span> wO <span class="op">@</span> dm)                <span class="co"># 反り = U_z(A) − U_z(O)（どちらも 5 点の温度の一次式）</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>eAO.append(<span class="bu">abs</span>(est <span class="op">-</span> aot[ci]))                       <span class="co"># 正解（OpenFOAM＋FrontISTR）との差</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-2-分">10-6. 9 ページ目で言うこと（約 2
+分）</h3>
+<ul>
+<li>点は 3 種類。ROM
+が計算する代表点、実際に測る観測点、一度も測らずに答え合わせだけに使う評価点
+A・O。</li>
+<li>温度 2 点だけでは、測っていない反りが合わない（0.78 µm）。</li>
+<li>選んだ変位 2 点を足すと、測っていない反りが 0.076 µm
+まで当たり、A・O を直接測る（0.137 µm）より正確だった。発熱量 25
+W・間欠加熱でも同じ。</li>
+<li>置き場所が悪いと効かない。どう選ぶかは 11
+ページ目で示す。次のページでは、測っていない場所の温度を見る。</li>
+</ul>
+<hr />
+<h2 id="ページ目未観測点の温度データ同化で測っていない場所も合う">11. 10
+ページ目「未観測点の温度：データ同化で、測っていない場所も合う」</h2>
+<p>ここ（11-1〜11-2）を、発表の 10 ページ目に載せます。11-3
+は使ったプログラム、11-4 は話す内容です。9
+ページ目は反り（変位）でした。このページでは、<strong>測っていない場所の温度</strong>も合うかを見ます。</p>
+<h3 id="やり方データ同化-gappy-pod-で全体の温度を戻す">11-1.
+やり方：データ同化 → gappy-POD で全体の温度を戻す</h3>
+<p>データ同化で直したのは代表 5 点の温度だけです。そこから gappy-POD
+で全 20,696
+セルの温度を戻し、観測していない場所の温度を正解（OpenFOAM）と比べました。</p>
+<p><span class="math display">\[
+\mathbf T_{\text{全体}} = \bar{\mathbf u} +
+\Phi\,\Phi_P^{+}\,\big(\mathbf T_P - \bar{\mathbf u}_P\big)
+\]</span></p>
+<p>（<span
+class="math inline">\(\Phi\)</span><code>：POD の型、</code><span
+class="math inline">\(\Phi_P\)</span><code>：その代表 5 点の行、</code><span
+class="math inline">\(^{+}\)</span><code>：擬似逆行列、</code><span
+class="math inline">\(\mathbf T_P\)</span>：直した代表 5 点の温度。5
+回の乱数の平均）</p>
+<p>比べた場所は、温度計のある P2・P0 とは別の 4
+か所（T1〜T4）です。どれも観測には使いません。</p>
+<figure>
+<img src="img/unobserved_points.png" alt="未観測点の場所" />
+<figcaption aria-hidden="true">未観測点の場所</figcaption>
+</figure>
+<p><em>図 12a　温度を比べた未観測点 T1〜T4（紫）と、温度計
+P2・P0（赤）、変位計 S1・S2（緑）、反りの評価点
+A・O（黒）。左は斜めから、右は真上から見た図。ヒータは +x
+側（右）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>点</th>
+<th>場所</th>
+<th>座標 (x, y, z) [mm]</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>T1</td>
+<td>代表点 P4。反対側の底面近く（温度計なし）</td>
+<td>(−35.1, 0.8, 0.8)</td>
+</tr>
+<tr class="even">
+<td>T2</td>
+<td>上面・ヒータ側（評価点 A の近く）</td>
+<td>(26.6, −1.6, 98.8)</td>
+</tr>
+<tr class="odd">
+<td>T3</td>
+<td>上面・反対側（評価点 O の近く）</td>
+<td>(−26.6, −1.6, 98.8)</td>
+</tr>
+<tr class="even">
+<td>T4</td>
+<td>反対側・中段</td>
+<td>(−28.5, −3.2, 46.9)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="結果">11-2. 結果</h3>
+<figure>
+<img src="img/holdout_unobserved_cells.png" alt="未観測点の温度" />
+<figcaption aria-hidden="true">未観測点の温度</figcaption>
+</figure>
+<p><em>図 12　未観測点 T1〜T4
+の温度（行：加熱の条件、列：場所）。黒が正解（OpenFOAM）、灰が温度 2
+点だけ、赤が温度 2 点＋選んだ変位 2
+点（本研究）。どちらもデータ同化で直した代表 5 点から gappy-POD
+で戻した温度。T1（P4）は代表点だが温度計はない。T2〜T4
+は代表点でもない。</em></p>
+<figure>
+<img src="img/holdout_field_rmse.png" alt="全セルの温度の誤差" />
+<figcaption aria-hidden="true">全セルの温度の誤差</figcaption>
+</figure>
+<p><em>図 13　全 20,696 セルの温度の RMSE の時間変化。かっこ内は加熱期
+30〜300 秒の平均。</em></p>
+<p><strong>観測していない場所の温度の誤差（加熱期 30〜300
+秒の平均）[K]</strong></p>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th>観測</th>
+<th style="text-align: right;">全セル（RMSE）</th>
+<th style="text-align: right;">T1（P4）</th>
+<th style="text-align: right;">T2 上面・ヒータ側</th>
+<th style="text-align: right;">T3 上面・反対側</th>
+<th style="text-align: right;">T4 反対側・中段</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W</td>
+<td>温度 2 点のみ</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.89</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">0.73</td>
+</tr>
+<tr class="even">
+<td>15 W</td>
+<td><strong>＋選んだ変位 2 点</strong></td>
+<td style="text-align: right;"><strong>0.13</strong></td>
+<td style="text-align: right;"><strong>0.09</strong></td>
+<td style="text-align: right;"><strong>0.08</strong></td>
+<td style="text-align: right;"><strong>0.08</strong></td>
+<td style="text-align: right;"><strong>0.04</strong></td>
+</tr>
+<tr class="odd">
+<td>25 W</td>
+<td>温度 2 点のみ</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">1.47</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">1.47</td>
+<td style="text-align: right;">1.37</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td><strong>＋選んだ変位 2 点</strong></td>
+<td style="text-align: right;"><strong>0.14</strong></td>
+<td style="text-align: right;"><strong>0.07</strong></td>
+<td style="text-align: right;"><strong>0.13</strong></td>
+<td style="text-align: right;"><strong>0.05</strong></td>
+<td style="text-align: right;"><strong>0.07</strong></td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td>温度 2 点のみ</td>
+<td style="text-align: right;">0.53</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.64</td>
+</tr>
+<tr class="even">
+<td>間欠加熱</td>
+<td><strong>＋選んだ変位 2 点</strong></td>
+<td style="text-align: right;"><strong>0.12</strong></td>
+<td style="text-align: right;"><strong>0.08</strong></td>
+<td style="text-align: right;"><strong>0.08</strong></td>
+<td style="text-align: right;"><strong>0.07</strong></td>
+<td style="text-align: right;"><strong>0.04</strong></td>
+</tr>
+</tbody>
+</table>
+<p>（<code>run/holdout_unobserved_cells.py</code> →
+<code>results/holdout_unobserved_cells.json</code>。全セル以外は、その場所の温度の差の絶対値の平均）</p>
+<ul>
+<li><strong>温度 2
+点だけでは、ヒータと反対側の温度が合わない</strong>（0.6〜1.5
+K）。温度計がヒータ側（P2・P0）にしかないためです。</li>
+<li><strong>変位 2 点を足すと、反対側も含めて 0.04〜0.13 K
+まで合う</strong>。全セルでも 0.12〜0.14 K で、温度 2 点だけ（0.53〜0.88
+K）の 1/4〜1/6 です。</li>
+<li>誤差が大きいのは加熱の初め（0〜100
+秒）で、データ同化を重ねるにつれて小さくなります（図 13）。</li>
+</ul>
+<h3 id="使ったプログラム-6">11-3. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/make_unobserved_points_fig.py</code></td>
+<td>未観測点 T1〜T4 と観測点・評価点の場所の図（図 12a）</td>
+</tr>
+<tr class="even">
+<td><code>run/holdout_unobserved_cells.py</code></td>
+<td>9 ページ目と同じデータ同化（温度 2 点のみ／温度 2 点＋選んだ変位 2
+点）を 3 条件 × 5 回の乱数で回し、直した代表 5 点から gappy-POD
+で全セルの温度を戻して、OpenFOAM と比べる</td>
+</tr>
+</tbody>
+</table>
+<p>全体の温度を戻す
+gappy-POD（<code>run/holdout_unobserved_cells.py</code>）：</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>UPp <span class="op">=</span> np.linalg.pinv(U[pod, :])                      <span class="co"># 代表 5 点の行の擬似逆行列（5 × 5）</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recon(T5):                                       <span class="co"># 直した代表 5 点の温度 → 全 20,696 セル</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mean[<span class="va">None</span>, :] <span class="op">+</span> ((T5 <span class="op">-</span> mp) <span class="op">@</span> UPp.T) <span class="op">@</span> U.T <span class="co"># T = 平均 + Φ Φ_P⁺ (T_P − 平均_P)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>full <span class="op">=</span> recon(T5m)                                    <span class="co"># 各時刻の全セルの温度</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> np.sqrt(((full <span class="op">-</span> Tf) <span class="op">**</span> <span class="dv">2</span>).mean(<span class="dv">1</span>))           <span class="co"># 正解（OpenFOAM）との差</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-3">11-4. 10 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>データ同化で直すのは代表 5 点の温度だけ。そこから gappy-POD
+で全体の温度を戻す。</li>
+<li>温度 2 点だけでは、温度計のないヒータの反対側が 0.6〜1.5 K
+ずれる。</li>
+<li>変位 2 点を足すと、測っていない場所の温度も 0.04〜0.13 K
+で合い、全セルでも 0.12〜0.14 K（温度 2 点だけの 1/4〜1/6）。25
+W・間欠加熱でも同じ。</li>
+</ul>
+<hr />
+<h2 id="ページ目センサの置き場所fisher-情報行列">12. 11
+ページ目「センサの置き場所：Fisher 情報行列」</h2>
+<p>ここ（12-1〜12-5）を、発表の 11 ページ目に載せます。12-6
+は使ったプログラム、12-7 は話す内容です。9
+ページ目で「置き場所が悪いと効かない」ことが分かりました。どこに置けばよいかを、<strong>Fisher
+情報行列</strong>の考え方で示します。</p>
+<h3 id="fisher-情報行列その観測で知りたいものがどれだけ分かるか">12-1.
+Fisher 情報行列：その観測で、知りたいものがどれだけ分かるか</h3>
+<p>推定したいもの（未知の数）を <span
+class="math inline">\(\boldsymbol\theta\)</span>、センサの値を <span
+class="math inline">\(\mathbf y\)</span>
+とします。センサの値が未知の数でどれだけ変わるか（感度）を <span
+class="math inline">\(G = \partial \mathbf y / \partial
+\boldsymbol\theta\)</span>、センサの誤差の大きさを <span
+class="math inline">\(R\)</span> とすると、Fisher
+情報行列は次の式です。</p>
+<p><span class="math display">\[
+F = \sum_{k} G_k^{\mathsf T}\, R^{-1}\, G_k
+\]</span></p>
+<ul>
+<li><span class="math inline">\(k\)</span>
+は観測の時刻。時刻ごとの情報を足し合わせます。</li>
+<li><strong>感度が大きく、誤差が小さいほど、情報が多い</strong>（<span
+class="math inline">\(F\)</span> が大きい）。</li>
+<li><span class="math inline">\(R^{-1}\)</span>
+で割るので、温度（K）と変位（µm）の単位がそろい、<strong>温度計と変位計を同じものさしで比べられます</strong>。</li>
+<li>独立なセンサを足すと、<span class="math inline">\(F\)</span>
+は足し算になります（<span
+class="math inline">\(F_{\text{温度}+\text{変位}} = F_{\text{温度}} +
+F_{\text{変位}}\)</span>）。</li>
+</ul>
+<h4 id="fisher-情報量のイメージと上の式の出どころ">Fisher
+情報量のイメージと、上の式の出どころ</h4>
+<p>参考：<a
+href="https://qiita.com/nekokaitaiyo_ne/items/aee3f7152b984b3644bf">Fisher情報量と共分散行列（Qiita）</a>、<a
+href="https://note.com/kimukimucitrus/n/nace8ba84d129">フィッシャー情報量、どんなイメージ？（note）</a></p>
+<ol type="1">
+<li><strong>尤度</strong>：未知の数が <span
+class="math inline">\(\boldsymbol\theta\)</span> のとき、センサの値
+<span class="math inline">\(\mathbf y\)</span> が出る確からしさ <span
+class="math inline">\(p(\mathbf y \mid
+\boldsymbol\theta)\)</span>。</li>
+<li><strong>スコア関数</strong>：対数尤度を <span
+class="math inline">\(\boldsymbol\theta\)</span> で微分したもの <span
+class="math inline">\(\mathbf s = \partial \ln p / \partial
+\boldsymbol\theta\)</span>。正しい <span
+class="math inline">\(\boldsymbol\theta\)</span> では、平均は 0
+になる。</li>
+<li><strong>Fisher
+情報量</strong>：スコア関数のばらつき（分散）。対数尤度の 2
+階微分（山のとがり具合）の期待値にマイナスを付けたものと等しい。</li>
+</ol>
+<p><span class="math display">\[
+F = \mathrm E\!\left[\mathbf s\,\mathbf s^{\mathsf T}\right] =
+-\,\mathrm E\!\left[\frac{\partial^2 \ln p}{\partial
+\boldsymbol\theta\,\partial \boldsymbol\theta^{\mathsf T}}\right]
+\]</span></p>
+<p>尤度の山が鋭いほど（少し <span
+class="math inline">\(\boldsymbol\theta\)</span>
+がずれただけで、その観測が出にくくなるほど）、情報が多い。</p>
+<p><strong>センサの誤差が正規分布のとき</strong>：センサの値を <span
+class="math inline">\(\mathbf y = \mathbf g(\boldsymbol\theta) +
+\boldsymbol\varepsilon\)</span>（誤差 <span
+class="math inline">\(\boldsymbol\varepsilon\)</span> の共分散 <span
+class="math inline">\(R\)</span>）とすると、</p>
+<p><span class="math display">\[
+\ln p = -\tfrac12\,\big(\mathbf y - \mathbf
+g(\boldsymbol\theta)\big)^{\mathsf T} R^{-1} \big(\mathbf y - \mathbf
+g(\boldsymbol\theta)\big) + \text{定数}
+\]</span></p>
+<p>これを 2 回微分して期待値をとると、感度 <span class="math inline">\(G
+= \partial \mathbf g / \partial \boldsymbol\theta\)</span> を使って
+<span class="math inline">\(F = G^{\mathsf T} R^{-1} G\)</span>
+になります。これが上の式です。</p>
+<p><strong>推定のばらつきとの関係</strong>：どんな（偏りのない）推定でも、推定のばらつき（共分散）<span
+class="math inline">\(C\)</span> は <span
+class="math inline">\(F^{-1}\)</span>
+より小さくできません（クラメール・ラオの下限、<span
+class="math inline">\(C \succeq
+F^{-1}\)</span>）。データが多ければ、最尤推定のばらつきは <span
+class="math inline">\(F^{-1}\)</span>
+に近づきます。つまり、<strong><span class="math inline">\(F\)</span>
+を大きくする置き場所ほど、推定のばらつきを小さくできる</strong>。</p>
+<p>次の 12-2 は、これに「測る前の不確かさ」を加えたものです（<span
+class="math inline">\(F^{-1}\)</span> が <span
+class="math inline">\((B^{-1}+F)^{-1}\)</span> になる）。</p>
+<h3 id="測る前の不確かさと合わせる測った後に残る不確かさ">12-2.
+測る前の不確かさと合わせる：測った後に残る不確かさ</h3>
+<p>データ同化では、測る前にも「だいたいこのくらい」という不確かさ（事前の共分散
+<span
+class="math inline">\(B\)</span>）があります。モデルと観測の関係が線形で誤差が正規分布なら、測った後に残る不確かさは</p>
+<p><span class="math display">\[
+P = \left(B^{-1} + F\right)^{-1}
+\]</span></p>
+<p>です。置き場所の良し悪しは、この <span
+class="math inline">\(P\)</span>
+を何の基準で小さくするかで決まります。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>基準</th>
+<th>小さくするもの</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A 最適</td>
+<td><span class="math inline">\(\operatorname{tr} P\)</span></td>
+<td>5 点の温度の不確かさの合計</td>
+</tr>
+<tr class="even">
+<td>D 最適</td>
+<td><span class="math inline">\(\det P\)</span></td>
+<td>不確かさの体積</td>
+</tr>
+<tr class="odd">
+<td>E 最適</td>
+<td><span class="math inline">\(F\)</span> の最小固有値を大きく</td>
+<td>一番分かりにくい方向をなくす（発熱量と放熱の見分けなど）</td>
+</tr>
+<tr class="even">
+<td><strong>目的指向</strong></td>
+<td><span class="math inline">\(\mathbf w^{\mathsf T} P\, \mathbf
+w\)</span></td>
+<td><strong>知りたい量（反り <span class="math inline">\(d = \mathbf
+w^{\mathsf T}\delta\mathbf T_P\)</span>）の不確かさ</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="本研究で使った基準反りに対する目的指向">12-3.
+本研究で使った基準：反りに対する目的指向</h3>
+<p>本研究は、知りたいのが<strong>反り A−O</strong>
+なので、目的指向の基準を使いました。センサ <span
+class="math inline">\(c\)</span>（感度 <span
+class="math inline">\(\mathbf h_c\)</span>、誤差 <span
+class="math inline">\(r_c\)</span>）を 1 本足すと、情報は <span
+class="math inline">\(F\)</span> に <span class="math inline">\(\mathbf
+h_c \mathbf h_c^{\mathsf T}/r_c\)</span> が足され、反りの分散は</p>
+<p><span class="math display">\[
+\Delta_c = \frac{\big(\mathbf w^{\mathsf T} P_S\, \mathbf
+h_c\big)^2}{\mathbf h_c^{\mathsf T} P_S\, \mathbf h_c + r_c}
+\]</span></p>
+<p>だけ減ります（<span class="math inline">\(P_S\)</span>
+はすでに選んだセンサで測った後の不確かさ）。30〜300
+秒で平均した「残る反りの標準偏差」<span
+class="math inline">\(J_c\)</span> が最小の点を、1 本ずつ選びました（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/25_sensor_selection_theory_and_idw.md">docs/25</a>）。</p>
+<ul>
+<li>分子：その観測が、反りを変える温度の動きを捉えているか</li>
+<li>分母：観測の信号が、誤差に埋もれないか</li>
+<li>2 本目は、1 本目で測った後の <span
+class="math inline">\(P_S\)</span> で採点し直すので、1
+本目と同じ情報しか持たない点は選ばれにくい</li>
+</ul>
+<p>これは、12-2 の式（<span class="math inline">\(B^{-1} +
+F\)</span>）に 1 本ずつ情報を足していく計算そのものです。</p>
+<h4 id="理論式fisher-情報から最適なセンサを選ぶ手順">理論式：Fisher
+情報から最適なセンサを選ぶ手順</h4>
+<p><strong>できます。</strong> Fisher 情報は「センサ 1
+本ごとの情報の足し算」なので、候補を 1 本ずつ足したときの <span
+class="math inline">\(P\)</span>
+の変化を式で書け、それを基準にして選べます。</p>
+<p><strong>① センサ 1 本の情報。</strong> 候補 <span
+class="math inline">\(c\)</span> の値が <span class="math inline">\(y_c
+= \mathbf h_c^{\mathsf T}\boldsymbol\theta +
+\varepsilon_c\)</span>（誤差の分散 <span
+class="math inline">\(r_c\)</span>）なら、その Fisher 情報は 1
+階（ランク 1）の行列です。時刻 <span class="math inline">\(k\)</span>
+ごとに足すと、</p>
+<p><span class="math display">\[
+F_c = \sum_k \frac{\mathbf h_{c,k}\,\mathbf h_{c,k}^{\mathsf T}}{r_c}
+\]</span></p>
+<ul>
+<li>温度計なら <span class="math inline">\(\mathbf h_c\)</span>
+は「その場所の温度が代表 5 点の温度でどう表されるか」（gappy-POD の行
+<span
+class="math inline">\(\Phi_c\Phi_P^{-1}\)</span>）、変位計なら「その場所・向きの変位の感度」（<span
+class="math inline">\(D_c\Phi_P^{-1}\)</span>、§7-4）です。</li>
+</ul>
+<p><strong>② 1 本足したときの、測った後の不確かさ。</strong>
+すでに選んだセンサの集合 <span class="math inline">\(S\)</span>
+で測った後の不確かさを <span class="math inline">\(P_S = (B^{-1} +
+\sum_{s\in S}F_s)^{-1}\)</span> とします。1 時刻ぶんの <span
+class="math inline">\(c\)</span>
+を足すと、逆行列の補題（シャーマン・モリソンの式）から</p>
+<p><span class="math display">\[
+P_{S\cup c} = \big(P_S^{-1} + \mathbf h_c \mathbf h_c^{\mathsf
+T}/r_c\big)^{-1}
+= P_S - \frac{P_S\,\mathbf h_c\,\mathbf h_c^{\mathsf T} P_S}{\mathbf
+h_c^{\mathsf T} P_S\,\mathbf h_c + r_c}
+\]</span></p>
+<p>逆行列を計算し直さずに、ベクトルの掛け算だけで更新できます。</p>
+<p><strong>③ 基準ごとの「1 本足したときの得」。</strong> ②
+をそれぞれの基準に入れると、</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>基準</th>
+<th>1 本足したときの得（大きいほどよい）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A 最適（<span class="math inline">\(\operatorname{tr}P\)</span>
+を減らす）</td>
+<td><span class="math inline">\(\dfrac{\mathbf h_c^{\mathsf T}
+P_S^{2}\,\mathbf h_c}{\mathbf h_c^{\mathsf T} P_S\,\mathbf h_c +
+r_c}\)</span></td>
+</tr>
+<tr class="even">
+<td>D 最適（<span class="math inline">\(\ln\det P\)</span>
+を減らす）</td>
+<td><span class="math inline">\(\ln\!\Big(1 + \dfrac{\mathbf
+h_c^{\mathsf T} P_S\,\mathbf h_c}{r_c}\Big)\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>目的指向</strong>（<span class="math inline">\(\mathbf
+w^{\mathsf T}P\mathbf w\)</span> を減らす）</td>
+<td><span class="math inline">\(\Delta_c = \dfrac{\big(\mathbf
+w^{\mathsf T} P_S\,\mathbf h_c\big)^2}{\mathbf h_c^{\mathsf T}
+P_S\,\mathbf h_c + r_c}\)</span>（12-3 の式）</td>
+</tr>
+<tr class="even">
+<td>E 最適（<span class="math inline">\(F\)</span>
+の最小固有値を大きく）</td>
+<td>式は閉じた形にならないので、候補ごとに固有値を計算し直す</td>
+</tr>
+</tbody>
+</table>
+<p>どれも分母に <span class="math inline">\(\mathbf h_c^{\mathsf T}
+P_S\,\mathbf h_c +
+r_c\)</span>（そのセンサの値の予想のばらつき＋誤差）があり、「すでに分かっている方向を測っても得が小さい」ことを表します。</p>
+<p><strong>④ 選ぶ手順（貪欲法）。</strong></p>
+<ol type="1">
+<li><span class="math inline">\(P \leftarrow
+B\)</span>（何も測っていない状態）から始める。</li>
+<li>すべての候補 <span class="math inline">\(c\)</span> について ③
+の得を計算し、一番大きい候補を選ぶ。</li>
+<li>② の式で <span class="math inline">\(P\)</span> を更新し、2
+に戻る。決めた本数になったら終わり。</li>
+</ol>
+<ul>
+<li>候補 14,754 通りでも、1
+本あたりベクトルの掛け算だけなので、データ同化を回すより十分速く選べます。</li>
+<li>D 最適の得（<span
+class="math inline">\(\ln\det\)</span>）は、足すほど得が減る性質（劣モジュラ性）を持つので、貪欲法でも、全組み合わせの最適の
+<span class="math inline">\((1-1/e)\approx 63\,\%\)</span>
+以上の得が保証されます。A
+最適・目的指向には一般にこの保証がありません。</li>
+<li>本研究の 12-4 の比較（A 最適・D
+最適・目的指向）は、この手順で選んだものです。E
+最適で選ぶ計算はまだしていません（未実施）。</li>
+</ul>
+<h3 id="結果既存の選び方と比べる">12-4. 結果：既存の選び方と比べる</h3>
+<p>同じ候補（変位 14,754 通り）から、選び方だけを変えて 2 点を選び、9
+ページ目と同じデータ同化で比べました（真値は
+OpenFOAM＋FrontISTR、温度計は
+P2・P0、<code>results/placement_method_comparison.json</code>）。</p>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>選び方</th>
+<th style="text-align: right;">予測した反りの不確かさ [µm]</th>
+<th style="text-align: right;">実際の反りの誤差 15 W [µm]</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位なし（温度 2 点のみ）</td>
+<td style="text-align: right;">1.19</td>
+<td style="text-align: right;">0.775</td>
+<td style="text-align: right;">1.417</td>
+<td style="text-align: right;">0.635</td>
+</tr>
+<tr class="even">
+<td>よく動く点に置く</td>
+<td style="text-align: right;">1.01</td>
+<td style="text-align: right;">0.569</td>
+<td style="text-align: right;">1.079</td>
+<td style="text-align: right;">0.453</td>
+</tr>
+<tr class="odd">
+<td>Q-DEIM</td>
+<td style="text-align: right;">0.32</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.165</td>
+<td style="text-align: right;">0.105</td>
+</tr>
+<tr class="even">
+<td>D 最適</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.109</td>
+<td style="text-align: right;">0.095</td>
+</tr>
+<tr class="odd">
+<td>A 最適</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.089</td>
+<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.078</td>
+</tr>
+<tr class="even">
+<td><strong>目的指向（本研究）</strong></td>
+<td style="text-align: right;"><strong>0.26</strong></td>
+<td style="text-align: right;"><strong>0.076</strong></td>
+<td style="text-align: right;"><strong>0.083</strong></td>
+<td style="text-align: right;"><strong>0.072</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>目的指向が 3 条件とも一番小さくなりました。ただし A 最適との差は
+8〜15 % です。</li>
+<li>「よく動く点に置く」は、2 点が 5 mm
+しか離れず同じ情報を測ってしまい、効きませんでした。</li>
+<li>予測した不確かさの順番と、実際の誤差の順番がおおむねそろっています（D
+最適と Q-DEIM の順は入れ替わる）。</li>
+</ul>
+<h3
+id="fisher-情報行列で最適な温度センサと変位センサの位置が分かるか">12-5.
+Fisher 情報行列で、最適な温度センサと変位センサの位置が分かるか</h3>
+<p><strong>分かります。ただし「何を知りたいか」「測る前の不確かさ」「センサの誤差」を決めたうえでの、近似の最適です。</strong></p>
+<p>分かること：</p>
+<ul>
+<li>温度計と変位計を、同じものさし（誤差で割った情報量）で比べ、組み合わせて選べる。</li>
+<li>知りたい量を決めれば、それに合った置き場所を、データ同化を回す前に計算で選べる。本研究では、反りに対して選んだ
+2 点が、実際のデータ同化でも一番よかった。</li>
+</ul>
+<p>気をつけること：</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>注意</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>知りたい量で答えが変わる</td>
+<td>反りに最適な点と、温度場全体・発熱量に最適な点は違う。本研究で確かめたのは<strong>反り</strong>に対する配置だけ</td>
+</tr>
+<tr class="even">
+<td>Fisher だけでは状態は決まらない</td>
+<td><span class="math inline">\(F\)</span>
+は観測からの情報だけ。温度場（状態）を推定するには、測る前の不確かさ
+<span class="math inline">\(B\)</span> と合わせた <span
+class="math inline">\(P = (B^{-1}+F)^{-1}\)</span> で評価する</td>
+</tr>
+<tr class="odd">
+<td>線形・正規分布の近似</td>
+<td>実際の EnKF は非線形で、メンバーは有限。1 回の補正の分散減少と、20
+回補正した後の誤差の順位は一致しないことがある（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/19_research_advantage_and_validation.md">docs/19
+§4-1</a>）。選んだ後に必ずデータ同化で確かめる</td>
+</tr>
+<tr class="even">
+<td>1 本ずつ選ぶ方法</td>
+<td>全部の組み合わせの中での最適（大域最適）は保証しない</td>
+</tr>
+<tr class="odd">
+<td>発熱量と放熱の見分け</td>
+<td><span class="math inline">\(F\)</span> の最小固有値（E
+最適）で、発熱量 <span class="math inline">\(Q\)</span> と放熱 <span
+class="math inline">\(h\)</span>
+を見分けられる位置・時間を選ぶ考え方は整理済み（<a
+href="blog005.html">blog_005
+§3</a>）。<strong>実際に計算して選んだことはまだない（未実施）</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="使ったプログラム-7">12-6. 使ったプログラム</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/select_nonrep_temp_disp.py</code></td>
+<td><code>add_row</code>（1 本測った後の不確かさ）と
+<code>score</code>（残る反りの不確かさ <span
+class="math inline">\(J_c\)</span>）</td>
+</tr>
+<tr class="even">
+<td><code>run/make_sensor_score_map.py</code></td>
+<td>変位の候補 14,754 通りを採点し、1 本ずつ 2
+本選ぶ（<code>results/sensor_score_idw.json</code>）</td>
+</tr>
+<tr class="odd">
+<td><code>run/placement_method_comparison.py</code></td>
+<td>A 最適・D 最適・Q-DEIM
+などで選び、同じデータ同化で比べる（<code>results/placement_method_comparison.json</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>1
+本測った後の不確かさと採点（<code>run/select_nonrep_temp_disp.py</code>）：</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_row(P, h, r):                 <span class="co"># センサ（感度 h、誤差 r）を 1 本足した後の P</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    Ph <span class="op">=</span> P <span class="op">@</span> h</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P <span class="op">-</span> np.outer(Ph, Ph) <span class="op">/</span> (h <span class="op">@</span> Ph <span class="op">+</span> r)      <span class="co"># = (P⁻¹ + h hᵀ / r)⁻¹</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(Ps, w, Hc, r):              <span class="co"># 候補ごとに、残る反りの標準偏差を時刻平均</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> np.zeros(<span class="bu">len</span>(Hc))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> P <span class="kw">in</span> Ps:                      <span class="co"># 30〜300 秒の 10 時刻</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        HP <span class="op">=</span> Hc <span class="op">@</span> P</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        s <span class="op">+=</span> np.sqrt(np.maximum(w <span class="op">@</span> P <span class="op">@</span> w <span class="op">-</span> (HP <span class="op">@</span> w)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (np.einsum(<span class="st">&quot;ij,ij-&gt;i&quot;</span>, HP, Hc) <span class="op">+</span> r), <span class="dv">0</span>))</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s <span class="op">/</span> <span class="bu">len</span>(Ps)                <span class="co"># J_c（小さいほどよい）</span></span></code></pre></div>
+<p>A 最適・D
+最適（<code>run/placement_method_comparison.py</code>）：同じ <span
+class="math inline">\(P\)</span>
+から、トレースと行列式を計算します。</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(B, ws):                      <span class="co"># 温度 2 点 + 変位を測った後の P</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> np.vstack([Ht] <span class="op">+</span> [w[<span class="va">None</span>, :] <span class="cf">for</span> w <span class="kw">in</span> ws])</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> B <span class="op">@</span> H.T <span class="op">@</span> np.linalg.inv(H <span class="op">@</span> B <span class="op">@</span> H.T <span class="op">+</span> R)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> B <span class="op">-</span> K <span class="op">@</span> H <span class="op">@</span> B</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> post(B, ws)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>sigma_AO <span class="op">=</span> np.sqrt(w_AO <span class="op">@</span> P <span class="op">@</span> w_AO)   <span class="co"># 目的指向（反りの不確かさ）</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>trace    <span class="op">=</span> np.trace(P)                <span class="co"># A 最適</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>logdet   <span class="op">=</span> np.linalg.slogdet(P)[<span class="dv">1</span>]    <span class="co"># D 最適</span></span></code></pre></div>
+<h3 id="ページ目で言うこと約-1-分-30-秒-2">12-7. 11
+ページ目で言うこと（約 1 分 30 秒）</h3>
+<ul>
+<li>置き場所は、Fisher
+情報行列（感度を誤差で割った情報量）で考える。温度計と変位計を同じものさしで比べられる。</li>
+<li>測る前の不確かさと合わせると、測った後に残る不確かさが計算できる。本研究は、知りたい反りの不確かさが一番小さくなる点を選んだ（目的指向）。</li>
+<li>既存の選び方（A 最適・D 最適・Q-DEIM）と同じ条件で比べ、3
+条件とも一番よかった（0.076 µm）。</li>
+<li>ただし、知りたい量が変われば最適な位置も変わる。選んだ後はデータ同化で確かめる。</li>
+</ul>
+<hr />
+<h2 id="ページ目今後の研究どこで優位性を出せるか">13. 12
+ページ目「今後の研究：どこで優位性を出せるか」</h2>
+<p>先行研究の調査（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/26_研究テーマ再検討_先行研究との比較.md">docs/26</a>）をもとに、今回の研究で言えることと、これから優位性を出せる所をまとめます。発表では最後の
+1 枚（今後の展開）にします。</p>
+<h3 id="今回の研究で言えること今の優位性">13-1.
+今回の研究で言えること（今の優位性）</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>言えること</th>
+<th>根拠（この記事の結果）</th>
+<th>近い先行研究との違い</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>温度と変位を<strong>同じデータ同化の観測</strong>に入れ、測らない反り（工具とワークのずれに当たる量）を直せる</td>
+<td>変位 2 点を足すと、測っていない場所の温度も全セルで 0.12〜0.14
+K（温度だけでは 0.53〜0.88 K）。§10・§11</td>
+<td>工作機械の熱変位の逐次推定（<a
+href="https://doi.org/10.1016/j.mfglet.2024.09.025">論文 A：Lang ら
+2024</a>、<a href="https://doi.org/10.1007/978-3-032-01194-7_25">論文
+B：Lang ら 2026</a>）は温度だけを観測に使い、変位は検証用</td>
+</tr>
+<tr class="even">
+<td>知りたい反りに合わせて、<strong>変位計の位置と向き</strong>まで選べる</td>
+<td>目的指向で選んだ配置が 3 条件とも一番よかった（0.076 µm。A 最適
+0.089、D 最適 0.108 µm）。§12</td>
+<td>目的を指定した配置（<a
+href="https://doi.org/10.1007/s11081-018-9391-8">Herzog ら
+2018</a>）は温度センサが対象。それを変位計に広げた</td>
+</tr>
+<tr class="odd">
+<td>すべて<strong>公開ソルバ</strong>（OpenFOAM＋FrontISTR）で、手順を追える</td>
+<td>プログラムを各章に載せた</td>
+<td><a
+href="https://blogs.sw.siemens.com/simcenter/simcenter-3d-smart-virtual-sensing-unveiling-the-magic/">Siemens
+Smart Virtual Sensing</a>
+は同じ枠組み（縮約モデル＋カルマンフィルタ＋配置設計）を構造で製品化している</td>
+</tr>
+</tbody>
+</table>
+<p>一方で、次のものは<strong>すでにあり、本研究の新しさではありません</strong>。</p>
+<ul>
+<li>縮約モデル＋カルマンフィルタ（論文 A、Siemens）</li>
+<li>発熱や熱伝達率を状態に加えて一緒に推定すること（<a
+href="https://doi.org/10.1109/THERMINIC65879.2025.11216915">Depaola ら
+2025</a>：電子基板で熱伝達率と発熱を推定）</li>
+<li>目的を指定した配置（Herzog らの系列、<a
+href="https://doi.org/10.1007/978-3-658-45180-6_12">Naumann ら
+2025</a>）</li>
+<li>変位から温度を求めること（<a
+href="https://arxiv.org/abs/2411.18118">Ansari ら 2025</a>）</li>
+</ul>
+<h3 id="このままでは優位性が狭まる理由">13-2.
+このままでは優位性が狭まる理由</h3>
+<ol type="1">
+<li><strong>競合が近い</strong>。論文 B
+のチーム（ETH）は熱入力の推定を次の課題に挙げ、ドイツの SFB/TR 96
+は変位の追加を目標にしています。Siemens
+は熱でも、発熱と熱伝達率の推定を研究段階まで進めています（Depaola ら
+2025）。手法の組み合わせだけで勝つ余地は小さく、狭まっています。</li>
+<li><strong>実機がない</strong>。比べる相手（論文
+A・B）は実機で示しています。今回は数値実験（双子実験）だけです。</li>
+<li><strong>差が小さい</strong>。目的指向と A 最適の差は、反りで 0.076
+と 0.089 µm（約 15 %）です。</li>
+</ol>
+<h3 id="これから優位性を出せる所">13-3. これから優位性を出せる所</h3>
+<p>論文 A・B
+の著者自身が「今後の課題」に挙げているのは、<strong>熱入力（発熱）の実時間推定</strong>と、<strong>熱伝達率などの境界条件を運転中に動かすこと</strong>です。ここはまだ空いており、工作機械を使う側（NC
+の回転数・電力が手に入り、実機で運転を変えられる）の立場が直接効きます。</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>方向</th>
+<th>すること</th>
+<th>優位性が出る理由</th>
+<th>今ある資産</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>A：運転・冷却の変化に追従する</strong></td>
+<td>主軸・送りの発熱やクーラントの流量が変わる運転で、発熱と冷却（熱伝達率）を同化で追い、熱変位を推定する</td>
+<td>論文 A は熱入力を 0、論文 B
+は既知として与え、境界条件は運転中に直さない</td>
+<td>106 の ROM＋EnKF（発熱 <span class="math inline">\(q\)</span> と放熱
+<span class="math inline">\(h\)</span> を状態に入れている）、25
+W・間欠加熱の真値</td>
+</tr>
+<tr class="even">
+<td><strong>B：流体と固体の熱連成（CHT）から ROM を作る</strong></td>
+<td>流れ（流量）が変わっても使える熱の ROM を、CHT の計算から作る</td>
+<td>論文 B は CFD を熱伝達率の範囲を決めるためだけに使う。Siemens の熱の
+ROM は熱伝導だけ</td>
+<td>OpenFOAM の CHT。108
+のクーラントタンク（ポンプを止めると流れが変わり、ROM
+が合わなくなることを確認済み）</td>
+</tr>
+<tr class="odd">
+<td><strong>理論：何を測れば何が分かるか</strong></td>
+<td>① 発熱 <span class="math inline">\(Q\)</span> と放熱 <span
+class="math inline">\(h\)</span>
+を見分けられる条件（観測期間・運転のしかた）、②
+変位の観測が温度場について持つ情報</td>
+<td>①「600 秒では <span class="math inline">\(h\)</span>
+が決まらない」、②「変位 2 点で測っていない場所の温度まで直る」の 2
+つの結果に、なぜそうなるかを式で示せる</td>
+<td>Fisher 情報の式、変位の換算行列 <span
+class="math inline">\(W\)</span>、POD の型</td>
+</tr>
+<tr class="even">
+<td><strong>実機での検証（必須）</strong></td>
+<td>社内の機械で、温度・主軸の伸び・クーラントの流量と温度・NC
+の回転数と電力を記録し、推定に使わないセンサで確かめる</td>
+<td>比べる相手はすべて実機。実機がないと評価されにくい</td>
+<td>社内の機械で測れる見込み</td>
+</tr>
+</tbody>
+</table>
+<h3 id="気をつけること">13-4. 気をつけること</h3>
+<ul>
+<li>変位を観測に入れる方向（13-1 の 1 行目）は、SFB/TR 96
+が目標に掲げ、Ansari ら（<a
+href="https://arxiv.org/abs/2603.09526">2026</a>）も温度＋変位に進んでいます。<strong>数年以内に近い成果が出る可能性があるので、早めに学会・論文で出す</strong>のがよいと考えます。</li>
+<li>理論（13-3 の ①）は、1
+点モデルなら教科書の範囲（感度の議論）に収まり、<strong>理論そのものの新しさは大きくない可能性</strong>があります。新しさは「工作機械の熱変位」「変位の観測」「観測期間と運転の設計」「流れで変わる
+<span
+class="math inline">\(h\)</span>」を組み合わせた所に置きます。</li>
+<li>ここでの「まだ空いている」は、英語の検索（約 30
+回）で見つからなかった、という意味です。日本語の文献と、SFB/TR 96
+の最新の成果は、まだ原文で確かめていません（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/26_研究テーマ再検討_先行研究との比較.md#7-確認すべき文献と調べ方">docs/26
+§7</a>）。</li>
+</ul>
+<h3 id="ページ目で言うこと約-1-分-4">13-5. 12 ページ目で言うこと（約 1
+分）</h3>
+<ul>
+<li>今回：温度と変位を同じデータ同化に入れ、測らない反りを直せた。置き場所も変位計の向きまで選べた。ただし数値実験だけ。</li>
+<li>今後：運転や冷却が変わる工作機械で、発熱と冷却を同化で追う。流れが変わっても使える
+ROM を CHT から作る。どちらも先行研究が「今後の課題」に残した所。</li>
+<li>社内の機械での実測で確かめる。</li>
+</ul>
+</body>
+</html>
