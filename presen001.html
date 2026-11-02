@@ -330,9 +330,9 @@ id="toc-材料openfoam-の温度の写真121-枚">7-1. 材料：OpenFOAM
 <li><a href="#特異値分解pod温度分布の型を取り出す"
 id="toc-特異値分解pod温度分布の型を取り出す">7-2.
 特異値分解（POD）：温度分布の「型」を取り出す</a></li>
-<li><a href="#q-deim型を見分けるのに一番よい-5-点を選ぶ"
-id="toc-q-deim型を見分けるのに一番よい-5-点を選ぶ">7-3.
-Q-DEIM：型を見分けるのに一番よい 5 点を選ぶ</a></li>
+<li><a href="#q-deim5つのモードの係数を安定に求めやすい5点を選ぶ"
+id="toc-q-deim5つのモードの係数を安定に求めやすい5点を選ぶ">7-3.
+Q-DEIM：5つのモードの係数を、安定に求めやすい5点を選ぶ</a></li>
 <li><a href="#rom代表-5-点の熱回路を作りopenfoam-に合わせる"
 id="toc-rom代表-5-点の熱回路を作りopenfoam-に合わせる">7-4. ROM：代表 5
 点の熱回路を作り、OpenFOAM に合わせる</a></li>
@@ -1332,68 +1332,327 @@ a_1(t)\,\boldsymbol\varphi_1 + a_2(t)\,\boldsymbol\varphi_2 +
 <p><strong>2 つの型で 99.89 %</strong> を表せました。2
 万セルの温度でも、ほとんどは 2 つの数 <span class="math inline">\(a_1,
 a_2\)</span> で決まるということです。</p>
-<h3 id="q-deim型を見分けるのに一番よい-5-点を選ぶ">7-3.
-Q-DEIM：型を見分けるのに一番よい 5 点を選ぶ</h3>
-<p>型の重み <span class="math inline">\(a_1, a_2, \dots\)</span>
-を知るには、どこかの点の温度が分かればよいはずです。ただ、点の選び方が悪いと（たとえば型がどれも
-0 に近い点や、似た点ばかり）重みを正しく決められません。</p>
-<p><strong>Q-DEIM</strong> は、型の行列 <span
-class="math inline">\(\Phi_r = [\boldsymbol\varphi_1, \dots,
-\boldsymbol\varphi_r]\)</span> の転置に、列の入れ替え付きの QR
-分解をかけて、点を選びます。</p>
+<h3 id="q-deim5つのモードの係数を安定に求めやすい5点を選ぶ">7-3.
+Q-DEIM：5つのモードの係数を、安定に求めやすい5点を選ぶ</h3>
+<p><strong>図解した投影用スライドを次の2枚に分けて掲載します。</strong>
+1枚目は「5点から何を求めるのか」、2枚目は「なぜその位置を選ぶのか」です。寄与率・係数時刻歴・全モード画像・QRの詳細を同じ1枚に重ねず、詳細は後半の補足に回します。</p>
+<h4
+id="スライド①5点の温度から全体の温度分布を復元したい">スライド①：5点の温度から、全体の温度分布を復元したい</h4>
+<figure>
+<img src="img/presen_qdeim_why_five.png"
+alt="スライド①：5点の温度から5つの係数を求める" />
+<figcaption
+aria-hidden="true">スライド①：5点の温度から5つの係数を求める</figcaption>
+</figure>
+<p><em>16:9の投影用スライド画像。青のモード1・橙のモード2・緑のモード5は、対応する係数と同じ色です。以下はベクトルの意味を補う図と、式の詳細です。</em></p>
+<p><strong>代表点を選ぶための、ベクトルの比較図</strong></p>
+<figure>
+<img src="img/presen_qdeim_vector_view.png"
+alt="P0・P1のモードへの反応ベクトルを比較する" />
+<figcaption
+aria-hidden="true">P0・P1のモードへの反応ベクトルを比較する</figcaption>
+</figure>
+<p><strong>選点で比べるベクトル</strong>は、その点での各モードの値を並べたものです。2モードで書くと、</p>
 <p><span class="math display">\[
-\Phi_r^{\mathsf T}\,\Pi = Q\,R
+\underbrace{\mathbf c_{P0}}_{2\times1}
+=\begin{bmatrix}\varphi_1[P0]\\\varphi_2[P0]\end{bmatrix},
+\qquad
+\underbrace{\mathbf c_{P1}}_{2\times1}
+=\begin{bmatrix}\varphi_1[P1]\\\varphi_2[P1]\end{bmatrix}.
 \]</span></p>
-<ul>
-<li><span class="math inline">\(\Pi\)</span>（列の入れ替え）の最初の
-<span class="math inline">\(r\)</span> 列が、選ぶ点です。</li>
-<li>「型の値が大きく、すでに選んだ点と似ていない点」を、1
-点ずつ貪欲に選んでいくことに当たります。</li>
-<li>モード 5 本を使い、<strong>代表 5
-点</strong>（P0〜P4）を選びました。</li>
-</ul>
-<h4 id="行列で見る列の入れ替え付き-qr-分解">行列で見る：列の入れ替え付き
-QR 分解</h4>
-<p>型の行列を横にした <span class="math inline">\(\Phi_r^{\mathsf
-T}\)</span>（5 行 × 20,696 列）を考えます。<strong>1 列が 1
-セル</strong>で、その列には「そのセルでの 5
-つの型の値」が縦に並んでいます。</p>
+<p>両点の温度は、<strong>共通の係数</strong> <span
+class="math inline">\(a_1,a_2\)</span> を使い、</p>
 <p><span class="math display">\[
-\Phi_r^{\mathsf T} =
-\begin{pmatrix}
-\varphi_1(1) &amp; \varphi_1(2) &amp; \cdots &amp; \varphi_1(N)\\
-\vdots &amp; \vdots &amp; &amp; \vdots\\
-\varphi_5(1) &amp; \varphi_5(2) &amp; \cdots &amp; \varphi_5(N)
-\end{pmatrix}
-= \big[\,\mathbf c_1,\ \mathbf c_2,\ \dots,\ \mathbf c_N\,\big],\qquad N
-= 20{,}696
+\begin{aligned}
+T[P0]&amp;\approx\overline T[P0]+\varphi_1[P0]a_1+\varphi_2[P0]a_2,\\
+T[P1]&amp;\approx\overline T[P1]+\varphi_1[P1]a_1+\varphi_2[P1]a_2
+\end{aligned}
 \]</span></p>
-<p>列の入れ替え付き QR 分解 <span class="math inline">\(\Phi_r^{\mathsf
-T}\,\Pi = Q\,R\)</span> は、次の手順を 5 回くりかえすのと同じです。</p>
+<p>となります。<span class="math inline">\(a_1,a_2\)</span>
+に掛かるモード値の比が同じなら、2点から分かる係数の組合せも同じです。例えば
+<span class="math inline">\(\mathbf c_{P1}=\lambda\mathbf
+c_{P0}\)</span> なら、</p>
+<p><span class="math display">\[
+T[P1]-\overline T[P1]
+\approx\lambda\{T[P0]-\overline T[P0]\}
+\]</span></p>
+<p>となり、2点の温度から2係数を別々には決められません。逆向きでも比例していれば同様です。同一直線上にないベクトルを持つ点を選ぶと、係数を区別するための別の式が得られます。ほぼ同じ向きの組合せも、誤差に弱くなるため避けたい配置です。</p>
+<p><strong>図の矢印は点ごとのモード値を示し、温度そのものを示す矢印ではありません。</strong>
+温度 <span class="math inline">\(T[P0]\)</span>
+はスカラーです。係数を掛ける前のPOD値を比較することで、未知の係数の値に依存せず、点を選べます。</p>
+<p>上の全温度場の式では <span class="math inline">\(\Phi\)</span>
+の<strong>1列が、全Nセルにわたる1モード</strong>でした。一方、この選点図では、<span
+class="math inline">\(\Phi\)</span>
+の<strong>1行が、その点での各モード値</strong>です。その行を縦に並べた
+<span class="math inline">\(\mathbf c_{Pj}\)</span>
+を矢印で比較しています。実際は5モードなので、各点のベクトルは5次元です。</p>
+<p><strong>スライド冒頭の一文</strong></p>
+<blockquote>
+<p>温度分布を5つのモードで表すと、求めるのは5つの係数になる。<br/>
+5点の温度から5本の式を作り、その係数を求める。</p>
+</blockquote>
+<p>ある時刻の温度場を、全セルの成分まで書くと次のようになります。<span
+class="math inline">\(N\)</span> はOpenFOAMの固体セル数です。</p>
+<p><span class="math display">\[
+\underbrace{\begin{bmatrix}
+T[1]\\T[2]\\\vdots\\T[N]
+\end{bmatrix}}_{\mathbf T:\ N\times1}
+\approx
+\underbrace{\begin{bmatrix}
+\overline T[1]\\\overline T[2]\\\vdots\\\overline T[N]
+\end{bmatrix}}_{\overline{\mathbf T}:\ N\times1}
++
+\underbrace{\begin{bmatrix}
+\varphi_1[1]&amp;\varphi_2[1]&amp;\cdots&amp;\varphi_5[1]\\
+\varphi_1[2]&amp;\varphi_2[2]&amp;\cdots&amp;\varphi_5[2]\\
+\vdots&amp;\vdots&amp;\ddots&amp;\vdots\\
+\varphi_1[N]&amp;\varphi_2[N]&amp;\cdots&amp;\varphi_5[N]
+\end{bmatrix}}_{\Phi:\ N\times5}
+\underbrace{\begin{bmatrix}a_1\\a_2\\a_3\\a_4\\a_5\end{bmatrix}}_{\mathbf
+a:\ 5\times1}.
+\]</span></p>
+<p><strong>行はセル、列はモードです。</strong> 例えばセル <span
+class="math inline">\(i\)</span> の温度は、</p>
+<p><span class="math display">\[
+T[i]\approx\overline T[i]+\varphi_1[i]a_1+\varphi_2[i]a_2
++\varphi_3[i]a_3+\varphi_4[i]a_4+\varphi_5[i]a_5
+\]</span></p>
+<p>です。<span class="math inline">\(\overline T[i]\)</span> はセル
+<span class="math inline">\(i\)</span> の時間平均温度、<span
+class="math inline">\(\varphi_j[i]\)</span> はそのセルでのモード <span
+class="math inline">\(j\)</span> の値です。<span
+class="math inline">\(a_1,\ldots,a_5\)</span>
+は時刻ごとに変わる係数で、全セルに共通して使います。</p>
+<p>5点P0〜P4について式を取り出すと、</p>
+<p><span class="math display">\[
+\underbrace{\begin{bmatrix}
+T[P0]\\T[P1]\\T[P2]\\T[P3]\\T[P4]
+\end{bmatrix}}_{\mathbf T_P:\ 5\times1}
+\approx
+\underbrace{\begin{bmatrix}
+\overline T[P0]\\\overline T[P1]\\\overline T[P2]\\\overline
+T[P3]\\\overline T[P4]
+\end{bmatrix}}_{\overline{\mathbf T}_P:\ 5\times1}
++
+\underbrace{\begin{bmatrix}
+\varphi_1[P0]&amp;\varphi_2[P0]&amp;\cdots&amp;\varphi_5[P0]\\
+\varphi_1[P1]&amp;\varphi_2[P1]&amp;\cdots&amp;\varphi_5[P1]\\
+\varphi_1[P2]&amp;\varphi_2[P2]&amp;\cdots&amp;\varphi_5[P2]\\
+\varphi_1[P3]&amp;\varphi_2[P3]&amp;\cdots&amp;\varphi_5[P3]\\
+\varphi_1[P4]&amp;\varphi_2[P4]&amp;\cdots&amp;\varphi_5[P4]
+\end{bmatrix}}_{\Phi_P:\ 5\times5}
+\underbrace{\begin{bmatrix}a_1\\a_2\\a_3\\a_4\\a_5\end{bmatrix}}_{\mathbf
+a:\ 5\times1}.
+\]</span></p>
+<p><strong>行は点、列はモードです。</strong>
+1行目は、P0の温度を「P0の平均温度＋5モードの寄与」で表す式です。まとめると
+<span class="math inline">\(\mathbf T_P\approx\overline{\mathbf
+T}_P+\Phi_P\mathbf a\)</span> です。ここで <span
+class="math inline">\(\overline T[P0]\)</span>
+はP0点の時間平均温度です。</p>
+<p><strong>下段は横向きの流れにする</strong></p>
+<pre class="mermaid">flowchart LR
+    A[&quot;代表5点の温度&quot;] --&gt; B[&quot;5本の式から&lt;br/&gt;5つの係数を求める&quot;]
+    B --&gt; C[&quot;5モードを足し合わせ&lt;br/&gt;全セルの温度を復元&quot;]</pre>
+<p><strong>この1枚の結論</strong></p>
+<blockquote>
+<p><strong>5点を選ぶ目的は、全温度場を表す5つの係数を求めること。<br/>
+ただし、どの5点でもよいわけではない。</strong></p>
+</blockquote>
+<p><strong>口頭説明（約30秒）</strong>：「PODで温度分布の形は先に求めてあります。時刻ごとに変わるのは、その形をどれだけ足すかという5つの係数です。各点の温度から1本ずつ式ができるので、5点あれば5本の式になります。ただし、その5本が似た式ばかりだと、係数を分けて求められません。そこで点の位置を選びます。」</p>
+<h4
+id="スライド②似た情報の点を避けモードを見分けられる5点を選ぶ">スライド②：似た情報の点を避け、モードを見分けられる5点を選ぶ</h4>
+<figure>
+<img src="img/presen_qdeim_why_positions.png"
+alt="スライド②：情報が重複しにくい点を順に選ぶ" />
+<figcaption
+aria-hidden="true">スライド②：情報が重複しにくい点を順に選ぶ</figcaption>
+</figure>
+<p><em>2モードの模式例。<span class="math inline">\(b_j,c_j\)</span>
+は各点のモード値、<span class="math inline">\(\lambda\)</span>
+は比例係数。右側は2本の式が互いに比例しない場合です。</em></p>
+<p><strong>スライド冒頭の一文</strong></p>
+<blockquote>
+<p><strong>同じように反応する点を増やしても、各モードの係数を区別しにくい。<br/>
+Q-DEIMは、すでに選んだ点とは違うモード情報を持つ点を順に選ぶ。</strong></p>
+</blockquote>
+<p>まず2モード・2点に減らして、点の選び方の違いを示します。<span
+class="math inline">\(b_1,b_2,c_1,c_2\)</span> は各点でのモード値、<span
+class="math inline">\(\lambda\)</span> は比例係数です。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>選び方</th>
+<th>2点から得られる式</th>
+<th>何が起きるか</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>似た情報の2点</strong></td>
+<td><span class="math inline">\(T[P0]=\overline
+T[P0]+b_1a_1+b_2a_2\)</span><br/><span
+class="math inline">\(T[P1]=\overline T[P1]+\lambda b_1a_1+\lambda
+b_2a_2\)</span></td>
+<td>2本目は1本目の定数倍。<span class="math inline">\(a_1,a_2\)</span>
+を別々に決められない</td>
+</tr>
+<tr class="even">
+<td><strong>違う情報の2点</strong></td>
+<td><span class="math inline">\(T[P0]=\overline
+T[P0]+b_1a_1+b_2a_2\)</span><br/><span
+class="math inline">\(T[P1]=\overline T[P1]+c_1a_1+c_2a_2\)</span></td>
+<td><span class="math inline">\(b_1c_2-b_2c_1\ne0\)</span>
+なら2係数を区別できる。ほぼ比例する組合せも避けたい</td>
+</tr>
+</tbody>
+</table>
+<p>実際は5モードなので、各点での5つのモード値を比較します。</p>
+<p><strong>Q-DEIMの選び方は、次の3行で示す</strong></p>
 <ol type="1">
-<li><strong>一番長い列を選ぶ</strong>：残っている列の中で、長さ <span
-class="math inline">\(|\mathbf c_i|\)</span>
-が最大の列（セル）を選び、先頭へ入れ替える（これが <span
-class="math inline">\(\Pi\)</span>）。</li>
-<li><strong>その向きを、全部の列から引く</strong>：選んだ列の向き <span
-class="math inline">\(\mathbf q = \mathbf c_{\text{選}}/|\mathbf
-c_{\text{選}}|\)</span> の成分を、ほかの列から引く（<span
-class="math inline">\(\mathbf c_i \leftarrow \mathbf c_i - (\mathbf
-q^{\mathsf T}\mathbf c_i)\,\mathbf q\)</span>）。これが <span
-class="math inline">\(Q\)</span> の 1 列を作ることに当たり、引いた量が
-<span class="math inline">\(R\)</span> に入る。</li>
-<li>引いた後の長さで、次の列を選ぶ。</li>
+<li><strong>最初の点</strong>：5つのモード値をまとめた大きさが大きい点を選ぶ。</li>
+<li><strong>次の点</strong>：選択済みの点で説明できる成分を除き、残る成分が大きい点を選ぶ。</li>
+<li><strong>5点まで繰り返す</strong>：5つの係数を、できるだけ安定に区別できる組合せを作る。</li>
 </ol>
-<ul>
-<li>1 回目は、型の値が大きいセル（列が長いセル）が選ばれます。</li>
-<li>2
-回目からは、すでに選んだセルと同じ向きの成分が引かれるので、<strong>似たセルは短くなり、選ばれにくくなります</strong>。</li>
-<li>その結果、5 点で取り出した 5 × 5 の行列 <span
+<p>この処理を行うのが、<span class="math inline">\(\Phi^{\mathsf
+T}\)</span>
+に対する列ピボット付きQR分解です。単に温度が高い点や、互いに遠い点を選ぶ方法ではありません。</p>
+<p><strong>この1枚の結論</strong></p>
+<blockquote>
+<p><strong>「モードの値が大きい」ことと「選択済みの点と情報が重複しにくい」ことを使い、<br/>
+5つの係数を安定に求めやすい代表点を選んだ。</strong></p>
+</blockquote>
+<p><strong>口頭説明（約40秒）</strong>：「例えば2点とも全体の温まり方に同じように反応すると、全体が温まったのか、左右の温度差が変わったのかを区別できません。そこで、最初に反応が大きい点を取り、次は、その点だけでは分からない変化に反応する点を取ります。この処理を5点まで繰り返すのが今回のQ-DEIMです。」</p>
+<p><strong>発表での区別</strong>：ここで選ぶのは、ROMで温度を計算し、全温度場を復元するための代表点です。後半で選ぶ「反りの推定に適した観測センサ位置」とは、目的が異なります。</p>
+<h4
+id="補足なぜ安定な復元につながるか">補足：なぜ安定な復元につながるか</h4>
+<p>実際は5モードなので、各候補点 <span class="math inline">\(i\)</span>
+を「その点での5つのモード値」で表します。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf c_i}_{5\times1}
+=\begin{bmatrix}\varphi_1[i]\\\varphi_2[i]\\\varphi_3[i]\\\varphi_4[i]\\\varphi_5[i]\end{bmatrix}.
+\]</span></p>
+<p><span class="math inline">\(\Phi_P\)</span>
+が正則なら、係数は次の小さな連立方程式から求まります。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf a}_{5\times1}
+\approx\underbrace{\Phi_P^{-1}}_{5\times5}
+\underbrace{(\mathbf T_P-\overline{\mathbf T}_P)}_{5\times1}.
+\]</span></p>
+<p>この段階では、温度の式 <span class="math inline">\(\mathbf
+T_P\approx\overline{\mathbf T}_P+\Phi_P\mathbf a\)</span>
+から平均を両辺で引き、係数 <span class="math inline">\(\mathbf
+a\)</span> を解いています。</p>
+<p>代表点温度に誤差 <span
+class="math inline">\(\boldsymbol\varepsilon_P\)</span>
+があると、係数と全温度場への影響は、</p>
+<p><span class="math display">\[
+\delta\mathbf a=\Phi_P^{-1}\boldsymbol\varepsilon_P,\qquad
+\delta\mathbf T_{\mathrm{full}}=\Phi\Phi_P^{-1}\boldsymbol\varepsilon_P
+\]</span></p>
+<p>となります。<strong>似た行ばかりの行列では、温度の小さな誤差が係数の大きな誤差へ増幅されやすくなります。</strong>
+Q-DEIMは不安定な選び方を避け、モードを見分けやすい組合せを得る方法です。全候補の組合せで最良になることまで、今回証明したわけではありません。</p>
+<p>保存済みの <code>results/qdeim_points.npz</code> の5点について、<span
 class="math inline">\(\Phi_P\)</span>
-が、つぶれにくい（逆行列が安定に求まる）組になります。gappy-POD で 5
-点から 5 つの型の重みを決めるとき、この <span
-class="math inline">\(\Phi_P\)</span> の逆行列を使います。</li>
+のランクが5、2ノルム条件数が約3.15であること、保存済み基底へのピボット付きQRが同じ5点を返すことを確認しました。これは今回の基底から係数を解く行列の確認で、学習外の温度分布やROM時間発展の精度を保証する値ではありません。</p>
+<p><strong>なぜ5点か</strong>：今回は5モードを保持し、その5係数を求めるため5点を選びました。5点という数自体が普遍的な最適値ではありません。2モードの寄与率が大きいことだけで、2点で必要な復元精度が得られるとは限りません。5モードに対して6点以上を使い、最小二乗で係数を求める構成もあります。</p>
+<h4
+id="補足qr分解の式と実際に選ばれた点">補足：QR分解の式と、実際に選ばれた点</h4>
+<p>ここからは、スライド②の3段階を行列で書いた補足です。最初に「セルごとのモード値」を並べ、最後にQR分解の式へつなげます。</p>
+<p><strong>① 1セルの情報は、その場所での5つのモード値です。</strong></p>
+<p>例えばセル <span class="math inline">\(i\)</span> の温度は、</p>
+<p><span class="math display">\[
+T[i]\approx\overline T[i]+
+\varphi_1[i]a_1+\varphi_2[i]a_2+\cdots+\varphi_5[i]a_5
+\]</span></p>
+<p>です。係数 <span class="math inline">\(a_1,\ldots,a_5\)</span>
+に掛かる5個の値を、ひと組にします。</p>
+<p><span class="math display">\[
+\underbrace{\mathbf c_i}_{5\times1}
+=\begin{bmatrix}\varphi_1[i]\\\varphi_2[i]\\\varphi_3[i]\\\varphi_4[i]\\\varphi_5[i]\end{bmatrix}.
+\]</span></p>
+<p><span class="math inline">\(\mathbf c_i\)</span>
+は座標でも温度そのものでもありません。<strong>「そのセルの温度が、各モードの係数にどう反応するか」を並べたもの</strong>です。</p>
+<p><strong>② 全セル分を横に並べます。</strong></p>
+<p><span class="math display">\[
+\underbrace{\Phi^{\mathsf T}}_{5\times N}
+=\left[
+\underbrace{\mathbf c_1}_{\text{セル1}}\quad
+\underbrace{\mathbf c_2}_{\text{セル2}}\quad
+\cdots\quad
+\underbrace{\mathbf c_N}_{\text{セル}N}
+\right],\qquad N\text{ は固体セル数}.
+\]</span></p>
+<ul>
+<li><strong>1列＝候補セル1個</strong>。列の中に、そのセルでのモード1〜5の値が入ります。</li>
+<li><strong>1行＝モード1本</strong>。そのモードが各セルで取る値が横に並びます。</li>
+<li>元の <span class="math inline">\(\Phi\)</span>
+は「1行＝セル」なので、セルごとの情報を列として扱うために転置しています。転置で新しい解析をしているわけではありません。</li>
 </ul>
+<p><strong>③ 似た列を重ねて選ばないように、5列を選びます。</strong></p>
+<ol type="1">
+<li>最初は、<span class="math inline">\(\|\mathbf c_i\|_2\)</span>
+が大きい列を選ぶ。</li>
+<li>選んだ列の方向に沿う成分を、候補の列から除く。</li>
+<li>まだ残っている成分が大きい列を次に選ぶ。5列まで繰り返す。</li>
+</ol>
+<p>例えば最初に選んだ列の単位ベクトルを <span
+class="math inline">\(\mathbf q_1\)</span>
+とすると、各候補に残る成分は、</p>
+<p><span class="math display">\[
+\mathbf r_i=\mathbf c_i-\mathbf q_1(\mathbf q_1^{\mathsf T}\mathbf c_i).
+\]</span></p>
+<p>選んだ列と比例する候補なら <span class="math inline">\(\mathbf
+r_i=\mathbf0\)</span>
+となり、新しい情報を追加しません。2列目以降も、<strong>選択済みのすべての方向</strong>の成分を除いてから比較します。</p>
+<p><strong>④
+この並べ替えと成分の分解を、QR分解の記号でまとめます。</strong></p>
+<p><span class="math display">\[
+\underbrace{\Phi^{\mathsf T}}_{5\times N}
+\underbrace{\Pi}_{N\times N}
+=
+\underbrace{Q}_{5\times5}
+\underbrace{R}_{5\times N}.
+\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>この計算での意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\Pi\)</span></td>
+<td>候補セルの列を、選んだ順が先頭に来るよう並べ替える行列</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(Q\)</span></td>
+<td>成分を除くために使う、互いに直交した5つの方向</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R\)</span></td>
+<td>各セルの列を、<span class="math inline">\(Q\)</span>
+の方向の成分で表した係数</td>
+</tr>
+</tbody>
+</table>
+<p><strong>選ばれる点は、並べ替え後の先頭5列に対応するセル番号です。</strong>
+<span class="math inline">\(\Pi\)</span>
+の要素自体がセル座標を表すわけではありません。実装では <span
+class="math inline">\(\Pi\)</span>
+の巨大な行列を作らず、並べ替え順の番号列 <code>piv</code>
+を受け取ります。</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> scipy.linalg.qr(Phi.T, pivoting<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>selected_cells <span class="op">=</span> piv[:<span class="dv">5</span>]  <span class="co"># 先頭5個のセル番号を、P0〜P4として使う</span></span></code></pre></div>
+<p>元のセル番号が <code>selected_cells[j]</code>
+の点に、代表点の名前Pjを付けています。P0が元メッシュのセル0という意味ではありません。</p>
 <figure>
 <img src="img/qdeim_animation.gif" alt="Q-DEIM のアニメーション" />
 <figcaption aria-hidden="true">Q-DEIM のアニメーション</figcaption>
@@ -2031,6 +2290,8 @@ POD–ガラーキンは、元の式（行列）を数学的に縮めるので�
 <li><p>1D-CAE（熱回路網）と同じ形なので、係数の意味（熱容量・熱コンダクタンス）は読み取れます。</p></li>
 </ul>
 <h3 id="使ったプログラム-2">7-6. 使ったプログラム</h3>
+<p>今回の2枚の図解は <code>run/make_presen_qdeim_explainer.py</code>
+から作成しています。図中の2モード例は選点理由を説明する模式例で、実際の解析結果の分布ではありません。</p>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -2070,41 +2331,41 @@ POD–ガラーキンは、元の式（行列）を数学的に縮めるので�
 </tbody>
 </table>
 <p>POD と Q-DEIM（<code>run/select_points_qdeim.py</code>）：</p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)<span class="op">;</span> Xc <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]           <span class="co"># 各セルの時間平均を引く</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)        <span class="co"># 特異値分解 X = U Σ Vᵀ</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()                             <span class="co"># 寄与率</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :RMODE].T, pivoting<span class="op">=</span><span class="va">True</span>)            <span class="co"># Q-DEIM：Φᵀ に列の入れ替え付き QR</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> <span class="bu">list</span>(piv[:NPT])                                    <span class="co"># 入れ替えの先頭 5 列 = 代表 5 点</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> X.mean(axis<span class="op">=</span><span class="dv">1</span>)<span class="op">;</span> Xc <span class="op">=</span> X <span class="op">-</span> mean[:, <span class="va">None</span>]           <span class="co"># 各セルの時間平均を引く</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>U, S, Vt <span class="op">=</span> np.linalg.svd(Xc, full_matrices<span class="op">=</span><span class="va">False</span>)        <span class="co"># 特異値分解 X = U Σ Vᵀ</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>energy <span class="op">=</span> S<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (S<span class="op">**</span><span class="dv">2</span>).<span class="bu">sum</span>()                             <span class="co"># 寄与率</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>_, _, piv <span class="op">=</span> qr(U[:, :RMODE].T, pivoting<span class="op">=</span><span class="va">True</span>)            <span class="co"># Q-DEIM：Φᵀ に列の入れ替え付き QR</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>pts <span class="op">=</span> <span class="bu">list</span>(piv[:NPT])                                    <span class="co"># 入れ替えの先頭 5 列 = 代表 5 点</span></span></code></pre></div>
 <p>係数の合わせ込み（<code>run/build_calibrate_rom.py</code>）：</p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(vec):                      <span class="co"># 係数 vec = [C 5 個, K 10 個, h 1 個] で ROM を計算</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> vec[:NPT]<span class="op">;</span> K <span class="op">=</span> rg.tri_to_matrix(vec[NPT:NPT<span class="op">+</span>ne], NPT)<span class="op">;</span> h <span class="op">=</span> vec[NPT<span class="op">+</span>ne]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ...                                <span class="co"># 0〜600 秒を積分して 5 点の温度の時刻歴を返す</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(vec):</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(vec) <span class="op">-</span> Yobs).ravel()   <span class="co"># ROM − OpenFOAM（5 点 × 全時刻）</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))   <span class="co"># 差の 2 乗和を最小にする</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward(vec):                      <span class="co"># 係数 vec = [C 5 個, K 10 個, h 1 個] で ROM を計算</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    C <span class="op">=</span> vec[:NPT]<span class="op">;</span> K <span class="op">=</span> rg.tri_to_matrix(vec[NPT:NPT<span class="op">+</span>ne], NPT)<span class="op">;</span> h <span class="op">=</span> vec[NPT<span class="op">+</span>ne]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    ...                                <span class="co"># 0〜600 秒を積分して 5 点の温度の時刻歴を返す</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resid(vec):</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (forward(vec) <span class="op">-</span> Yobs).ravel()   <span class="co"># ROM − OpenFOAM（5 点 × 全時刻）</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>sol <span class="op">=</span> least_squares(resid, x0, bounds<span class="op">=</span>(lb, ub))   <span class="co"># 差の 2 乗和を最小にする</span></span></code></pre></div>
 <p>熱回路の時間積分（<code>dacore/rom_general.py</code> の
 <code>integrate_ensemble</code>）：<span class="math inline">\(C\,dT/dt
 = -(\sum K + h)T + KT + hT_{\mathrm{air}} + q\)</span> を行列で書き、60
 メンバーを一度に進めます。</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> Kmat <span class="op">/</span> C[:, <span class="va">None</span>]                          <span class="co"># 他ノードからの熱流入</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>M[idx, idx] <span class="op">=</span> <span class="op">-</span>(Ksum <span class="op">+</span> h) <span class="op">/</span> C                  <span class="co"># 対角：自分から出ていく熱と放熱</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deriv(Tv, t):</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    heat[:, heat_node] <span class="op">=</span> heater_power_W(t, q_scale) <span class="op">/</span> C[heat_node]   <span class="co"># P2 だけに発熱</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> M <span class="op">@</span> Tv <span class="op">+</span> h <span class="op">*</span> T_AIR <span class="op">/</span> C <span class="op">+</span> heat</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>k1 <span class="op">=</span> deriv(T, t)<span class="op">;</span> k2 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k1, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)            <span class="co"># 4 次のルンゲ・クッタ</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>k3 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k2, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)<span class="op">;</span> k4 <span class="op">=</span> deriv(T <span class="op">+</span> dt<span class="op">*</span>k3, t <span class="op">+</span> dt)</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> T <span class="op">+</span> dt<span class="op">/</span><span class="dv">6</span> <span class="op">*</span> (k1 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k3 <span class="op">+</span> k4)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>M <span class="op">=</span> Kmat <span class="op">/</span> C[:, <span class="va">None</span>]                          <span class="co"># 他ノードからの熱流入</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>M[idx, idx] <span class="op">=</span> <span class="op">-</span>(Ksum <span class="op">+</span> h) <span class="op">/</span> C                  <span class="co"># 対角：自分から出ていく熱と放熱</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> deriv(Tv, t):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    heat[:, heat_node] <span class="op">=</span> heater_power_W(t, q_scale) <span class="op">/</span> C[heat_node]   <span class="co"># P2 だけに発熱</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> M <span class="op">@</span> Tv <span class="op">+</span> h <span class="op">*</span> T_AIR <span class="op">/</span> C <span class="op">+</span> heat</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>k1 <span class="op">=</span> deriv(T, t)<span class="op">;</span> k2 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k1, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)            <span class="co"># 4 次のルンゲ・クッタ</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>k3 <span class="op">=</span> deriv(T <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt<span class="op">*</span>k2, t <span class="op">+</span> <span class="fl">0.5</span><span class="op">*</span>dt)<span class="op">;</span> k4 <span class="op">=</span> deriv(T <span class="op">+</span> dt<span class="op">*</span>k3, t <span class="op">+</span> dt)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> T <span class="op">+</span> dt<span class="op">/</span><span class="dv">6</span> <span class="op">*</span> (k1 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k2 <span class="op">+</span> <span class="dv">2</span><span class="op">*</span>k3 <span class="op">+</span> k4)</span></code></pre></div>
 <h3 id="ページ目で言うこと約-1-分-30-秒">7-7. 6 ページ目で言うこと（約 1
 分 30 秒）</h3>
 <ul>
 <li>OpenFOAM の温度 121 枚を特異値分解すると、温度分布は 2 つの型で
 99.89 % 表せる。</li>
-<li>Q-DEIM で、型を見分けるのに一番よい代表 5 点を自動で選ぶ。</li>
+<li>Q-DEIMで、5つのモードの係数を安定に求めやすい代表5点を選ぶ。</li>
 <li>5 点の熱回路を OpenFOAM に合わせて ROM にした（差 0.014 K）。600
 秒が 31 ms で計算でき、データ同化を何十本でも回せる。</li>
 </ul>
@@ -2414,10 +2675,10 @@ class="math inline">\(\boldsymbol\varphi_k\)</span> は変わりません。</p>
 <p>最初の ROM では、ヒータの時間変化が「0〜300
 秒だけ発熱」と書き込まれていました（<code>dacore/rom_general.py</code>）。間欠加熱ではここを実際の
 ON/OFF に差し替えます。</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>HEATER_ON_S <span class="op">=</span> <span class="fl">300.0</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>HEATER_ON_S <span class="op">=</span> <span class="fl">300.0</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> heater_power_W(t, q_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.where(np.asarray(t) <span class="op">&lt;</span> HEATER_ON_S, q_scale <span class="op">*</span> HEATER_RATED_W, <span class="fl">0.0</span>)</span></code></pre></div>
 <h3 id="ページ目で言うこと約-1-分-2">8-6. 7 ページ目で言うこと（約 1
 分）</h3>
 <ul>
@@ -2575,8 +2836,9 @@ ROM で次の時刻まで進める「1 期先予測」（6 本に 1
 回目の補正で、観測の近くに寄ります。</li>
 <li>補正後の幅は、温度計のノイズ（0.3
 K）と同じくらいになります。予報の幅は、<span
-class="math inline">\(q\)</span>・<span class="math inline">\(h\)</span>
-が絞られるにつれて小さくなります（2.1 → 0.9 → 0.5 K）。</li>
+class="math inline">\(q\)</span><code>・</code><span
+class="math inline">\(h\)</span> が絞られるにつれて小さくなります（2.1 →
+0.9 → 0.5 K）。</li>
 <li>補正後の平均は、観測そのものではなく、予報と観測の間に入ります（90
 秒：予報 23.75、観測 22.63 → 補正後 22.86
 °C）。どちらをどれだけ信じるかを、散らばりの大きさから決めるのがカルマンゲインです。</li>
@@ -2686,15 +2948,15 @@ class="math inline">\(q\)</span>
 </tbody>
 </table>
 <p>1 サイクル（<code>run/holdout_AO_realsolver.py</code>、抜粋）：</p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ci, tb <span class="kw">in</span> <span class="bu">enumerate</span>(cyc, <span class="dv">1</span>):                    <span class="co"># 30 秒ごとに 20 回</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    Z[:, :NPT] <span class="op">=</span> integ_on(Z[:, :NPT], C, Km, Z[:, IH], Z[:, IQ], heat, on, tp, tb)   <span class="co"># ① ROM で予報</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    yv <span class="op">=</span> <span class="bu">list</span>(T5[ci][TN])<span class="op">;</span> Yf <span class="op">=</span> Z[:, TN]            <span class="co"># ② 温度計の予想 = その代表点の温度</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i, c), w, b0 <span class="kw">in</span> <span class="bu">zip</span>(obs, ws, u0):          <span class="co">#    変位計の予想 = 5 点の温度の一次式</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        yv.append(utrue[ci, i, c])</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> np.column_stack([Yf, b0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mp) <span class="op">@</span> w])</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.array(yv) <span class="op">+</span> ro.normal(<span class="dv">0</span>, np.sqrt(np.diag(Rd)))   <span class="co"># 実測（正解 + 誤差）</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)   <span class="co"># ③ 補正（5 点の温度・q・h）</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ci, tb <span class="kw">in</span> <span class="bu">enumerate</span>(cyc, <span class="dv">1</span>):                    <span class="co"># 30 秒ごとに 20 回</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    Z[:, :NPT] <span class="op">=</span> integ_on(Z[:, :NPT], C, Km, Z[:, IH], Z[:, IQ], heat, on, tp, tb)   <span class="co"># ① ROM で予報</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    yv <span class="op">=</span> <span class="bu">list</span>(T5[ci][TN])<span class="op">;</span> Yf <span class="op">=</span> Z[:, TN]            <span class="co"># ② 温度計の予想 = その代表点の温度</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i, c), w, b0 <span class="kw">in</span> <span class="bu">zip</span>(obs, ws, u0):          <span class="co">#    変位計の予想 = 5 点の温度の一次式</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        yv.append(utrue[ci, i, c])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        Yf <span class="op">=</span> np.column_stack([Yf, b0 <span class="op">+</span> (Z[:, :NPT] <span class="op">-</span> mp) <span class="op">@</span> w])</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> np.array(yv) <span class="op">+</span> ro.normal(<span class="dv">0</span>, np.sqrt(np.diag(Rd)))   <span class="co"># 実測（正解 + 誤差）</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    Z <span class="op">=</span> enkf_update(Z, y, <span class="va">None</span>, Rd, rng, inflation<span class="op">=</span>INFL, Yf<span class="op">=</span>Yf)   <span class="co"># ③ 補正（5 点の温度・q・h）</span></span></code></pre></div>
 <h3 id="ページ目で言うこと約-1-分-30-秒-1">9-6. 8 ページ目で言うこと（約
 1 分 30 秒）</h3>
 <ul>
@@ -2935,10 +3197,10 @@ A−O の誤差を計算（<code>results/holdout_AO_realsolver.json</code>）</t
 </table>
 <p>反りの推定（同じスクリプト、抜粋）：直した 5 点の温度の平均から、A・O
 の変位を一次式で計算します。</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Z[:, :NPT].mean(<span class="dv">0</span>)<span class="op">;</span> dm <span class="op">=</span> m <span class="op">-</span> mp                  <span class="co"># 直した 5 点の温度（平均）の、基準からの差</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>est <span class="op">=</span> (aA <span class="op">+</span> wA <span class="op">@</span> dm) <span class="op">-</span> (aO <span class="op">+</span> wO <span class="op">@</span> dm)                <span class="co"># 反り = U_z(A) − U_z(O)（どちらも 5 点の温度の一次式）</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>eAO.append(<span class="bu">abs</span>(est <span class="op">-</span> aot[ci]))                       <span class="co"># 正解（OpenFOAM＋FrontISTR）との差</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>m <span class="op">=</span> Z[:, :NPT].mean(<span class="dv">0</span>)<span class="op">;</span> dm <span class="op">=</span> m <span class="op">-</span> mp                  <span class="co"># 直した 5 点の温度（平均）の、基準からの差</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>est <span class="op">=</span> (aA <span class="op">+</span> wA <span class="op">@</span> dm) <span class="op">-</span> (aO <span class="op">+</span> wO <span class="op">@</span> dm)                <span class="co"># 反り = U_z(A) − U_z(O)（どちらも 5 点の温度の一次式）</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>eAO.append(<span class="bu">abs</span>(est <span class="op">-</span> aot[ci]))                       <span class="co"># 正解（OpenFOAM＋FrontISTR）との差</span></span></code></pre></div>
 <h3 id="ページ目で言うこと約-2-分">10-6. 9 ページ目で言うこと（約 2
 分）</h3>
 <ul>
@@ -3150,12 +3412,12 @@ K）の 1/4〜1/6 です。</li>
 </table>
 <p>全体の温度を戻す
 gappy-POD（<code>run/holdout_unobserved_cells.py</code>）：</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>UPp <span class="op">=</span> np.linalg.pinv(U[pod, :])                      <span class="co"># 代表 5 点の行の擬似逆行列（5 × 5）</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recon(T5):                                       <span class="co"># 直した代表 5 点の温度 → 全 20,696 セル</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mean[<span class="va">None</span>, :] <span class="op">+</span> ((T5 <span class="op">-</span> mp) <span class="op">@</span> UPp.T) <span class="op">@</span> U.T <span class="co"># T = 平均 + Φ Φ_P⁺ (T_P − 平均_P)</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>full <span class="op">=</span> recon(T5m)                                    <span class="co"># 各時刻の全セルの温度</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> np.sqrt(((full <span class="op">-</span> Tf) <span class="op">**</span> <span class="dv">2</span>).mean(<span class="dv">1</span>))           <span class="co"># 正解（OpenFOAM）との差</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>UPp <span class="op">=</span> np.linalg.pinv(U[pod, :])                      <span class="co"># 代表 5 点の行の擬似逆行列（5 × 5）</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> recon(T5):                                       <span class="co"># 直した代表 5 点の温度 → 全 20,696 セル</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> mean[<span class="va">None</span>, :] <span class="op">+</span> ((T5 <span class="op">-</span> mp) <span class="op">@</span> UPp.T) <span class="op">@</span> U.T <span class="co"># T = 平均 + Φ Φ_P⁺ (T_P − 平均_P)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>full <span class="op">=</span> recon(T5m)                                    <span class="co"># 各時刻の全セルの温度</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> np.sqrt(((full <span class="op">-</span> Tf) <span class="op">**</span> <span class="dv">2</span>).mean(<span class="dv">1</span>))           <span class="co"># 正解（OpenFOAM）との差</span></span></code></pre></div>
 <h3 id="ページ目で言うこと約-1-分-3">11-4. 10 ページ目で言うこと（約 1
 分）</h3>
 <ul>
@@ -3353,30 +3615,30 @@ class="math inline">\(J_c\)</span>）</td>
 </table>
 <p>1
 本測った後の不確かさと採点（<code>run/select_nonrep_temp_disp.py</code>）：</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_row(P, h, r):                 <span class="co"># センサ（感度 h、誤差 r）を 1 本足した後の P</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    Ph <span class="op">=</span> P <span class="op">@</span> h</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P <span class="op">-</span> np.outer(Ph, Ph) <span class="op">/</span> (h <span class="op">@</span> Ph <span class="op">+</span> r)      <span class="co"># = (P⁻¹ + h hᵀ / r)⁻¹</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(Ps, w, Hc, r):              <span class="co"># 候補ごとに、残る反りの標準偏差を時刻平均</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> np.zeros(<span class="bu">len</span>(Hc))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> P <span class="kw">in</span> Ps:                      <span class="co"># 30〜300 秒の 10 時刻</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        HP <span class="op">=</span> Hc <span class="op">@</span> P</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        s <span class="op">+=</span> np.sqrt(np.maximum(w <span class="op">@</span> P <span class="op">@</span> w <span class="op">-</span> (HP <span class="op">@</span> w)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (np.einsum(<span class="st">&quot;ij,ij-&gt;i&quot;</span>, HP, Hc) <span class="op">+</span> r), <span class="dv">0</span>))</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s <span class="op">/</span> <span class="bu">len</span>(Ps)                <span class="co"># J_c（小さいほどよい）</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> add_row(P, h, r):                 <span class="co"># センサ（感度 h、誤差 r）を 1 本足した後の P</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    Ph <span class="op">=</span> P <span class="op">@</span> h</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P <span class="op">-</span> np.outer(Ph, Ph) <span class="op">/</span> (h <span class="op">@</span> Ph <span class="op">+</span> r)      <span class="co"># = (P⁻¹ + h hᵀ / r)⁻¹</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(Ps, w, Hc, r):              <span class="co"># 候補ごとに、残る反りの標準偏差を時刻平均</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> np.zeros(<span class="bu">len</span>(Hc))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> P <span class="kw">in</span> Ps:                      <span class="co"># 30〜300 秒の 10 時刻</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        HP <span class="op">=</span> Hc <span class="op">@</span> P</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        s <span class="op">+=</span> np.sqrt(np.maximum(w <span class="op">@</span> P <span class="op">@</span> w <span class="op">-</span> (HP <span class="op">@</span> w)<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (np.einsum(<span class="st">&quot;ij,ij-&gt;i&quot;</span>, HP, Hc) <span class="op">+</span> r), <span class="dv">0</span>))</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> s <span class="op">/</span> <span class="bu">len</span>(Ps)                <span class="co"># J_c（小さいほどよい）</span></span></code></pre></div>
 <p>A 最適・D
 最適（<code>run/placement_method_comparison.py</code>）：同じ <span
 class="math inline">\(P\)</span>
 から、トレースと行列式を計算します。</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(B, ws):                      <span class="co"># 温度 2 点 + 変位を測った後の P</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> np.vstack([Ht] <span class="op">+</span> [w[<span class="va">None</span>, :] <span class="cf">for</span> w <span class="kw">in</span> ws])</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> B <span class="op">@</span> H.T <span class="op">@</span> np.linalg.inv(H <span class="op">@</span> B <span class="op">@</span> H.T <span class="op">+</span> R)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> B <span class="op">-</span> K <span class="op">@</span> H <span class="op">@</span> B</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> post(B, ws)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>sigma_AO <span class="op">=</span> np.sqrt(w_AO <span class="op">@</span> P <span class="op">@</span> w_AO)   <span class="co"># 目的指向（反りの不確かさ）</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>trace    <span class="op">=</span> np.trace(P)                <span class="co"># A 最適</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>logdet   <span class="op">=</span> np.linalg.slogdet(P)[<span class="dv">1</span>]    <span class="co"># D 最適</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> post(B, ws):                      <span class="co"># 温度 2 点 + 変位を測った後の P</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> np.vstack([Ht] <span class="op">+</span> [w[<span class="va">None</span>, :] <span class="cf">for</span> w <span class="kw">in</span> ws])</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    K <span class="op">=</span> B <span class="op">@</span> H.T <span class="op">@</span> np.linalg.inv(H <span class="op">@</span> B <span class="op">@</span> H.T <span class="op">+</span> R)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> B <span class="op">-</span> K <span class="op">@</span> H <span class="op">@</span> B</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> post(B, ws)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>sigma_AO <span class="op">=</span> np.sqrt(w_AO <span class="op">@</span> P <span class="op">@</span> w_AO)   <span class="co"># 目的指向（反りの不確かさ）</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>trace    <span class="op">=</span> np.trace(P)                <span class="co"># A 最適</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>logdet   <span class="op">=</span> np.linalg.slogdet(P)[<span class="dv">1</span>]    <span class="co"># D 最適</span></span></code></pre></div>
 <h3 id="ページ目で言うこと約-1-分-30-秒-2">12-6. 11
 ページ目で言うこと（約 1 分 30 秒）</h3>
 <ul>
