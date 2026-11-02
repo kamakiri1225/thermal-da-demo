@@ -2180,6 +2180,98 @@ K）より小さく収まりました。</li>
 秒ずっと発熱」のままにすると、最大 3.8 K 外れます（図 8
 の右の点線）。</li>
 </ul>
+<p>同じ結果に、ヒータの発熱（灰色の面、右の目盛り）を重ねて、字を大きくしたのが図
+8b
+です（発表用）。ヒータが入っている間に温度が上がり、切れると下がる様子と、ROM
+がそれに付いていく様子が 1 枚で見えます。</p>
+<figure>
+<img src="img/rom_applicability_heater.png"
+alt="ROM の適用範囲（ヒータの発熱を重ねた版）" />
+<figcaption aria-hidden="true">ROM
+の適用範囲（ヒータの発熱を重ねた版）</figcaption>
+</figure>
+<p><em>図 8b　図 8
+の上段にヒータの発熱を重ねた版。灰色の面がヒータの発熱（右の目盛り、W）。下段は
+ROM − OpenFOAM、帯は温度計のノイズ ±0.3 K。図 8 の右の点線（ON/OFF
+を与えない ROM）は載せていない。</em></p>
+<h4
+id="代表点以外の場所rom-から戻した温度分布も-openfoam-と合う">代表点以外の場所：ROM
+から戻した温度分布も OpenFOAM と合う</h4>
+<p>上の比較は代表 5 点の温度だけです。そこで、ROM の 5 点の温度から
+gappy-POD で全 20,696 セルの温度を戻し（<span
+class="math inline">\(\mathbf T = \bar{\mathbf T} +
+\Phi\,\Phi_P^{-1}(\mathbf T_P - \bar{\mathbf T}_P)\)</span>、§7-4
+と同じ）、<strong>代表 5 点以外の 20,691 セル</strong>で OpenFOAM
+と比べました。データ同化はしていません。</p>
+<figure>
+<img src="img/rom_field_vs_openfoam.png"
+alt="ROM から戻した温度分布と OpenFOAM（代表点以外）" />
+<figcaption aria-hidden="true">ROM から戻した温度分布と
+OpenFOAM（代表点以外）</figcaption>
+</figure>
+<p><em>図 8c　上：代表点以外の 3 か所の温度。T2（上面・ヒータ側、(26.6,
+−1.6, 98.8) mm）、T4（上面・横の +y 側、(1.6, 26.6, 98.8)
+mm）、T3（上面・反対側、(−26.6, −1.6, 98.8) mm）で、上面をヒータ側から
+0°・90°・180° 回った 3 か所（場所は図 8d）。T2・T3 は §11 と同じセル、T4
+は §11 の T4（反対側・中段）とは別の場所。太い薄い線が OpenFOAM、破線が
+ROM
+から戻した温度、黄色の面がヒータの発熱（右の目盛り、W）。ヒータから離れるほど（T2
+→ T4 →
+T3）温度の上がり方が遅い。下：代表点以外の全セルでの差（紫＝RMSE、灰＝最大の差、紫の点線＝OpenFOAM
+の温度を 5 つの型で一番よく表したときの RMSE）。</em></p>
+<figure>
+<img src="img/rom_field_points.png" alt="図 8c で温度を比べた場所" />
+<figcaption aria-hidden="true">図 8c で温度を比べた場所</figcaption>
+</figure>
+<p><em>図 8d　図 8c で代表点以外の温度を比べた 3 か所（T2 赤・T3 青・T4
+緑、図 8c の線と同じ色）と、代表点
+P0〜P4（灰）、代表点どうしをつなぐ熱回路の熱コンダクタンス
+K（灰の線、太いほど K が大きい。§7-4 の図 7 と同じ 6
+本）、ヒータ（薄い赤、外周の +x 側、高さ 25〜75 mm）。斜めから見た図。3
+か所とも上面で、ヒータからの向きだけが違う（T2 0°、T4 90°、T3
+180°）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>条件</th>
+<th style="text-align: right;">RMSE の最大</th>
+<th style="text-align: right;">最大の差</th>
+<th style="text-align: right;">5 つの型で表せる限界（RMSE）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15 W（作った条件）</td>
+<td style="text-align: right;">0.03 K</td>
+<td style="text-align: right;">0.04 K</td>
+<td style="text-align: right;">0.003 K</td>
+</tr>
+<tr class="even">
+<td>25 W</td>
+<td style="text-align: right;">0.08 K</td>
+<td style="text-align: right;">0.11 K</td>
+<td style="text-align: right;">0.005 K</td>
+</tr>
+<tr class="odd">
+<td>間欠加熱</td>
+<td style="text-align: right;">0.02 K</td>
+<td style="text-align: right;">0.05 K</td>
+<td style="text-align: right;">0.004 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>代表点以外のどの場所でも、差は温度計のノイズ（0.3
+K）より小さく収まりました。5
+点の温度が合えば、温度分布全体も合います。</li>
+<li>「5 つの型で表せる限界」は 0.005 K
+以下です。残っている差のほとんどは、型が 5
+つしかないことではなく、ROM（熱回路）が出す 5
+点の温度のずれから来ています。</li>
+<li>25 W では、600 秒に向かって差が大きくなります。§7-4 で見た「ROM
+の放熱 <span class="math inline">\(h\)</span>
+が物理の値より小さい」ことと合っていますが、原因かどうかは確かめていません。</li>
+</ul>
 <h3 id="使えるかどうかの決め手温度分布の型が変わるかどうか">8-3.
 使えるかどうかの決め手：温度分布の「型」が変わるかどうか</h3>
 <p>ROM の温度は、POD の型（固定）の足し合わせ <span
@@ -2279,6 +2371,20 @@ class="math inline">\(\boldsymbol\varphi_k\)</span> は変わりません。</p>
 <code>heater_power_W</code></td>
 <td>ヒータの発熱の時間変化。間欠加熱ではこの関数を差し替える</td>
 </tr>
+<tr class="even">
+<td><code>run/make_rom_applicability_fig.py --heater</code></td>
+<td>図 8b（ヒータの発熱を重ねた版）。<code>--heater</code> なしで図
+8</td>
+</tr>
+<tr class="odd">
+<td><code>run/rom_field_vs_openfoam.py</code></td>
+<td>図 8c。ROM → gappy-POD で全セルの温度を戻し、代表点以外で OpenFOAM
+と比べる（<code>results/rom_field_vs_openfoam.json</code>）</td>
+</tr>
+<tr class="even">
+<td><code>run/make_rom_field_points_fig.py</code></td>
+<td>図 8d。図 8c で温度を比べた場所・代表点・ヒータの図</td>
+</tr>
 </tbody>
 </table>
 <p>最初の ROM では、ヒータの時間変化が「0〜300
@@ -2296,6 +2402,8 @@ W）や加熱のしかた（間欠加熱）が変わっても、作り直さず�
 0.04〜0.11 K、温度計のノイズ以下）。</li>
 <li>間欠加熱では、ヒータがいつ入っているかを ROM
 に与える必要がある。</li>
+<li>5 点の温度から戻した温度分布も、代表点以外の場所で OpenFOAM
+と合った（RMSE 0.02〜0.08 K）。</li>
 <li>使えるかどうかは、温度分布の「型」が変わるかどうかで決まる。熱源の位置や形が変わったら作り直し。</li>
 </ul>
 <hr />
