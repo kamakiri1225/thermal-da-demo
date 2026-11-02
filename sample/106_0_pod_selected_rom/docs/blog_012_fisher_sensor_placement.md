@@ -83,7 +83,7 @@ y_c\equiv T^{\mathrm{obs}}[c]-\overline T[c]
 
 ### 2-3. 変位計の式
 
-線形熱弾性では、同じ係数から変位も復元できます。節点 $`S`$ の方向 $`\alpha`$（$`x,y,z`$）の変位は、
+線形熱弾性では、同じ係数から変位も復元できます。節点 $`S`$ の方向 $`\alpha`$`（`$`x,y,z`$）の変位は、
 
 ```math
 U_\alpha(S)\approx\overline u_{S,\alpha}
@@ -120,11 +120,11 @@ T_{P2}=\overline T_{P2}+\varphi_1[P2]\,a_1+\varepsilon .
 ```
 
 - $`a_1`$：未知量。その時刻の温度分布が、時間平均の温度分布からモード1の形にどれだけずれているか
-- $`T_{P2}`$：P2の読み、$`\overline T_{P2}`$：P2の時間平均温度
-- $`\varphi_1[P2]`$：モード1のP2での値。$`a_1`$ が1増えたときに、P2の読みが変わる量（感度）
+- $`T_{P2}`$`：P2の読み、`$`\overline T_{P2}`$：P2の時間平均温度
+- $`\varphi_1[P2]`$`：モード1のP2での値。`$`a_1`$ が1増えたときに、P2の読みが変わる量（感度）
 - $`\varepsilon`$：温度計のノイズ。平均0、分散 $`r`$
 
-記号を短くするため、$`y=T_{P2}-\overline T_{P2}`$、$`h=\varphi_1[P2]`$、$`a=a_1`$ と書くと、
+記号を短くするため、$`y=T_{P2}-\overline T_{P2}`$`、`$`h=\varphi_1[P2]`$`、`$`a=a_1`$ と書くと、
 
 ```math
 y=ha+\varepsilon .
@@ -411,7 +411,7 @@ T[P3]-\overline T[P3]\\T[P4]-\overline T[P4]
 \approx\underbrace{D\Phi_P^+}_{L_u:\ 3N_F\times5}\mathbf x.
 ```
 
-$`N_F`$ はFEM節点数、$`+`$は擬似逆行列です。$`D`$ はFEM節点への温度写像とFrontISTR応答を含みます。
+$`N_F`$ はFEM節点数、$`+`$`は擬似逆行列です。`$`D`$ はFEM節点への温度写像とFrontISTR応答を含みます。
 
 候補の感度は、温度なら $`G`$ の該当セルの行、変位なら $`L_u`$ の該当節点・方向の行です。
 
@@ -689,7 +689,7 @@ E最適は今回未実施です。単位の異なる未知量を混ぜる場合�
 | ファイル | 関数・変数 | 対応 |
 |---|---|---|
 | `run/make_blog012_fisher_figs.py` | `Us`, `Ds`, `hT`, `w` | 2モードの温度・変位感度、反りへの重み |
-| 同上 | `post()` | $`F=\sum_c\mathbf h_c\mathbf h_c^{\mathsf T}/r_c`$、$`P=(B^{-1}+F)^{-1}`$ |
+| 同上 | `post()` | $`F=\sum_c\mathbf h_c\mathbf h_c^{\mathsf T}/r_c`$`、`$`P=(B^{-1}+F)^{-1}`$ |
 | 同上 | `goal` | 分散低減量 $`\Delta_c`$ |
 | `run/placement_method_comparison.py` | `post()`, `scores()`, `greedy()` | 5次元の採点、変位2本の選定 |
 | 同上 | `run()` | EnKFで反りの平均絶対誤差を比較 |

@@ -525,8 +525,8 @@ flowchart LR
 
 | 選び方 | 2点から得られる式 | 何が起きるか |
 |---|---|---|
-| **似た情報の2点** | $`T[P0]=\overline T[P0]+b_1a_1+b_2a_2`$<br/>$`T[P1]=\overline T[P1]+\lambda b_1a_1+\lambda b_2a_2`$ | 2本目は1本目の定数倍。$`a_1,a_2`$ を別々に決められない |
-| **違う情報の2点** | $`T[P0]=\overline T[P0]+b_1a_1+b_2a_2`$<br/>$`T[P1]=\overline T[P1]+c_1a_1+c_2a_2`$ | $`b_1c_2-b_2c_1\ne0`$ なら2係数を区別できる。ほぼ比例する組合せも避けたい |
+| **似た情報の2点** | $`T[P0]=\overline T[P0]+b_1a_1+b_2a_2`$`<br/>`$`T[P1]=\overline T[P1]+\lambda b_1a_1+\lambda b_2a_2`$ | 2本目は1本目の定数倍。$`a_1,a_2`$ を別々に決められない |
+| **違う情報の2点** | $`T[P0]=\overline T[P0]+b_1a_1+b_2a_2`$`<br/>`$`T[P1]=\overline T[P1]+c_1a_1+c_2a_2`$ | $`b_1c_2-b_2c_1\ne0`$ なら2係数を区別できる。ほぼ比例する組合せも避けたい |
 
 実際は5モードなので、各点での5つのモード値を比較します。
 
@@ -633,30 +633,196 @@ $`\mathbf c_i`$ は座標でも温度そのものでもありません。**「�
 
 選んだ列と比例する候補なら $`\mathbf r_i=\mathbf0`$ となり、新しい情報を追加しません。2列目以降も、**選択済みのすべての方向**の成分を除いてから比較します。
 
-**④ この並べ替えと成分の分解を、QR分解の記号でまとめます。**
+#### ④ 列ピボット付きQR：点を並べ替え、独立な情報を順に取り出す
+
+ここでは $`U=\Phi`$ とします。$`Q`$ はQR分解の直交行列で、発熱量の記号ではありません。
+
+##### 1. 分解する行列：1列が1セルの情報
+
+```math
+\underbrace{\Phi^{\mathsf T}}_{5\times N}
+=
+\begin{bmatrix}
+\varphi_1[1]&\varphi_1[2]&\cdots&\varphi_1[N]\\
+\varphi_2[1]&\varphi_2[2]&\cdots&\varphi_2[N]\\
+\varphi_3[1]&\varphi_3[2]&\cdots&\varphi_3[N]\\
+\varphi_4[1]&\varphi_4[2]&\cdots&\varphi_4[N]\\
+\varphi_5[1]&\varphi_5[2]&\cdots&\varphi_5[N]
+\end{bmatrix}
+=
+\left[\mathbf c_1\ \mathbf c_2\ \cdots\ \mathbf c_N\right].
+```
+
+**列 $`j`$ は、セル $`j`$ での5つのモード値**です。Q-DEIMは、このN本の列から代表5点に対応する5本を選びます。
+
+##### 2. $`\Pi`$：選んだセルの列を、先頭へ移す
+
+P0〜P4が元メッシュのどのセルかを、そのセル番号 $`p_0,\ldots,p_4`$ で表します。残りのセル番号を $`j_6,\ldots,j_N`$ とします。$`\mathbf e_i`$ は「$`i`$ 番目の成分だけ1、ほかは0」の $`N\times1`$ ベクトルです。
+
+```math
+\underbrace{\Pi}_{N\times N}
+=
+\left[
+\underbrace{\mathbf e_{p_0}\ \mathbf e_{p_1}\ \mathbf e_{p_2}\ \mathbf e_{p_3}\ \mathbf e_{p_4}}_{\text{代表5点のセル番号}}
+\ \middle|\
+\underbrace{\mathbf e_{j_6}\ \cdots\ \mathbf e_{j_N}}_{\text{残りのセル番号}}
+\right].
+```
+
+行列の右から $`\mathbf e_i`$ を掛けると、その行列の $`i`$ 列目が取り出されます。したがって、右から $`\Pi`$ を掛けると、
+
+```math
+\underbrace{\Phi^{\mathsf T}\Pi}_{5\times N}
+=
+\left[
+\underbrace{\mathbf c_{P0}\ \mathbf c_{P1}\ \mathbf c_{P2}\ \mathbf c_{P3}\ \mathbf c_{P4}}_{\text{選んだ順に先頭へ}}
+\ \middle|\
+\underbrace{\mathbf c_{j_6}\ \cdots\ \mathbf c_{j_N}}_{\text{残り}}
+\right].
+```
+
+**$`\Pi`$ がするのは列の移動だけです。** モード値自体は変えません。$`\mathbf c_{P0}`$ は元のセル番号 $`p_0`$ の列であり、セル0という意味ではありません。
+
+##### 3. $`Q,R`$：移動後の各列を、直交する方向の成分で表す
+
+並べ替え後の行列を、次のように分解します。
 
 ```math
 \underbrace{\Phi^{\mathsf T}}_{5\times N}
 \underbrace{\Pi}_{N\times N}
 =
-\underbrace{Q}_{5\times5}
-\underbrace{R}_{5\times N}.
+\underbrace{\left[\mathbf q_1\ \mathbf q_2\ \mathbf q_3\ \mathbf q_4\ \mathbf q_5\right]}_{Q:\ 5\times5}
+\underbrace{R}_{5\times N},
+\qquad Q^{\mathsf T}Q=I_5.
 ```
 
-| 記号 | この計算での意味 |
-|---|---|
-| $`\Pi`$ | 候補セルの列を、選んだ順が先頭に来るよう並べ替える行列 |
-| $`Q`$ | 成分を除くために使う、互いに直交した5つの方向 |
-| $`R`$ | 各セルの列を、$`Q`$ の方向の成分で表した係数 |
+$`\mathbf q_1,\ldots,\mathbf q_5`$ は長さ1で互いに直交する方向です。$`R`$ は、並べ替えた各列がこの5方向をどれだけ含むかを表します。
 
-**選ばれる点は、並べ替え後の先頭5列に対応するセル番号です。** $`\Pi`$ の要素自体がセル座標を表すわけではありません。実装では $`\Pi`$ の巨大な行列を作らず、並べ替え順の番号列 `piv` を受け取ります。
+```math
+\underbrace{R}_{5\times N}
+=
+\left[
+\begin{array}{ccccc|ccc}
+r_{11}&r_{12}&r_{13}&r_{14}&r_{15}&r_{16}&\cdots&r_{1N}\\
+0&r_{22}&r_{23}&r_{24}&r_{25}&r_{26}&\cdots&r_{2N}\\
+0&0&r_{33}&r_{34}&r_{35}&r_{36}&\cdots&r_{3N}\\
+0&0&0&r_{44}&r_{45}&r_{46}&\cdots&r_{4N}\\
+0&0&0&0&r_{55}&r_{56}&\cdots&r_{5N}
+\end{array}
+\right]
+=
+\left[\underbrace{R_{11}}_{5\times5}\ \middle|\ \underbrace{R_{12}}_{5\times(N-5)}\right].
+```
+
+先頭5列の $`R_{11}`$ は**上三角行列**、$`R`$ 全体は**上台形行列**です。ピボット選択は残差の最大の列から進むので、厳密な計算では、
+
+```math
+|r_{11}|\ge |r_{22}|\ge |r_{33}|\ge |r_{44}|\ge |r_{55}|
+```
+
+となります。ここでの $`r_{kk}`$ は、**その点で新しく得られる、選択済みの方向では表せない成分の大きさ**に対応します。符号はQR分解の取り方で変わるため、長さは絶対値で読みます。
+
+列ごとに掛け算を展開すると、
+
+```math
+\begin{aligned}
+\mathbf c_{P0}&=r_{11}\mathbf q_1,\\
+\mathbf c_{P1}&=r_{12}\mathbf q_1+r_{22}\mathbf q_2,\\
+\mathbf c_{P2}&=r_{13}\mathbf q_1+r_{23}\mathbf q_2+r_{33}\mathbf q_3,\\
+\mathbf c_{P3}&=r_{14}\mathbf q_1+r_{24}\mathbf q_2+r_{34}\mathbf q_3+r_{44}\mathbf q_4,\\
+\mathbf c_{P4}&=r_{15}\mathbf q_1+r_{25}\mathbf q_2+r_{35}\mathbf q_3+r_{45}\mathbf q_4+r_{55}\mathbf q_5.
+\end{aligned}
+```
+
+例えばP1では、$`r_{12}\mathbf q_1`$ はP0で既に分かる方向、$`r_{22}\mathbf q_2`$ がP1によって新しく加わる方向です。
+
+##### 4. スライドの選定手順と、QRの量の対応
+
+| スライドの手順 | QRの量 | 何を最大にして選ぶか |
+|---|---|---|
+| 1. 最も長い列を選ぶ | $`\lvert r_{11}\rvert=\lVert\mathbf c_{P0}\rVert_2`$<br/>$`\mathbf q_1=\mathbf c_{P0}/r_{11}`$ | $`\lVert\mathbf c_j\rVert_2`$ |
+| 2. P0の方向を除いて次を選ぶ | $`r_{12}=\mathbf q_1^{\mathsf T}\mathbf c_{P1}`$<br/>$`\mathbf r[P1]=\mathbf c_{P1}-r_{12}\mathbf q_1`$<br/>$`\lvert r_{22}\rvert=\lVert\mathbf r[P1]\rVert_2`$ | P0方向を除いた残差のノルム |
+| 3. 同じ処理を繰り返す | $`k=3,4,5`$ について<br/>$`\lvert r_{kk}\rvert=\lVert\mathbf r[P_{k-1}]\rVert_2`$ | 選択済みの**全方向**を除いた残差のノルム |
+
+一般の $`k`$ 回目は、
+
+```math
+\mathbf r[P_{k-1}]
+=\mathbf c_{P_{k-1}}-\sum_{\ell=1}^{k-1}
+\mathbf q_\ell\left(\mathbf q_\ell^{\mathsf T}\mathbf c_{P_{k-1}}\right),
+\qquad
+\mathbf q_k=\frac{\mathbf r[P_{k-1}]}{r_{kk}}.
+```
+
+特に2回目は、$`\mathbf q_1=\mathbf c_{P0}/r_{11}`$、$`r_{11}^2=\mathbf c_{P0}^{\mathsf T}\mathbf c_{P0}`$ を代入すると、
+
+```math
+\begin{aligned}
+\mathbf r[P1]
+&=\mathbf c_{P1}-\mathbf q_1\left(\mathbf q_1^{\mathsf T}\mathbf c_{P1}\right)\\
+&=\mathbf c_{P1}
+-\frac{\mathbf c_{P1}^{\mathsf T}\mathbf c_{P0}}
+{\mathbf c_{P0}^{\mathsf T}\mathbf c_{P0}}\mathbf c_{P0}.
+\end{aligned}
+```
+
+これは、スライドに書いた「P0方向への射影成分を除く」式そのものです。3回目以降も、P0だけでなく、それまでに得たすべての $`\mathbf q_\ell`$ 方向を除きます。
+
+##### 5. 選んだ5点から、なぜ係数を逆算できるか
+
+代表5点を取り出した行列は、並べ替え後の先頭5列に対応します。
+
+```math
+\underbrace{\Phi_P^{\mathsf T}}_{5\times5}
+=
+\left[\mathbf c_{P0}\ \mathbf c_{P1}\ \mathbf c_{P2}\ \mathbf c_{P3}\ \mathbf c_{P4}\right]
+=\underbrace{Q}_{5\times5}\underbrace{R_{11}}_{5\times5}.
+```
+
+$`Q`$ は直交行列なので $`\det Q=\pm1`$、$`R_{11}`$ は上三角行列なので、
+
+```math
+\boxed{\det\Phi_P
+=\det\Phi_P^{\mathsf T}
+=\det Q\,\det R_{11}
+=\pm r_{11}r_{22}r_{33}r_{44}r_{55}}.
+```
+
+**5回ともゼロでない残差が得られれば、5本の独立な情報がそろい、$`\Phi_P`$ は逆行列を持ちます。** そのとき、
+
+```math
+\underbrace{\mathbf T_P}_{5\times1}
+\approx\underbrace{\overline{\mathbf T}_P}_{5\times1}
++\underbrace{\Phi_P}_{5\times5}\underbrace{\mathbf a}_{5\times1},
+\qquad
+\mathbf a\approx\Phi_P^{-1}(\mathbf T_P-\overline{\mathbf T}_P)
+```
+
+から係数を求められます。
+
+ただし、**行列式がゼロでないことだけでは、安定に解けるとは限りません。** 温度誤差 $`\boldsymbol\varepsilon_P`$ による係数誤差は、
+
+```math
+\|\delta\mathbf a\|_2
+\le\|\Phi_P^{-1}\|_2\,\|\boldsymbol\varepsilon_P\|_2,
+\qquad
+\|\Phi_P^{-1}\|_2
+=\frac1{\sigma_{\min}(\Phi_P)}
+=\frac1{\sigma_{\min}(R_{11})}.
+```
+
+$`\sigma_{\min}`$ は最小特異値です。これが小さいほど、温度誤差が係数誤差へ増幅されます。Q-DEIMは各段階で残差の大きな列を選び、既存の点とほぼ同じ情報だけを持つ点を避けることで、**安定に逆算しやすい組合せを得ようとする方法**です。行列式の積だけで安定性を保証したり、全組合せで条件数が最小になると主張したりはしません。
+
+##### 6. 実際のコードでは、$`\Pi`$ の代わりに番号列を受け取る
 
 ```python
-_, _, piv = scipy.linalg.qr(Phi.T, pivoting=True)
-selected_cells = piv[:5]  # 先頭5個のセル番号を、P0〜P4として使う
+_, _, piv = qr(U[:, :RMODE].T, pivoting=True)
+pts = list(piv[:NPT])  # RMODE=5, NPT=5。P0〜P4の元セル番号
 ```
 
-元のセル番号が `selected_cells[j]` の点に、代表点の名前Pjを付けています。P0が元メッシュのセル0という意味ではありません。
+これは `run/select_points_qdeim.py` の選定部分です。SciPyは $`A[:,\mathrm{piv}]=QR`$ を満たす並べ替え順を返します。したがって、実装で $`N\times N`$ の $`\Pi`$ を作る必要はありません。配列番号は0始まりで、代表点名P0とは区別します。[SciPy公式のQR分解の説明](https://docs.scipy.org/doc/scipy/reference/generated/scipy.linalg.qr.html)
+
+**選点原理としては「ピボット付きQR ＝ 残差が最大の列から順に行うグラム・シュミット直交化」です。** ただし、これは厳密な計算での対応を説明したものです。SciPy/LAPACKの実際のQR計算はHouseholder変換を用いており、古典的グラム・シュミット法をそのまま実行しているという意味ではありません。
 
 ![Q-DEIM のアニメーション](img/qdeim_animation.gif)
 
