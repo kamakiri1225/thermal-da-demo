@@ -751,6 +751,33 @@ class="math inline">\(h\)</span>、<span class="math inline">\(r\)</span>
 \]</span></p>
 <p>右端が上の式の1個版です。未知量が2個でも、同じ形になります。</p>
 <p>文字で展開して、実際に入れるものを確かめます。</p>
+<p><strong><span class="math inline">\(P_{11},P_{12},P_{22}\)</span>
+はどこで決まるか。</strong> 候補 <span class="math inline">\(c\)</span>
+を足す<strong>前</strong>の共分散、つまり温度計P2・P0だけで測った後の
+<span
+class="math inline">\(P=(B^{-1}+F)^{-1}\)</span>（§4）の成分です。かっこの中を
+<span class="math inline">\(A=B^{-1}+F\)</span>
+と書くと、2×2の逆行列なので</p>
+<p><span class="math display">\[
+\begin{bmatrix}P_{11}&amp;P_{12}\\P_{12}&amp;P_{22}\end{bmatrix}
+=\frac1{A_{11}A_{22}-A_{12}^2}\begin{bmatrix}A_{22}&amp;-A_{12}\\-A_{12}&amp;A_{11}\end{bmatrix}.
+\]</span></p>
+<ul>
+<li><span
+class="math inline">\(B\)</span>：測る前の共分散。初期温度・発熱・放熱を変えた4,000本のROMを、評価する時刻（この例は150秒）まで進め、その散らばりから決める</li>
+<li><span class="math inline">\(F\)</span>：温度計P2・P0の感度 <span
+class="math inline">\(\mathbf h_{P2},\mathbf h_{P0}\)</span> とノイズ
+<span class="math inline">\(r\)</span> から決める（§4）</li>
+</ul>
+<p>どちらも<strong>センサの実測値を使わない</strong>ので、<span
+class="math inline">\(P_{11},P_{12},P_{22}\)</span>
+はセンサを置く前に決まります。候補 <span
+class="math inline">\(c\)</span> を何本比べても、同じ <span
+class="math inline">\(P\)</span> を使います（候補ごとに変わるのは <span
+class="math inline">\(h_{c,1},h_{c,2}\)</span>
+だけ）。本番（§8）では、30〜300秒の10時刻それぞれで <span
+class="math inline">\(B_k\)</span> を作るので、<span
+class="math inline">\(P\)</span> も時刻ごとに10個あります。</p>
 <p><span class="math display">\[
 \underbrace{P\mathbf h_c}_{2\times1}
 =\begin{bmatrix}P_{11}h_{c,1}+P_{12}h_{c,2}\\
