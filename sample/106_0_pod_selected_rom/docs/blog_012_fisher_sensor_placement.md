@@ -422,7 +422,25 @@ $`\Delta_c`$ は追加により減る反りの分散です。1時刻・1本な�
 
 > **フィッシャー情報を足して、反りの分散が一番小さくなる候補を選ぶ。**
 
-**フィッシャー情報行列の導出（簡潔に）。** 未知量は、POD のモードの係数 $`\mathbf a=(a_1,a_2)^{\mathsf T}`$（§2-1）です（本番の §8 では、代わりに代表5点の温度 $`\delta\mathbf T_P`$）。センサの式を縦に並べて $`\mathbf y=H\mathbf a+\boldsymbol\varepsilon`$、ノイズを $`\boldsymbol\varepsilon\sim\mathcal N(\mathbf 0,R)`$ とします（$`H`$ の各行が感度 $`\mathbf h_c^{\mathsf T}`$、$`R`$ はノイズの分散を並べた対角行列）。
+**フィッシャー情報行列の導出（簡潔に）。** 未知量は、POD のモードの係数 $`\mathbf a=(a_1,a_2)^{\mathsf T}`$（§2-1）です（本番の §8 では、代わりに代表5点の温度 $`\delta\mathbf T_P`$）。
+
+§2 で見たとおり、センサ $`c`$ の読み（その場所の平均からのずれ）$`y_c`$ は、係数の一次式とノイズで書けます。
+
+```math
+y_c=\mathbf h_c^{\mathsf T}\mathbf a+\varepsilon_c,\qquad \operatorname{Var}\varepsilon_c=r_c .
+```
+
+使うセンサの数だけこの式があるので、縦に並べて行列で書きます。
+
+```math
+\underbrace{\begin{bmatrix}y_1\\ \vdots\\ y_n\end{bmatrix}}_{\mathbf y}
+=\underbrace{\begin{bmatrix}\mathbf h_1^{\mathsf T}\\ \vdots\\ \mathbf h_n^{\mathsf T}\end{bmatrix}}_{H}\mathbf a
++\underbrace{\begin{bmatrix}\varepsilon_1\\ \vdots\\ \varepsilon_n\end{bmatrix}}_{\boldsymbol\varepsilon},
+\qquad
+R=\begin{bmatrix}r_1&&\\&\ddots&\\&&r_n\end{bmatrix}.
+```
+
+ノイズが正規分布なら、係数が $`\mathbf a`$ のときに読み $`\mathbf y`$ が出る確からしさ（尤度）の対数を、$`\mathbf a`$ で2回微分します。
 
 ```math
 \log p(\mathbf y\mid\mathbf a)=C-\tfrac12(\mathbf y-H\mathbf a)^{\mathsf T}R^{-1}(\mathbf y-H\mathbf a)
