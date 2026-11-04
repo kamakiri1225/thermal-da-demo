@@ -1240,6 +1240,50 @@ c_1,\ c_2:\ \lVert\mathbf h_c\rVert_2\ \text{が大きい順に上位2つ}
 class="math inline">\(P\)</span> も使わず、感度を並べた行列 <span
 class="math inline">\([\,\mathbf h_c\,]_{c\in\mathcal
 C}\)</span>（5×14,754）を列の入れ替え付きQR分解し、最初に選ばれた2列にします（感度の向きがなるべく違う2つ）。</p>
+<h4
+id="解説2本は組み合わせで決まる順番は関係しない">解説：2本は「組み合わせ」で決まる（順番は関係しない）</h4>
+<p><strong>組み合わせが大事な理由。</strong> 2本の変位計 <span
+class="math inline">\(c_1,c_2\)</span> で測ったときの共分散は</p>
+<p><span class="math display">\[
+P_{\{c_1,c_2\}}=\Bigl(B^{-1}+F+\frac{\mathbf h_{c_1}\mathbf
+h_{c_1}^{\mathsf T}}{r}+\frac{\mathbf h_{c_2}\mathbf h_{c_2}^{\mathsf
+T}}{r}\Bigr)^{-1}
+\]</span></p>
+<p>です。もし <span class="math inline">\(\mathbf h_{c_2}\)</span> が
+<span class="math inline">\(\mathbf h_{c_1}\)</span>
+とほぼ同じ向き（<span class="math inline">\(\mathbf h_{c_2}\approx
+k\,\mathbf
+h_{c_1}\)</span>）なら、2本目の項は1本目の項とほぼ同じ向きの行列で、新しい向きの情報を足しません。<span
+class="math inline">\(P\)</span>
+は1本目だけのときとあまり変わらず、反りの分散もほとんど減りません。</p>
+<p>そのため、<strong>1本ずつ見て良い候補を2つ選んでも、2本の組として良いとは限りません</strong>。§8-2
+の「感度の大きさ」は、感度の長さ <span
+class="math inline">\(\lVert\mathbf h_c\rVert_2\)</span>
+の上位2つを選んだため、5 mm
+しか離れていない、感度の向きがほぼ同じ2点になりました。反りの誤差は
+0.569 µm で、目的指向（0.076 µm）の約7倍でした。</p>
+<p><strong>順番は関係しない。</strong>
+フィッシャー情報は足し算なので、<span class="math inline">\(c_1\)</span>
+と <span class="math inline">\(c_2\)</span> を入れ替えても <span
+class="math inline">\(P_{\{c_1,c_2\}}\)</span>
+は同じです。<strong>選んだ組の良し悪しは、足す順番によりません。</strong></p>
+<p><strong>1本ずつ選ぶ手順（貪欲法）は、組み合わせを考えている。</strong>
+2本目は、1本目を足した後の <span
+class="math inline">\(P_{\{c_1\}}\)</span> を使って採点します。</p>
+<p><span class="math display">\[
+c_2=\arg\min_{c}\ \mathbf w^{\mathsf
+T}\Bigl(P_{\{c_1\}}^{-1}+\frac{\mathbf h_c\mathbf h_c^{\mathsf
+T}}{r}\Bigr)^{-1}\mathbf w .
+\]</span></p>
+<p>1本目と同じ向きの候補は、<span
+class="math inline">\(P_{\{c_1\}}\)</span>
+ではもう分かっている向きを測ることになり、§6-2 の分母 <span
+class="math inline">\(\mathbf h_c^{\mathsf T}P\,\mathbf h_c\)</span>
+が小さく、分子も小さくなって選ばれにくくなります。1本目と違う情報を持つ候補が、自然に2本目に選ばれます。</p>
+<p><strong>ただし、全組み合わせの最適とは限らない。</strong>
+1本ずつ選ぶ手順は、1本目を決めた後で入れ替えません。そのため、全ての2本の組（約
+<span class="math inline">\(14{,}754\times14{,}753/2\approx1.1\)</span>
+億通り）の中で一番よい組と一致する保証はありません。今回、全組み合わせとの比較はしていません（未実施）。</p>
 <p><strong>比べ方。</strong> 選んだ <span
 class="math inline">\(S\)</span>
 ごとに、EnKF（60メンバー、30秒ごと）をまわして反りを推定し、正解（OpenFOAM＋FrontISTR）との差
