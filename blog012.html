@@ -822,6 +822,32 @@ alt="2係数の推定誤差を表す楕円" />
 <figcaption aria-hidden="true">2係数の推定誤差を表す楕円</figcaption>
 </figure>
 <p><em>点線は観測前、緑は温度2点を使う場合。赤は反りを目的に選んだ変位1成分を追加した場合、青は比較候補のUzを追加した場合。2次元のこの楕円内が68%の確率という意味ではありません。</em></p>
+<h4 id="まとめ選び方の方針発表用">まとめ：選び方の方針（発表用）</h4>
+<blockquote>
+<p><strong>フィッシャー情報を足して、反りの分散が一番小さくなる候補を選ぶ。</strong></p>
+</blockquote>
+<p><span class="math display">\[
+\underbrace{\mathbf h_c}_{\text{候補の感度}}
+\ \longrightarrow\
+\underbrace{F+\frac{\mathbf h_c\mathbf h_c^{\mathsf
+T}}{r_c}}_{\text{フィッシャー情報を足す}}
+\ \longrightarrow\
+\underbrace{P_{+c}=\Bigl(B^{-1}+F+\frac{\mathbf h_c\mathbf h_c^{\mathsf
+T}}{r_c}\Bigr)^{-1}}_{\text{測った後の共分散}}
+\ \longrightarrow\
+\underbrace{\mathbf w^{\mathsf T}P_{+c}\,\mathbf w}_{\text{反りの分散}}\
+\text{が最小の }c
+\]</span></p>
+<ol type="1">
+<li>候補ごとに、そのセンサの情報（感度×感度÷ノイズ）をフィッシャー情報に足す。</li>
+<li>測る前の情報 <span class="math inline">\(B^{-1}\)</span>
+と合わせて逆行列を取り、測った後の共分散 <span
+class="math inline">\(P_{+c}\)</span> にする。</li>
+<li>知りたい反りの分散 <span class="math inline">\(\mathbf w^{\mathsf
+T}P_{+c}\mathbf w\)</span> が一番小さい候補を選ぶ（＝ <span
+class="math inline">\(\Delta_c\)</span> が一番大きい候補）。</li>
+</ol>
+<p>どれも実測値を使わないので、<strong>センサを置く前に計算だけで選べます</strong>。次の図は、この3を表面の全候補で計算した結果です。</p>
 <h3 id="採点結果を空間分布にする">6-3. 採点結果を空間分布にする</h3>
 <ol type="1">
 <li>温度計P2・P0を使う場合の <span class="math inline">\(P\)</span>
