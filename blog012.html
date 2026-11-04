@@ -839,15 +839,29 @@ alt="2係数の推定誤差を表す楕円" />
 <p><strong>フィッシャー情報行列の導出（簡潔に）。</strong> 未知量は、POD
 のモードの係数 <span class="math inline">\(\mathbf a=(a_1,a_2)^{\mathsf
 T}\)</span>（§2-1）です（本番の §8 では、代わりに代表5点の温度 <span
-class="math inline">\(\delta\mathbf
-T_P\)</span>）。センサの式を縦に並べて <span
-class="math inline">\(\mathbf y=H\mathbf
-a+\boldsymbol\varepsilon\)</span>、ノイズを <span
-class="math inline">\(\boldsymbol\varepsilon\sim\mathcal N(\mathbf
-0,R)\)</span> とします（<span class="math inline">\(H\)</span>
-の各行が感度 <span class="math inline">\(\mathbf h_c^{\mathsf
-T}\)</span>、<span class="math inline">\(R\)</span>
-はノイズの分散を並べた対角行列）。</p>
+class="math inline">\(\delta\mathbf T_P\)</span>）。</p>
+<p>§2 で見たとおり、センサ <span class="math inline">\(c\)</span>
+の読み（その場所の平均からのずれ）<span
+class="math inline">\(y_c\)</span>
+は、係数の一次式とノイズで書けます。</p>
+<p><span class="math display">\[
+y_c=\mathbf h_c^{\mathsf T}\mathbf a+\varepsilon_c,\qquad
+\operatorname{Var}\varepsilon_c=r_c .
+\]</span></p>
+<p>使うセンサの数だけこの式があるので、縦に並べて行列で書きます。</p>
+<p><span class="math display">\[
+\underbrace{\begin{bmatrix}y_1\\ \vdots\\ y_n\end{bmatrix}}_{\mathbf y}
+=\underbrace{\begin{bmatrix}\mathbf h_1^{\mathsf T}\\ \vdots\\ \mathbf
+h_n^{\mathsf T}\end{bmatrix}}_{H}\mathbf a
++\underbrace{\begin{bmatrix}\varepsilon_1\\ \vdots\\
+\varepsilon_n\end{bmatrix}}_{\boldsymbol\varepsilon},
+\qquad
+R=\begin{bmatrix}r_1&amp;&amp;\\&amp;\ddots&amp;\\&amp;&amp;r_n\end{bmatrix}.
+\]</span></p>
+<p>ノイズが正規分布なら、係数が <span class="math inline">\(\mathbf
+a\)</span> のときに読み <span class="math inline">\(\mathbf y\)</span>
+が出る確からしさ（尤度）の対数を、<span class="math inline">\(\mathbf
+a\)</span> で2回微分します。</p>
 <p><span class="math display">\[
 \log p(\mathbf y\mid\mathbf a)=C-\tfrac12(\mathbf y-H\mathbf a)^{\mathsf
 T}R^{-1}(\mathbf y-H\mathbf a)
