@@ -422,7 +422,7 @@ $`\Delta_c`$ は追加により減る反りの分散です。1時刻・1本な�
 
 > **フィッシャー情報を足して、反りの分散が一番小さくなる候補を選ぶ。**
 
-**フィッシャー情報行列の導出（簡潔に）。** 未知量は、POD のモードの係数 $`\mathbf a=(a_1,a_2)^{\mathsf T}`$（§2-1）です（本番の §8 では、代わりに代表5点の温度 $`\delta\mathbf T_P`$）。
+**フィッシャー情報行列の導出（簡潔に）。** 未知量は、POD のモードの係数 $`\mathbf a=(a_1,a_2)^{\mathsf T}`$（§2-1）です（本番の §8 では、代わりに代表5点の温度のずれ $`\delta\mathbf T_P=\mathbf T_P-\overline{\mathbf T}_P`$。§8-2 で説明）。
 
 §2 で見たとおり、センサ $`c`$ の読み（その場所の平均からのずれ）$`y_c`$ は、係数の一次式とノイズで書けます。
 
@@ -658,7 +658,14 @@ B_k=\frac1{M-1}\sum_{m=1}^{M}\bigl(\mathbf T_P^{(m)}(t_k)-\overline{\mathbf T}_P
 
 ### 8-2. 6つの選び方を式で書く
 
-**共通の設定。** 未知量は代表5点の温度のずれ $`\delta\mathbf T_P`$（5×1）です。変位計の候補 $`c`$ は「節点 $`n`$ と向き $`j\in\{x,y,z\}`$」の組で、A・Oから12 mm以内を除いた14,754通りの集合を $`\mathcal C`$ とします。候補 $`c`$ の感度は、温度から変位への換算行列 $`W=D\,\Phi_P^{-1}`$ の1行です。
+**共通の設定。** 未知量は代表5点の温度のずれ $`\delta\mathbf T_P`$（5×1）です。
+
+```math
+\delta\mathbf T_P=\mathbf T_P-\overline{\mathbf T}_P
+=\begin{bmatrix}T_{P0}-\overline T_{P0}\\ \vdots\\ T_{P4}-\overline T_{P4}\end{bmatrix}.
+```
+
+$`\mathbf T_P`$ はその時刻の代表5点（P0〜P4）の温度、$`\overline{\mathbf T}_P`$ はその5点の時間平均温度（POD の平均の温度分布の、5点での値）です。5点の温度が分かれば、POD の係数 $`\mathbf a`$ も $`\mathbf a=\Phi_P^{-1}\delta\mathbf T_P`$ で決まるので（$`\Phi_P`$ はモードの5点での値を並べた5×5の行列）、$`\delta\mathbf T_P`$ と $`\mathbf a`$ は同じ情報を別の形で表したものです。説明例（§2〜6）は係数 $`\mathbf a`$、本番は5点の温度のずれ $`\delta\mathbf T_P`$ を未知量にしています。変位計の候補 $`c`$ は「節点 $`n`$ と向き $`j\in\{x,y,z\}`$」の組で、A・Oから12 mm以内を除いた14,754通りの集合を $`\mathcal C`$ とします。候補 $`c`$ の感度は、温度から変位への換算行列 $`W=D\,\Phi_P^{-1}`$ の1行です。
 
 ```math
 y_c=\mathbf h_c^{\mathsf T}\,\delta\mathbf T_P+\varepsilon_c,\qquad
