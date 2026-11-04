@@ -848,6 +848,67 @@ T}}{r_c}\Bigr)^{-1}}_{\text{測った後の共分散}}
 \underbrace{\mathbf w^{\mathsf T}P_{+c}\,\mathbf w}_{\text{反りの分散}}\
 \text{が最小の }c
 \]</span></p>
+<p>式の中の記号は、それぞれ次のものです。</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>何か</th>
+<th>中身</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf h_c\)</span></td>
+<td>候補 <span class="math inline">\(c\)</span> の感度</td>
+<td>候補は変位計なので、モード <span class="math inline">\(j\)</span>
+の温度変化を FrontISTR に入れて解いた、その節点・その向きの変位 <span
+class="math inline">\(h_{c,j}=D_{S\alpha,j}\)</span>（温度計なら、モードのその場所の値
+<span class="math inline">\(h_{c,j}=\varphi_j[c]\)</span>）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(F\)</span></td>
+<td>今あるフィッシャー情報</td>
+<td>固定した温度計P2・P0の分。温度計の感度はモードの値 <span
+class="math inline">\(\varphi\)</span> なので <span
+class="math inline">\(F=\dfrac{\boldsymbol\varphi[P2]\boldsymbol\varphi[P2]^{\mathsf
+T}}{r_T}+\dfrac{\boldsymbol\varphi[P0]\boldsymbol\varphi[P0]^{\mathsf
+T}}{r_T}\)</span>（<span
+class="math inline">\(\boldsymbol\varphi[c]=(\varphi_1[c],\varphi_2[c])^{\mathsf
+T}\)</span>）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf h_c\mathbf h_c^{\mathsf
+T}/r_c\)</span></td>
+<td>候補 <span class="math inline">\(c\)</span>
+を足したときに増えるフィッシャー情報</td>
+<td>変位計の感度 <span class="math inline">\(D\)</span> とノイズの分散
+<span class="math inline">\(r_c\)</span> から</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(B\)</span></td>
+<td>測る前の共分散</td>
+<td>4,000本のROMの散らばり（§8-1）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P_{+c}\)</span></td>
+<td>候補 <span class="math inline">\(c\)</span>
+を足して測った後の共分散</td>
+<td><span class="math inline">\(B^{-1}\)</span>
+とフィッシャー情報を足して逆行列</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf w\)</span></td>
+<td>反りの係数</td>
+<td>A と O の上下の変位の差を、モードの係数で表したもの（§5）</td>
+</tr>
+</tbody>
+</table>
 <ol type="1">
 <li>候補ごとに、そのセンサの情報（感度×感度÷ノイズ）をフィッシャー情報に足す。</li>
 <li>測る前の情報 <span class="math inline">\(B^{-1}\)</span>
