@@ -422,6 +422,25 @@ $`\Delta_c`$ は追加により減る反りの分散です。1時刻・1本な�
 
 > **フィッシャー情報を足して、反りの分散が一番小さくなる候補を選ぶ。**
 
+**フィッシャー情報行列の導出（簡潔に）。** センサの式を縦に並べて $`\mathbf y=H\mathbf a+\boldsymbol\varepsilon`$、ノイズを $`\boldsymbol\varepsilon\sim\mathcal N(\mathbf 0,R)`$ とします（$`H`$ の各行が感度 $`\mathbf h_c^{\mathsf T}`$、$`R`$ はノイズの分散を並べた対角行列）。
+
+```math
+\log p(\mathbf y\mid\mathbf a)=C-\tfrac12(\mathbf y-H\mathbf a)^{\mathsf T}R^{-1}(\mathbf y-H\mathbf a)
+\ \xrightarrow{\ \partial/\partial\mathbf a\ }\
+H^{\mathsf T}R^{-1}(\mathbf y-H\mathbf a)
+\ \xrightarrow{\ \partial/\partial\mathbf a\ }\
+-H^{\mathsf T}R^{-1}H
+```
+
+```math
+F=-\mathbb E\Bigl[\frac{\partial^2\log p}{\partial\mathbf a\,\partial\mathbf a^{\mathsf T}}\Bigr]
+=H^{\mathsf T}R^{-1}H=\sum_{c}\frac{\mathbf h_c\mathbf h_c^{\mathsf T}}{r_c}.
+```
+
+対数尤度を未知量で2回微分した「山の鋭さ」がフィッシャー情報で、センサごとの「感度×感度÷ノイズ」の足し算になります（未知量1個なら §3 の $`h^2/r`$）。だから、**センサを1本足すと、$`F`$ に $`\mathbf h_c\mathbf h_c^{\mathsf T}/r_c`$ が1つ足されます**。
+
+**選び方の流れ。**
+
 ```math
 \underbrace{\mathbf h_c}_{\text{候補の感度}}
 \ \longrightarrow\
