@@ -838,9 +838,16 @@ alt="2係数の推定誤差を表す楕円" />
 </blockquote>
 <p><strong>フィッシャー情報行列の導出（簡潔に）。</strong> 未知量は、POD
 のモードの係数 <span class="math inline">\(\mathbf a=(a_1,a_2)^{\mathsf
-T}\)</span>（§2-1）です（本番の §8 では、代わりに代表5点の温度のずれ
-<span class="math inline">\(\delta\mathbf T_P=\mathbf
-T_P-\overline{\mathbf T}_P\)</span>。§8-2 で説明）。</p>
+T}\)</span>（§2-1）です（本番の §8 では、代わりに <span
+class="math inline">\(\delta\mathbf T_P=\mathbf T_P-\overline{\mathbf
+T}_P\)</span> を未知量にします。<span class="math inline">\(\mathbf
+T_P\)</span> はその時刻の代表5点 P0〜P4 の温度、<span
+class="math inline">\(\overline{\mathbf T}_P\)</span>
+はその5点の時間平均温度で、<span class="math inline">\(\delta\mathbf
+T_P\)</span>
+は「代表5点の温度が、時間平均からどれだけずれているか」を並べた5×1のベクトルです。係数とは
+<span class="math inline">\(\mathbf a=\Phi_P^{-1}\delta\mathbf
+T_P\)</span> の関係で、同じ情報を別の形で表したもの）。</p>
 <p>§2 で見たとおり、センサ <span class="math inline">\(c\)</span>
 の読み（その場所の平均からのずれ）<span
 class="math inline">\(y_c\)</span>
