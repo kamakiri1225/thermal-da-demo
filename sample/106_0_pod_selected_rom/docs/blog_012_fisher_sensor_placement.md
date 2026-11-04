@@ -432,6 +432,17 @@ $`\Delta_c`$ は追加により減る反りの分散です。1時刻・1本な�
 \underbrace{\mathbf w^{\mathsf T}P_{+c}\,\mathbf w}_{\text{反りの分散}}\ \text{が最小の }c
 ```
 
+式の中の記号は、それぞれ次のものです。
+
+| 記号 | 何か | 中身 |
+|---|---|---|
+| $`\mathbf h_c`$ | 候補 $`c`$ の感度 | 候補は変位計なので、モード $`j`$ の温度変化を FrontISTR に入れて解いた、その節点・その向きの変位 $`h_{c,j}=D_{S\alpha,j}`$（温度計なら、モードのその場所の値 $`h_{c,j}=\varphi_j[c]`$） |
+| $`F`$ | 今あるフィッシャー情報 | 固定した温度計P2・P0の分。温度計の感度はモードの値 $`\varphi`$ なので $`F=\dfrac{\boldsymbol\varphi[P2]\boldsymbol\varphi[P2]^{\mathsf T}}{r_T}+\dfrac{\boldsymbol\varphi[P0]\boldsymbol\varphi[P0]^{\mathsf T}}{r_T}`$（$`\boldsymbol\varphi[c]=(\varphi_1[c],\varphi_2[c])^{\mathsf T}`$） |
+| $`\mathbf h_c\mathbf h_c^{\mathsf T}/r_c`$ | 候補 $`c`$ を足したときに増えるフィッシャー情報 | 変位計の感度 $`D`$ とノイズの分散 $`r_c`$ から |
+| $`B`$ | 測る前の共分散 | 4,000本のROMの散らばり（§8-1） |
+| $`P_{+c}`$ | 候補 $`c`$ を足して測った後の共分散 | $`B^{-1}`$ とフィッシャー情報を足して逆行列 |
+| $`\mathbf w`$ | 反りの係数 | A と O の上下の変位の差を、モードの係数で表したもの（§5） |
+
 1. 候補ごとに、そのセンサの情報（感度×感度÷ノイズ）をフィッシャー情報に足す。
 2. 測る前の情報 $`B^{-1}`$ と合わせて逆行列を取り、測った後の共分散 $`P_{+c}`$ にする。
 3. 知りたい反りの分散 $`\mathbf w^{\mathsf T}P_{+c}\mathbf w`$ が一番小さい候補を選ぶ（＝ $`\Delta_c`$ が一番大きい候補）。
