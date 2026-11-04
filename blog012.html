@@ -838,8 +838,9 @@ alt="2係数の推定誤差を表す楕円" />
 </blockquote>
 <p><strong>フィッシャー情報行列の導出（簡潔に）。</strong> 未知量は、POD
 のモードの係数 <span class="math inline">\(\mathbf a=(a_1,a_2)^{\mathsf
-T}\)</span>（§2-1）です（本番の §8 では、代わりに代表5点の温度 <span
-class="math inline">\(\delta\mathbf T_P\)</span>）。</p>
+T}\)</span>（§2-1）です（本番の §8 では、代わりに代表5点の温度のずれ
+<span class="math inline">\(\delta\mathbf T_P=\mathbf
+T_P-\overline{\mathbf T}_P\)</span>。§8-2 で説明）。</p>
 <p>§2 で見たとおり、センサ <span class="math inline">\(c\)</span>
 の読み（その場所の平均からのずれ）<span
 class="math inline">\(y_c\)</span>
@@ -1268,8 +1269,27 @@ h_c^{\mathsf T}}{r_c},
 <p>採点後、60メンバー・30秒ごとに更新するEnKFで実際に試し、観測に使わないA・Oの反りを評価しています。</p>
 <h3 id="つの選び方を式で書く">8-2. 6つの選び方を式で書く</h3>
 <p><strong>共通の設定。</strong> 未知量は代表5点の温度のずれ <span
-class="math inline">\(\delta\mathbf
-T_P\)</span>（5×1）です。変位計の候補 <span
+class="math inline">\(\delta\mathbf T_P\)</span>（5×1）です。</p>
+<p><span class="math display">\[
+\delta\mathbf T_P=\mathbf T_P-\overline{\mathbf T}_P
+=\begin{bmatrix}T_{P0}-\overline T_{P0}\\ \vdots\\ T_{P4}-\overline
+T_{P4}\end{bmatrix}.
+\]</span></p>
+<p><span class="math inline">\(\mathbf T_P\)</span>
+はその時刻の代表5点（P0〜P4）の温度、<span
+class="math inline">\(\overline{\mathbf T}_P\)</span>
+はその5点の時間平均温度（POD
+の平均の温度分布の、5点での値）です。5点の温度が分かれば、POD の係数
+<span class="math inline">\(\mathbf a\)</span> も <span
+class="math inline">\(\mathbf a=\Phi_P^{-1}\delta\mathbf T_P\)</span>
+で決まるので（<span class="math inline">\(\Phi_P\)</span>
+はモードの5点での値を並べた5×5の行列）、<span
+class="math inline">\(\delta\mathbf T_P\)</span> と <span
+class="math inline">\(\mathbf a\)</span>
+は同じ情報を別の形で表したものです。説明例（§2〜6）は係数 <span
+class="math inline">\(\mathbf a\)</span>、本番は5点の温度のずれ <span
+class="math inline">\(\delta\mathbf T_P\)</span>
+を未知量にしています。変位計の候補 <span
 class="math inline">\(c\)</span> は「節点 <span
 class="math inline">\(n\)</span> と向き <span
 class="math inline">\(j\in\{x,y,z\}\)</span>」の組で、A・Oから12
