@@ -836,6 +836,34 @@ alt="2係数の推定誤差を表す楕円" />
 <blockquote>
 <p><strong>フィッシャー情報を足して、反りの分散が一番小さくなる候補を選ぶ。</strong></p>
 </blockquote>
+<p><strong>フィッシャー情報行列の導出（簡潔に）。</strong>
+センサの式を縦に並べて <span class="math inline">\(\mathbf y=H\mathbf
+a+\boldsymbol\varepsilon\)</span>、ノイズを <span
+class="math inline">\(\boldsymbol\varepsilon\sim\mathcal N(\mathbf
+0,R)\)</span> とします（<span class="math inline">\(H\)</span>
+の各行が感度 <span class="math inline">\(\mathbf h_c^{\mathsf
+T}\)</span>、<span class="math inline">\(R\)</span>
+はノイズの分散を並べた対角行列）。</p>
+<p><span class="math display">\[
+\log p(\mathbf y\mid\mathbf a)=C-\tfrac12(\mathbf y-H\mathbf a)^{\mathsf
+T}R^{-1}(\mathbf y-H\mathbf a)
+\ \xrightarrow{\ \partial/\partial\mathbf a\ }\
+H^{\mathsf T}R^{-1}(\mathbf y-H\mathbf a)
+\ \xrightarrow{\ \partial/\partial\mathbf a\ }\
+-H^{\mathsf T}R^{-1}H
+\]</span></p>
+<p><span class="math display">\[
+F=-\mathbb E\Bigl[\frac{\partial^2\log p}{\partial\mathbf
+a\,\partial\mathbf a^{\mathsf T}}\Bigr]
+=H^{\mathsf T}R^{-1}H=\sum_{c}\frac{\mathbf h_c\mathbf h_c^{\mathsf
+T}}{r_c}.
+\]</span></p>
+<p>対数尤度を未知量で2回微分した「山の鋭さ」がフィッシャー情報で、センサごとの「感度×感度÷ノイズ」の足し算になります（未知量1個なら
+§3 の <span
+class="math inline">\(h^2/r\)</span>）。だから、<strong>センサを1本足すと、<span
+class="math inline">\(F\)</span> に <span class="math inline">\(\mathbf
+h_c\mathbf h_c^{\mathsf T}/r_c\)</span> が1つ足されます</strong>。</p>
+<p><strong>選び方の流れ。</strong></p>
 <p><span class="math display">\[
 \underbrace{\mathbf h_c}_{\text{候補の感度}}
 \ \longrightarrow\
