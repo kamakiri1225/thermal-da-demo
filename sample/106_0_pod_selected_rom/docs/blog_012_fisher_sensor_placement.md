@@ -308,21 +308,52 @@ d-\widehat d=w_1e_1+w_2e_2.
 
 ### 6-1. 候補の感度を情報行列に足す
 
-現在のセンサ情報を $`F`$ とします。独立な観測を1本加えると、
+**やりたいこと。** 今は温度計P2・P0の2本で測っています。そこに変位計の候補 $`c`$ を1本足したら、測った後の共分散 $`P`$ がどう変わるかを計算します。
+
+**手順1：候補 $`c`$ のセンサ式を書く。** 候補 $`c`$ も、§2の温度計と同じ形の一次式です。
 
 ```math
-\underbrace{F_{+c}}_{2\times2}=F+\frac{\mathbf h_c\mathbf h_c^{\mathsf T}}{r_c},
-\qquad
-\underbrace{P_{+c}}_{2\times2}
-=\left(B^{-1}+F+\frac{\mathbf h_c\mathbf h_c^{\mathsf T}}{r_c}\right)^{-1}.
+y_c=h_{c,1}\,a_1+h_{c,2}\,a_2+\varepsilon_c,\qquad \operatorname{Var}\varepsilon_c=r_c .
 ```
 
-$`P^{-1}=B^{-1}+F`$ を代入し、1本分の追加に対する逆行列の恒等式を使うと、
+$`h_{c,1},h_{c,2}`$ は「$`a_1`$・$`a_2`$ が1増えたときに、その場所・その向きの変位がどれだけ変わるか」（§2-3）、$`r_c`$ は変位計のノイズの分散です。
+
+**手順2：センサ式を1行足す。** §4では、温度計2本の式を縦に並べて $`H`$（2×2）と $`R`$ を作りました。候補 $`c`$ を足すと、行が1本増えます。
 
 ```math
-P_{+c}=P-\frac{P\mathbf h_c\mathbf h_c^{\mathsf T}P}
-{r_c+\mathbf h_c^{\mathsf T}P\mathbf h_c}.
+H_{+c}=\begin{bmatrix}h_{P2,1}&h_{P2,2}\\h_{P0,1}&h_{P0,2}\\h_{c,1}&h_{c,2}\end{bmatrix},\qquad
+R_{+c}=\begin{bmatrix}r_{P2}&0&0\\0&r_{P0}&0\\0&0&r_c\end{bmatrix}.
 ```
+
+**手順3：フィッシャー情報を計算し直す。** §4の式 $`F=H^{\mathsf T}R^{-1}H`$ に入れると、$`R`$ が対角なので、センサ1本ごとの項の足し算に分かれます。
+
+```math
+F_{+c}=H_{+c}^{\mathsf T}R_{+c}^{-1}H_{+c}
+=\underbrace{\frac{\mathbf h_{P2}\mathbf h_{P2}^{\mathsf T}}{r_{P2}}+\frac{\mathbf h_{P0}\mathbf h_{P0}^{\mathsf T}}{r_{P0}}}_{\text{今の }F}
++\underbrace{\frac1{r_c}\begin{bmatrix}h_{c,1}^2&h_{c,1}h_{c,2}\\h_{c,1}h_{c,2}&h_{c,2}^2\end{bmatrix}}_{\text{候補 }c\text{ の分 }\mathbf h_c\mathbf h_c^{\mathsf T}/r_c}.
+```
+
+つまり、**センサを1本足すと、フィッシャー情報には、そのセンサの「感度×感度÷ノイズ」の行列が1つ足されるだけ**です。
+
+**手順4：測った後の共分散にする。** §4と同じく、測る前の情報 $`B^{-1}`$ と足して逆行列を取ります。
+
+```math
+P_{+c}=\bigl(B^{-1}+F_{+c}\bigr)^{-1}=\Bigl(\underbrace{B^{-1}+F}_{=P^{-1}}+\frac{\mathbf h_c\mathbf h_c^{\mathsf T}}{r_c}\Bigr)^{-1}.
+```
+
+**手順5：逆行列を計算し直さずに求める。** かっこの中の $`B^{-1}+F`$ は、今の共分散の逆行列 $`P^{-1}`$ です。そこに1本分の行列を足したときの逆行列は、次の式で求まります（シャーマン・モリソンの式）。
+
+```math
+P_{+c}=P-\frac{P\mathbf h_c\mathbf h_c^{\mathsf T}P}{r_c+\mathbf h_c^{\mathsf T}P\mathbf h_c}.
+```
+
+未知量が1個（§3）なら、この式は通分で確かめられます。$`P`$、$`h`$、$`r`$ がただの数のとき、
+
+```math
+\Bigl(\frac1P+\frac{h^2}{r}\Bigr)^{-1}=\frac{P\,r}{r+h^2P}=P-\frac{P^2h^2}{r+h^2P}.
+```
+
+右端が上の式の1個版です。未知量が2個でも、同じ形になります。
 
 文字で展開して、実際に入れるものを確かめます。
 
