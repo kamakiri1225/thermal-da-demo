@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>blog_013：クリロフ部分空間法で低次元モデルを作り、今の ROM
+と比べる</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+     html body { max-width: 1120px !important; }
+     body { padding: 0 24px; }
+     img { max-width: 100%; height: auto; }
+     table { font-size: 0.95em; }
+     pre.mermaid { background: none; text-align: center; }
+    </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる"
+id="toc-blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる">blog_013：クリロフ部分空間法で低次元モデルを作り、今の
+ROM と比べる</a>
+<ul>
+<li><a href="#つの-rom-の違い" id="toc-つの-rom-の違い">1. 2 つの ROM
+の違い</a></li>
+<li><a href="#元になる式固体の熱伝導の-fem"
+id="toc-元になる式固体の熱伝導の-fem">2. 元になる式：固体の熱伝導の
+FEM</a></li>
+<li><a href="#クリロフ部分空間法で縮める"
+id="toc-クリロフ部分空間法で縮める">3. クリロフ部分空間法で縮める</a>
+<ul>
+<li><a href="#考え方入力から出力への伝わり方を合わせる"
+id="toc-考え方入力から出力への伝わり方を合わせる">3-1.
+考え方：入力から出力への伝わり方を合わせる</a></li>
+<li><a href="#手順基底-v-を作る" id="toc-手順基底-v-を作る">3-2.
+手順：基底 <span class="math inline">\(V\)</span> を作る</a></li>
+<li><a href="#縮めた式" id="toc-縮めた式">3-3. 縮めた式</a></li>
+</ul></li>
+<li><a href="#結果-1縮める誤差は-r-でどれだけ小さくなるか"
+id="toc-結果-1縮める誤差は-r-でどれだけ小さくなるか">4. 結果
+1：縮める誤差は <span class="math inline">\(r\)</span>
+でどれだけ小さくなるか</a></li>
+<li><a href="#結果-2openfoam-と比べる"
+id="toc-結果-2openfoam-と比べる">5. 結果 2：OpenFOAM と比べる</a>
+<ul>
+<li><a href="#cht-の-h-をそのまま使うと合わない"
+id="toc-cht-の-h-をそのまま使うと合わない">5-1. CHT の <span
+class="math inline">\(h\)</span> をそのまま使うと合わない</a></li>
+<li><a href="#h-に-1-つの係数を掛けて合わせると"
+id="toc-h-に-1-つの係数を掛けて合わせると">5-2. <span
+class="math inline">\(h\)</span> に 1
+つの係数を掛けて合わせると</a></li>
+</ul></li>
+<li><a href="#まとめどちらを使うか" id="toc-まとめどちらを使うか">6.
+まとめ：どちらを使うか</a></li>
+<li><a href="#使ったプログラム"
+id="toc-使ったプログラム">使ったプログラム</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1
+id="blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる">blog_013：クリロフ部分空間法で低次元モデルを作り、今の
+ROM と比べる</h1>
+<p>この研究の低次元モデル（ROM）は、POD と Q-DEIM で選んだ代表 5
+点の熱回路を、OpenFOAM の結果に合わせて作りました（<a
+href="presen001.html">presen_001
+§7</a>）。一方、構造や熱の FEM
+でよく使われる縮約は、<strong>クリロフ部分空間法</strong>です（Siemens
+Simcenter の熱の ROM など）。</p>
+<p>この記事では、同じ中空円筒でクリロフ部分空間法の ROM を作り、今の ROM
+と OpenFOAM で比べます。</p>
+<p><strong>この記事で分かること</strong></p>
+<ol type="1">
+<li>クリロフ部分空間法で ROM を作る手順（式と、その意味）</li>
+<li>縮める誤差は、変数の数 <span class="math inline">\(r\)</span>
+でどれだけ小さくなるか</li>
+<li>OpenFOAM（流体と固体の熱連成）と比べたときに、何が合って何が合わないか</li>
+</ol>
+<p>計算はすべて <code>run/krylov_rom.py</code> で行いました（数値は
+<code>results/krylov_rom.json</code>）。</p>
+<hr />
+<h2 id="つの-rom-の違い">1. 2 つの ROM の違い</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>今の ROM（POD・Q-DEIM＋熱回路）</th>
+<th>クリロフ ROM（この記事）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>何から作るか</td>
+<td>OpenFOAM の温度の結果（121 枚）</td>
+<td>熱伝導の式の行列（FEM の <span
+class="math inline">\(C\)</span>・<span
+class="math inline">\(K\)</span>・<span
+class="math inline">\(H\)</span>・<span
+class="math inline">\(f\)</span>）</td>
+</tr>
+<tr class="even">
+<td>状態（未知の数）</td>
+<td>代表 5 点の温度</td>
+<td>クリロフ部分空間の座標 <span class="math inline">\(\mathbf
+z\)</span>（<span class="math inline">\(r\)</span> 個）</td>
+</tr>
+<tr class="odd">
+<td>全体の温度</td>
+<td>gappy-POD で戻す</td>
+<td><span class="math inline">\(\boldsymbol\theta=V\mathbf z\)</span>
+でそのまま出る</td>
+</tr>
+<tr class="even">
+<td>係数の決め方</td>
+<td>OpenFOAM に最小二乗で合わせる</td>
+<td>行列から決まる（合わせ込みなし）</td>
+</tr>
+<tr class="odd">
+<td>熱伝達率</td>
+<td>合わせ込んだ係数に入る</td>
+<td>FEM の境界条件として与える</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="元になる式固体の熱伝導の-fem">2. 元になる式：固体の熱伝導の
+FEM</h2>
+<p>円筒（外径 75 mm、内径 40 mm、高さ 100.5 mm）を、FrontISTR
+と同じ六面体メッシュ（半径 4 × 周 48 × 高さ 20、5,040
+節点）に分けます。周りの空気からの温度上昇を <span
+class="math inline">\(\boldsymbol\theta=\mathbf
+T-T_{\mathrm{air}}\)</span>（5,040×1）とすると、</p>
+<p><span class="math display">\[
+C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf
+f\,P(t),\qquad G=K+H .
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>記号</th>
+<th>何か</th>
+<th>作り方</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(C\)</span></td>
+<td>熱容量の行列</td>
+<td><span class="math inline">\(\int\rho c\,N_aN_b\,dV\)</span>（鋼
+<span class="math inline">\(\rho=7850\)</span> kg/m³、<span
+class="math inline">\(c=480\)</span> J/(kg K)）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(K\)</span></td>
+<td>熱伝導の行列</td>
+<td><span class="math inline">\(\int\kappa\,\nabla N_a\cdot\nabla
+N_b\,dV\)</span>（<span class="math inline">\(\kappa=50\)</span> W/(m
+K)）</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(H\)</span></td>
+<td>表面の熱伝達の行列</td>
+<td><span class="math inline">\(\int h\,N_aN_b\,dA\)</span>（面ごとの
+<span class="math inline">\(h\)</span>）</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathbf f\)</span></td>
+<td>ヒータ 1 W あたりの熱の入り方</td>
+<td>外周の +x 側（周長 100 mm、高さ 25〜75 mm）に面積に比例して配る</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(P(t)\)</span></td>
+<td>ヒータの電力 [W]</td>
+<td>15 W・25 W・間欠加熱（OpenFOAM と同じ）</td>
+</tr>
+</tbody>
+</table>
+<p>表面の <span class="math inline">\(h\)</span> は、blog_001 で
+OpenFOAM の CHT から求めた面ごとの実効値を使いました。</p>
+<table>
+<thead>
+<tr class="header">
+<th>面</th>
+<th style="text-align: right;">外周（ヒータ側 +x）</th>
+<th style="text-align: right;">外周（反対側 −x）</th>
+<th style="text-align: right;">内面</th>
+<th style="text-align: right;">上面</th>
+<th style="text-align: right;">底面</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(h\)</span> [W/(m²K)]</td>
+<td style="text-align: right;">15.8</td>
+<td style="text-align: right;">10.5</td>
+<td style="text-align: right;">10.8</td>
+<td style="text-align: right;">11.9</td>
+<td style="text-align: right;">19.5</td>
+</tr>
+</tbody>
+</table>
+<p>この FEM（「全 FEM」と呼ぶ）を、時間刻み 2
+秒のクランク・ニコルソン法で 0〜600 秒解くと、約 0.9 秒かかります。</p>
+<hr />
+<h2 id="クリロフ部分空間法で縮める">3. クリロフ部分空間法で縮める</h2>
+<h3 id="考え方入力から出力への伝わり方を合わせる">3-1.
+考え方：入力から出力への伝わり方を合わせる</h3>
+<p>ヒータの電力 <span class="math inline">\(P\)</span> から温度 <span
+class="math inline">\(\boldsymbol\theta\)</span>
+への伝わり方を、ラプラス変換（<span class="math inline">\(d/dt\to
+s\)</span>）で書くと</p>
+<p><span class="math display">\[
+\boldsymbol\theta(s)=\left(G+sC\right)^{-1}\mathbf f\,P(s).
+\]</span></p>
+<p><span
+class="math inline">\(s=0\)</span>（ゆっくりした変化）のまわりで展開すると、</p>
+<p><span class="math display">\[
+\left(G+sC\right)^{-1}\mathbf f
+=\left(I+sG^{-1}C\right)^{-1}G^{-1}\mathbf f
+=\sum_{k=0}^{\infty}(-s)^k\left(G^{-1}C\right)^kG^{-1}\mathbf f .
+\]</span></p>
+<p>各項の係数ベクトル <span
+class="math inline">\(\left(G^{-1}C\right)^kG^{-1}\mathbf f\)</span>
+を<strong>モーメント</strong>と呼びます。</p>
+<ul>
+<li><span class="math inline">\(k=0\)</span>：<span
+class="math inline">\(G^{-1}\mathbf f\)</span>
+は、ヒータを入れ続けたときの定常の温度分布</li>
+<li><span
+class="math inline">\(k=1,2,\dots\)</span>：そこへ向かう途中（時間の遅れ）の形</li>
+</ul>
+<p>この最初の <span class="math inline">\(r\)</span>
+個が張る空間が、<strong>クリロフ部分空間</strong>です。</p>
+<p><span class="math display">\[
+\mathcal K_r=\operatorname{span}\left\{G^{-1}\mathbf f,\
+\left(G^{-1}C\right)G^{-1}\mathbf f,\ \dots,\
+\left(G^{-1}C\right)^{r-1}G^{-1}\mathbf f\right\}.
+\]</span></p>
+<p>温度をこの空間の中だけで表すと、縮めた ROM の伝わり方は、元の FEM
+と最初の <span class="math inline">\(r\)</span>
+個のモーメントが一致します（<strong>モーメント合わせ</strong>）。</p>
+<h3 id="手順基底-v-を作る">3-2. 手順：基底 <span
+class="math inline">\(V\)</span> を作る</h3>
+<p>モーメントをそのまま並べると、ほぼ同じ向きのベクトルばかりになり、計算が不安定になります。そこで、1
+本ずつ作って、熱容量 <span class="math inline">\(C\)</span>
+を重みにした内積で正規直交にします（アーノルディ法）。</p>
+<ol type="1">
+<li><span class="math inline">\(\mathbf v=G^{-1}\mathbf
+f\)</span>（<span class="math inline">\(G\)</span> の連立方程式を 1
+回解く）</li>
+<li>すでに作った基底の成分を引く：<span class="math inline">\(\mathbf
+v\leftarrow\mathbf v-V(V^{\mathsf T}C\mathbf v)\)</span>（念のため 2
+回）</li>
+<li>大きさをそろえる：<span class="math inline">\(\mathbf v_j=\mathbf
+v/\sqrt{\mathbf v^{\mathsf T}C\mathbf v}\)</span></li>
+<li>次のベクトル：<span class="math inline">\(\mathbf v=G^{-1}C\mathbf
+v_j\)</span>。2 に戻る（<span class="math inline">\(r\)</span>
+本になるまで）</li>
+</ol>
+<p>できた <span class="math inline">\(V=[\mathbf v_1,\dots,\mathbf
+v_r]\)</span>（5,040×<span class="math inline">\(r\)</span>）は <span
+class="math inline">\(V^{\mathsf T}CV=I\)</span> を満たします。<span
+class="math inline">\(G\)</span> の分解（LU 分解）は 1
+回だけ行い、使い回します。</p>
+<h3 id="縮めた式">3-3. 縮めた式</h3>
+<p><span class="math inline">\(\boldsymbol\theta\approx V\mathbf
+z\)</span> を元の式に入れ、左から <span class="math inline">\(V^{\mathsf
+T}\)</span> を掛けます（ガラーキン射影）。</p>
+<p><span class="math display">\[
+\underbrace{V^{\mathsf T}CV}_{=I\ (r\times r)}\frac{d\mathbf
+z}{dt}+\underbrace{V^{\mathsf T}GV}_{r\times r}\mathbf
+z=\underbrace{V^{\mathsf T}\mathbf f}_{r\times 1}P(t),
+\qquad \boldsymbol\theta\approx V\mathbf z .
+\]</span></p>
+<ul>
+<li>未知の数が 5,040 個から <span class="math inline">\(r\)</span>
+個になります。</li>
+<li><span class="math inline">\(C\)</span>・<span
+class="math inline">\(G\)</span> は対称なので、縮めた <span
+class="math inline">\(V^{\mathsf T}GV\)</span>
+も対称で正定値になり、安定性が保たれます。</li>
+<li>全節点の温度が <span class="math inline">\(V\mathbf z\)</span>
+でそのまま出るので、gappy-POD のような戻す手順は要りません。</li>
+</ul>
+<hr />
+<h2 id="結果-1縮める誤差は-r-でどれだけ小さくなるか">4. 結果
+1：縮める誤差は <span class="math inline">\(r\)</span>
+でどれだけ小さくなるか</h2>
+<p>全 FEM と、クリロフ ROM の温度の差（全節点・全時刻の最大）です。</p>
+<table>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(r\)</span></th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">10</th>
+<th style="text-align: right;">20</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全 FEM との差の最大 [K]</td>
+<td style="text-align: right;">0.36</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.0046</td>
+<td style="text-align: right;">0.00054</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><span class="math inline">\(r\)</span>
+を増やすと、差は急に小さくなります。<span
+class="math inline">\(r=10\)</span> で 0.005 K で、温度計のノイズ（0.3
+K）よりずっと小さいです。</li>
+<li>15 W
+と間欠加熱で同じ差でした。式が線形なので、電力の時間変化によりません。</li>
+<li><span class="math inline">\(r=10\)</span> の ROM で 0〜600
+秒を計算する時間は、約 0.014 秒でした（全 FEM は約 0.9 秒）。</li>
+</ul>
+<p><strong>縮めること自体は、学習データなしで、とても正確にできます。</strong></p>
+<hr />
+<h2 id="結果-2openfoam-と比べる">5. 結果 2：OpenFOAM と比べる</h2>
+<p>OpenFOAM
+の温度を節点へ移したものを正解にして、全節点の温度の差を比べました。</p>
+<figure>
+<img src="img/krylov_rom_compare.png"
+alt="クリロフ ROM と今の ROM の比較" />
+<figcaption aria-hidden="true">クリロフ ROM と今の ROM
+の比較</figcaption>
+</figure>
+<p><em>図 1　上：P2 の温度。下：全節点の温度の RMSE（OpenFOAM
+との差、対数の目盛り）。全 FEM とクリロフ ROM r=5・r=10
+の線は、ほぼ重なって 1 本に見える。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>全節点の RMSE の最大 [K]</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全 FEM（CHT の <span class="math inline">\(h\)</span>
+をそのまま使う）</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.46</td>
+</tr>
+<tr class="even">
+<td>クリロフ ROM r=10（同じ <span
+class="math inline">\(h\)</span>）</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.46</td>
+</tr>
+<tr class="odd">
+<td>クリロフ ROM r=10（<span class="math inline">\(h\)</span> を 0.21
+倍して 15 W に合わせた）</td>
+<td style="text-align: right;"><strong>0.04</strong></td>
+<td style="text-align: right;"><strong>0.06</strong></td>
+<td style="text-align: right;"><strong>0.04</strong></td>
+</tr>
+<tr class="even">
+<td>今の ROM（5 点の熱回路＋gappy-POD）</td>
+<td style="text-align: right;"><strong>0.03</strong></td>
+<td style="text-align: right;"><strong>0.08</strong></td>
+<td style="text-align: right;"><strong>0.02</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>最大の差（全節点・全時刻）[K]</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>クリロフ ROM r=10（<span class="math inline">\(h\)</span>
+を合わせた版）</td>
+<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.33</td>
+<td style="text-align: right;">0.20</td>
+</tr>
+<tr class="even">
+<td>今の ROM</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">0.11</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cht-の-h-をそのまま使うと合わない">5-1. CHT の <span
+class="math inline">\(h\)</span> をそのまま使うと合わない</h3>
+<ul>
+<li>全 FEM とクリロフ ROM は同じ値で、どちらも OpenFOAM から 0.5〜0.9 K
+ずれます。<strong>ずれの原因は縮め方ではなく、元の FEM
+の熱伝達率</strong>です。</li>
+<li>600 秒後の円筒全体の平均の温度上昇は、全 FEM 3.05 K、OpenFOAM 3.59 K
+でした。FEM は放熱が大きすぎます。</li>
+<li>CHT の熱伝達率は時間で変わります（<a
+href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/../results/heat_transfer_check.json">results/heat_transfer_check.json</a>：全表面の実効値は
+300 秒で約 8.6、600 秒で約 3.6
+W/(m²K)。周りの空気が温まり、温度差が小さくなるため）。blog_001
+の面ごとの値は、この変化を 1 つの値で表したもので、一定の <span
+class="math inline">\(h\)</span> では表しきれません。</li>
+</ul>
+<h3 id="h-に-1-つの係数を掛けて合わせると">5-2. <span
+class="math inline">\(h\)</span> に 1 つの係数を掛けて合わせると</h3>
+<ul>
+<li>すべての面の <span class="math inline">\(h\)</span> に同じ係数 <span
+class="math inline">\(s\)</span> を掛け、15 W の OpenFOAM
+との差が最小になる <span class="math inline">\(s\)</span>
+を探すと、<span class="math inline">\(s=0.21\)</span> でした（<span
+class="math inline">\(h\)</span> は約 2〜4 W/(m²K)）。</li>
+<li>そのまま 25 W・間欠加熱でも、RMSE 0.04〜0.06 K で合いました。今の
+ROM とほぼ同じです。</li>
+<li>ただし、最大の差は 0.2〜0.33 K で、今の ROM
+より大きいです。ヒータの近くの、時間で変わる熱の逃げ方は、一定の <span
+class="math inline">\(h\)</span>
+では表せないためと考えられます（確かめてはいません）。</li>
+</ul>
+<hr />
+<h2 id="まとめどちらを使うか">6. まとめ：どちらを使うか</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>クリロフ ROM</th>
+<th>今の ROM</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>強み</td>
+<td>行列から作るので学習データが要らない。縮める誤差を <span
+class="math inline">\(r\)</span>
+で調べられ、物理の式とつながっている</td>
+<td>OpenFOAM に合わせるので、熱伝達率のずれなども係数に吸収される</td>
+</tr>
+<tr class="even">
+<td>弱み</td>
+<td>元の FEM
+の条件（熱伝達率など）が合っていないと、そのずれがそのまま残る</td>
+<td>係数の物理の意味が弱い（<a
+href="presen001.html">presen_001
+§7-4</a>）。学習データが要る</td>
+</tr>
+<tr class="odd">
+<td>この円筒での精度（RMSE）</td>
+<td>0.04〜0.06 K（<span class="math inline">\(h\)</span> を 1
+つの係数で合わせた場合）</td>
+<td>0.02〜0.08 K</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>クリロフ法は、<strong>熱伝達率が分かっているなら</strong>、学習データなしで正確な
+ROM
+が作れます。この研究のように流れ（CHT）で熱伝達率が決まり、しかも時間で変わる問題では、熱伝達率の与え方が精度を決めます。</li>
+<li>熱伝達率を、データ同化で直す未知の数にすれば（<span
+class="math inline">\(G=K+\sum_j h_jH_j\)</span> の <span
+class="math inline">\(h_j\)</span>）、クリロフ ROM でも今の ROM
+と同じように補正できる可能性があります。<strong>この組み合わせは試していません（未実施）。</strong></li>
+<li>クリロフ ROM の温度からの熱変形、クリロフ ROM
+を使ったデータ同化も、まだしていません（未実施）。</li>
+</ul>
+<hr />
+<h2 id="使ったプログラム">使ったプログラム</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>プログラム</th>
+<th>すること</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>run/krylov_rom.py</code></td>
+<td>FEM の行列を作る、クリロフ基底を作る、全 FEM・クリロフ ROM・今の ROM
+を 3 条件で解いて OpenFOAM と比べる（図
+1、<code>results/krylov_rom.json</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>クリロフ基底（アーノルディ法、<span class="math inline">\(C\)</span>
+の内積で正規直交化）：</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> krylov_basis(fem, r):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    C, G, f <span class="op">=</span> fem[<span class="st">&quot;C&quot;</span>], fem[<span class="st">&quot;G&quot;</span>], fem[<span class="st">&quot;f&quot;</span>]<span class="op">;</span> lu <span class="op">=</span> splu(G)      <span class="co"># G = K + H を 1 回だけ LU 分解</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> np.zeros((<span class="bu">len</span>(f), r))<span class="op">;</span> v <span class="op">=</span> lu.solve(f)                  <span class="co"># 1 本目：G⁻¹f（定常の温度分布）</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(r):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):                                      <span class="co"># すでにある基底の成分を引く（2 回）</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            v <span class="op">=</span> v <span class="op">-</span> V[:, :j] <span class="op">@</span> (V[:, :j].T <span class="op">@</span> (C <span class="op">@</span> v))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        V[:, j] <span class="op">=</span> v <span class="op">/</span> np.sqrt(v <span class="op">@</span> (C <span class="op">@</span> v))                      <span class="co"># C の内積で大きさ 1</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> lu.solve(C <span class="op">@</span> V[:, j])                               <span class="co"># 次：G⁻¹C v</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> V</span></code></pre></div>
+<p>縮めた式の時間積分（クランク・ニコルソン法）：</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Cr <span class="op">=</span> V.T <span class="op">@</span> (C <span class="op">@</span> V)<span class="op">;</span> Gr <span class="op">=</span> V.T <span class="op">@</span> (G <span class="op">@</span> V)<span class="op">;</span> fr <span class="op">=</span> V.T <span class="op">@</span> f            <span class="co"># r×r、r×1</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Al <span class="op">=</span> np.linalg.inv(Cr <span class="op">/</span> DT <span class="op">+</span> Gr <span class="op">/</span> <span class="dv">2</span>)<span class="op">;</span> Ar <span class="op">=</span> Cr <span class="op">/</span> DT <span class="op">-</span> Gr <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> Al <span class="op">@</span> (Ar <span class="op">@</span> z <span class="op">+</span> fr <span class="op">*</span> (P(t) <span class="op">+</span> P(t <span class="op">+</span> DT)) <span class="op">/</span> <span class="dv">2</span>)                <span class="co"># 1 ステップ。温度は V @ z</span></span></code></pre></div>
+</body>
+</html>
