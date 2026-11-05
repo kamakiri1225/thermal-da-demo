@@ -3361,6 +3361,57 @@ A−O。黒が正解（OpenFOAM＋FrontISTR）、灰が温度 2 点だけ、青�
 <li><strong>置き場所が悪いと効かない</strong>。底面近くでは 0.5〜1.1 µm
 で、温度 2 点だけとあまり変わりません。</li>
 </ul>
+<h4 id="同化なしと比べると時刻歴">同化なしと比べると（時刻歴）</h4>
+<figure>
+<img src="img/da_timeseries.png" alt="データ同化による改善の時刻歴" />
+<figcaption aria-hidden="true">データ同化による改善の時刻歴</figcaption>
+</figure>
+<p><em>図
+11b　上：測らない点（上面の反対側、温度計なし）の温度。下：測らない反り
+A−O。灰の太線が正解、灰の破線が同化なし（初期温度・発熱が分からないまま
+ROM を進めただけ）、青が温度 2 点で同化、赤が温度 2 点＋変位 2
+点で同化。黄色はヒータ ON。乱数 5
+通りの時刻歴の平均（<code>run/da_timeseries_fig.py</code>）。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>30〜300 秒の平均の誤差</th>
+<th style="text-align: right;">同化なし</th>
+<th style="text-align: right;">温度 2 点</th>
+<th style="text-align: right;">温度 2 点＋変位 2 点</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>測らない点の温度 15 W・25 W・間欠 [K]</td>
+<td style="text-align: right;">4.50・3.72・4.46</td>
+<td style="text-align: right;">0.88・1.47・0.77</td>
+<td style="text-align: right;"><strong>0.08・0.05・0.07</strong></td>
+</tr>
+<tr class="even">
+<td>測らない反り 15 W・25 W・間欠 [µm]</td>
+<td style="text-align: right;">0.24・1.39・0.14</td>
+<td style="text-align: right;">0.76・1.42・0.60</td>
+<td style="text-align: right;"><strong>0.04・0.05・0.04</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>同化なしは、初めのずれ（約 4.5 K）が最後まで残ります。変位 2
+点を足すと、30 秒（1 回目の補正）でほぼ正解に乗ります。</li>
+<li>温度 2 点だけの同化は、15
+W・間欠加熱では反りが同化なしより悪くなりました。同化なしは温度が「全体に一様に」ずれているだけで、一様なずれは反りにほとんど効きません。温度
+2 点の同化はヒータ側の 2
+点だけで直すので、反対側との差を崩します。<strong>温度計だけでは反りは直らず、変位の観測が要る</strong>ことを示しています。</li>
+<li>この表は、乱数 5
+通りの時刻歴を平均してから誤差を取ったものなので、上の表（乱数ごとの誤差の平均）より小さく出ます。</li>
+</ul>
 <h3 id="分かったこと">10-4. 分かったこと</h3>
 <ul>
 <li>変位は温度場全体の重み付き和なので、変位計 1
@@ -3582,6 +3633,52 @@ K）。温度計がヒータ側（P2・P0）にしかないためです。</li>
 K）の 1/4〜1/6 です。</li>
 <li>誤差が大きいのは加熱の初め（0〜100
 秒）で、データ同化を重ねるにつれて小さくなります（図 13）。</li>
+</ul>
+<h4 id="全体の温度の範囲と分布">全体の温度の範囲と分布</h4>
+<figure>
+<img src="img/da_field_range.png" alt="全体の温度の範囲と分布" />
+<figcaption aria-hidden="true">全体の温度の範囲と分布</figcaption>
+</figure>
+<p><em>図
+13b　上：全セル（20,696）の最高・最低温度の時刻歴。灰色の帯が正解の範囲。下：150
+秒の全セルの温度（横＝正解、縦＝推定。3,000 セルを表示、RMSE
+は全セル）。斜めの線に乗るほど正確（<code>run/da_field_range_fig.py</code>）。</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>150 秒の全セルの RMSE [K]</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>同化なし</td>
+<td style="text-align: right;">4.57</td>
+<td style="text-align: right;">3.21</td>
+<td style="text-align: right;">4.56</td>
+</tr>
+<tr class="even">
+<td>温度 2 点で同化</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">0.47</td>
+</tr>
+<tr class="odd">
+<td><strong>温度 2 点＋変位 2 点で同化</strong></td>
+<td style="text-align: right;"><strong>0.05</strong></td>
+<td style="text-align: right;"><strong>0.05</strong></td>
+<td style="text-align: right;"><strong>0.05</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>温度 2
+点の同化は、最高温度は合いますが最低温度（ヒータの反対側）が高く出ます。下の図では傾きが
+1 より小さく、ヒータ側と反対側の差を小さく見積もっています。</li>
+<li>変位 2
+点を足すと、最高・最低とも正解の範囲の端に重なり、下の図でも正解の線に乗ります。変位は、ヒータ側と反対側の温度の差（＝反り）に敏感なので、この差を直せます。</li>
 </ul>
 <h3 id="使ったプログラム-6">11-3. 使ったプログラム</h3>
 <table>
