@@ -302,9 +302,9 @@ class="math inline">\(h\)</span> に 1
 id="toc-クリロフ-rom-は合わないものなのかデータ同化をすれば合うか">6.
 クリロフ ROM は合わないものなのか？データ同化をすれば合うか</a>
 <ul>
-<li><a href="#合わない原因はクリロフ法ではなく元の式の熱伝達率"
-id="toc-合わない原因はクリロフ法ではなく元の式の熱伝達率">6-1.
-合わない原因は「クリロフ法」ではなく「元の式の熱伝達率」</a></li>
+<li><a href="#縮約誤差と元モデルの不一致を分けて考える"
+id="toc-縮約誤差と元モデルの不一致を分けて考える">6-1.
+縮約誤差と、元モデルの不一致を分けて考える</a></li>
 <li><a href="#データ同化で熱伝達率を直すと"
 id="toc-データ同化で熱伝達率を直すと">6-2.
 データ同化で熱伝達率を直すと</a></li>
@@ -313,7 +313,19 @@ id="toc-熱変形の行列を作り変位の観測も使う">6-3.
 熱変形の行列を作り、変位の観測も使う</a></li>
 </ul></li>
 <li><a href="#まとめどちらを使うか" id="toc-まとめどちらを使うか">7.
-まとめ：どちらを使うか</a></li>
+まとめ：どちらを使うか</a>
+<ul>
+<li><a href="#熱解析と熱流体解析での使い分け"
+id="toc-熱解析と熱流体解析での使い分け">7-1.
+熱解析と熱流体解析での使い分け</a></li>
+</ul></li>
+<li><a
+href="#流れが変わる問題博士研究の方向-bでは固体はクリロフ流れによる熱伝達率の分布は-cht-の計算から少数の型podで表しその係数を同化で直すという組み合わせが有力な案になりますこの組み合わせは試していません未実施-今回は熱伝達率を全体に-1-つの係数で直しただけで面ごと場所ごとの分布は直していません"
+id="toc-流れが変わる問題博士研究の方向-bでは固体はクリロフ流れによる熱伝達率の分布は-cht-の計算から少数の型podで表しその係数を同化で直すという組み合わせが有力な案になりますこの組み合わせは試していません未実施-今回は熱伝達率を全体に-1-つの係数で直しただけで面ごと場所ごとの分布は直していません">流れが変わる問題（博士研究の方向
+B）では、「固体はクリロフ、流れによる熱伝達率の分布は CHT
+の計算から少数の型（POD）で表し、その係数を同化で直す」という組み合わせが有力な案になります。<strong>この組み合わせは試していません（未実施）。</strong>
+今回は熱伝達率を全体に 1
+つの係数で直しただけで、面ごと・場所ごとの分布は直していません。</a></li>
 <li><a href="#使ったプログラム"
 id="toc-使ったプログラム">使ったプログラム</a></li>
 <li><a href="#再現と今回の説明確認"
@@ -336,7 +348,7 @@ aria-hidden="true">クリロフROMを作り、温度を計算する流れ</figca
 <p>この記事では、中空円筒の熱FEMからROMを作り、既存のPOD・Q-DEIM＋熱回路ROMと比べます。まず元の熱方程式、基底作成、少数の係数の時間積分、全節点への復元の順に説明します。ラプラス変換による理由は§3-6へまとめています。</p>
 <p>計算プログラムは <code>run/krylov_rom.py</code>、既存結果は
 <code>results/krylov_rom.json</code>
-です。クリロフROMを使った変位計算・データ同化は、まだ実施していません。</p>
+です。後半の§6には、追加された温度観測・変位観測を使うデータ同化の結果があります。前半の§2〜5は基底作成と温度ROM単体の説明、§6はその応用です。</p>
 <h2 id="podq-deimのromと何が違うか">1. POD・Q-DEIMのROMと何が違うか</h2>
 <table>
 <colgroup>
@@ -391,10 +403,11 @@ T_{\mathrm{air}}\mathbf1+V\mathbf z\)</span> で復元</td>
 <h2 id="元になる式固体の熱伝導のfem">2.
 元になる式：固体の熱伝導のFEM</h2>
 <p>プログラムの <code>build_fem()</code>
-が、Pythonで熱FEMの行列を組み立てています。（外径 75 mm、内径 40
-mm、高さ 100.5 mm）を、FrontISTR と同じ六面体メッシュ（半径 4 × 周 48 ×
-高さ 20、5,040 節点）に分けます。全節点の温度を <span
-class="math inline">\(\mathbf T\)</span>、一定の外気温を <span
+が、Pythonで熱FEMの行列を組み立てています。</p>
+<p>円筒（外径 75 mm、内径 40 mm、高さ 100.5 mm）を、FrontISTR
+と同じ六面体メッシュ（半径 4 × 周 48 × 高さ 20、5,040
+節点）に分けます。全節点の温度を <span class="math inline">\(\mathbf
+T\)</span>、一定の外気温を <span
 class="math inline">\(T_{\mathrm{air}}\)</span>
 とし、NをFEM節点数とします（今回はN=5,040）。</p>
 <p><span class="math display">\[
@@ -464,9 +477,9 @@ K)）</td>
 <p>表中の <span class="math inline">\(N_a,N_b\)</span>
 はFEM要素内の補間関数、a・bは要素内の節点番号です。<span
 class="math inline">\(P(t)\)</span>
-は既存記事の発熱量Qに相当し、ここではコードに合わせてPと書きます。<span
-class="math inline">\(h\)</span> は、blog_001 で OpenFOAM の CHT
-から求めた面ごとの実効値を使いました。</p>
+は既存記事の発熱量Qに相当し、ここではコードに合わせてPと書きます。</p>
+<p>表面の <span class="math inline">\(h\)</span> は、blog_001 で
+OpenFOAM の CHT から求めた面ごとの実効値を使いました。</p>
 <table>
 <thead>
 <tr class="header">
@@ -491,7 +504,8 @@ class="math inline">\(h\)</span> は、blog_001 で OpenFOAM の CHT
 </table>
 <p>ここでの表面熱伝達率h [W/(m²K)]と、5点熱回路の放熱コンダクタンス
 <span class="math inline">\(h_{\mathrm{ROM}}\)</span>
-[W/K]は単位が異なります。FEM（「全 FEM」と呼ぶ）を、時間刻み 2
+[W/K]は単位が異なります。</p>
+<p>この FEM（「全 FEM」と呼ぶ）を、時間刻み 2
 秒のクランク・ニコルソン法で 0〜600 秒解くと、約 0.9 秒かかります。</p>
 <hr />
 <h2 id="基底を作り少数の係数だけを時間積分する">3.
@@ -887,8 +901,8 @@ class="math inline">\(h\)</span>
 <hr />
 <h2 id="クリロフ-rom-は合わないものなのかデータ同化をすれば合うか">6.
 クリロフ ROM は合わないものなのか？データ同化をすれば合うか</h2>
-<h3 id="合わない原因はクリロフ法ではなく元の式の熱伝達率">6-1.
-合わない原因は「クリロフ法」ではなく「元の式の熱伝達率」</h3>
+<h3 id="縮約誤差と元モデルの不一致を分けて考える">6-1.
+縮約誤差と、元モデルの不一致を分けて考える</h3>
 <p>§4・§5 から、ずれの出どころは次のように分けられます。</p>
 <p><span class="math display">\[
 \underbrace{\boldsymbol\theta_{\mathrm{OpenFOAM}}-\boldsymbol\theta_{\mathrm{ROM}}}_{\text{全体のずれ}}
@@ -907,6 +921,7 @@ K}}
 </ul>
 <h3 id="データ同化で熱伝達率を直すと">6-2.
 データ同化で熱伝達率を直すと</h3>
+<p>ここからは、係数の時間発展を観測値で補正する計算です。前半の10本のクリロフ基底に、一様な初期温度差を表す基底を1本追加しているため、温度の係数はm=11個です。r=10のROM単体比較と、状態の数が異なります。</p>
 <p>そこで、熱伝達率の倍率 <span class="math inline">\(s\)</span>
 を未知の数に入れ、測った温度で直しました（<code>run/krylov_da.py</code>）。</p>
 <p><span class="math display">\[
@@ -970,6 +985,7 @@ class="math inline">\(q\)</span> の正解と、15 W に合わせた <span
 class="math inline">\(s=0.21\)</span>。今の ROM の線は presen_001 §11
 の結果（全セルで計算）、クリロフ ROM
 の線は全節点で計算したもので、比べ方が少し違う。</em></p>
+<p><strong>比較条件の読み方</strong>：クリロフ側はFEM節点、既存ROM側はOpenFOAMセルで温度誤差を評価しています。初期温度のばらつきも、クリロフ側は一様な温度差、既存5点ROM側は点ごとの温度差を使っています。下表はそれぞれの設定で得た値です。方式自体の優劣を比較するには、評価位置と初期分布もそろえる必要があります。</p>
 <table>
 <colgroup>
 <col style="width: 20%" />
@@ -1040,9 +1056,9 @@ class="math inline">\(s\)</span> も、15 W
 に合わせた値（0.21）に近づきます。ただし、600 秒では 0.25〜0.33
 で、まだ近づいている途中です（放熱は 600
 秒ではゆっくりしか効かないため。presen_001 §7-4 と同じ理由）。</li>
-<li><strong>温度計 2 点だけなら、今の ROM
-より正確でした</strong>（加熱中の平均 0.14〜0.21 K と 0.53〜0.88
-K）。今の ROM は 5 点の温度しか持たないのに対し、クリロフ ROM
+<li><strong>掲載した温度2点の設定では、クリロフ側の温度誤差指標が小さくなりました</strong>（加熱中の平均
+0.14〜0.21 K と 0.53〜0.88 K）。今の ROM は 5
+点の温度しか持たないのに対し、クリロフ ROM
 は熱伝導の式から全体の温度の形を持っているので、測っていない場所も物理に沿って動くためと考えられます（確かめてはいません）。</li>
 <li>今の ROM に変位 2 点を足した場合（0.12〜0.14 K）と比べると、15
 W・間欠加熱ではほぼ同じ、25 W では少し悪いです。</li>
@@ -1073,10 +1089,11 @@ T}\)</span>（熱ひずみは伸びだけ）。</li>
 <p>クリロフ ROM では <span
 class="math inline">\(\boldsymbol\theta=V\mathbf z\)</span> なので、</p>
 <p><span class="math display">\[
-\mathbf u=\underbrace{K_u^{-1}LV}_{W_z\ (15{,}120\times m)}\ \mathbf z .
+\mathbf u=\underbrace{K_u^{-1}LV}_{W_z\ (3N\times m)}\ \mathbf z .
 \]</span></p>
 <p><span class="math inline">\(W_z\)</span> を前もって 1
 回計算しておけば、変位は行列 × ベクトル 1 回で出ます。</p>
+<p>ここでNはFEM節点数、mは温度の係数の数（このデータ同化では11）です。</p>
 <p><strong>行列の確かめ。</strong> OpenFOAM
 の温度（節点へ移したもの）を入れて変位を計算し、FrontISTR
 の変位（正解）と比べました。</p>
@@ -1201,9 +1218,8 @@ ROM（全節点で計算）。</em></p>
 </tbody>
 </table>
 <ul>
-<li><strong>全体の温度は、クリロフ ROM ＋
-温度・変位の同化が一番正確でした</strong>（0.06〜0.09 K。今の ROM
-の約半分）。</li>
+<li><strong>掲載した各設定の温度指標では、クリロフROM＋温度・変位の同化が最小でした</strong>（0.06〜0.09
+K。今の ROM の約半分）。</li>
 <li><strong>測らない反りは、今の ROM
 のほうが少しよい</strong>（0.076〜0.083 µm と 0.086〜0.100
 µm）。変位計の位置は今の ROM（5 点の温度）で選んだもので、クリロフ ROM
@@ -1260,7 +1276,99 @@ OpenFOAM に合いました（§6）。</li>
 より正確、反りは少し劣りました（§6-3）。クリロフ ROM
 に合わせて変位計の位置を選び直すことは、まだしていません（未実施）。</li>
 </ul>
-<hr />
+<h3 id="熱解析と熱流体解析での使い分け">7-1.
+熱解析と熱流体解析での使い分け</h3>
+<p><strong>熱解析（固体の熱伝導だけ）なら、クリロフ法のほうが楽で確実です。</strong></p>
+<ul>
+<li>FEM の熱解析なら、熱容量 <span
+class="math inline">\(C\)</span>、熱伝導 <span
+class="math inline">\(K+H\)</span>、熱の入り方 <span
+class="math inline">\(\mathbf f\)</span>
+の行列がソルバーの中にあり、それを縮めるだけです。</li>
+<li>正解の計算（学習用のスナップショット）を何本も回す必要がありません。連立方程式を
+<span class="math inline">\(r\)</span> 回解けば ROM ができます（今回
+<span class="math inline">\(r=10\)</span>、数秒）。</li>
+<li><span class="math inline">\(r\)</span> を増やせば元の FEM
+に近づき、その差を直接計算できます（今回 <span
+class="math inline">\(r=10\)</span> で 0.005 K）。</li>
+<li>発熱源が複数あれば、熱源ごとの <span class="math inline">\(\mathbf
+f\)</span>
+を並べて基底を作れば済み、新しい運転条件を学習し直す必要がありません。</li>
+</ul>
+<p><strong>熱流体解析（流れと熱の連成、CHT）では、そのままでは使いにくいです。</strong></p>
+<ul>
+<li>流れの式は非線形で、自然対流では流れが温度で変わります。クリロフ法は線形の式を縮める方法なので、流体の式にはそのまま使えません。</li>
+<li>流体ソルバー（OpenFOAM
+など）から、縮めるための行列を取り出すのも大変です。</li>
+<li>流体を表面の熱伝達率 <span class="math inline">\(h\)</span>
+に置き換えて固体だけを縮めると、<span class="math inline">\(h\)</span>
+が時間で変わるため、今回は 0.5〜0.9 K
+ずれました（§5）。縮め方が正確でも、<span
+class="math inline">\(h\)</span> の与え方で精度が決まります。</li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>クリロフ ROM</th>
+<th>今の ROM（POD・Q-DEIM＋熱回路）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>作るのに要るもの</td>
+<td>熱解析の行列</td>
+<td>正解の計算結果（CHT でもよい）</td>
+</tr>
+<tr class="even">
+<td>流体を含む問題</td>
+<td><span class="math inline">\(h\)</span> を与える必要がある</td>
+<td>CHT の結果から直接作れる（流れの影響も係数に入る）</td>
+</tr>
+<tr class="odd">
+<td>同化なしの精度（OpenFOAM との RMSE）</td>
+<td>0.5〜0.9 K（<span class="math inline">\(h\)</span> は CHT
+の値）、0.04〜0.06 K（<span class="math inline">\(h\)</span> を 1
+つの係数で合わせた場合）</td>
+<td>0.02〜0.08 K</td>
+</tr>
+<tr class="even">
+<td>同化あり（温度 2 点＋変位 2 点）の全体の温度</td>
+<td><strong>0.06〜0.09 K</strong></td>
+<td>0.12〜0.14 K</td>
+</tr>
+<tr class="odd">
+<td>同化あり の測らない反り</td>
+<td>0.086〜0.100 µm</td>
+<td><strong>0.072〜0.083 µm</strong></td>
+</tr>
+<tr class="even">
+<td>条件の変化への強さ</td>
+<td>式から作るので、発熱の変化や熱源の追加に強い。熱伝達率の変化には弱い</td>
+<td>学習した温度分布の型から外れる変化（熱源の位置など）に弱い</td>
+</tr>
+</tbody>
+</table>
+<p><strong>おすすめの組み合わせ：固体はクリロフ
+ROM、熱伝達率はデータ同化で直す。</strong></p>
+<ul>
+<li>固体の熱伝導は、クリロフ法で物理の式どおり正確に縮めます。</li>
+<li>流れの影響（熱伝達率）は、運転中に測った温度・変位から同化で直します。</li>
+<li>今回の計算でも、この組み合わせ（温度＋変位の同化）で、全体の温度が一番正確でした（§6-3）。</li>
+</ul>
+<p>今の
+ROM（データから作る）が向いているのは、熱解析の行列が手に入らない（商用ソフトの結果しかない）場合や、熱伝達率の分布が複雑で少ない係数では表せない場合です。</p>
+<h2
+id="流れが変わる問題博士研究の方向-bでは固体はクリロフ流れによる熱伝達率の分布は-cht-の計算から少数の型podで表しその係数を同化で直すという組み合わせが有力な案になりますこの組み合わせは試していません未実施-今回は熱伝達率を全体に-1-つの係数で直しただけで面ごと場所ごとの分布は直していません">流れが変わる問題（博士研究の方向
+B）では、「固体はクリロフ、流れによる熱伝達率の分布は CHT
+の計算から少数の型（POD）で表し、その係数を同化で直す」という組み合わせが有力な案になります。<strong>この組み合わせは試していません（未実施）。</strong>
+今回は熱伝達率を全体に 1
+つの係数で直しただけで、面ごと・場所ごとの分布は直していません。</h2>
 <h2 id="使ったプログラム">使ったプログラム</h2>
 <table>
 <colgroup>
@@ -1275,13 +1383,17 @@ OpenFOAM に合いました（§6）。</li>
 </thead>
 <tbody>
 <tr class="odd">
+<td><code>run/krylov_thermoelastic.py</code></td>
+<td>熱弾性行列と、温度・変位を使うデータ同化（§6-3）</td>
+</tr>
+<tr class="even">
 <td><code>run/krylov_da.py</code></td>
 <td>クリロフ ROM ＋ EnKF（温度 2 点で <span
 class="math inline">\(\mathbf z\)</span>・<span
 class="math inline">\(q\)</span>・<span class="math inline">\(s\)</span>
 を直す）（図 2、<code>results/krylov_da.json</code>）</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>run/krylov_rom.py</code></td>
 <td>FEM の行列を作る、クリロフ基底を作る、全 FEM・クリロフ ROM・今の ROM
 を 3 条件で解いて OpenFOAM と比べる（図
