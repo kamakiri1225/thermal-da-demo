@@ -165,21 +165,31 @@ def main():
     json.dump(out, open(os.path.join(RES, "krylov_rom.json"), "w"), ensure_ascii=False, indent=1)
 
     plt.rcParams.update({"font.size": 16, "axes.titlesize": 18, "axes.labelsize": 17, "xtick.labelsize": 15, "ytick.labelsize": 15, "legend.fontsize": 15})
-    show = [("全 FEM（h は CHT の実効値）", "#888888", "-"), ("クリロフ ROM r=5", "#1f77b4", "--"), ("クリロフ ROM r=10", "#2ca02c", "-"),
-            ("クリロフ ROM r=10（h を合わせた版）", "#9467bd", "-"), ("今の ROM（5 点の熱回路＋gappy-POD）", "#C0392B", "-")]
-    fig, axs = plt.subplots(2, 3, figsize=(16, 9.0), sharex=True, gridspec_kw=dict(hspace=0.12, wspace=0.25))
+    # 線の描き方：全 FEM は太い灰、r=5 は丸の印、r=10 は四角の印（3 本はほぼ重なるので、印で見分ける）
+    show = [("全 FEM（h は CHT の実効値）", dict(color="#8c564b", lw=5, alpha=.45)),
+            ("クリロフ ROM r=5", dict(color="#1f77b4", lw=1.6, ls="--", marker="o", ms=7, mfc="white", markevery=(0, 3))),
+            ("クリロフ ROM r=10", dict(color="#2ca02c", lw=1.6, ls=":", marker="s", ms=6, markevery=(1, 3))),
+            ("クリロフ ROM r=10（h を合わせた版）", dict(color="#9467bd", lw=2.2)),
+            ("今の ROM（5 点の熱回路＋gappy-POD）", dict(color="#C0392B", lw=2.2))]
+    fig, axs = plt.subplots(3, 3, figsize=(16, 12.5), sharex=True, gridspec_kw=dict(hspace=0.16, wspace=0.27))
     for j, (case, lab) in enumerate(CASES):
         t, Tt, r = res[case]
-        ax = axs[0, j]; ax.plot(t, Tt[:, nodeP[2]] + 20, "-", color="k", lw=7, alpha=.25, label="OpenFOAM")
-        for nm, c, ls in show: ax.plot(t, r[nm][:, nodeP[2]] + 20, ls, color=c, lw=2, label=nm)
+        ax = axs[0, j]; ax.plot(t, Tt[:, nodeP[2]] + 20, "-", color="k", lw=9, alpha=.18, label="OpenFOAM（正解）")
+        for nm, kw in show: ax.plot(t, r[nm][:, nodeP[2]] + 20, label=nm, **kw)
         ax.set_title(lab); ax.grid(alpha=.3)
         ax = axs[1, j]
-        for nm, c, ls in show: ax.plot(t, np.sqrt(((r[nm] - Tt) ** 2).mean(1)), ls, color=c, lw=2.2)
-        ax.set_yscale("log"); ax.set_ylim(3e-3, 5); ax.grid(alpha=.3, which="both"); ax.set_xlabel("時刻 [s]"); ax.set_xticks([0, 200, 400, 600])
-    axs[0, 0].set_ylabel("P2 の温度 [°C]"); axs[1, 0].set_ylabel("全節点の RMSE [K]\n（OpenFOAM との差）")
-    h_, l_ = axs[0, 0].get_legend_handles_labels()
-    fig.legend(h_, l_, loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.06), frameon=False)
-    fig.savefig(os.path.join(IMG, "krylov_rom_compare.png"), dpi=120, bbox_inches="tight", facecolor="white"); plt.close(fig)
+        for nm, kw in show: ax.plot(t, np.sqrt(((r[nm] - Tt) ** 2).mean(1)), **kw)
+        ax.set_yscale("log"); ax.set_ylim(3e-3, 5); ax.grid(alpha=.3, which="both")
+        ax.text(0.03, 0.95, "全 FEM・r=5・r=10 は重なる", transform=ax.transAxes, va="top", fontsize=14, color="#555")
+        ax = axs[2, j]                     # 縮める誤差：全 FEM との差（全節点の最大）
+        full = r["全 FEM（h は CHT の実効値）"]
+        for nm, kw in show[1:3]: ax.plot(t, np.abs(r[nm] - full).max(1) + 1e-6, **kw)
+        V20 = r["クリロフ ROM r=20"]; ax.plot(t, np.abs(V20 - full).max(1) + 1e-6, color="#ff7f0e", lw=2, label="クリロフ ROM r=20")
+        ax.set_yscale("log"); ax.set_ylim(1e-5, 1); ax.grid(alpha=.3, which="both"); ax.set_xlabel("時刻 [s]"); ax.set_xticks([0, 200, 400, 600])
+    axs[0, 0].set_ylabel("P2 の温度 [°C]"); axs[1, 0].set_ylabel("OpenFOAM との差\n全節点の RMSE [K]"); axs[2, 0].set_ylabel("縮める誤差\n|ROM − 全 FEM| の最大 [K]")
+    h_, l_ = axs[0, 0].get_legend_handles_labels(); h2, l2 = axs[2, 0].get_legend_handles_labels()
+    fig.legend(h_ + h2[-1:], l_ + l2[-1:], loc="lower center", ncol=3, bbox_to_anchor=(0.5, -0.06), frameon=False)
+    fig.savefig(os.path.join(IMG, "krylov_rom_compare.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
     print("wrote docs/img/krylov_rom_compare.png")
 
 
