@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>blog_013：クリロフ部分空間法で低次元モデルを作り、今の ROM
-と比べる</title>
+  <title>blog_013：クリロフ部分空間法とは何か ―
+熱方程式から小さなROMを作る</title>
   <style>
     html {
       color: #1a1a1a;
@@ -247,24 +247,41 @@
 <nav id="TOC" role="doc-toc">
 <ul>
 <li><a
-href="#blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる"
-id="toc-blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる">blog_013：クリロフ部分空間法で低次元モデルを作り、今の
-ROM と比べる</a>
+href="#blog_013クリロフ部分空間法とは何か-熱方程式から小さなromを作る"
+id="toc-blog_013クリロフ部分空間法とは何か-熱方程式から小さなromを作る">blog_013：クリロフ部分空間法とは何か
+― 熱方程式から小さなROMを作る</a>
 <ul>
-<li><a href="#つの-rom-の違い" id="toc-つの-rom-の違い">1. 2 つの ROM
-の違い</a></li>
-<li><a href="#元になる式固体の熱伝導の-fem"
-id="toc-元になる式固体の熱伝導の-fem">2. 元になる式：固体の熱伝導の
-FEM</a></li>
-<li><a href="#クリロフ部分空間法で縮める"
-id="toc-クリロフ部分空間法で縮める">3. クリロフ部分空間法で縮める</a>
+<li><a href="#podq-deimのromと何が違うか"
+id="toc-podq-deimのromと何が違うか">1.
+POD・Q-DEIMのROMと何が違うか</a></li>
+<li><a href="#元になる式固体の熱伝導のfem"
+id="toc-元になる式固体の熱伝導のfem">2.
+元になる式：固体の熱伝導のFEM</a></li>
+<li><a href="#基底を作り少数の係数だけを時間積分する"
+id="toc-基底を作り少数の係数だけを時間積分する">3.
+基底を作り、少数の係数だけを時間積分する</a>
 <ul>
-<li><a href="#考え方入力から出力への伝わり方を合わせる"
-id="toc-考え方入力から出力への伝わり方を合わせる">3-1.
-考え方：入力から出力への伝わり方を合わせる</a></li>
-<li><a href="#手順基底-v-を作る" id="toc-手順基底-v-を作る">3-2.
-手順：基底 <span class="math inline">\(V\)</span> を作る</a></li>
-<li><a href="#縮めた式" id="toc-縮めた式">3-3. 縮めた式</a></li>
+<li><a href="#最初の候補定常加熱への温度応答を求める"
+id="toc-最初の候補定常加熱への温度応答を求める">3-1.
+最初の候補：定常加熱への温度応答を求める</a></li>
+<li><a href="#次の候補cを掛けたベクトルを右辺にしてまたgを解く"
+id="toc-次の候補cを掛けたベクトルを右辺にしてまたgを解く">3-2.
+次の候補：Cを掛けたベクトルを右辺にして、またGを解く</a></li>
+<li><a href="#部分空間は候補の足し合わせで表せる分布の集合"
+id="toc-部分空間は候補の足し合わせで表せる分布の集合">3-3.
+「部分空間」は、候補の足し合わせで表せる分布の集合</a></li>
+<li><a href="#重複する成分を除き使いやすい基底を作る"
+id="toc-重複する成分を除き使いやすい基底を作る">3-4.
+重複する成分を除き、使いやすい基底を作る</a></li>
+<li><a href="#係数だけの熱方程式へ縮め全温度場へ戻す"
+id="toc-係数だけの熱方程式へ縮め全温度場へ戻す">3-5.
+係数だけの熱方程式へ縮め、全温度場へ戻す</a></li>
+<li><a href="#なぜこの基底候補を使うのかモーメント合わせ"
+id="toc-なぜこの基底候補を使うのかモーメント合わせ">3-6.
+なぜこの基底候補を使うのか：モーメント合わせ</a></li>
+<li><a href="#式とプログラムを対応させる"
+id="toc-式とプログラムを対応させる">3-7.
+式とプログラムを対応させる</a></li>
 </ul></li>
 <li><a href="#結果-1縮める誤差は-r-でどれだけ小さくなるか"
 id="toc-結果-1縮める誤差は-r-でどれだけ小さくなるか">4. 結果
@@ -281,35 +298,46 @@ id="toc-h-に-1-つの係数を掛けて合わせると">5-2. <span
 class="math inline">\(h\)</span> に 1
 つの係数を掛けて合わせると</a></li>
 </ul></li>
-<li><a href="#まとめどちらを使うか" id="toc-まとめどちらを使うか">6.
+<li><a href="#クリロフ-rom-は合わないものなのかデータ同化をすれば合うか"
+id="toc-クリロフ-rom-は合わないものなのかデータ同化をすれば合うか">6.
+クリロフ ROM は合わないものなのか？データ同化をすれば合うか</a>
+<ul>
+<li><a href="#合わない原因はクリロフ法ではなく元の式の熱伝達率"
+id="toc-合わない原因はクリロフ法ではなく元の式の熱伝達率">6-1.
+合わない原因は「クリロフ法」ではなく「元の式の熱伝達率」</a></li>
+<li><a href="#データ同化で熱伝達率を直すと"
+id="toc-データ同化で熱伝達率を直すと">6-2.
+データ同化で熱伝達率を直すと</a></li>
+<li><a href="#熱変形の行列を作り変位の観測も使う"
+id="toc-熱変形の行列を作り変位の観測も使う">6-3.
+熱変形の行列を作り、変位の観測も使う</a></li>
+</ul></li>
+<li><a href="#まとめどちらを使うか" id="toc-まとめどちらを使うか">7.
 まとめ：どちらを使うか</a></li>
 <li><a href="#使ったプログラム"
 id="toc-使ったプログラム">使ったプログラム</a></li>
+<li><a href="#再現と今回の説明確認"
+id="toc-再現と今回の説明確認">再現と今回の説明確認</a></li>
 </ul></li>
 </ul>
 </nav>
 <h1
-id="blog_013クリロフ部分空間法で低次元モデルを作り今の-rom-と比べる">blog_013：クリロフ部分空間法で低次元モデルを作り、今の
-ROM と比べる</h1>
-<p>この研究の低次元モデル（ROM）は、POD と Q-DEIM で選んだ代表 5
-点の熱回路を、OpenFOAM の結果に合わせて作りました（<a
-href="presen001.html">presen_001
-§7</a>）。一方、構造や熱の FEM
-でよく使われる縮約は、<strong>クリロフ部分空間法</strong>です（Siemens
-Simcenter の熱の ROM など）。</p>
-<p>この記事では、同じ中空円筒でクリロフ部分空間法の ROM を作り、今の ROM
-と OpenFOAM で比べます。</p>
-<p><strong>この記事で分かること</strong></p>
-<ol type="1">
-<li>クリロフ部分空間法で ROM を作る手順（式と、その意味）</li>
-<li>縮める誤差は、変数の数 <span class="math inline">\(r\)</span>
-でどれだけ小さくなるか</li>
-<li>OpenFOAM（流体と固体の熱連成）と比べたときに、何が合って何が合わないか</li>
-</ol>
-<p>計算はすべて <code>run/krylov_rom.py</code> で行いました（数値は
-<code>results/krylov_rom.json</code>）。</p>
-<hr />
-<h2 id="つの-rom-の違い">1. 2 つの ROM の違い</h2>
+id="blog_013クリロフ部分空間法とは何か-熱方程式から小さなromを作る">blog_013：クリロフ部分空間法とは何か
+― 熱方程式から小さなROMを作る</h1>
+<p><strong>クリロフ部分空間法は、元の熱方程式の行列から温度分布の基底を作り、その少数の係数だけを時間積分する方法です。</strong></p>
+<p>全N節点の温度を直接計算する代わりに、r本の分布を足し合わせて温度を近似し、r個の係数を計算します。<strong>「部分空間」は、そのr本の基底を足し合わせて表せる温度分布の集合</strong>という意味です。</p>
+<figure>
+<img src="img/blog013_krylov_flow.png"
+alt="クリロフROMを作り、温度を計算する流れ" />
+<figcaption
+aria-hidden="true">クリロフROMを作り、温度を計算する流れ</figcaption>
+</figure>
+<p><em>計算手順の模式図。NはFEM節点数、rは保持する基底の本数。CAEの温度分布を描いた図ではありません。</em></p>
+<p>この記事では、中空円筒の熱FEMからROMを作り、既存のPOD・Q-DEIM＋熱回路ROMと比べます。まず元の熱方程式、基底作成、少数の係数の時間積分、全節点への復元の順に説明します。ラプラス変換による理由は§3-6へまとめています。</p>
+<p>計算プログラムは <code>run/krylov_rom.py</code>、既存結果は
+<code>results/krylov_rom.json</code>
+です。クリロフROMを使った変位計算・データ同化は、まだ実施していません。</p>
+<h2 id="podq-deimのromと何が違うか">1. POD・Q-DEIMのROMと何が違うか</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -336,14 +364,14 @@ class="math inline">\(f\)</span>）</td>
 <tr class="even">
 <td>状態（未知の数）</td>
 <td>代表 5 点の温度</td>
-<td>クリロフ部分空間の座標 <span class="math inline">\(\mathbf
-z\)</span>（<span class="math inline">\(r\)</span> 個）</td>
+<td>全節点に値を持つ基底に掛ける係数 <span
+class="math inline">\(z_1,\ldots,z_r\)</span></td>
 </tr>
 <tr class="odd">
 <td>全体の温度</td>
-<td>gappy-POD で戻す</td>
-<td><span class="math inline">\(\boldsymbol\theta=V\mathbf z\)</span>
-でそのまま出る</td>
+<td>gappy-PODで復元</td>
+<td><span class="math inline">\(\mathbf T\approx
+T_{\mathrm{air}}\mathbf1+V\mathbf z\)</span> で復元</td>
 </tr>
 <tr class="even">
 <td>係数の決め方</td>
@@ -358,17 +386,35 @@ z\)</span>（<span class="math inline">\(r\)</span> 個）</td>
 </tbody>
 </table>
 <hr />
-<h2 id="元になる式固体の熱伝導の-fem">2. 元になる式：固体の熱伝導の
-FEM</h2>
-<p>円筒（外径 75 mm、内径 40 mm、高さ 100.5 mm）を、FrontISTR
-と同じ六面体メッシュ（半径 4 × 周 48 × 高さ 20、5,040
-節点）に分けます。周りの空気からの温度上昇を <span
-class="math inline">\(\boldsymbol\theta=\mathbf
-T-T_{\mathrm{air}}\)</span>（5,040×1）とすると、</p>
+<p><strong>両方とも分布を少数の基底で表します。</strong>
+既存ROMは代表5点の温度を計算しますが、本記事のクリロフROMでは代表点を選ばず、全節点の分布に掛ける係数を計算します。</p>
+<h2 id="元になる式固体の熱伝導のfem">2.
+元になる式：固体の熱伝導のFEM</h2>
+<p>プログラムの <code>build_fem()</code>
+が、Pythonで熱FEMの行列を組み立てています。（外径 75 mm、内径 40
+mm、高さ 100.5 mm）を、FrontISTR と同じ六面体メッシュ（半径 4 × 周 48 ×
+高さ 20、5,040 節点）に分けます。全節点の温度を <span
+class="math inline">\(\mathbf T\)</span>、一定の外気温を <span
+class="math inline">\(T_{\mathrm{air}}\)</span>
+とし、NをFEM節点数とします（今回はN=5,040）。</p>
 <p><span class="math display">\[
-C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf
-f\,P(t),\qquad G=K+H .
+\underbrace{\mathbf
+T}_{N\times1}=\begin{bmatrix}T[1]\\T[2]\\\vdots\\T[N]\end{bmatrix},
+\qquad
+\underbrace{\boldsymbol\theta}_{N\times1}
+=\begin{bmatrix}T[1]-T_{\mathrm{air}}\\T[2]-T_{\mathrm{air}}\\\vdots\\T[N]-T_{\mathrm{air}}\end{bmatrix}.
 \]</span></p>
+<p><span class="math inline">\(\boldsymbol\theta\)</span>
+は外気温からの温度上昇です。熱方程式は、</p>
+<p><span class="math display">\[
+\underbrace{C}_{N\times
+N}\underbrace{\dot{\boldsymbol\theta}}_{N\times1}
++\underbrace{G}_{N\times N}\underbrace{\boldsymbol\theta}_{N\times1}
+=\underbrace{\mathbf f}_{N\times1}P(t),\qquad G=K+H.
+\]</span></p>
+<p>例えば節点iの式は <span class="math inline">\(\sum_j
+C_{ij}\dot\theta[j]+\sum_jG_{ij}\theta[j]=f_iP(t)\)</span>
+です。全FEMは、このN本の式をまとめて時間積分します。</p>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -415,8 +461,12 @@ K)）</td>
 </tr>
 </tbody>
 </table>
-<p>表面の <span class="math inline">\(h\)</span> は、blog_001 で
-OpenFOAM の CHT から求めた面ごとの実効値を使いました。</p>
+<p>表中の <span class="math inline">\(N_a,N_b\)</span>
+はFEM要素内の補間関数、a・bは要素内の節点番号です。<span
+class="math inline">\(P(t)\)</span>
+は既存記事の発熱量Qに相当し、ここではコードに合わせてPと書きます。<span
+class="math inline">\(h\)</span> は、blog_001 で OpenFOAM の CHT
+から求めた面ごとの実効値を使いました。</p>
 <table>
 <thead>
 <tr class="header">
@@ -439,98 +489,241 @@ OpenFOAM の CHT から求めた面ごとの実効値を使いました。</p>
 </tr>
 </tbody>
 </table>
-<p>この FEM（「全 FEM」と呼ぶ）を、時間刻み 2
+<p>ここでの表面熱伝達率h [W/(m²K)]と、5点熱回路の放熱コンダクタンス
+<span class="math inline">\(h_{\mathrm{ROM}}\)</span>
+[W/K]は単位が異なります。FEM（「全 FEM」と呼ぶ）を、時間刻み 2
 秒のクランク・ニコルソン法で 0〜600 秒解くと、約 0.9 秒かかります。</p>
 <hr />
-<h2 id="クリロフ部分空間法で縮める">3. クリロフ部分空間法で縮める</h2>
-<h3 id="考え方入力から出力への伝わり方を合わせる">3-1.
-考え方：入力から出力への伝わり方を合わせる</h3>
-<p>ヒータの電力 <span class="math inline">\(P\)</span> から温度 <span
-class="math inline">\(\boldsymbol\theta\)</span>
-への伝わり方を、ラプラス変換（<span class="math inline">\(d/dt\to
-s\)</span>）で書くと</p>
+<h2 id="基底を作り少数の係数だけを時間積分する">3.
+基底を作り、少数の係数だけを時間積分する</h2>
+<h3 id="最初の候補定常加熱への温度応答を求める">3-1.
+最初の候補：定常加熱への温度応答を求める</h3>
+<p>一定電力を与えて温度が落ち着くと、<span
+class="math inline">\(\dot{\boldsymbol\theta}=\mathbf0\)</span>
+になります。1 Wあたりの定常温度上昇を <span
+class="math inline">\(\mathbf m_0\)</span> とすると、</p>
 <p><span class="math display">\[
-\boldsymbol\theta(s)=\left(G+sC\right)^{-1}\mathbf f\,P(s).
+\underbrace{G}_{N\times N}\underbrace{\mathbf m_0}_{N\times1}
+=\underbrace{\mathbf f}_{N\times1},\qquad
+\mathbf m_0=G^{-1}\mathbf f.
 \]</span></p>
-<p><span
-class="math inline">\(s=0\)</span>（ゆっくりした変化）のまわりで展開すると、</p>
+<p><strong>最初の候補は、ヒータを入れ続けたときの定常温度分布の形です。</strong>
+一定電力 <span class="math inline">\(P_0\)</span> [W]なら <span
+class="math inline">\(\boldsymbol\theta_{\mathrm{ss}}=\mathbf
+m_0P_0\)</span> です。</p>
+<p><span class="math inline">\(G^{-1}\mathbf f\)</span>
+は「Gの連立方程式を解く」という意味で使っています。コードは
+<code>lu.solve(f)</code> で解き、大きな逆行列を作りません。</p>
+<h3 id="次の候補cを掛けたベクトルを右辺にしてまたgを解く">3-2.
+次の候補：Cを掛けたベクトルを右辺にして、またGを解く</h3>
 <p><span class="math display">\[
-\left(G+sC\right)^{-1}\mathbf f
-=\left(I+sG^{-1}C\right)^{-1}G^{-1}\mathbf f
-=\sum_{k=0}^{\infty}(-s)^k\left(G^{-1}C\right)^kG^{-1}\mathbf f .
+\begin{aligned}
+G\mathbf m_0&amp;=\mathbf f,\\
+G\mathbf m_1&amp;=C\mathbf m_0,\\
+G\mathbf m_2&amp;=C\mathbf m_1,\\
+&amp;\ \vdots
+\end{aligned}
+\qquad
+\underbrace{\mathbf m_k}_{N\times1}
+=\underbrace{G^{-1}C}_{N\times N}\mathbf m_{k-1}.
 \]</span></p>
-<p>各項の係数ベクトル <span
-class="math inline">\(\left(G^{-1}C\right)^kG^{-1}\mathbf f\)</span>
-を<strong>モーメント</strong>と呼びます。</p>
-<ul>
-<li><span class="math inline">\(k=0\)</span>：<span
-class="math inline">\(G^{-1}\mathbf f\)</span>
-は、ヒータを入れ続けたときの定常の温度分布</li>
-<li><span
-class="math inline">\(k=1,2,\dots\)</span>：そこへ向かう途中（時間の遅れ）の形</li>
-</ul>
-<p>この最初の <span class="math inline">\(r\)</span>
-個が張る空間が、<strong>クリロフ部分空間</strong>です。</p>
+<p>こうして <span class="math inline">\(\mathbf m_0,(G^{-1}C)\mathbf
+m_0,(G^{-1}C)^2\mathbf m_0,\ldots\)</span>
+を作ります。<strong>kは基底候補の番号で、実際の時刻を進める計算ではありません。</strong>
+これらを選ぶ理論的な理由は§3-6で示します。</p>
+<h3 id="部分空間は候補の足し合わせで表せる分布の集合">3-3.
+「部分空間」は、候補の足し合わせで表せる分布の集合</h3>
+<p>最初のr本の候補から作れるベクトル全体は、</p>
 <p><span class="math display">\[
-\mathcal K_r=\operatorname{span}\left\{G^{-1}\mathbf f,\
-\left(G^{-1}C\right)G^{-1}\mathbf f,\ \dots,\
-\left(G^{-1}C\right)^{r-1}G^{-1}\mathbf f\right\}.
+\mathcal K_r=
+\left\{\beta_0\mathbf m_0+\beta_1\mathbf m_1+\cdots+\beta_{r-1}\mathbf
+m_{r-1}
+\ ;\ \beta_0,\ldots,\beta_{r-1}\in\mathbb R\right\}.
 \]</span></p>
-<p>温度をこの空間の中だけで表すと、縮めた ROM の伝わり方は、元の FEM
-と最初の <span class="math inline">\(r\)</span>
-個のモーメントが一致します（<strong>モーメント合わせ</strong>）。</p>
-<h3 id="手順基底-v-を作る">3-2. 手順：基底 <span
-class="math inline">\(V\)</span> を作る</h3>
-<p>モーメントをそのまま並べると、ほぼ同じ向きのベクトルばかりになり、計算が不安定になります。そこで、1
-本ずつ作って、熱容量 <span class="math inline">\(C\)</span>
-を重みにした内積で正規直交にします（アーノルディ法）。</p>
-<ol type="1">
-<li><span class="math inline">\(\mathbf v=G^{-1}\mathbf
-f\)</span>（<span class="math inline">\(G\)</span> の連立方程式を 1
-回解く）</li>
-<li>すでに作った基底の成分を引く：<span class="math inline">\(\mathbf
-v\leftarrow\mathbf v-V(V^{\mathsf T}C\mathbf v)\)</span>（念のため 2
-回）</li>
-<li>大きさをそろえる：<span class="math inline">\(\mathbf v_j=\mathbf
-v/\sqrt{\mathbf v^{\mathsf T}C\mathbf v}\)</span></li>
-<li>次のベクトル：<span class="math inline">\(\mathbf v=G^{-1}C\mathbf
-v_j\)</span>。2 に戻る（<span class="math inline">\(r\)</span>
-本になるまで）</li>
-</ol>
-<p>できた <span class="math inline">\(V=[\mathbf v_1,\dots,\mathbf
-v_r]\)</span>（5,040×<span class="math inline">\(r\)</span>）は <span
-class="math inline">\(V^{\mathsf T}CV=I\)</span> を満たします。<span
-class="math inline">\(G\)</span> の分解（LU 分解）は 1
-回だけ行い、使い回します。</p>
-<h3 id="縮めた式">3-3. 縮めた式</h3>
-<p><span class="math inline">\(\boldsymbol\theta\approx V\mathbf
-z\)</span> を元の式に入れ、左から <span class="math inline">\(V^{\mathsf
-T}\)</span> を掛けます（ガラーキン射影）。</p>
+<p><span class="math inline">\(\beta_k\)</span>
+は任意の係数です。これを短く書くと、</p>
 <p><span class="math display">\[
-\underbrace{V^{\mathsf T}CV}_{=I\ (r\times r)}\frac{d\mathbf
-z}{dt}+\underbrace{V^{\mathsf T}GV}_{r\times r}\mathbf
-z=\underbrace{V^{\mathsf T}\mathbf f}_{r\times 1}P(t),
-\qquad \boldsymbol\theta\approx V\mathbf z .
+\mathcal K_r=\operatorname{span}\{\mathbf m_0,\mathbf m_1,\ldots,\mathbf
+m_{r-1}\}.
 \]</span></p>
-<ul>
-<li>未知の数が 5,040 個から <span class="math inline">\(r\)</span>
-個になります。</li>
-<li><span class="math inline">\(C\)</span>・<span
-class="math inline">\(G\)</span> は対称なので、縮めた <span
-class="math inline">\(V^{\mathsf T}GV\)</span>
-も対称で正定値になり、安定性が保たれます。</li>
-<li>全節点の温度が <span class="math inline">\(V\mathbf z\)</span>
-でそのまま出るので、gappy-POD のような戻す手順は要りません。</li>
-</ul>
-<hr />
+<p><strong>spanは「そのベクトルの足し合わせで表せるものすべて」という意味です。</strong>
+候補r本が独立なら、この空間はr次元です。</p>
+<p><strong>絵で見ると。</strong> 下の 4
+つは、実際の円筒で作った基底の最初の 4 本です（§3-4
+の手順で、前の形と重ならないようにしたもの）。温度は、この形の足し合わせ
+<span class="math inline">\(z_1\mathbf v_1+z_2\mathbf
+v_2+\cdots\)</span> で表し、時間とともに変わるのは係数 <span
+class="math inline">\(z_j\)</span> だけです。5,040
+個の節点の温度の代わりに、<span class="math inline">\(r\)</span>
+個の係数だけを計算すればよい、これが「縮める」ということです。</p>
+<figure>
+<img src="img/krylov_basis.png" alt="クリロフ基底の最初の 4 本" />
+<figcaption aria-hidden="true">クリロフ基底の最初の 4 本</figcaption>
+</figure>
+<p><em>図 0　クリロフ基底の最初の 4
+本（<code>run/make_krylov_basis_fig.py</code>）。1
+本目はヒータを入れ続けたときに落ち着く温度の形で、この円筒は熱がよく伝わるのでほぼ一様になる。2
+本目以降は、そこへ向かう途中の「ヒータ側が先に温まる」形で、本数を増やすほど細かい形が加わる。</em></p>
+<h3 id="重複する成分を除き使いやすい基底を作る">3-4.
+重複する成分を除き、使いやすい基底を作る</h3>
+<p>候補をそのまま使うと似た方向になりやすいため、既存の基底で説明できる成分を除き、大きさをそろえます。今回のコードはCを使った内積と長さを採用します。</p>
+<p><span class="math display">\[
+\langle\mathbf x,\mathbf y\rangle_C=\mathbf x^{\mathsf T}C\mathbf y,
+\qquad
+\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}.
+\]</span></p>
+<p>最初は <span class="math inline">\(\mathbf v_1=\mathbf
+m_0/\lVert\mathbf m_0\rVert_C\)</span> です。j本目では候補 <span
+class="math inline">\(\mathbf w=G^{-1}C\mathbf v_{j-1}\)</span>
+から、</p>
+<p><span class="math display">\[
+\widetilde{\mathbf w}
+=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell
+(\mathbf v_\ell^{\mathsf T}C\mathbf w),
+\qquad
+\mathbf v_j=\frac{\widetilde{\mathbf w}}
+{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
+\]</span></p>
+<p>として作ります。コードでは丸め誤差を抑えるため、成分を除く処理を2回行います。このアーノルディ法で得る基底行列は、</p>
+<p><span class="math display">\[
+\underbrace{V}_{N\times r}
+=\begin{bmatrix}
+v_1[1]&amp;v_2[1]&amp;\cdots&amp;v_r[1]\\
+v_1[2]&amp;v_2[2]&amp;\cdots&amp;v_r[2]\\
+\vdots&amp;\vdots&amp;&amp;\vdots\\
+v_1[N]&amp;v_2[N]&amp;\cdots&amp;v_r[N]
+\end{bmatrix},
+\qquad V^{\mathsf T}CV=I_r.
+\]</span></p>
+<p><strong>1列が全N節点に値を持つ1本の基底です。</strong>
+候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。</p>
+<h3 id="係数だけの熱方程式へ縮め全温度場へ戻す">3-5.
+係数だけの熱方程式へ縮め、全温度場へ戻す</h3>
+<p>温度上昇を、</p>
+<p><span class="math display">\[
+\underbrace{\boldsymbol\theta}_{N\times1}
+\approx\underbrace{V}_{N\times r}
+\underbrace{\begin{bmatrix}z_1\\z_2\\\vdots\\z_r\end{bmatrix}}_{\mathbf
+z:\ r\times1},
+\qquad
+\mathbf T\approx T_{\mathrm{air}}\mathbf1+V\mathbf z
+\]</span></p>
+<p>と近似します。節点iでは <span class="math inline">\(T[i]\approx
+T_{\mathrm{air}}+\sum_jv_j[i]z_j\)</span> です。<strong><span
+class="math inline">\(z_j\)</span>
+は基底に掛ける係数で、代表点の温度そのものではありません。</strong>
+ここで足す基準は外気温です。PODの時間平均温度場とは異なります。</p>
+<p>Vを時間に依存しない基底として元の式へ代入します。</p>
+<p><span class="math display">\[
+CV\dot{\mathbf z}+GV\mathbf z\approx\mathbf fP(t).
+\]</span></p>
+<p>左から <span class="math inline">\(V^{\mathsf T}\)</span>
+を掛け、縮約後の式として等号を課します（ガラーキン射影）。</p>
+<p><span class="math display">\[
+\underbrace{V^{\mathsf T}CV}_{C_r:\ r\times r}\dot{\mathbf z}
++\underbrace{V^{\mathsf T}GV}_{G_r:\ r\times r}\mathbf z
+=\underbrace{V^{\mathsf T}\mathbf f}_{\mathbf f_r:\ r\times1}P(t).
+\]</span></p>
+<p>今回は <span class="math inline">\(C_r=I_r\)</span>
+になるよう正規化しています。コードは数値誤差も含めた <span
+class="math inline">\(C_r\)</span>
+を計算して使用します。<strong>時間積分するのはr個の係数だけで、その後
+<span class="math inline">\(T_{\mathrm{air}}\mathbf1+V\mathbf z\)</span>
+から全節点温度を復元します。</strong></p>
+<p>今回のC・Gが対称正定値で、Vの列が独立なら、<span
+class="math inline">\(C_r,G_r\)</span>
+も対称正定値です。そのため、無入力時に温度上昇が減衰する性質を保持できます。対称性だけから正定値が決まるわけではありません。</p>
+<p>今回の初期温度は全節点で外気温なので <span
+class="math inline">\(\mathbf z(0)=\mathbf0\)</span>
+です。別の初期温度場を使う場合には、その分布を基底で表せるかも確認します。</p>
+<h3 id="なぜこの基底候補を使うのかモーメント合わせ">3-6.
+なぜこの基底候補を使うのか：モーメント合わせ</h3>
+<p>ここは基底の作り方の理論的な補足です。初期温度上昇0として元の式をラプラス変換すると、</p>
+<p><span class="math display">\[
+(G+sC)\boldsymbol\theta(s)=\mathbf fP(s),\qquad
+\boldsymbol\theta(s)=(G+sC)^{-1}\mathbf fP(s).
+\]</span></p>
+<p>sはラプラス変換の変数で、<span class="math inline">\(s=0\)</span>
+は定常応答に対応します。<span
+class="math inline">\(G+sC=G(I+sG^{-1}C)\)</span>
+と分け、0付近で展開します。</p>
+<p><span class="math display">\[
+\begin{aligned}
+(G+sC)^{-1}\mathbf f
+&amp;=(I+sG^{-1}C)^{-1}G^{-1}\mathbf f\\
+&amp;=\left[I-sG^{-1}C+s^2(G^{-1}C)^2-\cdots\right]G^{-1}\mathbf f\\
+&amp;=\mathbf m_0-s\mathbf m_1+s^2\mathbf m_2-\cdots.
+\end{aligned}
+\]</span></p>
+<p>展開の係数（符号を含めた <span class="math inline">\((-1)^k\mathbf
+m_k\)</span>）をモーメントと呼びます。<strong>§3-2の候補は、元のFEMが入力にどう応答するかを表す、この展開の係数から作ったものです。</strong></p>
+<p>最初のr本を含む基底を使うと、この設定では縮約モデルも最初のr個の係数を再現できます。これがモーメント合わせです。0付近での一致を使うため、急なON/OFFを含む任意の入力について、時間領域の誤差を一律に保証するものではありません。rを変え、実際の入力履歴で確認します。<a
+href="https://www.epc.ed.tum.de/en/rt/research/model-order-reduction/past-topics/krylov-subspace-methods/">TUMのクリロフROMの説明</a></p>
+<h3 id="式とプログラムを対応させる">3-7. 式とプログラムを対応させる</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>計算</th>
+<th>コード中の場所</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>行列の組立て</td>
+<td><code>build_fem()</code></td>
+<td>メッシュ・物性・境界条件からC・G・fを作る</td>
+</tr>
+<tr class="even">
+<td>最初の候補</td>
+<td><code>krylov_basis()</code> の <code>lu.solve(f)</code></td>
+<td><span class="math inline">\(G\mathbf m_0=\mathbf f\)</span>
+を解く</td>
+</tr>
+<tr class="odd">
+<td>既存成分を除く</td>
+<td><code>v - V[:, :j] @ (V[:, :j].T @ (C @ v))</code></td>
+<td>Cを使った射影成分を引く</td>
+</tr>
+<tr class="even">
+<td>正規化</td>
+<td><code>v / np.sqrt(v @ (C @ v))</code></td>
+<td>Cを使った長さを1にする</td>
+</tr>
+<tr class="odd">
+<td>次の候補</td>
+<td><code>lu.solve(C @ V[:, j])</code></td>
+<td><span class="math inline">\(G\mathbf w=C\mathbf v_j\)</span>
+を解く</td>
+</tr>
+<tr class="even">
+<td>縮約行列の計算</td>
+<td><code>run_rom()</code> の <code>Cr, Gr, fr</code></td>
+<td><span class="math inline">\(V^{\mathsf T}CV,V^{\mathsf
+T}GV,V^{\mathsf T}\mathbf f\)</span></td>
+</tr>
+<tr class="odd">
+<td>復元</td>
+<td><code>np.array(out) @ V.T</code></td>
+<td>時刻ごとに <span class="math inline">\(V\mathbf z\)</span>
+を計算し、行方向に並べて返す</td>
+</tr>
+</tbody>
+</table>
+<p>GのLU分解は基底作成時に1回行って使い回します。時間積分は全FEM・ROMともクランク・ニコルソン法、刻み2秒です。</p>
 <h2 id="結果-1縮める誤差は-r-でどれだけ小さくなるか">4. 結果
 1：縮める誤差は <span class="math inline">\(r\)</span>
 でどれだけ小さくなるか</h2>
-<p>全 FEM と、クリロフ ROM の温度の差（全節点・全時刻の最大）です。</p>
+<p>同じ熱FEMを縮めたときの誤差を比較します。下表は今回の再確認値です。0〜600秒を<strong>30秒ごとに出力した21時刻</strong>と全5,040節点について、最大絶対差を求めています。</p>
 <table>
 <thead>
 <tr class="header">
-<th><span class="math inline">\(r\)</span></th>
+<th>基底数r</th>
 <th style="text-align: right;">2</th>
 <th style="text-align: right;">3</th>
 <th style="text-align: right;">5</th>
@@ -540,12 +733,20 @@ class="math inline">\(V^{\mathsf T}GV\)</span>
 </thead>
 <tbody>
 <tr class="odd">
-<td>全 FEM との差の最大 [K]</td>
-<td style="text-align: right;">0.36</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">0.041</td>
-<td style="text-align: right;">0.0046</td>
-<td style="text-align: right;">0.00054</td>
+<td>15 W連続加熱 [K]</td>
+<td style="text-align: right;">0.3567</td>
+<td style="text-align: right;">0.1348</td>
+<td style="text-align: right;">0.04123</td>
+<td style="text-align: right;">0.004584</td>
+<td style="text-align: right;">0.0005389</td>
+</tr>
+<tr class="even">
+<td>15 W間欠加熱 [K]</td>
+<td style="text-align: right;">0.3456</td>
+<td style="text-align: right;">0.1370</td>
+<td style="text-align: right;">0.04127</td>
+<td style="text-align: right;">0.004584</td>
+<td style="text-align: right;">0.0005389</td>
 </tr>
 </tbody>
 </table>
@@ -554,12 +755,12 @@ class="math inline">\(V^{\mathsf T}GV\)</span>
 を増やすと、差は急に小さくなります。<span
 class="math inline">\(r=10\)</span> で 0.005 K で、温度計のノイズ（0.3
 K）よりずっと小さいです。</li>
-<li>15 W
-と間欠加熱で同じ差でした。式が線形なので、電力の時間変化によりません。</li>
+<li>今回の連続・間欠加熱では同程度の差でした。誤差は入力履歴にも依存します。同じON/OFFのまま電力を一定倍率にする場合は、ゼロ初期条件の線形モデル同士の差も同倍率になります。</li>
 <li><span class="math inline">\(r=10\)</span> の ROM で 0〜600
 秒を計算する時間は、約 0.014 秒でした（全 FEM は約 0.9 秒）。</li>
 </ul>
-<p><strong>縮めること自体は、学習データなしで、とても正確にできます。</strong></p>
+<p><strong>この一定境界条件のFEMは、r=10でも元のFEMに近い応答を再現できました。</strong>
+ここで確認したのは縮約誤差で、元モデルとOpenFOAMのCHTとの違いは次節で評価します。</p>
 <hr />
 <h2 id="結果-2openfoam-と比べる">5. 結果 2：OpenFOAM と比べる</h2>
 <p>OpenFOAM
@@ -570,11 +771,19 @@ alt="クリロフ ROM と今の ROM の比較" />
 <figcaption aria-hidden="true">クリロフ ROM と今の ROM
 の比較</figcaption>
 </figure>
-<p><em>図 1　上：P2 の温度。中：全節点の温度の RMSE（OpenFOAM
-との差、対数の目盛り）。下：縮める誤差（クリロフ ROM と全 FEM
-の差、全節点の最大）。全 FEM（茶の太い線）とクリロフ ROM
+<p><em>図
+1　上：OpenFOAMの代表点P2に最も近いFEM節点の温度。中：全節点の温度の
+RMSE（OpenFOAM との差、対数の目盛り）。下：縮める誤差（クリロフ ROM と全
+FEM の差、全節点の最大）。全 FEM（茶の太い線）とクリロフ ROM
 r=5（丸）・r=10（四角）は、上と中の段ではほぼ重なる。r=5・r=10
 の違いは下の段で見える（加熱の入り切りの直後に誤差が大きくなる）。</em></p>
+<p>評価は、OpenFOAMの固体温度をIDWでFEM節点へ写し、各時刻の全節点RMSEを求め、その最大値を取っています。</p>
+<p><span class="math display">\[
+\mathrm{RMSE}(t_k)=\sqrt{\frac1N\sum_{i=1}^N
+\left(T_{\mathrm{model}}[i,t_k]-T_{\mathrm{CHT\
+mapped}}[i,t_k]\right)^2},
+\qquad E_{\mathrm{RMSE}}=\max_k\mathrm{RMSE}(t_k).
+\]</span></p>
 <table>
 <colgroup>
 <col style="width: 20%" />
@@ -649,14 +858,14 @@ class="math inline">\(h\)</span>）</td>
 class="math inline">\(h\)</span> をそのまま使うと合わない</h3>
 <ul>
 <li>全 FEM とクリロフ ROM は同じ値で、どちらも OpenFOAM から 0.5〜0.9 K
-ずれます。<strong>ずれの原因は縮め方ではなく、元の FEM
-の熱伝達率</strong>です。</li>
+ずれます。<strong>ずれの主な部分は、縮約前のFEMにもあります。</strong>
+熱伝達率の調整で改善しますが、熱源の離散化・空気側の扱い・メッシュ・温度写像などの寄与をすべて切り分けたわけではありません。</li>
 <li>600 秒後の円筒全体の平均の温度上昇は、全 FEM 3.05 K、OpenFOAM 3.59 K
 でした。FEM は放熱が大きすぎます。</li>
 <li>CHT の熱伝達率は時間で変わります（<a
 href="https://github.com/kamakiri1225/thermal-da-demo/blob/main/sample/106_0_pod_selected_rom/docs/../results/heat_transfer_check.json">results/heat_transfer_check.json</a>：全表面の実効値は
 300 秒で約 8.6、600 秒で約 3.6
-W/(m²K)。周りの空気が温まり、温度差が小さくなるため）。blog_001
+W/(m²K)。実効値は熱流と基準温度差の取り方にも依存するため、この変化の原因は別途確認が必要）。blog_001
 の面ごとの値は、この変化を 1 つの値で表したもので、一定の <span
 class="math inline">\(h\)</span> では表しきれません。</li>
 </ul>
@@ -676,7 +885,335 @@ class="math inline">\(h\)</span>
 では表せないためと考えられます（確かめてはいません）。</li>
 </ul>
 <hr />
-<h2 id="まとめどちらを使うか">6. まとめ：どちらを使うか</h2>
+<h2 id="クリロフ-rom-は合わないものなのかデータ同化をすれば合うか">6.
+クリロフ ROM は合わないものなのか？データ同化をすれば合うか</h2>
+<h3 id="合わない原因はクリロフ法ではなく元の式の熱伝達率">6-1.
+合わない原因は「クリロフ法」ではなく「元の式の熱伝達率」</h3>
+<p>§4・§5 から、ずれの出どころは次のように分けられます。</p>
+<p><span class="math display">\[
+\underbrace{\boldsymbol\theta_{\mathrm{OpenFOAM}}-\boldsymbol\theta_{\mathrm{ROM}}}_{\text{全体のずれ}}
+=\underbrace{\left(\boldsymbol\theta_{\mathrm{OpenFOAM}}-\boldsymbol\theta_{\mathrm{FEM}}\right)}_{\text{モデルのずれ：0.5〜0.9
+K}}
++\underbrace{\left(\boldsymbol\theta_{\mathrm{FEM}}-\boldsymbol\theta_{\mathrm{ROM}}\right)}_{\text{縮める誤差：r=10
+で 0.005 K}}
+\]</span></p>
+<ul>
+<li>クリロフ法が受け持つのは、2
+つ目の「縮める誤差」だけで、これはとても小さいです。</li>
+<li>1 つ目の「モデルのずれ」は、元の FEM が OpenFOAM
+と違う（熱伝達率が一定、ヒータの扱い）ことから来ます。<strong>どんな縮め方をしても、このずれは消えません。</strong></li>
+<li>今の ROM は、OpenFOAM
+の結果に直接合わせて作るので、このずれも係数に吸収されています。</li>
+</ul>
+<h3 id="データ同化で熱伝達率を直すと">6-2.
+データ同化で熱伝達率を直すと</h3>
+<p>そこで、熱伝達率の倍率 <span class="math inline">\(s\)</span>
+を未知の数に入れ、測った温度で直しました（<code>run/krylov_da.py</code>）。</p>
+<p><span class="math display">\[
+\underbrace{V^{\mathsf T}CV}_{C_r}\frac{d\mathbf
+z}{dt}+\Bigl(\underbrace{V^{\mathsf
+T}KV}_{K_r}+s\,\underbrace{V^{\mathsf T}HV}_{H_r}\Bigr)\mathbf
+z=\underbrace{V^{\mathsf T}\mathbf f}_{\mathbf f_r}\cdot 15\,\mathrm
+W\cdot q\cdot\mathrm{on}(t)
+\]</span></p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>設定</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>状態（EnKF で直すもの）</td>
+<td>クリロフの座標 <span class="math inline">\(\mathbf z\)</span>（r=10
+＋ 一様な温度の成分 1 つ）、発熱の倍率 <span
+class="math inline">\(q\)</span>、熱伝達率の倍率 <span
+class="math inline">\(s\)</span></td>
+</tr>
+<tr class="even">
+<td>観測</td>
+<td>温度計 P2・P0（OpenFOAM の値＋ノイズ 0.3 K、30 秒ごと）。今の ROM
+の「温度 2 点」と同じ</td>
+</tr>
+<tr class="odd">
+<td>測る前のばらつき</td>
+<td>初期温度 20 °C の −3〜+12 K、<span class="math inline">\(q\)</span>
+は 0.3〜1.8、<span class="math inline">\(s\)</span> は
+0.1〜1.5（対数で一様）</td>
+</tr>
+<tr class="even">
+<td>EnKF</td>
+<td>60 メンバー、膨張係数 1.02、乱数 5 通りの平均</td>
+</tr>
+</tbody>
+</table>
+<p>基底 <span class="math inline">\(V\)</span> は <span
+class="math inline">\(s=1\)</span> で 1 回作り、<span
+class="math inline">\(s\)</span> が変わっても使い回します（<span
+class="math inline">\(K_r\)</span>・<span
+class="math inline">\(H_r\)</span> を前もって計算しておけば、<span
+class="math inline">\(s\)</span> を変えるのは足し算だけ）。</p>
+<figure>
+<img src="img/krylov_da.png" alt="クリロフ ROM ＋データ同化" />
+<figcaption aria-hidden="true">クリロフ ROM ＋データ同化</figcaption>
+</figure>
+<p><em>図 2　上：全体の温度の RMSE（OpenFOAM
+との差）。下：推定した発熱の倍率 <span
+class="math inline">\(q\)</span>（赤）と熱伝達率の倍率 <span
+class="math inline">\(s\)</span>（緑）。点線は <span
+class="math inline">\(q\)</span> の正解と、15 W に合わせた <span
+class="math inline">\(s=0.21\)</span>。今の ROM の線は presen_001 §11
+の結果（全セルで計算）、クリロフ ROM
+の線は全節点で計算したもので、比べ方が少し違う。</em></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>全体の温度の RMSE（加熱中 30〜300 秒の平均）[K]</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>今の ROM＋同化（温度 2 点）</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">0.53</td>
+</tr>
+<tr class="even">
+<td><strong>クリロフ ROM＋同化（温度 2 点）</strong></td>
+<td style="text-align: right;"><strong>0.14</strong></td>
+<td style="text-align: right;"><strong>0.21</strong></td>
+<td style="text-align: right;"><strong>0.14</strong></td>
+</tr>
+<tr class="odd">
+<td>今の ROM＋同化（温度 2 点＋変位 2 点）</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.12</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>600 秒での推定値</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>発熱の倍率 <span class="math inline">\(q\)</span>（正解）</td>
+<td style="text-align: right;">0.97（1.00）</td>
+<td style="text-align: right;">1.62（1.67）</td>
+<td style="text-align: right;">1.02（1.00）</td>
+</tr>
+<tr class="even">
+<td>熱伝達率の倍率 <span class="math inline">\(s\)</span></td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">0.25</td>
+<td style="text-align: right;">0.33</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>データ同化をすると合います。</strong>
+熱伝達率をそのまま使ったときの 0.5〜0.9 K のずれが、0.06〜0.07 K（600
+秒）まで小さくなりました。</li>
+<li>発熱の倍率 <span class="math inline">\(q\)</span> は、3
+条件とも正解の 3 % 以内に入りました。熱伝達率の倍率 <span
+class="math inline">\(s\)</span> も、15 W
+に合わせた値（0.21）に近づきます。ただし、600 秒では 0.25〜0.33
+で、まだ近づいている途中です（放熱は 600
+秒ではゆっくりしか効かないため。presen_001 §7-4 と同じ理由）。</li>
+<li><strong>温度計 2 点だけなら、今の ROM
+より正確でした</strong>（加熱中の平均 0.14〜0.21 K と 0.53〜0.88
+K）。今の ROM は 5 点の温度しか持たないのに対し、クリロフ ROM
+は熱伝導の式から全体の温度の形を持っているので、測っていない場所も物理に沿って動くためと考えられます（確かめてはいません）。</li>
+<li>今の ROM に変位 2 点を足した場合（0.12〜0.14 K）と比べると、15
+W・間欠加熱ではほぼ同じ、25 W では少し悪いです。</li>
+</ul>
+<h3 id="熱変形の行列を作り変位の観測も使う">6-3.
+熱変形の行列を作り、変位の観測も使う</h3>
+<p>クリロフ ROM
+の温度から熱変形を出すため、熱弾性の行列を作りました（<code>run/krylov_thermoelastic.py</code>）。</p>
+<p><span class="math display">\[
+K_u\,\mathbf u=L\,\boldsymbol\theta,\qquad
+K_u=\int B^{\mathsf T}DB\,dV,\qquad
+L=\int B^{\mathsf T}D\,\mathbf m\,\alpha\,N^{\mathsf T}dV
+\]</span></p>
+<ul>
+<li><span
+class="math inline">\(K_u\)</span>：剛性行列（15,120×15,120）。<span
+class="math inline">\(B\)</span> はひずみと変位の関係、<span
+class="math inline">\(D\)</span> は鋼の弾性（<span
+class="math inline">\(E=205\)</span> GPa、<span
+class="math inline">\(\nu=0.3\)</span>）。</li>
+<li><span
+class="math inline">\(L\)</span>：温度から熱荷重を作る行列（15,120×5,040）。<span
+class="math inline">\(\alpha=1.2\times10^{-5}\)</span> /K、<span
+class="math inline">\(\mathbf m=(1,1,1,0,0,0)^{\mathsf
+T}\)</span>（熱ひずみは伸びだけ）。</li>
+<li>拘束は FrontISTR と同じ 3-2-1 の点拘束です。</li>
+</ul>
+<p>クリロフ ROM では <span
+class="math inline">\(\boldsymbol\theta=V\mathbf z\)</span> なので、</p>
+<p><span class="math display">\[
+\mathbf u=\underbrace{K_u^{-1}LV}_{W_z\ (15{,}120\times m)}\ \mathbf z .
+\]</span></p>
+<p><span class="math inline">\(W_z\)</span> を前もって 1
+回計算しておけば、変位は行列 × ベクトル 1 回で出ます。</p>
+<p><strong>行列の確かめ。</strong> OpenFOAM
+の温度（節点へ移したもの）を入れて変位を計算し、FrontISTR
+の変位（正解）と比べました。</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>変位の最大 [µm]</td>
+<td style="text-align: right;">6.24</td>
+<td style="text-align: right;">10.38</td>
+<td style="text-align: right;">6.10</td>
+</tr>
+<tr class="even">
+<td>FrontISTR との差の最大 [µm]</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.013</td>
+</tr>
+<tr class="odd">
+<td>反り A−O の差の最大 [µm]</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.006</td>
+</tr>
+</tbody>
+</table>
+<p>差は変位の 0.2 % 程度で、FrontISTR と同じ計算ができています。</p>
+<p><strong>変位の観測も使ったデータ同化。</strong> §6-2 の同化に、変位計
+S1（Ux）・S2（Uz）（blog_012 の目的指向で選んだ 2
+本）を足しました。予報した変位は <span class="math inline">\(W_z\mathbf
+z\)</span> の 2 行です。</p>
+<figure>
+<img src="img/krylov_thermoelastic.png"
+alt="クリロフ ROM ＋ 温度と変位の同化" />
+<figcaption aria-hidden="true">クリロフ ROM ＋
+温度と変位の同化</figcaption>
+</figure>
+<p><em>図 3　全体の温度の RMSE（OpenFOAM との差）。灰・赤は今の
+ROM（presen_001 §11、全セルで計算）、青・緑はクリロフ
+ROM（全節点で計算）。</em></p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>加熱中（30〜300 秒）の平均</th>
+<th>観測</th>
+<th style="text-align: right;">15 W</th>
+<th style="text-align: right;">25 W</th>
+<th style="text-align: right;">間欠加熱</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>全体の温度の RMSE [K]</td>
+<td>今の ROM：温度 2 点</td>
+<td style="text-align: right;">0.54</td>
+<td style="text-align: right;">0.88</td>
+<td style="text-align: right;">0.53</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>今の ROM：温度 2 点＋変位 2 点</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">0.12</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>クリロフ ROM：温度 2 点</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.21</td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="even">
+<td></td>
+<td><strong>クリロフ ROM：温度 2 点＋変位 2 点</strong></td>
+<td style="text-align: right;"><strong>0.07</strong></td>
+<td style="text-align: right;"><strong>0.09</strong></td>
+<td style="text-align: right;"><strong>0.06</strong></td>
+</tr>
+<tr class="odd">
+<td>測らない反り A−O の誤差 [µm]</td>
+<td>今の ROM：温度 2 点</td>
+<td style="text-align: right;">0.775</td>
+<td style="text-align: right;">1.417</td>
+<td style="text-align: right;">0.635</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>今の ROM：温度 2 点＋変位 2 点</td>
+<td style="text-align: right;"><strong>0.076</strong></td>
+<td style="text-align: right;"><strong>0.083</strong></td>
+<td style="text-align: right;"><strong>0.072</strong></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>クリロフ ROM：温度 2 点</td>
+<td style="text-align: right;">0.219</td>
+<td style="text-align: right;">0.348</td>
+<td style="text-align: right;">0.199</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>クリロフ ROM：温度 2 点＋変位 2 点</td>
+<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.086</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>全体の温度は、クリロフ ROM ＋
+温度・変位の同化が一番正確でした</strong>（0.06〜0.09 K。今の ROM
+の約半分）。</li>
+<li><strong>測らない反りは、今の ROM
+のほうが少しよい</strong>（0.076〜0.083 µm と 0.086〜0.100
+µm）。変位計の位置は今の ROM（5 点の温度）で選んだもので、クリロフ ROM
+に合わせて選び直してはいません。</li>
+<li>変位を足すと、温度だけのときより、温度は約半分、反りは約 1/2〜1/3
+になりました。<strong>変位の観測が効く</strong>ことが、クリロフ ROM
+でも確かめられました。</li>
+</ul>
+<hr />
+<h2 id="まとめどちらを使うか">7. まとめ：どちらを使うか</h2>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -715,15 +1252,13 @@ href="presen001.html">presen_001
 </tbody>
 </table>
 <ul>
-<li>クリロフ法は、<strong>熱伝達率が分かっているなら</strong>、学習データなしで正確な
-ROM
-が作れます。この研究のように流れ（CHT）で熱伝達率が決まり、しかも時間で変わる問題では、熱伝達率の与え方が精度を決めます。</li>
-<li>熱伝達率を、データ同化で直す未知の数にすれば（<span
-class="math inline">\(G=K+\sum_j h_jH_j\)</span> の <span
-class="math inline">\(h_j\)</span>）、クリロフ ROM でも今の ROM
-と同じように補正できる可能性があります。<strong>この組み合わせは試していません（未実施）。</strong></li>
-<li>クリロフ ROM の温度からの熱変形、クリロフ ROM
-を使ったデータ同化も、まだしていません（未実施）。</li>
+<li>クリロフ法は、<strong>元の熱FEMの行列と条件が与えられれば</strong>、温度スナップショットを使わず、そのFEMに近いROMを作れます。現象自体に合うかは、物性・熱源・境界条件にも依存します。この研究のように流れ（CHT）で熱伝達率が決まり、しかも時間で変わる問題では、熱伝達率の与え方が精度を決めます。</li>
+<li>熱伝達率を、データ同化で直す未知の数にすると、クリロフ ROM でも
+OpenFOAM に合いました（§6）。</li>
+<li>熱弾性の行列を作れば、クリロフ ROM
+でも変位の観測を使えます。温度は今の ROM
+より正確、反りは少し劣りました（§6-3）。クリロフ ROM
+に合わせて変位計の位置を選び直すことは、まだしていません（未実施）。</li>
 </ul>
 <hr />
 <h2 id="使ったプログラム">使ったプログラム</h2>
@@ -740,6 +1275,13 @@ class="math inline">\(h_j\)</span>）、クリロフ ROM でも今の ROM
 </thead>
 <tbody>
 <tr class="odd">
+<td><code>run/krylov_da.py</code></td>
+<td>クリロフ ROM ＋ EnKF（温度 2 点で <span
+class="math inline">\(\mathbf z\)</span>・<span
+class="math inline">\(q\)</span>・<span class="math inline">\(s\)</span>
+を直す）（図 2、<code>results/krylov_da.json</code>）</td>
+</tr>
+<tr class="even">
 <td><code>run/krylov_rom.py</code></td>
 <td>FEM の行列を作る、クリロフ基底を作る、全 FEM・クリロフ ROM・今の ROM
 を 3 条件で解いて OpenFOAM と比べる（図
@@ -764,5 +1306,17 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a hr
 class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Cr <span class="op">=</span> V.T <span class="op">@</span> (C <span class="op">@</span> V)<span class="op">;</span> Gr <span class="op">=</span> V.T <span class="op">@</span> (G <span class="op">@</span> V)<span class="op">;</span> fr <span class="op">=</span> V.T <span class="op">@</span> f            <span class="co"># r×r、r×1</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>Al <span class="op">=</span> np.linalg.inv(Cr <span class="op">/</span> DT <span class="op">+</span> Gr <span class="op">/</span> <span class="dv">2</span>)<span class="op">;</span> Ar <span class="op">=</span> Cr <span class="op">/</span> DT <span class="op">-</span> Gr <span class="op">/</span> <span class="dv">2</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> Al <span class="op">@</span> (Ar <span class="op">@</span> z <span class="op">+</span> fr <span class="op">*</span> (P(t) <span class="op">+</span> P(t <span class="op">+</span> DT)) <span class="op">/</span> <span class="dv">2</span>)                <span class="co"># 1 ステップ。温度は V @ z</span></span></code></pre></div>
+<h2 id="再現と今回の説明確認">再現と今回の説明確認</h2>
+<ul>
+<li>作業フォルダ：<code>sample/106_0_pod_selected_rom/</code>。</li>
+<li>既存解析：<code>run/krylov_rom.py</code>。保存結果：<code>results/krylov_rom.json</code>。h倍率の校正とOpenFOAMとの比較は、この既存結果を参照しています。</li>
+<li>今回の再確認：<code>run/check_blog013_explanation.py</code>。r=2・3・5・10・20で、基底の直交性と、連続・間欠加熱の縮約誤差を計算。結果は
+<code>results/blog013_explanation_check.json</code>。</li>
+<li>図の生成：<code>run/make_blog013_concept.py</code>。計算手順を示す模式図です。</li>
+<li>§6-2・§6-3
+のデータ同化と熱弾性の行列：<code>run/krylov_da.py</code>、<code>run/krylov_thermoelastic.py</code>（<code>results/krylov_da.json</code>、<code>results/krylov_thermoelastic.json</code>）。OpenFOAM・FrontISTR
+は新たに実行していません（保存してある正解を使用）。</li>
+<li>基底の図：<code>run/make_krylov_basis_fig.py</code>。</li>
+</ul>
 </body>
 </html>
