@@ -116,7 +116,7 @@ def main():
         t, Tf, Tt, uf = truth[case]; on = SCHED[case]; heat = (t > 0) & (t <= 300)
         yT = Tf[:, pod][:, [2, 0]] - rg.T_AIR_K; yU = uf[:, srow]; warp_true = uf[:, rA] - uf[:, rO]
         res = {}
-        for key, use_u in (("temp", False), ("temp_disp", True)):
+        for key, use_u in (("none", None), ("temp", False), ("temp_disp", True)):
             rms, werr, tser, wser = [], [], [], []
             for seed in SEEDS:
                 rng = np.random.default_rng(seed); ro = np.random.default_rng(seed + 7)
@@ -126,6 +126,10 @@ def main():
                 z0 = Z[:, :m].mean(0); ts_ = [float(V[iT] @ z0)]; ws_ = [float((Wz[rA] - Wz[rO]) @ z0)]
                 for k, tb in enumerate(t[1:], 1):
                     Z = forecast(Z, tp, tb, on); tp = tb
+                    if use_u is None:                          # 同化なし：予報だけ
+                        zm = Z[:, :m].mean(0); rm.append(float(np.sqrt(((V @ zm - Tt[k]) ** 2).mean())))
+                        u = Wz @ zm; we.append(float(abs((u[rA] - u[rO]) - warp_true[k]))); ts_.append(float(V[iT] @ zm)); ws_.append(float(u[rA] - u[rO]))
+                        continue
                     y = list(yT[k] + ro.normal(0, SIG_T, 2)); Yf = Z[:, :m] @ Ht.T
                     if use_u: y += list(yU[k] + ro.normal(0, SIG_U, 2)); Yf = np.column_stack([Yf, Z[:, :m] @ Hu.T])
                     Z = enkf_update(Z, np.array(y), None, R, rng, inflation=INFL, Yf=Yf)
@@ -164,16 +168,16 @@ def main():
             if case == "intermittent": ax.axvspan(300, 450, color="#FFF4B8", lw=0)
             tru = Tt[:, iT] + 20 if row == 0 else uf[:, rA] - uf[:, rO]
             ax.plot(t, tru, "-", color="k", lw=7, alpha=.22, label="正解（OpenFOAM＋FrontISTR）")
-            for key, c, lab in (("temp", "#1f77b4", "クリロフ ROM＋同化（温度 2 点）"), ("temp_disp", "#2ca02c", "クリロフ ROM＋同化（温度 2 点＋変位 2 点）")):
+            for key, c, lab in (("none", "#999999", "クリロフ ROM・同化なし（初期温度・発熱・熱伝達率が分からないまま）"), ("temp", "#1f77b4", "クリロフ ROM＋同化（温度 2 点）"), ("temp_disp", "#2ca02c", "クリロフ ROM＋同化（温度 2 点＋変位 2 点）")):
                 y = series[(case, key)][row] + (20 if row == 0 else 0)
-                ax.plot(t, y, "-", color=c, lw=2.6, marker="o", ms=4, label=lab)
+                ax.plot(t, y, "--" if key == "none" else "-", color=c, lw=2.6, marker=None if key == "none" else "o", ms=4, label=lab)
             ax.grid(alpha=.3)
         axs[0, j].set_title(titles[case]); axs[1, j].set_xlabel("時刻 [s]"); axs[1, j].set_xticks([0, 200, 400, 600])
     axs[0, 0].set_ylabel("測らない点の温度 [°C]"); axs[1, 0].set_ylabel("測らない反り A−O [µm]")
     axs[0, 0].text(0.97, 0.04, "上面・反対側（温度計なし）", transform=axs[0, 0].transAxes, ha="right", fontsize=14)
     from matplotlib.patches import Patch
     h_, l_ = axs[0, 0].get_legend_handles_labels()
-    fig.legend(h_ + [Patch(fc="#FFF4B8")], l_ + ["ヒータ ON"], loc="upper center", ncol=2, bbox_to_anchor=(0.5, 0.02), frameon=False)
+    fig.legend(h_ + [Patch(fc="#FFF4B8")], l_ + ["ヒータ ON"], loc="upper center", ncol=1, bbox_to_anchor=(0.5, 0.02), frameon=False)
     fig.savefig(os.path.join(IMG, "krylov_da_timeseries.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
     print("wrote docs/img/krylov_da_timeseries.png")
 
