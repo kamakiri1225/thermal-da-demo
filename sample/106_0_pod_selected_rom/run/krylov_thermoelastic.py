@@ -117,29 +117,29 @@ def main():
         yT = Tf[:, pod][:, [2, 0]] - rg.T_AIR_K; yU = uf[:, srow]; warp_true = uf[:, rA] - uf[:, rO]
         res = {}
         for key, use_u in (("none", None), ("temp", False), ("temp_disp", True)):
-            rms, werr, tser, wser = [], [], [], []
+            rms, werr, tser, wser, aser, oser = [], [], [], [], [], []
             for seed in SEEDS:
                 rng = np.random.default_rng(seed); ro = np.random.default_rng(seed + 7)
                 Z = np.zeros((N_ENS, m + 2)); Z[:, :m] = rng.uniform(-3, 12, N_ENS)[:, None] * one[None]
                 Z[:, m] = rng.uniform(0.3, 1.8, N_ENS); Z[:, m + 1] = np.exp(rng.uniform(np.log(0.1), np.log(1.5), N_ENS))
                 R = np.diag([SIG_T ** 2] * 2 + ([SIG_U ** 2] * 2 if use_u else [])); tp = 0.0; rm = [np.nan]; we = [np.nan]
-                z0 = Z[:, :m].mean(0); ts_ = [float(V[iT] @ z0)]; ws_ = [float((Wz[rA] - Wz[rO]) @ z0)]
+                z0 = Z[:, :m].mean(0); ts_ = [float(V[iT] @ z0)]; ws_ = [float((Wz[rA] - Wz[rO]) @ z0)]; as_ = [float(Wz[rA] @ z0)]; os_ = [float(Wz[rO] @ z0)]
                 for k, tb in enumerate(t[1:], 1):
                     Z = forecast(Z, tp, tb, on); tp = tb
                     if use_u is None:                          # 同化なし：予報だけ
                         zm = Z[:, :m].mean(0); rm.append(float(np.sqrt(((V @ zm - Tt[k]) ** 2).mean())))
-                        u = Wz @ zm; we.append(float(abs((u[rA] - u[rO]) - warp_true[k]))); ts_.append(float(V[iT] @ zm)); ws_.append(float(u[rA] - u[rO]))
+                        u = Wz @ zm; we.append(float(abs((u[rA] - u[rO]) - warp_true[k]))); ts_.append(float(V[iT] @ zm)); ws_.append(float(u[rA] - u[rO])); as_.append(float(u[rA])); os_.append(float(u[rO]))
                         continue
                     y = list(yT[k] + ro.normal(0, SIG_T, 2)); Yf = Z[:, :m] @ Ht.T
                     if use_u: y += list(yU[k] + ro.normal(0, SIG_U, 2)); Yf = np.column_stack([Yf, Z[:, :m] @ Hu.T])
                     Z = enkf_update(Z, np.array(y), None, R, rng, inflation=INFL, Yf=Yf)
                     Z[:, m] = np.clip(Z[:, m], 0, 3); Z[:, m + 1] = np.clip(Z[:, m + 1], 0.01, 3)
                     zm = Z[:, :m].mean(0); rm.append(float(np.sqrt(((V @ zm - Tt[k]) ** 2).mean())))
-                    u = Wz @ zm; we.append(float(abs((u[rA] - u[rO]) - warp_true[k]))); ts_.append(float(V[iT] @ zm)); ws_.append(float(u[rA] - u[rO]))
-                rms.append(rm); werr.append(we); tser.append(ts_); wser.append(ws_)
+                    u = Wz @ zm; we.append(float(abs((u[rA] - u[rO]) - warp_true[k]))); ts_.append(float(V[iT] @ zm)); ws_.append(float(u[rA] - u[rO])); as_.append(float(u[rA])); os_.append(float(u[rO]))
+                rms.append(rm); werr.append(we); tser.append(ts_); wser.append(ws_); aser.append(as_); oser.append(os_)
             rms = np.mean(rms, 0); werr = np.mean(werr, 0)
             res[key] = dict(rmse_heat_mean_K=float(np.nanmean(rms[heat])), warp_err_heat_mean_um=float(np.nanmean(werr[heat])))
-            hist[(case, key)] = (t, rms, werr); series[(case, key)] = (np.mean(tser, 0), np.mean(wser, 0))
+            hist[(case, key)] = (t, rms, werr); series[(case, key)] = (np.mean(tser, 0), np.mean(wser, 0), np.mean(aser, 0), np.mean(oser, 0))
         out["cases"][case] = res; print(case, res, flush=True)
     json.dump(out, open(os.path.join(RES, "krylov_thermoelastic.json"), "w"), ensure_ascii=False, indent=1)
 
@@ -180,6 +180,26 @@ def main():
     fig.legend(h_ + [Patch(fc="#FFF4B8")], l_ + ["ヒータ ON"], loc="upper center", ncol=1, bbox_to_anchor=(0.5, 0.02), frameon=False)
     fig.savefig(os.path.join(IMG, "krylov_da_timeseries_nodata.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
     print("wrote docs/img/krylov_da_timeseries_nodata.png")
+    # A・O それぞれの上下の変位
+    fig, axs = plt.subplots(2, 3, figsize=(16, 9.2), sharex=True, gridspec_kw=dict(hspace=0.14, wspace=0.25))
+    for j, case in enumerate(("learned", "q25", "intermittent")):
+        t, Tf, Tt, uf = truth[case]
+        for row, (r_, nm) in enumerate(((rA, "A"), (rO, "O"))):
+            ax = axs[row, j]
+            ax.axvspan(0, 300 if case != "intermittent" else 150, color="#FFF4B8", lw=0)
+            if case == "intermittent": ax.axvspan(300, 450, color="#FFF4B8", lw=0)
+            ax.plot(t, uf[:, r_], "-", color="k", lw=7, alpha=.22, label="正解（OpenFOAM＋FrontISTR）")
+            for key, c, lab in (("none", "#999999", "クリロフ ROM・同化なし"), ("temp", "#1f77b4", "クリロフ ROM＋同化（温度 2 点）"), ("temp_disp", "#2ca02c", "クリロフ ROM＋同化（温度 2 点＋変位 2 点）")):
+                ax.plot(t, series[(case, key)][2 + row], "--" if key == "none" else "-", color=c, lw=2.6, marker=None if key == "none" else "o", ms=4, label=lab)
+            ax.grid(alpha=.3)
+        axs[0, j].set_title(titles[case]); axs[1, j].set_xlabel("時刻 [s]"); axs[1, j].set_xticks([0, 200, 400, 600])
+    axs[0, 0].set_ylabel("A の上下の変位 [µm]"); axs[1, 0].set_ylabel("O の上下の変位 [µm]")
+    axs[0, 0].text(0.97, 0.04, "A：上面・ヒータ側", transform=axs[0, 0].transAxes, ha="right", fontsize=14)
+    axs[1, 0].text(0.97, 0.04, "O：上面・反対側", transform=axs[1, 0].transAxes, ha="right", fontsize=14)
+    h_, l_ = axs[0, 0].get_legend_handles_labels()
+    fig.legend(h_ + [Patch(fc="#FFF4B8")], l_ + ["ヒータ ON"], loc="upper center", ncol=2, bbox_to_anchor=(0.5, 0.02), frameon=False)
+    fig.savefig(os.path.join(IMG, "krylov_da_AO.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
+    print("wrote docs/img/krylov_da_AO.png")
 
 
 if __name__ == "__main__":
