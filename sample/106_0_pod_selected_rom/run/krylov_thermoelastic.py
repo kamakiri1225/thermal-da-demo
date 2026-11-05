@@ -178,8 +178,8 @@ def main():
     from matplotlib.patches import Patch
     h_, l_ = axs[0, 0].get_legend_handles_labels()
     fig.legend(h_ + [Patch(fc="#FFF4B8")], l_ + ["ヒータ ON"], loc="upper center", ncol=1, bbox_to_anchor=(0.5, 0.02), frameon=False)
-    fig.savefig(os.path.join(IMG, "krylov_da_timeseries.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
-    print("wrote docs/img/krylov_da_timeseries.png")
+    fig.savefig(os.path.join(IMG, "krylov_da_timeseries_nodata.png"), dpi=110, bbox_inches="tight", facecolor="white"); plt.close(fig)
+    print("wrote docs/img/krylov_da_timeseries_nodata.png")
 
 
 if __name__ == "__main__":
