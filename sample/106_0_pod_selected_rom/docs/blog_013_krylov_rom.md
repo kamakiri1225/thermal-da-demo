@@ -1,38 +1,51 @@
-# blog_013：クリロフ部分空間法で低次元モデルを作り、今の ROM と比べる
+# blog_013：クリロフ部分空間法とは何か ― 熱方程式から小さなROMを作る
 
-この研究の低次元モデル（ROM）は、POD と Q-DEIM で選んだ代表 5 点の熱回路を、OpenFOAM の結果に合わせて作りました（[presen_001 §7](presen_001_introduction_positioning.md)）。一方、構造や熱の FEM でよく使われる縮約は、**クリロフ部分空間法**です（Siemens Simcenter の熱の ROM など）。
+**クリロフ部分空間法は、元の熱方程式の行列から温度分布の基底を作り、その少数の係数だけを時間積分する方法です。**
 
-この記事では、同じ中空円筒でクリロフ部分空間法の ROM を作り、今の ROM と OpenFOAM で比べます。
+全N節点の温度を直接計算する代わりに、r本の分布を足し合わせて温度を近似し、r個の係数を計算します。**「部分空間」は、そのr本の基底を足し合わせて表せる温度分布の集合**という意味です。
 
-**この記事で分かること**
+![クリロフROMを作り、温度を計算する流れ](img/blog013_krylov_flow.png)
 
-1. クリロフ部分空間法で ROM を作る手順（式と、その意味）
-2. 縮める誤差は、変数の数 $`r`$ でどれだけ小さくなるか
-3. OpenFOAM（流体と固体の熱連成）と比べたときに、何が合って何が合わないか
+*計算手順の模式図。NはFEM節点数、rは保持する基底の本数。CAEの温度分布を描いた図ではありません。*
 
-計算はすべて `run/krylov_rom.py` で行いました（数値は `results/krylov_rom.json`）。
+この記事では、中空円筒の熱FEMからROMを作り、既存のPOD・Q-DEIM＋熱回路ROMと比べます。まず元の熱方程式、基底作成、少数の係数の時間積分、全節点への復元の順に説明します。ラプラス変換による理由は§3-6へまとめています。
 
----
+計算プログラムは `run/krylov_rom.py`、既存結果は `results/krylov_rom.json` です。クリロフROMを使った変位計算・データ同化は、まだ実施していません。
 
-## 1. 2 つの ROM の違い
+## 1. POD・Q-DEIMのROMと何が違うか
 
 | | 今の ROM（POD・Q-DEIM＋熱回路） | クリロフ ROM（この記事） |
 |---|---|---|
 | 何から作るか | OpenFOAM の温度の結果（121 枚） | 熱伝導の式の行列（FEM の $`C`$・$`K`$・$`H`$・$`f`$） |
-| 状態（未知の数） | 代表 5 点の温度 | クリロフ部分空間の座標 $`\mathbf z`$（$`r`$ 個） |
-| 全体の温度 | gappy-POD で戻す | $`\boldsymbol\theta=V\mathbf z`$ でそのまま出る |
+| 状態（未知の数） | 代表 5 点の温度 | 全節点に値を持つ基底に掛ける係数 $`z_1,\ldots,z_r`$ |
+| 全体の温度 | gappy-PODで復元 | $`\mathbf T\approx T_{\mathrm{air}}\mathbf1+V\mathbf z`$ で復元 |
 | 係数の決め方 | OpenFOAM に最小二乗で合わせる | 行列から決まる（合わせ込みなし） |
 | 熱伝達率 | 合わせ込んだ係数に入る | FEM の境界条件として与える |
 
 ---
 
-## 2. 元になる式：固体の熱伝導の FEM
+**両方とも分布を少数の基底で表します。** 既存ROMは代表5点の温度を計算しますが、本記事のクリロフROMでは代表点を選ばず、全節点の分布に掛ける係数を計算します。
 
-円筒（外径 75 mm、内径 40 mm、高さ 100.5 mm）を、FrontISTR と同じ六面体メッシュ（半径 4 × 周 48 × 高さ 20、5,040 節点）に分けます。周りの空気からの温度上昇を $`\boldsymbol\theta=\mathbf T-T_{\mathrm{air}}`$（5,040×1）とすると、
+## 2. 元になる式：固体の熱伝導のFEM
+
+プログラムの `build_fem()` が、Pythonで熱FEMの行列を組み立てています。\n\n円筒（外径 75 mm、内径 40 mm、高さ 100.5 mm）を、FrontISTR と同じ六面体メッシュ（半径 4 × 周 48 × 高さ 20、5,040 節点）に分けます。全節点の温度を $`\mathbf T`$、一定の外気温を $`T_{\mathrm{air}}`$ とし、NをFEM節点数とします（今回はN=5,040）。
 
 ```math
-C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf f\,P(t),\qquad G=K+H .
+\underbrace{\mathbf T}_{N\times1}=\begin{bmatrix}T[1]\\T[2]\\\vdots\\T[N]\end{bmatrix},
+\qquad
+\underbrace{\boldsymbol\theta}_{N\times1}
+=\begin{bmatrix}T[1]-T_{\mathrm{air}}\\T[2]-T_{\mathrm{air}}\\\vdots\\T[N]-T_{\mathrm{air}}\end{bmatrix}.
 ```
+
+$`\boldsymbol\theta`$ は外気温からの温度上昇です。熱方程式は、
+
+```math
+\underbrace{C}_{N\times N}\underbrace{\dot{\boldsymbol\theta}}_{N\times1}
++\underbrace{G}_{N\times N}\underbrace{\boldsymbol\theta}_{N\times1}
+=\underbrace{\mathbf f}_{N\times1}P(t),\qquad G=K+H.
+```
+
+例えば節点iの式は $`\sum_j C_{ij}\dot\theta[j]+\sum_jG_{ij}\theta[j]=f_iP(t)`$ です。全FEMは、このN本の式をまとめて時間積分します。
 
 | 記号 | 何か | 作り方 |
 |---|---|---|
@@ -42,86 +55,194 @@ C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf f\,P(t),\qquad G=K
 | $`\mathbf f`$ | ヒータ 1 W あたりの熱の入り方 | 外周の +x 側（周長 100 mm、高さ 25〜75 mm）に面積に比例して配る |
 | $`P(t)`$ | ヒータの電力 [W] | 15 W・25 W・間欠加熱（OpenFOAM と同じ） |
 
-表面の $`h`$ は、blog_001 で OpenFOAM の CHT から求めた面ごとの実効値を使いました。
+表中の $`N_a,N_b`$ はFEM要素内の補間関数、a・bは要素内の節点番号です。$`P(t)`$ は既存記事の発熱量Qに相当し、ここではコードに合わせてPと書きます。\n\n表面の $`h`$ は、blog_001 で OpenFOAM の CHT から求めた面ごとの実効値を使いました。
 
 | 面 | 外周（ヒータ側 +x） | 外周（反対側 −x） | 内面 | 上面 | 底面 |
 |---|---:|---:|---:|---:|---:|
 | $`h`$ [W/(m²K)] | 15.8 | 10.5 | 10.8 | 11.9 | 19.5 |
 
-この FEM（「全 FEM」と呼ぶ）を、時間刻み 2 秒のクランク・ニコルソン法で 0〜600 秒解くと、約 0.9 秒かかります。
+ここでの表面熱伝達率h [W/(m²K)]と、5点熱回路の放熱コンダクタンス $`h_{\mathrm{ROM}}`$ [W/K]は単位が異なります。\n\nこの FEM（「全 FEM」と呼ぶ）を、時間刻み 2 秒のクランク・ニコルソン法で 0〜600 秒解くと、約 0.9 秒かかります。
 
 ---
 
-## 3. クリロフ部分空間法で縮める
+## 3. 基底を作り、少数の係数だけを時間積分する
 
-### 3-1. 考え方：入力から出力への伝わり方を合わせる
+### 3-1. 最初の候補：定常加熱への温度応答を求める
 
-ヒータの電力 $`P`$ から温度 $`\boldsymbol\theta`$ への伝わり方を、ラプラス変換（$`d/dt\to s`$）で書くと
-
-```math
-\boldsymbol\theta(s)=\left(G+sC\right)^{-1}\mathbf f\,P(s).
-```
-
-$`s=0`$（ゆっくりした変化）のまわりで展開すると、
+一定電力を与えて温度が落ち着くと、$`\dot{\boldsymbol\theta}=\mathbf0`$ になります。1 Wあたりの定常温度上昇を $`\mathbf m_0`$ とすると、
 
 ```math
-\left(G+sC\right)^{-1}\mathbf f
-=\left(I+sG^{-1}C\right)^{-1}G^{-1}\mathbf f
-=\sum_{k=0}^{\infty}(-s)^k\left(G^{-1}C\right)^kG^{-1}\mathbf f .
+\underbrace{G}_{N\times N}\underbrace{\mathbf m_0}_{N\times1}
+=\underbrace{\mathbf f}_{N\times1},\qquad
+\mathbf m_0=G^{-1}\mathbf f.
 ```
 
-各項の係数ベクトル $`\left(G^{-1}C\right)^kG^{-1}\mathbf f`$ を**モーメント**と呼びます。
+**最初の候補は、ヒータを入れ続けたときの定常温度分布の形です。** 一定電力 $`P_0`$ [W]なら $`\boldsymbol\theta_{\mathrm{ss}}=\mathbf m_0P_0`$ です。
 
-- $`k=0`$：$`G^{-1}\mathbf f`$ は、ヒータを入れ続けたときの定常の温度分布
-- $`k=1,2,\dots`$：そこへ向かう途中（時間の遅れ）の形
+$`G^{-1}\mathbf f`$ は「Gの連立方程式を解く」という意味で使っています。コードは `lu.solve(f)` で解き、大きな逆行列を作りません。
 
-この最初の $`r`$ 個が張る空間が、**クリロフ部分空間**です。
+### 3-2. 次の候補：Cを掛けたベクトルを右辺にして、またGを解く
 
 ```math
-\mathcal K_r=\operatorname{span}\left\{G^{-1}\mathbf f,\ \left(G^{-1}C\right)G^{-1}\mathbf f,\ \dots,\ \left(G^{-1}C\right)^{r-1}G^{-1}\mathbf f\right\}.
+\begin{aligned}
+G\mathbf m_0&=\mathbf f,\\
+G\mathbf m_1&=C\mathbf m_0,\\
+G\mathbf m_2&=C\mathbf m_1,\\
+&\ \vdots
+\end{aligned}
+\qquad
+\underbrace{\mathbf m_k}_{N\times1}
+=\underbrace{G^{-1}C}_{N\times N}\mathbf m_{k-1}.
 ```
 
-温度をこの空間の中だけで表すと、縮めた ROM の伝わり方は、元の FEM と最初の $`r`$ 個のモーメントが一致します（**モーメント合わせ**）。
+こうして $`\mathbf m_0,(G^{-1}C)\mathbf m_0,(G^{-1}C)^2\mathbf m_0,\ldots`$ を作ります。**kは基底候補の番号で、実際の時刻を進める計算ではありません。** これらを選ぶ理論的な理由は§3-6で示します。
 
-### 3-2. 手順：基底 $`V`$ を作る
+### 3-3. 「部分空間」は、候補の足し合わせで表せる分布の集合
 
-モーメントをそのまま並べると、ほぼ同じ向きのベクトルばかりになり、計算が不安定になります。そこで、1 本ずつ作って、熱容量 $`C`$ を重みにした内積で正規直交にします（アーノルディ法）。
-
-1. $`\mathbf v=G^{-1}\mathbf f`$（$`G`$ の連立方程式を 1 回解く）
-2. すでに作った基底の成分を引く：$`\mathbf v\leftarrow\mathbf v-V(V^{\mathsf T}C\mathbf v)`$（念のため 2 回）
-3. 大きさをそろえる：$`\mathbf v_j=\mathbf v/\sqrt{\mathbf v^{\mathsf T}C\mathbf v}`$
-4. 次のベクトル：$`\mathbf v=G^{-1}C\mathbf v_j`$。2 に戻る（$`r`$ 本になるまで）
-
-できた $`V=[\mathbf v_1,\dots,\mathbf v_r]`$（5,040×$`r`$）は $`V^{\mathsf T}CV=I`$ を満たします。$`G`$ の分解（LU 分解）は 1 回だけ行い、使い回します。
-
-### 3-3. 縮めた式
-
-$`\boldsymbol\theta\approx V\mathbf z`$ を元の式に入れ、左から $`V^{\mathsf T}`$ を掛けます（ガラーキン射影）。
+最初のr本の候補から作れるベクトル全体は、
 
 ```math
-\underbrace{V^{\mathsf T}CV}_{=I\ (r\times r)}\frac{d\mathbf z}{dt}+\underbrace{V^{\mathsf T}GV}_{r\times r}\mathbf z=\underbrace{V^{\mathsf T}\mathbf f}_{r\times 1}P(t),
-\qquad \boldsymbol\theta\approx V\mathbf z .
+\mathcal K_r=
+\left\{\beta_0\mathbf m_0+\beta_1\mathbf m_1+\cdots+\beta_{r-1}\mathbf m_{r-1}
+\ ;\ \beta_0,\ldots,\beta_{r-1}\in\mathbb R\right\}.
 ```
 
-- 未知の数が 5,040 個から $`r`$ 個になります。
-- $`C`$・$`G`$ は対称なので、縮めた $`V^{\mathsf T}GV`$ も対称で正定値になり、安定性が保たれます。
-- 全節点の温度が $`V\mathbf z`$ でそのまま出るので、gappy-POD のような戻す手順は要りません。
+$`\beta_k`$ は任意の係数です。これを短く書くと、
 
----
+```math
+\mathcal K_r=\operatorname{span}\{\mathbf m_0,\mathbf m_1,\ldots,\mathbf m_{r-1}\}.
+```
+
+**spanは「そのベクトルの足し合わせで表せるものすべて」という意味です。** 候補r本が独立なら、この空間はr次元です。
+
+**絵で見ると。** 下の 4 つは、実際の円筒で作った基底の最初の 4 本です（§3-4 の手順で、前の形と重ならないようにしたもの）。温度は、この形の足し合わせ $`z_1\mathbf v_1+z_2\mathbf v_2+\cdots`$ で表し、時間とともに変わるのは係数 $`z_j`$ だけです。5,040 個の節点の温度の代わりに、$`r`$ 個の係数だけを計算すればよい、これが「縮める」ということです。
+
+![クリロフ基底の最初の 4 本](img/krylov_basis.png)
+
+*図 0　クリロフ基底の最初の 4 本（`run/make_krylov_basis_fig.py`）。1 本目はヒータを入れ続けたときに落ち着く温度の形で、この円筒は熱がよく伝わるのでほぼ一様になる。2 本目以降は、そこへ向かう途中の「ヒータ側が先に温まる」形で、本数を増やすほど細かい形が加わる。*
+
+### 3-4. 重複する成分を除き、使いやすい基底を作る
+
+候補をそのまま使うと似た方向になりやすいため、既存の基底で説明できる成分を除き、大きさをそろえます。今回のコードはCを使った内積と長さを採用します。
+
+```math
+\langle\mathbf x,\mathbf y\rangle_C=\mathbf x^{\mathsf T}C\mathbf y,
+\qquad
+\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}.
+```
+
+最初は $`\mathbf v_1=\mathbf m_0/\lVert\mathbf m_0\rVert_C`$ です。j本目では候補 $`\mathbf w=G^{-1}C\mathbf v_{j-1}`$ から、
+
+```math
+\widetilde{\mathbf w}
+=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell
+(\mathbf v_\ell^{\mathsf T}C\mathbf w),
+\qquad
+\mathbf v_j=\frac{\widetilde{\mathbf w}}
+{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
+```
+
+として作ります。コードでは丸め誤差を抑えるため、成分を除く処理を2回行います。このアーノルディ法で得る基底行列は、
+
+```math
+\underbrace{V}_{N\times r}
+=\begin{bmatrix}
+v_1[1]&v_2[1]&\cdots&v_r[1]\\
+v_1[2]&v_2[2]&\cdots&v_r[2]\\
+\vdots&\vdots&&\vdots\\
+v_1[N]&v_2[N]&\cdots&v_r[N]
+\end{bmatrix},
+\qquad V^{\mathsf T}CV=I_r.
+```
+
+**1列が全N節点に値を持つ1本の基底です。** 候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。
+
+### 3-5. 係数だけの熱方程式へ縮め、全温度場へ戻す
+
+温度上昇を、
+
+```math
+\underbrace{\boldsymbol\theta}_{N\times1}
+\approx\underbrace{V}_{N\times r}
+\underbrace{\begin{bmatrix}z_1\\z_2\\\vdots\\z_r\end{bmatrix}}_{\mathbf z:\ r\times1},
+\qquad
+\mathbf T\approx T_{\mathrm{air}}\mathbf1+V\mathbf z
+```
+
+と近似します。節点iでは $`T[i]\approx T_{\mathrm{air}}+\sum_jv_j[i]z_j`$ です。**$`z_j`$ は基底に掛ける係数で、代表点の温度そのものではありません。** ここで足す基準は外気温です。PODの時間平均温度場とは異なります。
+
+Vを時間に依存しない基底として元の式へ代入します。
+
+```math
+CV\dot{\mathbf z}+GV\mathbf z\approx\mathbf fP(t).
+```
+
+左から $`V^{\mathsf T}`$ を掛け、縮約後の式として等号を課します（ガラーキン射影）。
+
+```math
+\underbrace{V^{\mathsf T}CV}_{C_r:\ r\times r}\dot{\mathbf z}
++\underbrace{V^{\mathsf T}GV}_{G_r:\ r\times r}\mathbf z
+=\underbrace{V^{\mathsf T}\mathbf f}_{\mathbf f_r:\ r\times1}P(t).
+```
+
+今回は $`C_r=I_r`$ になるよう正規化しています。コードは数値誤差も含めた $`C_r`$ を計算して使用します。**時間積分するのはr個の係数だけで、その後 $`T_{\mathrm{air}}\mathbf1+V\mathbf z`$ から全節点温度を復元します。**
+
+今回のC・Gが対称正定値で、Vの列が独立なら、$`C_r,G_r`$ も対称正定値です。そのため、無入力時に温度上昇が減衰する性質を保持できます。対称性だけから正定値が決まるわけではありません。
+
+今回の初期温度は全節点で外気温なので $`\mathbf z(0)=\mathbf0`$ です。別の初期温度場を使う場合には、その分布を基底で表せるかも確認します。
+
+### 3-6. なぜこの基底候補を使うのか：モーメント合わせ
+
+ここは基底の作り方の理論的な補足です。初期温度上昇0として元の式をラプラス変換すると、
+
+```math
+(G+sC)\boldsymbol\theta(s)=\mathbf fP(s),\qquad
+\boldsymbol\theta(s)=(G+sC)^{-1}\mathbf fP(s).
+```
+
+sはラプラス変換の変数で、$`s=0`$ は定常応答に対応します。$`G+sC=G(I+sG^{-1}C)`$ と分け、0付近で展開します。
+
+```math
+\begin{aligned}
+(G+sC)^{-1}\mathbf f
+&=(I+sG^{-1}C)^{-1}G^{-1}\mathbf f\\
+&=\left[I-sG^{-1}C+s^2(G^{-1}C)^2-\cdots\right]G^{-1}\mathbf f\\
+&=\mathbf m_0-s\mathbf m_1+s^2\mathbf m_2-\cdots.
+\end{aligned}
+```
+
+展開の係数（符号を含めた $`(-1)^k\mathbf m_k`$）をモーメントと呼びます。**§3-2の候補は、元のFEMが入力にどう応答するかを表す、この展開の係数から作ったものです。**
+
+最初のr本を含む基底を使うと、この設定では縮約モデルも最初のr個の係数を再現できます。これがモーメント合わせです。0付近での一致を使うため、急なON/OFFを含む任意の入力について、時間領域の誤差を一律に保証するものではありません。rを変え、実際の入力履歴で確認します。[TUMのクリロフROMの説明](https://www.epc.ed.tum.de/en/rt/research/model-order-reduction/past-topics/krylov-subspace-methods/)
+
+### 3-7. 式とプログラムを対応させる
+
+| 計算 | コード中の場所 | 意味 |
+|---|---|---|
+| 行列の組立て | `build_fem()` | メッシュ・物性・境界条件からC・G・fを作る |
+| 最初の候補 | `krylov_basis()` の `lu.solve(f)` | $`G\mathbf m_0=\mathbf f`$ を解く |
+| 既存成分を除く | `v - V[:, :j] @ (V[:, :j].T @ (C @ v))` | Cを使った射影成分を引く |
+| 正規化 | `v / np.sqrt(v @ (C @ v))` | Cを使った長さを1にする |
+| 次の候補 | `lu.solve(C @ V[:, j])` | $`G\mathbf w=C\mathbf v_j`$ を解く |
+| 縮約行列の計算 | `run_rom()` の `Cr, Gr, fr` | $`V^{\mathsf T}CV,V^{\mathsf T}GV,V^{\mathsf T}\mathbf f`$ |
+| 復元 | `np.array(out) @ V.T` | 時刻ごとに $`V\mathbf z`$ を計算し、行方向に並べて返す |
+
+GのLU分解は基底作成時に1回行って使い回します。時間積分は全FEM・ROMともクランク・ニコルソン法、刻み2秒です。
 
 ## 4. 結果 1：縮める誤差は $`r`$ でどれだけ小さくなるか
 
-全 FEM と、クリロフ ROM の温度の差（全節点・全時刻の最大）です。
+同じ熱FEMを縮めたときの誤差を比較します。下表は今回の再確認値です。0〜600秒を**30秒ごとに出力した21時刻**と全5,040節点について、最大絶対差を求めています。
 
-| $`r`$ | 2 | 3 | 5 | 10 | 20 |
+| 基底数r | 2 | 3 | 5 | 10 | 20 |
 |---|---:|---:|---:|---:|---:|
-| 全 FEM との差の最大 [K] | 0.36 | 0.14 | 0.041 | 0.0046 | 0.00054 |
+| 15 W連続加熱 [K] | 0.3567 | 0.1348 | 0.04123 | 0.004584 | 0.0005389 |
+| 15 W間欠加熱 [K] | 0.3456 | 0.1370 | 0.04127 | 0.004584 | 0.0005389 |
 
 - $`r`$ を増やすと、差は急に小さくなります。$`r=10`$ で 0.005 K で、温度計のノイズ（0.3 K）よりずっと小さいです。
-- 15 W と間欠加熱で同じ差でした。式が線形なので、電力の時間変化によりません。
+- 今回の連続・間欠加熱では同程度の差でした。誤差は入力履歴にも依存します。同じON/OFFのまま電力を一定倍率にする場合は、ゼロ初期条件の線形モデル同士の差も同倍率になります。
 - $`r=10`$ の ROM で 0〜600 秒を計算する時間は、約 0.014 秒でした（全 FEM は約 0.9 秒）。
 
-**縮めること自体は、学習データなしで、とても正確にできます。**
+**この一定境界条件のFEMは、r=10でも元のFEMに近い応答を再現できました。** ここで確認したのは縮約誤差で、元モデルとOpenFOAMのCHTとの違いは次節で評価します。
 
 ---
 
@@ -131,7 +252,15 @@ OpenFOAM の温度を節点へ移したものを正解にして、全節点の�
 
 ![クリロフ ROM と今の ROM の比較](img/krylov_rom_compare.png)
 
-*図 1　上：P2 の温度。中：全節点の温度の RMSE（OpenFOAM との差、対数の目盛り）。下：縮める誤差（クリロフ ROM と全 FEM の差、全節点の最大）。全 FEM（茶の太い線）とクリロフ ROM r=5（丸）・r=10（四角）は、上と中の段ではほぼ重なる。r=5・r=10 の違いは下の段で見える（加熱の入り切りの直後に誤差が大きくなる）。*
+*図 1　上：OpenFOAMの代表点P2に最も近いFEM節点の温度。中：全節点の温度の RMSE（OpenFOAM との差、対数の目盛り）。下：縮める誤差（クリロフ ROM と全 FEM の差、全節点の最大）。全 FEM（茶の太い線）とクリロフ ROM r=5（丸）・r=10（四角）は、上と中の段ではほぼ重なる。r=5・r=10 の違いは下の段で見える（加熱の入り切りの直後に誤差が大きくなる）。*
+
+評価は、OpenFOAMの固体温度をIDWでFEM節点へ写し、各時刻の全節点RMSEを求め、その最大値を取っています。
+
+```math
+\mathrm{RMSE}(t_k)=\sqrt{\frac1N\sum_{i=1}^N
+\left(T_{\mathrm{model}}[i,t_k]-T_{\mathrm{CHT\ mapped}}[i,t_k]\right)^2},
+\qquad E_{\mathrm{RMSE}}=\max_k\mathrm{RMSE}(t_k).
+```
 
 | 全節点の RMSE の最大 [K] | 15 W | 25 W | 間欠加熱 |
 |---|---:|---:|---:|
@@ -147,9 +276,9 @@ OpenFOAM の温度を節点へ移したものを正解にして、全節点の�
 
 ### 5-1. CHT の $`h`$ をそのまま使うと合わない
 
-- 全 FEM とクリロフ ROM は同じ値で、どちらも OpenFOAM から 0.5〜0.9 K ずれます。**ずれの原因は縮め方ではなく、元の FEM の熱伝達率**です。
+- 全 FEM とクリロフ ROM は同じ値で、どちらも OpenFOAM から 0.5〜0.9 K ずれます。**ずれの主な部分は、縮約前のFEMにもあります。** 熱伝達率の調整で改善しますが、熱源の離散化・空気側の扱い・メッシュ・温度写像などの寄与をすべて切り分けたわけではありません。
 - 600 秒後の円筒全体の平均の温度上昇は、全 FEM 3.05 K、OpenFOAM 3.59 K でした。FEM は放熱が大きすぎます。
-- CHT の熱伝達率は時間で変わります（[results/heat_transfer_check.json](../results/heat_transfer_check.json)：全表面の実効値は 300 秒で約 8.6、600 秒で約 3.6 W/(m²K)。周りの空気が温まり、温度差が小さくなるため）。blog_001 の面ごとの値は、この変化を 1 つの値で表したもので、一定の $`h`$ では表しきれません。
+- CHT の熱伝達率は時間で変わります（[results/heat_transfer_check.json](../results/heat_transfer_check.json)：全表面の実効値は 300 秒で約 8.6、600 秒で約 3.6 W/(m²K)。実効値は熱流と基準温度差の取り方にも依存するため、この変化の原因は別途確認が必要）。blog_001 の面ごとの値は、この変化を 1 つの値で表したもので、一定の $`h`$ では表しきれません。
 
 ### 5-2. $`h`$ に 1 つの係数を掛けて合わせると
 
@@ -159,7 +288,115 @@ OpenFOAM の温度を節点へ移したものを正解にして、全節点の�
 
 ---
 
-## 6. まとめ：どちらを使うか
+## 6. クリロフ ROM は合わないものなのか？データ同化をすれば合うか
+
+### 6-1. 合わない原因は「クリロフ法」ではなく「元の式の熱伝達率」
+
+§4・§5 から、ずれの出どころは次のように分けられます。
+
+```math
+\underbrace{\boldsymbol\theta_{\mathrm{OpenFOAM}}-\boldsymbol\theta_{\mathrm{ROM}}}_{\text{全体のずれ}}
+=\underbrace{\left(\boldsymbol\theta_{\mathrm{OpenFOAM}}-\boldsymbol\theta_{\mathrm{FEM}}\right)}_{\text{モデルのずれ：0.5〜0.9 K}}
++\underbrace{\left(\boldsymbol\theta_{\mathrm{FEM}}-\boldsymbol\theta_{\mathrm{ROM}}\right)}_{\text{縮める誤差：r=10 で 0.005 K}}
+```
+
+- クリロフ法が受け持つのは、2 つ目の「縮める誤差」だけで、これはとても小さいです。
+- 1 つ目の「モデルのずれ」は、元の FEM が OpenFOAM と違う（熱伝達率が一定、ヒータの扱い）ことから来ます。**どんな縮め方をしても、このずれは消えません。**
+- 今の ROM は、OpenFOAM の結果に直接合わせて作るので、このずれも係数に吸収されています。
+
+### 6-2. データ同化で熱伝達率を直すと
+
+そこで、熱伝達率の倍率 $`s`$ を未知の数に入れ、測った温度で直しました（`run/krylov_da.py`）。
+
+```math
+\underbrace{V^{\mathsf T}CV}_{C_r}\frac{d\mathbf z}{dt}+\Bigl(\underbrace{V^{\mathsf T}KV}_{K_r}+s\,\underbrace{V^{\mathsf T}HV}_{H_r}\Bigr)\mathbf z=\underbrace{V^{\mathsf T}\mathbf f}_{\mathbf f_r}\cdot 15\,\mathrm W\cdot q\cdot\mathrm{on}(t)
+```
+
+| 設定 | 内容 |
+|---|---|
+| 状態（EnKF で直すもの） | クリロフの座標 $`\mathbf z`$（r=10 ＋ 一様な温度の成分 1 つ）、発熱の倍率 $`q`$、熱伝達率の倍率 $`s`$ |
+| 観測 | 温度計 P2・P0（OpenFOAM の値＋ノイズ 0.3 K、30 秒ごと）。今の ROM の「温度 2 点」と同じ |
+| 測る前のばらつき | 初期温度 20 °C の −3〜+12 K、$`q`$ は 0.3〜1.8、$`s`$ は 0.1〜1.5（対数で一様） |
+| EnKF | 60 メンバー、膨張係数 1.02、乱数 5 通りの平均 |
+
+基底 $`V`$ は $`s=1`$ で 1 回作り、$`s`$ が変わっても使い回します（$`K_r`$・$`H_r`$ を前もって計算しておけば、$`s`$ を変えるのは足し算だけ）。
+
+![クリロフ ROM ＋データ同化](img/krylov_da.png)
+
+*図 2　上：全体の温度の RMSE（OpenFOAM との差）。下：推定した発熱の倍率 $`q`$（赤）と熱伝達率の倍率 $`s`$（緑）。点線は $`q`$ の正解と、15 W に合わせた $`s=0.21`$。今の ROM の線は presen_001 §11 の結果（全セルで計算）、クリロフ ROM の線は全節点で計算したもので、比べ方が少し違う。*
+
+| 全体の温度の RMSE（加熱中 30〜300 秒の平均）[K] | 15 W | 25 W | 間欠加熱 |
+|---|---:|---:|---:|
+| 今の ROM＋同化（温度 2 点） | 0.54 | 0.88 | 0.53 |
+| **クリロフ ROM＋同化（温度 2 点）** | **0.14** | **0.21** | **0.14** |
+| 今の ROM＋同化（温度 2 点＋変位 2 点） | 0.13 | 0.14 | 0.12 |
+
+| 600 秒での推定値 | 15 W | 25 W | 間欠加熱 |
+|---|---:|---:|---:|
+| 発熱の倍率 $`q`$（正解） | 0.97（1.00） | 1.62（1.67） | 1.02（1.00） |
+| 熱伝達率の倍率 $`s`$ | 0.29 | 0.25 | 0.33 |
+
+- **データ同化をすると合います。** 熱伝達率をそのまま使ったときの 0.5〜0.9 K のずれが、0.06〜0.07 K（600 秒）まで小さくなりました。
+- 発熱の倍率 $`q`$ は、3 条件とも正解の 3 % 以内に入りました。熱伝達率の倍率 $`s`$ も、15 W に合わせた値（0.21）に近づきます。ただし、600 秒では 0.25〜0.33 で、まだ近づいている途中です（放熱は 600 秒ではゆっくりしか効かないため。presen_001 §7-4 と同じ理由）。
+- **温度計 2 点だけなら、今の ROM より正確でした**（加熱中の平均 0.14〜0.21 K と 0.53〜0.88 K）。今の ROM は 5 点の温度しか持たないのに対し、クリロフ ROM は熱伝導の式から全体の温度の形を持っているので、測っていない場所も物理に沿って動くためと考えられます（確かめてはいません）。
+- 今の ROM に変位 2 点を足した場合（0.12〜0.14 K）と比べると、15 W・間欠加熱ではほぼ同じ、25 W では少し悪いです。
+
+### 6-3. 熱変形の行列を作り、変位の観測も使う
+
+クリロフ ROM の温度から熱変形を出すため、熱弾性の行列を作りました（`run/krylov_thermoelastic.py`）。
+
+```math
+K_u\,\mathbf u=L\,\boldsymbol\theta,\qquad
+K_u=\int B^{\mathsf T}DB\,dV,\qquad
+L=\int B^{\mathsf T}D\,\mathbf m\,\alpha\,N^{\mathsf T}dV
+```
+
+- $`K_u`$：剛性行列（15,120×15,120）。$`B`$ はひずみと変位の関係、$`D`$ は鋼の弾性（$`E=205`$ GPa、$`\nu=0.3`$）。
+- $`L`$：温度から熱荷重を作る行列（15,120×5,040）。$`\alpha=1.2\times10^{-5}`$ /K、$`\mathbf m=(1,1,1,0,0,0)^{\mathsf T}`$（熱ひずみは伸びだけ）。
+- 拘束は FrontISTR と同じ 3-2-1 の点拘束です。
+
+クリロフ ROM では $`\boldsymbol\theta=V\mathbf z`$ なので、
+
+```math
+\mathbf u=\underbrace{K_u^{-1}LV}_{W_z\ (15{,}120\times m)}\ \mathbf z .
+```
+
+$`W_z`$ を前もって 1 回計算しておけば、変位は行列 × ベクトル 1 回で出ます。
+
+**行列の確かめ。** OpenFOAM の温度（節点へ移したもの）を入れて変位を計算し、FrontISTR の変位（正解）と比べました。
+
+| | 15 W | 25 W | 間欠加熱 |
+|---|---:|---:|---:|
+| 変位の最大 [µm] | 6.24 | 10.38 | 6.10 |
+| FrontISTR との差の最大 [µm] | 0.014 | 0.023 | 0.013 |
+| 反り A−O の差の最大 [µm] | 0.007 | 0.011 | 0.006 |
+
+差は変位の 0.2 % 程度で、FrontISTR と同じ計算ができています。
+
+**変位の観測も使ったデータ同化。** §6-2 の同化に、変位計 S1（Ux）・S2（Uz）（blog_012 の目的指向で選んだ 2 本）を足しました。予報した変位は $`W_z\mathbf z`$ の 2 行です。
+
+![クリロフ ROM ＋ 温度と変位の同化](img/krylov_thermoelastic.png)
+
+*図 3　全体の温度の RMSE（OpenFOAM との差）。灰・赤は今の ROM（presen_001 §11、全セルで計算）、青・緑はクリロフ ROM（全節点で計算）。*
+
+| 加熱中（30〜300 秒）の平均 | 観測 | 15 W | 25 W | 間欠加熱 |
+|---|---|---:|---:|---:|
+| 全体の温度の RMSE [K] | 今の ROM：温度 2 点 | 0.54 | 0.88 | 0.53 |
+| | 今の ROM：温度 2 点＋変位 2 点 | 0.13 | 0.14 | 0.12 |
+| | クリロフ ROM：温度 2 点 | 0.13 | 0.21 | 0.13 |
+| | **クリロフ ROM：温度 2 点＋変位 2 点** | **0.07** | **0.09** | **0.06** |
+| 測らない反り A−O の誤差 [µm] | 今の ROM：温度 2 点 | 0.775 | 1.417 | 0.635 |
+| | 今の ROM：温度 2 点＋変位 2 点 | **0.076** | **0.083** | **0.072** |
+| | クリロフ ROM：温度 2 点 | 0.219 | 0.348 | 0.199 |
+| | クリロフ ROM：温度 2 点＋変位 2 点 | 0.090 | 0.100 | 0.086 |
+
+- **全体の温度は、クリロフ ROM ＋ 温度・変位の同化が一番正確でした**（0.06〜0.09 K。今の ROM の約半分）。
+- **測らない反りは、今の ROM のほうが少しよい**（0.076〜0.083 µm と 0.086〜0.100 µm）。変位計の位置は今の ROM（5 点の温度）で選んだもので、クリロフ ROM に合わせて選び直してはいません。
+- 変位を足すと、温度だけのときより、温度は約半分、反りは約 1/2〜1/3 になりました。**変位の観測が効く**ことが、クリロフ ROM でも確かめられました。
+
+---
+
+## 7. まとめ：どちらを使うか
 
 | | クリロフ ROM | 今の ROM |
 |---|---|---|
@@ -167,9 +404,9 @@ OpenFOAM の温度を節点へ移したものを正解にして、全節点の�
 | 弱み | 元の FEM の条件（熱伝達率など）が合っていないと、そのずれがそのまま残る | 係数の物理の意味が弱い（[presen_001 §7-4](presen_001_introduction_positioning.md)）。学習データが要る |
 | この円筒での精度（RMSE） | 0.04〜0.06 K（$`h`$ を 1 つの係数で合わせた場合） | 0.02〜0.08 K |
 
-- クリロフ法は、**熱伝達率が分かっているなら**、学習データなしで正確な ROM が作れます。この研究のように流れ（CHT）で熱伝達率が決まり、しかも時間で変わる問題では、熱伝達率の与え方が精度を決めます。
-- 熱伝達率を、データ同化で直す未知の数にすれば（$`G=K+\sum_j h_jH_j`$ の $`h_j`$）、クリロフ ROM でも今の ROM と同じように補正できる可能性があります。**この組み合わせは試していません（未実施）。**
-- クリロフ ROM の温度からの熱変形、クリロフ ROM を使ったデータ同化も、まだしていません（未実施）。
+- クリロフ法は、**元の熱FEMの行列と条件が与えられれば**、温度スナップショットを使わず、そのFEMに近いROMを作れます。現象自体に合うかは、物性・熱源・境界条件にも依存します。この研究のように流れ（CHT）で熱伝達率が決まり、しかも時間で変わる問題では、熱伝達率の与え方が精度を決めます。
+- 熱伝達率を、データ同化で直す未知の数にすると、クリロフ ROM でも OpenFOAM に合いました（§6）。
+- 熱弾性の行列を作れば、クリロフ ROM でも変位の観測を使えます。温度は今の ROM より正確、反りは少し劣りました（§6-3）。クリロフ ROM に合わせて変位計の位置を選び直すことは、まだしていません（未実施）。
 
 ---
 
@@ -177,6 +414,7 @@ OpenFOAM の温度を節点へ移したものを正解にして、全節点の�
 
 | プログラム | すること |
 |---|---|
+| `run/krylov_da.py` | クリロフ ROM ＋ EnKF（温度 2 点で $`\mathbf z`$・$`q`$・$`s`$ を直す）（図 2、`results/krylov_da.json`） |
 | `run/krylov_rom.py` | FEM の行列を作る、クリロフ基底を作る、全 FEM・クリロフ ROM・今の ROM を 3 条件で解いて OpenFOAM と比べる（図 1、`results/krylov_rom.json`） |
 
 クリロフ基底（アーノルディ法、$`C`$ の内積で正規直交化）：
@@ -200,3 +438,12 @@ Cr = V.T @ (C @ V); Gr = V.T @ (G @ V); fr = V.T @ f            # r×r、r×1
 Al = np.linalg.inv(Cr / DT + Gr / 2); Ar = Cr / DT - Gr / 2
 z = Al @ (Ar @ z + fr * (P(t) + P(t + DT)) / 2)                # 1 ステップ。温度は V @ z
 ```
+
+## 再現と今回の説明確認
+
+- 作業フォルダ：`sample/106_0_pod_selected_rom/`。
+- 既存解析：`run/krylov_rom.py`。保存結果：`results/krylov_rom.json`。h倍率の校正とOpenFOAMとの比較は、この既存結果を参照しています。
+- 今回の再確認：`run/check_blog013_explanation.py`。r=2・3・5・10・20で、基底の直交性と、連続・間欠加熱の縮約誤差を計算。結果は `results/blog013_explanation_check.json`。
+- 図の生成：`run/make_blog013_concept.py`。計算手順を示す模式図です。
+- §6-2・§6-3 のデータ同化と熱弾性の行列：`run/krylov_da.py`、`run/krylov_thermoelastic.py`（`results/krylov_da.json`、`results/krylov_thermoelastic.json`）。OpenFOAM・FrontISTR は新たに実行していません（保存してある正解を使用）。
+- 基底の図：`run/make_krylov_basis_fig.py`。
