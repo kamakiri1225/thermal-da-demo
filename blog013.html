@@ -1224,6 +1224,30 @@ K。今の ROM の約半分）。</li>
 になりました。<strong>変位の観測が効く</strong>ことが、クリロフ ROM
 でも確かめられました。</li>
 </ul>
+<p><strong>時刻歴で見ると。</strong>
+測らない点の温度と、測らない反りの時刻歴です。点の場所は下の図のとおりです。</p>
+<figure>
+<img src="img/da_points.png" alt="時刻歴を描いた点の場所" />
+<figcaption aria-hidden="true">時刻歴を描いた点の場所</figcaption>
+</figure>
+<p><em>時刻歴を描いた点の場所（<code>run/make_da_points_fig.py</code>）。赤＝温度計
+P2・P0（観測）、青＝変位計
+S1（Ux）・S2（Uz）（観測、矢印＝測る向き）、紫＝温度の時刻歴を描いた測らない点
+T3（上面・反対側）、黒＝反り A−O
+の評価点（測らない）、薄い赤の面＝ヒータ。</em></p>
+<figure>
+<img src="img/krylov_da_timeseries.png"
+alt="クリロフ ROM ＋ 同化の温度と反りの時刻歴" />
+<figcaption aria-hidden="true">クリロフ ROM ＋
+同化の温度と反りの時刻歴</figcaption>
+</figure>
+<p><em>図 4　上：測らない点 T3 の温度。下：測らない反り
+A−O。灰の太線が正解、青がクリロフ ROM＋温度 2 点の同化、緑がクリロフ
+ROM＋温度 2 点＋変位 2 点の同化。乱数 5
+通りの時刻歴の平均（<code>run/krylov_thermoelastic.py</code>）。初めは
+20 °C の −3〜+12 K のばらつきの平均（約 24.5 °C）から始まり、30 秒（1
+回目の補正）で正解に近づく。変位 2
+点を足すと、加熱中の反りがより正解に近くなる。</em></p>
 <hr />
 <h2 id="まとめどちらを使うか">7. まとめ：どちらを使うか</h2>
 <table>
