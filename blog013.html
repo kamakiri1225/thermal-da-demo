@@ -735,6 +735,146 @@ v_1[N]&amp;v_2[N]&amp;\cdots&amp;v_r[N]
 \]</span></p>
 <p><strong>1列が全N節点に値を持つ1本の基底です。</strong>
 候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。</p>
+<h4 id="v-を作る手順を節点-3-つの例で-1-歩ずつ">V を作る手順を、節点 3
+つの例で 1 歩ずつ</h4>
+<p>式だけでは分かりにくいので、節点が 3 つの小さな例で、<span
+class="math inline">\(V\)</span> を実際に作ってみます。棒を 3
+つに分け、節点 1
+にヒータがあるとします（数字は説明のために私が決めたもの）。</p>
+<p><span class="math display">\[
+C=\begin{bmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{bmatrix},\qquad
+G=\begin{bmatrix}2&amp;-1&amp;0\\-1&amp;2&amp;-1\\0&amp;-1&amp;2\end{bmatrix},\qquad
+\mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
+\]</span></p>
+<ul>
+<li><span class="math inline">\(C\)</span>：熱容量（どの節点も 1）</li>
+<li><span class="math inline">\(G\)</span>：隣どうしの熱の行き来（<span
+class="math inline">\(-1\)</span>）と、両端からの放熱（対角の 2）</li>
+<li><span class="math inline">\(\mathbf f\)</span>：ヒータは節点 1
+だけ</li>
+</ul>
+<p><strong>手順 1：1 本目の候補 <span class="math inline">\(\mathbf
+m_0\)</span> を作る</strong>（<span class="math inline">\(G\mathbf
+m_0=\mathbf f\)</span> を解く）</p>
+<p><span class="math display">\[
+\mathbf m_0=G^{-1}\mathbf f=\begin{bmatrix}0.75\\0.50\\0.25\end{bmatrix}
+\]</span></p>
+<p>ヒータを入れ続けたときに落ち着く温度の形です（ヒータに近い節点 1
+が一番高い）。</p>
+<p><strong>手順 2：長さを 1 にそろえて <span
+class="math inline">\(\mathbf v_1\)</span> にする</strong></p>
+<p><span class="math display">\[
+\lVert\mathbf m_0\rVert_C=\sqrt{\mathbf m_0^{\mathsf T}C\mathbf
+m_0}=\sqrt{0.75^2+0.50^2+0.25^2}=0.935,\qquad
+\mathbf v_1=\frac{\mathbf
+m_0}{0.935}=\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
+\]</span></p>
+<p><strong>手順 3：次の候補 <span class="math inline">\(\mathbf
+w\)</span> を作る</strong>（右辺を <span class="math inline">\(C\mathbf
+v_1\)</span> にして、また <span class="math inline">\(G\)</span>
+を解く）</p>
+<p><span class="math display">\[
+G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad \mathbf
+w=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}
+\]</span></p>
+<p><strong>手順 4：<span class="math inline">\(\mathbf w\)</span>
+から、<span class="math inline">\(\mathbf v_1\)</span>
+で表せる部分（影）を引く</strong></p>
+<p>影の大きさは <span class="math inline">\(\mathbf v_1^{\mathsf
+T}C\mathbf
+w=0.802\times0.935+0.535\times1.069+0.267\times0.668=1.50\)</span>
+なので、</p>
+<p><span class="math display">\[
+\widetilde{\mathbf w}=\mathbf w-1.50\,\mathbf v_1
+=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}-1.50\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
+=\begin{bmatrix}-0.267\\0.267\\0.267\end{bmatrix}.
+\]</span></p>
+<p>残ったのは「節点 1 が低く、節点 2・3 が高い」形です。これが、<span
+class="math inline">\(\mathbf v_1\)</span>
+だけでは表せない<strong>新しい形</strong>（時間の遅れで生まれる、温まり方の偏りの違い）です。</p>
+<p><strong>手順 5：長さを 1 にそろえて <span
+class="math inline">\(\mathbf v_2\)</span> にする</strong></p>
+<p><span class="math display">\[
+\lVert\widetilde{\mathbf w}\rVert_C=0.463,\qquad
+\mathbf v_2=\frac{\widetilde{\mathbf
+w}}{0.463}=\begin{bmatrix}-0.577\\0.577\\0.577\end{bmatrix}
+\]</span></p>
+<p>確かめ：<span class="math inline">\(\mathbf v_1^{\mathsf T}C\mathbf
+v_2=0\)</span>（重なりがない）、<span class="math inline">\(\mathbf
+v_2^{\mathsf T}C\mathbf v_2=1\)</span>（長さ 1）です。</p>
+<p><strong>手順 6：3 本目も同じ</strong>（<span
+class="math inline">\(G\mathbf w=C\mathbf v_2\)</span> を解き、<span
+class="math inline">\(\mathbf v_1\)</span> と <span
+class="math inline">\(\mathbf v_2\)</span> の両方の影を引き、長さを 1
+にする）</p>
+<p><span class="math display">\[
+\mathbf w=\begin{bmatrix}0\\0.577\\0.577\end{bmatrix},\quad
+\widetilde{\mathbf w}=\mathbf w-0.463\,\mathbf v_1-0.667\,\mathbf
+v_2=\begin{bmatrix}0.014\\-0.055\\0.069\end{bmatrix},\quad
+\mathbf v_3=\begin{bmatrix}0.154\\-0.617\\0.772\end{bmatrix}
+\]</span></p>
+<p><strong>できあがり：</strong> 並べたものが <span
+class="math inline">\(V\)</span> です。</p>
+<p><span class="math display">\[
+V=\begin{bmatrix}\mathbf v_1&amp;\mathbf
+v_2\end{bmatrix}=\begin{bmatrix}0.802&amp;-0.577\\0.535&amp;0.577\\0.267&amp;0.577\end{bmatrix}\
+（r=2\ のとき）,\qquad V^{\mathsf
+T}CV=\begin{bmatrix}1&amp;0\\0&amp;1\end{bmatrix}
+\]</span></p>
+<p><strong>順番のまとめ</strong>（実際の円筒でも、節点が 5,040
+個になるだけで同じ）</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>手順</th>
+<th>すること</th>
+<th>コード（<code>krylov_basis</code>）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><span class="math inline">\(G\mathbf m_0=\mathbf f\)</span>
+を解く</td>
+<td><code>v = lu.solve(f)</code></td>
+</tr>
+<tr class="even">
+<td>2・5</td>
+<td>すでにある基底の影を引く</td>
+<td><code>v = v - V[:, :j] @ (V[:, :j].T @ (C @ v))</code></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>長さを 1 にそろえて <span class="math inline">\(j\)</span>
+本目にする</td>
+<td><code>V[:, j] = v / np.sqrt(v @ (C @ v))</code></td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>次の候補：<span class="math inline">\(G\mathbf w=C\mathbf
+v_j\)</span> を解く</td>
+<td><code>v = lu.solve(C @ V[:, j])</code></td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>2〜4 を <span class="math inline">\(r\)</span>
+本になるまでくりかえす</td>
+<td><code>for j in range(r)</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><span class="math inline">\(G\)</span> の LU 分解は最初に 1
+回だけ行い、手順 1・4 で使い回します。</li>
+<li>影を引く処理（手順
+2）は、計算の丸め誤差で重なりが少し残るのを防ぐため、2
+回くりかえしています。</li>
+</ul>
 <h3 id="係数だけの熱方程式へ縮め全温度場へ戻す">3-5.
 係数だけの熱方程式へ縮め、全温度場へ戻す</h3>
 <p>温度上昇を、</p>
