@@ -639,7 +639,72 @@ class="math inline">\(z_j\)</span> だけです。5,040
 本目以降は、そこへ向かう途中の「ヒータ側が先に温まる」形で、本数を増やすほど細かい形が加わる。</em></p>
 <h3 id="重複する成分を除き使いやすい基底を作る">3-4.
 重複する成分を除き、使いやすい基底を作る</h3>
-<p>候補をそのまま使うと似た方向になりやすいため、既存の基底で説明できる成分を除き、大きさをそろえます。今回のコードはCを使った内積と長さを採用します。</p>
+<p><strong>なぜ重複を除くのか。</strong> §3-2 の候補 <span
+class="math inline">\(\mathbf m_0,\mathbf m_1,\mathbf m_2,\dots\)</span>
+は、そのままだとほとんど同じ形です。この円筒で実際に計算すると、2
+つの候補の「向きの近さ」（下の内積で測った cos）は、</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: right;"><span class="math inline">\(\mathbf
+m_0\)</span> と <span class="math inline">\(\mathbf m_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\mathbf
+m_1\)</span> と <span class="math inline">\(\mathbf m_2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\mathbf
+m_2\)</span> と <span class="math inline">\(\mathbf m_3\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>向きの近さ（1 なら完全に同じ向き）</td>
+<td style="text-align: right;">0.99956</td>
+<td style="text-align: right;">1.00000</td>
+<td style="text-align: right;">1.00000</td>
+</tr>
+</tbody>
+</table>
+<p>でした。この円筒は熱がよく伝わるので、温まり方の形はほぼ一様で、遅れの形
+<span class="math inline">\(\mathbf m_1\)</span> もほとんど <span
+class="math inline">\(\mathbf m_0\)</span> と同じ形になるためです（§3-2
+の 1 節点の例で <span class="math inline">\(m_1=\tau m_0\)</span>
+になったのと同じ）。</p>
+<p>このまま並べても、同じ情報が何度も入るだけで、新しい形は増えません。しかも、ほぼ同じ向きのベクトルで連立方程式を解くと、計算が不安定になります。そこで、<strong>新しい候補から「もう持っている形で表せる部分」を引き、残った「新しい部分」だけを次の基底にします。</strong></p>
+<figure>
+<img src="img/gram_schmidt.png" alt="重複する成分を除く手順" />
+<figcaption aria-hidden="true">重複する成分を除く手順</figcaption>
+</figure>
+<p><em>2 次元の模式図（<code>run/make_gram_schmidt_fig.py</code>）。①
+次の候補 <span class="math inline">\(\mathbf w\)</span> は 1 本目 <span
+class="math inline">\(\mathbf v_1\)</span> とほぼ同じ向き。② <span
+class="math inline">\(\mathbf w\)</span> のうち <span
+class="math inline">\(\mathbf v_1\)</span>
+の向きの成分（影）を引くと、短い「残り」が出る。③ 残りを長さ 1
+にそろえて 2 本目 <span class="math inline">\(\mathbf v_2\)</span>
+にする。この円筒では、<span class="math inline">\(\mathbf m_1\)</span>
+から <span class="math inline">\(\mathbf m_0\)</span>
+の成分を引くと、残りは元の長さの約 3 % だった。この 3 %
+が「遅れによる形の違い」で、新しい情報。</em></p>
+<p><strong>「長さ」と「向きの近さ」を熱容量 <span
+class="math inline">\(C\)</span> で測る理由。</strong> 普通の長さ <span
+class="math inline">\(\sqrt{\mathbf x^{\mathsf T}\mathbf x}\)</span>
+ではなく、熱容量 <span class="math inline">\(C\)</span>
+を重みにした長さを使います。</p>
+<ul>
+<li>節点ごとの体積（熱容量）の違いを考えに入れるためです。メッシュの細かい所の節点が、たくさんあるだけで重く数えられることがなくなります。<span
+class="math inline">\(\mathbf x^{\mathsf T}C\mathbf x\)</span>
+は、温度分布 <span class="math inline">\(\mathbf x\)</span>
+のときに円筒にたまる熱の大きさ（に比例する量）です。</li>
+<li>こうしておくと、できた基底が <span class="math inline">\(V^{\mathsf
+T}CV=I\)</span>（§3-5
+の縮めた式の熱容量の行列が単位行列）になり、縮めた式が簡単になります。</li>
+</ul>
 <p><span class="math display">\[
 \langle\mathbf x,\mathbf y\rangle_C=\mathbf x^{\mathsf T}C\mathbf y,
 \qquad
