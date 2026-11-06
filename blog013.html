@@ -732,55 +732,69 @@ class="math inline">\(\mathbf x,\mathbf y\)</span>
 \]</span></p>
 <p>で測ります。これは、どの節点も同じ重さ 1 で数えています。</p>
 <p><strong>(b) それで困ること：節点の切り方で長さが変わる。</strong>
-長さ 1 の棒で、左半分が 1 K、右半分が 0 K という同じ温度分布を、2
-通りのメッシュで表してみます。</p>
+棒の左半分の温度が <span
+class="math inline">\(\theta_L\)</span>、右半分が <span
+class="math inline">\(\theta_R\)</span> という同じ温度分布を、2
+通りのメッシュで表してみます。半分の体積を <span
+class="math inline">\(\Delta V\)</span> とします。</p>
 <table>
 <colgroup>
-<col style="width: 23%" />
-<col style="width: 23%" />
-<col style="width: 23%" />
-<col style="width: 30%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th></th>
 <th>節点の値 <span class="math inline">\(\mathbf x\)</span></th>
-<th>各節点が受け持つ長さ</th>
-<th style="text-align: right;">ふつうの長さの 2 乗 <span
-class="math inline">\(\sum x[i]^2\)</span></th>
+<th>各節点が受け持つ体積</th>
+<th>ふつうの長さの 2 乗 <span class="math inline">\(\sum
+x[i]^2\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>メッシュ A（左右 1 節点ずつ）</td>
-<td><span class="math inline">\((1,\ 0)\)</span></td>
-<td><span class="math inline">\(1/2,\ 1/2\)</span></td>
-<td style="text-align: right;">1</td>
+<td><span class="math inline">\((\theta_L,\ \theta_R)\)</span></td>
+<td><span class="math inline">\(\Delta V,\ \Delta V\)</span></td>
+<td><span class="math inline">\(\theta_L^2+\theta_R^2\)</span></td>
 </tr>
 <tr class="even">
-<td>メッシュ B（左だけ 2 節点に細かく）</td>
-<td><span class="math inline">\((1,\ 1,\ 0)\)</span></td>
-<td><span class="math inline">\(1/4,\ 1/4,\ 1/2\)</span></td>
-<td style="text-align: right;">2</td>
+<td>メッシュ B（左だけ <span class="math inline">\(n\)</span>
+節点に細かく）</td>
+<td><span
+class="math inline">\((\underbrace{\theta_L,\dots,\theta_L}_{n\ 個},\
+\theta_R)\)</span></td>
+<td><span class="math inline">\(\underbrace{\Delta V/n,\dots,\Delta
+V/n}_{n\ 個},\ \Delta V\)</span></td>
+<td><span class="math inline">\(n\,\theta_L^2+\theta_R^2\)</span></td>
 </tr>
 </tbody>
 </table>
-<p>同じ温度分布なのに、細かく切った所の節点が多いだけで、長さが変わってしまいます。</p>
+<p>同じ温度分布なのに、メッシュ B では左半分が <span
+class="math inline">\(n\)</span>
+倍重く数えられます。細かく切った所の節点が多いだけで、長さが変わってしまいます。</p>
 <p><strong>(c) 受け持つ大きさ（熱容量）で重みをつける。</strong> 節点
 <span class="math inline">\(i\)</span> の熱容量を <span
-class="math inline">\(c_i\)</span>（密度×比熱×受け持つ体積）として、各項に
-<span class="math inline">\(c_i\)</span> を掛けます。上の例で密度×比熱を
-1 とすると、</p>
-<ul>
-<li>メッシュ A：<span
-class="math inline">\(\tfrac12\cdot1^2+\tfrac12\cdot0^2=0.5\)</span></li>
-<li>メッシュ B：<span
-class="math inline">\(\tfrac14\cdot1^2+\tfrac14\cdot1^2+\tfrac12\cdot0^2=0.5\)</span></li>
-</ul>
-<p>となり、同じになります。<span class="math inline">\(\sum_i
+class="math inline">\(c_i=\rho c_p\,\Delta V_i\)</span>（密度 × 比熱 ×
+受け持つ体積）として、各項に <span class="math inline">\(c_i\)</span>
+を掛けます。</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{メッシュ A：}&amp;\ \rho c_p\Delta V\,\theta_L^2+\rho c_p\Delta
+V\,\theta_R^2,\\
+\text{メッシュ B：}&amp;\ n\times\rho c_p\frac{\Delta
+V}{n}\,\theta_L^2+\rho c_p\Delta V\,\theta_R^2
+=\rho c_p\Delta V\,\theta_L^2+\rho c_p\Delta V\,\theta_R^2 .
+\end{aligned}
+\]</span></p>
+<p><span class="math inline">\(n\)</span>
+が消えて、同じになります。<span class="math inline">\(\sum_i
 c_i\,x[i]^2\)</span> は「物体全体で、温度の 2
 乗を体積で重みづけして足したもの」（<span class="math inline">\(\int\rho
-c_p\,x^2\,dV\)</span> の近似）なので、メッシュの切り方によりません。</p>
+c_p\,\theta^2\,dV\)</span>
+の近似）なので、メッシュの切り方によりません。</p>
 <p><span class="math inline">\(c_i\)</span> を対角に並べた行列を <span
 class="math inline">\(C\)</span> とすると、<span
 class="math inline">\(\sum_i c_i\,x[i]^2=\mathbf x^{\mathsf T}C\mathbf
@@ -905,96 +919,110 @@ v_1[N]&amp;v_2[N]&amp;\cdots&amp;v_r[N]
 \]</span></p>
 <p><strong>1列が全N節点に値を持つ1本の基底です。</strong>
 候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。</p>
-<h4 id="v-を作る手順を節点-3-つの例で-1-歩ずつ">V を作る手順を、節点 3
-つの例で 1 歩ずつ</h4>
-<p>式だけでは分かりにくいので、節点が 3 つの小さな例で、<span
-class="math inline">\(V\)</span>
-を実際に作ってみます。ここでは簡単にするため <span
-class="math inline">\(C\)</span>
-を単位行列にしているので、重みつきの長さ・重なりは、ふつうの長さ・内積と同じ値になります。棒を
-3 つに分け、節点 1
-にヒータがあるとします（数字は説明のために私が決めたもの）。</p>
-<p><span class="math display">\[
-C=\begin{bmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{bmatrix},\qquad
-G=\begin{bmatrix}2&amp;-1&amp;0\\-1&amp;2&amp;-1\\0&amp;-1&amp;2\end{bmatrix},\qquad
-\mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
-\]</span></p>
-<ul>
-<li><span class="math inline">\(C\)</span>：熱容量（どの節点も 1。上の
-(c) の重みがすべて同じ場合）</li>
-<li><span class="math inline">\(G\)</span>：隣どうしの熱の行き来（<span
-class="math inline">\(-1\)</span>）と、両端からの放熱（対角の 2）</li>
-<li><span class="math inline">\(\mathbf f\)</span>：ヒータは節点 1
-だけ</li>
-</ul>
+<h4 id="v-を作る手順を-1-歩ずつr3-の場合">V を作る手順を 1 歩ずつ（<span
+class="math inline">\(r=3\)</span> の場合）</h4>
+<p>上の式を、3 本目まで 1 歩ずつ書き下します。<span
+class="math inline">\(C,\ G,\ \mathbf f\)</span> は §2 の FEM
+の行列とベクトル（節点 <span class="math inline">\(N\)</span>
+個）です。</p>
 <p><strong>手順 1：1 本目の候補 <span class="math inline">\(\mathbf
-m_0\)</span> を作る</strong>（<span class="math inline">\(G\mathbf
-m_0=\mathbf f\)</span> を解く）</p>
+m_0\)</span> を作る。</strong> <span class="math inline">\(G\mathbf
+m_0=\mathbf f\)</span> を解きます。</p>
 <p><span class="math display">\[
-\mathbf m_0=G^{-1}\mathbf f=\begin{bmatrix}0.75\\0.50\\0.25\end{bmatrix}
+\mathbf m_0=G^{-1}\mathbf f
 \]</span></p>
-<p>ヒータを入れ続けたときに落ち着く温度の形です（ヒータに近い節点 1
-が一番高い）。</p>
+<p>ヒータを入れ続けたときに落ち着く温度の形です（§3-1）。</p>
 <p><strong>手順 2：長さを 1 にそろえて <span
-class="math inline">\(\mathbf v_1\)</span> にする</strong></p>
+class="math inline">\(\mathbf v_1\)</span> にする。</strong></p>
 <p><span class="math display">\[
-\lVert\mathbf m_0\rVert_C=\sqrt{\mathbf m_0^{\mathsf T}C\mathbf
-m_0}=\sqrt{0.75^2+0.50^2+0.25^2}=0.935,\qquad
-\mathbf v_1=\frac{\mathbf
-m_0}{0.935}=\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
-\]</span></p>
-<p><strong>手順 3：次の候補 <span class="math inline">\(\mathbf
-w\)</span> を作る</strong>（右辺を <span class="math inline">\(C\mathbf
-v_1\)</span> にして、また <span class="math inline">\(G\)</span>
-を解く）</p>
-<p><span class="math display">\[
-G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad \mathbf
-w=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}
-\]</span></p>
-<p><strong>手順 4：<span class="math inline">\(\mathbf w\)</span>
-から、<span class="math inline">\(\mathbf v_1\)</span>
-で表せる部分（影）を引く</strong></p>
-<p>影の大きさは <span class="math inline">\(\mathbf v_1^{\mathsf
-T}C\mathbf
-w=0.802\times0.935+0.535\times1.069+0.267\times0.668=1.50\)</span>
-なので、</p>
-<p><span class="math display">\[
-\widetilde{\mathbf w}=\mathbf w-1.50\,\mathbf v_1
-=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}-1.50\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
-=\begin{bmatrix}-0.267\\0.267\\0.267\end{bmatrix}.
-\]</span></p>
-<p>残ったのは「節点 1 が低く、節点 2・3 が高い」形です。これが、<span
-class="math inline">\(\mathbf v_1\)</span>
-だけでは表せない<strong>新しい形</strong>（時間の遅れで生まれる、温まり方の偏りの違い）です。</p>
-<p><strong>手順 5：長さを 1 にそろえて <span
-class="math inline">\(\mathbf v_2\)</span> にする</strong></p>
-<p><span class="math display">\[
-\lVert\widetilde{\mathbf w}\rVert_C=0.463,\qquad
-\mathbf v_2=\frac{\widetilde{\mathbf
-w}}{0.463}=\begin{bmatrix}-0.577\\0.577\\0.577\end{bmatrix}
+\mathbf v_1=\frac{\mathbf m_0}{\sqrt{\mathbf m_0^{\mathsf T}C\mathbf
+m_0}}
 \]</span></p>
 <p>確かめ：<span class="math inline">\(\mathbf v_1^{\mathsf T}C\mathbf
-v_2=0\)</span>（重なりがない）、<span class="math inline">\(\mathbf
-v_2^{\mathsf T}C\mathbf v_2=1\)</span>（長さ 1）です。</p>
-<p><strong>手順 6：3 本目も同じ</strong>（<span
-class="math inline">\(G\mathbf w=C\mathbf v_2\)</span> を解き、<span
+v_1=\dfrac{\mathbf m_0^{\mathsf T}C\mathbf m_0}{\mathbf m_0^{\mathsf
+T}C\mathbf m_0}=1\)</span>。</p>
+<p><strong>手順 3：次の候補 <span class="math inline">\(\mathbf
+w\)</span> を作る。</strong> 右辺を <span class="math inline">\(C\mathbf
+v_1\)</span> にして、また <span class="math inline">\(G\)</span>
+の式を解きます。</p>
+<p><span class="math display">\[
+G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad\mathbf w=G^{-1}C\mathbf v_1
+\]</span></p>
+<p><span class="math inline">\(\mathbf v_1\)</span> は <span
+class="math inline">\(\mathbf m_0\)</span>
+を定数で割ったものなので、<span class="math inline">\(\mathbf w\)</span>
+は §3-2 の遅れの形 <span class="math inline">\(\mathbf
+m_1=G^{-1}C\mathbf m_0\)</span> を同じ定数で割ったものです。</p>
+<p><strong>手順 4：<span class="math inline">\(\mathbf w\)</span>
+から、<span class="math inline">\(\mathbf v_1\)</span>
+で表せる部分（影）を引く。</strong></p>
+<p><span class="math display">\[
+a_1=\mathbf v_1^{\mathsf T}C\mathbf w,\qquad
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1
+\]</span></p>
+<p>確かめ：<span class="math inline">\(\mathbf v_1^{\mathsf
+T}C\widetilde{\mathbf w}=\mathbf v_1^{\mathsf T}C\mathbf w-a_1\,\mathbf
+v_1^{\mathsf T}C\mathbf
+v_1=a_1-a_1\times1=0\)</span>（重なりがない）。</p>
+<p>残った <span class="math inline">\(\widetilde{\mathbf w}\)</span>
+は、<span class="math inline">\(\mathbf
+v_1\)</span>（＝落ち着いた形）だけでは表せない<strong>新しい形</strong>、つまり時間の遅れで生まれる温まり方の偏りの違いです。</p>
+<p><strong>手順 5：長さを 1 にそろえて <span
+class="math inline">\(\mathbf v_2\)</span> にする。</strong></p>
+<p><span class="math display">\[
+\mathbf v_2=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf
+w}^{\mathsf T}C\widetilde{\mathbf w}}}
+\]</span></p>
+<p><strong>手順 6：3 本目も同じ。</strong> 候補を作り、<span
 class="math inline">\(\mathbf v_1\)</span> と <span
 class="math inline">\(\mathbf v_2\)</span> の両方の影を引き、長さを 1
-にする）</p>
+にします。</p>
 <p><span class="math display">\[
-\mathbf w=\begin{bmatrix}0\\0.577\\0.577\end{bmatrix},\quad
-\widetilde{\mathbf w}=\mathbf w-0.463\,\mathbf v_1-0.667\,\mathbf
-v_2=\begin{bmatrix}0.014\\-0.055\\0.069\end{bmatrix},\quad
-\mathbf v_3=\begin{bmatrix}0.154\\-0.617\\0.772\end{bmatrix}
+\mathbf w=G^{-1}C\mathbf v_2,\qquad
+a_1=\mathbf v_1^{\mathsf T}C\mathbf w,\quad a_2=\mathbf v_2^{\mathsf
+T}C\mathbf w,\qquad
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1-a_2\mathbf v_2,\qquad
+\mathbf v_3=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf
+w}^{\mathsf T}C\widetilde{\mathbf w}}}
+\]</span></p>
+<p>確かめ（<span class="math inline">\(\mathbf v_1^{\mathsf T}C\mathbf
+v_2=0\)</span> を使う）：</p>
+<p><span class="math display">\[
+\begin{aligned}
+\mathbf v_1^{\mathsf T}C\widetilde{\mathbf
+w}&amp;=a_1-a_1\times1-a_2\times0=0,\\
+\mathbf v_2^{\mathsf T}C\widetilde{\mathbf
+w}&amp;=a_2-a_1\times0-a_2\times1=0 .
+\end{aligned}
 \]</span></p>
 <p><strong>できあがり：</strong> 並べたものが <span
 class="math inline">\(V\)</span> です。</p>
 <p><span class="math display">\[
-V=\begin{bmatrix}\mathbf v_1&amp;\mathbf
-v_2\end{bmatrix}=\begin{bmatrix}0.802&amp;-0.577\\0.535&amp;0.577\\0.267&amp;0.577\end{bmatrix}\
-（r=2\ のとき）,\qquad V^{\mathsf
-T}CV=\begin{bmatrix}1&amp;0\\0&amp;1\end{bmatrix}
+V=\begin{bmatrix}\mathbf v_1&amp;\mathbf v_2&amp;\mathbf
+v_3\end{bmatrix}\ (N\times3),\qquad
+V^{\mathsf T}CV=
+\begin{bmatrix}
+\mathbf v_1^{\mathsf T}C\mathbf v_1&amp;\mathbf v_1^{\mathsf T}C\mathbf
+v_2&amp;\mathbf v_1^{\mathsf T}C\mathbf v_3\\
+\mathbf v_2^{\mathsf T}C\mathbf v_1&amp;\mathbf v_2^{\mathsf T}C\mathbf
+v_2&amp;\mathbf v_2^{\mathsf T}C\mathbf v_3\\
+\mathbf v_3^{\mathsf T}C\mathbf v_1&amp;\mathbf v_3^{\mathsf T}C\mathbf
+v_2&amp;\mathbf v_3^{\mathsf T}C\mathbf v_3
+\end{bmatrix}
+=\begin{bmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{bmatrix}
 \]</span></p>
+<p><span class="math inline">\(\mathbf v_1\)</span> は <span
+class="math inline">\(\mathbf m_0\)</span> の定数倍、<span
+class="math inline">\(\mathbf v_2\)</span> は <span
+class="math inline">\(\mathbf m_0\)</span> と <span
+class="math inline">\(\mathbf m_1\)</span> の足し合わせ、<span
+class="math inline">\(\mathbf v_3\)</span> は <span
+class="math inline">\(\mathbf m_0,\mathbf m_1,\mathbf m_2\)</span>
+の足し合わせです。そのため、<span class="math inline">\(\mathbf
+v_1,\mathbf v_2,\mathbf v_3\)</span> の足し合わせで表せる分布は、§3-3
+の候補 <span class="math inline">\(\mathbf m_0,\mathbf m_1,\mathbf
+m_2\)</span>
+の足し合わせで表せる分布と同じです。形の集まりは変えずに、重なりのない使いやすい基底に並べ直しただけです。</p>
 <p><strong>順番のまとめ</strong>（実際の円筒でも、節点が 5,040
 個になるだけで同じ）</p>
 <table>
