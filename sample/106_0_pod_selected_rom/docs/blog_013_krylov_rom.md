@@ -217,21 +217,26 @@ $`\beta_k`$ は任意の係数です。これを短く書くと、
 
 で測ります。これは、どの節点も同じ重さ 1 で数えています。
 
-**(b) それで困ること：節点の切り方で長さが変わる。** 長さ 1 の棒で、左半分が 1 K、右半分が 0 K という同じ温度分布を、2 通りのメッシュで表してみます。
+**(b) それで困ること：節点の切り方で長さが変わる。** 棒の左半分の温度が $`\theta_L`$、右半分が $`\theta_R`$ という同じ温度分布を、2 通りのメッシュで表してみます。半分の体積を $`\Delta V`$ とします。
 
-| | 節点の値 $`\mathbf x`$ | 各節点が受け持つ長さ | ふつうの長さの 2 乗 $`\sum x[i]^2`$ |
-|---|---|---|---:|
-| メッシュ A（左右 1 節点ずつ） | $`(1,\ 0)`$ | $`1/2,\ 1/2`$ | 1 |
-| メッシュ B（左だけ 2 節点に細かく） | $`(1,\ 1,\ 0)`$ | $`1/4,\ 1/4,\ 1/2`$ | 2 |
+| | 節点の値 $`\mathbf x`$ | 各節点が受け持つ体積 | ふつうの長さの 2 乗 $`\sum x[i]^2`$ |
+|---|---|---|---|
+| メッシュ A（左右 1 節点ずつ） | $`(\theta_L,\ \theta_R)`$ | $`\Delta V,\ \Delta V`$ | $`\theta_L^2+\theta_R^2`$ |
+| メッシュ B（左だけ $`n`$ 節点に細かく） | $`(\underbrace{\theta_L,\dots,\theta_L}_{n\ 個},\ \theta_R)`$ | $`\underbrace{\Delta V/n,\dots,\Delta V/n}_{n\ 個},\ \Delta V`$ | $`n\,\theta_L^2+\theta_R^2`$ |
 
-同じ温度分布なのに、細かく切った所の節点が多いだけで、長さが変わってしまいます。
+同じ温度分布なのに、メッシュ B では左半分が $`n`$ 倍重く数えられます。細かく切った所の節点が多いだけで、長さが変わってしまいます。
 
-**(c) 受け持つ大きさ（熱容量）で重みをつける。** 節点 $`i`$ の熱容量を $`c_i`$（密度×比熱×受け持つ体積）として、各項に $`c_i`$ を掛けます。上の例で密度×比熱を 1 とすると、
+**(c) 受け持つ大きさ（熱容量）で重みをつける。** 節点 $`i`$ の熱容量を $`c_i=\rho c_p\,\Delta V_i`$（密度 × 比熱 × 受け持つ体積）として、各項に $`c_i`$ を掛けます。
 
-- メッシュ A：$`\tfrac12\cdot1^2+\tfrac12\cdot0^2=0.5`$
-- メッシュ B：$`\tfrac14\cdot1^2+\tfrac14\cdot1^2+\tfrac12\cdot0^2=0.5`$
+```math
+\begin{aligned}
+\text{メッシュ A：}&\ \rho c_p\Delta V\,\theta_L^2+\rho c_p\Delta V\,\theta_R^2,\\
+\text{メッシュ B：}&\ n\times\rho c_p\frac{\Delta V}{n}\,\theta_L^2+\rho c_p\Delta V\,\theta_R^2
+=\rho c_p\Delta V\,\theta_L^2+\rho c_p\Delta V\,\theta_R^2 .
+\end{aligned}
+```
 
-となり、同じになります。$`\sum_i c_i\,x[i]^2`$ は「物体全体で、温度の 2 乗を体積で重みづけして足したもの」（$`\int\rho c_p\,x^2\,dV`$ の近似）なので、メッシュの切り方によりません。
+$`n`$ が消えて、同じになります。$`\sum_i c_i\,x[i]^2`$ は「物体全体で、温度の 2 乗を体積で重みづけして足したもの」（$`\int\rho c_p\,\theta^2\,dV`$ の近似）なので、メッシュの切り方によりません。
 
 $`c_i`$ を対角に並べた行列を $`C`$ とすると、$`\sum_i c_i\,x[i]^2=\mathbf x^{\mathsf T}C\mathbf x`$ です。2 本の場合も同じように重みをつけて、
 
@@ -331,75 +336,83 @@ v_1[N]&v_2[N]&\cdots&v_r[N]
 
 **1列が全N節点に値を持つ1本の基底です。** 候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。
 
-#### V を作る手順を、節点 3 つの例で 1 歩ずつ
+#### V を作る手順を 1 歩ずつ（$`r=3`$ の場合）
 
-式だけでは分かりにくいので、節点が 3 つの小さな例で、$`V`$ を実際に作ってみます。ここでは簡単にするため $`C`$ を単位行列にしているので、重みつきの長さ・重なりは、ふつうの長さ・内積と同じ値になります。棒を 3 つに分け、節点 1 にヒータがあるとします（数字は説明のために私が決めたもの）。
+上の式を、3 本目まで 1 歩ずつ書き下します。$`C,\ G,\ \mathbf f`$ は §2 の FEM の行列とベクトル（節点 $`N`$ 個）です。
+
+**手順 1：1 本目の候補 $`\mathbf m_0`$ を作る。** $`G\mathbf m_0=\mathbf f`$ を解きます。
 
 ```math
-C=\begin{bmatrix}1&0&0\\0&1&0\\0&0&1\end{bmatrix},\qquad
-G=\begin{bmatrix}2&-1&0\\-1&2&-1\\0&-1&2\end{bmatrix},\qquad
-\mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
+\mathbf m_0=G^{-1}\mathbf f
 ```
 
-- $`C`$：熱容量（どの節点も 1。上の (c) の重みがすべて同じ場合）
-- $`G`$：隣どうしの熱の行き来（$`-1`$）と、両端からの放熱（対角の 2）
-- $`\mathbf f`$：ヒータは節点 1 だけ
+ヒータを入れ続けたときに落ち着く温度の形です（§3-1）。
 
-**手順 1：1 本目の候補 $`\mathbf m_0`$ を作る**（$`G\mathbf m_0=\mathbf f`$ を解く）
+**手順 2：長さを 1 にそろえて $`\mathbf v_1`$ にする。**
 
 ```math
-\mathbf m_0=G^{-1}\mathbf f=\begin{bmatrix}0.75\\0.50\\0.25\end{bmatrix}
+\mathbf v_1=\frac{\mathbf m_0}{\sqrt{\mathbf m_0^{\mathsf T}C\mathbf m_0}}
 ```
 
-ヒータを入れ続けたときに落ち着く温度の形です（ヒータに近い節点 1 が一番高い）。
+確かめ：$`\mathbf v_1^{\mathsf T}C\mathbf v_1=\dfrac{\mathbf m_0^{\mathsf T}C\mathbf m_0}{\mathbf m_0^{\mathsf T}C\mathbf m_0}=1`$。
 
-**手順 2：長さを 1 にそろえて $`\mathbf v_1`$ にする**
+**手順 3：次の候補 $`\mathbf w`$ を作る。** 右辺を $`C\mathbf v_1`$ にして、また $`G`$ の式を解きます。
 
 ```math
-\lVert\mathbf m_0\rVert_C=\sqrt{\mathbf m_0^{\mathsf T}C\mathbf m_0}=\sqrt{0.75^2+0.50^2+0.25^2}=0.935,\qquad
-\mathbf v_1=\frac{\mathbf m_0}{0.935}=\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
+G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad\mathbf w=G^{-1}C\mathbf v_1
 ```
 
-**手順 3：次の候補 $`\mathbf w`$ を作る**（右辺を $`C\mathbf v_1`$ にして、また $`G`$ を解く）
+$`\mathbf v_1`$ は $`\mathbf m_0`$ を定数で割ったものなので、$`\mathbf w`$ は §3-2 の遅れの形 $`\mathbf m_1=G^{-1}C\mathbf m_0`$ を同じ定数で割ったものです。
+
+**手順 4：$`\mathbf w`$ から、$`\mathbf v_1`$ で表せる部分（影）を引く。**
 
 ```math
-G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad \mathbf w=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}
+a_1=\mathbf v_1^{\mathsf T}C\mathbf w,\qquad
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1
 ```
 
-**手順 4：$`\mathbf w`$ から、$`\mathbf v_1`$ で表せる部分（影）を引く**
+確かめ：$`\mathbf v_1^{\mathsf T}C\widetilde{\mathbf w}=\mathbf v_1^{\mathsf T}C\mathbf w-a_1\,\mathbf v_1^{\mathsf T}C\mathbf v_1=a_1-a_1\times1=0`$（重なりがない）。
 
-影の大きさは $`\mathbf v_1^{\mathsf T}C\mathbf w=0.802\times0.935+0.535\times1.069+0.267\times0.668=1.50`$ なので、
+残った $`\widetilde{\mathbf w}`$ は、$`\mathbf v_1`$（＝落ち着いた形）だけでは表せない**新しい形**、つまり時間の遅れで生まれる温まり方の偏りの違いです。
+
+**手順 5：長さを 1 にそろえて $`\mathbf v_2`$ にする。**
 
 ```math
-\widetilde{\mathbf w}=\mathbf w-1.50\,\mathbf v_1
-=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}-1.50\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
-=\begin{bmatrix}-0.267\\0.267\\0.267\end{bmatrix}.
+\mathbf v_2=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
 ```
 
-残ったのは「節点 1 が低く、節点 2・3 が高い」形です。これが、$`\mathbf v_1`$ だけでは表せない**新しい形**（時間の遅れで生まれる、温まり方の偏りの違い）です。
-
-**手順 5：長さを 1 にそろえて $`\mathbf v_2`$ にする**
+**手順 6：3 本目も同じ。** 候補を作り、$`\mathbf v_1`$ と $`\mathbf v_2`$ の両方の影を引き、長さを 1 にします。
 
 ```math
-\lVert\widetilde{\mathbf w}\rVert_C=0.463,\qquad
-\mathbf v_2=\frac{\widetilde{\mathbf w}}{0.463}=\begin{bmatrix}-0.577\\0.577\\0.577\end{bmatrix}
+\mathbf w=G^{-1}C\mathbf v_2,\qquad
+a_1=\mathbf v_1^{\mathsf T}C\mathbf w,\quad a_2=\mathbf v_2^{\mathsf T}C\mathbf w,\qquad
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1-a_2\mathbf v_2,\qquad
+\mathbf v_3=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
 ```
 
-確かめ：$`\mathbf v_1^{\mathsf T}C\mathbf v_2=0`$（重なりがない）、$`\mathbf v_2^{\mathsf T}C\mathbf v_2=1`$（長さ 1）です。
-
-**手順 6：3 本目も同じ**（$`G\mathbf w=C\mathbf v_2`$ を解き、$`\mathbf v_1`$ と $`\mathbf v_2`$ の両方の影を引き、長さを 1 にする）
+確かめ（$`\mathbf v_1^{\mathsf T}C\mathbf v_2=0`$ を使う）：
 
 ```math
-\mathbf w=\begin{bmatrix}0\\0.577\\0.577\end{bmatrix},\quad
-\widetilde{\mathbf w}=\mathbf w-0.463\,\mathbf v_1-0.667\,\mathbf v_2=\begin{bmatrix}0.014\\-0.055\\0.069\end{bmatrix},\quad
-\mathbf v_3=\begin{bmatrix}0.154\\-0.617\\0.772\end{bmatrix}
+\begin{aligned}
+\mathbf v_1^{\mathsf T}C\widetilde{\mathbf w}&=a_1-a_1\times1-a_2\times0=0,\\
+\mathbf v_2^{\mathsf T}C\widetilde{\mathbf w}&=a_2-a_1\times0-a_2\times1=0 .
+\end{aligned}
 ```
 
 **できあがり：** 並べたものが $`V`$ です。
 
 ```math
-V=\begin{bmatrix}\mathbf v_1&\mathbf v_2\end{bmatrix}=\begin{bmatrix}0.802&-0.577\\0.535&0.577\\0.267&0.577\end{bmatrix}\ （r=2\ のとき）,\qquad V^{\mathsf T}CV=\begin{bmatrix}1&0\\0&1\end{bmatrix}
+V=\begin{bmatrix}\mathbf v_1&\mathbf v_2&\mathbf v_3\end{bmatrix}\ (N\times3),\qquad
+V^{\mathsf T}CV=
+\begin{bmatrix}
+\mathbf v_1^{\mathsf T}C\mathbf v_1&\mathbf v_1^{\mathsf T}C\mathbf v_2&\mathbf v_1^{\mathsf T}C\mathbf v_3\\
+\mathbf v_2^{\mathsf T}C\mathbf v_1&\mathbf v_2^{\mathsf T}C\mathbf v_2&\mathbf v_2^{\mathsf T}C\mathbf v_3\\
+\mathbf v_3^{\mathsf T}C\mathbf v_1&\mathbf v_3^{\mathsf T}C\mathbf v_2&\mathbf v_3^{\mathsf T}C\mathbf v_3
+\end{bmatrix}
+=\begin{bmatrix}1&0&0\\0&1&0\\0&0&1\end{bmatrix}
 ```
+
+$`\mathbf v_1`$ は $`\mathbf m_0`$ の定数倍、$`\mathbf v_2`$ は $`\mathbf m_0`$ と $`\mathbf m_1`$ の足し合わせ、$`\mathbf v_3`$ は $`\mathbf m_0,\mathbf m_1,\mathbf m_2`$ の足し合わせです。そのため、$`\mathbf v_1,\mathbf v_2,\mathbf v_3`$ の足し合わせで表せる分布は、§3-3 の候補 $`\mathbf m_0,\mathbf m_1,\mathbf m_2`$ の足し合わせで表せる分布と同じです。形の集まりは変えずに、重なりのない使いやすい基底に並べ直しただけです。
 
 **順番のまとめ**（実際の円筒でも、節点が 5,040 個になるだけで同じ）
 
