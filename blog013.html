@@ -713,38 +713,186 @@ class="math inline">\(\mathbf v_1\)</span>
 から <span class="math inline">\(\mathbf m_0\)</span>
 の成分を引くと、残りは元の長さの約 3 % だった。この 3 %
 が「遅れによる形の違い」で、新しい情報。</em></p>
-<p><strong>「長さ」と「向きの近さ」を熱容量 <span
-class="math inline">\(C\)</span> で測る理由。</strong> 普通の長さ <span
-class="math inline">\(\sqrt{\mathbf x^{\mathsf T}\mathbf x}\)</span>
-ではなく、熱容量 <span class="math inline">\(C\)</span>
-を重みにした長さを使います。</p>
+<h4 id="長さと重なりをどう測るか">「長さ」と「重なり」をどう測るか</h4>
+<p>影を引くには、先に 2 つのことを決めておく必要があります。</p>
 <ul>
-<li>節点ごとの体積（熱容量）の違いを考えに入れるためです。メッシュの細かい所の節点が、たくさんあるだけで重く数えられることがなくなります。<span
-class="math inline">\(\mathbf x^{\mathsf T}C\mathbf x\)</span>
-は、温度分布 <span class="math inline">\(\mathbf x\)</span>
-のときに円筒にたまる熱の大きさ（に比例する量）です。</li>
-<li>こうしておくと、できた基底が <span class="math inline">\(V^{\mathsf
-T}CV=I\)</span>（§3-5
-の縮めた式の熱容量の行列が単位行列）になり、縮めた式が簡単になります。</li>
+<li>ベクトル（温度分布）の<strong>長さ</strong></li>
+<li>2
+本のベクトルの<strong>重なり</strong>（内積。影の大きさはこれで決まる）</li>
 </ul>
+<p>ここでは、ふつうの測り方から始めて、なぜ熱容量 <span
+class="math inline">\(C\)</span>
+で重みをつけるのかを順に説明します。</p>
+<p><strong>(a) ふつうの測り方。</strong> 温度分布 <span
+class="math inline">\(\mathbf x,\mathbf y\)</span>
+は、各節点の値を縦に並べたベクトルです。ふつうは</p>
 <p><span class="math display">\[
-\langle\mathbf x,\mathbf y\rangle_C=\mathbf x^{\mathsf T}C\mathbf y,
-\qquad
-\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}.
+\mathbf x^{\mathsf T}\mathbf y=\sum_i x[i]\,y[i],\qquad
+\lVert\mathbf x\rVert=\sqrt{\mathbf x^{\mathsf T}\mathbf x}
 \]</span></p>
-<p>最初は <span class="math inline">\(\mathbf v_1=\mathbf
-m_0/\lVert\mathbf m_0\rVert_C\)</span> です。j本目では候補 <span
-class="math inline">\(\mathbf w=G^{-1}C\mathbf v_{j-1}\)</span>
-から、</p>
+<p>で測ります。これは、どの節点も同じ重さ 1 で数えています。</p>
+<p><strong>(b) それで困ること：節点の切り方で長さが変わる。</strong>
+長さ 1 の棒で、左半分が 1 K、右半分が 0 K という同じ温度分布を、2
+通りのメッシュで表してみます。</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 23%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>節点の値 <span class="math inline">\(\mathbf x\)</span></th>
+<th>各節点が受け持つ長さ</th>
+<th style="text-align: right;">ふつうの長さの 2 乗 <span
+class="math inline">\(\sum x[i]^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>メッシュ A（左右 1 節点ずつ）</td>
+<td><span class="math inline">\((1,\ 0)\)</span></td>
+<td><span class="math inline">\(1/2,\ 1/2\)</span></td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td>メッシュ B（左だけ 2 節点に細かく）</td>
+<td><span class="math inline">\((1,\ 1,\ 0)\)</span></td>
+<td><span class="math inline">\(1/4,\ 1/4,\ 1/2\)</span></td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+<p>同じ温度分布なのに、細かく切った所の節点が多いだけで、長さが変わってしまいます。</p>
+<p><strong>(c) 受け持つ大きさ（熱容量）で重みをつける。</strong> 節点
+<span class="math inline">\(i\)</span> の熱容量を <span
+class="math inline">\(c_i\)</span>（密度×比熱×受け持つ体積）として、各項に
+<span class="math inline">\(c_i\)</span> を掛けます。上の例で密度×比熱を
+1 とすると、</p>
+<ul>
+<li>メッシュ A：<span
+class="math inline">\(\tfrac12\cdot1^2+\tfrac12\cdot0^2=0.5\)</span></li>
+<li>メッシュ B：<span
+class="math inline">\(\tfrac14\cdot1^2+\tfrac14\cdot1^2+\tfrac12\cdot0^2=0.5\)</span></li>
+</ul>
+<p>となり、同じになります。<span class="math inline">\(\sum_i
+c_i\,x[i]^2\)</span> は「物体全体で、温度の 2
+乗を体積で重みづけして足したもの」（<span class="math inline">\(\int\rho
+c_p\,x^2\,dV\)</span> の近似）なので、メッシュの切り方によりません。</p>
+<p><span class="math inline">\(c_i\)</span> を対角に並べた行列を <span
+class="math inline">\(C\)</span> とすると、<span
+class="math inline">\(\sum_i c_i\,x[i]^2=\mathbf x^{\mathsf T}C\mathbf
+x\)</span> です。2 本の場合も同じように重みをつけて、</p>
+<p><span class="math display">\[
+\langle\mathbf x,\mathbf y\rangle_C=\sum_i c_i\,x[i]\,y[i]=\mathbf
+x^{\mathsf T}C\mathbf y,
+\qquad
+\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}
+\]</span></p>
+<p>と決めます。これが図の「長さ」と「重なり」です。</p>
+<p><strong>(d) FEM の <span class="math inline">\(C\)</span>
+は対角ではないが、意味は同じ。</strong> FEM の熱容量行列は、形状関数
+<span class="math inline">\(N_i\)</span>（節点 <span
+class="math inline">\(i\)</span> で 1、ほかの節点で 0
+になる山形の関数）を使って <span class="math inline">\(C_{ij}=\int\rho
+c_p\,N_iN_j\,dV\)</span> です。隣どうしの節点では <span
+class="math inline">\(N_iN_j\)</span>
+が重なるので、非対角にも値が入ります。これを使うと、</p>
+<p><span class="math display">\[
+\mathbf x^{\mathsf T}C\mathbf x
+=\sum_i\sum_j x[i]\,x[j]\int\rho c_p\,N_iN_j\,dV
+=\int\rho c_p\Bigl(\sum_i N_i\,x[i]\Bigr)^2dV .
+\]</span></p>
+<p>かっこの中 <span class="math inline">\(\sum_i N_i\,x[i]\)</span>
+は、節点の値をつないで作った物体内の温度分布そのものです。つまり <span
+class="math inline">\(\mathbf x^{\mathsf T}C\mathbf x\)</span>
+は、<strong>(c) の「温度の 2
+乗を体積で重みづけした積分」をそのまま計算したもの</strong>です。</p>
+<p><strong>(e) もう 1 つの利点。</strong> この測り方で長さ 1・重なり 0
+の基底を作ると、<span class="math inline">\(V^{\mathsf T}CV=I\)</span>
+になります。§3-5 の縮めた式の熱容量の行列 <span
+class="math inline">\(C_r=V^{\mathsf T}CV\)</span>
+が単位行列になり、式が簡単になります。</p>
+<h4 id="影を引く式を導く">影を引く式を導く</h4>
+<p>すでに長さ 1・互いに重なり 0 の基底 <span
+class="math inline">\(\mathbf v_1,\dots,\mathbf v_{j-1}\)</span>
+があるとします。つまり</p>
+<p><span class="math display">\[
+\mathbf v_k^{\mathsf T}C\mathbf v_\ell=
+\begin{cases}1&amp;(k=\ell)\\0&amp;(k\neq\ell)\end{cases}
+\]</span></p>
+<p>です。次の候補 <span class="math inline">\(\mathbf w\)</span>
+から、これらで表せる部分を引いた残りを</p>
+<p><span class="math display">\[
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1-a_2\mathbf
+v_2-\cdots-a_{j-1}\mathbf v_{j-1}
+\tag{2}
+\]</span></p>
+<p>と書きます。引く量 <span
+class="math inline">\(a_1,\dots,a_{j-1}\)</span>
+はまだ分かりません。これを「残りが、どの <span
+class="math inline">\(\mathbf v_k\)</span>
+とも重ならない」という条件で決めます。</p>
+<p><span class="math display">\[
+\mathbf v_k^{\mathsf T}C\,\widetilde{\mathbf w}=0\qquad(k=1,\dots,j-1)
+\tag{3}
+\]</span></p>
+<ol start="3" type="1">
+<li>の <span class="math inline">\(\widetilde{\mathbf w}\)</span> に (2)
+を入れると、</li>
+</ol>
+<p><span class="math display">\[
+\mathbf v_k^{\mathsf T}C\mathbf w
+-a_1\,\mathbf v_k^{\mathsf T}C\mathbf v_1-\cdots-a_{j-1}\,\mathbf
+v_k^{\mathsf T}C\mathbf v_{j-1}=0 .
+\]</span></p>
+<p><span class="math inline">\(\mathbf v_k^{\mathsf T}C\mathbf
+v_\ell\)</span> は <span class="math inline">\(\ell=k\)</span>
+のときだけ 1 で、ほかは 0 です。そのため、引き算の項は <span
+class="math inline">\(a_k\)</span> の 1 つだけが残り、</p>
+<p><span class="math display">\[
+\mathbf v_k^{\mathsf T}C\mathbf w-a_k=0
+\quad\Rightarrow\quad
+a_k=\mathbf v_k^{\mathsf T}C\mathbf w .
+\]</span></p>
+<p><span class="math inline">\(a_k\)</span> は、<span
+class="math inline">\(\mathbf w\)</span> と <span
+class="math inline">\(\mathbf v_k\)</span>
+の重なり、つまり図の②の「影」の大きさです。これを (2) に戻すと、</p>
 <p><span class="math display">\[
 \widetilde{\mathbf w}
-=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell
-(\mathbf v_\ell^{\mathsf T}C\mathbf w),
-\qquad
-\mathbf v_j=\frac{\widetilde{\mathbf w}}
-{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
+=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell\,(\mathbf v_\ell^{\mathsf
+T}C\mathbf w).
 \]</span></p>
-<p>として作ります。コードでは丸め誤差を抑えるため、成分を除く処理を2回行います。このアーノルディ法で得る基底行列は、</p>
+<p>最後に、長さで割って長さ 1 にします（図の③）。</p>
+<p><span class="math display">\[
+\mathbf v_j=\frac{\widetilde{\mathbf w}}{\lVert\widetilde{\mathbf
+w}\rVert_C}
+=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf w}^{\mathsf
+T}C\widetilde{\mathbf w}}}
+\]</span></p>
+<p>こうしてできた <span class="math inline">\(\mathbf v_j\)</span>
+は、(3) によって前の基底と重なりが 0、割り算によって長さ 1
+です。したがって <span class="math inline">\(\mathbf v_1,\dots,\mathbf
+v_j\)</span> も「長さ 1・互いに重なり
+0」になり、次の本数でも同じ計算がそのまま使えます。</p>
+<h4 id="作る順番">作る順番</h4>
+<ol type="1">
+<li>1 本目：<span class="math inline">\(\mathbf v_1=\mathbf
+m_0/\lVert\mathbf m_0\rVert_C\)</span></li>
+<li><span class="math inline">\(j\)</span> 本目の候補：<span
+class="math inline">\(\mathbf w=G^{-1}C\mathbf v_{j-1}\)</span>（§3-2 の
+<span class="math inline">\(\mathbf m_1=G^{-1}C\mathbf m_0\)</span>
+と同じ作り方を、1 つ前の基底に使う）</li>
+<li>上の式で影を引き、長さ 1 にして <span class="math inline">\(\mathbf
+v_j\)</span> にする</li>
+<li>2・3 を <span class="math inline">\(r\)</span>
+本になるまでくりかえす</li>
+</ol>
+<p>コードでは丸め誤差を抑えるため、影を引く処理を 2
+回行います。この作り方（アーノルディ法）で得る基底行列は、</p>
 <p><span class="math display">\[
 \underbrace{V}_{N\times r}
 =\begin{bmatrix}
@@ -760,8 +908,11 @@ v_1[N]&amp;v_2[N]&amp;\cdots&amp;v_r[N]
 <h4 id="v-を作る手順を節点-3-つの例で-1-歩ずつ">V を作る手順を、節点 3
 つの例で 1 歩ずつ</h4>
 <p>式だけでは分かりにくいので、節点が 3 つの小さな例で、<span
-class="math inline">\(V\)</span> を実際に作ってみます。棒を 3
-つに分け、節点 1
+class="math inline">\(V\)</span>
+を実際に作ってみます。ここでは簡単にするため <span
+class="math inline">\(C\)</span>
+を単位行列にしているので、重みつきの長さ・重なりは、ふつうの長さ・内積と同じ値になります。棒を
+3 つに分け、節点 1
 にヒータがあるとします（数字は説明のために私が決めたもの）。</p>
 <p><span class="math display">\[
 C=\begin{bmatrix}1&amp;0&amp;0\\0&amp;1&amp;0\\0&amp;0&amp;1\end{bmatrix},\qquad
@@ -769,7 +920,8 @@ G=\begin{bmatrix}2&amp;-1&amp;0\\-1&amp;2&amp;-1\\0&amp;-1&amp;2\end{bmatrix},\q
 \mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
 \]</span></p>
 <ul>
-<li><span class="math inline">\(C\)</span>：熱容量（どの節点も 1）</li>
+<li><span class="math inline">\(C\)</span>：熱容量（どの節点も 1。上の
+(c) の重みがすべて同じ場合）</li>
 <li><span class="math inline">\(G\)</span>：隣どうしの熱の行き来（<span
 class="math inline">\(-1\)</span>）と、両端からの放熱（対角の 2）</li>
 <li><span class="math inline">\(\mathbf f\)</span>：ヒータは節点 1
