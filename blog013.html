@@ -264,9 +264,9 @@ id="toc-基底を作り少数の係数だけを時間積分する">3.
 <li><a href="#最初の候補定常加熱への温度応答を求める"
 id="toc-最初の候補定常加熱への温度応答を求める">3-1.
 最初の候補：定常加熱への温度応答を求める</a></li>
-<li><a href="#次の候補cを掛けたベクトルを右辺にしてまたgを解く"
-id="toc-次の候補cを掛けたベクトルを右辺にしてまたgを解く">3-2.
-次の候補：Cを掛けたベクトルを右辺にして、またGを解く</a></li>
+<li><a href="#次の候補電力が変わるときの遅れの形を求める"
+id="toc-次の候補電力が変わるときの遅れの形を求める">3-2.
+次の候補：電力が変わるときの「遅れ」の形を求める</a></li>
 <li><a href="#部分空間は候補の足し合わせで表せる分布の集合"
 id="toc-部分空間は候補の足し合わせで表せる分布の集合">3-3.
 「部分空間」は、候補の足し合わせで表せる分布の集合</a></li>
@@ -524,85 +524,107 @@ m_0P_0\)</span> です。</p>
 <p><span class="math inline">\(G^{-1}\mathbf f\)</span>
 は「Gの連立方程式を解く」という意味で使っています。コードは
 <code>lu.solve(f)</code> で解き、大きな逆行列を作りません。</p>
-<h3 id="次の候補cを掛けたベクトルを右辺にしてまたgを解く">3-2.
-次の候補：Cを掛けたベクトルを右辺にして、またGを解く</h3>
+<h3 id="次の候補電力が変わるときの遅れの形を求める">3-2.
+次の候補：電力が変わるときの「遅れ」の形を求める</h3>
+<h4 id="やりたいこと">やりたいこと</h4>
+<p><span class="math inline">\(\mathbf m_0\)</span>
+は、電力が<strong>ずっと一定</strong>のときの形です。でも実際は、ヒータを入れた直後や切った直後のように、電力
+<span class="math inline">\(P(t)\)</span>
+が変わります。そのとき温度は、定常の形にすぐにはならず、<strong>遅れて</strong>ついていきます。この「遅れ」がどんな形になるかを、元の式から求めます。</p>
+<h4 id="元の式を温度-の形に書き直す">元の式を「温度 =
+」の形に書き直す</h4>
+<p>元の式は</p>
 <p><span class="math display">\[
-\begin{aligned}
-G\mathbf m_0&amp;=\mathbf f,\\
-G\mathbf m_1&amp;=C\mathbf m_0,\\
-G\mathbf m_2&amp;=C\mathbf m_1,\\
-&amp;\ \vdots
-\end{aligned}
-\qquad
-\underbrace{\mathbf m_k}_{N\times1}
-=\underbrace{G^{-1}C}_{N\times N}\mathbf m_{k-1}.
+C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf f\,P(t).
 \]</span></p>
-<p>こうして <span class="math inline">\(\mathbf m_0,(G^{-1}C)\mathbf
-m_0,(G^{-1}C)^2\mathbf m_0,\ldots\)</span>
-を作ります。<strong>kは基底候補の番号で、実際の時刻を進める計算ではありません。</strong>
-これらを選ぶ理論的な理由は§3-6で示します。</p>
-<h4 id="なぜ-gmathbf-m_1cmathbf-m_0-なのか式の出どころ">なぜ <span
-class="math inline">\(G\mathbf m_1=C\mathbf m_0\)</span>
-なのか（式の出どころ）</h4>
-<p><strong>考え方：</strong> ヒータの電力 <span
-class="math inline">\(P(t)\)</span>
-がゆっくり変わるとき、温度は「定常の形 <span
-class="math inline">\(\mathbf m_0\)</span> ×
-今の電力」に、遅れの分の補正を足したものになると考えます。</p>
+<p>左辺の <span class="math inline">\(G\boldsymbol\theta\)</span>
+だけを残して、両辺に左から <span class="math inline">\(G^{-1}\)</span>
+を掛けます（<span class="math inline">\(G\)</span>
+の連立方程式を解く、という意味）。</p>
 <p><span class="math display">\[
-\boldsymbol\theta(t)\approx\mathbf m_0\,P(t)\;-\;\mathbf
-m_1\,\frac{dP}{dt}\;+\;\mathbf m_2\,\frac{d^2P}{dt^2}\;-\;\cdots
+\boldsymbol\theta
+=\underbrace{G^{-1}\mathbf f}_{\mathbf
+m_0}\,P(t)\;-\;G^{-1}C\,\frac{d\boldsymbol\theta}{dt}.
+\tag{1}
 \]</span></p>
 <ul>
-<li>1 項目：今の電力で、すぐに定常になったとしたときの温度</li>
-<li>2 項目：電力が増えている間（<span
-class="math inline">\(dP/dt&gt;0\)</span>）は、温まるのが追いつかず、そのぶん低くなる（遅れ）</li>
-<li>3 項目以降：遅れの、さらに細かい補正</li>
+<li>1 項目 <span class="math inline">\(\mathbf
+m_0P(t)\)</span>：今の電力で、すぐに定常になったとしたときの温度（§3-1）</li>
+<li>2 項目：温度が変化している間（<span
+class="math inline">\(d\boldsymbol\theta/dt\ne0\)</span>）は、そのぶん定常からずれる。熱容量
+<span class="math inline">\(C\)</span>
+に熱を取られて、温まるのが遅れる分です</li>
 </ul>
-<p>これを元の式 <span
-class="math inline">\(C\dot{\boldsymbol\theta}+G\boldsymbol\theta=\mathbf
-f P\)</span> に入れます。<span
-class="math inline">\(\dot{\boldsymbol\theta}\approx\mathbf
-m_0\,dP/dt-\mathbf m_1\,d^2P/dt^2+\cdots\)</span> なので、</p>
+<h4 id="項目の中の-boldsymboltheta-に1-をもう一度入れる">2 項目の中の
+<span class="math inline">\(\boldsymbol\theta\)</span> に、(1)
+をもう一度入れる</h4>
+<ol type="1">
+<li>の右辺にも <span class="math inline">\(\boldsymbol\theta\)</span>
+が入っています。そこで、右辺の <span
+class="math inline">\(\boldsymbol\theta\)</span> に (1)
+自身を入れ直します。電力がゆっくり変わるなら、<span
+class="math inline">\(d\boldsymbol\theta/dt\)</span> は小さいので、まず
+<span class="math inline">\(\boldsymbol\theta\approx\mathbf
+m_0P\)</span> を入れると、</li>
+</ol>
 <p><span class="math display">\[
-\underbrace{G\mathbf m_0}_{P\ の係数}P\;+\;\underbrace{\left(C\mathbf
-m_0-G\mathbf m_1\right)}_{dP/dt\
-の係数}\frac{dP}{dt}\;+\;\underbrace{\left(-C\mathbf m_1+G\mathbf
-m_2\right)}_{d^2P/dt^2\ の係数}\frac{d^2P}{dt^2}\;+\cdots\;=\;\mathbf
-f\,P .
+\frac{d\boldsymbol\theta}{dt}\approx\mathbf m_0\,\frac{dP}{dt}
+\quad\Rightarrow\quad
+\boldsymbol\theta\approx\mathbf m_0P-\underbrace{G^{-1}C\,\mathbf
+m_0}_{\mathbf m_1}\,\frac{dP}{dt}.
 \]</span></p>
-<p>どんな <span class="math inline">\(P(t)\)</span>
-でも成り立つためには、<span class="math inline">\(P\)</span>、<span
+<p>もう一度入れ直すと、次の項が出ます。</p>
+<p><span class="math display">\[
+\boldsymbol\theta\approx\mathbf m_0\,P\;-\;\mathbf
+m_1\,\frac{dP}{dt}\;+\;\underbrace{G^{-1}C\,\mathbf m_1}_{\mathbf
+m_2}\,\frac{d^2P}{dt^2}\;-\;\cdots
+\]</span></p>
+<p>つまり、<strong>温度は、形 <span class="math inline">\(\mathbf
+m_0,\mathbf m_1,\mathbf m_2,\dots\)</span>
+の足し合わせで表せて、時間とともに変わるのは、その係数（<span
+class="math inline">\(P\)</span>、<span
 class="math inline">\(dP/dt\)</span>、<span
-class="math inline">\(d^2P/dt^2\)</span> …
-の係数が左右で等しくなければなりません。</p>
+class="math inline">\(d^2P/dt^2\)</span>
+…）だけ</strong>です。だから、この形を基底の候補にします。</p>
+<h4 id="形の作り方まとめ">形の作り方（まとめ）</h4>
+<p>上の式から、形は次の順番で作れます。</p>
 <p><span class="math display">\[
-G\mathbf m_0=\mathbf f,\qquad G\mathbf m_1=C\mathbf m_0,\qquad G\mathbf
-m_2=C\mathbf m_1,\qquad\cdots
+\begin{aligned}
+G\,\mathbf m_0&amp;=\mathbf f &amp;&amp;\text{（定常の形）}\\
+G\,\mathbf m_1&amp;=C\,\mathbf m_0 &amp;&amp;\text{（1
+つ目の遅れの形）}\\
+G\,\mathbf m_2&amp;=C\,\mathbf m_1 &amp;&amp;\text{（2
+つ目の遅れの形）}\\
+&amp;\ \vdots
+\end{aligned}
 \]</span></p>
-<p>これが上の手順の式です。</p>
-<p><strong>意味：</strong> <span class="math inline">\(C\mathbf
-m_0\)</span> は、温度を「<span class="math inline">\(\mathbf
-m_0\)</span> の形で 1 秒あたり 1
-だけ」上げるのに、各節点が吸い込む熱です。<span
-class="math inline">\(G\mathbf m_1=C\mathbf m_0\)</span>
-は、「この吸い込まれる熱を、熱源のかわりに置いたときの温度の形が <span
-class="math inline">\(\mathbf m_1\)</span>」という意味になります。つまり
-<span class="math inline">\(\mathbf m_1\)</span>
-は、<strong>熱容量に熱を取られて、温まるのが遅れる分の形</strong>です。熱容量が大きく、大きく温まる所ほど、遅れが大きくなります。</p>
-<p><strong>節点が 1 つの場合で確かめる：</strong> <span
-class="math inline">\(C,G,f\)</span> がただの数なら、</p>
-<p><span class="math display">\[
-m_0=\frac fG,\qquad m_1=\frac CG\,m_0=\tau\,m_0,\qquad m_2=\tau^2
-m_0,\qquad \tau=\frac CG\ （時定数）
-\]</span></p>
-<p>となり、<span class="math inline">\(\theta\approx
-m_0\left(P-\tau\,\dfrac{dP}{dt}+\tau^2\dfrac{d^2P}{dt^2}-\cdots\right)\)</span>
-です。これは、時定数 <span class="math inline">\(\tau\)</span> の 1
-次遅れの応答を展開したものそのものです。節点が多いと、<span
-class="math inline">\(\mathbf m_1,\mathbf m_2\)</span> は <span
+<p>どれも「右辺を作って、<span class="math inline">\(G\)</span>
+の連立方程式を解く」だけです。2 行目以降は、<strong>1 つ前の形に熱容量
+<span class="math inline">\(C\)</span>
+を掛けたものを、熱源のかわりに右辺に置く</strong>、という作業です。<span
+class="math inline">\(C\mathbf m_0\)</span> は「温度を <span
 class="math inline">\(\mathbf m_0\)</span>
-と同じ形ではなくなり、場所ごとの遅れの違い（ヒータ側が先に温まる、など）を表す新しい形になります。図
+の形で上げるときに、各節点の熱容量が吸い込む熱」なので、<span
+class="math inline">\(\mathbf m_1\)</span>
+は「その熱を吸い込まれたせいで生まれる、温度の遅れの形」になります。</p>
+<p>番号 <span class="math inline">\(k\)</span>
+は基底の候補の番号で、実際の時刻を進める計算ではありません。</p>
+<h4 id="節点が-1-つのときで確かめる">節点が 1 つのときで確かめる</h4>
+<p><span class="math inline">\(C,G,f\)</span> がただの数なら、<span
+class="math inline">\(\tau=C/G\)</span>（時定数）として、</p>
+<p><span class="math display">\[
+m_0=\frac fG,\qquad m_1=\tau\,m_0,\qquad m_2=\tau^2 m_0,
+\qquad
+\theta\approx
+m_0\left(P-\tau\,\frac{dP}{dt}+\tau^2\frac{d^2P}{dt^2}-\cdots\right).
+\]</span></p>
+<p>これは、時定数 <span class="math inline">\(\tau\)</span> の <strong>1
+次遅れ</strong>の応答そのものです（電力が増えている間は、<span
+class="math inline">\(\tau\,dP/dt\)</span>
+だけ遅れる）。節点が多いと、<span class="math inline">\(\mathbf
+m_1,\mathbf m_2\)</span> は <span class="math inline">\(\mathbf
+m_0\)</span>
+と違う形になり、場所ごとの遅れの違い（ヒータ側が先に温まる、など）を表します。図
 0 の 2 本目以降が、その形です。</p>
 <h3 id="部分空間は候補の足し合わせで表せる分布の集合">3-3.
 「部分空間」は、候補の足し合わせで表せる分布の集合</h3>
