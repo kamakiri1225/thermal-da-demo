@@ -103,6 +103,42 @@ G\mathbf m_2&=C\mathbf m_1,\\
 
 こうして $`\mathbf m_0,(G^{-1}C)\mathbf m_0,(G^{-1}C)^2\mathbf m_0,\ldots`$ を作ります。**kは基底候補の番号で、実際の時刻を進める計算ではありません。** これらを選ぶ理論的な理由は§3-6で示します。
 
+#### なぜ $`G\mathbf m_1=C\mathbf m_0`$ なのか（式の出どころ）
+
+**考え方：** ヒータの電力 $`P(t)`$ がゆっくり変わるとき、温度は「定常の形 $`\mathbf m_0`$ × 今の電力」に、遅れの分の補正を足したものになると考えます。
+
+```math
+\boldsymbol\theta(t)\approx\mathbf m_0\,P(t)\;-\;\mathbf m_1\,\frac{dP}{dt}\;+\;\mathbf m_2\,\frac{d^2P}{dt^2}\;-\;\cdots
+```
+
+- 1 項目：今の電力で、すぐに定常になったとしたときの温度
+- 2 項目：電力が増えている間（$`dP/dt>0`$）は、温まるのが追いつかず、そのぶん低くなる（遅れ）
+- 3 項目以降：遅れの、さらに細かい補正
+
+これを元の式 $`C\dot{\boldsymbol\theta}+G\boldsymbol\theta=\mathbf f P`$ に入れます。$`\dot{\boldsymbol\theta}\approx\mathbf m_0\,dP/dt-\mathbf m_1\,d^2P/dt^2+\cdots`$ なので、
+
+```math
+\underbrace{G\mathbf m_0}_{P\ の係数}P\;+\;\underbrace{\left(C\mathbf m_0-G\mathbf m_1\right)}_{dP/dt\ の係数}\frac{dP}{dt}\;+\;\underbrace{\left(-C\mathbf m_1+G\mathbf m_2\right)}_{d^2P/dt^2\ の係数}\frac{d^2P}{dt^2}\;+\cdots\;=\;\mathbf f\,P .
+```
+
+どんな $`P(t)`$ でも成り立つためには、$`P`$、$`dP/dt`$、$`d^2P/dt^2`$ … の係数が左右で等しくなければなりません。
+
+```math
+G\mathbf m_0=\mathbf f,\qquad G\mathbf m_1=C\mathbf m_0,\qquad G\mathbf m_2=C\mathbf m_1,\qquad\cdots
+```
+
+これが上の手順の式です。
+
+**意味：** $`C\mathbf m_0`$ は、温度を「$`\mathbf m_0`$ の形で 1 秒あたり 1 だけ」上げるのに、各節点が吸い込む熱です。$`G\mathbf m_1=C\mathbf m_0`$ は、「この吸い込まれる熱を、熱源のかわりに置いたときの温度の形が $`\mathbf m_1`$」という意味になります。つまり $`\mathbf m_1`$ は、**熱容量に熱を取られて、温まるのが遅れる分の形**です。熱容量が大きく、大きく温まる所ほど、遅れが大きくなります。
+
+**節点が 1 つの場合で確かめる：** $`C,G,f`$ がただの数なら、
+
+```math
+m_0=\frac fG,\qquad m_1=\frac CG\,m_0=\tau\,m_0,\qquad m_2=\tau^2 m_0,\qquad \tau=\frac CG\ （時定数）
+```
+
+となり、$`\theta\approx m_0\left(P-\tau\,\dfrac{dP}{dt}+\tau^2\dfrac{d^2P}{dt^2}-\cdots\right)`$ です。これは、時定数 $`\tau`$ の 1 次遅れの応答を展開したものそのものです。節点が多いと、$`\mathbf m_1,\mathbf m_2`$ は $`\mathbf m_0`$ と同じ形ではなくなり、場所ごとの遅れの違い（ヒータ側が先に温まる、など）を表す新しい形になります。図 0 の 2 本目以降が、その形です。
+
 ### 3-3. 「部分空間」は、候補の足し合わせで表せる分布の集合
 
 最初のr本の候補から作れるベクトル全体は、
