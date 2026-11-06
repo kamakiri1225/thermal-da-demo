@@ -216,6 +216,89 @@ v_1[N]&v_2[N]&\cdots&v_r[N]
 
 **1列が全N節点に値を持つ1本の基底です。** 候補が完全に重複して残差が0になれば、それ以上は独立な基底を追加できません。今回確認したr=2〜20では基底を作れています。
 
+#### V を作る手順を、節点 3 つの例で 1 歩ずつ
+
+式だけでは分かりにくいので、節点が 3 つの小さな例で、$`V`$ を実際に作ってみます。棒を 3 つに分け、節点 1 にヒータがあるとします（数字は説明のために私が決めたもの）。
+
+```math
+C=\begin{bmatrix}1&0&0\\0&1&0\\0&0&1\end{bmatrix},\qquad
+G=\begin{bmatrix}2&-1&0\\-1&2&-1\\0&-1&2\end{bmatrix},\qquad
+\mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
+```
+
+- $`C`$：熱容量（どの節点も 1）
+- $`G`$：隣どうしの熱の行き来（$`-1`$）と、両端からの放熱（対角の 2）
+- $`\mathbf f`$：ヒータは節点 1 だけ
+
+**手順 1：1 本目の候補 $`\mathbf m_0`$ を作る**（$`G\mathbf m_0=\mathbf f`$ を解く）
+
+```math
+\mathbf m_0=G^{-1}\mathbf f=\begin{bmatrix}0.75\\0.50\\0.25\end{bmatrix}
+```
+
+ヒータを入れ続けたときに落ち着く温度の形です（ヒータに近い節点 1 が一番高い）。
+
+**手順 2：長さを 1 にそろえて $`\mathbf v_1`$ にする**
+
+```math
+\lVert\mathbf m_0\rVert_C=\sqrt{\mathbf m_0^{\mathsf T}C\mathbf m_0}=\sqrt{0.75^2+0.50^2+0.25^2}=0.935,\qquad
+\mathbf v_1=\frac{\mathbf m_0}{0.935}=\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
+```
+
+**手順 3：次の候補 $`\mathbf w`$ を作る**（右辺を $`C\mathbf v_1`$ にして、また $`G`$ を解く）
+
+```math
+G\mathbf w=C\mathbf v_1\quad\Rightarrow\quad \mathbf w=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}
+```
+
+**手順 4：$`\mathbf w`$ から、$`\mathbf v_1`$ で表せる部分（影）を引く**
+
+影の大きさは $`\mathbf v_1^{\mathsf T}C\mathbf w=0.802\times0.935+0.535\times1.069+0.267\times0.668=1.50`$ なので、
+
+```math
+\widetilde{\mathbf w}=\mathbf w-1.50\,\mathbf v_1
+=\begin{bmatrix}0.935\\1.069\\0.668\end{bmatrix}-1.50\begin{bmatrix}0.802\\0.535\\0.267\end{bmatrix}
+=\begin{bmatrix}-0.267\\0.267\\0.267\end{bmatrix}.
+```
+
+残ったのは「節点 1 が低く、節点 2・3 が高い」形です。これが、$`\mathbf v_1`$ だけでは表せない**新しい形**（時間の遅れで生まれる、温まり方の偏りの違い）です。
+
+**手順 5：長さを 1 にそろえて $`\mathbf v_2`$ にする**
+
+```math
+\lVert\widetilde{\mathbf w}\rVert_C=0.463,\qquad
+\mathbf v_2=\frac{\widetilde{\mathbf w}}{0.463}=\begin{bmatrix}-0.577\\0.577\\0.577\end{bmatrix}
+```
+
+確かめ：$`\mathbf v_1^{\mathsf T}C\mathbf v_2=0`$（重なりがない）、$`\mathbf v_2^{\mathsf T}C\mathbf v_2=1`$（長さ 1）です。
+
+**手順 6：3 本目も同じ**（$`G\mathbf w=C\mathbf v_2`$ を解き、$`\mathbf v_1`$ と $`\mathbf v_2`$ の両方の影を引き、長さを 1 にする）
+
+```math
+\mathbf w=\begin{bmatrix}0\\0.577\\0.577\end{bmatrix},\quad
+\widetilde{\mathbf w}=\mathbf w-0.463\,\mathbf v_1-0.667\,\mathbf v_2=\begin{bmatrix}0.014\\-0.055\\0.069\end{bmatrix},\quad
+\mathbf v_3=\begin{bmatrix}0.154\\-0.617\\0.772\end{bmatrix}
+```
+
+**できあがり：** 並べたものが $`V`$ です。
+
+```math
+V=\begin{bmatrix}\mathbf v_1&\mathbf v_2\end{bmatrix}=\begin{bmatrix}0.802&-0.577\\0.535&0.577\\0.267&0.577\end{bmatrix}\ （r=2\ のとき）,\qquad V^{\mathsf T}CV=\begin{bmatrix}1&0\\0&1\end{bmatrix}
+```
+
+**順番のまとめ**（実際の円筒でも、節点が 5,040 個になるだけで同じ）
+
+| 手順 | すること | コード（`krylov_basis`） |
+|---|---|---|
+| 1 | $`G\mathbf m_0=\mathbf f`$ を解く | `v = lu.solve(f)` |
+| 2・5 | すでにある基底の影を引く | `v = v - V[:, :j] @ (V[:, :j].T @ (C @ v))` |
+| 3 | 長さを 1 にそろえて $`j`$ 本目にする | `V[:, j] = v / np.sqrt(v @ (C @ v))` |
+| 4 | 次の候補：$`G\mathbf w=C\mathbf v_j`$ を解く | `v = lu.solve(C @ V[:, j])` |
+| 6 | 2〜4 を $`r`$ 本になるまでくりかえす | `for j in range(r)` |
+
+- $`G`$ の LU 分解は最初に 1 回だけ行い、手順 1・4 で使い回します。
+- 影を引く処理（手順 2）は、計算の丸め誤差で重なりが少し残るのを防ぐため、2 回くりかえしています。
+
 ### 3-5. 係数だけの熱方程式へ縮め、全温度場へ戻す
 
 温度上昇を、
