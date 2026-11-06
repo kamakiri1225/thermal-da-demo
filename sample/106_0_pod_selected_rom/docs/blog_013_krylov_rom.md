@@ -199,29 +199,124 @@ $`\beta_k`$ は任意の係数です。これを短く書くと、
 
 *2 次元の模式図（`run/make_gram_schmidt_fig.py`）。① 次の候補 $`\mathbf w`$ は 1 本目 $`\mathbf v_1`$ とほぼ同じ向き。② $`\mathbf w`$ のうち $`\mathbf v_1`$ の向きの成分（影）を引くと、短い「残り」が出る。③ 残りを長さ 1 にそろえて 2 本目 $`\mathbf v_2`$ にする。この円筒では、$`\mathbf m_1`$ から $`\mathbf m_0`$ の成分を引くと、残りは元の長さの約 3 % だった。この 3 % が「遅れによる形の違い」で、新しい情報。*
 
-**「長さ」と「向きの近さ」を熱容量 $`C`$ で測る理由。** 普通の長さ $`\sqrt{\mathbf x^{\mathsf T}\mathbf x}`$ ではなく、熱容量 $`C`$ を重みにした長さを使います。
+#### 「長さ」と「重なり」をどう測るか
 
-- 節点ごとの体積（熱容量）の違いを考えに入れるためです。メッシュの細かい所の節点が、たくさんあるだけで重く数えられることがなくなります。$`\mathbf x^{\mathsf T}C\mathbf x`$ は、温度分布 $`\mathbf x`$ のときに円筒にたまる熱の大きさ（に比例する量）です。
-- こうしておくと、できた基底が $`V^{\mathsf T}CV=I`$（§3-5 の縮めた式の熱容量の行列が単位行列）になり、縮めた式が簡単になります。
+影を引くには、先に 2 つのことを決めておく必要があります。
+
+- ベクトル（温度分布）の**長さ**
+- 2 本のベクトルの**重なり**（内積。影の大きさはこれで決まる）
+
+ここでは、ふつうの測り方から始めて、なぜ熱容量 $`C`$ で重みをつけるのかを順に説明します。
+
+**(a) ふつうの測り方。** 温度分布 $`\mathbf x,\mathbf y`$ は、各節点の値を縦に並べたベクトルです。ふつうは
 
 ```math
-\langle\mathbf x,\mathbf y\rangle_C=\mathbf x^{\mathsf T}C\mathbf y,
-\qquad
-\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}.
+\mathbf x^{\mathsf T}\mathbf y=\sum_i x[i]\,y[i],\qquad
+\lVert\mathbf x\rVert=\sqrt{\mathbf x^{\mathsf T}\mathbf x}
 ```
 
-最初は $`\mathbf v_1=\mathbf m_0/\lVert\mathbf m_0\rVert_C`$ です。j本目では候補 $`\mathbf w=G^{-1}C\mathbf v_{j-1}`$ から、
+で測ります。これは、どの節点も同じ重さ 1 で数えています。
+
+**(b) それで困ること：節点の切り方で長さが変わる。** 長さ 1 の棒で、左半分が 1 K、右半分が 0 K という同じ温度分布を、2 通りのメッシュで表してみます。
+
+| | 節点の値 $`\mathbf x`$ | 各節点が受け持つ長さ | ふつうの長さの 2 乗 $`\sum x[i]^2`$ |
+|---|---|---|---:|
+| メッシュ A（左右 1 節点ずつ） | $`(1,\ 0)`$ | $`1/2,\ 1/2`$ | 1 |
+| メッシュ B（左だけ 2 節点に細かく） | $`(1,\ 1,\ 0)`$ | $`1/4,\ 1/4,\ 1/2`$ | 2 |
+
+同じ温度分布なのに、細かく切った所の節点が多いだけで、長さが変わってしまいます。
+
+**(c) 受け持つ大きさ（熱容量）で重みをつける。** 節点 $`i`$ の熱容量を $`c_i`$（密度×比熱×受け持つ体積）として、各項に $`c_i`$ を掛けます。上の例で密度×比熱を 1 とすると、
+
+- メッシュ A：$`\tfrac12\cdot1^2+\tfrac12\cdot0^2=0.5`$
+- メッシュ B：$`\tfrac14\cdot1^2+\tfrac14\cdot1^2+\tfrac12\cdot0^2=0.5`$
+
+となり、同じになります。$`\sum_i c_i\,x[i]^2`$ は「物体全体で、温度の 2 乗を体積で重みづけして足したもの」（$`\int\rho c_p\,x^2\,dV`$ の近似）なので、メッシュの切り方によりません。
+
+$`c_i`$ を対角に並べた行列を $`C`$ とすると、$`\sum_i c_i\,x[i]^2=\mathbf x^{\mathsf T}C\mathbf x`$ です。2 本の場合も同じように重みをつけて、
+
+```math
+\langle\mathbf x,\mathbf y\rangle_C=\sum_i c_i\,x[i]\,y[i]=\mathbf x^{\mathsf T}C\mathbf y,
+\qquad
+\lVert\mathbf x\rVert_C=\sqrt{\mathbf x^{\mathsf T}C\mathbf x}
+```
+
+と決めます。これが図の「長さ」と「重なり」です。
+
+**(d) FEM の $`C`$ は対角ではないが、意味は同じ。** FEM の熱容量行列は、形状関数 $`N_i`$（節点 $`i`$ で 1、ほかの節点で 0 になる山形の関数）を使って $`C_{ij}=\int\rho c_p\,N_iN_j\,dV`$ です。隣どうしの節点では $`N_iN_j`$ が重なるので、非対角にも値が入ります。これを使うと、
+
+```math
+\mathbf x^{\mathsf T}C\mathbf x
+=\sum_i\sum_j x[i]\,x[j]\int\rho c_p\,N_iN_j\,dV
+=\int\rho c_p\Bigl(\sum_i N_i\,x[i]\Bigr)^2dV .
+```
+
+かっこの中 $`\sum_i N_i\,x[i]`$ は、節点の値をつないで作った物体内の温度分布そのものです。つまり $`\mathbf x^{\mathsf T}C\mathbf x`$ は、**(c) の「温度の 2 乗を体積で重みづけした積分」をそのまま計算したもの**です。
+
+**(e) もう 1 つの利点。** この測り方で長さ 1・重なり 0 の基底を作ると、$`V^{\mathsf T}CV=I`$ になります。§3-5 の縮めた式の熱容量の行列 $`C_r=V^{\mathsf T}CV`$ が単位行列になり、式が簡単になります。
+
+#### 影を引く式を導く
+
+すでに長さ 1・互いに重なり 0 の基底 $`\mathbf v_1,\dots,\mathbf v_{j-1}`$ があるとします。つまり
+
+```math
+\mathbf v_k^{\mathsf T}C\mathbf v_\ell=
+\begin{cases}1&(k=\ell)\\0&(k\neq\ell)\end{cases}
+```
+
+です。次の候補 $`\mathbf w`$ から、これらで表せる部分を引いた残りを
+
+```math
+\widetilde{\mathbf w}=\mathbf w-a_1\mathbf v_1-a_2\mathbf v_2-\cdots-a_{j-1}\mathbf v_{j-1}
+\tag{2}
+```
+
+と書きます。引く量 $`a_1,\dots,a_{j-1}`$ はまだ分かりません。これを「残りが、どの $`\mathbf v_k`$ とも重ならない」という条件で決めます。
+
+```math
+\mathbf v_k^{\mathsf T}C\,\widetilde{\mathbf w}=0\qquad(k=1,\dots,j-1)
+\tag{3}
+```
+
+(3) の $`\widetilde{\mathbf w}`$ に (2) を入れると、
+
+```math
+\mathbf v_k^{\mathsf T}C\mathbf w
+-a_1\,\mathbf v_k^{\mathsf T}C\mathbf v_1-\cdots-a_{j-1}\,\mathbf v_k^{\mathsf T}C\mathbf v_{j-1}=0 .
+```
+
+$`\mathbf v_k^{\mathsf T}C\mathbf v_\ell`$ は $`\ell=k`$ のときだけ 1 で、ほかは 0 です。そのため、引き算の項は $`a_k`$ の 1 つだけが残り、
+
+```math
+\mathbf v_k^{\mathsf T}C\mathbf w-a_k=0
+\quad\Rightarrow\quad
+a_k=\mathbf v_k^{\mathsf T}C\mathbf w .
+```
+
+$`a_k`$ は、$`\mathbf w`$ と $`\mathbf v_k`$ の重なり、つまり図の②の「影」の大きさです。これを (2) に戻すと、
 
 ```math
 \widetilde{\mathbf w}
-=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell
-(\mathbf v_\ell^{\mathsf T}C\mathbf w),
-\qquad
-\mathbf v_j=\frac{\widetilde{\mathbf w}}
-{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
+=\mathbf w-\sum_{\ell=1}^{j-1}\mathbf v_\ell\,(\mathbf v_\ell^{\mathsf T}C\mathbf w).
 ```
 
-として作ります。コードでは丸め誤差を抑えるため、成分を除く処理を2回行います。このアーノルディ法で得る基底行列は、
+最後に、長さで割って長さ 1 にします（図の③）。
+
+```math
+\mathbf v_j=\frac{\widetilde{\mathbf w}}{\lVert\widetilde{\mathbf w}\rVert_C}
+=\frac{\widetilde{\mathbf w}}{\sqrt{\widetilde{\mathbf w}^{\mathsf T}C\widetilde{\mathbf w}}}
+```
+
+こうしてできた $`\mathbf v_j`$ は、(3) によって前の基底と重なりが 0、割り算によって長さ 1 です。したがって $`\mathbf v_1,\dots,\mathbf v_j`$ も「長さ 1・互いに重なり 0」になり、次の本数でも同じ計算がそのまま使えます。
+
+#### 作る順番
+
+1. 1 本目：$`\mathbf v_1=\mathbf m_0/\lVert\mathbf m_0\rVert_C`$
+2. $`j`$ 本目の候補：$`\mathbf w=G^{-1}C\mathbf v_{j-1}`$（§3-2 の $`\mathbf m_1=G^{-1}C\mathbf m_0`$ と同じ作り方を、1 つ前の基底に使う）
+3. 上の式で影を引き、長さ 1 にして $`\mathbf v_j`$ にする
+4. 2・3 を $`r`$ 本になるまでくりかえす
+
+コードでは丸め誤差を抑えるため、影を引く処理を 2 回行います。この作り方（アーノルディ法）で得る基底行列は、
 
 ```math
 \underbrace{V}_{N\times r}
@@ -238,7 +333,7 @@ v_1[N]&v_2[N]&\cdots&v_r[N]
 
 #### V を作る手順を、節点 3 つの例で 1 歩ずつ
 
-式だけでは分かりにくいので、節点が 3 つの小さな例で、$`V`$ を実際に作ってみます。棒を 3 つに分け、節点 1 にヒータがあるとします（数字は説明のために私が決めたもの）。
+式だけでは分かりにくいので、節点が 3 つの小さな例で、$`V`$ を実際に作ってみます。ここでは簡単にするため $`C`$ を単位行列にしているので、重みつきの長さ・重なりは、ふつうの長さ・内積と同じ値になります。棒を 3 つに分け、節点 1 にヒータがあるとします（数字は説明のために私が決めたもの）。
 
 ```math
 C=\begin{bmatrix}1&0&0\\0&1&0\\0&0&1\end{bmatrix},\qquad
@@ -246,7 +341,7 @@ G=\begin{bmatrix}2&-1&0\\-1&2&-1\\0&-1&2\end{bmatrix},\qquad
 \mathbf f=\begin{bmatrix}1\\0\\0\end{bmatrix}
 ```
 
-- $`C`$：熱容量（どの節点も 1）
+- $`C`$：熱容量（どの節点も 1。上の (c) の重みがすべて同じ場合）
 - $`G`$：隣どうしの熱の行き来（$`-1`$）と、両端からの放熱（対角の 2）
 - $`\mathbf f`$：ヒータは節点 1 だけ
 
