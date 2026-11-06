@@ -87,57 +87,77 @@ $`\boldsymbol\theta`$ は外気温からの温度上昇です。熱方程式は�
 
 $`G^{-1}\mathbf f`$ は「Gの連立方程式を解く」という意味で使っています。コードは `lu.solve(f)` で解き、大きな逆行列を作りません。
 
-### 3-2. 次の候補：Cを掛けたベクトルを右辺にして、またGを解く
+### 3-2. 次の候補：電力が変わるときの「遅れ」の形を求める
+
+#### やりたいこと
+
+$`\mathbf m_0`$ は、電力が**ずっと一定**のときの形です。でも実際は、ヒータを入れた直後や切った直後のように、電力 $`P(t)`$ が変わります。そのとき温度は、定常の形にすぐにはならず、**遅れて**ついていきます。この「遅れ」がどんな形になるかを、元の式から求めます。
+
+#### 元の式を「温度 = 」の形に書き直す
+
+元の式は
+
+```math
+C\,\frac{d\boldsymbol\theta}{dt}+G\,\boldsymbol\theta=\mathbf f\,P(t).
+```
+
+左辺の $`G\boldsymbol\theta`$ だけを残して、両辺に左から $`G^{-1}`$ を掛けます（$`G`$ の連立方程式を解く、という意味）。
+
+```math
+\boldsymbol\theta
+=\underbrace{G^{-1}\mathbf f}_{\mathbf m_0}\,P(t)\;-\;G^{-1}C\,\frac{d\boldsymbol\theta}{dt}.
+\tag{1}
+```
+
+- 1 項目 $`\mathbf m_0P(t)`$：今の電力で、すぐに定常になったとしたときの温度（§3-1）
+- 2 項目：温度が変化している間（$`d\boldsymbol\theta/dt\ne0`$）は、そのぶん定常からずれる。熱容量 $`C`$ に熱を取られて、温まるのが遅れる分です
+
+#### 2 項目の中の $`\boldsymbol\theta`$ に、(1) をもう一度入れる
+
+(1) の右辺にも $`\boldsymbol\theta`$ が入っています。そこで、右辺の $`\boldsymbol\theta`$ に (1) 自身を入れ直します。電力がゆっくり変わるなら、$`d\boldsymbol\theta/dt`$ は小さいので、まず $`\boldsymbol\theta\approx\mathbf m_0P`$ を入れると、
+
+```math
+\frac{d\boldsymbol\theta}{dt}\approx\mathbf m_0\,\frac{dP}{dt}
+\quad\Rightarrow\quad
+\boldsymbol\theta\approx\mathbf m_0P-\underbrace{G^{-1}C\,\mathbf m_0}_{\mathbf m_1}\,\frac{dP}{dt}.
+```
+
+もう一度入れ直すと、次の項が出ます。
+
+```math
+\boldsymbol\theta\approx\mathbf m_0\,P\;-\;\mathbf m_1\,\frac{dP}{dt}\;+\;\underbrace{G^{-1}C\,\mathbf m_1}_{\mathbf m_2}\,\frac{d^2P}{dt^2}\;-\;\cdots
+```
+
+つまり、**温度は、形 $`\mathbf m_0,\mathbf m_1,\mathbf m_2,\dots`$ の足し合わせで表せて、時間とともに変わるのは、その係数（$`P`$、$`dP/dt`$、$`d^2P/dt^2`$ …）だけ**です。だから、この形を基底の候補にします。
+
+#### 形の作り方（まとめ）
+
+上の式から、形は次の順番で作れます。
 
 ```math
 \begin{aligned}
-G\mathbf m_0&=\mathbf f,\\
-G\mathbf m_1&=C\mathbf m_0,\\
-G\mathbf m_2&=C\mathbf m_1,\\
+G\,\mathbf m_0&=\mathbf f &&\text{（定常の形）}\\
+G\,\mathbf m_1&=C\,\mathbf m_0 &&\text{（1 つ目の遅れの形）}\\
+G\,\mathbf m_2&=C\,\mathbf m_1 &&\text{（2 つ目の遅れの形）}\\
 &\ \vdots
 \end{aligned}
+```
+
+どれも「右辺を作って、$`G`$ の連立方程式を解く」だけです。2 行目以降は、**1 つ前の形に熱容量 $`C`$ を掛けたものを、熱源のかわりに右辺に置く**、という作業です。$`C\mathbf m_0`$ は「温度を $`\mathbf m_0`$ の形で上げるときに、各節点の熱容量が吸い込む熱」なので、$`\mathbf m_1`$ は「その熱を吸い込まれたせいで生まれる、温度の遅れの形」になります。
+
+番号 $`k`$ は基底の候補の番号で、実際の時刻を進める計算ではありません。
+
+#### 節点が 1 つのときで確かめる
+
+$`C,G,f`$ がただの数なら、$`\tau=C/G`$（時定数）として、
+
+```math
+m_0=\frac fG,\qquad m_1=\tau\,m_0,\qquad m_2=\tau^2 m_0,
 \qquad
-\underbrace{\mathbf m_k}_{N\times1}
-=\underbrace{G^{-1}C}_{N\times N}\mathbf m_{k-1}.
+\theta\approx m_0\left(P-\tau\,\frac{dP}{dt}+\tau^2\frac{d^2P}{dt^2}-\cdots\right).
 ```
 
-こうして $`\mathbf m_0,(G^{-1}C)\mathbf m_0,(G^{-1}C)^2\mathbf m_0,\ldots`$ を作ります。**kは基底候補の番号で、実際の時刻を進める計算ではありません。** これらを選ぶ理論的な理由は§3-6で示します。
-
-#### なぜ $`G\mathbf m_1=C\mathbf m_0`$ なのか（式の出どころ）
-
-**考え方：** ヒータの電力 $`P(t)`$ がゆっくり変わるとき、温度は「定常の形 $`\mathbf m_0`$ × 今の電力」に、遅れの分の補正を足したものになると考えます。
-
-```math
-\boldsymbol\theta(t)\approx\mathbf m_0\,P(t)\;-\;\mathbf m_1\,\frac{dP}{dt}\;+\;\mathbf m_2\,\frac{d^2P}{dt^2}\;-\;\cdots
-```
-
-- 1 項目：今の電力で、すぐに定常になったとしたときの温度
-- 2 項目：電力が増えている間（$`dP/dt>0`$）は、温まるのが追いつかず、そのぶん低くなる（遅れ）
-- 3 項目以降：遅れの、さらに細かい補正
-
-これを元の式 $`C\dot{\boldsymbol\theta}+G\boldsymbol\theta=\mathbf f P`$ に入れます。$`\dot{\boldsymbol\theta}\approx\mathbf m_0\,dP/dt-\mathbf m_1\,d^2P/dt^2+\cdots`$ なので、
-
-```math
-\underbrace{G\mathbf m_0}_{P\ の係数}P\;+\;\underbrace{\left(C\mathbf m_0-G\mathbf m_1\right)}_{dP/dt\ の係数}\frac{dP}{dt}\;+\;\underbrace{\left(-C\mathbf m_1+G\mathbf m_2\right)}_{d^2P/dt^2\ の係数}\frac{d^2P}{dt^2}\;+\cdots\;=\;\mathbf f\,P .
-```
-
-どんな $`P(t)`$ でも成り立つためには、$`P`$、$`dP/dt`$、$`d^2P/dt^2`$ … の係数が左右で等しくなければなりません。
-
-```math
-G\mathbf m_0=\mathbf f,\qquad G\mathbf m_1=C\mathbf m_0,\qquad G\mathbf m_2=C\mathbf m_1,\qquad\cdots
-```
-
-これが上の手順の式です。
-
-**意味：** $`C\mathbf m_0`$ は、温度を「$`\mathbf m_0`$ の形で 1 秒あたり 1 だけ」上げるのに、各節点が吸い込む熱です。$`G\mathbf m_1=C\mathbf m_0`$ は、「この吸い込まれる熱を、熱源のかわりに置いたときの温度の形が $`\mathbf m_1`$」という意味になります。つまり $`\mathbf m_1`$ は、**熱容量に熱を取られて、温まるのが遅れる分の形**です。熱容量が大きく、大きく温まる所ほど、遅れが大きくなります。
-
-**節点が 1 つの場合で確かめる：** $`C,G,f`$ がただの数なら、
-
-```math
-m_0=\frac fG,\qquad m_1=\frac CG\,m_0=\tau\,m_0,\qquad m_2=\tau^2 m_0,\qquad \tau=\frac CG\ （時定数）
-```
-
-となり、$`\theta\approx m_0\left(P-\tau\,\dfrac{dP}{dt}+\tau^2\dfrac{d^2P}{dt^2}-\cdots\right)`$ です。これは、時定数 $`\tau`$ の 1 次遅れの応答を展開したものそのものです。節点が多いと、$`\mathbf m_1,\mathbf m_2`$ は $`\mathbf m_0`$ と同じ形ではなくなり、場所ごとの遅れの違い（ヒータ側が先に温まる、など）を表す新しい形になります。図 0 の 2 本目以降が、その形です。
+これは、時定数 $`\tau`$ の **1 次遅れ**の応答そのものです（電力が増えている間は、$`\tau\,dP/dt`$ だけ遅れる）。節点が多いと、$`\mathbf m_1,\mathbf m_2`$ は $`\mathbf m_0`$ と違う形になり、場所ごとの遅れの違い（ヒータ側が先に温まる、など）を表します。図 0 の 2 本目以降が、その形です。
 
 ### 3-3. 「部分空間」は、候補の足し合わせで表せる分布の集合
 
