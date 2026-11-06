@@ -844,35 +844,35 @@ T}CV=\begin{bmatrix}1&amp;0\\0&amp;1\end{bmatrix}
 <td><code>v = lu.solve(f)</code></td>
 </tr>
 <tr class="even">
-<td>2・5</td>
-<td>すでにある基底の影を引く</td>
+<td>4</td>
+<td>すでにある基底の影を引く（1 本目は何もしない）</td>
 <td><code>v = v - V[:, :j] @ (V[:, :j].T @ (C @ v))</code></td>
 </tr>
 <tr class="odd">
-<td>3</td>
+<td>2・5</td>
 <td>長さを 1 にそろえて <span class="math inline">\(j\)</span>
 本目にする</td>
 <td><code>V[:, j] = v / np.sqrt(v @ (C @ v))</code></td>
 </tr>
 <tr class="even">
-<td>4</td>
+<td>3</td>
 <td>次の候補：<span class="math inline">\(G\mathbf w=C\mathbf
 v_j\)</span> を解く</td>
 <td><code>v = lu.solve(C @ V[:, j])</code></td>
 </tr>
 <tr class="odd">
 <td>6</td>
-<td>2〜4 を <span class="math inline">\(r\)</span>
-本になるまでくりかえす</td>
+<td>影を引く → 長さをそろえる → 次の候補、を <span
+class="math inline">\(r\)</span> 本になるまでくりかえす</td>
 <td><code>for j in range(r)</code></td>
 </tr>
 </tbody>
 </table>
 <ul>
 <li><span class="math inline">\(G\)</span> の LU 分解は最初に 1
-回だけ行い、手順 1・4 で使い回します。</li>
+回だけ行い、手順 1・3 で使い回します。</li>
 <li>影を引く処理（手順
-2）は、計算の丸め誤差で重なりが少し残るのを防ぐため、2
+4）は、計算の丸め誤差で重なりが少し残るのを防ぐため、2
 回くりかえしています。</li>
 </ul>
 <h3 id="係数だけの熱方程式へ縮め全温度場へ戻す">3-5.
